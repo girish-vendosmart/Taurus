@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
-import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
+import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import { Supplier } from '../supplier.model';
 
@@ -18,6 +18,12 @@ export function gstValidator(control: AbstractControl): ValidationErrors | null 
   return gstPattern.test(value) ? null : { 'invalidGST': true };
 }
 
+// Add these interfaces near the top of your file
+interface LocationItem {
+  id: string;
+  name: string;
+}
+
 @Component({
   selector: 'app-supplier-onboarding.components.ts',
   standalone: true,
@@ -30,6 +36,92 @@ export class SupplierOnboardingComponentsTsComponent {
   model: Partial<Supplier> = {};
   currentStep = 0;
   
+  // First define your data
+  // Sample data for country-state-city relationships
+  countries: LocationItem[] = [
+    { id: 'US', name: 'United States' },
+    { id: 'IN', name: 'India' },
+    { id: 'UK', name: 'United Kingdom' },
+    { id: 'CA', name: 'Canada' },
+    { id: 'AU', name: 'Australia' }
+  ];
+  
+  states: { [countryId: string]: LocationItem[] } = {
+    'US': [
+      { id: 'CA', name: 'California' },
+      { id: 'TX', name: 'Texas' },
+      { id: 'NY', name: 'New York' },
+      { id: 'FL', name: 'Florida' },
+      { id: 'IL', name: 'Illinois' }
+    ],
+    'IN': [
+      { id: 'MH', name: 'Maharashtra' },
+      { id: 'DL', name: 'Delhi' },
+      { id: 'KA', name: 'Karnataka' },
+      { id: 'TN', name: 'Tamil Nadu' },
+      { id: 'GJ', name: 'Gujarat' }
+    ],
+    'UK': [
+      { id: 'LDN', name: 'London' },
+      { id: 'MAN', name: 'Manchester' },
+      { id: 'BIR', name: 'Birmingham' },
+      { id: 'EDI', name: 'Edinburgh' },
+      { id: 'CAR', name: 'Cardiff' }
+    ],
+    'CA': [
+      { id: 'ON', name: 'Ontario' },
+      { id: 'QC', name: 'Quebec' },
+      { id: 'BC', name: 'British Columbia' },
+      { id: 'AB', name: 'Alberta' },
+      { id: 'NS', name: 'Nova Scotia' }
+    ],
+    'AU': [
+      { id: 'NSW', name: 'New South Wales' },
+      { id: 'VIC', name: 'Victoria' },
+      { id: 'QLD', name: 'Queensland' },
+      { id: 'WA', name: 'Western Australia' },
+      { id: 'SA', name: 'South Australia' }
+    ]
+  };
+  
+  cities: { [stateId: string]: LocationItem[] } = {
+    // US States
+    'CA': [{ id: 'SF', name: 'San Francisco' }, { id: 'LA', name: 'Los Angeles' }, { id: 'SD', name: 'San Diego' }],
+    'TX': [{ id: 'HOU', name: 'Houston' }, { id: 'AUS', name: 'Austin' }, { id: 'DAL', name: 'Dallas' }],
+    'NY': [{ id: 'NYC', name: 'New York City' }, { id: 'BUF', name: 'Buffalo' }, { id: 'ROC', name: 'Rochester' }],
+    'FL': [{ id: 'MIA', name: 'Miami' }, { id: 'ORL', name: 'Orlando' }, { id: 'JAX', name: 'Jacksonville' }],
+    'IL': [{ id: 'CHI', name: 'Chicago' }, { id: 'SPR', name: 'Springfield' }, { id: 'PEO', name: 'Peoria' }],
+    
+    // India States
+    'MH': [{ id: 'MUM', name: 'Mumbai' }, { id: 'PUN', name: 'Pune' }, { id: 'NAG', name: 'Nagpur' }],
+    'DL': [{ id: 'NDL', name: 'New Delhi' }, { id: 'ODL', name: 'Old Delhi' }],
+    'KA': [{ id: 'BLR', name: 'Bangalore' }, { id: 'MYS', name: 'Mysore' }, { id: 'HUB', name: 'Hubli' }],
+    'TN': [{ id: 'CHN', name: 'Chennai' }, { id: 'COI', name: 'Coimbatore' }, { id: 'MAD', name: 'Madurai' }],
+    'GJ': [{ id: 'AHD', name: 'Ahmedabad' }, { id: 'SUR', name: 'Surat' }, { id: 'VAD', name: 'Vadodara' }],
+    
+    // UK States
+    'LDN': [{ id: 'WST', name: 'Westminster' }, { id: 'KEN', name: 'Kensington' }, { id: 'GRN', name: 'Greenwich' }],
+    'MAN': [{ id: 'MCC', name: 'Manchester City Center' }, { id: 'SAL', name: 'Salford' }],
+    'BIR': [{ id: 'BCC', name: 'Birmingham City Center' }, { id: 'SOL', name: 'Solihull' }],
+    'EDI': [{ id: 'OLD', name: 'Old Town' }, { id: 'NEW', name: 'New Town' }, { id: 'LEI', name: 'Leith' }],
+    'CAR': [{ id: 'CTC', name: 'Cardiff City Center' }, { id: 'BAY', name: 'Cardiff Bay' }],
+    
+    // Canadian States
+    'ON': [{ id: 'TOR', name: 'Toronto' }, { id: 'OTT', name: 'Ottawa' }, { id: 'HAM', name: 'Hamilton' }],
+    'QC': [{ id: 'MTL', name: 'Montreal' }, { id: 'QUE', name: 'Quebec City' }, { id: 'GAT', name: 'Gatineau' }],
+    'BC': [{ id: 'VAN', name: 'Vancouver' }, { id: 'VIC', name: 'Victoria' }, { id: 'KEL', name: 'Kelowna' }],
+    'AB': [{ id: 'CAL', name: 'Calgary' }, { id: 'EDM', name: 'Edmonton' }, { id: 'RED', name: 'Red Deer' }],
+    'NS': [{ id: 'HAL', name: 'Halifax' }, { id: 'DAR', name: 'Dartmouth' }, { id: 'SYD', name: 'Sydney' }],
+    
+    // Australian States
+    'NSW': [{ id: 'SYD', name: 'Sydney' }, { id: 'NEW', name: 'Newcastle' }, { id: 'WOL', name: 'Wollongong' }],
+    'VIC': [{ id: 'MEL', name: 'Melbourne' }, { id: 'GEE', name: 'Geelong' }, { id: 'BAL', name: 'Ballarat' }],
+    'QLD': [{ id: 'BRI', name: 'Brisbane' }, { id: 'GCO', name: 'Gold Coast' }, { id: 'CAI', name: 'Cairns' }],
+    'WA': [{ id: 'PER', name: 'Perth' }, { id: 'FRE', name: 'Fremantle' }, { id: 'BUN', name: 'Bunbury' }],
+    'SA': [{ id: 'ADE', name: 'Adelaide' }, { id: 'MBK', name: 'Mount Barker' }, { id: 'GAW', name: 'Gawler' }]
+  };
+
+  // Then initialize the steps array AFTER the data is defined
   steps = [
     {
       label: 'Basic Information',
@@ -215,21 +307,85 @@ export class SupplierOnboardingComponentsTsComponent {
             }
           },
           {
-            key: 'city',
-            type: 'input',
+            key: 'country',
+            type: 'select',
             props: {
-              label: 'City',
-              placeholder: 'Enter city',
+              label: 'Country',
+              placeholder: 'Select country',
               required: true,
+              options: this.countries.map(country => ({
+                label: country.name,
+                value: country.id
+              }))
+            },
+            hooks: {
+              onInit: (field) => {
+                // Reset state and city when country changes
+                field.formControl?.valueChanges.subscribe(countryId => {
+                  const form = field.parent?.formControl as FormGroup;
+                  if (form && countryId) {
+                    form.get('state')?.setValue(null);
+                    form.get('city')?.setValue(null);
+                    
+                    // Update the state options
+                    const stateField = field.parent?.fieldGroup?.find(f => f.key === 'state');
+                    if (stateField && stateField.props) {
+                      const stateOptions = this.states[countryId as string] || [];
+                      stateField.props.options = stateOptions.map((state: LocationItem) => ({
+                        label: state.name,
+                        value: state.id
+                      }));
+                    }
+                  }
+                });
+              }
             }
           },
           {
             key: 'state',
-            type: 'input',
+            type: 'select',
             props: {
               label: 'State / Province / Region',
-              placeholder: 'Enter state, province or region',
+              placeholder: 'Select state',
               required: true,
+              options: [] // Will be populated dynamically
+            },
+            hooks: {
+              onInit: (field) => {
+                // Reset city when state changes
+                field.formControl?.valueChanges.subscribe(stateId => {
+                  const form = field.parent?.formControl as FormGroup;
+                  if (form && stateId) {
+                    form.get('city')?.setValue(null);
+                    
+                    // Update the city options
+                    const cityField = field.parent?.fieldGroup?.find(f => f.key === 'city');
+                    if (cityField && cityField.props) {
+                      const cityOptions = this.cities[stateId as string] || [];
+                      cityField.props.options = cityOptions.map((city: LocationItem) => ({
+                        label: city.name,
+                        value: city.id
+                      }));
+                    }
+                  }
+                });
+              }
+            },
+            expressions: {
+              'props.disabled': '!model.address.country'
+            }
+          },
+          {
+            key: 'city',
+            type: 'select',
+            props: {
+              label: 'City',
+              placeholder: 'Select city',
+              required: true,
+              options: [] // Will be populated dynamically
+            },
+            expressions: {
+              'props.disabled': '!model.address.state'
             }
           },
           {
@@ -239,26 +395,6 @@ export class SupplierOnboardingComponentsTsComponent {
               label: 'Postal / ZIP Code',
               placeholder: 'Enter postal or ZIP code',
               required: true,
-            }
-          },
-          {
-            key: 'country',
-            type: 'select',
-            props: {
-              label: 'Country',
-              placeholder: 'Select country',
-              required: true,
-              options: [
-                { label: 'United States', value: 'US' },
-                { label: 'United Kingdom', value: 'UK' },
-                { label: 'Canada', value: 'CA' },
-                { label: 'Australia', value: 'AU' },
-                { label: 'India', value: 'IN' },
-                { label: 'Germany', value: 'DE' },
-                { label: 'France', value: 'FR' },
-                { label: 'Japan', value: 'JP' },
-                // Add more countries as needed
-              ]
             }
           }
         ]
