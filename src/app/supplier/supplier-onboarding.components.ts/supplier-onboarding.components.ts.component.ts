@@ -33,7 +33,9 @@ interface LocationItem {
 })
 export class SupplierOnboardingComponentsTsComponent {
   form = new FormGroup({});
-  model: Partial<Supplier> = {};
+  model: Partial<Supplier> = {
+    productsOffered: [] // Initialize empty array
+  };
   currentStep = 0;
   
   // First define your data
@@ -146,6 +148,10 @@ export class SupplierOnboardingComponentsTsComponent {
     {
       label: 'Product/Service Information',
       fields: this.getProductServiceFields()
+    },
+    {
+      label: 'Products Offered',
+      fields: this.getProductsOfferedFields()
     },
     {
       label: 'Terms and Compliance',
@@ -602,6 +608,115 @@ export class SupplierOnboardingComponentsTsComponent {
       }
     ];
     
+  }
+
+  private getProductsOfferedFields(): FormlyFieldConfig[] {
+    return [
+      {
+        key: 'productsOffered',
+        type: 'repeat',
+        props: {
+          label: 'Products Offered',
+          description: 'Add all products that your company offers',
+          addText: 'Add Product',
+          removeText: 'Remove'
+        },
+        fieldArray: {
+          fieldGroup: [
+            {
+              key: 'productName',
+              type: 'input',
+              props: {
+                label: 'Product Name',
+                placeholder: 'Enter product name',
+                required: true,
+              }
+            },
+            {
+              key: 'productDescription',
+              type: 'textarea',
+              props: {
+                label: 'Description',
+                placeholder: 'Enter product description',
+                required: true,
+                rows: 3
+              }
+            },
+            {
+              key: 'itemCode',
+              type: 'input',
+              props: {
+                label: 'Item Code/SKU',
+                placeholder: 'Enter product code or SKU',
+                required: true,
+              }
+            },
+            {
+              key: 'category',
+              type: 'select',
+              props: {
+                label: 'Category',
+                placeholder: 'Select product category',
+                required: true,
+                options: [
+                  { label: 'Electronics', value: 'electronics' },
+                  { label: 'Clothing & Apparel', value: 'apparel' },
+                  { label: 'Food & Beverage', value: 'food' },
+                  { label: 'Home & Furniture', value: 'home' },
+                  { label: 'Office Supplies', value: 'office' },
+                  { label: 'Industrial Equipment', value: 'industrial' },
+                  { label: 'Raw Materials', value: 'raw_materials' },
+                  { label: 'Software', value: 'software' },
+                  { label: 'Services', value: 'services' },
+                  { label: 'Other', value: 'other' }
+                ]
+              }
+            },
+            {
+              key: 'price',
+              type: 'input',
+              props: {
+                type: 'number',
+                label: 'Unit Price',
+                placeholder: 'Enter unit price',
+                required: true,
+                min: 0,
+                step: 0.01
+              }
+            },
+            {
+              key: 'currency',
+              type: 'select',
+              props: {
+                label: 'Currency',
+                placeholder: 'Select currency',
+                required: true,
+                options: [
+                  { label: 'USD - US Dollar', value: 'USD' },
+                  { label: 'EUR - Euro', value: 'EUR' },
+                  { label: 'GBP - British Pound', value: 'GBP' },
+                  { label: 'INR - Indian Rupee', value: 'INR' },
+                  { label: 'CAD - Canadian Dollar', value: 'CAD' },
+                  { label: 'AUD - Australian Dollar', value: 'AUD' },
+                  { label: 'JPY - Japanese Yen', value: 'JPY' }
+                ]
+              }
+            },
+            {
+              key: 'availableQuantity',
+              type: 'input',
+              props: {
+                type: 'number',
+                label: 'Available Quantity',
+                placeholder: 'Enter available quantity',
+                required: true,
+                min: 0
+              }
+            }
+          ]
+        }
+      }
+    ];
   }
 
   private getTermsFields() {

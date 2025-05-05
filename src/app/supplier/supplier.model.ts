@@ -1,3 +1,14 @@
+// Add a Product interface
+export interface Product {
+  productName: string;
+  productDescription: string;
+  itemCode: string;
+  category: string;
+  price: number;
+  currency: string;
+  availableQuantity: number;
+}
+
 export interface Supplier {
     // Basic Information
     companyName: string;
@@ -51,4 +62,7 @@ export interface Supplier {
     
     // Additional Information
     additionalNotes?: string;
+    
+    // Add productsOffered property
+    productsOffered: Product[];
   }

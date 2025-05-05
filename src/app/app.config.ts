@@ -6,6 +6,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import { PanelWrapperComponent } from './formly.config';
+import { FormlyRepeatTypeComponent } from './formly-repeat-type.component';
 
 import { routes } from './app.routes';
 
@@ -17,6 +18,9 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(
       ReactiveFormsModule,
       FormlyModule.forRoot({
+        types: [
+          { name: 'repeat', component: FormlyRepeatTypeComponent },
+        ],
         wrappers: [
           { name: 'panel', component: PanelWrapperComponent },
         ],
@@ -27,6 +31,5 @@ export const appConfig: ApplicationConfig = {
       }),
       FormlyBootstrapModule
     )
-    // Remove providePrimeNG from here
   ]
 };
