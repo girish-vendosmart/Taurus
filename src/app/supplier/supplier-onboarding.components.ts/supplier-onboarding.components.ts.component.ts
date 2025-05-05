@@ -1,9 +1,22 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import { Supplier } from '../supplier.model';
+
+// Add this at the top of your file, outside the component class
+export function gstValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  
+  if (!value) {
+    return null; // Let required validation handle empty values
+  }
+  
+  const gstPattern = /^[0-9]{2}[A-Za-z0-9]{10}[A-Za-z0-9]{1}Z[A-Za-z0-9]{1}$/;
+  
+  return gstPattern.test(value) ? null : { 'invalidGST': true };
+}
 
 @Component({
   selector: 'app-supplier-onboarding.components.ts',
@@ -83,6 +96,32 @@ export class SupplierOnboardingComponentsTsComponent {
           label: 'Business Registration Number',
           placeholder: 'Enter business registration number',
           required: true,
+        }
+      },
+      {
+        key: 'gstNumber',
+        type: 'input',
+        props: {
+          label: 'GST Number',
+          placeholder: 'Enter GST number',
+          required: true,
+          description: 'Format: 2 digits + 10-character PAN + 1 entity code + Z + 1 checksum'
+        },
+        validators: {
+          validation: [(control: AbstractControl) => {
+            const value = control.value;
+            if (!value) {
+              return null; // Let required validation handle empty values
+            }
+            
+            const gstPattern = /^[0-9]{2}[A-Za-z0-9]{10}[A-Za-z0-9]{1}Z[A-Za-z0-9]{1}$/;
+            return gstPattern.test(value) ? null : { 'gstFormat': true };
+          }]
+        },
+        validation: {
+          messages: {
+            gstFormat: 'Invalid GST format. Must be: 2 digits (state code) + 10-character PAN + entity code + Z + checksum'
+          }
         }
       }
     ];
