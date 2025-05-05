@@ -490,8 +490,15 @@ export class SupplierOnboardingComponentsTsComponent {
   
   nextStep(): void {
     if (this.currentStep < this.steps.length - 1) {
-      this.currentStep++;
-      window.scrollTo(0, 0);
+      // Mark fields in the current step as touched to trigger validation
+      const currentFields = this.steps[this.currentStep].fields;
+      this.markFieldsAsTouched(currentFields);
+      
+      // Check if the current step is valid
+      if (this.isStepValid(currentFields)) {
+        this.currentStep++;
+        window.scrollTo(0, 0);
+      }
     }
   }
   
@@ -510,5 +517,98 @@ export class SupplierOnboardingComponentsTsComponent {
     return this.currentStep === this.steps.length - 1;
   }
 
+  // Helper method to mark all fields in the current step as touched
+  private markFieldsAsTouched(fields: FormlyFieldConfig[]): void {
+    const markRecursively = (field: FormlyFieldConfig) => {
+      // If field has formControl property, use it directly
+      if (field.formControl) {
+        field.formControl.markAsTouched();
+        field.formControl.markAsDirty();
+      } 
+      
+      // Handle nested fieldGroup
+      if (field.fieldGroup) {
+        field.fieldGroup.forEach(childField => markRecursively(childField));
+      }
+      
+      // Handle nested fields with keys
+      if (field.key) {
+        // For object paths like 'address.street'
+        if (typeof field.key === 'string' && field.key.includes('.')) {
+          const parts = field.key.split('.');
+          let control:any = this.form;
+          for (const part of parts) {
+            control = control.get(part);
+            if (!control) break;
+          }
+          if (control) {
+            control.markAsTouched();
+            control.markAsDirty();
+          }
+        } else {
+          const control = this.form.get(String(field.key));
+          if (control) {
+            control.markAsTouched();
+            control.markAsDirty();
+          }
+        }
+      }
+    };
+
+    fields.forEach(field => markRecursively(field));
+  }
+
+  // Helper method to check if the current step is valid
+  private isStepValid(fields: FormlyFieldConfig[]): boolean {
+    let valid = true;
+    
+    const validateRecursively = (field: FormlyFieldConfig): boolean => {
+      // If field has formControl property, check validity directly
+      if (field.formControl && field.formControl.invalid) {
+        return false;
+      }
+      
+      // Handle nested fieldGroup
+      if (field.fieldGroup) {
+        for (const childField of field.fieldGroup) {
+          if (!validateRecursively(childField)) {
+            return false;
+          }
+        }
+      }
+      
+      // Handle nested fields with keys
+      if (field.key) {
+        // For object paths like 'address.street'
+        if (typeof field.key === 'string' && field.key.includes('.')) {
+          const parts = field.key.split('.');
+          let control:any = this.form;
+          for (const part of parts) {
+            control = control.get(part);
+            if (!control) break;
+          }
+          if (control && control.invalid) {
+            return false;
+          }
+        } else {
+          const control = this.form.get(String(field.key));
+          if (control && control.invalid) {
+            return false;
+          }
+        }
+      }
+      
+      return true;
+    };
+    
+    for (const field of fields) {
+      if (!validateRecursively(field)) {
+        valid = false;
+        break;
+      }
+    }
+    
+    return valid;
+  }
 
 }
