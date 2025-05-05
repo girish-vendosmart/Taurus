@@ -1,4 +1,115 @@
 /* You can add global styles to this file, and also import other style files */
 
-/* Importing Bootstrap SCSS file. */
+/* Import our custom variables first */
+@import 'assets/scss/variables.scss';
+
+/* Importing Bootstrap SCSS file */
 @import 'bootstrap/scss/bootstrap';
+
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Global typography styles */
+body {
+  font-family: $font-family-sans-serif;
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+  color: $precision-black;
+  background-color: $technical-white;
+}
+
+/* Typography utility classes */
+.body-large {
+  font-size: $font-size-lg;
+  line-height: $line-height-lg;
+}
+
+.body-default {
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+}
+
+.body-small {
+  font-size: $font-size-sm;
+  line-height: $line-height-sm;
+}
+
+.caption {
+  font-size: $font-size-xs;
+  line-height: $line-height-xs;
+}
+
+/* Adjust headings */
+h1, .h1 {
+  font-weight: $font-weight-bold;
+}
+
+h2, .h2 {
+  font-weight: $font-weight-semibold;
+}
+
+h3, .h3 {
+  font-weight: $font-weight-semibold;
+}
+
+h4, .h4 {
+  font-weight: $font-weight-medium;
+}
+
+/* Custom accent colors */
+.bg-blueprint-blue {
+  background-color: $blueprint-blue;
+}
+
+.bg-technical-white {
+  background-color: $technical-white;
+}
+
+.bg-precision-black {
+  background-color: $precision-black;
+}
+
+.bg-machine-gray {
+  background-color: $machine-gray;
+}
+
+.bg-material-silver {
+  background-color: $material-finish-silver;
+}
+
+.bg-safety-orange {
+  background-color: $safety-orange;
+}
+
+.bg-process-green {
+  background-color: $process-green;
+}
+
+/* Text colors */
+.text-blueprint-blue {
+  color: $blueprint-blue;
+}
+
+.text-technical-white {
+  color: $technical-white;
+}
+
+.text-precision-black {
+  color: $precision-black;
+}
+
+.text-machine-gray {
+  color: $machine-gray;
+}
+
+.text-material-silver {
+  color: $material-finish-silver;
+}
+
+.text-safety-orange {
+  color: $safety-orange;
+}
+
+.text-process-green {
+  color: $process-green;
+}

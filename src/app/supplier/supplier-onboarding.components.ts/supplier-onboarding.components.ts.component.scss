@@ -1,3 +1,5 @@
+@import 'index';
+
 .supplier-onboarding-container {
     max-width: 800px;
     margin: 0 auto;
@@ -10,12 +12,12 @@
   }
   
   .header h1 {
-    color: #2c3e50;
+    color: $blueprint-blue;
     margin-bottom: 0.5rem;
   }
   
   .header .lead {
-    color: #7f8c8d;
+    color: $machine-gray;
     font-size: 1.1rem;
   }
   
@@ -24,7 +26,7 @@
   }
   
   .progress-bar {
-    background-color: #ecf0f1;
+    background-color: $material-finish-silver;
     height: 10px;
     border-radius: 5px;
     overflow: hidden;
@@ -32,20 +34,20 @@
   }
   
   .progress {
-    background-color: #3498db;
+    background-color: $blueprint-blue;
     height: 100%;
     transition: width 0.3s ease;
   }
   
   .step-indicator {
     font-size: 0.9rem;
-    color: #7f8c8d;
+    color: $machine-gray;
     text-align: center;
   }
   
   .card {
     border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba($precision-black, 0.1);
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 2rem;
@@ -56,8 +58,8 @@
   }
   
   .card-footer {
-    background-color: #f8f9fa;
-    border-top: 1px solid #e9ecef;
+    background-color: $technical-white;
+    border-top: 1px solid $material-finish-silver;
     padding: 1.5rem 2rem;
   }
   
@@ -68,39 +70,39 @@
   
   .btn {
     padding: 0.5rem 1.5rem;
-    font-weight: 500;
+    font-weight: $font-weight-medium;
     border-radius: 4px;
     transition: all 0.2s ease;
   }
   
   .btn-primary {
-    background-color: #3498db;
-    border-color: #3498db;
+    background-color: $blueprint-blue;
+    border-color: $blueprint-blue;
   }
   
   .btn-primary:hover {
-    background-color: #2980b9;
-    border-color: #2980b9;
+    background-color: darken($blueprint-blue, 10%);
+    border-color: darken($blueprint-blue, 10%);
   }
   
   .btn-secondary {
-    background-color: #95a5a6;
-    border-color: #95a5a6;
+    background-color: $machine-gray;
+    border-color: $machine-gray;
   }
   
   .btn-secondary:hover {
-    background-color: #7f8c8d;
-    border-color: #7f8c8d;
+    background-color: darken($machine-gray, 10%);
+    border-color: darken($machine-gray, 10%);
   }
   
   .btn-success {
-    background-color: #2ecc71;
-    border-color: #2ecc71;
+    background-color: $process-green;
+    border-color: $process-green;
   }
   
   .btn-success:hover {
-    background-color: #27ae60;
-    border-color: #27ae60;
+    background-color: darken($process-green, 10%);
+    border-color: darken($process-green, 10%);
   }
   
   /* Form styling */
@@ -111,23 +113,23 @@
   :host ::ng-deep .form-control {
     border-radius: 4px;
     padding: 0.75rem 1rem;
-    border: 1px solid #dce4ec;
+    border: 1px solid $material-finish-silver;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   }
   
   :host ::ng-deep .form-control:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    border-color: $blueprint-blue;
+    box-shadow: 0 0 0 0.2rem rgba($blueprint-blue, 0.25);
   }
   
   :host ::ng-deep label {
-    font-weight: 500;
+    font-weight: $font-weight-medium;
     margin-bottom: 0.5rem;
-    color: #34495e;
+    color: $precision-black;
   }
   
   :host ::ng-deep .invalid-feedback {
-    color: #e74c3c;
+    color: $safety-orange;
     font-size: 0.85rem;
   }
   
@@ -137,7 +139,7 @@
   
   :host ::ng-deep .description {
     font-size: 0.85rem;
-    color: #7f8c8d;
+    color: $machine-gray;
     margin-top: 0.25rem;
   }
   
@@ -145,14 +147,14 @@
   :host ::ng-deep .card {
     margin-bottom: 1.5rem;
     box-shadow: none;
-    border: 1px solid #dce4ec;
+    border: 1px solid $material-finish-silver;
   }
   
   :host ::ng-deep .card-header {
-    background-color: #f8f9fa;
+    background-color: $technical-white;
     padding: 0.75rem 1.25rem;
-    font-weight: 500;
-    color: #2c3e50;
+    font-weight: $font-weight-medium;
+    color: $blueprint-blue;
   }
   
   :host ::ng-deep .card-body {

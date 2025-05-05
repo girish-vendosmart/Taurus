@@ -1,52 +1,54 @@
+@import 'index';
+
 :host ::ng-deep {
     // Enhance PrimeNG table with Bootstrap styles
     .p-datatable {
-      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      box-shadow: 0 0.125rem 0.25rem rgba($precision-black, 0.075);
       border-radius: 0.5rem;
       overflow: hidden;
       
       .p-datatable-header {
-        background-color: var(--bs-primary);
-        color: white;
+        background-color: $blueprint-blue;
+        color: $technical-white;
         padding: 1rem;
-        border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        border-bottom: 2px solid rgba($precision-black, 0.1);
       }
       
       .p-datatable-thead > tr > th {
-        background-color: var(--bs-light);
-        color: var(--bs-dark);
-        font-weight: 600;
+        background-color: $technical-white;
+        color: $precision-black;
+        font-weight: $font-weight-semibold;
         padding: 0.75rem 1rem;
-        border-bottom: 2px solid #dee2e6;
+        border-bottom: 2px solid $material-finish-silver;
       }
       
       .p-datatable-tbody > tr > td {
         padding: 0.75rem 1rem;
         vertical-align: middle;
-        border-bottom: 1px solid #f2f2f2;
+        border-bottom: 1px solid $material-finish-silver;
       }
       
       .p-paginator {
-        background-color: var(--bs-light);
+        background-color: $technical-white;
         border-radius: 0 0 0.5rem 0.5rem;
         padding: 0.5rem;
-        border-top: 1px solid #dee2e6;
+        border-top: 1px solid $material-finish-silver;
       }
       
       .p-sortable-column {
         transition: background-color 0.2s;
         
         &:hover {
-          background-color: rgba(var(--bs-primary-rgb), 0.05);
+          background-color: rgba($blueprint-blue, 0.05);
         }
         
         &.p-highlight {
-          background-color: rgba(var(--bs-primary-rgb), 0.1);
-          color: var(--bs-primary);
+          background-color: rgba($blueprint-blue, 0.1);
+          color: $blueprint-blue;
         }
         
         .p-sortable-column-icon {
-          color: var(--bs-primary);
+          color: $blueprint-blue;
         }
       }
       
@@ -54,11 +56,11 @@
         transition: background-color 0.2s;
         
         &:hover {
-          background-color: rgba(var(--bs-primary-rgb), 0.05);
+          background-color: rgba($blueprint-blue, 0.05);
         }
         
         &:nth-child(even) {
-          background-color: rgba(0, 0, 0, 0.02);
+          background-color: rgba($precision-black, 0.02);
         }
       }
     }
@@ -72,7 +74,7 @@
         border-width: 1px;
         
         &:hover {
-          background-color: rgba(var(--bs-danger-rgb), 0.1);
+          background-color: rgba($safety-orange, 0.1);
         }
       }
     }
@@ -80,7 +82,7 @@
     // Style status badges
     .badge {
       padding: 0.5rem 0.75rem;
-      font-weight: 500;
+      font-weight: $font-weight-medium;
       border-radius: 0.25rem;
     }
     
@@ -91,11 +93,11 @@
         margin: 0 0.125rem;
         
         &:hover {
-          background-color: rgba(var(--bs-primary-rgb), 0.1);
+          background-color: rgba($blueprint-blue, 0.1);
         }
         
         &.p-highlight {
-          background-color: var(--bs-primary);
+          background-color: $blueprint-blue;
         }
       }
     }
@@ -109,8 +111,8 @@
     
     .progress-bar {
       transition: width 0.3s ease;
-      font-weight: 600;
-      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+      font-weight: $font-weight-semibold;
+      text-shadow: 1px 1px 1px rgba($precision-black, 0.2);
     }
   }
   
@@ -118,11 +120,11 @@
   .card {
     border-radius: 0.5rem;
     overflow: hidden;
-    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0.25rem 0.75rem rgba($precision-black, 0.1);
     
     .card-header {
       padding: 1rem 1.5rem;
-      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+      border-bottom: 2px solid rgba($precision-black, 0.1);
     }
     
     .card-body {
@@ -132,20 +134,20 @@
   
   // Input group styling
   .input-group {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0.125rem 0.25rem rgba($precision-black, 0.05);
     border-radius: 0.25rem;
     overflow: hidden;
     
     .input-group-text {
-      background-color: var(--bs-light);
-      border-color: #dee2e6;
+      background-color: $technical-white;
+      border-color: $material-finish-silver;
     }
     
     .form-control {
-      border-color: #dee2e6;
+      border-color: $material-finish-silver;
       &:focus {
         box-shadow: none;
-        border-color: var(--bs-primary);
+        border-color: $blueprint-blue;
       }
     }
   }

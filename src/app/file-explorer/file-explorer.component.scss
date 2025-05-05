@@ -1,25 +1,27 @@
+@import 'index';
+
 :host ::ng-deep {
   // Custom styling for TreeTable 
   .p-treetable {
     .p-treetable-thead > tr > th {
-      background-color: #f8f9fa;
-      border-color: #dee2e6;
-      color: #495057;
-      font-weight: 600;
+      background-color: $technical-white;
+      border-color: $material-finish-silver;
+      color: $precision-black;
+      font-weight: $font-weight-semibold;
     }
 
     .p-treetable-tbody > tr {
       &:nth-child(even) {
-        background-color: rgba(0, 0, 0, 0.02);
+        background-color: rgba($precision-black, 0.02);
       }
       
       &:hover {
-        background-color: rgba(0, 0, 0, 0.05);
+        background-color: rgba($blueprint-blue, 0.05);
       }
       
       &.p-highlight {
-        background-color: rgba(13, 110, 253, 0.1);
-        color: #212529;
+        background-color: rgba($blueprint-blue, 0.1);
+        color: $precision-black;
       }
     }
     
@@ -34,15 +36,15 @@
   }
   
   .pi-file-pdf {
-    color: #dc3545;
+    color: $safety-orange;
   }
   
   .pi-file-excel {
-    color: #198754;
+    color: $process-green;
   }
   
   .pi-file-word {
-    color: #0d6efd;
+    color: $blueprint-blue;
   }
   
   .pi-image {
@@ -50,7 +52,7 @@
   }
   
   .pi-file-audio {
-    color: #fd7e14;
+    color: $safety-orange;
   }
   
   // Custom scrollbar
@@ -60,17 +62,17 @@
   }
   
   .p-treetable-scrollable-body::-webkit-scrollbar-thumb {
-    background-color: #adb5bd;
+    background-color: $machine-gray;
     border-radius: 4px;
   }
   
   .p-treetable-scrollable-body::-webkit-scrollbar-track {
-    background-color: #f8f9fa;
+    background-color: $technical-white;
   }
   
   // Card styling with Bootstrap
   .card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    box-shadow: 0 0.125rem 0.25rem rgba($precision-black, 0.075);
     border-radius: 0.375rem;
   }
   
