@@ -1,0 +1,151 @@
+:host ::ng-deep {
+    // Enhance PrimeNG table with Bootstrap styles
+    .p-datatable {
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      
+      .p-datatable-header {
+        background-color: var(--bs-primary);
+        color: white;
+        padding: 1rem;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+      }
+      
+      .p-datatable-thead > tr > th {
+        background-color: var(--bs-light);
+        color: var(--bs-dark);
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        border-bottom: 2px solid #dee2e6;
+      }
+      
+      .p-datatable-tbody > tr > td {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f2f2f2;
+      }
+      
+      .p-paginator {
+        background-color: var(--bs-light);
+        border-radius: 0 0 0.5rem 0.5rem;
+        padding: 0.5rem;
+        border-top: 1px solid #dee2e6;
+      }
+      
+      .p-sortable-column {
+        transition: background-color 0.2s;
+        
+        &:hover {
+          background-color: rgba(var(--bs-primary-rgb), 0.05);
+        }
+        
+        &.p-highlight {
+          background-color: rgba(var(--bs-primary-rgb), 0.1);
+          color: var(--bs-primary);
+        }
+        
+        .p-sortable-column-icon {
+          color: var(--bs-primary);
+        }
+      }
+      
+      .p-datatable-tbody > tr {
+        transition: background-color 0.2s;
+        
+        &:hover {
+          background-color: rgba(var(--bs-primary-rgb), 0.05);
+        }
+        
+        &:nth-child(even) {
+          background-color: rgba(0, 0, 0, 0.02);
+        }
+      }
+    }
+    
+    // Style PrimeNG buttons with Bootstrap
+    .p-button {
+      border-radius: 0.25rem;
+      transition: all 0.2s;
+      
+      &.p-button-outlined {
+        border-width: 1px;
+        
+        &:hover {
+          background-color: rgba(var(--bs-danger-rgb), 0.1);
+        }
+      }
+    }
+    
+    // Style status badges
+    .badge {
+      padding: 0.5rem 0.75rem;
+      font-weight: 500;
+      border-radius: 0.25rem;
+    }
+    
+    // Improve pagination
+    .p-paginator {
+      .p-paginator-element {
+        border-radius: 0.25rem;
+        margin: 0 0.125rem;
+        
+        &:hover {
+          background-color: rgba(var(--bs-primary-rgb), 0.1);
+        }
+        
+        &.p-highlight {
+          background-color: var(--bs-primary);
+        }
+      }
+    }
+  }
+  
+  // Additional custom styling
+  .progress {
+    height: 20px;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    
+    .progress-bar {
+      transition: width 0.3s ease;
+      font-weight: 600;
+      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+    }
+  }
+  
+  // Improve card styling
+  .card {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+    
+    .card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+  
+  // Input group styling
+  .input-group {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+    border-radius: 0.25rem;
+    overflow: hidden;
+    
+    .input-group-text {
+      background-color: var(--bs-light);
+      border-color: #dee2e6;
+    }
+    
+    .form-control {
+      border-color: #dee2e6;
+      &:focus {
+        box-shadow: none;
+        border-color: var(--bs-primary);
+      }
+    }
+  }
