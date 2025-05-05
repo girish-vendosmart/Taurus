@@ -1,0 +1,176 @@
+.supplier-onboarding-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .header h1 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+  }
+  
+  .header .lead {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+  }
+  
+  .progress-container {
+    margin-bottom: 2rem;
+  }
+  
+  .progress-bar {
+    background-color: #ecf0f1;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+  
+  .progress {
+    background-color: #3498db;
+    height: 100%;
+    transition: width 0.3s ease;
+  }
+  
+  .step-indicator {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    text-align: center;
+  }
+  
+  .card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  
+  .card-body {
+    padding: 2rem;
+  }
+  
+  .card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem 2rem;
+  }
+  
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .btn {
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-primary {
+    background-color: #3498db;
+    border-color: #3498db;
+  }
+  
+  .btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+  }
+  
+  .btn-secondary {
+    background-color: #95a5a6;
+    border-color: #95a5a6;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #7f8c8d;
+    border-color: #7f8c8d;
+  }
+  
+  .btn-success {
+    background-color: #2ecc71;
+    border-color: #2ecc71;
+  }
+  
+  .btn-success:hover {
+    background-color: #27ae60;
+    border-color: #27ae60;
+  }
+  
+  /* Form styling */
+  :host ::ng-deep .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  :host ::ng-deep .form-control {
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #dce4ec;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  
+  :host ::ng-deep .form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+  }
+  
+  :host ::ng-deep label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #34495e;
+  }
+  
+  :host ::ng-deep .invalid-feedback {
+    color: #e74c3c;
+    font-size: 0.85rem;
+  }
+  
+  :host ::ng-deep .form-check {
+    padding-left: 1.5rem;
+  }
+  
+  :host ::ng-deep .description {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-top: 0.25rem;
+  }
+  
+  /* Panel wrapper styling */
+  :host ::ng-deep .card {
+    margin-bottom: 1.5rem;
+    box-shadow: none;
+    border: 1px solid #dce4ec;
+  }
+  
+  :host ::ng-deep .card-header {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    color: #2c3e50;
+  }
+  
+  :host ::ng-deep .card-body {
+    padding: 1.25rem;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .card-body {
+      padding: 1.5rem;
+    }
+    
+    .card-footer {
+      padding: 1.25rem 1.5rem;
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+  }
