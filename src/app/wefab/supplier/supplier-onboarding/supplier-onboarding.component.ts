@@ -14,6 +14,7 @@ import { StepsModule } from 'primeng/steps';
 import { MenuItem } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 @Component({
   selector: 'app-supplier-onboarding',
@@ -29,7 +30,8 @@ import { MessageService } from 'primeng/api';
     DropdownModule,
     TooltipModule,
     StepsModule,
-    ToastModule
+    ToastModule,
+    MultiSelectModule
   ],
   providers: [MessageService],
   templateUrl: './supplier-onboarding.component.html',
@@ -89,13 +91,12 @@ export class SupplierOnboardingComponent implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'Legal Business Name',
-              placeholder: 'Enter your registered company name',
-              required: true,
-              description: 'Enter the official registered name of your business'
+              placeholder: 'Enter company name',
+              required: true
             },
             validation: {
               messages: {
-                required: 'Legal Business Name is required'
+                required: 'Required'
               }
             }
           },
@@ -105,51 +106,12 @@ export class SupplierOnboardingComponent implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'GST Number',
-              placeholder: 'Enter 15-digit GST number',
-              required: true,
-              description: 'Your Goods and Services Tax registration number'
-            },
-            validation: {
-              messages: {
-                required: 'GST Number is required'
-              }
-            }
-          }
-        ]
-      },
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
-          {
-            className: 'col-md-6 mb-3',
-            key: 'contactPersonName',
-            type: 'input',
-            templateOptions: {
-              label: 'Contact Person Name',
-              placeholder: 'Enter full name of primary contact person',
+              placeholder: 'Enter GST number',
               required: true
             },
             validation: {
               messages: {
-                required: 'Contact Person Name is required'
-              }
-            }
-          },
-          {
-            className: 'col-md-6 mb-3',
-            key: 'emailAddress',
-            type: 'input',
-            templateOptions: {
-              label: 'Email Address',
-              placeholder: 'Enter contact email address',
-              required: true,
-              type: 'email',
-              description: 'This will be used for all communications'
-            },
-            validation: {
-              messages: {
-                required: 'Email Address is required',
-                email: 'Please enter a valid email address'
+                required: 'Required'
               }
             }
           }
@@ -164,12 +126,49 @@ export class SupplierOnboardingComponent implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'PAN Number',
-              placeholder: 'Enter 10-character PAN number',
+              placeholder: 'Enter PAN number',
               required: true
             },
             validation: {
               messages: {
-                required: 'PAN Number is required'
+                required: 'Required'
+              }
+            }
+          },
+          {
+            className: 'col-md-6 mb-3',
+            key: 'contactPersonName',
+            type: 'input',
+            templateOptions: {
+              label: 'Contact Person Name',
+              placeholder: 'Enter full name',
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'Required'
+              }
+            }
+          }
+        ]
+      },
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6 mb-3',
+            key: 'emailAddress',
+            type: 'input',
+            templateOptions: {
+              label: 'Email Address',
+              placeholder: 'Enter email',
+              required: true,
+              type: 'email'
+            },
+            validation: {
+              messages: {
+                required: 'Required',
+                email: 'Invalid email'
               }
             }
           },
@@ -191,7 +190,7 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             validation: {
               messages: {
-                required: 'Country is required'
+                required: 'Required'
               }
             }
           }
@@ -205,18 +204,18 @@ export class SupplierOnboardingComponent implements OnInit {
             key: 'phoneNumber',
             type: 'input',
             templateOptions: {
-              label: 'Phone Number (with OTP verification)',
+              label: 'Phone Number',
               placeholder: 'Enter phone number',
               required: true,
               addonRight: {
-                text: 'Send OTP',
+                text: 'OTP',
                 className: 'btn-primary',
                 onClick: () => this.sendOTP(),
               }
             },
             validation: {
               messages: {
-                required: 'Phone Number is required'
+                required: 'Required'
               }
             }
           },
@@ -226,7 +225,7 @@ export class SupplierOnboardingComponent implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'OTP',
-              placeholder: 'Enter OTP sent to your phone',
+              placeholder: 'Enter OTP',
               required: true
             },
             expressionProperties: {
@@ -234,125 +233,11 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             validation: {
               messages: {
-                required: 'OTP is required'
+                required: 'Required'
               }
             }
           }
         ]
-      },
-      {
-        key: 'registeredAddress',
-        type: 'textarea',
-        templateOptions: {
-          label: 'Registered Address',
-          placeholder: 'Enter complete registered address with city, state, PIN code',
-          required: true,
-          rows: 3
-        },
-        validation: {
-          messages: {
-            required: 'Registered Address is required'
-          }
-        }
-      },
-      {
-        key: 'manufacturingFacilityAddress',
-        type: 'textarea',
-        templateOptions: {
-          label: 'Manufacturing Facility Address',
-          placeholder: 'Enter manufacturing facility address with city, state, PIN code',
-          required: true,
-          rows: 3,
-          description: 'Please include the full address of your manufacturing facility'
-        },
-        validation: {
-          messages: {
-            required: 'Manufacturing Facility Address is required'
-          }
-        }
-      }
-    ];
-  }
-
-  getManufacturingCapabilitiesFields(): FormlyFieldConfig[] {
-    return [
-      {
-        key: 'manufacturingCapabilities',
-        type: 'multicheckbox',
-        templateOptions: {
-          label: 'Manufacturing Capabilities',
-          required: true,
-          options: [
-            { label: 'CNC Machining', value: 'cnc_machining' },
-            { label: '3D Printing', value: '3d_printing' },
-            { label: 'Sheet Metal Fabrication', value: 'sheet_metal' },
-            { label: 'Injection Molding', value: 'injection_molding' },
-            { label: 'Casting', value: 'casting' },
-            { label: 'Extrusion', value: 'extrusion' },
-            { label: 'Welding', value: 'welding' },
-            { label: 'Electronics Assembly', value: 'electronics' }
-          ],
-          description: 'Select all manufacturing capabilities that apply to your business'
-        },
-        validation: {
-          messages: {
-            required: 'Please select at least one manufacturing capability'
-          }
-        }
-      },
-      {
-        key: 'materialTypes',
-        type: 'multicheckbox',
-        templateOptions: {
-          label: 'Material Types',
-          required: true,
-          options: [
-            { label: 'Metals (Steel, Aluminum, etc.)', value: 'metals' },
-            { label: 'Plastics (ABS, PLA, Nylon, etc.)', value: 'plastics' },
-            { label: 'Rubber & Elastomers', value: 'rubber' },
-            { label: 'Composites', value: 'composites' },
-            { label: 'Wood', value: 'wood' },
-            { label: 'Ceramics', value: 'ceramics' },
-            { label: 'Electronics Components', value: 'electronics' }
-          ]
-        },
-        validation: {
-          messages: {
-            required: 'Please select at least one material type'
-          }
-        }
-      },
-      {
-        key: 'certifications',
-        type: 'multicheckbox',
-        templateOptions: {
-          label: 'Certifications',
-          options: [
-            { label: 'ISO 9001', value: 'iso_9001' },
-            { label: 'ISO 14001', value: 'iso_14001' },
-            { label: 'AS9100', value: 'as9100' },
-            { label: 'IATF 16949', value: 'iatf_16949' },
-            { label: 'UL Certification', value: 'ul' },
-            { label: 'CE Marking', value: 'ce' },
-            { label: 'RoHS Compliance', value: 'rohs' }
-          ],
-          description: 'Select all certifications that your company currently holds'
-        }
-      },
-      {
-        key: 'qualityControlProcess',
-        type: 'textarea',
-        templateOptions: {
-          label: 'Quality Control Process',
-          placeholder: 'Describe your quality control procedures and processes',
-          required: true,
-          rows: 3
-        },
-        validation: {
-          messages: {
-            required: 'Quality Control Process description is required'
-          }
-        }
       },
       {
         fieldGroupClassName: 'row',
@@ -363,13 +248,13 @@ export class SupplierOnboardingComponent implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'Minimum Order Value (INR)',
-              placeholder: 'Enter minimum order value',
+              placeholder: 'Enter value',
               required: true,
               type: 'number'
             },
             validation: {
               messages: {
-                required: 'Minimum Order Value is required'
+                required: 'Required'
               }
             }
           },
@@ -379,70 +264,148 @@ export class SupplierOnboardingComponent implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'Average Lead Time (Days)',
-              placeholder: 'Enter average lead time in days',
+              placeholder: 'Enter days',
               required: true,
               type: 'number'
             },
             validation: {
               messages: {
-                required: 'Lead Time is required'
+                required: 'Required'
               }
             }
           }
         ]
       },
       {
-        key: 'documents',
-        templateOptions: {
-          label: 'Required Documents',
-        },
+        fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            key: 'gstCertificate',
-            type: 'file',
+            className: 'col-md-6 mb-3',
+            key: 'registeredAddress',
+            type: 'textarea',
             templateOptions: {
-              label: 'GST Registration Certificate',
+              label: 'Registered Address',
+              placeholder: 'Enter complete address',
               required: true,
-              description: 'Upload GST registration certificate (PDF format only)'
+              rows: 2
             },
             validation: {
               messages: {
-                required: 'GST Certificate is required'
+                required: 'Required'
               }
             }
           },
           {
-            key: 'panCard',
-            type: 'file',
+            className: 'col-md-6 mb-3',
+            key: 'manufacturingFacilityAddress',
+            type: 'textarea',
             templateOptions: {
-              label: 'PAN Card',
+              label: 'Manufacturing Facility Address',
+              placeholder: 'Enter facility address',
               required: true,
-              description: 'Upload PAN card copy (PDF or JPG format)'
+              rows: 2
             },
             validation: {
               messages: {
-                required: 'PAN Card copy is required'
+                required: 'Required'
               }
-            }
-          },
-          {
-            key: 'msmeRegistration',
-            type: 'file',
-            templateOptions: {
-              label: 'MSME Registration (if applicable)',
-              description: 'Upload MSME registration certificate if applicable'
-            }
-          },
-          {
-            key: 'iso9001',
-            type: 'file',
-            templateOptions: {
-              label: 'ISO 9001 Certificate (if applicable)',
-              description: 'Upload ISO 9001 certificate if applicable'
             }
           }
         ]
       }
+    ];
+  }
+
+  getManufacturingCapabilitiesFields(): FormlyFieldConfig[] {
+    return [
+      {
+        key: 'qualityControlProcess',
+        type: 'textarea',
+        templateOptions: {
+          label: 'Quality Control Process',
+          placeholder: 'Describe your QC procedures',
+          required: true,
+          rows: 3
+        },
+        validation: {
+          messages: {
+            required: 'Required'
+          }
+        }
+      },
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6 mb-3',
+            key: 'documents.panCard',
+            type: 'file',
+            props: {
+              label: 'PAN Card',
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'Required'
+              }
+            }
+          },
+          // {
+          //   className: 'col-md-6 mb-3',
+          //   key: 'certifications',
+          //   type: 'p-multiselect',
+          //   props: {
+          //     label: 'Certifications',
+          //     multiple: true,
+          //     placeholder: 'Select any certifications you hold',
+          //     options: [
+          //       { label: 'ISO 9001', value: 'iso_9001' },
+          //       { label: 'ISO 14001', value: 'iso_14001' },
+          //       { label: 'AS9100', value: 'as9100' },
+          //       { label: 'IATF 16949', value: 'iatf_16949' },
+          //       { label: 'UL', value: 'ul' },
+          //       { label: 'CE', value: 'ce' },
+          //       { label: 'RoHS', value: 'rohs' }
+          //     ]
+          //   }
+          // },
+          {
+            className: 'col-md-6 mb-3',
+            key: 'documents.gstCertificate',
+            type: 'file',
+            props: {
+              label: 'GST Registration Certificate',
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'Required'
+              }
+            }
+          }
+        ]
+      },
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6 mb-3',
+            key: 'documents.iso9001',
+            type: 'file',
+            props: {
+              label: 'ISO 9001 Certificate (if applicable)'
+            }
+          },
+          {
+            className: 'col-md-6 mb-3',
+            key: 'documents.msmeRegistration',
+            type: 'file',
+            props: {
+              label: 'MSME Registration (if applicable)'
+            }
+          }
+        ]
+      },
     ];
   }
 
@@ -452,7 +415,7 @@ export class SupplierOnboardingComponent implements OnInit {
       severity: 'success',
       summary: 'OTP Sent',
       detail: 'A verification code has been sent to your phone number.',
-      life: 5000
+      life: 3000
     });
   }
 
@@ -483,7 +446,7 @@ export class SupplierOnboardingComponent implements OnInit {
         severity: 'error',
         summary: 'Validation Error',
         detail: errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.',
-        life: 6000
+        life: 4000
       });
     }
   }
@@ -526,8 +489,8 @@ export class SupplierOnboardingComponent implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
-        detail: 'Your supplier onboarding application has been received and will be reviewed shortly. You will receive confirmation via email.',
-        life: 8000
+        detail: 'Your supplier onboarding application has been received and will be reviewed shortly.',
+        life: 5000
       });
     } else {
       this.form.markAllAsTouched();
@@ -535,7 +498,7 @@ export class SupplierOnboardingComponent implements OnInit {
         severity: 'error',
         summary: 'Validation Error',
         detail: 'Please fill all required fields correctly before submitting the form.',
-        life: 6000
+        life: 4000
       });
     }
   }
