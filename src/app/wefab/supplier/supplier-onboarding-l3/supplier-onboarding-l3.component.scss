@@ -1,0 +1,650 @@
+// Import variables from the main theme
+@import '../../../../assets/scss/variables.scss';
+
+:host {
+  display: block;
+  background-color: $technical-white;
+  min-height: 100vh;
+}
+
+// Local color variables - using the imported values to ensure consistency
+$light-gray: $technical-white;
+$border-color: $material-finish-silver;
+$success-green: $process-green;
+
+// Card styling
+.card {
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  border: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .card-title {
+    font-weight: $font-weight-semibold;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  
+  .card-body {
+    padding: 1.75rem 2rem;
+  }
+}
+
+// Left navigation panel specific styles
+.col-md-3 {
+  .card {
+    background: linear-gradient(145deg, #ffffff, #f8fbff);
+    border-left: 4px solid $blueprint-blue;
+    
+    .card-body {
+      padding: 2rem;
+    }
+    
+    .card-title {
+      font-size: 1.1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba($blueprint-blue, 0.1);
+      margin-bottom: 1.5rem;
+    }
+  }
+}
+
+// Right form area specific styles
+.col-md-9 {
+  .card {
+    background: #ffffff;
+    border-right: 4px solid $blueprint-blue;
+    
+    .card-body {
+      padding: 2rem;
+    }
+  }
+}
+
+// Header badge
+.header-badge {
+  display: inline-block;
+  background-color: $blueprint-blue;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-weight: $font-weight-semibold;
+  margin-top: 1rem;
+  box-shadow: 0 4px 8px rgba($blueprint-blue, 0.3);
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+// Step navigation styling
+.steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 0.75rem 0;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+    
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 50px;
+      height: calc(100% - 10px);
+      width: 3px;
+      background-color: $material-finish-silver;
+      z-index: 1;
+    }
+    
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background-color: $material-finish-silver;
+      color: $machine-gray;
+      font-weight: $font-weight-bold;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-size: 1.1rem;
+    }
+    
+    .step-content {
+      padding-top: 0.5rem;
+      
+      .step-title {
+        color: $machine-gray;
+        font-weight: $font-weight-medium;
+        transition: all 0.3s ease;
+        font-size: 1.05rem;
+        display: block;
+        line-height: 1.4;
+      }
+      
+      .step-description {
+        color: lighten($machine-gray, 15%);
+        font-size: 0.85rem;
+        display: block;
+        margin-top: 0.25rem;
+      }
+    }
+    
+    &.active {
+      .step-number {
+        background-color: $blueprint-blue;
+        color: $technical-white;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba($blueprint-blue, 0.4);
+      }
+      
+      .step-content {
+        .step-title {
+          color: $blueprint-blue;
+          font-weight: $font-weight-semibold;
+          transform: translateX(3px);
+        }
+        
+        .step-description {
+          color: darken($machine-gray, 5%);
+        }
+      }
+      
+      &:not(:last-child)::after {
+        background-color: $blueprint-blue;
+      }
+    }
+    
+    &.completed {
+      .step-number {
+        background-color: $success-green;
+        color: $technical-white;
+        
+        &::after {
+          content: '✓';
+          position: absolute;
+          font-size: 1.2rem;
+        }
+      }
+      
+      &:not(:last-child)::after {
+        background-color: $success-green;
+      }
+    }
+    
+    &:hover:not(.active):not(.completed) {
+      .step-number {
+        transform: scale(1.05);
+        background-color: lighten($blueprint-blue, 35%);
+      }
+      
+      .step-content .step-title {
+        color: darken($machine-gray, 15%);
+      }
+    }
+  }
+}
+
+// Overall onboarding progress
+.onboarding-progress {
+  background-color: rgba($blueprint-blue, 0.05);
+  border-radius: 10px;
+  padding: 1.25rem;
+  
+  .onboarding-progress-title {
+    font-weight: $font-weight-medium;
+    margin-bottom: 1rem;
+    color: $blueprint-blue;
+    font-size: 0.95rem;
+  }
+  
+  .onboarding-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    
+    .onboarding-step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      
+      .onboarding-step-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: $material-finish-silver;
+      }
+      
+      .onboarding-step-label {
+        font-size: 0.85rem;
+        color: $machine-gray;
+      }
+      
+      &.completed {
+        .onboarding-step-indicator {
+          background-color: $success-green;
+        }
+        
+        .onboarding-step-label {
+          color: darken($machine-gray, 15%);
+          font-weight: $font-weight-medium;
+        }
+      }
+      
+      &.active {
+        .onboarding-step-indicator {
+          background-color: $blueprint-blue;
+          box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.2);
+        }
+        
+        .onboarding-step-label {
+          color: $blueprint-blue;
+          font-weight: $font-weight-semibold;
+        }
+      }
+    }
+  }
+}
+
+// Progress bar styling
+.progress-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  
+  .progress-bar-wrapper {
+    flex: 1;
+    margin-right: 1.25rem;
+    
+    .progress {
+      height: 10px;
+      background-color: rgba($material-finish-silver, 0.5);
+      border-radius: 6px;
+      overflow: hidden;
+      
+      .progress-bar {
+        border-radius: 6px;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(90deg, $blueprint-blue, lighten($blueprint-blue, 10%));
+        box-shadow: 0 2px 5px rgba($blueprint-blue, 0.3);
+      }
+    }
+  }
+  
+  .progress-text {
+    font-size: 0.875rem;
+    color: $machine-gray;
+    white-space: nowrap;
+    font-weight: $font-weight-medium;
+    background-color: rgba($blueprint-blue, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+  }
+}
+
+// Page header
+.text-blueprint-blue {
+  color: $blueprint-blue !important;
+  position: relative;
+  display: inline-block;
+  
+  &.mb-2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: $blueprint-blue;
+    margin: 0.5rem auto 0;
+    border-radius: 2px;
+  }
+}
+
+.text-machine-gray {
+  color: $machine-gray;
+}
+
+// Section headers
+.section-header {
+  h4 {
+    color: $blueprint-blue;
+    font-weight: $font-weight-semibold;
+    margin-bottom: 0.5rem;
+    position: relative;
+    display: inline-block;
+    
+    &::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 3px;
+      background-color: $blueprint-blue;
+      margin-top: 0.5rem;
+      border-radius: 2px;
+    }
+  }
+  
+  p {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+    color: $machine-gray;
+  }
+}
+
+// Alert styling
+.alert {
+  border-radius: 8px;
+  border-left: 4px solid;
+  
+  &.alert-info {
+    background-color: rgba($blueprint-blue, 0.1);
+    border-color: $blueprint-blue;
+    color: darken($blueprint-blue, 15%);
+  }
+  
+  &.alert-warning {
+    background-color: rgba(#ffc107, 0.1);
+    border-color: #ffc107;
+    color: darken(#ffc107, 25%);
+  }
+}
+
+// Document guidelines box
+.document-guidelines {
+  background-color: rgba($blueprint-blue, 0.05);
+  border-left: 4px solid rgba($blueprint-blue, 0.3);
+  
+  h5 {
+    color: $blueprint-blue;
+    font-weight: $font-weight-medium;
+    font-size: 1.05rem;
+  }
+  
+  p, ul {
+    color: $machine-gray;
+    font-size: 0.9rem;
+  }
+  
+  ul {
+    padding-left: 1.5rem;
+    
+    li {
+      margin-bottom: 0.25rem;
+    }
+  }
+}
+
+// Form styling enhancements
+:host ::ng-deep {
+  // Input fields
+  .form-control, .form-select, .p-inputtext {
+    border: 1px solid $material-finish-silver;
+    border-radius: 8px;
+    padding: 0.95rem 1.2rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: rgba($technical-white, 0.8);
+    width: 100%;
+    
+    &:hover {
+      border-color: lighten($blueprint-blue, 20%);
+      background-color: rgba($technical-white, 1);
+    }
+    
+    &:focus {
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
+      background-color: #fff;
+      outline: none;
+    }
+    
+    &::placeholder {
+      color: lighten($machine-gray, 20%);
+      font-style: italic;
+      opacity: 0.7;
+    }
+  }
+  
+  // Labels
+  .form-label {
+    font-weight: $font-weight-medium;
+    color: $precision-black;
+    margin-bottom: 0.7rem;
+    font-size: 1rem;
+    
+    .text-danger {
+      color: $safety-orange !important;
+      margin-left: 0.25rem;
+    }
+  }
+  
+  // Validation errors
+  .invalid-feedback {
+    color: $safety-orange;
+    font-size: 0.85rem;
+    margin-top: 0.35rem;
+  }
+  
+  // Make checkboxes more prominent
+  .p-checkbox .p-checkbox-box {
+    border-radius: 4px;
+    width: 18px;
+    height: 18px;
+    
+    &.p-highlight {
+      background-color: $blueprint-blue;
+      border-color: $blueprint-blue;
+    }
+  }
+  
+  // Enhance file upload component
+  .file-upload-area {
+    border: 2px dashed rgba($blueprint-blue, 0.3);
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background-color: rgba($blueprint-blue, 0.02);
+    
+    &:hover {
+      border-color: $blueprint-blue;
+      background-color: rgba($blueprint-blue, 0.05);
+    }
+    
+    .upload-icon {
+      font-size: 2rem;
+      color: $blueprint-blue;
+      margin-bottom: 1rem;
+    }
+    
+    .upload-text {
+      color: $machine-gray;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .upload-hint {
+      color: lighten($machine-gray, 15%);
+      font-size: 0.85rem;
+    }
+  }
+  
+  // Button styles
+  .btn {
+    border-radius: 6px;
+    font-weight: $font-weight-medium;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    
+    &.btn-primary {
+      background: linear-gradient(135deg, $blueprint-blue, darken($blueprint-blue, 10%));
+      border: none;
+      box-shadow: 0 4px 12px rgba($blueprint-blue, 0.3);
+      
+      &:hover {
+        background: linear-gradient(135deg, lighten($blueprint-blue, 5%), $blueprint-blue);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba($blueprint-blue, 0.4);
+      }
+      
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba($blueprint-blue, 0.3);
+      }
+    }
+    
+    &.btn-outline-secondary {
+      border: 2px solid $material-finish-silver;
+      color: $machine-gray;
+      
+      &:hover {
+        background-color: $light-gray;
+        border-color: darken($material-finish-silver, 5%);
+        color: darken($machine-gray, 10%);
+      }
+    }
+  }
+  
+  // Dropdown styling
+  .p-dropdown {
+    width: 100%;
+    border-radius: 8px;
+    
+    .p-dropdown-trigger {
+      background-color: transparent;
+    }
+    
+    .p-dropdown-label {
+      padding: 0.95rem 1.2rem;
+    }
+    
+    &:hover {
+      border-color: lighten($blueprint-blue, 20%);
+    }
+    
+    &:focus {
+      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
+    }
+  }
+  
+  // MultiSelect styling
+  .p-multiselect {
+    width: 100%;
+    border-radius: 8px;
+    
+    .p-multiselect-trigger {
+      background-color: transparent;
+    }
+    
+    .p-multiselect-label {
+      padding: 0.95rem 1.2rem;
+      margin: 0;
+    }
+    
+    &:hover {
+      border-color: lighten($blueprint-blue, 20%);
+    }
+    
+    &:focus {
+      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
+    }
+  }
+  
+  // Textarea styling
+  textarea.form-control {
+    min-height: 100px;
+  }
+  
+  // Toast notifications
+  .p-toast {
+    .p-toast-message {
+      border-radius: 8px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+      
+      &.p-toast-message-success {
+        background-color: rgba($success-green, 0.1);
+        border-left: 4px solid $success-green;
+        color: darken($success-green, 10%);
+        
+        .p-toast-message-icon,
+        .p-toast-summary {
+          color: $success-green;
+        }
+      }
+      
+      &.p-toast-message-error {
+        background-color: rgba($safety-orange, 0.1);
+        border-left: 4px solid $safety-orange;
+        color: darken($safety-orange, 10%);
+        
+        .p-toast-message-icon,
+        .p-toast-summary {
+          color: $safety-orange;
+        }
+      }
+    }
+  }
+  
+  // Required field indicator
+  .required-indicator {
+    color: $safety-orange;
+    margin-left: 3px;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .card .card-body {
+    padding: 1.5rem;
+  }
+  
+  .progress-container {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    .progress-bar-wrapper {
+      width: 100%;
+      margin-right: 0;
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  .steps-container {
+    gap: 2rem;
+    
+    .step {
+      gap: 1rem;
+      
+      .step-number {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+      }
+    }
+  }
+  
+  .header-badge {
+    padding: 0.4rem 1.25rem;
+    font-size: 0.8rem;
+  }
+} 

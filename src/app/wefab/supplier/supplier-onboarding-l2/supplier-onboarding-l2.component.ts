@@ -4,6 +4,7 @@ import { FormGroup, FormBuilder, ReactiveFormsModule, AbstractControl, Validatio
 import { FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
+import { Router } from '@angular/router';
 
 // PrimeNG imports
 import { CardModule } from 'primeng/card';
@@ -84,6 +85,7 @@ export class SupplierOnboardingL2Component implements OnInit {
   constructor(
     private fb: FormBuilder, 
     private messageService: MessageService,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.form = this.fb.group({});
@@ -516,10 +518,14 @@ export class SupplierOnboardingL2Component implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
-        detail: 'Your detailed supplier information has been received and will be reviewed shortly.',
-        life: 5000
+        detail: 'Your detailed supplier information has been received. Redirecting to financial information form.',
+        life: 3000
       });
-      // Here you would typically send the data to the server or navigate to the next step
+      
+      // Navigate to L3 form after 3 seconds
+      setTimeout(() => {
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
+      }, 3000);
     } else {
       this.messageService.add({
         severity: 'error',
