@@ -1,1 +1,102 @@
-<p>supplier-onboarding works!</p>
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-11">
+      
+      <!-- Header Section -->
+      <div class="text-center mb-4">
+        <h2 class="text-blueprint-blue mb-2">Supplier Onboarding: L1 Form</h2>
+        <p class="text-machine-gray">Complete the following form to begin the supplier onboarding process. Fill in all required fields and provide accurate information to ensure quick approval.</p>
+      </div>
+      
+      <div class="row">
+        <!-- Left Navigation Panel -->
+        <div class="col-md-5 mb-4 mb-md-0">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+              <h5 class="card-title text-blueprint-blue mb-3">ONBOARDING STEPS</h5>
+              
+              <div class="steps-container">
+                <div class="step" [ngClass]="{'active': activeStepIndex === 0}">
+                  <div class="step-number">1</div>
+                  <div class="step-content">
+                    <span class="step-title">Basic Details</span>
+                  </div>
+                </div>
+                
+                <div class="step" [ngClass]="{'active': activeStepIndex === 1}">
+                  <div class="step-number">2</div>
+                  <div class="step-content">
+                    <span class="step-title">Manufacturing<br>Capabilities &<br>Documents</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Form Area -->
+        <div class="col-md-7">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <!-- Progress Bar -->
+              <div class="progress-container mb-4">
+                <div class="progress-bar-wrapper">
+                  <div class="progress">
+                    <div class="progress-bar bg-blueprint-blue" role="progressbar" 
+                         [style.width]="(activeStepIndex + 1) * 100 / steps.length + '%'"></div>
+                  </div>
+                </div>
+                <div class="progress-text">
+                  <span>Step {{ activeStepIndex + 1 }} of {{ steps.length }}</span>
+                </div>
+              </div>
+              
+              <!-- Form Title -->
+              <div class="mb-4">
+                <h3 class="text-blueprint-blue">{{ activeStepIndex === 0 ? 'Basic Details' : 'Manufacturing Capabilities & Documents' }}</h3>
+                <p class="text-machine-gray" *ngIf="activeStepIndex === 0">
+                  Please provide your company information and contact details.
+                </p>
+                <p class="text-machine-gray" *ngIf="activeStepIndex === 1">
+                  Please provide details about your manufacturing capabilities and upload required documents.
+                </p>
+              </div>
+              
+              <!-- Form -->
+              <form [formGroup]="form">
+                <formly-form
+                  [form]="form"
+                  [fields]="currentFields"
+                  [model]="model"
+                  [options]="options">
+                </formly-form>
+                
+                <!-- Form Navigation Buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                  <button 
+                    *ngIf="activeStepIndex > 0"
+                    type="button" 
+                    class="btn btn-outline-secondary px-4"
+                    (click)="prevStep()">
+                    <i class="pi pi-arrow-left me-2"></i> Previous
+                  </button>
+                  
+                  <button 
+                    type="button" 
+                    class="btn btn-primary px-4 ms-auto"
+                    (click)="nextStep()">
+                    {{ activeStepIndex < steps.length - 1 ? 'Next' : 'Submit' }}
+                    <i *ngIf="activeStepIndex < steps.length - 1" class="pi pi-arrow-right ms-2"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast for notifications -->
+<p-toast></p-toast>

@@ -7,6 +7,7 @@ import { FormlyModule } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import { PanelWrapperComponent } from './formly.config';
 import { FormlyRepeatTypeComponent } from './formly-repeat-type.component';
+import { FormlyFieldFileComponent } from './file-type.component';
 
 import { routes } from './app.routes';
 
@@ -20,6 +21,7 @@ export const appConfig: ApplicationConfig = {
       FormlyModule.forRoot({
         types: [
           { name: 'repeat', component: FormlyRepeatTypeComponent },
+          { name: 'file', component: FormlyFieldFileComponent },
         ],
         wrappers: [
           { name: 'panel', component: PanelWrapperComponent },
