@@ -22,6 +22,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { CalendarModule } from 'primeng/calendar';
 import { SliderModule } from 'primeng/slider';
 import { CheckboxModule } from 'primeng/checkbox';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
 // Import Components
 import { FileUploadComponent } from '../supplier-onboarding/file-upload.component';
@@ -52,6 +54,8 @@ import { FormlyFieldDropdownComponent } from '../../../../app/dropdown-type.comp
     CalendarModule,
     SliderModule,
     CheckboxModule,
+    InputGroupModule,
+    InputGroupAddonModule,
     FileUploadComponent,
     FormlyRepeatTypeComponent,
     FormlyFieldFileUploadComponent,
@@ -65,20 +69,17 @@ import { FormlyFieldDropdownComponent } from '../../../../app/dropdown-type.comp
 export class SupplierOnboardingL3Component implements OnInit {
   form: FormGroup;
   model: any = {
-    bankInformation: {
-      bankName: '',
-      accountNumber: '',
-      routingNumber: '',
-      swiftCode: '',
-      accountHolderName: '',
-      accountType: ''
-    },
-    financialDocuments: null,
     companyFinancials: {
-      annualRevenue: 0,
-      yearInBusiness: 0,
-      employeeCount: 0,
+      annualRevenue2024: '',
+      annualRevenue2023: '',
+      annualRevenue2022: '',
+      creditRatingProvider: 'CRISIL',
+      taxCompliant: true,
       currency: 'USD'
+    },
+    insuranceCoverage: {
+      generalLiabilityInsurance: 'i-0987',
+      productLiabilityInsurance: '0987'
     },
     additionalInformation: {
       preferredPaymentTerms: '',
@@ -143,290 +144,173 @@ export class SupplierOnboardingL3Component implements OnInit {
 
   getFinancialInformationFields(): FormlyFieldConfig[] {
     return [
-      // Bank Information Section
+      // Header
       {
-        fieldGroupClassName: 'mb-4',
-        fieldGroup: [
-          {
-            template: `
-              <div class="section-header mb-3">
-                <h4 class="text-blueprint-blue">Bank Information</h4>
-                <p class="text-machine-gray">Please provide your banking details for payment processing.</p>
-              </div>
-            `
-          },
-          {
-            template: `
-              <div class="alert alert-info mb-4">
-                <i class="pi pi-info-circle me-2"></i>
-                <span>Your banking information is securely stored and only used for payment processing.</span>
-              </div>
-            `
-          },
-          {
-            key: 'bankInformation',
-            fieldGroup: [
-              {
-                fieldGroupClassName: 'row',
-                fieldGroup: [
-                  {
-                    className: 'col-md-6 mb-3',
-                    key: 'accountHolderName',
-                    type: 'input',
-                    templateOptions: {
-                      label: 'Account Holder Name',
-                      placeholder: 'Enter account holder name',
-                      required: true
-                    },
-                    validation: {
-                      messages: {
-                        required: 'Account holder name is required'
-                      }
-                    }
-                  },
-                  {
-                    className: 'col-md-6 mb-3',
-                    key: 'accountType',
-                    type: 'select',
-                    templateOptions: {
-                      label: 'Account Type',
-                      options: [
-                        { label: 'Checking', value: 'Checking' },
-                        { label: 'Savings', value: 'Savings' },
-                        { label: 'Business', value: 'Business' }
-                      ],
-                      required: true
-                    },
-                    validation: {
-                      messages: {
-                        required: 'Account type is required'
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                fieldGroupClassName: 'row',
-                fieldGroup: [
-                  {
-                    className: 'col-md-6 mb-3',
-                    key: 'bankName',
-                    type: 'input',
-                    templateOptions: {
-                      label: 'Bank Name',
-                      placeholder: 'Enter your bank name',
-                      required: true
-                    },
-                    validation: {
-                      messages: {
-                        required: 'Bank name is required'
-                      }
-                    }
-                  },
-                  {
-                    className: 'col-md-6 mb-3',
-                    key: 'accountNumber',
-                    type: 'input',
-                    templateOptions: {
-                      label: 'Account Number',
-                      placeholder: 'Enter account number',
-                      required: true
-                    },
-                    validation: {
-                      messages: {
-                        required: 'Account number is required'
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                fieldGroupClassName: 'row',
-                fieldGroup: [
-                  {
-                    className: 'col-md-6 mb-3',
-                    key: 'routingNumber',
-                    type: 'input',
-                    templateOptions: {
-                      label: 'Routing Number',
-                      placeholder: 'Enter routing number',
-                      required: true
-                    },
-                    validation: {
-                      messages: {
-                        required: 'Routing number is required'
-                      }
-                    }
-                  },
-                  {
-                    className: 'col-md-6 mb-3',
-                    key: 'swiftCode',
-                    type: 'input',
-                    templateOptions: {
-                      label: 'SWIFT Code',
-                      placeholder: 'Enter SWIFT code',
-                      required: true
-                    },
-                    validation: {
-                      messages: {
-                        required: 'SWIFT code is required'
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+        template: `
+          <h3 class="text-blueprint-blue mb-2">Financial Information</h3>
+          <p class="text-machine-gray mb-4">Share your financial details to improve matching with potential clients</p>
+        `
       },
-      
-      // Financial Documents Section
+      // Info section
       {
-        fieldGroupClassName: 'mb-4 mt-5',
+        template: `
+          <div class="info-container mb-4">
+            <div class="info-icon">
+              <i class="pi pi-info-circle"></i>
+            </div>
+            <div class="info-content">
+              <h5 class="info-title">Why provide financial information?</h5>
+              <p class="info-text">Sharing your financial information helps us match you with appropriate clients and projects. This information is securely stored and only shared with verified clients when necessary. Suppliers who complete this section receive priority in our matching algorithm.</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        template: '<h4 class="financial-overview-title mb-3">Financial Overview</h4>'
+      },
+      {
+        template: '<h6 class="annual-revenue-title mb-2">Annual Revenue (Last 3 Years)</h6>'
+      },
+      // Annual Revenue 2024 and 2023 in one row
+      {
+        fieldGroupClassName: 'row mb-3',
         fieldGroup: [
           {
-            template: `
-              <div class="section-header mb-3">
-                <h4 class="text-blueprint-blue">Financial Documents</h4>
-                <p class="text-machine-gray">Upload relevant financial documents for verification.</p>
-              </div>
-            `
-          },
-          {
-            template: `
-              <div class="document-guidelines p-3 mb-4 bg-light rounded">
-                <h5 class="mb-2"><i class="pi pi-file me-2"></i> Financial Document Guidelines</h5>
-                <p class="mb-2">For a comprehensive financial assessment, please upload the following documents:</p>
-                <ul class="mb-0">
-                  <li>Financial statements for the last fiscal year</li>
-                  <li>Tax documents</li>
-                  <li>Business credit reports (if available)</li>
-                  <li>Bank statements for the last three months</li>
-                </ul>
-              </div>
-            `
-          },
-          {
-            key: 'financialDocuments',
-            type: 'file-upload',
-            className: 'mb-3',
+            className: 'col-md-6',
+            key: 'companyFinancials.annualRevenue2024',
+            type: 'input',
             templateOptions: {
-              label: 'Financial Documents',
-              description: 'Upload financial statements, tax documents, etc. (max 10MB per file)',
-              required: true
+              label: 'Annual Revenue (2024) (USD) *',
+              required: true,
+              type: 'text',
+              placeholder: '12359'
             },
             validation: {
               messages: {
-                required: 'At least one document is required'
+                required: 'Annual revenue is required'
+              }
+            }
+          },
+          {
+            className: 'col-md-6',
+            key: 'companyFinancials.annualRevenue2023',
+            type: 'input',
+            templateOptions: {
+              label: 'Annual Revenue (2023) (USD) *',
+              required: true,
+              type: 'text',
+              placeholder: '9876'
+            },
+            validation: {
+              messages: {
+                required: 'Annual revenue is required'
               }
             }
           }
         ]
       },
-      
-      // Company Financials Section
       {
-        fieldGroupClassName: 'mb-4 mt-5',
+        template: '<small class="text-muted d-block mb-3">Enter the exact amount in your local currency</small>'
+      },
+      // Annual Revenue 2022 and Credit Rating Provider in one row
+      {
+        fieldGroupClassName: 'row mb-3',
         fieldGroup: [
           {
-            template: `
-              <div class="section-header mb-3">
-                <h4 class="text-blueprint-blue">Company Financials</h4>
-                <p class="text-machine-gray">Provide information about your company's financial health.</p>
-              </div>
-            `
+            className: 'col-md-6',
+            key: 'companyFinancials.annualRevenue2022',
+            type: 'input',
+            templateOptions: {
+              label: 'Annual Revenue (2022) (USD) *',
+              required: true,
+              type: 'text',
+              placeholder: '09876r'
+            },
+            validation: {
+              messages: {
+                required: 'Annual revenue is required'
+              }
+            }
           },
           {
-            key: 'companyFinancials',
-            fieldGroup: [
-              {
-                fieldGroupClassName: 'row',
-                fieldGroup: [
-                  {
-                    className: 'col-md-6 mb-3',
-                    key: 'annualRevenue',
-                    type: 'input',
-                    templateOptions: {
-                      label: 'Annual Revenue',
-                      type: 'number',
-                      min: 0,
-                      placeholder: 'Enter annual revenue',
-                      required: true
-                    },
-                    validation: {
-                      messages: {
-                        required: 'Annual revenue is required'
-                      }
-                    }
-                  },
-                  {
-                    className: 'col-md-6 mb-3',
-                    key: 'currency',
-                    type: 'select',
-                    templateOptions: {
-                      label: 'Currency',
-                      options: [
-                        { label: 'USD - US Dollar', value: 'USD' },
-                        { label: 'EUR - Euro', value: 'EUR' },
-                        { label: 'GBP - British Pound', value: 'GBP' },
-                        { label: 'INR - Indian Rupee', value: 'INR' },
-                        { label: 'CNY - Chinese Yuan', value: 'CNY' },
-                        { label: 'JPY - Japanese Yen', value: 'JPY' }
-                      ],
-                      required: true
-                    },
-                    validation: {
-                      messages: {
-                        required: 'Currency is required'
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                fieldGroupClassName: 'row',
-                fieldGroup: [
-                  {
-                    className: 'col-md-6 mb-3',
-                    key: 'yearInBusiness',
-                    type: 'input',
-                    templateOptions: {
-                      label: 'Years in Business',
-                      type: 'number',
-                      min: 1,
-                      placeholder: 'Enter years in business',
-                      required: true
-                    },
-                    validation: {
-                      messages: {
-                        required: 'Years in business is required'
-                      }
-                    }
-                  },
-                  {
-                    className: 'col-md-6 mb-3',
-                    key: 'employeeCount',
-                    type: 'input',
-                    templateOptions: {
-                      label: 'Number of Employees',
-                      type: 'number',
-                      min: 1,
-                      placeholder: 'Enter number of employees',
-                      required: true
-                    },
-                    validation: {
-                      messages: {
-                        required: 'Employee count is required'
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
+            className: 'col-md-6',
+            key: 'companyFinancials.creditRatingProvider',
+            type: 'select',
+            templateOptions: {
+              label: 'Credit Rating Provider',
+              options: [
+                { label: 'CRISIL', value: 'CRISIL' },
+                { label: 'Dun & Bradstreet', value: 'D&B' },
+                { label: 'Moody\'s', value: 'Moodys' },
+                { label: 'Standard & Poor\'s', value: 'S&P' },
+                { label: 'Fitch', value: 'Fitch' },
+                { label: 'Other', value: 'Other' },
+                { label: 'None', value: 'None' }
+              ],
+              placeholder: 'Select credit rating provider'
+            }
           }
         ]
+      },
+      {
+        template: '<small class="text-muted d-block mb-4">Enter the exact amount in your local currency / Select your credit rating provider, if any</small>'
+      },
+      
+      // Tax Compliance
+      {
+        key: 'companyFinancials.taxCompliant',
+        type: 'checkbox',
+        className: 'mb-4',
+        templateOptions: {
+          label: 'We are compliant with all applicable tax regulations',
+          required: true
+        }
+      },
+      
+      // Insurance Coverage Section
+      {
+        template: '<h4 class="insurance-title mt-4 mb-3">Insurance Coverage</h4>'
+      },
+      // Row with General Liability and Product Liability Insurance
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6 mb-3',
+            key: 'insuranceCoverage.generalLiabilityInsurance',
+            type: 'input',
+            templateOptions: {
+              label: 'General Liability Insurance',
+              placeholder: 'i-0987',
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'General liability insurance coverage is required'
+              }
+            }
+          },
+          {
+            className: 'col-md-6 mb-3',
+            key: 'insuranceCoverage.productLiabilityInsurance',
+            type: 'input',
+            templateOptions: {
+              label: 'Product Liability Insurance',
+              placeholder: '0987',
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'Product liability insurance coverage is required'
+              }
+            }
+          }
+        ]
+      },
+      {
+        template: '<small class="text-muted d-block mb-3">Coverage amount</small>'
       }
-    ];
+    ] as FormlyFieldConfig[];
   }
 
   getAdditionalInformationFields(): FormlyFieldConfig[] {

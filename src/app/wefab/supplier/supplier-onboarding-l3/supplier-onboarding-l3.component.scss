@@ -647,4 +647,169 @@ $success-green: $process-green;
     padding: 0.4rem 1.25rem;
     font-size: 0.8rem;
   }
+}
+
+// Info container styling
+.info-container {
+  display: flex;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 24px;
+  
+  .info-icon {
+    margin-right: 12px;
+    color: #1976d2;
+    
+    i {
+      font-size: 20px;
+    }
+  }
+  
+  .info-content {
+    .info-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+    
+    .info-text {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Financial overview section styling
+.financial-overview-title {
+  color: #2c3e50;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.annual-revenue-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 12px;
+}
+
+// Insurance section styling
+.insurance-title {
+  color: #2c3e50;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 32px;
+  margin-bottom: 16px;
+}
+
+// Help text styling
+.text-muted {
+  color: #777;
+  font-size: 13px;
+  margin-top: -6px;
+}
+
+// Row styling for 2-column layout
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px;
+  
+  .col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding: 0 10px;
+    
+    @media (max-width: 767px) {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+}
+
+.currency-selector {
+  width: 100px !important;
+  min-width: auto !important;
+  
+  .p-dropdown {
+    min-width: auto !important;
+  }
+}
+
+.section-divider {
+  margin: 2rem 0 1.5rem;
+  border-top: 1px solid $material-finish-silver;
+  padding-top: 1.5rem;
+}
+
+.company-size-section {
+  margin-bottom: 1.5rem;
+}
+
+// Form inputs
+:host ::ng-deep {
+  // Clean styling for text inputs matching the screenshot
+  .form-control {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    height: 48px;
+    padding: 8px 16px;
+    background-color: #fff;
+    
+    &:focus {
+      border-color: #4d90fe;
+      box-shadow: 0 0 0 2px rgba(77, 144, 254, 0.2);
+    }
+    
+    &::placeholder {
+      color: #aaa;
+    }
+  }
+  
+  // Label styling to match screenshot
+  .form-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  // Help text styling
+  .text-muted {
+    color: #777;
+    font-size: 13px;
+    margin-top: 4px;
+    display: block;
+  }
+  
+  // Checkbox styling
+  .form-check {
+    margin-top: 12px;
+    
+    .form-check-input {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+    
+    .form-check-label {
+      font-size: 14px;
+      color: #333;
+    }
+  }
+  
+  // Select dropdown styling
+  .form-select {
+    height: 48px;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    
+    &:focus {
+      border-color: #4d90fe;
+      box-shadow: 0 0 0 2px rgba(77, 144, 254, 0.2);
+    }
+  }
 } 
