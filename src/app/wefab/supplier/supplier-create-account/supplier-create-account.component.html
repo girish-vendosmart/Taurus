@@ -1,0 +1,128 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="text-center mb-4">
+        <h2 class="mb-2 text-blueprint-blue">Create Your Supplier Account</h2>
+        <p class="text-machine-gray">Complete the following steps to join WeFab AI's manufacturing network</p>
+      </div>
+
+      <div class="card shadow-sm rounded-3 border-0 p-4 mb-4">
+        <h4 class="mb-2 text-blueprint-blue">Account Creation</h4>
+        <p class="text-machine-gray mb-4">Create your account to start the onboarding process.</p>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <!-- Email field -->
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input 
+                type="email" 
+                class="form-control" 
+                id="email" 
+                formControlName="email" 
+                placeholder="test@gmail.com"
+                [ngClass]="{'is-invalid': emailControl?.invalid && emailControl?.touched}">
+              <span class="input-group-text" *ngIf="emailControl?.valid && emailControl?.touched">
+                <i class="bi bi-check-circle text-success"></i>
+              </span>
+            </div>
+            <small class="form-text text-machine-gray mt-1">We'll send a verification link to this email.</small>
+            <div *ngIf="emailControl?.invalid && emailControl?.touched" class="invalid-feedback d-block">
+              <span *ngIf="emailControl?.errors?.['required']">Email is required.</span>
+              <span *ngIf="emailControl?.errors?.['email']">Please enter a valid email address.</span>
+            </div>
+          </div>
+
+          <!-- Password field -->
+          <div class="mb-3">
+            <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input 
+                [type]="showPassword ? 'text' : 'password'" 
+                class="form-control" 
+                id="password" 
+                formControlName="password" 
+                placeholder="••••••••"
+                [ngClass]="{'is-invalid': passwordControl?.invalid && passwordControl?.touched}">
+              <button class="input-group-text bg-white border-start-0" type="button" (click)="togglePasswordVisibility()">
+                <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+              </button>
+            </div>
+            <small class="form-text text-machine-gray mt-1">Must be at least 8 characters.</small>
+            <div *ngIf="passwordControl?.invalid && passwordControl?.touched" class="invalid-feedback d-block">
+              <span *ngIf="passwordControl?.errors?.['required']">Password is required.</span>
+              <span *ngIf="passwordControl?.errors?.['minlength']">Password must be at least 8 characters.</span>
+            </div>
+          </div>
+
+          <!-- Terms & Privacy -->
+          <div class="bg-light p-3 rounded-3 mb-4 small">
+            <p class="mb-0">By creating an account, you agree to WeFab AI's 
+              <a href="#" class="text-blueprint-blue">Terms of Service</a> and 
+              <a href="#" class="text-blueprint-blue">Privacy Policy</a>.
+            </p>
+          </div>
+
+          <!-- Captcha -->
+          <div class="mb-4">
+            <label for="captcha" class="form-label">Security Verification <span class="text-danger">*</span></label>
+            <div class="captcha-container bg-light p-3 rounded-3 mb-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="captcha-image bg-white p-2 rounded">
+                  <span class="captcha-text">
+                    <span class="text-primary">B</span>
+                    <span class="text-success">T</span>
+                    <span class="text-danger">V</span>
+                    <span class="text-primary">A</span>
+                    <span class="text-warning">E</span>
+                    <span class="text-info">S</span>
+                  </span>
+                </div>
+                <button type="button" class="btn btn-outline-secondary" (click)="refreshCaptcha()">
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="input-group">
+              <input 
+                type="text" 
+                class="form-control" 
+                id="captcha"
+                formControlName="captcha"
+                placeholder="BTVAEs" 
+                [ngClass]="{'is-invalid': captchaControl?.invalid && captchaControl?.touched}">
+              <button 
+                type="button" 
+                class="btn btn-secondary" 
+                (click)="verifyCaptcha()"
+                [disabled]="!captchaControl?.value">
+                Verify
+              </button>
+            </div>
+            
+            <div *ngIf="captchaVerified" class="text-success small mt-2">
+              <i class="bi bi-check-circle me-1"></i> Captcha verified successfully.
+            </div>
+            <div *ngIf="captchaControl?.value && !captchaVerified" class="text-machine-gray small mt-2">
+              Please complete the captcha to verify you're human
+            </div>
+            <div *ngIf="captchaControl?.invalid && captchaControl?.touched && !captchaControl?.value" class="invalid-feedback d-block">
+              <span *ngIf="captchaControl?.errors?.['required']">Security verification is required.</span>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid">
+            <button 
+              type="submit" 
+              class="btn btn-primary py-2" 
+              [disabled]="form.invalid || !captchaVerified">
+              Continue
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
