@@ -9,6 +9,7 @@ import { PanelWrapperComponent } from './formly.config';
 import { FormlyRepeatTypeComponent } from './formly-repeat-type.component';
 import { FormlyFieldFileComponent } from './file-type.component';
 import { FormlyFieldMultiSelectComponent } from './multiselect-type.component';
+import { FormlyFieldPhoneOtpComponent } from './phone-otp-type.component';
 
 import { routes } from './app.routes';
 
@@ -24,6 +25,7 @@ export const appConfig: ApplicationConfig = {
           { name: 'repeat', component: FormlyRepeatTypeComponent },
           { name: 'file', component: FormlyFieldFileComponent },
           { name: 'p-multiselect', component: FormlyFieldMultiSelectComponent },
+          { name: 'phone-otp', component: FormlyFieldPhoneOtpComponent },
         ],
         wrappers: [
           { name: 'panel', component: PanelWrapperComponent },

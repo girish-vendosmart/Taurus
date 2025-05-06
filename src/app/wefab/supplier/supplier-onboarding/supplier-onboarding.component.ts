@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild, TemplateRef, Inject, PLATFORM_ID, Renderer2 } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormGroup, FormBuilder, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 
@@ -15,6 +16,14 @@ import { MenuItem } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
+
+// Import FileUploadComponent
+import { FileUploadComponent } from './file-upload.component';
+
+// Import PhoneOtpVerificationComponent
+import { PhoneOtpVerificationComponent } from '../../wefab-shared-component/phone-otp-verification/phone-otp-verification.component';
 
 // GST Validator function
 export function gstValidator(control: AbstractControl): ValidationErrors | null {
@@ -35,6 +44,7 @@ export function gstValidator(control: AbstractControl): ValidationErrors | null 
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     FormlyModule,
     FormlyBootstrapModule,
     CardModule,
@@ -44,7 +54,11 @@ export function gstValidator(control: AbstractControl): ValidationErrors | null 
     TooltipModule,
     StepsModule,
     ToastModule,
-    MultiSelectModule
+    MultiSelectModule,
+    DialogModule,
+    InputNumberModule,
+    FileUploadComponent,
+    PhoneOtpVerificationComponent
   ],
   providers: [MessageService],
   templateUrl: './supplier-onboarding.component.html',
@@ -60,9 +74,22 @@ export class SupplierOnboardingComponent implements OnInit {
   
   // Create arrays of field configurations for each step
   stepFields: FormlyFieldConfig[][] = [];
+  
+  // Phone verification state
+  phoneVerified = false;
 
-  constructor(private fb: FormBuilder, private messageService: MessageService) {
+  @ViewChild('verifyOtpButton') verifyOtpButtonTemplate!: TemplateRef<any>;
+
+  isBrowser: boolean;
+  
+  constructor(
+    private fb: FormBuilder, 
+    private messageService: MessageService,
+    private renderer: Renderer2,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     this.form = this.fb.group({});
+    this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
   ngOnInit(): void {
@@ -80,12 +107,18 @@ export class SupplierOnboardingComponent implements OnInit {
         }
       },
       {
-        label: 'Manufacturing Capabilities & Documents',
+        label: 'Contact & Capabilities',
         command: () => {
           this.activeStepIndex = 1;
         }
       }
     ];
+  }
+
+  // Handle phone verification event
+  onPhoneVerified(verified: boolean): void {
+    this.phoneVerified = verified;
+    console.log('Phone verification status:', verified);
   }
 
   // Getter to make accessing the current step's fields easy in template
@@ -336,29 +369,15 @@ export class SupplierOnboardingComponent implements OnInit {
   getManufacturingCapabilitiesFields(): FormlyFieldConfig[] {
     return [
       {
-        key: 'qualityControlProcess',
-        type: 'textarea',
-        templateOptions: {
-          label: 'Quality Control Process',
-          placeholder: 'Describe your QC procedures',
-          required: true,
-          rows: 3
-        },
-        validation: {
-          messages: {
-            required: 'Required'
-          }
-        }
-      },
-      {
-        fieldGroupClassName: 'row',
+        fieldGroupClassName: 'row align-items-end',
         fieldGroup: [
           {
-            className: 'col-md-6 mb-3',
-            key: 'documents.panCard',
-            type: 'file',
-            props: {
-              label: 'PAN Card',
+            className: 'col-md-4 mb-3',
+            key: 'primaryContactName',
+            type: 'input',
+            templateOptions: {
+              label: 'Primary Contact Name',
+              placeholder: 'Full name of primary contact person',
               required: true
             },
             validation: {
@@ -367,32 +386,33 @@ export class SupplierOnboardingComponent implements OnInit {
               }
             }
           },
-          // {
-          //   className: 'col-md-6 mb-3',
-          //   key: 'certifications',
-          //   type: 'p-multiselect',
-          //   props: {
-          //     label: 'Certifications',
-          //     multiple: true,
-          //     placeholder: 'Select any certifications you hold',
-          //     options: [
-          //       { label: 'ISO 9001', value: 'iso_9001' },
-          //       { label: 'ISO 14001', value: 'iso_14001' },
-          //       { label: 'AS9100', value: 'as9100' },
-          //       { label: 'IATF 16949', value: 'iatf_16949' },
-          //       { label: 'UL', value: 'ul' },
-          //       { label: 'CE', value: 'ce' },
-          //       { label: 'RoHS', value: 'rohs' }
-          //     ]
-          //   }
-          // },
           {
-            className: 'col-md-6 mb-3',
-            key: 'documents.gstCertificate',
-            type: 'file',
-            props: {
-              label: 'GST Registration Certificate',
-              required: true
+            className: 'col-md-4 mb-3',
+            key: 'phoneNumber',
+            type: 'phone-otp',
+            templateOptions: {
+              label: 'Phone Number',
+              required: true,
+              placeholder: 'Enter phone number',
+              countryCode: '91',
+              parentComponent: this
+            }
+          },
+          {
+            className: 'col-md-4 mb-3',
+            key: 'primaryManufacturingProcess',
+            type: 'select',
+            templateOptions: {
+              label: 'Primary Manufacturing Process',
+              placeholder: 'Select manufacturing process',
+              required: true,
+              options: [
+                { label: 'CNC Machining', value: 'cnc_machining' },
+                { label: 'Injection Molding', value: 'injection_molding' },
+                { label: 'Sheet Metal Fabrication', value: 'sheet_metal_fabrication' },
+                { label: '3D Printing', value: '3d_printing' },
+                { label: 'Die Casting', value: 'die_casting' }
+              ]
             },
             validation: {
               messages: {
@@ -407,33 +427,57 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroup: [
           {
             className: 'col-md-6 mb-3',
-            key: 'documents.iso9001',
-            type: 'file',
-            props: {
-              label: 'ISO 9001 Certificate (if applicable)'
+            key: 'websiteURL',
+            type: 'input',
+            templateOptions: {
+              label: 'Website URL',
+              placeholder: 'https://yourcompany.com',
+              required: false
             }
           },
           {
             className: 'col-md-6 mb-3',
-            key: 'documents.msmeRegistration',
-            type: 'file',
-            props: {
-              label: 'MSME Registration (if applicable)'
+            key: 'linkedinURL',
+            type: 'input',
+            templateOptions: {
+              label: 'LinkedIn URL',
+              placeholder: 'https://linkedin.com/company/yourcompany',
+              required: false
             }
           }
         ]
       },
+      {
+        fieldGroupClassName: 'mt-4',
+        fieldGroup: [
+          {
+            template: `
+              <div class="documentation-guidelines p-3 mb-4 rounded">
+                <h5 class="mb-3"><i class="pi pi-info-circle me-2"></i> Documentation Guidelines</h5>
+                <p class="mb-3">To help us make quick and accurate decision-making, we encourage you to upload comprehensive and relevant documentation. A well-documented profile significantly increases your visibility and enhances your chances of being shortlisted for business opportunities.</p>
+                <p class="mb-3">We highly recommend uploading a single ZIP file containing all supporting documents. However, individual file uploads are also accepted for your convenience.</p>
+                <p class="mb-3">Please ensure the inclusion of the following key documents, where applicable:</p>
+                <ul class="mb-3">
+                  <li><strong>Manufacturing Facility Details</strong> – Photos, videos, or formal documentation showcasing your production facilities</li>
+                  <li><strong>Machinery Information</strong> – Makes, models, and specifications of key equipment in use</li>
+                  <li><strong>Product Portfolio</strong> – A detailed list of products or services you currently manufacture</li>
+                  <li><strong>Certifications</strong> – Copies of relevant quality, safety, environmental, or industry-specific certifications</li>
+                </ul>
+                <p>Providing a complete set of documents enhances our ability to assess your capabilities thoroughly and match you with suitable business opportunities.</p>
+              </div>
+            `
+          },
+          {
+            key: 'companyDocuments',
+            type: 'custom',
+            templateOptions: {
+              label: 'Company Documents'
+            },
+            template: `<app-file-upload [formControl]="form.get('companyDocuments')"></app-file-upload>`
+          }
+        ]
+      }
     ];
-  }
-
-  sendOTP() {
-    // Mock function to simulate sending OTP
-    this.messageService.add({
-      severity: 'success',
-      summary: 'OTP Sent',
-      detail: 'A verification code has been sent to your phone number.',
-      life: 3000
-    });
   }
 
   prevStep() {
@@ -448,6 +492,17 @@ export class SupplierOnboardingComponent implements OnInit {
     
     // Check if the current step is valid
     if (this.isStepValid(formlyFields)) {
+      // For step 1 to 2, check if phone verification is required
+      if (this.activeStepIndex === 1 && !this.phoneVerified) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Validation Error',
+          detail: 'Please verify your phone number before submitting the form.',
+          life: 4000
+        });
+        return;
+      }
+      
       if (this.activeStepIndex < this.steps.length - 1) {
         this.activeStepIndex++;
       } else {
@@ -518,5 +573,13 @@ export class SupplierOnboardingComponent implements OnInit {
         life: 4000
       });
     }
+  }
+
+  sendOTP() {
+    console.log('Sending OTP');
+  }
+
+  verifyOTP() {
+    console.log('Verifying OTP');
   }
 }
