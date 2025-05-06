@@ -4,6 +4,7 @@ import { FormGroup, FormBuilder, ReactiveFormsModule, AbstractControl, Validatio
 import { FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
+import { Router } from '@angular/router';
 
 // PrimeNG imports
 import { CardModule } from 'primeng/card';
@@ -86,6 +87,7 @@ export class SupplierOnboardingComponent implements OnInit {
     private fb: FormBuilder, 
     private messageService: MessageService,
     private renderer: Renderer2,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.form = this.fb.group({});
@@ -561,9 +563,14 @@ export class SupplierOnboardingComponent implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
-        detail: 'Your supplier onboarding application has been received and will be reviewed shortly.',
-        life: 5000
+        detail: 'Your supplier onboarding application has been received. Redirecting to detailed information form.',
+        life: 3000
       });
+      
+      // Navigate to L2 form after 3 seconds
+      setTimeout(() => {
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
+      }, 3000);
     } else {
       this.form.markAllAsTouched();
       this.messageService.add({

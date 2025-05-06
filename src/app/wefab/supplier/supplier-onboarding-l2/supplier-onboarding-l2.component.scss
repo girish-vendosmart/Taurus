@@ -1,0 +1,783 @@
+// Import variables from the main theme
+@import '../../../../assets/scss/variables.scss';
+
+:host {
+  display: block;
+  background-color: $technical-white;
+  min-height: 100vh;
+}
+
+// Card styling
+.card {
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  border: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .card-title {
+    font-weight: $font-weight-semibold;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  
+  .card-body {
+    padding: 1.75rem 2rem;
+  }
+}
+
+// Left navigation panel specific styles
+.col-md-3 {
+  .card {
+    background: linear-gradient(145deg, #ffffff, #f8fbff);
+    border-left: 4px solid $blueprint-blue;
+    
+    .card-body {
+      padding: 2rem;
+    }
+    
+    .card-title {
+      font-size: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba($blueprint-blue, 0.1);
+      margin-bottom: 1.5rem;
+    }
+  }
+}
+
+// Right form area specific styles
+.col-md-9 {
+  .card {
+    background: #ffffff;
+    border-right: 4px solid $blueprint-blue;
+    
+    .card-body {
+      padding: 2rem;
+    }
+  }
+}
+
+// Step navigation styling
+.steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 0.75rem 0;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+    
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 50px;
+      height: calc(100% - 10px);
+      width: 3px;
+      background-color: $material-finish-silver;
+      z-index: 1;
+    }
+    
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background-color: $material-finish-silver;
+      color: $machine-gray;
+      font-weight: $font-weight-bold;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-size: 1.1rem;
+    }
+    
+    .step-content {
+      padding-top: 0.5rem;
+      
+      .step-title {
+        color: $machine-gray;
+        font-weight: $font-weight-medium;
+        transition: all 0.3s ease;
+        font-size: 1.05rem;
+        display: block;
+        line-height: 1.4;
+      }
+    }
+    
+    &.active {
+      .step-number {
+        background-color: $blueprint-blue;
+        color: $technical-white;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba($blueprint-blue, 0.4);
+      }
+      
+      .step-content {
+        .step-title {
+          color: $blueprint-blue;
+          font-weight: $font-weight-semibold;
+          transform: translateX(3px);
+        }
+      }
+      
+      &:not(:last-child)::after {
+        background-color: $blueprint-blue;
+      }
+    }
+    
+    &:hover:not(.active) {
+      .step-number {
+        transform: scale(1.05);
+        background-color: lighten($blueprint-blue, 35%);
+      }
+      
+      .step-content .step-title {
+        color: darken($machine-gray, 15%);
+      }
+    }
+  }
+}
+
+// Progress bar styling
+.progress-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  
+  .progress-bar-wrapper {
+    flex: 1;
+    margin-right: 1.25rem;
+    
+    .progress {
+      height: 10px;
+      background-color: rgba($material-finish-silver, 0.5);
+      border-radius: 6px;
+      overflow: hidden;
+      
+      .progress-bar {
+        border-radius: 6px;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(90deg, $blueprint-blue, lighten($blueprint-blue, 10%));
+        box-shadow: 0 2px 5px rgba($blueprint-blue, 0.3);
+      }
+    }
+  }
+  
+  .progress-text {
+    font-size: 0.875rem;
+    color: $machine-gray;
+    white-space: nowrap;
+    font-weight: $font-weight-medium;
+    background-color: rgba($blueprint-blue, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+  }
+}
+
+// Page header
+.text-blueprint-blue {
+  color: $blueprint-blue !important;
+  position: relative;
+  display: inline-block;
+  
+  &.mb-2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: $blueprint-blue;
+    margin: 0.5rem auto 0;
+    border-radius: 2px;
+  }
+}
+
+// Form styling enhancements
+:host ::ng-deep {
+  // Input fields
+  .form-control, .form-select, .p-inputtext {
+    border: 1px solid $material-finish-silver;
+    border-radius: 8px;
+    padding: 0.95rem 1.2rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: rgba($technical-white, 0.8);
+    width: 100%;
+    
+    &:hover {
+      border-color: lighten($blueprint-blue, 20%);
+      background-color: rgba($technical-white, 1);
+    }
+    
+    &:focus {
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
+      background-color: #fff;
+      outline: none;
+    }
+    
+    &::placeholder {
+      color: lighten($machine-gray, 20%);
+      font-style: italic;
+      opacity: 0.7;
+    }
+  }
+  
+  // Labels
+  .form-label {
+    font-weight: $font-weight-medium;
+    color: $precision-black;
+    margin-bottom: 0.7rem;
+    font-size: 1.05rem;
+    
+    .text-danger {
+      margin-left: 3px;
+      font-size: 1.2em;
+      position: relative;
+      top: 2px;
+    }
+  }
+  
+  // Field descriptions
+  .form-text {
+    font-size: 0.85rem;
+    color: $machine-gray;
+    margin-top: 0.4rem;
+    font-style: italic;
+  }
+  
+  // Checkboxes and radio buttons
+  .form-check {
+    margin-bottom: 0.75rem;
+    padding-left: 1.8rem;
+    
+    .form-check-input {
+      width: 1.1rem;
+      height: 1.1rem;
+      margin-left: -1.8rem;
+      margin-top: 0.25rem;
+      border: 2px solid $material-finish-silver;
+      transition: all 0.2s ease;
+      
+      &:checked {
+        background-color: $blueprint-blue;
+        border-color: $blueprint-blue;
+        box-shadow: 0 0 0 2px rgba($blueprint-blue, 0.2);
+      }
+      
+      &:focus {
+        box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
+      }
+    }
+    
+    .form-check-label {
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+  }
+  
+  // Buttons
+  .btn {
+    font-weight: $font-weight-medium;
+    padding: 0.7rem 1.8rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    
+    &:active {
+      transform: translateY(1px);
+    }
+    
+    .pi {
+      font-size: 0.85rem;
+    }
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, $blueprint-blue, darken($blueprint-blue, 8%));
+    border-color: $blueprint-blue;
+    box-shadow: 0 4px 10px rgba($blueprint-blue, 0.3);
+    
+    &:hover, &:focus {
+      background: linear-gradient(135deg, darken($blueprint-blue, 5%), darken($blueprint-blue, 15%));
+      border-color: darken($blueprint-blue, 10%);
+      box-shadow: 0 6px 15px rgba($blueprint-blue, 0.4);
+      transform: translateY(-2px);
+    }
+  }
+  
+  .btn-outline-secondary {
+    color: $machine-gray;
+    border: 1px solid $machine-gray;
+    background-color: transparent;
+    
+    &:hover, &:focus {
+      background-color: $machine-gray;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba($machine-gray, 0.25);
+    }
+  }
+
+  .btn-outline-primary {
+    color: $blueprint-blue;
+    border: 1px solid $blueprint-blue;
+    background-color: transparent;
+    
+    &:hover, &:focus {
+      background-color: rgba($blueprint-blue, 0.1);
+      color: darken($blueprint-blue, 10%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba($blueprint-blue, 0.25);
+    }
+  }
+
+  .btn-outline-danger {
+    color: $safety-orange;
+    border: 1px solid $safety-orange;
+    background-color: transparent;
+    padding: 0.4rem 0.6rem;
+    
+    &:hover, &:focus {
+      background-color: rgba($safety-orange, 0.1);
+      color: darken($safety-orange, 10%);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba($safety-orange, 0.25);
+    }
+  }
+  
+  // File upload
+  .file-upload {
+    border: 2px dashed rgba($blueprint-blue, 0.3);
+    border-radius: 8px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    margin: 1rem 0;
+    background-color: rgba($blueprint-blue, 0.02);
+    
+    &:hover {
+      border-color: $blueprint-blue;
+      background-color: rgba($blueprint-blue, 0.05);
+      transform: translateY(-2px);
+    }
+  }
+  
+  // Error messages
+  .p-error, .text-danger {
+    color: $safety-orange !important;
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
+    display: block;
+    font-weight: $font-weight-medium;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  // Validation icons
+  .is-valid {
+    border-color: $process-green !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+  }
+  
+  // Select dropdown
+  .p-dropdown {
+    width: 100%;
+    border-radius: 8px;
+    
+    .p-dropdown-label {
+      padding: 0.95rem 1.2rem;
+      font-size: 1rem;
+    }
+    
+    .p-dropdown-trigger {
+      width: 3.2rem;
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+    
+    .p-dropdown-panel {
+      border-radius: 8px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+      
+      .p-dropdown-items {
+        padding: 0.5rem 0;
+        
+        .p-dropdown-item {
+          padding: 0.75rem 1.2rem;
+          
+          &:hover {
+            background-color: rgba($blueprint-blue, 0.05);
+          }
+          
+          &.p-highlight {
+            background-color: rgba($blueprint-blue, 0.15);
+            color: $blueprint-blue;
+          }
+        }
+      }
+    }
+  }
+  
+  // MultiSelect dropdown styling
+  .p-multiselect {
+    width: 100%;
+    border-radius: 8px;
+    background-color: rgba($technical-white, 0.8);
+    border: 1px solid $material-finish-silver;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      border-color: lighten($blueprint-blue, 20%);
+      background-color: rgba($technical-white, 1);
+    }
+    
+    &.p-focus {
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
+      background-color: #fff;
+    }
+    
+    .p-multiselect-label-container {
+      .p-multiselect-label {
+        padding: 0.85rem 1.2rem;
+        font-size: 1rem;
+      }
+      
+      .p-placeholder {
+        color: lighten($machine-gray, 20%);
+        font-style: italic;
+        opacity: 0.7;
+      }
+    }
+    
+    .p-multiselect-trigger {
+      width: 3.2rem;
+    }
+    
+    .p-multiselect-panel {
+      border-radius: 8px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+      
+      .p-multiselect-header {
+        padding: 0.75rem 1.2rem;
+        border-bottom: 1px solid rgba($blueprint-blue, 0.1);
+        
+        .p-multiselect-filter-container {
+          margin-bottom: 0;
+          
+          .p-inputtext {
+            padding: 0.6rem 1rem;
+          }
+          
+          .p-multiselect-filter-icon {
+            right: 0.75rem;
+            color: $machine-gray;
+          }
+        }
+        
+        .p-checkbox {
+          .p-checkbox-box {
+            border: 2px solid $material-finish-silver;
+            border-radius: 4px;
+            
+            &.p-highlight {
+              background-color: $blueprint-blue;
+              border-color: $blueprint-blue;
+            }
+            
+            .p-checkbox-icon {
+              font-size: 0.75rem;
+            }
+          }
+        }
+      }
+      
+      .p-multiselect-items {
+        padding: 0.5rem 0;
+        
+        .p-multiselect-item {
+          padding: 0.75rem 1.2rem;
+          transition: all 0.2s ease;
+          
+          &:hover {
+            background-color: rgba($blueprint-blue, 0.05);
+          }
+          
+          &.p-highlight {
+            background-color: rgba($blueprint-blue, 0.15);
+            color: $blueprint-blue;
+          }
+          
+          .p-checkbox {
+            margin-right: 0.75rem;
+            
+            .p-checkbox-box {
+              border: 2px solid $material-finish-silver;
+              border-radius: 4px;
+              transition: all 0.2s ease;
+              
+              &.p-highlight {
+                background-color: $blueprint-blue;
+                border-color: $blueprint-blue;
+              }
+              
+              .p-checkbox-icon {
+                font-size: 0.75rem;
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // Style for selected tokens
+    .p-multiselect-token {
+      background-color: rgba($blueprint-blue, 0.15);
+      color: $blueprint-blue;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      margin-right: 0.5rem;
+      
+      .p-multiselect-token-icon {
+        margin-left: 0.5rem;
+        color: $blueprint-blue;
+        
+        &:hover {
+          color: darken($blueprint-blue, 15%);
+        }
+      }
+    }
+  }
+  
+  // Form field spacing
+  .formly-field {
+    margin-bottom: 2rem;
+    animation: fadeIn 0.4s ease;
+  }
+  
+  // Row field groups
+  .row {
+    margin-left: -15px;
+    margin-right: -15px;
+    
+    [class*="col-"] {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  }
+  
+  // Textarea fields
+  textarea.form-control {
+    min-height: 100px;
+  }
+  
+  // Repeatable section styling
+  .repeatable-section {
+    .repeatable-section-items {
+      .repeatable-section-item {
+        .card {
+          border-radius: 12px;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08) !important;
+          }
+          
+          .card-header {
+            background-color: rgba($blueprint-blue, 0.05);
+            border-bottom: 1px solid rgba($blueprint-blue, 0.1);
+            
+            h5 {
+              color: $blueprint-blue;
+              font-size: 1.1rem;
+              font-weight: $font-weight-medium;
+            }
+          }
+        }
+      }
+    }
+    
+    .repeatable-section-add {
+      .btn-outline-primary {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+        
+        .pi {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+  
+  // Section header styling
+  .section-header {
+    h4 {
+      color: $blueprint-blue;
+      font-weight: $font-weight-semibold;
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      position: relative;
+      padding-bottom: 0.5rem;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background-color: $blueprint-blue;
+        border-radius: 2px;
+      }
+    }
+    
+    p {
+      color: $machine-gray;
+      font-size: 0.95rem;
+    }
+  }
+}
+
+// Toast styling
+:host ::ng-deep {
+  .p-toast {
+    .p-toast-message {
+      border-radius: 8px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+      border: none;
+      
+      &.p-toast-message-success {
+        background-color: lighten($process-green, 48%);
+        border-left: 4px solid $process-green;
+        color: darken($process-green, 15%);
+        
+        .p-toast-message-icon,
+        .p-toast-icon-close {
+          color: $process-green;
+        }
+      }
+      
+      &.p-toast-message-error {
+        background-color: lighten($safety-orange, 40%);
+        border-left: 4px solid $safety-orange;
+        color: darken($safety-orange, 15%);
+        
+        .p-toast-message-icon,
+        .p-toast-icon-close {
+          color: $safety-orange;
+        }
+      }
+      
+      .p-toast-message-content {
+        padding: 0.5rem 0;
+        
+        .p-toast-summary {
+          font-weight: $font-weight-semibold;
+          font-size: 1rem;
+        }
+        
+        .p-toast-detail {
+          margin-top: 0.25rem;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}
+
+// Container styling
+.container-fluid {
+  padding: 2rem 3rem;
+}
+
+// Adjust the row spacing for better balance
+.row {
+  margin-bottom: 1.5rem;
+}
+
+// Add some space between the left and right columns
+.col-md-3 {
+  padding-right: 1.75rem;
+}
+
+.col-md-9 {
+  padding-left: 1.75rem;
+}
+
+// Form section title
+h3.text-blueprint-blue {
+  font-size: 1.5rem;
+  font-weight: $font-weight-semibold;
+  position: relative;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba($blueprint-blue, 0.1);
+  margin-bottom: 1.5rem;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background-color: $blueprint-blue;
+    border-radius: 3px;
+  }
+}
+
+// Media queries for responsive design
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 1.5rem 1rem;
+  }
+  
+  .card .card-body {
+    padding: 1.25rem;
+  }
+  
+  .steps-container {
+    gap: 1.5rem;
+  }
+  
+  h3.text-blueprint-blue {
+    font-size: 1.3rem;
+  }
+  
+  // Multiselect responsive adjustments
+  :host ::ng-deep {
+    .p-multiselect-panel {
+      width: 90vw !important;
+      left: 5vw !important;
+    }
+  }
+} 

@@ -2,13 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FieldType, FieldTypeConfig, FormlyModule } from '@ngx-formly/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MultiSelectModule } from 'primeng/multiselect';
+import { DropdownModule } from 'primeng/dropdown';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'formly-field-multiselect',
+  selector: 'formly-field-dropdown',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormlyModule, MultiSelectModule],
+  imports: [CommonModule, ReactiveFormsModule, FormlyModule, DropdownModule],
   template: `
     <div class="mb-3">
       <label *ngIf="props['label']" class="form-label">
@@ -17,18 +17,18 @@ import { Observable } from 'rxjs';
       </label>
       <p *ngIf="props['description']" class="form-text text-muted">{{ props['description'] }}</p>
       
-      <p-multiSelect
+      <p-dropdown
         [formControl]="formControl"
-        [options]="multiselectOptions"
+        [options]="dropdownOptions"
         optionLabel="label"
         optionValue="value"
-        [placeholder]="props['placeholder'] || 'Select options'"
+        [placeholder]="props['placeholder'] || 'Select an option'"
         [filter]="props['filter'] !== false"
-        [showToggleAll]="props['showToggleAll'] !== false"
+        [showClear]="props['showClear'] !== false"
         [style]="{ width: '100%' }"
         styleClass="w-100"
         appendTo="body"
-      ></p-multiSelect>
+      ></p-dropdown>
       
       <div class="invalid-feedback d-block" *ngIf="showError">
         <formly-validation-message [field]="field"></formly-validation-message>
@@ -37,36 +37,31 @@ import { Observable } from 'rxjs';
   `,
   styles: [`
     :host ::ng-deep {
-      .p-multiselect {
+      .p-dropdown {
         width: 100%;
         border-radius: 6px;
         border-color: #d1d5db;
       }
       
-      .p-multiselect:hover {
+      .p-dropdown:hover {
         border-color: #2563eb;
       }
       
-      .p-multiselect:focus,
-      .p-multiselect.p-focus {
+      .p-dropdown:focus,
+      .p-dropdown.p-focus {
         border-color: #2563eb;
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
       }
       
-      .p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight {
+      .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
         background-color: rgba(37, 99, 235, 0.1);
-        color: #2563eb;
-      }
-      
-      .p-multiselect-token {
-        background: rgba(37, 99, 235, 0.1);
         color: #2563eb;
       }
     }
   `]
 })
-export class FormlyFieldMultiSelectComponent extends FieldType<FieldTypeConfig> implements OnInit {
-  multiselectOptions: any[] = [];
+export class FormlyFieldDropdownComponent extends FieldType<FieldTypeConfig> implements OnInit {
+  dropdownOptions: any[] = [];
 
   ngOnInit() {
     this.setOptions();
@@ -103,12 +98,12 @@ export class FormlyFieldMultiSelectComponent extends FieldType<FieldTypeConfig> 
     
     if (fieldOptions instanceof Observable) {
       fieldOptions.subscribe(opts => {
-        this.multiselectOptions = opts || [];
+        this.dropdownOptions = opts || [];
       });
     } else if (Array.isArray(fieldOptions)) {
-      this.multiselectOptions = fieldOptions;
+      this.dropdownOptions = fieldOptions;
     } else {
-      this.multiselectOptions = [];
+      this.dropdownOptions = [];
     }
   }
 } 

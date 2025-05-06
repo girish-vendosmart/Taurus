@@ -1,0 +1,98 @@
+<div class="container-fluid py-3">
+  <div class="row justify-content-center">
+    <div class="col-lg-11">
+      
+      <!-- Header Section -->
+      <div class="text-center mb-3">
+        <h2 class="text-blueprint-blue mb-2">Supplier Onboarding: L2 Form</h2>
+        <p class="text-machine-gray">Please provide detailed information about your manufacturing capabilities, certifications, and production capacity.</p>
+      </div>
+      
+      <div class="row">
+        <!-- Left Navigation Panel -->
+        <div class="col-md-3 mb-3 mb-md-0">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+              <h5 class="card-title text-blueprint-blue mb-3">DETAILED INFORMATION</h5>
+              
+              <div class="steps-container">
+                <div class="step" [ngClass]="{'active': activeStepIndex === 0}">
+                  <div class="step-number">1</div>
+                  <div class="step-content">
+                    <span class="step-title">Manufacturing Capabilities</span>
+                  </div>
+                </div>
+                
+                <div class="step" [ngClass]="{'active': activeStepIndex === 1}">
+                  <div class="step-number">2</div>
+                  <div class="step-content">
+                    <span class="step-title">Facility Verification</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Form Area -->
+        <div class="col-md-9">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <!-- Progress Bar -->
+              <div class="progress-container mb-3">
+                <div class="progress-bar-wrapper">
+                  <div class="progress">
+                    <div class="progress-bar bg-blueprint-blue" role="progressbar" 
+                         [style.width]="(activeStepIndex + 1) * 100 / steps.length + '%'"></div>
+                  </div>
+                </div>
+                <div class="progress-text">
+                  <span>Step {{ activeStepIndex + 1 }} of {{ steps.length }}</span>
+                </div>
+              </div>
+              
+              <!-- Form Title -->
+              <div class="mb-3">
+                <!-- <p class="text-machine-gray" *ngIf="activeStepIndex === 1">
+                  Provide information about your manufacturing facility for verification purposes.
+                </p> -->
+              </div>
+              
+              <!-- Form -->
+              <form [formGroup]="form">
+                <formly-form
+                  [form]="form"
+                  [fields]="currentFields"
+                  [model]="model"
+                  [options]="options">
+                </formly-form>
+                
+                <!-- Form Navigation Buttons -->
+                <div class="d-flex justify-content-between mt-3">
+                  <button 
+                    *ngIf="activeStepIndex > 0"
+                    type="button" 
+                    class="btn btn-outline-secondary px-3"
+                    (click)="prevStep()">
+                    <i class="pi pi-arrow-left me-2"></i> Previous
+                  </button>
+                  
+                  <button 
+                    type="button" 
+                    class="btn btn-primary px-3 ms-auto"
+                    (click)="nextStep()">
+                    {{ activeStepIndex < steps.length - 1 ? 'Next' : 'Submit' }}
+                    <i *ngIf="activeStepIndex < steps.length - 1" class="pi pi-arrow-right ms-2"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast for notifications -->
+<p-toast></p-toast> 

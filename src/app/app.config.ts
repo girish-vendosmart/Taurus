@@ -10,6 +10,9 @@ import { FormlyRepeatTypeComponent } from './formly-repeat-type.component';
 import { FormlyFieldFileComponent } from './file-type.component';
 import { FormlyFieldMultiSelectComponent } from './multiselect-type.component';
 import { FormlyFieldPhoneOtpComponent } from './phone-otp-type.component';
+import { FormlyFieldFileUploadComponent } from './file-upload-type.component';
+import { FormlyFieldRangeSliderComponent } from './range-slider-type.component';
+import { FormlyFieldDropdownComponent } from './dropdown-type.component';
 
 import { routes } from './app.routes';
 
@@ -24,8 +27,11 @@ export const appConfig: ApplicationConfig = {
         types: [
           { name: 'repeat', component: FormlyRepeatTypeComponent },
           { name: 'file', component: FormlyFieldFileComponent },
+          { name: 'file-upload', component: FormlyFieldFileUploadComponent },
           { name: 'p-multiselect', component: FormlyFieldMultiSelectComponent },
           { name: 'phone-otp', component: FormlyFieldPhoneOtpComponent },
+          { name: 'range-slider', component: FormlyFieldRangeSliderComponent },
+          { name: 'p-dropdown', component: FormlyFieldDropdownComponent },
         ],
         wrappers: [
           { name: 'panel', component: PanelWrapperComponent },
