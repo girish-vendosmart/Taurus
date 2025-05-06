@@ -140,9 +140,23 @@ export class SupplierOnboardingComponent implements OnInit {
                 }
               },
               {
+                key: 'panNumber',
+                type: 'input',
+                className: 'mb-2',
+                templateOptions: {
+                  label: 'PAN',
+                  placeholder: 'ABCDE1234F',
+                  required: false,
+                  maxLength: 10,
+                  description: 'Enter 10-character PAN (e.g., ABCDE1234F)'
+                },
+                expressionProperties: {
+                  'hide': '!model.noGst'
+                }
+              },
+              {
                 key: 'noGst',
                 type: 'checkbox',
-                className: 'mt-2',
                 defaultValue: false,
                 templateOptions: {
                   label: 'We don\'t have GST'
@@ -160,20 +174,6 @@ export class SupplierOnboardingComponent implements OnInit {
                       }
                     });
                   }
-                }
-              },
-              {
-                key: 'panNumber',
-                type: 'input',
-                templateOptions: {
-                  label: 'PAN',
-                  placeholder: 'ABCDE1234F',
-                  required: false,
-                  maxLength: 10,
-                  description: 'Enter 10-character PAN (e.g., ABCDE1234F)'
-                },
-                expressionProperties: {
-                  'hide': '!model.noGst'
                 }
               }
             ]
