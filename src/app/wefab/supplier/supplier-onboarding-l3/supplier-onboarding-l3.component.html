@@ -81,24 +81,15 @@
                   [options]="options">
                 </formly-form>
                 
-                <!-- Form Navigation Buttons -->
+                <!-- Navigation buttons -->
                 <div class="d-flex justify-content-between mt-4">
-                  <button 
-                    *ngIf="activeStepIndex > 0"
-                    type="button" 
-                    class="btn btn-outline-secondary px-4 py-2"
-                    (click)="prevStep()">
-                    <i class="pi pi-arrow-left me-2"></i> Previous
-                  </button>
-                  
-                  <button 
-                    type="button" 
-                    class="btn btn-primary px-4 py-2 ms-auto"
-                    (click)="nextStep()">
-                    {{ activeStepIndex < steps.length - 1 ? 'Next' : 'Complete Onboarding' }}
-                    <i *ngIf="activeStepIndex < steps.length - 1" class="pi pi-arrow-right ms-2"></i>
-                    <i *ngIf="activeStepIndex >= steps.length - 1" class="pi pi-check ms-2"></i>
-                  </button>
+                  <button type="button" class="btn btn-light" (click)="prevStep()">Back</button>
+                  <ng-container *ngIf="activeStepIndex < steps.length - 1; else completeButton">
+                    <button type="button" class="btn btn-primary" (click)="nextStep()">Continue</button>
+                  </ng-container>
+                  <ng-template #completeButton>
+                    <button type="button" class="btn btn-primary btn-complete" (click)="submit()">Complete Onboarding</button>
+                  </ng-template>
                 </div>
               </form>
             </div>

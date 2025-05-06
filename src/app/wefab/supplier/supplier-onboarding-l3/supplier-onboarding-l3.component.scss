@@ -812,4 +812,266 @@ $success-green: $process-green;
       box-shadow: 0 0 0 2px rgba(77, 144, 254, 0.2);
     }
   }
+}
+
+// Tab navigation styling
+.tab-container {
+  margin-bottom: 24px;
+  
+  .nav-tabs {
+    display: flex;
+    margin-bottom: 20px;
+  }
+  
+  .nav-tab {
+    padding: 10px 24px;
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #444;
+    flex: 1;
+    
+    &:first-child {
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
+    }
+    
+    &:nth-child(2) {
+      border-left: none;
+      border-right: none;
+    }
+    
+    &:last-child {
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+    
+    &:hover {
+      background-color: #f0f0f0;
+    }
+    
+    &.active {
+      background-color: white;
+      color: #1976d2;
+      font-weight: 500;
+      border-color: #1976d2;
+    }
+  }
+}
+
+// Content container styling
+.content-container {
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+// Tab content styling
+.tab-content-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+// Hide tabs that aren't active
+.hidden-tab-content {
+  display: none;
+}
+
+// Form field styling for URLs
+.url-input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  
+  &::placeholder {
+    color: #aaa;
+  }
+}
+
+// Footprints title
+.footprints-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 16px;
+}
+
+// Delete button styling
+.delete-btn-container {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  justify-content: center;
+  
+  .btn-icon {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+      color: #d32f2f;
+    }
+  }
+}
+
+// Add Digital Footprint button
+button.add-digital-footprint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background-color: transparent;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  padding: 12px;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  
+  i {
+    margin-right: 8px;
+    font-size: 16px;
+  }
+  
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+// Navigation buttons
+.btn-light {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  padding: 8px 24px;
+  font-size: 14px;
+  border-radius: 4px;
+  
+  &:hover {
+    background-color: #e9ecef;
+  }
+}
+
+.btn-primary {
+  background-color: #1976d2;
+  border: none;
+  color: white;
+  padding: 8px 24px;
+  font-size: 14px;
+  border-radius: 4px;
+  
+  &:hover {
+    background-color: #1565c0;
+  }
+  
+  &.btn-complete {
+    background-color: #0d47a1;
+    
+    &:hover {
+      background-color: #083378;
+    }
+  }
+}
+
+// PrimeNG TabView styling
+:host ::ng-deep {
+  .additional-info-tabs {
+    .p-tabview-nav {
+      display: flex;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+      padding: 0;
+      margin-bottom: 24px;
+      
+      li {
+        flex: 1;
+        margin: 0;
+        
+        a {
+          background-color: transparent;
+          color: #666;
+          border: none;
+          border-radius: 0;
+          padding: 12px 24px;
+          font-weight: normal;
+          text-align: center;
+          width: 100%;
+          
+          &:hover {
+            background-color: #f0f0f0;
+            color: #444;
+          }
+          
+          &:focus {
+            box-shadow: none;
+          }
+        }
+        
+        &:first-child a {
+          border-top-left-radius: 4px;
+          border-bottom-left-radius: 4px;
+        }
+        
+        &:last-child a {
+          border-top-right-radius: 4px;
+          border-bottom-right-radius: 4px;
+        }
+        
+        &:not(:last-child) {
+          border-right: 1px solid #e0e0e0;
+        }
+        
+        &.p-highlight {
+          a {
+            background-color: white;
+            color: #1976d2;
+            font-weight: 500;
+            border-color: #1976d2;
+          }
+        }
+      }
+    }
+    
+    .p-tabview-panels {
+      padding: 0;
+      border: none;
+      
+      .p-tabview-panel {
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 24px;
+      }
+    }
+  }
+}
+
+// Digital presence section styling
+.digital-presence-section {
+  margin-bottom: 16px;
+}
+
+// Tab content wrapper
+.tab-content-wrapper {
+  .tab-content-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 24px;
+  }
 } 
