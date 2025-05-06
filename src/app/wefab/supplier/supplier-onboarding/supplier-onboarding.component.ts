@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormGroup, FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormBuilder, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 
@@ -15,6 +15,19 @@ import { MenuItem } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { MultiSelectModule } from 'primeng/multiselect';
+
+// GST Validator function
+export function gstValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  
+  if (!value) {
+    return null; // Let required validation handle empty values
+  }
+  
+  const gstPattern = /^[0-9]{2}[A-Za-z0-9]{10}[A-Za-z0-9]{1}Z[A-Za-z0-9]{1}$/;
+  
+  return gstPattern.test(value) ? null : { 'gstFormat': true };
+}
 
 @Component({
   selector: 'app-supplier-onboarding',
@@ -91,7 +104,7 @@ export class SupplierOnboardingComponent implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'Legal Business Name',
-              placeholder: 'Enter company name',
+              placeholder: 'Your company\'s registered name',
               required: true
             },
             validation: {
@@ -102,76 +115,74 @@ export class SupplierOnboardingComponent implements OnInit {
           },
           {
             className: 'col-md-6 mb-3',
-            key: 'gstNumber',
-            type: 'input',
-            templateOptions: {
-              label: 'GST Number',
-              placeholder: 'Enter GST number',
-              required: true
-            },
-            validation: {
-              messages: {
-                required: 'Required'
+            fieldGroup: [
+              {
+                key: 'gstinNumber',
+                type: 'input',
+                templateOptions: {
+                  label: 'GSTIN',
+                  placeholder: '22AAAAA0000A1Z5',
+                  required: true,
+                  description: 'Format: 2 digits + 10-character PAN + 1 entity code + Z + 1 checksum'
+                },
+                validators: {
+                  validation: [gstValidator]
+                },
+                validation: {
+                  messages: {
+                    required: 'Required',
+                    gstFormat: 'Invalid GSTIN format'
+                  }
+                },
+                expressionProperties: {
+                  'templateOptions.required': '!model.noGst',
+                  'hide': 'model.noGst'
+                }
+              },
+              {
+                key: 'noGst',
+                type: 'checkbox',
+                className: 'mt-2',
+                defaultValue: false,
+                templateOptions: {
+                  label: 'We don\'t have GST'
+                },
+                hooks: {
+                  onInit: (field) => {
+                    field.formControl?.valueChanges.subscribe(value => {
+                      const panField = field.form?.get('panNumber');
+                      const gstinField = field.form?.get('gstinNumber');
+                      
+                      if (value && gstinField) {
+                        // When "We don't have GST" is checked, clear GSTIN validation errors
+                        gstinField.setErrors(null);
+                        gstinField.setValue('');
+                      }
+                    });
+                  }
+                }
+              },
+              {
+                key: 'panNumber',
+                type: 'input',
+                templateOptions: {
+                  label: 'PAN',
+                  placeholder: 'ABCDE1234F',
+                  required: false,
+                  maxLength: 10,
+                  description: 'Enter 10-character PAN (e.g., ABCDE1234F)'
+                },
+                expressionProperties: {
+                  'hide': '!model.noGst'
+                }
               }
-            }
+            ]
           }
         ]
       },
       {
         fieldGroupClassName: 'row',
         fieldGroup: [
-          {
-            className: 'col-md-6 mb-3',
-            key: 'panNumber',
-            type: 'input',
-            templateOptions: {
-              label: 'PAN Number',
-              placeholder: 'Enter PAN number',
-              required: true
-            },
-            validation: {
-              messages: {
-                required: 'Required'
-              }
-            }
-          },
-          {
-            className: 'col-md-6 mb-3',
-            key: 'contactPersonName',
-            type: 'input',
-            templateOptions: {
-              label: 'Contact Person Name',
-              placeholder: 'Enter full name',
-              required: true
-            },
-            validation: {
-              messages: {
-                required: 'Required'
-              }
-            }
-          }
-        ]
-      },
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
-          {
-            className: 'col-md-6 mb-3',
-            key: 'emailAddress',
-            type: 'input',
-            templateOptions: {
-              label: 'Email Address',
-              placeholder: 'Enter email',
-              required: true,
-              type: 'email'
-            },
-            validation: {
-              messages: {
-                required: 'Required',
-                email: 'Invalid email'
-              }
-            }
-          },
           {
             className: 'col-md-6 mb-3',
             key: 'country',
@@ -179,6 +190,7 @@ export class SupplierOnboardingComponent implements OnInit {
             templateOptions: {
               label: 'Country',
               required: true,
+              placeholder: 'Select country',
               options: [
                 { label: 'India', value: 'india' },
                 { label: 'United States', value: 'us' },
@@ -193,85 +205,64 @@ export class SupplierOnboardingComponent implements OnInit {
                 required: 'Required'
               }
             }
-          }
-        ]
-      },
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
+          },
           {
             className: 'col-md-6 mb-3',
-            key: 'phoneNumber',
-            type: 'input',
+            key: 'state',
+            type: 'select',
             templateOptions: {
-              label: 'Phone Number',
-              placeholder: 'Enter phone number',
+              label: 'State',
               required: true,
-              addonRight: {
-                text: 'OTP',
-                className: 'btn-primary',
-                onClick: () => this.sendOTP(),
+              placeholder: 'Select state',
+              options: []
+            },
+            hooks: {
+              onInit: (field) => {
+                // Initialize state options based on country
+                field.form?.get('country')?.valueChanges.subscribe(country => {
+                  // Reset state value when country changes
+                  field.formControl?.setValue(null);
+                  
+                  // Set state options based on selected country
+                  switch(country) {
+                    case 'india':
+                      field.templateOptions!.options = [
+                        { label: 'Delhi', value: 'delhi' },
+                        { label: 'Maharashtra', value: 'maharashtra' },
+                        { label: 'Karnataka', value: 'karnataka' },
+                        { label: 'Tamil Nadu', value: 'tamil_nadu' },
+                        { label: 'Uttar Pradesh', value: 'uttar_pradesh' }
+                      ];
+                      break;
+                    case 'us':
+                      field.templateOptions!.options = [
+                        { label: 'California', value: 'california' },
+                        { label: 'Texas', value: 'texas' },
+                        { label: 'New York', value: 'new_york' },
+                        { label: 'Florida', value: 'florida' }
+                      ];
+                      break;
+                    case 'uk':
+                      field.templateOptions!.options = [
+                        { label: 'England', value: 'england' },
+                        { label: 'Scotland', value: 'scotland' },
+                        { label: 'Wales', value: 'wales' },
+                        { label: 'Northern Ireland', value: 'northern_ireland' }
+                      ];
+                      break;
+                    default:
+                      field.templateOptions!.options = [];
+                  }
+                });
               }
             },
             validation: {
               messages: {
                 required: 'Required'
               }
-            }
-          },
-          {
-            className: 'col-md-6 mb-3',
-            key: 'otp',
-            type: 'input',
-            templateOptions: {
-              label: 'OTP',
-              placeholder: 'Enter OTP',
-              required: true
             },
             expressionProperties: {
-              'templateOptions.disabled': 'model.basicDetails && !model.basicDetails.phoneNumber',
-            },
-            validation: {
-              messages: {
-                required: 'Required'
-              }
-            }
-          }
-        ]
-      },
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
-          {
-            className: 'col-md-6 mb-3',
-            key: 'minimumOrderValue',
-            type: 'input',
-            templateOptions: {
-              label: 'Minimum Order Value (INR)',
-              placeholder: 'Enter value',
-              required: true,
-              type: 'number'
-            },
-            validation: {
-              messages: {
-                required: 'Required'
-              }
-            }
-          },
-          {
-            className: 'col-md-6 mb-3',
-            key: 'leadTime',
-            type: 'input',
-            templateOptions: {
-              label: 'Average Lead Time (Days)',
-              placeholder: 'Enter days',
-              required: true,
-              type: 'number'
-            },
-            validation: {
-              messages: {
-                required: 'Required'
-              }
+              'templateOptions.disabled': '!model.country'
             }
           }
         ]
@@ -285,7 +276,7 @@ export class SupplierOnboardingComponent implements OnInit {
             type: 'textarea',
             templateOptions: {
               label: 'Registered Address',
-              placeholder: 'Enter complete address',
+              placeholder: 'Enter your registered address',
               required: true,
               rows: 2
             },
@@ -301,7 +292,7 @@ export class SupplierOnboardingComponent implements OnInit {
             type: 'textarea',
             templateOptions: {
               label: 'Manufacturing Facility Address',
-              placeholder: 'Enter facility address',
+              placeholder: 'Enter your manufacturing facility address',
               required: true,
               rows: 2
             },
@@ -309,9 +300,35 @@ export class SupplierOnboardingComponent implements OnInit {
               messages: {
                 required: 'Required'
               }
+            },
+            expressionProperties: {
+              'templateOptions.disabled': 'model.sameAsRegistered'
             }
           }
         ]
+      },
+      {
+        key: 'sameAsRegistered',
+        type: 'checkbox',
+        className: 'mb-3',
+        defaultValue: false,
+        templateOptions: {
+          label: 'Manufacturing Facility Address is Same as Registered Address'
+        },
+        hooks: {
+          onInit: (field) => {
+            field.formControl?.valueChanges.subscribe(value => {
+              const manufacturingAddressField = field.form?.get('manufacturingFacilityAddress');
+              if (value && manufacturingAddressField) {
+                const registeredAddress = field.form?.get('registeredAddress')?.value;
+                manufacturingAddressField.setValue(registeredAddress);
+                manufacturingAddressField.disable();
+              } else if (manufacturingAddressField) {
+                manufacturingAddressField.enable();
+              }
+            });
+          }
+        }
       }
     ];
   }
