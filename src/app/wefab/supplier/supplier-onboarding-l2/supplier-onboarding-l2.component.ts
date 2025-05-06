@@ -399,100 +399,46 @@ export class SupplierOnboardingL2Component implements OnInit {
   getFacilityVerificationFields(): FormlyFieldConfig[] {
     return [
       {
-        fieldGroupClassName: 'mb-4',
-        fieldGroup: [
-          {
-            template: `
-              <div class="section-header mb-3">
-                <h4 class="text-blueprint-blue">Facility Information</h4>
-                <p class="text-machine-gray">Provide details about your manufacturing facility for verification purposes.</p>
-              </div>
-            `
-          },
-          {
-            key: 'facilityAddress',
-            type: 'textarea',
-            templateOptions: {
-              label: 'Facility Address',
-              placeholder: 'Enter complete facility address',
-              required: true,
-              rows: 3
-            },
-            validation: {
-              messages: {
-                required: 'Required'
-              }
-            }
-          },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-6 mb-3',
-                key: 'gpsCoordinates',
-                type: 'input',
-                templateOptions: {
-                  label: 'GPS Coordinates (optional)',
-                  placeholder: 'e.g. 28.6139,77.2090',
-                  description: 'Help us locate your facility precisely'
-                }
-              },
-              {
-                className: 'col-md-6 mb-3',
-                key: 'floorArea',
-                type: 'input',
-                templateOptions: {
-                  label: 'Facility Floor Area (sq. ft)',
-                  type: 'number',
-                  min: 0,
-                  required: true,
-                  placeholder: 'Total floor area in square feet'
-                },
-                validation: {
-                  messages: {
-                    required: 'Required'
-                  }
-                }
-              }
-            ]
-          },
-          {
-            key: 'facilityPhotos',
-            type: 'file-upload',
-            templateOptions: {
-              label: 'Facility Photos',
-              description: 'Upload photos of your manufacturing facility (exterior and interior)',
-              required: true
-            },
-            validation: {
-              messages: {
-                required: 'At least one facility photo is required'
-              }
-            }
-          }
-        ]
+        template: `
+          <h4 class="text-blueprint-blue mb-2">Facility Verification</h4>
+          <p class="mb-4">Upload geotagged photos of your manufacturing facility.</p>
+        `
       },
       {
-        fieldGroupClassName: 'mb-4 mt-5',
-        fieldGroup: [
-          {
-            template: `
-              <div class="section-header mb-3">
-                <h4 class="text-blueprint-blue">Verification Notes</h4>
-                <p class="text-machine-gray">Additional information to help with facility verification.</p>
-              </div>
-            `
-          },
-          {
-            key: 'verificationNotes',
-            type: 'textarea',
-            templateOptions: {
-              label: 'Additional Notes',
-              placeholder: 'Any additional details that would help us verify your facility (e.g., landmarks, operating hours, etc.)',
-              rows: 3
-            }
+        template: `
+          <div class="alert alert-warning mb-4">
+            <strong>Important:</strong> Verified facility photos improve your profile ranking and visibility to potential clients. Please ensure photos clearly show your manufacturing space and equipment.
+          </div>
+        `
+      },
+      {
+        key: 'facilityPhotos',
+        type: 'file-upload',
+        templateOptions: {
+          label: 'Facility Photos',
+          required: true,
+          multiple: true
+        },
+        validation: {
+          messages: {
+            required: 'Facility photos are required'
           }
-        ]
+        }
+      },
+      {
+        template: `
+          <p class="mt-2 mb-4">Upload at least 3 photos of your facility (exterior, production floor, quality control area)</p>
+        `
+      },
+      {
+        template: `
+          <div class="card border-primary mt-4 mb-3">
+            <div class="card-body">
+              <h5 class="card-title text-primary">Verification Process</h5>
+              <p class="card-text">Our team will verify the uploaded photos against your registered address. This process typically takes 2-3 business days. You'll be notified once verification is complete.</p>
+            </div>
+          </div>
+        `
       }
     ];
   }
