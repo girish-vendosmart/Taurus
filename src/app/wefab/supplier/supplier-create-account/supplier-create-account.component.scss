@@ -1,24 +1,92 @@
-// Card styling
-.card {
-  background-color: var(--bs-white);
+// PrimeNG Card styling
+.p-card-custom {
   border: none;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+  padding: 1.5rem !important;
+  border-radius: 0.375rem !important;
+  background-color: var(--bs-white);
 }
 
-// Form element styling
-.form-control {
-  border-color: #d1d5db;
-  padding: 0.6rem 0.75rem;
-  
-  &:focus {
-    border-color: #1A3A5F;
-    box-shadow: 0 0 0 0.25rem rgba(26, 58, 95, 0.1);
+// Input styling for PrimeNG components
+:host ::ng-deep {
+  .p-inputtext {
+    border-color: #d1d5db;
+    padding: 0.6rem 0.75rem;
+    width: 100%;
+    
+    &:enabled:focus {
+      border-color: #1A3A5F;
+      box-shadow: 0 0 0 0.25rem rgba(26, 58, 95, 0.1);
+    }
+    
+    &.ng-dirty.ng-invalid {
+      border-color: var(--red-500);
+    }
   }
-}
-
-.input-group-text {
-  background-color: #fff;
-  border-color: #d1d5db;
+  
+  .p-password {
+    width: 100%;
+    
+    input {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+    }
+  }
+  
+  .p-inputgroup {
+    .p-inputgroup-addon {
+      background-color: #fff;
+      border-color: #d1d5db;
+      color: #545A64;
+    }
+  }
+  
+  // Button styling for PrimeNG
+  .p-button {
+    &.p-button-primary {
+      background-color: #1A3A5F;
+      border-color: #1A3A5F;
+      
+      &:enabled:hover {
+        background-color: darken(#1A3A5F, 10%);
+        border-color: darken(#1A3A5F, 10%);
+      }
+      
+      &:disabled {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        opacity: 0.65;
+      }
+    }
+    
+    &.p-button-secondary {
+      background-color: #545A64;
+      border-color: #545A64;
+    }
+    
+    &.p-button-outlined.p-button-secondary {
+      color: #545A64;
+      border-color: #d1d5db;
+      
+      &:enabled:hover {
+        background-color: #f6f7f9;
+        color: #1A3A5F;
+        border-color: #d1d5db;
+      }
+    }
+    
+    // Fix for refresh button icon visibility
+    &.refresh-btn {
+      .p-button-icon {
+        color: #545A64;
+        visibility: visible !important;
+      }
+      
+      &:hover .p-button-icon {
+        color: #1A3A5F;
+      }
+    }
+  }
 }
 
 // Captcha styling
@@ -52,39 +120,6 @@
   }
 }
 
-// Button styling
-.btn-primary {
-  background-color: #1A3A5F;
-  border-color: #1A3A5F;
-  
-  &:hover {
-    background-color: darken(#1A3A5F, 10%);
-    border-color: darken(#1A3A5F, 10%);
-  }
-  
-  &:disabled {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    opacity: 0.65;
-  }
-}
-
-.btn-secondary {
-  background-color: #545A64;
-  border-color: #545A64;
-}
-
-.btn-outline-secondary {
-  color: #545A64;
-  border-color: #d1d5db;
-  
-  &:hover {
-    background-color: #f6f7f9;
-    color: #1A3A5F;
-    border-color: #d1d5db;
-  }
-}
-
 // Text styling
 h2 {
   color: #1A3A5F;
@@ -112,4 +147,30 @@ a {
 // Background colors
 .bg-light {
   background-color: #f6f7f9 !important;
+}
+
+// Error styling
+.p-error {
+  color: var(--red-500);
+}
+
+// Extra styling for text colors
+.text-primary {
+  color: #1A3A5F !important;
+}
+
+.text-success {
+  color: #12856E !important;
+}
+
+.text-danger {
+  color: #FF5722 !important;
+}
+
+.text-warning {
+  color: #FFC107 !important;
+}
+
+.text-info {
+  color: #0dcaf0 !important;
 }
