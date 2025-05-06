@@ -37,6 +37,20 @@ import { FileUploadComponent } from './wefab/supplier/supplier-onboarding/file-u
         [multiple]="props['multiple'] || false"
       />
       
+      <!-- Display uploaded files -->
+      <div *ngIf="uploadedFiles.length > 0" class="uploaded-files mt-3">
+        <div *ngFor="let file of uploadedFiles; let i = index" class="uploaded-file-item">
+          <div class="file-info">
+            <i class="pi pi-file me-2"></i>
+            <span class="file-name">{{ file.name }}</span>
+            <span class="file-size">({{ formatFileSize(file.size) }})</span>
+          </div>
+          <button type="button" class="btn-remove" (click)="removeFile(i, $event)">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
+      
       <div class="invalid-feedback d-block" *ngIf="showError">
         <formly-validation-message [field]="field"></formly-validation-message>
       </div>
@@ -90,10 +104,63 @@ import { FileUploadComponent } from './wefab/supplier/supplier-onboarding/file-u
       font-size: 0.75rem;
       color: #6b7280;
     }
+    
+    .uploaded-files {
+      margin-top: 1rem;
+    }
+    
+    .uploaded-file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      border: 1px solid #eee;
+    }
+    
+    .file-info {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    
+    .file-name {
+      font-weight: 500;
+      margin-right: 0.5rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .file-size {
+      color: #6c757d;
+      font-size: 0.85rem;
+    }
+    
+    .btn-remove {
+      background: none;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+    }
+    
+    .btn-remove:hover {
+      background-color: rgba(220, 53, 69, 0.1);
+    }
   `]
 })
 export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> {
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
+  uploadedFiles: File[] = [];
   
   triggerFileInput(): void {
     this.fileInputRef.nativeElement.click();
@@ -110,16 +177,61 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> {
     
     if (event.dataTransfer && event.dataTransfer.files.length) {
       const fileList = event.dataTransfer.files;
-      this.formControl.setValue(fileList);
-      this.formControl.markAsTouched();
+      this.updateFiles(fileList);
     }
   }
   
   onFileSelected(event: Event): void {
     const files = (event.target as HTMLInputElement).files;
     if (files && files.length > 0) {
-      this.formControl.setValue(files);
-      this.formControl.markAsTouched();
+      this.updateFiles(files);
+    }
+  }
+  
+  updateFiles(fileList: FileList): void {
+    // Convert FileList to array and update the form
+    if (this.props['multiple']) {
+      // For multiple file upload, add to existing files
+      const newFiles = Array.from(fileList);
+      this.uploadedFiles = [...this.uploadedFiles, ...newFiles];
+    } else {
+      // For single file upload, replace existing file
+      this.uploadedFiles = Array.from(fileList);
+    }
+    
+    // Update form control value
+    this.formControl.setValue(this.uploadedFiles.length > 0 ? 
+      (this.props['multiple'] ? this.uploadedFiles : this.uploadedFiles[0]) : null);
+    this.formControl.markAsTouched();
+  }
+  
+  removeFile(index: number, event: Event): void {
+    event.stopPropagation(); // Prevent triggering fileInput click
+    
+    // Remove file from array
+    this.uploadedFiles.splice(index, 1);
+    
+    // Update form control value
+    if (this.uploadedFiles.length === 0) {
+      this.formControl.setValue(null);
+    } else {
+      this.formControl.setValue(this.props['multiple'] ? 
+        this.uploadedFiles : this.uploadedFiles[0]);
+    }
+    
+    // Reset file input if all files removed
+    if (this.uploadedFiles.length === 0) {
+      this.fileInputRef.nativeElement.value = '';
+    }
+  }
+  
+  formatFileSize(size: number): string {
+    if (size < 1024) {
+      return size + ' B';
+    } else if (size < 1024 * 1024) {
+      return (size / 1024).toFixed(1) + ' KB';
+    } else {
+      return (size / (1024 * 1024)).toFixed(1) + ' MB';
     }
   }
 } 
