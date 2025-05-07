@@ -37,21 +37,33 @@ $success-green: $process-green;
   }
 }
 
-// Left navigation panel specific styles
-.col-md-3 {
-  .card {
-    background: linear-gradient(145deg, #ffffff, #f8fbff);
-    border-left: 4px solid $blueprint-blue;
+// Improved left navigation panel sticky styles
+.supplier-onboarding-content {
+  .col-md-3 {
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
+    height: fit-content;
+    z-index: 10; // Ensure sticky element appears above other content
     
-    .card-body {
-      padding: 2rem;
-    }
-    
-    .card-title {
-      font-size: 1.1rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba($blueprint-blue, 0.1);
-      margin-bottom: 1.5rem;
+    .card {
+      background: linear-gradient(145deg, #ffffff, #f8fbff);
+      border-left: 4px solid $blueprint-blue;
+      height: auto;
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 0;
+      
+      .card-body {
+        padding: 1.25rem 1.5rem;
+      }
+      
+      .card-title {
+        font-size: 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba($blueprint-blue, 0.1);
+        margin-bottom: 1.5rem;
+      }
     }
   }
 }
@@ -139,13 +151,6 @@ $success-green: $process-green;
         display: block;
         line-height: 1.4;
       }
-      
-      .step-description {
-        color: lighten($machine-gray, 15%);
-        font-size: 0.85rem;
-        display: block;
-        margin-top: 0.25rem;
-      }
     }
     
     &.active {
@@ -162,10 +167,6 @@ $success-green: $process-green;
           font-weight: $font-weight-semibold;
           transform: translateX(3px);
         }
-        
-        .step-description {
-          color: darken($machine-gray, 5%);
-        }
       }
       
       &:not(:last-child)::after {
@@ -173,24 +174,7 @@ $success-green: $process-green;
       }
     }
     
-    &.completed {
-      .step-number {
-        background-color: $success-green;
-        color: $technical-white;
-        
-        &::after {
-          content: '✓';
-          position: absolute;
-          font-size: 1.2rem;
-        }
-      }
-      
-      &:not(:last-child)::after {
-        background-color: $success-green;
-      }
-    }
-    
-    &:hover:not(.active):not(.completed) {
+    &:hover:not(.active) {
       .step-number {
         transform: scale(1.05);
         background-color: lighten($blueprint-blue, 35%);
@@ -216,7 +200,7 @@ $success-green: $process-green;
     font-size: 0.95rem;
   }
   
-  .onboarding-steps {
+  .onboarding-progress-steps {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -349,734 +333,9 @@ $success-green: $process-green;
   }
 }
 
-// Alert styling
-.alert {
-  border-radius: 8px;
-  border-left: 4px solid;
-  
-  &.alert-info {
-    background-color: rgba($blueprint-blue, 0.1);
-    border-color: $blueprint-blue;
-    color: darken($blueprint-blue, 15%);
-  }
-  
-  &.alert-warning {
-    background-color: rgba(#ffc107, 0.1);
-    border-color: #ffc107;
-    color: darken(#ffc107, 25%);
-  }
-}
+/* Rest of your SCSS remains the same */
 
-// Document guidelines box
-.document-guidelines {
-  background-color: rgba($blueprint-blue, 0.05);
-  border-left: 4px solid rgba($blueprint-blue, 0.3);
-  
-  h5 {
-    color: $blueprint-blue;
-    font-weight: $font-weight-medium;
-    font-size: 1.05rem;
-  }
-  
-  p, ul {
-    color: $machine-gray;
-    font-size: 0.9rem;
-  }
-  
-  ul {
-    padding-left: 1.5rem;
-    
-    li {
-      margin-bottom: 0.25rem;
-    }
-  }
-}
-
-// Form styling enhancements
-:host ::ng-deep {
-  // Input fields
-  .form-control, .form-select, .p-inputtext {
-    border: 1px solid $material-finish-silver;
-    border-radius: 8px;
-    padding: 0.95rem 1.2rem;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background-color: rgba($technical-white, 0.8);
-    width: 100%;
-    
-    &:hover {
-      border-color: lighten($blueprint-blue, 20%);
-      background-color: rgba($technical-white, 1);
-    }
-    
-    &:focus {
-      border-color: $blueprint-blue;
-      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
-      background-color: #fff;
-      outline: none;
-    }
-    
-    &::placeholder {
-      color: lighten($machine-gray, 20%);
-      font-style: italic;
-      opacity: 0.7;
-    }
-  }
-  
-  // Labels
-  .form-label {
-    font-weight: $font-weight-medium;
-    color: $precision-black;
-    margin-bottom: 0.7rem;
-    font-size: 1rem;
-    
-    .text-danger {
-      color: $safety-orange !important;
-      margin-left: 0.25rem;
-    }
-  }
-  
-  // Validation errors
-  .invalid-feedback {
-    color: $safety-orange;
-    font-size: 0.85rem;
-    margin-top: 0.35rem;
-  }
-  
-  // Make checkboxes more prominent
-  .p-checkbox .p-checkbox-box {
-    border-radius: 4px;
-    width: 18px;
-    height: 18px;
-    
-    &.p-highlight {
-      background-color: $blueprint-blue;
-      border-color: $blueprint-blue;
-    }
-  }
-  
-  // Enhance file upload component
-  .file-upload-area {
-    border: 2px dashed rgba($blueprint-blue, 0.3);
-    border-radius: 10px;
-    padding: 2rem;
-    text-align: center;
-    transition: all 0.3s ease;
-    background-color: rgba($blueprint-blue, 0.02);
-    
-    &:hover {
-      border-color: $blueprint-blue;
-      background-color: rgba($blueprint-blue, 0.05);
-    }
-    
-    .upload-icon {
-      font-size: 2rem;
-      color: $blueprint-blue;
-      margin-bottom: 1rem;
-    }
-    
-    .upload-text {
-      color: $machine-gray;
-      font-size: 0.95rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .upload-hint {
-      color: lighten($machine-gray, 15%);
-      font-size: 0.85rem;
-    }
-  }
-  
-  // Button styles
-  .btn {
-    border-radius: 6px;
-    font-weight: $font-weight-medium;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 0.9rem;
-    
-    &.btn-primary {
-      background: linear-gradient(135deg, $blueprint-blue, darken($blueprint-blue, 10%));
-      border: none;
-      box-shadow: 0 4px 12px rgba($blueprint-blue, 0.3);
-      
-      &:hover {
-        background: linear-gradient(135deg, lighten($blueprint-blue, 5%), $blueprint-blue);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba($blueprint-blue, 0.4);
-      }
-      
-      &:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 8px rgba($blueprint-blue, 0.3);
-      }
-    }
-    
-    &.btn-outline-secondary {
-      border: 2px solid $material-finish-silver;
-      color: $machine-gray;
-      
-      &:hover {
-        background-color: $light-gray;
-        border-color: darken($material-finish-silver, 5%);
-        color: darken($machine-gray, 10%);
-      }
-    }
-  }
-  
-  // Dropdown styling
-  .p-dropdown {
-    width: 100%;
-    border-radius: 8px;
-    
-    .p-dropdown-trigger {
-      background-color: transparent;
-    }
-    
-    .p-dropdown-label {
-      padding: 0.95rem 1.2rem;
-    }
-    
-    &:hover {
-      border-color: lighten($blueprint-blue, 20%);
-    }
-    
-    &:focus {
-      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
-    }
-  }
-  
-  // MultiSelect styling
-  .p-multiselect {
-    width: 100%;
-    border-radius: 8px;
-    
-    .p-multiselect-trigger {
-      background-color: transparent;
-    }
-    
-    .p-multiselect-label {
-      padding: 0.95rem 1.2rem;
-      margin: 0;
-    }
-    
-    &:hover {
-      border-color: lighten($blueprint-blue, 20%);
-    }
-    
-    &:focus {
-      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
-    }
-  }
-  
-  // Textarea styling
-  textarea.form-control {
-    min-height: 100px;
-  }
-  
-  // Toast notifications
-  .p-toast {
-    .p-toast-message {
-      border-radius: 8px;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-      
-      &.p-toast-message-success {
-        background-color: rgba($success-green, 0.1);
-        border-left: 4px solid $success-green;
-        color: darken($success-green, 10%);
-        
-        .p-toast-message-icon,
-        .p-toast-summary {
-          color: $success-green;
-        }
-      }
-      
-      &.p-toast-message-error {
-        background-color: rgba($safety-orange, 0.1);
-        border-left: 4px solid $safety-orange;
-        color: darken($safety-orange, 10%);
-        
-        .p-toast-message-icon,
-        .p-toast-summary {
-          color: $safety-orange;
-        }
-      }
-    }
-  }
-  
-  // Required field indicator
-  .required-indicator {
-    color: $safety-orange;
-    margin-left: 3px;
-  }
-}
-
-// Responsive adjustments
-@media (max-width: 768px) {
-  .card .card-body {
-    padding: 1.5rem;
-  }
-  
-  .progress-container {
-    flex-direction: column;
-    align-items: flex-start;
-    
-    .progress-bar-wrapper {
-      width: 100%;
-      margin-right: 0;
-      margin-bottom: 0.5rem;
-    }
-  }
-  
-  .steps-container {
-    gap: 2rem;
-    
-    .step {
-      gap: 1rem;
-      
-      .step-number {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
-      }
-    }
-  }
-  
-  .header-badge {
-    padding: 0.4rem 1.25rem;
-    font-size: 0.8rem;
-  }
-}
-
-// Info container styling
-.info-container {
-  display: flex;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  padding: 16px;
-  margin-bottom: 24px;
-  
-  .info-icon {
-    margin-right: 12px;
-    color: #1976d2;
-    
-    i {
-      font-size: 20px;
-    }
-  }
-  
-  .info-content {
-    .info-title {
-      font-weight: 600;
-      margin-bottom: 8px;
-      font-size: 16px;
-    }
-    
-    .info-text {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 0;
-    }
-  }
-}
-
-// Financial overview section styling
-.financial-overview-title {
-  color: #2c3e50;
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.annual-revenue-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: #444;
-  margin-bottom: 12px;
-}
-
-// Insurance section styling
-.insurance-title {
-  color: #2c3e50;
-  font-size: 18px;
-  font-weight: 600;
-  margin-top: 32px;
-  margin-bottom: 16px;
-}
-
-// Help text styling
-.text-muted {
-  color: #777;
-  font-size: 13px;
-  margin-top: -6px;
-}
-
-// Row styling for 2-column layout
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 -10px;
-  
-  .col-md-6 {
-    flex: 0 0 50%;
-    max-width: 50%;
-    padding: 0 10px;
-    
-    @media (max-width: 767px) {
-      flex: 0 0 100%;
-      max-width: 100%;
-    }
-  }
-}
-
-.currency-selector {
-  width: 100px !important;
-  min-width: auto !important;
-  
-  .p-dropdown {
-    min-width: auto !important;
-  }
-}
-
-.section-divider {
-  margin: 2rem 0 1.5rem;
-  border-top: 1px solid $material-finish-silver;
-  padding-top: 1.5rem;
-}
-
-.company-size-section {
-  margin-bottom: 1.5rem;
-}
-
-// Form inputs
-:host ::ng-deep {
-  // Clean styling for text inputs matching the screenshot
-  .form-control {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    height: 48px;
-    padding: 8px 16px;
-    background-color: #fff;
-    
-    &:focus {
-      border-color: #4d90fe;
-      box-shadow: 0 0 0 2px rgba(77, 144, 254, 0.2);
-    }
-    
-    &::placeholder {
-      color: #aaa;
-    }
-  }
-  
-  // Label styling to match screenshot
-  .form-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 8px;
-  }
-  
-  // Help text styling
-  .text-muted {
-    color: #777;
-    font-size: 13px;
-    margin-top: 4px;
-    display: block;
-  }
-  
-  // Checkbox styling
-  .form-check {
-    margin-top: 12px;
-    
-    .form-check-input {
-      width: 20px;
-      height: 20px;
-      margin-right: 10px;
-    }
-    
-    .form-check-label {
-      font-size: 14px;
-      color: #333;
-    }
-  }
-  
-  // Select dropdown styling
-  .form-select {
-    height: 48px;
-    border: 1px solid #ddd;
-    padding: 8px 16px;
-    
-    &:focus {
-      border-color: #4d90fe;
-      box-shadow: 0 0 0 2px rgba(77, 144, 254, 0.2);
-    }
-  }
-}
-
-// Tab navigation styling
-.tab-container {
-  margin-bottom: 24px;
-  
-  .nav-tabs {
-    display: flex;
-    margin-bottom: 20px;
-  }
-  
-  .nav-tab {
-    padding: 10px 24px;
-    background-color: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    text-align: center;
-    cursor: pointer;
-    font-size: 14px;
-    color: #444;
-    flex: 1;
-    
-    &:first-child {
-      border-top-left-radius: 4px;
-      border-bottom-left-radius: 4px;
-    }
-    
-    &:nth-child(2) {
-      border-left: none;
-      border-right: none;
-    }
-    
-    &:last-child {
-      border-top-right-radius: 4px;
-      border-bottom-right-radius: 4px;
-    }
-    
-    &:hover {
-      background-color: #f0f0f0;
-    }
-    
-    &.active {
-      background-color: white;
-      color: #1976d2;
-      font-weight: 500;
-      border-color: #1976d2;
-    }
-  }
-}
-
-// Content container styling
-.content-container {
-  background-color: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-// Tab content styling
-.tab-content-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 24px;
-}
-
-// Hide tabs that aren't active
-.hidden-tab-content {
-  display: none;
-}
-
-// Form field styling for URLs
-.url-input {
-  width: 100%;
-  height: 40px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 14px;
-  
-  &::placeholder {
-    color: #aaa;
-  }
-}
-
-// Footprints title
-.footprints-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: #444;
-  margin-bottom: 16px;
-}
-
-// Delete button styling
-.delete-btn-container {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  justify-content: center;
-  
-  .btn-icon {
-    background: none;
-    border: none;
-    color: #999;
-    cursor: pointer;
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    &:hover {
-      color: #d32f2f;
-    }
-  }
-}
-
-// Add Digital Footprint button
-button.add-digital-footprint {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  background-color: transparent;
-  border: 1px dashed #ccc;
-  border-radius: 4px;
-  padding: 12px;
-  color: #666;
-  cursor: pointer;
-  font-size: 14px;
-  
-  i {
-    margin-right: 8px;
-    font-size: 16px;
-  }
-  
-  &:hover {
-    background-color: #f5f5f5;
-  }
-}
-
-// Navigation buttons
-.btn-light {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  color: #495057;
-  padding: 8px 24px;
-  font-size: 14px;
-  border-radius: 4px;
-  
-  &:hover {
-    background-color: #e9ecef;
-  }
-}
-
-.btn-primary {
-  background-color: #1976d2;
-  border: none;
-  color: white;
-  padding: 8px 24px;
-  font-size: 14px;
-  border-radius: 4px;
-  
-  &:hover {
-    background-color: #1565c0;
-  }
-  
-  &.btn-complete {
-    background-color: #0d47a1;
-    
-    &:hover {
-      background-color: #083378;
-    }
-  }
-}
-
-// PrimeNG TabView styling
-:host ::ng-deep {
-  .additional-info-tabs {
-    .p-tabview-nav {
-      display: flex;
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      background-color: #f8f9fa;
-      padding: 0;
-      margin-bottom: 24px;
-      
-      li {
-        flex: 1;
-        margin: 0;
-        
-        a {
-          background-color: transparent;
-          color: #666;
-          border: none;
-          border-radius: 0;
-          padding: 12px 24px;
-          font-weight: normal;
-          text-align: center;
-          width: 100%;
-          
-          &:hover {
-            background-color: #f0f0f0;
-            color: #444;
-          }
-          
-          &:focus {
-            box-shadow: none;
-          }
-        }
-        
-        &:first-child a {
-          border-top-left-radius: 4px;
-          border-bottom-left-radius: 4px;
-        }
-        
-        &:last-child a {
-          border-top-right-radius: 4px;
-          border-bottom-right-radius: 4px;
-        }
-        
-        &:not(:last-child) {
-          border-right: 1px solid #e0e0e0;
-        }
-        
-        &.p-highlight {
-          a {
-            background-color: white;
-            color: #1976d2;
-            font-weight: 500;
-            border-color: #1976d2;
-          }
-        }
-      }
-    }
-    
-    .p-tabview-panels {
-      padding: 0;
-      border: none;
-      
-      .p-tabview-panel {
-        background-color: white;
-        border: 1px solid #e0e0e0;
-        border-radius: 4px;
-        padding: 24px;
-      }
-    }
-  }
-}
-
-// Digital presence section styling
-.digital-presence-section {
-  margin-bottom: 16px;
-}
-
-// Tab content wrapper
-.tab-content-wrapper {
-  .tab-content-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 24px;
-  }
-}
-
-// Additional Information section styling
+// Additional Information section styling - MODIFIED
 .additional-info-content {
   padding: 0.5rem;
 
@@ -1113,4 +372,28 @@ button.add-digital-footprint {
       }
     }
   }
-} 
+}
+
+// Supplier onboarding content container - MODIFIED
+.supplier-onboarding-content {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 100vh;
+  position: relative;
+}
+
+// Container fluid styles
+.container-fluid {
+  overflow-x: hidden; // Prevent horizontal scrollbar
+  min-height: 100vh; // Ensure the container takes up full viewport height
+}
+
+// Media queries for responsive behavior
+@media (max-width: 768px) {
+  .supplier-onboarding-content .col-md-3 {
+    position: relative; // Disable sticky on mobile
+    top: 0;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+}

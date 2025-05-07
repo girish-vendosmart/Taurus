@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, TemplateRef, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, Inject, PLATFORM_ID, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormGroup, FormBuilder, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
@@ -111,6 +111,7 @@ export class SupplierOnboardingL3Component implements OnInit {
   stepFields: FormlyFieldConfig[][] = [];
   
   isBrowser: boolean;
+  isMobile: boolean = false;
   
   constructor(
     private fb: FormBuilder, 
@@ -123,7 +124,21 @@ export class SupplierOnboardingL3Component implements OnInit {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.checkScreenSize();
+  }
+
+  checkScreenSize() {
+    this.isMobile = window.innerWidth < 768;
+  }
+
   ngOnInit(): void {
+    // Check screen size on init
+    if (this.isBrowser) {
+      this.checkScreenSize();
+    }
+    
     // Initialize step fields
     this.stepFields = [
       this.getFinancialInformationFields(),
@@ -180,6 +195,25 @@ export class SupplierOnboardingL3Component implements OnInit {
         this.model.additionalInformation[field] = [];
       }
     });
+    
+    // Apply the sticky position based on the screen size
+    this.updateStickyNavigation();
+  }
+
+  // Added method to update sticky navigation based on screen size
+  updateStickyNavigation() {
+    if (this.isBrowser) {
+      const leftPanel = document.querySelector('.supplier-onboarding-content .col-md-3') as HTMLElement;
+      if (leftPanel) {
+        if (this.isMobile) {
+          leftPanel.style.position = 'relative';
+          leftPanel.style.top = '0';
+        } else {
+          leftPanel.style.position = 'sticky';
+          leftPanel.style.top = '20px';
+        }
+      }
+    }
   }
 
   // Getter to make accessing the current step's fields easy in template
@@ -193,13 +227,13 @@ export class SupplierOnboardingL3Component implements OnInit {
       {
         template: `
           <h3 class="text-blueprint-blue mb-2">Financial Information</h3>
-          <p class="text-machine-gray mb-4">Share your financial details to improve matching with potential clients</p>
+          <p class="text-machine-gray mb-3">Share your financial details to improve matching with potential clients</p>
         `
       },
       // Info section
       {
         template: `
-          <div class="info-container mb-4">
+          <div class="info-container mb-6">
             <div class="info-icon">
               <i class="pi pi-info-circle"></i>
             </div>
@@ -211,14 +245,14 @@ export class SupplierOnboardingL3Component implements OnInit {
         `
       },
       {
-        template: '<h4 class="financial-overview-title mb-3">Financial Overview</h4>'
+        template: '<h4 class="financial-overview-title mb-2 mt-4">Financial Overview</h4>'
       },
       {
-        template: '<h6 class="annual-revenue-title mb-2">Annual Revenue (Last 3 Years)</h6>'
+        template: '<h6 class="annual-revenue-title mb-1">Annual Revenue (Last 3 Years)</h6>'
       },
       // Annual Revenue 2024 and 2023 in one row
       {
-        fieldGroupClassName: 'row mb-3',
+        fieldGroupClassName: 'row',
         fieldGroup: [
           {
             className: 'col-md-6',
@@ -255,11 +289,11 @@ export class SupplierOnboardingL3Component implements OnInit {
         ]
       },
       {
-        template: '<small class="text-muted d-block mb-3">Enter the exact amount in your local currency</small>'
+        template: '<small class="text-muted d-block mb-2">Enter the exact amount in your local currency</small>'
       },
       // Annual Revenue 2022 and Credit Rating Provider in one row
       {
-        fieldGroupClassName: 'row mb-3',
+        fieldGroupClassName: 'row',
         fieldGroup: [
           {
             className: 'col-md-6',
@@ -298,14 +332,14 @@ export class SupplierOnboardingL3Component implements OnInit {
         ]
       },
       {
-        template: '<small class="text-muted d-block mb-4">Enter the exact amount in your local currency / Select your credit rating provider, if any</small>'
+        template: '<small class="text-muted d-block mb-3">Enter the exact amount in your local currency / Select your credit rating provider, if any</small>'
       },
       
       // Tax Compliance
       {
         key: 'companyFinancials.taxCompliant',
         type: 'checkbox',
-        className: 'mb-4',
+        className: 'mb-3',
         templateOptions: {
           label: 'We are compliant with all applicable tax regulations',
           required: true
@@ -314,14 +348,14 @@ export class SupplierOnboardingL3Component implements OnInit {
       
       // Insurance Coverage Section
       {
-        template: '<h4 class="insurance-title mt-4 mb-3">Insurance Coverage</h4>'
+        template: '<h4 class="insurance-title mt-3 mb-2 mt-6">Insurance Coverage</h4>'
       },
       // Row with General Liability and Product Liability Insurance
       {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-6 mb-3',
+            className: 'col-md-6',
             key: 'insuranceCoverage.generalLiabilityInsurance',
             type: 'input',
             templateOptions: {
@@ -336,7 +370,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             }
           },
           {
-            className: 'col-md-6 mb-3',
+            className: 'col-md-6',
             key: 'insuranceCoverage.productLiabilityInsurance',
             type: 'input',
             templateOptions: {
@@ -353,7 +387,7 @@ export class SupplierOnboardingL3Component implements OnInit {
         ]
       },
       {
-        template: '<small class="text-muted d-block mb-3">Coverage amount</small>'
+        template: '<small class="text-muted d-block mb-2">Coverage amount</small>'
       }
     ] as FormlyFieldConfig[];
   }
@@ -366,7 +400,7 @@ export class SupplierOnboardingL3Component implements OnInit {
           // Digital Presence Section
           {
             template: `
-              <div class="mt-4 mb-3">
+              <div class="mt-3 mb-2">
                 <h4 class="section-title">Digital Presence</h4>
               </div>
             `
@@ -396,7 +430,7 @@ export class SupplierOnboardingL3Component implements OnInit {
           // Operational Metrics Section
           {
             template: `
-              <div class="mt-4 mb-3">
+              <div class="mt-3 mb-2">
                 <h4 class="section-title">Operational Metrics</h4>
               </div>
             `
@@ -471,7 +505,7 @@ export class SupplierOnboardingL3Component implements OnInit {
           // Business Terms Section
           {
             template: `
-              <div class="mt-4 mb-3">
+              <div class="mt-3 mb-2">
                 <h4 class="section-title">Business Terms</h4>
               </div>
             `
@@ -509,7 +543,7 @@ export class SupplierOnboardingL3Component implements OnInit {
           // References Section (Simplified)
           {
             template: `
-              <div class="mt-4 mb-3">
+              <div class="mt-3 mb-2">
                 <h4 class="section-title">Business References</h4>
                 <p class="text-muted small">Provide at least one reference from current or past clients/partners</p>
               </div>
@@ -574,6 +608,16 @@ export class SupplierOnboardingL3Component implements OnInit {
       if (this.isStepValid(this.currentFields)) {
         // If validation passes, move to the next step
         this.activeStepIndex++;
+        
+        // Scroll to top of form when changing steps for better UX
+        if (this.isBrowser) {
+          setTimeout(() => {
+            const formElement = document.querySelector('.col-md-9 .card');
+            if (formElement) {
+              formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 100);
+        }
       } else {
         // If validation fails, mark all required fields as touched to show errors
         this.markFieldsAsTouched(this.currentFields);
@@ -665,8 +709,6 @@ export class SupplierOnboardingL3Component implements OnInit {
 
   submit() {
     if (this.form.valid) {
-      // In a real application, you would send the form data to a server here
-      debugger
       console.log('Form submitted:', this.model);
       let body = this.updateData(this.model);
 
@@ -698,4 +740,4 @@ export class SupplierOnboardingL3Component implements OnInit {
       });
     }
   }
-} 
+}
