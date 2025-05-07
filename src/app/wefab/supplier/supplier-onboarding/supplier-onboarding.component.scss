@@ -28,18 +28,25 @@
   }
   
   .card-body {
-    padding: 1.75rem 2rem;
+    padding: 1.25rem 2rem;
   }
 }
 
 // Left navigation panel specific styles
 .col-md-3 {
+  padding-right: 1.25rem;
+  height: fit-content;
+  
   .card {
     background: linear-gradient(145deg, #ffffff, #f8fbff);
     border-left: 4px solid $blueprint-blue;
+    height: auto;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 0;
     
     .card-body {
-      padding: 2rem;
+      padding: 1.25rem 1.5rem;
     }
     
     .card-title {
@@ -215,7 +222,7 @@
   .form-control, .form-select, .p-inputtext {
     border: 1px solid $material-finish-silver;
     border-radius: 8px;
-    padding: 0.95rem 1.2rem;
+    padding: 0.8rem 1.2rem;
     font-size: 1rem;
     transition: all 0.3s ease;
     background-color: rgba($technical-white, 0.8);
@@ -244,7 +251,7 @@
   .form-label {
     font-weight: $font-weight-medium;
     color: $precision-black;
-    margin-bottom: 0.7rem;
+    margin-bottom: 0.4rem;
     font-size: 1.05rem;
     
     .text-danger {
@@ -259,13 +266,14 @@
   .form-text {
     font-size: 0.85rem;
     color: $machine-gray;
-    margin-top: 0.4rem;
+    margin-top: 0.3rem;
+    margin-bottom: 0.3rem;
     font-style: italic;
   }
   
   // Checkboxes and radio buttons
   .form-check {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     padding-left: 1.8rem;
     
     .form-check-input {
@@ -552,8 +560,14 @@
   
   // Form field spacing
   .formly-field {
-    margin-bottom: 2rem;
+    margin-bottom: 0.4rem;
     animation: fadeIn 0.4s ease;
+  }
+  
+  // Additional spacing adjustment for columns
+  :host ::ng-deep .formly-field [class*="col-"].mb-3,
+  :host ::ng-deep .formly-field [class*="col-"].mb-2 {
+    margin-bottom: 0.4rem !important;
   }
   
   // Row field groups
@@ -569,7 +583,16 @@
   
   // Textarea fields
   textarea.form-control {
-    min-height: 100px;
+    min-height: 80px;
+  }
+  
+  // Additional global spacing adjustments
+  .mb-3 {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .mb-4 {
+    margin-bottom: 0.75rem !important;
   }
 }
 
@@ -628,14 +651,10 @@
 
 // Adjust the row spacing for better balance
 .row {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 // Add some space between the left and right columns
-.col-md-3 {
-  padding-right: 1.75rem;
-}
-
 .col-md-9 {
   padding-left: 1.75rem;
 }
@@ -645,9 +664,9 @@ h3.text-blueprint-blue {
   font-size: 1.5rem;
   font-weight: $font-weight-semibold;
   position: relative;
-  padding-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
   border-bottom: 1px solid rgba($blueprint-blue, 0.1);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   
   &::before {
     content: '';
@@ -692,11 +711,13 @@ h3.text-blueprint-blue {
 .documentation-guidelines {
   background-color: rgba($blueprint-blue, 0.05);
   border-left: 4px solid $blueprint-blue;
+  padding: 0.75rem !important;
   
   h5 {
     color: $blueprint-blue;
     font-weight: $font-weight-semibold;
     font-size: 1.1rem;
+    margin-bottom: 0.5rem;
     
     .pi {
       color: $blueprint-blue;
@@ -708,14 +729,15 @@ h3.text-blueprint-blue {
   p, ul {
     color: $machine-gray;
     font-size: 0.9rem;
-    line-height: 1.5;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
   }
   
   ul {
     padding-left: 1.5rem;
     
     li {
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
       
       strong {
         color: $precision-black;

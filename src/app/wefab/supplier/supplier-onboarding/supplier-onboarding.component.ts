@@ -136,7 +136,7 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-6 mb-3',
+            className: 'col-md-6 mb-2',
             key: 'legalBusinessName',
             type: 'input',
             templateOptions: {
@@ -221,7 +221,7 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-6 mb-3',
+            className: 'col-md-6 mb-2',
             key: 'country',
             type: 'select',
             templateOptions: {
@@ -244,7 +244,7 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           },
           {
-            className: 'col-md-6 mb-3',
+            className: 'col-md-6 mb-2',
             key: 'state',
             type: 'select',
             templateOptions: {
@@ -308,14 +308,14 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-6 mb-3',
+            className: 'col-md-6 mb-2',
             key: 'registeredAddress',
             type: 'textarea',
             templateOptions: {
               label: 'Registered Address',
               placeholder: 'Enter your registered address',
               required: true,
-              rows: 2
+              rows: 1
             },
             validation: {
               messages: {
@@ -324,14 +324,14 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           },
           {
-            className: 'col-md-6 mb-3',
+            className: 'col-md-6 mb-2',
             key: 'manufacturingFacilityAddress',
             type: 'textarea',
             templateOptions: {
               label: 'Manufacturing Facility Address',
               placeholder: 'Enter your manufacturing facility address',
               required: true,
-              rows: 2
+              rows: 1
             },
             validation: {
               messages: {
@@ -347,7 +347,7 @@ export class SupplierOnboardingComponent implements OnInit {
       {
         key: 'sameAsRegistered',
         type: 'checkbox',
-        className: 'mb-3',
+        className: 'mb-2',
         defaultValue: false,
         templateOptions: {
           label: 'Manufacturing Facility Address is Same as Registered Address'
@@ -376,7 +376,7 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroupClassName: 'row align-items-end',
         fieldGroup: [
           {
-            className: 'col-md-4 mb-3',
+            className: 'col-md-4 mb-2',
             key: 'primaryContactName',
             type: 'input',
             templateOptions: {
@@ -391,7 +391,7 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           },
           {
-            className: 'col-md-4 mb-3',
+            className: 'col-md-4 mb-2',
             key: 'phoneNumber',
             type: 'phone-otp',
             templateOptions: {
@@ -403,7 +403,7 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           },
           {
-            className: 'col-md-4 mb-3',
+            className: 'col-md-4 mb-2',
             key: 'primaryManufacturingProcess',
             type: 'select',
             templateOptions: {
@@ -430,7 +430,7 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-6 mb-3',
+            className: 'col-md-6 mb-2',
             key: 'websiteURL',
             type: 'input',
             templateOptions: {
@@ -440,7 +440,7 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           },
           {
-            className: 'col-md-6 mb-3',
+            className: 'col-md-6 mb-2',
             key: 'linkedinURL',
             type: 'input',
             templateOptions: {
