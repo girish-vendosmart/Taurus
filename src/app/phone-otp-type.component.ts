@@ -33,6 +33,8 @@ import { PhoneOtpVerificationComponent } from './wefab/wefab-shared-component/ph
 })
 export class FormlyFieldPhoneOtpComponent extends FieldType<FieldTypeConfig> {
   onPhoneVerified(verified: boolean) {
+    debugger;
+    console.log('onPhoneVerified', verified)
     if (this.props['parentComponent'] && this.props['parentComponent'].onPhoneVerified) {
       this.props['parentComponent'].onPhoneVerified(verified);
     }

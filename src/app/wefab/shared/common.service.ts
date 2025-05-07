@@ -4,12 +4,14 @@ import { Route } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../../enviornments/enviornment';
 import { Router } from '@angular/router';
+import { FirebaseService } from '../../core/services/firebase.service';
 
 @Injectable({
     providedIn: 'root'
 })
 
 export class CommonService {
+    private firebaseService = inject(FirebaseService);
 
     constructor(private http: HttpClient) {}
 
@@ -29,5 +31,25 @@ export class CommonService {
             { headers, params }
         );
     }
+
+    sendOTP(phoneNumber: string) {
+        return this.firebaseService.sendPhoneVerificationCode(phoneNumber, 'recaptcha-container');
+    }
     
+    // Send OTP to phone number
+    // async sendOTP(phoneNumber: string) {
+    //     try {
+    //         // Use our enhanced FirebaseService for OTP
+    //         // Note: We need a container ID for the recaptcha component
+    //         // You might need to adjust this to match your UI components
+    //         const confirmationResult = await this.firebaseService.sendPhoneVerificationCode(
+    //             phoneNumber, 
+    //             'recaptcha-container' // This should match an element ID in your HTML
+    //         );
+    //         return confirmationResult;
+    //     } catch (error) {
+    //         console.error('Error sending OTP:', error);
+    //         throw error;
+    //     }
+    // }
 }

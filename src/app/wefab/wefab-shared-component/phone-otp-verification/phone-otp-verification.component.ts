@@ -6,7 +6,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-
+import { CommonService } from '../../shared/common.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 @Component({
   selector: 'app-phone-otp-verification',
   standalone: true,
@@ -161,8 +162,9 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   
   private onChange: (value: any) => void = () => {};
   private onTouched: () => void = () => {};
+  confirmationResult: any;
   
-  constructor(private messageService: MessageService) {}
+  constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService) {}
   
   ngOnInit(): void {
     // Initialize with initial value if needed
@@ -176,7 +178,7 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     });
   }
   
-  sendOTP(): void {
+  async sendOTP() {
     if (!this.phoneControl.value) {
       this.messageService.add({
         severity: 'error',
@@ -186,17 +188,35 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
       });
       return;
     }
-    
-    // Show OTP dialog
-    this.showOtpDialog = true;
-    
-    // Mock function to simulate sending OTP
-    this.messageService.add({
-      severity: 'success',
-      summary: 'OTP Sent',
-      detail: 'A verification code has been sent to your phone number.',
-      life: 3000
-    });
+
+    try {
+      // Create a unique ID for the recaptcha container
+      const recaptchaContainerId = 'recaptcha-container-' + new Date().getTime();
+      
+      // Create the container element if it doesn't exist
+      let container = document.getElementById(recaptchaContainerId);
+      if (!container) {
+        container = document.createElement('div');
+        container.id = recaptchaContainerId;
+        document.body.appendChild(container);
+      }
+      
+      // Call the updated method with the container ID
+      this.confirmationResult = await this.firebaseService.sendPhoneVerificationCode(
+        '+' + this.countryCode + this.phoneControl.value, 
+        recaptchaContainerId
+      );
+      
+      this.showOtpDialog = true;
+    } catch (error: any) {
+      console.error('Error sending OTP:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.message || 'Failed to send verification code',
+        life: 5000
+      });
+    }
   }
   
   verifyOTP(): void {
