@@ -4,6 +4,7 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
+import { CommonService} from '../../../app/wefab/wefab-common-service/wefab-common.service' 
 
 interface Product {
   id: number;
@@ -23,6 +24,8 @@ interface Product {
   styleUrl: './test-components.component.scss'
 })
 export class TestComponentsComponent {
+
+  constructor(private commonService: CommonService) {}
 
   products: Product[] = [];
   globalFilterValue: string = '';
@@ -69,7 +72,15 @@ export class TestComponentsComponent {
         status: 'In Stock',
         quantity: 30
       }
-    ];
+    ]
+    
+    this.checkMockApi();
+
+    
+  }
+
+  checkMockApi() {
+    let endPoint = 'products';
   }
 
   clear(table: any) {

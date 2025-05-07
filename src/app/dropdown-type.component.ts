@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
   imports: [CommonModule, ReactiveFormsModule, FormlyModule, DropdownModule],
   template: `
     <div class="mb-3">
-      <label *ngIf="props['label']" class="form-label">
+      <label *ngIf="props['label']" class="form-label d-flex align-items-center">
         {{ props['label'] }}
         <span class="text-danger" *ngIf="props['required']">*</span>
       </label>
@@ -26,7 +26,7 @@ import { Observable } from 'rxjs';
         [filter]="props['filter'] !== false"
         [showClear]="props['showClear'] !== false"
         [style]="{ width: '100%' }"
-        styleClass="w-100"
+        styleClass="w-100 formly-dropdown"
         appendTo="body"
       ></p-dropdown>
       
@@ -38,9 +38,24 @@ import { Observable } from 'rxjs';
   styles: [`
     :host ::ng-deep {
       .p-dropdown {
-        width: 100%;
-        border-radius: 6px;
-        border-color: #d1d5db;
+        width: 100% !important;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        min-height: 52px;
+      }
+      
+      .p-dropdown-label {
+        padding: 0.95rem 1.2rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+      }
+      
+      .p-dropdown-trigger {
+        width: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       
       .p-dropdown:hover {
@@ -53,9 +68,32 @@ import { Observable } from 'rxjs';
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
       }
       
-      .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
-        background-color: rgba(37, 99, 235, 0.1);
-        color: #2563eb;
+      .p-dropdown-panel {
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        
+        .p-dropdown-items {
+          padding: 0.5rem 0;
+        }
+        
+        .p-dropdown-item {
+          padding: 0.75rem 1.2rem;
+          font-size: 1rem;
+        }
+        
+        .p-dropdown-items .p-dropdown-item.p-highlight {
+          background-color: rgba(37, 99, 235, 0.1);
+          color: #2563eb;
+        }
+        
+        .p-dropdown-filter-container {
+          padding: 0.5rem 1rem;
+          
+          .p-dropdown-filter {
+            padding: 0.5rem;
+            font-size: 1rem;
+          }
+        }
       }
     }
   `]

@@ -26,6 +26,9 @@ import { FileUploadComponent } from './file-upload.component';
 // Import PhoneOtpVerificationComponent
 import { PhoneOtpVerificationComponent } from '../../wefab-shared-component/phone-otp-verification/phone-otp-verification.component';
 
+// Import FormlyFieldDropdownComponent
+import { FormlyFieldDropdownComponent } from '../../../../app/dropdown-type.component';
+
 // GST Validator function
 export function gstValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
@@ -59,7 +62,8 @@ export function gstValidator(control: AbstractControl): ValidationErrors | null 
     DialogModule,
     InputNumberModule,
     FileUploadComponent,
-    PhoneOtpVerificationComponent
+    PhoneOtpVerificationComponent,
+    FormlyFieldDropdownComponent
   ],
   providers: [MessageService],
   templateUrl: './supplier-onboarding.component.html',
@@ -221,11 +225,12 @@ export class SupplierOnboardingComponent implements OnInit {
           {
             className: 'col-md-6 mb-3',
             key: 'country',
-            type: 'select',
+            type: 'p-dropdown',
             templateOptions: {
               label: 'Country',
               required: true,
               placeholder: 'Select country',
+              filter: true,
               options: [
                 { label: 'India', value: 'india' },
                 { label: 'United States', value: 'us' },
@@ -244,11 +249,12 @@ export class SupplierOnboardingComponent implements OnInit {
           {
             className: 'col-md-6 mb-3',
             key: 'state',
-            type: 'select',
+            type: 'p-dropdown',
             templateOptions: {
               label: 'State',
               required: true,
               placeholder: 'Select state',
+              filter: true,
               options: []
             },
             hooks: {
@@ -403,11 +409,12 @@ export class SupplierOnboardingComponent implements OnInit {
           {
             className: 'col-md-4 mb-3',
             key: 'primaryManufacturingProcess',
-            type: 'select',
+            type: 'p-dropdown',
             templateOptions: {
               label: 'Primary Manufacturing Process',
               placeholder: 'Select manufacturing process',
               required: true,
+              filter: true,
               options: [
                 { label: 'CNC Machining', value: 'cnc_machining' },
                 { label: 'Injection Molding', value: 'injection_molding' },

@@ -380,41 +380,62 @@
     background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
   }
   
-  // Select dropdown
+  // Dropdown specific styles
   .p-dropdown {
-    width: 100%;
-    border-radius: 8px;
+    width: 100% !important;
+    border-radius: 8px !important;
+    min-height: 52px !important;
     
     .p-dropdown-label {
-      padding: 0.95rem 1.2rem;
-      font-size: 1rem;
+      padding: 0.95rem 1.2rem !important;
+      font-size: 1rem !important;
+      display: flex !important;
+      align-items: center !important;
+      border: none !important;
     }
     
     .p-dropdown-trigger {
-      width: 3.2rem;
-      border-top-right-radius: 8px;
-      border-bottom-right-radius: 8px;
+      width: 3rem !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
     
-    .p-dropdown-panel {
-      border-radius: 8px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    &:hover {
+      border-color: $blueprint-blue !important;
+    }
+    
+    &:focus, &.p-focus {
+      border-color: $blueprint-blue !important;
+      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.2) !important;
+    }
+  }
+  
+  .p-dropdown-panel {
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    
+    .p-dropdown-items {
+      padding: 0.5rem 0 !important;
+    }
+    
+    .p-dropdown-item {
+      padding: 0.75rem 1.2rem !important;
+      font-size: 1rem !important;
       
-      .p-dropdown-items {
-        padding: 0.5rem 0;
-        
-        .p-dropdown-item {
-          padding: 0.75rem 1.2rem;
-          
-          &:hover {
-            background-color: rgba($blueprint-blue, 0.05);
-          }
-          
-          &.p-highlight {
-            background-color: rgba($blueprint-blue, 0.15);
-            color: $blueprint-blue;
-          }
-        }
+      &.p-highlight {
+        background-color: rgba($blueprint-blue, 0.1) !important;
+        color: $blueprint-blue !important;
+      }
+    }
+    
+    .p-dropdown-filter-container {
+      padding: 0.5rem 1rem !important;
+      
+      .p-dropdown-filter {
+        padding: 0.5rem !important;
+        font-size: 1rem !important;
+        border-radius: 6px !important;
       }
     }
   }
