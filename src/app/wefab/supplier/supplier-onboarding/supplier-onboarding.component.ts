@@ -588,17 +588,13 @@ export class SupplierOnboardingComponent implements OnInit {
         this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
       }, 3000);
     }, (err) => {
+      console.error('Error submitting form:', err);
       this.messageService.add({
-        severity: 'success',
-        summary: 'Form Submitted Successfully',
-        detail: 'Your supplier onboarding application has been received. Redirecting to detailed information form.',
-        life: 3000
+        severity: 'error',
+        summary: 'Submission Error',
+        detail: err.error?.message || 'An error occurred while submitting the form. Please try again later.',
+        life: 5000
       });
-      
-      // Navigate to L2 form after 3 seconds
-      setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
-      }, 3000);
     });
   }
 
