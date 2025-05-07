@@ -7,7 +7,7 @@ export const environment = {
         projectId: "wefab-ai",
         storageBucket: "wefab-ai.firebasestorage.app",
         messagingSenderId: "433633847176",
-        appId: "1:433633847176:web:8ea71a55592c2ecc84fc3d",
-        measurementId: "G-749E1BZFRS"
+        appId: "1:433633847176:web:0b886e0be56c2d9684fc3d",
+        measurementId: "G-VT34DZTX07"
     }
 }
