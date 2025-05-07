@@ -559,10 +559,23 @@ export class SupplierOnboardingComponent implements OnInit {
     return isValid;
   }
 
+  updateData(data:any) {
+    debugger
+    console.log(data)
+    let body = {
+      company_name: data.legalBusinessName,
+      primary_email_id: data.primaryEmailId,
+      onboarding_status: 'Under Review',
+      company_profile: JSON.stringify(data)
+    }
+    return body
+  }
+
   postSupplierOnboardingL1() {
-    let endPoint = '/api/resource/SupplierOnboardingL1';
-    let body = this.model;
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L1';
+    let body = this.updateData(this.model);
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
+      sessionStorage.setItem('supplier_id', res.data.name)
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
