@@ -25,6 +25,7 @@ import { FileUploadComponent } from './file-upload.component';
 
 // Import PhoneOtpVerificationComponent
 import { PhoneOtpVerificationComponent } from '../../wefab-shared-component/phone-otp-verification/phone-otp-verification.component';
+import { CommonService } from '../../shared/common.service';
 
 // GST Validator function
 export function gstValidator(control: AbstractControl): ValidationErrors | null {
@@ -88,6 +89,7 @@ export class SupplierOnboardingComponent implements OnInit {
     private messageService: MessageService,
     private renderer: Renderer2,
     private router: Router,
+    private commonService: CommonService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.form = this.fb.group({});
@@ -557,9 +559,10 @@ export class SupplierOnboardingComponent implements OnInit {
     return isValid;
   }
 
-  submit() {
-    if (this.form.valid) {
-      console.log('Form submitted successfully', this.model);
+  postSupplierOnboardingL1() {
+    let endPoint = '/api/resource/SupplierOnboardingL1';
+    let body = this.model;
+    this.commonService.postData(endPoint, body).subscribe((res: any) => {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
@@ -571,6 +574,26 @@ export class SupplierOnboardingComponent implements OnInit {
       setTimeout(() => {
         this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
       }, 3000);
+    }, (err) => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Form Submitted Successfully',
+        detail: 'Your supplier onboarding application has been received. Redirecting to detailed information form.',
+        life: 3000
+      });
+      
+      // Navigate to L2 form after 3 seconds
+      setTimeout(() => {
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
+      }, 3000);
+    });
+  }
+
+  submit() {
+    if (this.form.valid) {
+      debugger
+      console.log('Form submitted successfully', this.model);
+      this.postSupplierOnboardingL1();
     } else {
       this.form.markAllAsTouched();
       this.messageService.add({
