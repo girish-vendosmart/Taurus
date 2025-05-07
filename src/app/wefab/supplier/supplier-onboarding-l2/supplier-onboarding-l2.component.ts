@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import { Router } from '@angular/router';
+import { CommonService } from '../../shared/common.service';
 
 // PrimeNG imports
 import { CardModule } from 'primeng/card';
@@ -86,7 +87,8 @@ export class SupplierOnboardingL2Component implements OnInit {
     private fb: FormBuilder, 
     private messageService: MessageService,
     private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private commonService: CommonService
   ) {
     this.form = this.fb.group({});
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -509,12 +511,10 @@ export class SupplierOnboardingL2Component implements OnInit {
     return isValid;
   }
 
-  submit() {
-    // Mark all fields as touched
-    this.markFieldsAsTouched(this.currentFields);
-    
-    if (this.form.valid) {
-      console.log('L2 Form submitted successfully', this.model);
+  postSupplierOnboardingL2() {
+    let endPoint = 'api/resource/wfb_supplier_onboarding_L1';
+    let body = this.model;
+    this.commonService.postData(endPoint, body).subscribe((res: any) => {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
@@ -526,6 +526,40 @@ export class SupplierOnboardingL2Component implements OnInit {
       setTimeout(() => {
         this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
       }, 3000);
+    }, (err:any) => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Form Submitted Successfully',
+        detail: 'Your detailed supplier information has been received. Redirecting to financial information form.',
+        life: 3000
+      });
+      
+      // Navigate to L3 form after 3 seconds
+      setTimeout(() => {
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
+      }, 3000);
+    });
+  }
+
+  submit() {
+    // Mark all fields as touched
+    this.markFieldsAsTouched(this.currentFields);
+    
+    if (this.form.valid) {
+      debugger
+      console.log('L2 Form submitted successfully', this.model);
+      this.postSupplierOnboardingL2();
+      // this.messageService.add({
+      //   severity: 'success',
+      //   summary: 'Form Submitted Successfully',
+      //   detail: 'Your detailed supplier information has been received. Redirecting to financial information form.',
+      //   life: 3000
+      // });
+      
+      // // Navigate to L3 form after 3 seconds
+      // setTimeout(() => {
+      //   this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
+      // }, 3000);
     } else {
       this.messageService.add({
         severity: 'error',
