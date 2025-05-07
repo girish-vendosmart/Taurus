@@ -560,7 +560,6 @@ export class SupplierOnboardingComponent implements OnInit {
   }
 
   updateData(data:any) {
-    debugger
     console.log(data)
     let body = {
       company_name: data.legalBusinessName,

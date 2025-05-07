@@ -511,9 +511,19 @@ export class SupplierOnboardingL2Component implements OnInit {
     return isValid;
   }
 
+  updateData(data:any) {
+    console.log(data)
+    let body = {
+      supplier_company_id: sessionStorage.getItem('supplier_id'),
+      onboarding_status: 'Under Review',
+      company_profile: JSON.stringify(data)
+    }
+    return body
+  }
+
   postSupplierOnboardingL2() {
-    let endPoint = 'api/resource/wfb_supplier_onboarding_L1';
-    let body = this.model;
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L2';
+    let body = this.updateData(this.model);
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
       this.messageService.add({
         severity: 'success',
@@ -527,17 +537,13 @@ export class SupplierOnboardingL2Component implements OnInit {
         this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
       }, 3000);
     }, (err:any) => {
+      console.error('Error submitting form:', err);
       this.messageService.add({
-        severity: 'success',
-        summary: 'Form Submitted Successfully',
-        detail: 'Your detailed supplier information has been received. Redirecting to financial information form.',
-        life: 3000
+        severity: 'error',
+        summary: 'Submission Error',
+        detail: err.error?.message || 'An error occurred while submitting the form. Please try again later.',
+        life: 5000
       });
-      
-      // Navigate to L3 form after 3 seconds
-      setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
-      }, 3000);
     });
   }
 
