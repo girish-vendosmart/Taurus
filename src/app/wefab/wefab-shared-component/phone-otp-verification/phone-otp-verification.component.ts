@@ -200,21 +200,21 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
 
     try {
       // Create a unique ID for the recaptcha container
-      const recaptchaContainerId = 'recaptcha-container-' + new Date().getTime();
+      // const recaptchaContainerId = 'recaptcha-container-' + new Date().getTime();
       
-      // Create the container element if it doesn't exist
-      let container = document.getElementById(recaptchaContainerId);
-      if (!container) {
-        container = document.createElement('div');
-        container.id = recaptchaContainerId;
-        document.body.appendChild(container);
-      }
+      // // Create the container element if it doesn't exist
+      // let container = document.getElementById(recaptchaContainerId);
+      // if (!container) {
+      //   container = document.createElement('div');
+      //   container.id = recaptchaContainerId;
+      //   document.body.appendChild(container);
+      // }
       
-      // Call the updated method with the container ID
-      this.confirmationResult = await this.firebaseService.sendPhoneVerificationCode(
-        '+' + this.countryCode + this.phoneControl.value, 
-        recaptchaContainerId
-      );
+      // // Call the updated method with the container ID
+      // this.confirmationResult = await this.firebaseService.sendPhoneVerificationCode(
+      //   '+' + this.countryCode + this.phoneControl.value, 
+      //   recaptchaContainerId
+      // );
       
       this.showOtpDialog = true;
     } catch (error: any) {
