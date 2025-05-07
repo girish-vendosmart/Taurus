@@ -36,6 +36,9 @@
 .col-md-3 {
   padding-right: 1.25rem;
   height: fit-content;
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
   
   .card {
     background: linear-gradient(145deg, #ffffff, #f8fbff);
