@@ -126,11 +126,11 @@ export class SupplierOnboardingL2Component implements OnInit {
     return [
       // Machine Details Section
       {
-        fieldGroupClassName: 'mb-4',
+        fieldGroupClassName: 'mb-2',
         fieldGroup: [
           {
             template: `
-              <div class="section-header mb-3">
+              <div class="section-header mb-2">
                 <h4 class="text-blueprint-blue">Machine Details</h4>
                 <p class="text-machine-gray">Add details about your manufacturing machines.</p>
               </div>
@@ -145,7 +145,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                   fieldGroupClassName: 'row',
                   fieldGroup: [
                     {
-                      className: 'col-md-6 mb-3',
+                      className: 'col-md-6 mb-2',
                       key: 'make',
                       type: 'input',
                       templateOptions: {
@@ -160,7 +160,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       }
                     },
                     {
-                      className: 'col-md-6 mb-3',
+                      className: 'col-md-6 mb-2',
                       key: 'model',
                       type: 'input',
                       templateOptions: {
@@ -180,7 +180,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                   fieldGroupClassName: 'row',
                   fieldGroup: [
                     {
-                      className: 'col-md-6 mb-3',
+                      className: 'col-md-6 mb-2',
                       key: 'specifications',
                       type: 'input',
                       templateOptions: {
@@ -195,7 +195,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       }
                     },
                     {
-                      className: 'col-md-6 mb-3',
+                      className: 'col-md-6 mb-2',
                       key: 'quantity',
                       type: 'input',
                       templateOptions: {
@@ -216,7 +216,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                 {
                   key: 'machinePhotos',
                   type: 'file-upload',
-                  className: 'mb-3',
+                  className: 'col-12 mb-2',
                   templateOptions: {
                     label: 'Machine Photos',
                     description: 'Upload photos of this machine (max 10MB per file)',
@@ -236,11 +236,11 @@ export class SupplierOnboardingL2Component implements OnInit {
       
       // Certifications Section
       {
-        fieldGroupClassName: 'mb-4 mt-5',
+        fieldGroupClassName: 'mb-2 mt-3',
         fieldGroup: [
           {
             template: `
-              <div class="section-header mb-3">
+              <div class="section-header mb-2">
                 <h4 class="text-blueprint-blue">Certifications</h4>
                 <p class="text-machine-gray">Add details about your certifications.</p>
               </div>
@@ -255,7 +255,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                   fieldGroupClassName: 'row',
                   fieldGroup: [
                     {
-                      className: 'col-md-6 mb-3',
+                      className: 'col-md-6 mb-2',
                       key: 'certificationName',
                       type: 'input',
                       templateOptions: {
@@ -270,7 +270,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       }
                     },
                     {
-                      className: 'col-md-6 mb-3',
+                      className: 'col-md-6 mb-2',
                       key: 'certifyingBody',
                       type: 'input',
                       templateOptions: {
@@ -290,7 +290,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                   fieldGroupClassName: 'row',
                   fieldGroup: [
                     {
-                      className: 'col-md-6 mb-3',
+                      className: 'col-md-6 mb-2',
                       key: 'expirationDate',
                       type: 'input',
                       templateOptions: {
@@ -305,7 +305,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       }
                     },
                     {
-                      className: 'col-md-6 mb-3',
+                      className: 'col-md-6 mb-2',
                       key: 'certificateDocument',
                       type: 'file-upload',
                       templateOptions: {
@@ -329,11 +329,11 @@ export class SupplierOnboardingL2Component implements OnInit {
       
       // Production & Industries Section
       {
-        fieldGroupClassName: 'mb-4 mt-5',
+        fieldGroupClassName: 'mb-2 mt-3',
         fieldGroup: [
           {
             template: `
-              <div class="section-header mb-3">
+              <div class="section-header mb-2">
                 <h4 class="text-blueprint-blue">Production & Industries</h4>
                 <p class="text-machine-gray">Provide details about your production capacity and industries served.</p>
               </div>
@@ -343,7 +343,7 @@ export class SupplierOnboardingL2Component implements OnInit {
             fieldGroupClassName: 'row',
             fieldGroup: [
               {
-                className: 'col-md-6 mb-3',
+                className: 'col-md-6 mb-2',
                 key: 'productionCapacity',
                 type: 'range-slider',
                 templateOptions: {
@@ -365,7 +365,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                 }
               },
               {
-                className: 'col-md-6 mb-3',
+                className: 'col-md-6 mb-2',
                 key: 'industries',
                 type: 'p-multiselect',
                 templateOptions: {
@@ -404,13 +404,15 @@ export class SupplierOnboardingL2Component implements OnInit {
     return [
       {
         template: `
-          <h4 class="text-blueprint-blue mb-2">Facility Verification</h4>
-          <p class="mb-4">Upload geotagged photos of your manufacturing facility.</p>
+          <div class="section-header mb-2">
+            <h4 class="text-blueprint-blue">Facility Verification</h4>
+            <p class="text-machine-gray mb-2">Upload geotagged photos of your manufacturing facility.</p>
+          </div>
         `
       },
       {
         template: `
-          <div class="alert alert-warning mb-4">
+          <div class="alert alert-warning mb-2">
             <strong>Important:</strong> Verified facility photos improve your profile ranking and visibility to potential clients. Please ensure photos clearly show your manufacturing space and equipment.
           </div>
         `
@@ -418,6 +420,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       {
         key: 'facilityPhotos',
         type: 'file-upload',
+        className: 'col-12 mb-2',
         templateOptions: {
           label: 'Facility Photos',
           required: true,
@@ -431,15 +434,15 @@ export class SupplierOnboardingL2Component implements OnInit {
       },
       {
         template: `
-          <p class="mt-2 mb-4">Upload at least 3 photos of your facility (exterior, production floor, quality control area)</p>
+          <p class="mt-1 mb-2">Upload at least 3 photos of your facility (exterior, production floor, quality control area)</p>
         `
       },
       {
         template: `
-          <div class="card border-primary mt-4 mb-3">
-            <div class="card-body">
-              <h5 class="card-title text-primary">Verification Process</h5>
-              <p class="card-text">Our team will verify the uploaded photos against your registered address. This process typically takes 2-3 business days. You'll be notified once verification is complete.</p>
+          <div class="card border-primary mt-2 mb-1">
+            <div class="card-body" style="padding: 0.75rem 1rem;">
+              <h5 class="card-title text-primary" style="font-size: 1rem; margin-bottom: 0.25rem;">Verification Process</h5>
+              <p class="card-text" style="font-size: 0.85rem; margin-bottom: 0;">Our team will verify the uploaded photos against your registered address. This process typically takes 2-3 business days. You'll be notified once verification is complete.</p>
             </div>
           </div>
         `
