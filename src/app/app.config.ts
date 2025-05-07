@@ -36,6 +36,11 @@ export const appConfig: ApplicationConfig = {
         wrappers: [
           { name: 'panel', component: PanelWrapperComponent },
         ],
+        extras: {
+          showError: function(field) {
+            return !!(field.formControl && field.formControl.invalid && (field.formControl.touched || field.options.parentForm?.submitted));
+          }
+        },
         validationMessages: [
           { name: 'required', message: 'This field is required' },
           { name: 'email', message: 'Invalid email address' },

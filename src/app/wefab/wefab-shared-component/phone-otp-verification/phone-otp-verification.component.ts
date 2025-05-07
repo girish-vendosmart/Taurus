@@ -50,7 +50,8 @@ import { FirebaseService } from '../../../core/services/firebase.service';
           {{ isVerified ? 'Verified' : 'Verify OTP' }}
         </button>
       </div>
-      <div class="invalid-feedback d-block" *ngIf="phoneControl.invalid && phoneControl.touched">
+      <div class="invalid-feedback d-block phone-otp-error" *ngIf="phoneControl.invalid && phoneControl.touched">
+        <i class="pi pi-exclamation-triangle" style="margin-right: 0.4rem;"></i>
         {{ errorMessage }}
       </div>
     </div>
@@ -142,6 +143,14 @@ import { FirebaseService } from '../../../core/services/firebase.service';
             opacity: 0.7;
           }
         }
+      }
+      
+      .phone-otp-error {
+        color: var(--safety-orange, #ff6b6b) !important;
+        font-size: 0.8rem;
+        margin-top: 0.3rem;
+        display: flex !important;
+        align-items: center;
       }
     }
   `]

@@ -25,7 +25,8 @@ import { PhoneOtpVerificationComponent } from './wefab/wefab-shared-component/ph
         [class.is-invalid]="showError">
       </app-phone-otp-verification>
       
-      <div *ngIf="showError" class="invalid-feedback d-block">
+      <div *ngIf="showError" class="invalid-feedback d-block phone-otp-error">
+        <i class="pi pi-exclamation-triangle" style="margin-right: 0.4rem;"></i>
         <formly-validation-message [field]="field"></formly-validation-message>
       </div>
     </div>

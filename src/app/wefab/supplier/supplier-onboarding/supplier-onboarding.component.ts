@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, TemplateRef, Inject, PLATFORM_ID, Rendere
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormGroup, FormBuilder, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
+import { FormlyFieldConfig, FormlyModule, FormlyFormOptions, FormlyExtension } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import { Router } from '@angular/router';
 
@@ -117,6 +117,9 @@ export class SupplierOnboardingComponent implements OnInit {
         }
       }
     ];
+    
+    // Add icon wrapper to all error messages for validation
+    this.addValidationIconToErrorMessages(this.stepFields);
   }
 
   // Handle phone verification event
@@ -146,7 +149,7 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             validation: {
               messages: {
-                required: 'Required'
+                required: 'Please enter legal business name'
               }
             }
           },
@@ -167,7 +170,7 @@ export class SupplierOnboardingComponent implements OnInit {
                 },
                 validation: {
                   messages: {
-                    required: 'Required',
+                    required: 'Please enter your GSTIN number',
                     gstFormat: 'Invalid GSTIN format'
                   }
                 },
@@ -239,7 +242,7 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             validation: {
               messages: {
-                required: 'Required'
+                required: 'Please select a country'
               }
             }
           },
@@ -295,7 +298,7 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             validation: {
               messages: {
-                required: 'Required'
+                required: 'Please select a state'
               }
             },
             expressionProperties: {
@@ -319,7 +322,7 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             validation: {
               messages: {
-                required: 'Required'
+                required: 'Please enter your registered address'
               }
             }
           },
@@ -335,7 +338,7 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             validation: {
               messages: {
-                required: 'Required'
+                required: 'Please enter your manufacturing facility address'
               }
             },
             expressionProperties: {
@@ -386,7 +389,7 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             validation: {
               messages: {
-                required: 'Required'
+                required: 'Please enter primary contact name'
               }
             }
           },
@@ -400,6 +403,11 @@ export class SupplierOnboardingComponent implements OnInit {
               placeholder: 'Enter phone number',
               countryCode: '91',
               parentComponent: this
+            },
+            validation: {
+              messages: {
+                required: 'Please enter your phone number'
+              }
             }
           },
           {
@@ -420,7 +428,7 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             validation: {
               messages: {
-                required: 'Required'
+                required: 'Please select a manufacturing process'
               }
             }
           }
@@ -618,5 +626,53 @@ export class SupplierOnboardingComponent implements OnInit {
 
   verifyOTP() {
     console.log('Verifying OTP');
+  }
+
+  // Add this method to the component
+  addValidationIconToErrorMessages(fields: FormlyFieldConfig[][]) {
+    fields.forEach(step => {
+      step.forEach(field => {
+        // Add a validation message transformer to add an icon
+        if (!field.validators) {
+          field.validators = {};
+        }
+        
+        // Add a wrapper to all fields
+        if (!field.wrappers) {
+          field.wrappers = [];
+        }
+        
+        // Process nested fields
+        if (field.fieldGroup) {
+          this.processFieldGroup(field.fieldGroup);
+        }
+      });
+    });
+  }
+  
+  // Modify processFieldGroup method
+  processFieldGroup(fieldGroup: FormlyFieldConfig[]) {
+    fieldGroup.forEach(field => {
+      if (field.fieldGroup) {
+        this.processFieldGroup(field.fieldGroup);
+      } else {
+        // Add an icon wrapper to this field's error display if needed
+        if (field.type === 'phone-otp') {
+          // Phone OTP fields already have an icon added via component
+          return;
+        }
+        
+        // For other field types, make sure they use proper error formatting
+        if (!field.expressionProperties) {
+          field.expressionProperties = {};
+        }
+        
+        // Add a class to error elements
+        if (!field.className) {
+          field.className = '';
+        }
+        field.className += ' has-validation-icon';
+      }
+    });
   }
 }

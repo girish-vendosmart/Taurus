@@ -365,209 +365,67 @@
   }
   
   // Error messages
-  .p-error, .text-danger {
+  .p-error, .text-danger, .formly-validation-message {
     color: $safety-orange !important;
     font-size: 0.8rem;
-    margin-top: 0.35rem;
-    display: block;
+    margin-top: 0.2rem;
+    display: flex !important;
+    align-items: center;
     font-weight: $font-weight-medium;
     animation: fadeIn 0.3s ease;
+    line-height: 1.2;
   }
   
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
+  // Add specific styles for the phone number error message
+  .phone-otp-error {
+    color: $safety-orange !important;
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+    display: flex !important;
+    align-items: center;
+    font-weight: $font-weight-medium;
   }
   
-  // Validation icons
-  .is-valid {
-    border-color: $process-green !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right calc(0.375em + 0.1875rem) center;
-    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-  }
-  
-  // Select dropdown
-  .p-dropdown {
-    width: 100%;
-    border-radius: 8px;
-    
-    .p-dropdown-label {
-      padding: 0.95rem 1.2rem;
-      font-size: 1rem;
-    }
-    
-    .p-dropdown-trigger {
-      width: 3.2rem;
-      border-top-right-radius: 8px;
-      border-bottom-right-radius: 8px;
-    }
-    
-    .p-dropdown-panel {
-      border-radius: 8px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-      
-      .p-dropdown-items {
-        padding: 0.5rem 0;
-        
-        .p-dropdown-item {
-          padding: 0.75rem 1.2rem;
-          
-          &:hover {
-            background-color: rgba($blueprint-blue, 0.05);
-          }
-          
-          &.p-highlight {
-            background-color: rgba($blueprint-blue, 0.15);
-            color: $blueprint-blue;
-          }
-        }
-      }
-    }
-  }
-  
-  // MultiSelect dropdown styling
-  .p-multiselect {
-    width: 100%;
-    border-radius: 8px;
-    background-color: rgba($technical-white, 0.8);
-    border: 1px solid $material-finish-silver;
-    transition: all 0.3s ease;
-    
-    &:hover {
-      border-color: lighten($blueprint-blue, 20%);
-      background-color: rgba($technical-white, 1);
-    }
-    
-    &.p-focus {
-      border-color: $blueprint-blue;
-      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
-      background-color: #fff;
-    }
-    
-    .p-multiselect-label-container {
-      .p-multiselect-label {
-        padding: 0.85rem 1.2rem;
-        font-size: 1rem;
-      }
-      
-      .p-placeholder {
-        color: lighten($machine-gray, 20%);
-        font-style: italic;
-        opacity: 0.7;
-      }
-    }
-    
-    .p-multiselect-trigger {
-      width: 3.2rem;
-    }
-    
-    .p-multiselect-panel {
-      border-radius: 8px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-      
-      .p-multiselect-header {
-        padding: 0.75rem 1.2rem;
-        border-bottom: 1px solid rgba($blueprint-blue, 0.1);
-        
-        .p-multiselect-filter-container {
-          margin-bottom: 0;
-          
-          .p-inputtext {
-            padding: 0.6rem 1rem;
-          }
-          
-          .p-multiselect-filter-icon {
-            right: 0.75rem;
-            color: $machine-gray;
-          }
-        }
-        
-        .p-checkbox {
-          .p-checkbox-box {
-            border: 2px solid $material-finish-silver;
-            border-radius: 4px;
-            
-            &.p-highlight {
-              background-color: $blueprint-blue;
-              border-color: $blueprint-blue;
-            }
-            
-            .p-checkbox-icon {
-              font-size: 0.75rem;
-            }
-          }
-        }
-      }
-      
-      .p-multiselect-items {
-        padding: 0.5rem 0;
-        
-        .p-multiselect-item {
-          padding: 0.75rem 1.2rem;
-          transition: all 0.2s ease;
-          
-          &:hover {
-            background-color: rgba($blueprint-blue, 0.05);
-          }
-          
-          &.p-highlight {
-            background-color: rgba($blueprint-blue, 0.15);
-            color: $blueprint-blue;
-          }
-          
-          .p-checkbox {
-            margin-right: 0.75rem;
-            
-            .p-checkbox-box {
-              border: 2px solid $material-finish-silver;
-              border-radius: 4px;
-              transition: all 0.2s ease;
-              
-              &.p-highlight {
-                background-color: $blueprint-blue;
-                border-color: $blueprint-blue;
-              }
-              
-              .p-checkbox-icon {
-                font-size: 0.75rem;
-              }
-            }
-          }
-        }
-      }
-    }
-    
-    // Style for selected tokens
-    .p-multiselect-token {
-      background-color: rgba($blueprint-blue, 0.15);
-      color: $blueprint-blue;
-      border-radius: 4px;
-      padding: 0.25rem 0.5rem;
-      margin-right: 0.5rem;
-      
-      .p-multiselect-token-icon {
-        margin-left: 0.5rem;
-        color: $blueprint-blue;
-        
-        &:hover {
-          color: darken($blueprint-blue, 15%);
-        }
-      }
-    }
-  }
-  
-  // Form field spacing
+  // Form field styling to maintain consistent layout
   .formly-field {
-    margin-bottom: 0.4rem;
+    margin-bottom: 1.5rem;
     animation: fadeIn 0.4s ease;
+    position: relative;
+  }
+  
+  // Position error messages in a consistent way
+  .formly-validation-message,
+  .invalid-feedback,
+  .text-danger,
+  .p-error {
+    position: relative;
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+    margin-bottom: 0;
+    line-height: 1;
+  }
+  
+  // Ensure phone component maintains consistent height
+  app-phone-otp-verification {
+    display: block;
+    position: relative;
+    
+    .validation-message {
+      position: absolute;
+      bottom: -18px;
+      left: 0;
+    }
+  }
+  
+  // Row alignment for fields
+  .row.align-items-end {
+    align-items: flex-start !important; // Override to ensure consistent alignment
   }
   
   // Additional spacing adjustment for columns
   :host ::ng-deep .formly-field [class*="col-"].mb-3,
   :host ::ng-deep .formly-field [class*="col-"].mb-2 {
-    margin-bottom: 0.4rem !important;
+    margin-bottom: 1.5rem !important; // Increase margin to accommodate error messages
   }
   
   // Row field groups
@@ -593,6 +451,52 @@
   
   .mb-4 {
     margin-bottom: 0.75rem !important;
+  }
+  
+  // For phone number field specifically
+  .formly-field-phone-otp {
+    margin-bottom: 1.5rem;
+    
+    app-phone-otp-verification {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  // Additional CSS for consistent error display
+  .invalid-feedback {
+    color: $safety-orange !important;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    display: flex !important;
+    align-items: center;
+    font-weight: $font-weight-medium;
+  }
+  
+  // Make sure formly validation messages are displayed
+  formly-validation-message {
+    display: block !important;
+  }
+  
+  // Custom validation icon styling for all error messages
+  .has-validation-icon {
+    formly-validation-message {
+      position: relative;
+      padding-left: 1.5rem;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ff6b6b' class='bi bi-exclamation-triangle' viewBox='0 0 16 16'%3E%3Cpath d='M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z'/%3E%3Cpath d='M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+    }
   }
 }
 
