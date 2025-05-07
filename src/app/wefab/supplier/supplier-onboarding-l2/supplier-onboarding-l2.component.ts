@@ -155,7 +155,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       },
                       validation: {
                         messages: {
-                          required: 'Required'
+                          required: 'Please enter the machine manufacturer name'
                         }
                       }
                     },
@@ -170,7 +170,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       },
                       validation: {
                         messages: {
-                          required: 'Required'
+                          required: 'Please provide the machine model number'
                         }
                       }
                     }
@@ -190,7 +190,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       },
                       validation: {
                         messages: {
-                          required: 'Required'
+                          required: 'Please specify the key machine specifications'
                         }
                       }
                     },
@@ -207,7 +207,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       },
                       validation: {
                         messages: {
-                          required: 'Required'
+                          required: 'Please enter the quantity of machines'
                         }
                       }
                     }
@@ -224,7 +224,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                   },
                   validation: {
                     messages: {
-                      required: 'At least one photo is required'
+                      required: 'Please upload at least one photo of this machine'
                     }
                   }
                 }
@@ -265,7 +265,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       },
                       validation: {
                         messages: {
-                          required: 'Required'
+                          required: 'Please enter the certification name'
                         }
                       }
                     },
@@ -280,7 +280,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       },
                       validation: {
                         messages: {
-                          required: 'Required'
+                          required: 'Please specify the certifying organization'
                         }
                       }
                     }
@@ -300,7 +300,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       },
                       validation: {
                         messages: {
-                          required: 'Required'
+                          required: 'Please enter the certification expiration date'
                         }
                       }
                     },
@@ -315,7 +315,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       },
                       validation: {
                         messages: {
-                          required: 'Certificate document is required'
+                          required: 'Please upload the certificate document'
                         }
                       }
                     }
@@ -360,7 +360,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                 },
                 validation: {
                   messages: {
-                    required: 'Required'
+                    required: 'Please indicate your current production capacity'
                   }
                 }
               },
@@ -389,7 +389,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                 },
                 validation: {
                   messages: {
-                    required: 'Required'
+                    required: 'Please select at least one industry you serve'
                   }
                 }
               }
@@ -428,7 +428,7 @@ export class SupplierOnboardingL2Component implements OnInit {
         },
         validation: {
           messages: {
-            required: 'Facility photos are required'
+            required: 'Please upload at least 3 photos of your facility'
           }
         }
       },
