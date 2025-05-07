@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import { Router } from '@angular/router';
+import { CommonService } from '../../shared/common.service';
 
 // PrimeNG imports
 import { CardModule } from 'primeng/card';
@@ -87,57 +88,14 @@ export class SupplierOnboardingL3Component implements OnInit {
     },
     additionalInformation: {
       websites: {
-        website: '',
-        linkedinUrl: ''
+        website: ''
       },
-      onlineMarketplaces: '',
-      marketplaceProfiles: [],
-      otherDigitalFootprints: [],
       totalEmployees: '',
       foundedYear: '',
-      annualProductionCapacity: '',
-      capacityUnit: '',
       productionFacilities: [{}],
-      averageOrderFulfillmentTime: '',
-      qualityControlProcess: '',
-      certifications: '',
-      qualityStandards: '',
-      environmentalComplianceCertifications: [],
-      sustainabilityInitiatives: [],
-      socialResponsibilityInitiatives: [],
-      diversityInclusion: [],
-      sustainabilityReport: false,
-      sustainabilityReportUrl: '',
-      preferredPaymentTerms: '',
-      paymentMethods: '',
-      returnPolicy: '',
-      warrantyPeriod: '',
-      bulkDiscounts: false,
-      bulkDiscountTiers: [],
       leadTime: '',
       minimumOrderQuantity: 0,
-      references: [{}],
-      shippingCapabilities: [],
-      // New Supply Chain fields
-      rawMaterialSources: '',
-      hasEthicalSourcing: false,
-      ethicalSourcingDetails: '',
-      supplyChainVisibility: '',
-      traceabilityMethods: [],
-      inventoryManagementSystem: '',
-      hasJustInTimeDelivery: false,
-      riskManagementPlan: false,
-      riskManagementDetails: '',
-      backupSuppliers: [],
-      // New Compliance fields
-      industryRegulations: '',
-      hasComplianceOfficer: false,
-      complianceOfficerName: '',
-      complianceOfficerEmail: '',
-      regularComplianceAudits: false,
-      lastAuditDate: null,
-      regulatoryViolations: false,
-      violationDetails: ''
+      references: [{}]
     },
     termsAndConditions: {
       acceptTerms: false,
@@ -158,6 +116,7 @@ export class SupplierOnboardingL3Component implements OnInit {
     private fb: FormBuilder, 
     private messageService: MessageService,
     private router: Router,
+    private commonService: CommonService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.form = this.fb.group({});
@@ -193,7 +152,7 @@ export class SupplierOnboardingL3Component implements OnInit {
     
     // Initialize nested objects to prevent errors
     if (!this.model.additionalInformation.websites) {
-      this.model.additionalInformation.websites = { website: '', linkedinUrl: '' };
+      this.model.additionalInformation.websites = { website: '' };
     }
     
     if (!this.model.additionalInformation.productionFacilities || 
@@ -417,7 +376,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             fieldGroupClassName: 'row',
             fieldGroup: [
               {
-                className: 'col-md-6',
+                className: 'col-md-12',
                 key: 'website',
                 type: 'input',
                 templateOptions: {
@@ -430,81 +389,8 @@ export class SupplierOnboardingL3Component implements OnInit {
                     required: 'Company website is required'
                   }
                 }
-              },
-              {
-                className: 'col-md-6',
-                key: 'linkedinUrl',
-                type: 'input',
-                templateOptions: {
-                  label: 'LinkedIn URL',
-                  placeholder: 'Enter your company LinkedIn URL',
-                  required: false
-                }
               }
             ]
-          },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-12',
-                key: 'onlineMarketplaces',
-                type: 'select',
-                templateOptions: {
-                  label: 'Online Marketplaces',
-                  options: [
-                    { label: 'Amazon', value: 'amazon' },
-                    { label: 'Alibaba', value: 'alibaba' },
-                    { label: 'eBay', value: 'ebay' },
-                    { label: 'Indiamart', value: 'indiamart' },
-                    { label: 'TradeIndia', value: 'tradeindia' },
-                    { label: 'Other', value: 'other' }
-                  ],
-                  required: false
-                }
-              }
-            ]
-          },
-          {
-            key: 'marketplaceProfiles',
-            type: 'repeat',
-            templateOptions: {
-              addText: '+ Add Marketplace Profile',
-              min: 0
-            },
-            hideExpression: (model) => !model.onlineMarketplaces,
-            fieldArray: {
-              fieldGroupClassName: 'row',
-              fieldGroup: [
-                {
-                  className: 'col-md-6',
-                  key: 'marketplace',
-                  type: 'select',
-                  templateOptions: {
-                    label: 'Marketplace',
-                    options: [
-                      { label: 'Amazon', value: 'amazon' },
-                      { label: 'Alibaba', value: 'alibaba' },
-                      { label: 'eBay', value: 'ebay' },
-                      { label: 'Indiamart', value: 'indiamart' },
-                      { label: 'TradeIndia', value: 'tradeindia' },
-                      { label: 'Other', value: 'other' }
-                    ],
-                    required: true
-                  }
-                },
-                {
-                  className: 'col-md-6',
-                  key: 'profileUrl',
-                  type: 'input',
-                  templateOptions: {
-                    label: 'Profile URL',
-                    placeholder: 'Enter marketplace profile URL',
-                    required: true
-                  }
-                }
-              ]
-            }
           },
           
           // Operational Metrics Section
@@ -545,40 +431,8 @@ export class SupplierOnboardingL3Component implements OnInit {
               }
             ]
           },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-6',
-                key: 'annualProductionCapacity',
-                type: 'input',
-                templateOptions: {
-                  type: 'number',
-                  label: 'Annual Production Capacity',
-                  placeholder: 'Enter annual production capacity',
-                  min: 0,
-                  required: true
-                }
-              },
-              {
-                className: 'col-md-6',
-                key: 'capacityUnit',
-                type: 'select',
-                templateOptions: {
-                  label: 'Capacity Unit',
-                  options: [
-                    { label: 'Units', value: 'units' },
-                    { label: 'Tons', value: 'tons' },
-                    { label: 'Kilograms', value: 'kg' },
-                    { label: 'Meters', value: 'meters' },
-                    { label: 'Square Meters', value: 'sqm' }
-                  ],
-                  required: true
-                },
-                hideExpression: (model) => !model.annualProductionCapacity
-              }
-            ]
-          },
+          
+          // Production Facility
           {
             key: 'productionFacilities',
             type: 'repeat',
@@ -609,112 +463,9 @@ export class SupplierOnboardingL3Component implements OnInit {
                     placeholder: 'Enter facility location',
                     required: true
                   }
-                },
-                {
-                  className: 'col-md-6',
-                  key: 'facilitySize',
-                  type: 'input',
-                  templateOptions: {
-                    type: 'number',
-                    label: 'Facility Size (sq. m)',
-                    placeholder: 'Enter facility size in square meters',
-                    min: 1,
-                    required: true
-                  }
-                },
-                {
-                  className: 'col-md-6',
-                  key: 'employeeCount',
-                  type: 'input',
-                  templateOptions: {
-                    type: 'number',
-                    label: 'Number of Employees',
-                    placeholder: 'Enter number of employees at this facility',
-                    min: 1,
-                    required: true
-                  }
                 }
               ]
             }
-          },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-6',
-                key: 'averageOrderFulfillmentTime',
-                type: 'input',
-                templateOptions: {
-                  type: 'number',
-                  label: 'Average Order Fulfillment Time (Days)',
-                  placeholder: 'Enter average days to fulfill an order',
-                  min: 1,
-                  required: true
-                }
-              },
-              {
-                className: 'col-md-6',
-                key: 'qualityControlProcess',
-                type: 'select',
-                templateOptions: {
-                  label: 'Quality Control Process',
-                  options: [
-                    { label: 'In-house QC Team', value: 'inhouse' },
-                    { label: 'Third-party QC', value: 'thirdparty' },
-                    { label: 'Both In-house and Third-party', value: 'both' },
-                    { label: 'Automated QC Systems', value: 'automated' },
-                    { label: 'Other', value: 'other' }
-                  ],
-                  required: true
-                }
-              }
-            ]
-          },
-          
-          // ESG & Quality Section
-          {
-            template: `
-              <div class="mt-4 mb-3">
-                <h4 class="section-title">ESG & Quality Standards</h4>
-              </div>
-            `
-          },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-6',
-                key: 'certifications',
-                type: 'select',
-                templateOptions: {
-                  label: 'Quality Certifications',
-                  options: [
-                    { label: 'ISO 9001', value: 'iso9001' },
-                    { label: 'ISO 14001', value: 'iso14001' },
-                    { label: 'OHSAS 18001', value: 'ohsas18001' },
-                    { label: 'TS 16949', value: 'ts16949' },
-                    { label: 'AS9100', value: 'as9100' }
-                  ],
-                  required: false
-                }
-              },
-              {
-                className: 'col-md-6',
-                key: 'qualityStandards',
-                type: 'select',
-                templateOptions: {
-                  label: 'Quality Standards',
-                  options: [
-                    { label: 'Six Sigma', value: 'sixSigma' },
-                    { label: 'Lean Manufacturing', value: 'lean' },
-                    { label: 'Total Quality Management', value: 'tqm' },
-                    { label: 'Kaizen', value: 'kaizen' },
-                    { label: '5S Methodology', value: '5s' }
-                  ],
-                  required: false
-                }
-              }
-            ]
           },
           
           // Business Terms Section
@@ -754,195 +505,13 @@ export class SupplierOnboardingL3Component implements OnInit {
               }
             ]
           },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-6',
-                key: 'preferredPaymentTerms',
-                type: 'select',
-                templateOptions: {
-                  label: 'Preferred Payment Terms',
-                  options: [
-                    { label: 'Net 30', value: 'net30' },
-                    { label: 'Net 60', value: 'net60' },
-                    { label: 'Net 90', value: 'net90' },
-                    { label: 'Advance Payment', value: 'advance' },
-                    { label: 'Letter of Credit', value: 'loc' },
-                    { label: 'Other', value: 'other' }
-                  ],
-                  required: true
-                }
-              },
-              {
-                className: 'col-md-6',
-                key: 'paymentMethods',
-                type: 'select',
-                templateOptions: {
-                  label: 'Accepted Payment Methods',
-                  options: [
-                    { label: 'Bank Transfer', value: 'bankTransfer' },
-                    { label: 'Credit Card', value: 'creditCard' },
-                    { label: 'PayPal', value: 'paypal' },
-                    { label: 'Letter of Credit', value: 'loc' },
-                    { label: 'Escrow', value: 'escrow' }
-                  ],
-                  required: true
-                }
-              }
-            ]
-          },
           
-          // Supply Chain Section
-          {
-            template: `
-              <div class="mt-4 mb-3">
-                <h4 class="section-title">Supply Chain Management</h4>
-              </div>
-            `
-          },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-12',
-                key: 'rawMaterialSources',
-                type: 'select',
-                templateOptions: {
-                  label: 'Raw Material Sources',
-                  options: [
-                    { label: 'Direct from Manufacturers', value: 'manufacturers' },
-                    { label: 'Wholesalers/Distributors', value: 'wholesalers' },
-                    { label: 'Importers', value: 'importers' },
-                    { label: 'Local Sources', value: 'local' },
-                    { label: 'International Sources', value: 'international' },
-                    { label: 'Recycled/Upcycled Sources', value: 'recycled' }
-                  ],
-                  required: true
-                }
-              }
-            ]
-          },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-6',
-                key: 'supplyChainVisibility',
-                type: 'select',
-                templateOptions: {
-                  label: 'Supply Chain Visibility',
-                  options: [
-                    { label: 'Tier 1 (Direct Suppliers Only)', value: 'tier1' },
-                    { label: 'Tier 2 (Suppliers of Suppliers)', value: 'tier2' },
-                    { label: 'Full Supply Chain Visibility', value: 'full' },
-                    { label: 'Limited Visibility', value: 'limited' }
-                  ],
-                  required: true
-                }
-              },
-              {
-                className: 'col-md-6',
-                key: 'inventoryManagementSystem',
-                type: 'select',
-                templateOptions: {
-                  label: 'Inventory Management System',
-                  options: [
-                    { label: 'Just-in-Time (JIT)', value: 'jit' },
-                    { label: 'Material Requirements Planning (MRP)', value: 'mrp' },
-                    { label: 'Economic Order Quantity (EOQ)', value: 'eoq' },
-                    { label: 'ABC Analysis', value: 'abc' },
-                    { label: 'FIFO/LIFO', value: 'fifo' },
-                    { label: 'Vendor-Managed Inventory (VMI)', value: 'vmi' },
-                    { label: 'Other', value: 'other' }
-                  ],
-                  required: true
-                }
-              }
-            ]
-          },
-          
-          // Compliance Section
-          {
-            template: `
-              <div class="mt-4 mb-3">
-                <h4 class="section-title">Regulatory Compliance</h4>
-              </div>
-            `
-          },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-12',
-                key: 'industryRegulations',
-                type: 'select',
-                templateOptions: {
-                  label: 'Industry Regulations Compliance *',
-                  options: [
-                    { label: 'ISO Standards', value: 'iso' },
-                    { label: 'FDA Regulations', value: 'fda' },
-                    { label: 'CE Marking', value: 'ce' },
-                    { label: 'RoHS Compliance', value: 'rohs' },
-                    { label: 'REACH Compliance', value: 'reach' },
-                    { label: 'GDPR Compliance', value: 'gdpr' },
-                    { label: 'OSHA Regulations', value: 'osha' },
-                    { label: 'Local Industry Regulations', value: 'local' }
-                  ],
-                  required: true
-                }
-              }
-            ]
-          },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-12',
-                key: 'hasComplianceOfficer',
-                type: 'toggle',
-                templateOptions: {
-                  label: 'Do you have a designated compliance officer?',
-                  labelPosition: 'before',
-                  required: false
-                }
-              }
-            ]
-          },
-          {
-            fieldGroupClassName: 'row',
-            hideExpression: (model) => !model.hasComplianceOfficer,
-            fieldGroup: [
-              {
-                className: 'col-md-6',
-                key: 'complianceOfficerName',
-                type: 'input',
-                templateOptions: {
-                  label: 'Compliance Officer Name',
-                  placeholder: 'Enter name of compliance officer',
-                  required: false
-                }
-              },
-              {
-                className: 'col-md-6',
-                key: 'complianceOfficerEmail',
-                type: 'input',
-                templateOptions: {
-                  type: 'email',
-                  label: 'Compliance Officer Email',
-                  placeholder: 'Enter email of compliance officer',
-                  required: false
-                }
-              }
-            ]
-          },
-          
-          // References Section
+          // References Section (Simplified)
           {
             template: `
               <div class="mt-4 mb-3">
                 <h4 class="section-title">Business References</h4>
-                <p class="text-muted small">Provide references from current or past clients/partners</p>
+                <p class="text-muted small">Provide at least one reference from current or past clients/partners</p>
               </div>
             `
           },
@@ -977,7 +546,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                   }
                 },
                 {
-                  className: 'col-md-6',
+                  className: 'col-md-12',
                   key: 'email',
                   type: 'input',
                   templateOptions: {
@@ -985,16 +554,6 @@ export class SupplierOnboardingL3Component implements OnInit {
                     label: 'Email',
                     placeholder: 'Enter contact email',
                     required: true
-                  }
-                },
-                {
-                  className: 'col-md-6',
-                  key: 'phone',
-                  type: 'input',
-                  templateOptions: {
-                    label: 'Phone',
-                    placeholder: 'Enter contact phone number',
-                    required: false
                   }
                 }
               ]
@@ -1095,21 +654,41 @@ export class SupplierOnboardingL3Component implements OnInit {
     return valid;
   }
 
+  updateData(data:any) {
+    let body = {
+      supplier_company_id: sessionStorage.getItem('supplier_id'),
+      onboarding_status: 'Under Review',
+      company_profile: JSON.stringify(data)
+    } 
+    return body
+  }
+
   submit() {
     if (this.form.valid) {
       // In a real application, you would send the form data to a server here
+      debugger
       console.log('Form submitted:', this.model);
-      
-      this.messageService.add({
-        severity: 'success', 
-        summary: 'Onboarding Complete', 
-        detail: 'Thank you! Your supplier onboarding process has been completed successfully. We will review your information and contact you shortly.'
+      let body = this.updateData(this.model);
+
+      this.commonService.postData('/api/resource/wfb_supplier_onboarding_L3', body).subscribe((res: any) => {
+        this.messageService.add({
+          severity: 'success', 
+          summary: 'Onboarding Complete', 
+          detail: 'Thank you! Your supplier onboarding process has been completed successfully. We will review your information and contact you shortly.'
+        });
+        
+        // Here you might redirect to a supplier dashboard or confirmation page
+        setTimeout(() => {
+          this.router.navigate(['/wefab/supplier']);
+        }, 3000);
+      }, (err: any) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Submission Error',
+          detail: err.error?.message || 'An error occurred while submitting the form. Please try again later.',
+          life: 5000
+        });
       });
-      
-      // Here you might redirect to a supplier dashboard or confirmation page
-      setTimeout(() => {
-        this.router.navigate(['/wefab/supplier']);
-      }, 3000);
     } else {
       this.markFieldsAsTouched(this.stepFields.flat());
       this.messageService.add({
