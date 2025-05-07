@@ -546,7 +546,6 @@ export class SupplierOnboardingL2Component implements OnInit {
     this.markFieldsAsTouched(this.currentFields);
     
     if (this.form.valid) {
-      debugger
       console.log('L2 Form submitted successfully', this.model);
       this.postSupplierOnboardingL2();
       // this.messageService.add({

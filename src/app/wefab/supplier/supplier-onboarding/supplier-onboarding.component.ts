@@ -591,7 +591,6 @@ export class SupplierOnboardingComponent implements OnInit {
 
   submit() {
     if (this.form.valid) {
-      debugger
       console.log('Form submitted successfully', this.model);
       this.postSupplierOnboardingL1();
     } else {
