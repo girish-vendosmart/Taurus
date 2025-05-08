@@ -6,5 +6,9 @@ import { FileExplorerComponent } from './file-explorer/file-explorer.component';
 export const routes: Routes = [
   { path: 'test', component: TestComponentsComponent },
   { path: 'supplier-onboarding', component: SupplierOnboardingComponentsTsComponent },
-  { path: 'file-explorer', component: FileExplorerComponent }
+  { path: 'file-explorer', component: FileExplorerComponent },
+  {
+    path: 'wefab',
+    loadChildren: () => import('./wefab/wefab-component.routes').then(m => m.WEFAB_ROUTES)
+  }
 ];

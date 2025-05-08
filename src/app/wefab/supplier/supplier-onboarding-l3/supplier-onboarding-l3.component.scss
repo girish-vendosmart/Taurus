@@ -1,0 +1,399 @@
+// Import variables from the main theme
+@import '../../../../assets/scss/variables.scss';
+
+:host {
+  display: block;
+  background-color: $technical-white;
+  min-height: 100vh;
+}
+
+// Local color variables - using the imported values to ensure consistency
+$light-gray: $technical-white;
+$border-color: $material-finish-silver;
+$success-green: $process-green;
+
+// Card styling
+.card {
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  border: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .card-title {
+    font-weight: $font-weight-semibold;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  
+  .card-body {
+    padding: 1.75rem 2rem;
+  }
+}
+
+// Improved left navigation panel sticky styles
+.supplier-onboarding-content {
+  .col-md-3 {
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
+    height: fit-content;
+    z-index: 10; // Ensure sticky element appears above other content
+    
+    .card {
+      background: linear-gradient(145deg, #ffffff, #f8fbff);
+      border-left: 4px solid $blueprint-blue;
+      height: auto;
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 0;
+      
+      .card-body {
+        padding: 1.25rem 1.5rem;
+      }
+      
+      .card-title {
+        font-size: 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba($blueprint-blue, 0.1);
+        margin-bottom: 1.5rem;
+      }
+    }
+  }
+}
+
+// Right form area specific styles
+.col-md-9 {
+  .card {
+    background: #ffffff;
+    border-right: 4px solid $blueprint-blue;
+    
+    .card-body {
+      padding: 2rem;
+    }
+  }
+}
+
+// Header badge
+.header-badge {
+  display: inline-block;
+  background-color: $blueprint-blue;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-weight: $font-weight-semibold;
+  margin-top: 1rem;
+  box-shadow: 0 4px 8px rgba($blueprint-blue, 0.3);
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+// Step navigation styling
+.steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 0.75rem 0;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+    
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 50px;
+      height: calc(100% - 10px);
+      width: 3px;
+      background-color: $material-finish-silver;
+      z-index: 1;
+    }
+    
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background-color: $material-finish-silver;
+      color: $machine-gray;
+      font-weight: $font-weight-bold;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-size: 1.1rem;
+    }
+    
+    .step-content {
+      padding-top: 0.5rem;
+      
+      .step-title {
+        color: $machine-gray;
+        font-weight: $font-weight-medium;
+        transition: all 0.3s ease;
+        font-size: 1.05rem;
+        display: block;
+        line-height: 1.4;
+      }
+    }
+    
+    &.active {
+      .step-number {
+        background-color: $blueprint-blue;
+        color: $technical-white;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba($blueprint-blue, 0.4);
+      }
+      
+      .step-content {
+        .step-title {
+          color: $blueprint-blue;
+          font-weight: $font-weight-semibold;
+          transform: translateX(3px);
+        }
+      }
+      
+      &:not(:last-child)::after {
+        background-color: $blueprint-blue;
+      }
+    }
+    
+    &:hover:not(.active) {
+      .step-number {
+        transform: scale(1.05);
+        background-color: lighten($blueprint-blue, 35%);
+      }
+      
+      .step-content .step-title {
+        color: darken($machine-gray, 15%);
+      }
+    }
+  }
+}
+
+// Overall onboarding progress
+.onboarding-progress {
+  background-color: rgba($blueprint-blue, 0.05);
+  border-radius: 10px;
+  padding: 1.25rem;
+  
+  .onboarding-progress-title {
+    font-weight: $font-weight-medium;
+    margin-bottom: 1rem;
+    color: $blueprint-blue;
+    font-size: 0.95rem;
+  }
+  
+  .onboarding-progress-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    
+    .onboarding-step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      
+      .onboarding-step-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: $material-finish-silver;
+      }
+      
+      .onboarding-step-label {
+        font-size: 0.85rem;
+        color: $machine-gray;
+      }
+      
+      &.completed {
+        .onboarding-step-indicator {
+          background-color: $success-green;
+        }
+        
+        .onboarding-step-label {
+          color: darken($machine-gray, 15%);
+          font-weight: $font-weight-medium;
+        }
+      }
+      
+      &.active {
+        .onboarding-step-indicator {
+          background-color: $blueprint-blue;
+          box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.2);
+        }
+        
+        .onboarding-step-label {
+          color: $blueprint-blue;
+          font-weight: $font-weight-semibold;
+        }
+      }
+    }
+  }
+}
+
+// Progress bar styling
+.progress-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  
+  .progress-bar-wrapper {
+    flex: 1;
+    margin-right: 1.25rem;
+    
+    .progress {
+      height: 10px;
+      background-color: rgba($material-finish-silver, 0.5);
+      border-radius: 6px;
+      overflow: hidden;
+      
+      .progress-bar {
+        border-radius: 6px;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(90deg, $blueprint-blue, lighten($blueprint-blue, 10%));
+        box-shadow: 0 2px 5px rgba($blueprint-blue, 0.3);
+      }
+    }
+  }
+  
+  .progress-text {
+    font-size: 0.875rem;
+    color: $machine-gray;
+    white-space: nowrap;
+    font-weight: $font-weight-medium;
+    background-color: rgba($blueprint-blue, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+  }
+}
+
+// Page header
+.text-blueprint-blue {
+  color: $blueprint-blue !important;
+  position: relative;
+  display: inline-block;
+  
+  &.mb-2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: $blueprint-blue;
+    margin: 0.5rem auto 0;
+    border-radius: 2px;
+  }
+}
+
+.text-machine-gray {
+  color: $machine-gray;
+}
+
+// Section headers
+.section-header {
+  h4 {
+    color: $blueprint-blue;
+    font-weight: $font-weight-semibold;
+    margin-bottom: 0.5rem;
+    position: relative;
+    display: inline-block;
+    
+    &::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 3px;
+      background-color: $blueprint-blue;
+      margin-top: 0.5rem;
+      border-radius: 2px;
+    }
+  }
+  
+  p {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+    color: $machine-gray;
+  }
+}
+
+/* Rest of your SCSS remains the same */
+
+// Additional Information section styling - MODIFIED
+.additional-info-content {
+  padding: 0.5rem;
+
+  .section {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    border-left: 3px solid $blueprint-blue;
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .section-title {
+      color: $blueprint-blue;
+      font-size: 1.2rem;
+      font-weight: $font-weight-semibold;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid rgba($blueprint-blue, 0.1);
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background-color: $blueprint-blue;
+        border-radius: 3px;
+      }
+    }
+  }
+}
+
+// Supplier onboarding content container - MODIFIED
+.supplier-onboarding-content {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 100vh;
+  position: relative;
+}
+
+// Container fluid styles
+.container-fluid {
+  overflow-x: hidden; // Prevent horizontal scrollbar
+  min-height: 100vh; // Ensure the container takes up full viewport height
+}
+
+// Media queries for responsive behavior
+@media (max-width: 768px) {
+  .supplier-onboarding-content .col-md-3 {
+    position: relative; // Disable sticky on mobile
+    top: 0;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+}

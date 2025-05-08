@@ -1,0 +1,120 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="text-center mb-4">
+        <h2 class="mb-2 text-blueprint-blue">Create Your Supplier Account</h2>
+        <p class="text-machine-gray">Complete the following steps to join WeFab AI's manufacturing network</p>
+      </div>
+
+      <p-card styleClass="shadow-sm rounded-3 border-0 p-card-custom mb-4">
+        <h4 class="mb-2 text-blueprint-blue">Account Creation</h4>
+        <p class="text-machine-gray mb-4">Create your account to start the onboarding process.</p>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <!-- Email field -->
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+            <p-inputGroup>
+              <input 
+                pInputText 
+                id="email" 
+                formControlName="email" 
+                placeholder="test@gmail.com"
+                [ngClass]="{'ng-invalid ng-dirty': emailControl?.invalid && emailControl?.touched}">
+              <p-inputGroupAddon *ngIf="emailControl?.valid && emailControl?.touched">
+                <i class="pi pi-check-circle" style="color: green;"></i>
+              </p-inputGroupAddon>
+            </p-inputGroup>
+            <div *ngIf="emailControl?.invalid && emailControl?.touched" class="p-error mt-1">
+              <small *ngIf="emailControl?.errors?.['required']">Email is required.</small>
+              <small *ngIf="emailControl?.errors?.['email']">Please enter a valid email address.</small>
+            </div>
+          </div>
+
+          <!-- Password field -->
+          <div class="mb-3">
+            <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+            <p-password 
+              id="password" 
+              formControlName="password" 
+              [toggleMask]="true"
+              placeholder="••••••••"
+              [ngClass]="{'ng-invalid ng-dirty': passwordControl?.invalid && passwordControl?.touched}"
+              [feedback]="false"
+              styleClass="w-100">
+            </p-password>
+            <small class="form-text text-machine-gray mt-1">Must be at least 8 characters.</small>
+            <div *ngIf="passwordControl?.invalid && passwordControl?.touched" class="p-error mt-1">
+              <small *ngIf="passwordControl?.errors?.['required']">Password is required.</small>
+              <small *ngIf="passwordControl?.errors?.['minlength']">Password must be at least 8 characters.</small>
+            </div>
+          </div>
+
+          <!-- Terms & Privacy -->
+          <div class="bg-light p-3 rounded-3 mb-4 small">
+            <p class="mb-0">By creating an account, you agree to WeFab AI's 
+              <a href="#" class="text-blueprint-blue">Terms of Service</a> and 
+              <a href="#" class="text-blueprint-blue">Privacy Policy</a>.
+            </p>
+          </div>
+
+          <!-- Captcha -->
+          <div class="mb-4">
+            <label for="captcha" class="form-label">Security Verification <span class="text-danger">*</span></label>
+            <div class="captcha-container bg-light p-3 rounded-3 mb-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="captcha-image bg-white p-2 rounded">
+                  <span class="captcha-text">
+                    <ng-container *ngFor="let char of captchaText.split(''); let i = index">
+                      <span [ngClass]="getColorClass(i)">{{ char }}</span>
+                    </ng-container>
+                  </span>
+                </div>
+                <p-button 
+                  icon="pi pi-refresh" 
+                  styleClass="p-button-outlined p-button-secondary refresh-btn"
+                  (onClick)="refreshCaptcha()">
+                </p-button>
+              </div>
+            </div>
+            
+            <p-inputGroup>
+              <input 
+                pInputText
+                id="captcha"
+                formControlName="captcha"
+                placeholder="Enter the code above" 
+                [ngClass]="{'ng-invalid ng-dirty': captchaControl?.invalid && captchaControl?.touched}">
+              <p-button 
+                label="Verify" 
+                styleClass="p-button-secondary" 
+                (onClick)="verifyCaptcha()"
+                [disabled]="!captchaControl?.value">
+              </p-button>
+            </p-inputGroup>
+            
+            <div *ngIf="captchaVerified" class="text-success small mt-2">
+              <i class="pi pi-check-circle" style="margin-right: 0.25rem;"></i> Captcha verified successfully.
+            </div>
+            <div *ngIf="captchaControl?.value && !captchaVerified" class="text-machine-gray small mt-2">
+              Please complete the captcha to verify you're human
+            </div>
+            <div *ngIf="captchaControl?.invalid && captchaControl?.touched && !captchaControl?.value" class="p-error mt-1">
+              <small *ngIf="captchaControl?.errors?.['required']">Security verification is required.</small>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid">
+            <p-button 
+              label="Continue"
+              styleClass="p-button-primary w-100 py-2"
+              [disabled]="form.invalid || !captchaVerified"
+              type="submit">
+            </p-button>
+          </div>
+        </form>
+      </p-card>
+    </div>
+  </div>
+</div>
