@@ -83,6 +83,9 @@ export class SupplierOnboardingComponent implements OnInit {
   @ViewChild('verifyOtpButton') verifyOtpButtonTemplate!: TemplateRef<any>;
 
   isBrowser: boolean;
+  countryList: any = []
+  selectedCountry: any;
+  stateList: any;
   
   constructor(
     private fb: FormBuilder, 
@@ -96,7 +99,24 @@ export class SupplierOnboardingComponent implements OnInit {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
+  getCountryList() {
+    let endPoint = '/api/resource/Country?limit=300';
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      this.countryList = res.data;
+    })
+  }
+
+  getStates(country: any) {
+    let endPoint = `/api/resource/pq_city?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${this.selectedCountry}"]]`
+    this.commonService.getData(endPoint).subscribe((res:any) => {
+      debugger
+      this.stateList = res.data
+    })
+  }
+
   ngOnInit(): void {
+    // get List of Country
+    this.getCountryList();
     // Initialize step fields
     this.stepFields = [
       this.getBasicDetailsFields(),          // Step 1
@@ -231,14 +251,22 @@ export class SupplierOnboardingComponent implements OnInit {
               label: 'Country',
               required: true,
               placeholder: 'Select country',
-              options: [
-                { label: 'India', value: 'india' },
-                { label: 'United States', value: 'us' },
-                { label: 'United Kingdom', value: 'uk' },
-                { label: 'Germany', value: 'germany' },
-                { label: 'Japan', value: 'japan' },
-                { label: 'China', value: 'china' }
-              ]
+              options: this.countryList.map((country: any) => ({
+                label: country.name,
+                value: country.name
+              }))
+            },
+            hooks: {
+              onInit: (field) => {
+                // Update options when country list changes
+                this.commonService.getData('/api/resource/Country?limit=0').subscribe((res: any) => {
+                  field.templateOptions!.options = res.data.map((country: any) => ({
+                    label: country.name,
+                    value: country.name
+                  }));
+                  field.formControl?.updateValueAndValidity();
+                });
+              }
             },
             validation: {
               messages: {
@@ -254,48 +282,15 @@ export class SupplierOnboardingComponent implements OnInit {
               label: 'State',
               required: true,
               placeholder: 'Select state',
-              options: []
+              options: [
+                { label: 'Delhi', value: 'delhi' },
+                { label: 'Maharashtra', value: 'maharashtra' },
+                { label: 'Karnataka', value: 'karnataka' },
+                { label: 'Tamil Nadu', value: 'tamil_nadu' },
+                { label: 'Uttar Pradesh', value: 'uttar_pradesh' }
+              ]
             },
-            hooks: {
-              onInit: (field) => {
-                // Initialize state options based on country
-                field.form?.get('country')?.valueChanges.subscribe(country => {
-                  // Reset state value when country changes
-                  field.formControl?.setValue(null);
-                  
-                  // Set state options based on selected country
-                  switch(country) {
-                    case 'india':
-                      field.templateOptions!.options = [
-                        { label: 'Delhi', value: 'delhi' },
-                        { label: 'Maharashtra', value: 'maharashtra' },
-                        { label: 'Karnataka', value: 'karnataka' },
-                        { label: 'Tamil Nadu', value: 'tamil_nadu' },
-                        { label: 'Uttar Pradesh', value: 'uttar_pradesh' }
-                      ];
-                      break;
-                    case 'us':
-                      field.templateOptions!.options = [
-                        { label: 'California', value: 'california' },
-                        { label: 'Texas', value: 'texas' },
-                        { label: 'New York', value: 'new_york' },
-                        { label: 'Florida', value: 'florida' }
-                      ];
-                      break;
-                    case 'uk':
-                      field.templateOptions!.options = [
-                        { label: 'England', value: 'england' },
-                        { label: 'Scotland', value: 'scotland' },
-                        { label: 'Wales', value: 'wales' },
-                        { label: 'Northern Ireland', value: 'northern_ireland' }
-                      ];
-                      break;
-                    default:
-                      field.templateOptions!.options = [];
-                  }
-                });
-              }
-            },
+            hooks: {},
             validation: {
               messages: {
                 required: 'Please select a state'

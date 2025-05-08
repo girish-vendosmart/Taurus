@@ -17,6 +17,15 @@ export class CommonService {
 
     baseUrl = environment.apiUrl;
 
+    getData(endPoint: string, params?: HttpParams) {
+        // Create headers with Authorization token
+        const headers = new HttpHeaders({
+            'Authorization': 'Token c82020f17e1fd10:f34acaf7862dc9c',
+            'Content-Type': 'application/json'
+        });
+        return this.http.get(`${this.baseUrl}${endPoint}`, { headers, params });
+    }
+
     postData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({

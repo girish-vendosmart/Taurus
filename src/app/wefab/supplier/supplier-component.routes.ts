@@ -4,6 +4,7 @@ import { SupplierOnboardingComponent } from './supplier-onboarding/supplier-onbo
 import { SupplierCreateAccountComponent } from './supplier-create-account/supplier-create-account.component';
 import { SupplierOnboardingL2Component } from './supplier-onboarding-l2/supplier-onboarding-l2.component';
 import { SupplierOnboardingL3Component } from './supplier-onboarding-l3/supplier-onboarding-l3.component';
+import { SupplierOnboardingReviewComponent } from './supplier-onboarding-review/supplier-onboarding-review.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
@@ -26,6 +27,10 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
                 path: 'supplier-onboarding-l3',
                 component: SupplierOnboardingL3Component
             },
+            {
+                path: 'supplier-onboarding-review',
+                component: SupplierOnboardingReviewComponent
+            }
         ]
     }
 ]

@@ -1,0 +1,1056 @@
+@import '../../../../assets/scss/variables.scss';
+
+:host {
+  display: block;
+  background-color: #f7f9fc;
+  min-height: 100%;
+}
+
+// Print styles
+@media print {
+  .review-header .header-content {
+    margin-bottom: 10px;
+  }
+  
+  .edit-button, .btn-secondary, .btn-primary, .review-footer {
+    display: none !important;
+  }
+  
+  .review-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .section-header {
+    background-color: #f1f5fa !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .info-card, .machine-card, .certification-card, .facility-card, .reference-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+// Text colors
+.text-primary { color: $blueprint-blue; }
+.text-success { color: $process-green; }
+.text-danger { color: $safety-orange; }
+.text-warning { color: $safety-orange; }
+.text-muted { color: #6c757d; }
+
+// Animations
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+// Loading overlay
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+  
+  .spinner {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: $blueprint-blue;
+    animation: spin 1s linear infinite;
+  }
+  
+  .loading-text {
+    font-size: 18px;
+    color: $blueprint-blue;
+    font-weight: 500;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Container styles
+.review-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+// Header section
+.review-header {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  animation: slideInUp 0.5s ease-out;
+  
+  .header-content {
+    text-align: center;
+  }
+  
+  .review-title {
+    color: $blueprint-blue;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 2.2rem;
+  }
+  
+  .review-subtitle {
+    color: #6c757d;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+  }
+}
+
+// Completion indicator
+.completion-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1.5rem 0;
+  
+  .progress-ring-container {
+    margin-bottom: 2rem;
+  }
+  
+  .progress-ring {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    
+    .progress-circle {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s ease;
+    }
+    
+    .progress-inner {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      
+      .percentage {
+        font-size: 2rem;
+        font-weight: 700;
+        color: $blueprint-blue;
+      }
+      
+      .complete-text {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: -5px;
+      }
+    }
+  }
+  
+  .levels-indicator {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    justify-content: space-between;
+    
+    .level-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0.6;
+      transition: all 0.3s ease;
+      
+      &.completed {
+        opacity: 1;
+      }
+      
+      .level-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+      }
+      
+      &.completed .level-circle {
+        background-color: $blueprint-blue;
+        color: white;
+      }
+      
+      span {
+        font-size: 0.85rem;
+        color: #6c757d;
+      }
+    }
+    
+    .level-connector {
+      flex-grow: 1;
+      height: 3px;
+      background-color: #e9ecef;
+      margin: 0 10px;
+      margin-bottom: 28px;
+      transition: all 0.3s ease;
+      
+      &.completed {
+        background-color: $blueprint-blue;
+      }
+    }
+  }
+}
+
+// Success banner
+.success-banner {
+  background-color: lighten($process-green, 48%);
+  border-left: 4px solid $process-green;
+  color: darken($process-green, 10%);
+  padding: 1rem;
+  margin-top: 1.5rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  animation: slideInUp 0.5s ease-out, pulse 2s infinite;
+  
+  i {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+  }
+  
+  p {
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+// Section styling
+.review-section {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  overflow: hidden;
+  animation: fadeIn 0.5s ease-in-out;
+  animation-fill-mode: both;
+  
+  &:nth-child(1) { animation-delay: 0.1s; }
+  &:nth-child(2) { animation-delay: 0.2s; }
+  &:nth-child(3) { animation-delay: 0.3s; }
+  
+  .section-header {
+    background-color: #f1f5fa;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eaedf0;
+    
+    .section-title {
+      display: flex;
+      align-items: center;
+      
+      .section-badge {
+        background-color: $blueprint-blue;
+        color: white;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        font-weight: 600;
+        margin-right: 1rem;
+        font-size: 0.9rem;
+      }
+      
+      h2 {
+        font-size: 1.4rem;
+        margin: 0;
+        color: #2c3e50;
+        font-weight: 600;
+      }
+    }
+    
+    .edit-button {
+      background-color: white;
+      border: 1px solid $blueprint-blue;
+      color: $blueprint-blue;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      
+      i {
+        margin-right: 5px;
+      }
+      
+      &:hover {
+        background-color: $blueprint-blue;
+        color: white;
+      }
+    }
+  }
+  
+  .section-content {
+    padding: 1.5rem;
+  }
+}
+
+// Info cards
+.info-cards-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -0.75rem;
+  justify-content: flex-start;
+  
+  // This creates a row-based layout where all cards in a row have the same height
+  &::after {
+    content: "";
+    flex: auto;
+  }
+  
+  .info-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    margin: 0.75rem;
+    flex: 0 0 calc(33.33% - 1.5rem);
+    min-width: 250px;
+    max-width: calc(33.33% - 1.5rem);
+    border: 1px solid #eaedf0;
+    transition: all 0.2s ease;
+    display: flex;
+    height: calc(100% - 1.5rem); // Preserve height calculation
+    align-items: flex-start;
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: rgba($blueprint-blue, 0.15);
+      color: $blueprint-blue;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1.25rem;
+      flex-shrink: 0;
+      
+      i {
+        font-size: 1.3rem;
+      }
+    }
+    
+    .card-content {
+      flex-grow: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      
+      h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #2c3e50;
+      }
+      
+      .info-item {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0.75rem;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        .info-label {
+          font-size: 0.85rem;
+          color: #6c757d;
+          margin-bottom: 0.25rem;
+        }
+        
+        .info-value {
+          font-size: 0.95rem;
+          color: #2c3e50;
+          font-weight: 500;
+          word-wrap: break-word;
+          word-break: break-word;
+          overflow-wrap: break-word;
+          max-width: 100%;
+          display: inline-block;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          
+          &.highlight {
+            color: $blueprint-blue;
+            font-weight: 600;
+          }
+          
+          a {
+            color: $blueprint-blue;
+            text-decoration: none;
+            display: inline-block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+          
+          // Allow normal wrapping for badges
+          .status-badge {
+            white-space: normal;
+          }
+        }
+      }
+    }
+    
+    &.financial-card {
+      .revenue-trends {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+        width: 100%;
+        overflow: hidden;
+        
+        @media (min-width: 480px) {
+          flex-direction: row;
+          align-items: center;
+          flex-wrap: wrap;
+          justify-content: space-between;
+        }
+        
+        .revenue-year {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-bottom: 0.5rem;
+          flex: 1 1 auto;
+          min-width: 0; // Important for text overflow
+          max-width: 33%;
+          padding: 0 5px;
+          box-sizing: border-box;
+          
+          @media (max-width: 479px) {
+            max-width: 100%;
+            width: 100%;
+          }
+          
+          .year {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 0.2rem;
+          }
+          
+          .amount {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            text-align: center;
+            
+            @media (min-width: 1400px) {
+              font-size: 1rem;
+            }
+            
+            @media (max-width: 1399px) {
+              font-size: 0.85rem;
+            }
+          }
+        }
+        
+        .revenue-arrow {
+          margin: 0 0.25rem;
+          color: $blueprint-blue;
+          align-self: center;
+          flex-shrink: 0;
+          
+          i {
+            font-size: 0.9rem;
+          }
+          
+          @media (max-width: 479px) {
+            transform: rotate(90deg);
+            margin: 0.25rem 0;
+            width: 100%;
+            text-align: center;
+          }
+        }
+      }
+      
+      .info-item {
+        .info-value {
+          // Make sure the currency has proper display
+          white-space: normal;
+        }
+      }
+    }
+  }
+  
+  @media (max-width: 1200px) {
+    .info-card {
+      flex: 0 0 calc(50% - 1.5rem);
+      max-width: calc(50% - 1.5rem);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .info-card {
+      flex: 0 0 calc(100% - 1.5rem);
+      max-width: 100%;
+    }
+  }
+}
+
+// Metrics display
+.metrics-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -0.75rem;
+  margin-bottom: 2rem;
+  
+  .metric-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 1.2rem;
+    margin: 0.75rem;
+    flex: 0 0 calc(25% - 1.5rem);
+    min-width: 120px;
+    text-align: center;
+    border: 1px solid #eaedf0;
+    
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: $blueprint-blue;
+      margin-bottom: 0.5rem;
+    }
+    
+    .metric-label {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .metric-card {
+      flex: 0 0 calc(50% - 1.5rem);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .metric-card {
+      flex: 0 0 calc(50% - 1.5rem);
+    }
+  }
+}
+
+// Document status badges
+.document-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  
+  i {
+    margin-right: 3px;
+    font-size: 0.8rem;
+  }
+  
+  &.uploaded {
+    background-color: rgba($process-green, 0.15);
+    color: $process-green;
+  }
+  
+  &.not-uploaded {
+    background-color: rgba($safety-orange, 0.15);
+    color: $safety-orange;
+  }
+}
+
+// Status badges
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+  
+  i {
+    margin-right: 3px;
+    font-size: 0.8rem;
+  }
+  
+  &.verified {
+    background-color: rgba($process-green, 0.15);
+    color: $process-green;
+  }
+  
+  &.unverified {
+    background-color: rgba($safety-orange, 0.15);
+    color: $safety-orange;
+  }
+}
+
+// Compliance status
+.compliance-status {
+  display: inline-flex;
+  align-items: center;
+  
+  i {
+    margin-right: 5px;
+  }
+  
+  &.compliant {
+    color: $process-green;
+  }
+  
+  &:not(.compliant) {
+    color: $safety-orange;
+  }
+}
+
+// Industries section
+.industries-section {
+  margin-bottom: 2rem;
+  
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    
+    i {
+      margin-right: 0.5rem;
+      color: $blueprint-blue;
+    }
+  }
+  
+  .industries-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    
+    .industry-tag {
+      background-color: rgba($blueprint-blue, 0.1);
+      color: $blueprint-blue;
+      padding: 0.4rem 0.8rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      
+      &.empty {
+        background-color: #f1f1f1;
+        color: #888;
+      }
+    }
+  }
+}
+
+// Facility section
+.facility-section, 
+.machines-section, 
+.certifications-section, 
+.business-terms-section,
+.facilities-section,
+.references-section {
+  margin-bottom: 2rem;
+  
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    
+    i {
+      margin-right: 0.5rem;
+      color: $blueprint-blue;
+    }
+  }
+}
+
+// Machines display
+.machines-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  
+  .machine-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaedf0;
+    width: calc(33.33% - 0.75rem);
+    overflow: hidden;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .machine-header {
+      background-color: #f1f5fa;
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid #eaedf0;
+      display: flex;
+      flex-direction: column;
+      
+      .machine-title {
+        font-weight: 600;
+        color: $blueprint-blue;
+        margin-bottom: 0.2rem;
+      }
+      
+      .machine-make {
+        font-size: 0.85rem;
+        color: #6c757d;
+      }
+    }
+    
+    .machine-content {
+      padding: 1rem;
+    }
+    
+    @media (max-width: 1200px) {
+      width: calc(50% - 0.5rem);
+    }
+    
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+}
+
+// Certifications display
+.certifications-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  
+  .certification-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaedf0;
+    width: calc(33.33% - 0.75rem);
+    overflow: hidden;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .certification-header {
+      background-color: #f1f5fa;
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid #eaedf0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .certification-title {
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      
+      .certification-badge {
+        color: $process-green;
+        
+        i {
+          font-size: 1.2rem;
+        }
+      }
+    }
+    
+    .certification-content {
+      padding: 1rem;
+    }
+    
+    @media (max-width: 1200px) {
+      width: calc(50% - 0.5rem);
+    }
+    
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+}
+
+// Facilities display
+.facilities-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  
+  .facility-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaedf0;
+    padding: 1rem;
+    width: calc(33.33% - 0.75rem);
+    transition: all 0.2s ease;
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .facility-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      
+      i {
+        color: $blueprint-blue;
+        margin-right: 0.5rem;
+      }
+      
+      .facility-name {
+        font-weight: 600;
+        color: #2c3e50;
+      }
+    }
+    
+    .facility-location {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+    
+    @media (max-width: 1200px) {
+      width: calc(50% - 0.5rem);
+    }
+    
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+}
+
+// References display
+.references-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  
+  .reference-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaedf0;
+    width: calc(33.33% - 0.75rem);
+    overflow: hidden;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .reference-header {
+      background-color: #f1f5fa;
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid #eaedf0;
+      
+      .reference-name {
+        font-weight: 600;
+        color: #2c3e50;
+      }
+    }
+    
+    .reference-content {
+      padding: 1rem;
+    }
+    
+    @media (max-width: 1200px) {
+      width: calc(50% - 0.5rem);
+    }
+    
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+}
+
+// Footer section
+.review-footer {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+  animation-delay: 0.4s;
+  animation-fill-mode: both;
+  
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    
+    @media (max-width: 576px) {
+      flex-direction: column;
+    }
+    
+    .btn-secondary, .btn-primary {
+      padding: 0.8rem 2rem;
+      border-radius: 6px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      min-width: 200px;
+      
+      i {
+        margin-right: 0.5rem;
+      }
+    }
+    
+    .btn-secondary {
+      background-color: white;
+      border: 1px solid #ccc;
+      color: #555;
+      
+      &:hover {
+        background-color: #f8f9fa;
+      }
+    }
+    
+    .btn-primary {
+      background-color: $blueprint-blue;
+      border: none;
+      color: white;
+      
+      &:hover:not(:disabled) {
+        background-color: darken($blueprint-blue, 10%);
+      }
+      
+      &:disabled {
+        background-color: lighten($blueprint-blue, 20%);
+        cursor: not-allowed;
+      }
+    }
+  }
+  
+  .disclaimer {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin: 0;
+  }
+}
+
+// Terms card
+.terms-card {
+  .info-item {
+    margin-bottom: 1rem;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Financial overview
+.financial-overview {
+  margin-bottom: 2rem;
+}
+
+// Make specific adjustments to fix row alignment issues in different sections
+.section-content {
+  .info-cards-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    
+    // Apply a wrapper for equal-height cards in a row
+    &::before, &::after {
+      content: '';
+      display: block;
+      flex: 0 0 100%;
+      order: 1;
+      height: 0;
+    }
+    
+    // Use flex-grow approach to ensure equal heights
+    .info-card {
+      height: auto;
+      display: flex;
+      flex-direction: row;
+      
+      // Fix alignment for nested content
+      .card-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+    }
+  }
+} 
