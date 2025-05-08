@@ -224,7 +224,7 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-6 mb-2',
+            className: 'col-md-4 mb-2',
             key: 'country',
             type: 'select',
             templateOptions: {
@@ -247,7 +247,7 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           },
           {
-            className: 'col-md-6 mb-2',
+            className: 'col-md-4 mb-2',
             key: 'state',
             type: 'select',
             templateOptions: {
@@ -303,6 +303,21 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             expressionProperties: {
               'templateOptions.disabled': '!model.country'
+            }
+          },
+          {
+            className: 'col-md-4 mb-2',
+            key: 'city',
+            type: 'input',
+            templateOptions: {
+              label: 'City',
+              placeholder: 'Enter your city',
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'Please enter your city'
+              }
             }
           }
         ]
