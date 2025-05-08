@@ -115,13 +115,11 @@ export class SupplierOnboardingComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // get List of Country
-    this.getCountryList();
-    // Initialize step fields
-    this.stepFields = [
-      this.getBasicDetailsFields(),          // Step 1
-      this.getManufacturingCapabilitiesFields() // Step 2
-    ];
+    // Initialize form with empty fields first
+    this.form = this.fb.group({});
+    
+    // Load country list first, then initialize fields after data is loaded
+    this.getCountryListAndInitializeForm();
     
     this.steps = [
       {
@@ -137,9 +135,35 @@ export class SupplierOnboardingComponent implements OnInit {
         }
       }
     ];
-    
-    // Add icon wrapper to all error messages for validation
-    this.addValidationIconToErrorMessages(this.stepFields);
+  }
+
+  // New method to load countries then initialize form
+  getCountryListAndInitializeForm() {
+    let endPoint = '/api/resource/Country?limit=300';
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      // Store country list
+      this.countryList = res.data || [];
+      
+      console.log('Country list loaded:', this.countryList.length);
+      
+      // Initialize form fields after country data is loaded
+      this.stepFields = [
+        this.getBasicDetailsFields(),          // Step 1
+        this.getManufacturingCapabilitiesFields() // Step 2
+      ];
+      
+      // Add icon wrapper to all error messages for validation
+      this.addValidationIconToErrorMessages(this.stepFields);
+    }, error => {
+      console.error('Error loading country list:', error);
+      // Initialize with empty country list if there's an error
+      this.countryList = [];
+      this.stepFields = [
+        this.getBasicDetailsFields(),          // Step 1
+        this.getManufacturingCapabilitiesFields() // Step 2
+      ];
+      this.addValidationIconToErrorMessages(this.stepFields);
+    });
   }
 
   // Handle phone verification event
@@ -246,7 +270,7 @@ export class SupplierOnboardingComponent implements OnInit {
           {
             className: 'col-md-4 mb-2',
             key: 'country',
-            type: 'select',
+            type: 'searchable-select',
             templateOptions: {
               label: 'Country',
               required: true,
@@ -258,13 +282,27 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             hooks: {
               onInit: (field) => {
-                // Update options when country list changes
-                this.commonService.getData('/api/resource/Country?limit=0').subscribe((res: any) => {
-                  field.templateOptions!.options = res.data.map((country: any) => ({
+                // Country list should be already loaded at this point
+                const options = field.templateOptions?.options;
+                const optionsLength = Array.isArray(options) ? options.length : 0;
+                console.log('Country field initialized with options:', optionsLength);
+                
+                // If empty, try to update it once more
+                if (optionsLength === 0 && this.countryList.length > 0) {
+                  field.templateOptions!.options = this.countryList.map((country: any) => ({
                     label: country.name,
                     value: country.name
                   }));
                   field.formControl?.updateValueAndValidity();
+                }
+                
+                // Watch for country changes to update state dropdown
+                field.formControl?.valueChanges.subscribe(selectedCountry => {
+                  console.log('Selected country:', selectedCountry);
+                  if (selectedCountry) {
+                    this.selectedCountry = selectedCountry;
+                    this.getStates(selectedCountry);
+                  }
                 });
               }
             },

@@ -5,6 +5,7 @@ import { SupplierCreateAccountComponent } from './supplier-create-account/suppli
 import { SupplierOnboardingL2Component } from './supplier-onboarding-l2/supplier-onboarding-l2.component';
 import { SupplierOnboardingL3Component } from './supplier-onboarding-l3/supplier-onboarding-l3.component';
 import { SupplierOnboardingReviewComponent } from './supplier-onboarding-review/supplier-onboarding-review.component';
+import { SupplierProfileReviewComponent } from './supplier-profile-review/supplier-profile-review.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
@@ -30,6 +31,10 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
             {
                 path: 'supplier-onboarding-review',
                 component: SupplierOnboardingReviewComponent
+            },
+            {
+                path: 'profile-review',
+                component: SupplierProfileReviewComponent
             }
         ]
     }

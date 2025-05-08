@@ -13,6 +13,7 @@ import { FormlyFieldPhoneOtpComponent } from './phone-otp-type.component';
 import { FormlyFieldFileUploadComponent } from './file-upload-type.component';
 import { FormlyFieldRangeSliderComponent } from './range-slider-type.component';
 import { FormlyFieldDropdownComponent } from './dropdown-type.component';
+import { FormlyFieldSearchableSelectComponent } from './searchable-select-type.component';
 
 import { routes } from './app.routes';
 
@@ -32,6 +33,7 @@ export const appConfig: ApplicationConfig = {
           { name: 'phone-otp', component: FormlyFieldPhoneOtpComponent },
           { name: 'range-slider', component: FormlyFieldRangeSliderComponent },
           { name: 'p-dropdown', component: FormlyFieldDropdownComponent },
+          { name: 'searchable-select', component: FormlyFieldSearchableSelectComponent },
         ],
         wrappers: [
           { name: 'panel', component: PanelWrapperComponent },
