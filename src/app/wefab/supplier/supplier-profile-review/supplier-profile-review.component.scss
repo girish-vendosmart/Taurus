@@ -419,46 +419,20 @@ $safety-orange: #F26830;
     }
   }
   
-  .revenue-section {
+  .review-info-container {
     margin-bottom: 1.5rem;
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     
     h3 {
       font-size: 1.1rem;
       font-weight: 600;
       margin-bottom: 1rem;
       color: #333;
-    }
-    
-    .revenue-data {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
-      
-      .revenue-year {
-        padding: 1rem;
-        border: 1px solid #eaedf0;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        
-        &:hover {
-          background-color: rgba($blueprint-blue, 0.02);
-          border-color: rgba($blueprint-blue, 0.2);
-        }
-        
-        h4 {
-          font-size: 0.9rem;
-          color: #6c757d;
-          margin: 0 0 0.5rem 0;
-          font-weight: 500;
-        }
-        
-        .revenue-amount {
-          font-size: 1.2rem;
-          font-weight: 600;
-          color: #333;
-          margin: 0;
-        }
-      }
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #eee;
     }
   }
   

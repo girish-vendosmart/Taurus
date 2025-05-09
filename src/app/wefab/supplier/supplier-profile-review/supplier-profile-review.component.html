@@ -261,40 +261,55 @@
               <span class="note-label">Note:</span> Financial information is confidential and is only shared with verified clients when necessary for business purposes.
             </div>
 
-            <div class="revenue-section">
+            <div class="review-info-container">
               <h3>Annual Revenue (Last 3 Years)</h3>
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Annual Revenue (2024)</div>
+                  <div class="field-value">{{ financialData.year2024Revenue }}</div>
+                </div>
+                <div class="review-col">
+                  <div class="field-label">Annual Revenue (2023)</div>
+                  <div class="field-value">{{ financialData.year2023Revenue }}</div>
+                </div>
+              </div>
               
-              <div class="revenue-data">
-                <div class="revenue-year">
-                  <h4>Annual Revenue (2024)</h4>
-                  <p class="revenue-amount">{{ financialData.year2024Revenue }}</p>
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Annual Revenue (2022)</div>
+                  <div class="field-value">{{ financialData.year2022Revenue }}</div>
                 </div>
-                
-                <div class="revenue-year">
-                  <h4>Annual Revenue (2023)</h4>
-                  <p class="revenue-amount">{{ financialData.year2023Revenue }}</p>
-                </div>
-                
-                <div class="revenue-year">
-                  <h4>Annual Revenue (2022)</h4>
-                  <p class="revenue-amount">{{ financialData.year2022Revenue }}</p>
+                <div class="review-col">
+                  <div class="field-label">Currency</div>
+                  <div class="field-value">INR (₹)</div>
                 </div>
               </div>
             </div>
             
-            <div class="info-card">
-              <div class="card-header">
-                <i class="pi pi-chart-line"></i>
-                <h3>Credit Information</h3>
-              </div>
-              <div class="card-content">
-                <div class="info-item">
-                  <span class="item-label">Credit Rating Provider</span>
-                  <span class="item-value">CRISIL</span>
+            <div class="review-info-container">
+              <h3>Credit Information</h3>
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Credit Rating Provider</div>
+                  <div class="field-value">CRISIL</div>
                 </div>
-                <div class="info-item">
-                  <span class="item-label">Tax Compliance</span>
-                  <span class="item-value"><i class="pi pi-check-circle verified-icon"></i> Compliant</span>
+                <div class="review-col">
+                  <div class="field-label">Tax Compliance</div>
+                  <div class="field-value"><i class="pi pi-check-circle verified-icon"></i> Compliant</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="review-info-container">
+              <h3>Insurance Coverage</h3>
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">General Liability</div>
+                  <div class="field-value">₹5,00,00,000</div>
+                </div>
+                <div class="review-col">
+                  <div class="field-label">Product Liability</div>
+                  <div class="field-value">₹2,50,00,000</div>
                 </div>
               </div>
             </div>
@@ -304,57 +319,36 @@
         <!-- Additional Information Tab Content -->
         <div class="financial-tab-content" *ngIf="financialTab === 'additional'">
           <div class="additional-info">
-            <div class="info-card">
-              <div class="card-header">
-                <i class="pi pi-shield"></i>
-                <h3>Insurance Coverage</h3>
-              </div>
-              <div class="card-content">
-                <div class="info-item">
-                  <span class="item-label">General Liability</span>
-                  <span class="item-value">₹5,00,00,000</span>
+            <div class="review-info-container">
+              <h3>Business Terms</h3>
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Lead Time (Days)</div>
+                  <div class="field-value">14</div>
                 </div>
-                <div class="info-item">
-                  <span class="item-label">Product Liability</span>
-                  <span class="item-value">₹2,50,00,000</span>
+                <div class="review-col">
+                  <div class="field-label">Minimum Order Quantity</div>
+                  <div class="field-value">50 units</div>
                 </div>
               </div>
             </div>
             
-            <div class="info-card">
-              <div class="card-header">
-                <i class="pi pi-calendar"></i>
-                <h3>Business Terms</h3>
-              </div>
-              <div class="card-content">
-                <div class="info-item">
-                  <span class="item-label">Lead Time (Days)</span>
-                  <span class="item-value">14</span>
+            <div class="review-info-container">
+              <h3>Additional Capabilities</h3>
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Export Experience</div>
+                  <div class="field-value">Yes, 5+ years</div>
                 </div>
-                <div class="info-item">
-                  <span class="item-label">Minimum Order Quantity</span>
-                  <span class="item-value">50 units</span>
+                <div class="review-col">
+                  <div class="field-label">Custom Design Services</div>
+                  <div class="field-value">Available</div>
                 </div>
               </div>
-            </div>
-            
-            <div class="info-card full-width">
-              <div class="card-header">
-                <i class="pi pi-list"></i>
-                <h3>Additional Capabilities</h3>
-              </div>
-              <div class="card-content">
-                <div class="info-item">
-                  <span class="item-label">Export Experience</span>
-                  <span class="item-value">Yes, 5+ years</span>
-                </div>
-                <div class="info-item">
-                  <span class="item-label">Custom Design Services</span>
-                  <span class="item-value">Available</span>
-                </div>
-                <div class="info-item">
-                  <span class="item-label">Supply Chain Partnerships</span>
-                  <span class="item-value">3 Active Partners</span>
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Supply Chain Partnerships</div>
+                  <div class="field-value">3 Active Partners</div>
                 </div>
               </div>
             </div>
