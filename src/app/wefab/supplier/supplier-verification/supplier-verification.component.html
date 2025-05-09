@@ -1,0 +1,131 @@
+<div class="container-fluid py-5">
+  <div class="row justify-content-center" style="width: 40%; margin: auto;">
+    <div class="col-md-8">
+
+      <div class="verification-container">
+        <!-- Header -->
+        <div class="mb-4">
+          <h2 class="verification-title">Verifying Your Information</h2>
+          <p class="verification-subtitle">Please wait while we verify the information you've provided</p>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-line-container">
+          <div class="progress-line"></div>
+        </div>
+
+        <!-- Verification steps -->
+        <div class="verification-steps">
+          <!-- Step 1: Company Credentials -->
+          <div class="verification-step">
+            <div class="step-icon" 
+                 [ngClass]="{
+                   'verifying': verificationStatus.credentials === 'verifying',
+                   'completed': verificationStatus.credentials === 'completed',
+                   'failed': verificationStatus.credentials === 'failed'
+                 }">
+              <i class="pi" 
+                 [ngClass]="{
+                   'pi-spinner pi-spin': verificationStatus.credentials === 'verifying',
+                   'pi-check': verificationStatus.credentials === 'completed',
+                   'pi-times': verificationStatus.credentials === 'failed'
+                 }"></i>
+            </div>
+            <div class="shield-icon">
+              <i class="pi pi-shield"></i>
+            </div>
+            <div class="step-content">
+              <h4 class="step-title">Company Credentials</h4>
+              <p class="step-description">Verifying business registration and tax information</p>
+              <p class="verification-success" *ngIf="verificationStatus.credentials === 'completed'">Verification successful</p>
+              <p class="verification-in-progress" *ngIf="verificationStatus.credentials === 'verifying'">Verification in progress...</p>
+              <p class="verification-error" *ngIf="verificationStatus.credentials === 'failed'">Verification failed. Please contact support.</p>
+            </div>
+          </div>
+
+          <!-- Step 2: Primary Contact -->
+          <div class="verification-step">
+            <div class="step-icon" 
+                 [ngClass]="{
+                   'verifying': verificationStatus.contact === 'verifying',
+                   'completed': verificationStatus.contact === 'completed',
+                   'failed': verificationStatus.contact === 'failed'
+                 }">
+              <i class="pi" 
+                 [ngClass]="{
+                   'pi-spinner pi-spin': verificationStatus.contact === 'verifying',
+                   'pi-check': verificationStatus.contact === 'completed',
+                   'pi-times': verificationStatus.contact === 'failed'
+                 }"></i>
+            </div>
+            <div class="user-icon">
+              <i class="pi pi-user"></i>
+            </div>
+            <div class="step-content">
+              <h4 class="step-title">Primary Contact</h4>
+              <p class="step-description">Validating contact details and phone verification</p>
+              <p class="verification-success" *ngIf="verificationStatus.contact === 'completed'">Verification successful</p>
+              <p class="verification-in-progress" *ngIf="verificationStatus.contact === 'verifying'">Verification in progress...</p>
+              <p class="verification-error" *ngIf="verificationStatus.contact === 'failed'">Verification failed. Please check your details.</p>
+            </div>
+          </div>
+
+          <!-- Step 3: Documents -->
+          <div class="verification-step">
+            <div class="step-icon" 
+                 [ngClass]="{
+                   'verifying': verificationStatus.documents === 'verifying',
+                   'completed': verificationStatus.documents === 'completed',
+                   'failed': verificationStatus.documents === 'failed'
+                 }">
+              <i class="pi" 
+                 [ngClass]="{
+                   'pi-spinner pi-spin': verificationStatus.documents === 'verifying',
+                   'pi-check': verificationStatus.documents === 'completed',
+                   'pi-times': verificationStatus.documents === 'failed'
+                 }"></i>
+            </div>
+            <div class="document-icon">
+              <i class="pi pi-file"></i>
+            </div>
+            <div class="step-content">
+              <h4 class="step-title">Documents</h4>
+              <p class="step-description">Processing uploaded documentation</p>
+              <p class="verification-success" *ngIf="verificationStatus.documents === 'completed'">Verification successful</p>
+              <p class="verification-in-progress" *ngIf="verificationStatus.documents === 'verifying'">Verification in progress...</p>
+              <p class="verification-error" *ngIf="verificationStatus.documents === 'failed'">Required documents missing or incomplete.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verification incomplete message -->
+        <div class="verification-incomplete" *ngIf="verificationError">
+          <div class="error-icon">
+            <i class="pi pi-times-circle"></i>
+          </div>
+          <div class="error-content">
+            <h4 class="error-title">Verification Incomplete</h4>
+            <p class="error-message">We've detected some issues with your information. You can choose to continue to further sections; however, our team will contact you for verification. Please check your email inbox for more information.</p>
+          </div>
+          <div class="error-actions">
+            <button class="btn-continue" (click)="continueAnyway()">Continue Anyway</button>
+          </div>
+        </div>
+
+        <!-- Verification complete message -->
+        <div class="verification-complete" *ngIf="verificationComplete">
+          <div class="success-icon">
+            <i class="pi pi-check-circle"></i>
+          </div>
+          <div class="success-content">
+            <h4 class="success-title">Verification Complete</h4>
+            <p class="success-message">All your information has been successfully verified. You will be automatically redirected to the next step.</p>
+          </div>
+          <div class="success-actions">
+            <button class="btn-success" (click)="continueAnyway()">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

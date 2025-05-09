@@ -733,13 +733,13 @@ export class SupplierOnboardingComponent implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
-        detail: 'Your supplier onboarding application has been received. Redirecting to detailed information form.',
+        detail: 'Your supplier onboarding application has been received. Redirecting to verification page.',
         life: 3000
       });
       
-      // Navigate to L2 form after 3 seconds
+      // Navigate to verification page after 3 seconds
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
+        this.router.navigate(['/wefab/supplier/supplier-verification']);
       }, 3000);
     }, (err) => {
       console.error('Error submitting form:', err);
