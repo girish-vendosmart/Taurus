@@ -92,10 +92,17 @@ export class SupplierOnboardingL3Component implements OnInit {
       },
       totalEmployees: '',
       foundedYear: '',
-      productionFacilities: [{}],
+      productionFacilities: [{
+        facilityName: '',
+        facilityLocation: ''
+      }],
       leadTime: '',
       minimumOrderQuantity: 0,
-      references: [{}]
+      references: [{
+        companyName: '',
+        contactName: '',
+        email: ''
+      }]
     },
     termsAndConditions: {
       acceptTerms: false,
@@ -172,12 +179,19 @@ export class SupplierOnboardingL3Component implements OnInit {
     
     if (!this.model.additionalInformation.productionFacilities || 
         !this.model.additionalInformation.productionFacilities.length) {
-      this.model.additionalInformation.productionFacilities = [{}];
+      this.model.additionalInformation.productionFacilities = [{
+        facilityName: '',
+        facilityLocation: ''
+      }];
     }
     
     if (!this.model.additionalInformation.references || 
         !this.model.additionalInformation.references.length) {
-      this.model.additionalInformation.references = [{}];
+      this.model.additionalInformation.references = [{
+        companyName: '',
+        contactName: '',
+        email: ''
+      }];
     }
     
     // Initialize arrays
@@ -414,7 +428,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                 key: 'website',
                 type: 'input',
                 templateOptions: {
-                  label: 'Company Website',
+                  label: 'Company Website *',
                   placeholder: 'Enter company website URL',
                   required: true
                 },
@@ -444,10 +458,15 @@ export class SupplierOnboardingL3Component implements OnInit {
                 type: 'input',
                 templateOptions: {
                   type: 'number',
-                  label: 'Total Number of Employees',
+                  label: 'Total Number of Employees *',
                   placeholder: 'Enter number of employees',
                   min: 1,
                   required: true
+                },
+                validation: {
+                  messages: {
+                    required: 'Number of employees is required'
+                  }
                 }
               },
               {
@@ -456,11 +475,16 @@ export class SupplierOnboardingL3Component implements OnInit {
                 type: 'input',
                 templateOptions: {
                   type: 'number',
-                  label: 'Year Founded',
+                  label: 'Year Founded *',
                   placeholder: 'Enter year company was founded',
                   min: 1900,
                   max: new Date().getFullYear(),
                   required: true
+                },
+                validation: {
+                  messages: {
+                    required: 'Year founded is required'
+                  }
                 }
               }
             ]
@@ -472,31 +496,48 @@ export class SupplierOnboardingL3Component implements OnInit {
             type: 'repeat',
             templateOptions: {
               label: 'Production Facilities',
-              addText: '+ Add Production Facility',
+              addText: '+ Add Item',
               min: 1
             },
             fieldArray: {
-              fieldGroupClassName: 'row',
               fieldGroup: [
                 {
-                  className: 'col-md-6',
-                  key: 'facilityName',
-                  type: 'input',
-                  templateOptions: {
-                    label: 'Facility Name',
-                    placeholder: 'Enter facility name',
-                    required: true
-                  }
+                  template: `<div class="mt-3 mb-1"><h6>Item 1</h6></div>`
                 },
                 {
-                  className: 'col-md-6',
-                  key: 'facilityLocation',
-                  type: 'input',
-                  templateOptions: {
-                    label: 'Location',
-                    placeholder: 'Enter facility location',
-                    required: true
-                  }
+                  fieldGroupClassName: 'row',
+                  fieldGroup: [
+                    {
+                      className: 'col-md-6',
+                      key: 'facilityName',
+                      type: 'input',
+                      templateOptions: {
+                        label: 'Facility Name *',
+                        placeholder: 'Enter facility name',
+                        required: true
+                      },
+                      validation: {
+                        messages: {
+                          required: 'Facility name is required'
+                        }
+                      }
+                    },
+                    {
+                      className: 'col-md-6',
+                      key: 'facilityLocation',
+                      type: 'input',
+                      templateOptions: {
+                        label: 'Location *',
+                        placeholder: 'Enter facility location',
+                        required: true
+                      },
+                      validation: {
+                        messages: {
+                          required: 'Facility location is required'
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -519,10 +560,15 @@ export class SupplierOnboardingL3Component implements OnInit {
                 type: 'input',
                 templateOptions: {
                   type: 'number',
-                  label: 'Average Lead Time (Days)',
+                  label: 'Average Lead Time (Days) *',
                   placeholder: 'Enter average production lead time in days',
                   min: 1,
                   required: true
+                },
+                validation: {
+                  messages: {
+                    required: 'Average lead time is required'
+                  }
                 }
               },
               {
@@ -531,16 +577,21 @@ export class SupplierOnboardingL3Component implements OnInit {
                 type: 'input',
                 templateOptions: {
                   type: 'number',
-                  label: 'Minimum Order Quantity',
+                  label: 'Minimum Order Quantity *',
                   placeholder: 'Enter minimum order quantity',
-                  min: 1,
+                  min: 0,
                   required: true
+                },
+                validation: {
+                  messages: {
+                    required: 'Minimum order quantity is required'
+                  }
                 }
               }
             ]
           },
           
-          // References Section (Simplified)
+          // References Section
           {
             template: `
               <div class="mt-3 mb-2">
@@ -553,42 +604,69 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'references',
             type: 'repeat',
             templateOptions: {
-              addText: '+ Add Reference',
+              addText: '+ Add Item',
               min: 1
             },
             fieldArray: {
-              fieldGroupClassName: 'row',
               fieldGroup: [
                 {
-                  className: 'col-md-6',
-                  key: 'companyName',
-                  type: 'input',
-                  templateOptions: {
-                    label: 'Company Name',
-                    placeholder: 'Enter company name',
-                    required: true
-                  }
+                  template: `<div class="mt-3 mb-1"><h6>Item 1</h6></div>`
                 },
                 {
-                  className: 'col-md-6',
-                  key: 'contactName',
-                  type: 'input',
-                  templateOptions: {
-                    label: 'Contact Name',
-                    placeholder: 'Enter contact person name',
-                    required: true
-                  }
+                  fieldGroupClassName: 'row',
+                  fieldGroup: [
+                    {
+                      className: 'col-md-6',
+                      key: 'companyName',
+                      type: 'input',
+                      templateOptions: {
+                        label: 'Company Name *',
+                        placeholder: 'Enter company name',
+                        required: true
+                      },
+                      validation: {
+                        messages: {
+                          required: 'Company name is required'
+                        }
+                      }
+                    },
+                    {
+                      className: 'col-md-6',
+                      key: 'contactName',
+                      type: 'input',
+                      templateOptions: {
+                        label: 'Contact Name *',
+                        placeholder: 'Enter contact person name',
+                        required: true
+                      },
+                      validation: {
+                        messages: {
+                          required: 'Contact name is required'
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
-                  className: 'col-md-12',
-                  key: 'email',
-                  type: 'input',
-                  templateOptions: {
-                    type: 'email',
-                    label: 'Email',
-                    placeholder: 'Enter contact email',
-                    required: true
-                  }
+                  fieldGroupClassName: 'row',
+                  fieldGroup: [
+                    {
+                      className: 'col-md-12',
+                      key: 'email',
+                      type: 'input',
+                      templateOptions: {
+                        type: 'email',
+                        label: 'Email *',
+                        placeholder: 'Enter contact email',
+                        required: true
+                      },
+                      validation: {
+                        messages: {
+                          required: 'Email is required'
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
