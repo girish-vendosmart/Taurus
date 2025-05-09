@@ -8,6 +8,7 @@ import { SupplierOnboardingReviewComponent } from './supplier-onboarding-review/
 import { SupplierProfileReviewComponent } from './supplier-profile-review/supplier-profile-review.component';
 import { SupplierVerificationComponent } from './supplier-verification/supplier-verification.component';
 import { ManufacturingVerificationComponent } from './manufacturing-verification/manufacturing-verification.component';
+import { SupplierOnboardingCompleteComponent } from './supplier-onboarding-complete/supplier-onboarding-complete.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
@@ -45,6 +46,10 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
             {
                 path: 'profile-review',
                 component: SupplierProfileReviewComponent
+            },
+            {
+                path: 'onboarding-complete',
+                component: SupplierOnboardingCompleteComponent
             }
         ]
     }
