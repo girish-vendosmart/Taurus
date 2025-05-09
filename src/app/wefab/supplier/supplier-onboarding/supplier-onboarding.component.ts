@@ -428,7 +428,7 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             validation: {
               messages: {
-                required: 'Please select a city'
+                required: 'Please enter city name'
               }
             },
             expressionProperties: {

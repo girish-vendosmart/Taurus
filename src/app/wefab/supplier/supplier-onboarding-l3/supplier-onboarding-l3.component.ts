@@ -259,7 +259,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'companyFinancials.annualRevenue2024',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (2024) (USD) *',
+              label: 'Annual Revenue (2024) (INR) *',
               required: true,
               type: 'text',
               placeholder: '12359'
@@ -275,7 +275,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'companyFinancials.annualRevenue2023',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (2023) (USD) *',
+              label: 'Annual Revenue (2023) (INR) *',
               required: true,
               type: 'text',
               placeholder: '9876'
@@ -300,7 +300,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'companyFinancials.annualRevenue2022',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (2022) (USD) *',
+              label: 'Annual Revenue (2022) (INR) *',
               required: true,
               type: 'text',
               placeholder: '09876r'

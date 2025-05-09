@@ -561,46 +561,7 @@ $safety-orange: #F26830;
   }
   
   .action-buttons {
-    display: flex;
-    gap: 0.75rem;
-    
-    .btn {
-      flex: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.6rem 1rem;
-      border-radius: 4px;
-      font-weight: 500;
-      font-size: 0.9rem;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s ease;
-      
-      i {
-        margin-right: 0.3rem;
-      }
-    }
-    
-    .btn-danger {
-      background-color: #fff;
-      color: $safety-orange;
-      border: 1px solid $safety-orange;
-      
-      &:hover {
-        background-color: $safety-orange;
-        color: white;
-      }
-    }
-    
-    .btn-success {
-      background-color: $process-green;
-      color: white;
-      
-      &:hover {
-        background-color: darken($process-green, 5%);
-      }
-    }
+    display: none;
   }
 }
 
@@ -696,7 +657,6 @@ $safety-orange: #F26830;
 // Manufacturing tabs
 .manufacturing-tabs {
   display: flex;
-  overflow-x: auto;
   border-bottom: 1px solid #ddd;
   margin-bottom: 1.5rem;
   
@@ -736,7 +696,6 @@ $safety-orange: #F26830;
 // Basic Info tabs
 .basic-info-tabs {
   display: flex;
-  overflow-x: auto;
   border-bottom: 1px solid #ddd;
   margin-bottom: 1.5rem;
   

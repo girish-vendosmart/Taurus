@@ -66,8 +66,12 @@ export class SupplierProfileReviewComponent implements OnInit {
   activeLevelTab: string = 'basic'; // 'basic', 'manufacturing', 'financial'
   activeTab: string = 'revenue'; // 'revenue', 'credit', 'compliance', etc.
   basicInfoTab: string = 'company'; // Only 'company' and 'contact' now
-  manufacturingTab: string = 'machines'; // 'machines', 'facility', 'certifications', 'capacity'
-  
+  manufacturingTab: string = 'machines'; // 'machines', 'facility', 
+  // 'certifications', 'capacity'
+
+  // Financial Tab
+  financialTab: string = 'financial'; // 'financial', 'additional'
+
   // Completion Status
   completionStatus: CompletionStatus = {
     basicInformation: 100,
@@ -368,5 +372,9 @@ export class SupplierProfileReviewComponent implements OnInit {
       case 'capacity': return 'Production Capacity';
       default: return tab.charAt(0).toUpperCase() + tab.slice(1);
     }
+  }
+
+  changeFinancialTab(tab: string): void {
+    this.financialTab = tab;
   }
 } 
