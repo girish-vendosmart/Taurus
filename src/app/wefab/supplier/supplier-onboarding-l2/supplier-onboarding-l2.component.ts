@@ -531,13 +531,13 @@ export class SupplierOnboardingL2Component implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
-        detail: 'Your detailed supplier information has been received. Redirecting to financial information form.',
+        detail: 'Your detailed supplier information has been received. Starting manufacturing verification process.',
         life: 3000
       });
       
-      // Navigate to L3 form after 3 seconds
+      // Navigate to manufacturing verification after 3 seconds
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
+        this.router.navigate(['/wefab/supplier/manufacturing-verification']);
       }, 3000);
     }, (err:any) => {
       console.error('Error submitting form:', err);
