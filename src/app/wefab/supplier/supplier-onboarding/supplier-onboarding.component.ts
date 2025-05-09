@@ -22,6 +22,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 
 // Import FileUploadComponent
 import { FileUploadComponent } from './file-upload.component';
+// Import MultiFileUploadComponent
+import { MultiFileUploadComponent } from './multi-file-upload.component';
 
 // Import PhoneOtpVerificationComponent
 import { PhoneOtpVerificationComponent } from '../../wefab-shared-component/phone-otp-verification/phone-otp-verification.component';
@@ -60,7 +62,8 @@ export function gstValidator(control: AbstractControl): ValidationErrors | null 
     DialogModule,
     InputNumberModule,
     FileUploadComponent,
-    PhoneOtpVerificationComponent
+    PhoneOtpVerificationComponent,
+    MultiFileUploadComponent
   ],
   providers: [MessageService],
   templateUrl: './supplier-onboarding.component.html',
@@ -107,21 +110,82 @@ export class SupplierOnboardingComponent implements OnInit {
   }
 
   getStates(country: any) {
-    let endPoint = `/api/resource/pq_city?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${this.selectedCountry}"]]`
-    this.commonService.getData(endPoint).subscribe((res:any) => {
-      debugger
-      this.stateList = res.data
-    })
+    let endPoint = `/api/resource/pq_city?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"]]`
+    console.log('Fetching states for country:', country);
+    
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      console.log('States API response:', res);
+      if (res && res.data) {
+        // Extract unique states from the response
+        const states = [...new Set(res.data.map((item: any) => item.state_title))];
+        
+        this.stateList = states.map((state: any) => ({
+          label: state,
+          value: state
+        }));
+        
+        console.log('State list updated:', this.stateList);
+        
+        // Update the state dropdown options
+        this.updateStateDropdownOptions();
+      } else {
+        this.stateList = [];
+      }
+    }, error => {
+      console.error('Error fetching states:', error);
+      this.stateList = [];
+    });
+  }
+
+  // Method to update state dropdown options
+  updateStateDropdownOptions() {
+    // Find the state field in the form
+    if (this.stepFields && this.stepFields.length > 0) {
+      const basicDetailsFields = this.stepFields[0];
+      
+      // Find the row containing country, state, city fields
+      const addressRow = basicDetailsFields.find((fieldGroup: any) => 
+        fieldGroup.fieldGroup && 
+        fieldGroup.fieldGroup.some((field: any) => field.key === 'country')
+      );
+      
+      if (addressRow && addressRow.fieldGroup) {
+        // Find the state field
+        const stateField = addressRow.fieldGroup.find((field: any) => field.key === 'state');
+        
+        if (stateField && stateField.templateOptions) {
+          // Update the options
+          stateField.templateOptions.options = this.stateList;
+          
+          // Reset the state value if it's not in the new options
+          const stateControl = this.form.get('state');
+          if (stateControl && stateControl.value) {
+            const stateExists = this.stateList.some(
+              (option: any) => option.value === stateControl.value
+            );
+            
+            if (!stateExists) {
+              stateControl.setValue('');
+            }
+          }
+          
+          // Force update the UI
+          setTimeout(() => {
+            if (stateField.formControl) {
+              stateField.formControl.updateValueAndValidity();
+            }
+          });
+        }
+      }
+    }
   }
 
   ngOnInit(): void {
-    // get List of Country
-    this.getCountryList();
-    // Initialize step fields
-    this.stepFields = [
-      this.getBasicDetailsFields(),          // Step 1
-      this.getManufacturingCapabilitiesFields() // Step 2
-    ];
+    // Initialize form with empty fields first
+    this.form = this.fb.group({});
+    
+    // Load country list first, then initialize fields after data is loaded
+    this.getCountryListAndInitializeForm();
     
     this.steps = [
       {
@@ -137,9 +201,35 @@ export class SupplierOnboardingComponent implements OnInit {
         }
       }
     ];
-    
-    // Add icon wrapper to all error messages for validation
-    this.addValidationIconToErrorMessages(this.stepFields);
+  }
+
+  // New method to load countries then initialize form
+  getCountryListAndInitializeForm() {
+    let endPoint = '/api/resource/Country?limit=300';
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      // Store country list
+      this.countryList = res.data || [];
+      
+      console.log('Country list loaded:', this.countryList.length);
+      
+      // Initialize form fields after country data is loaded
+      this.stepFields = [
+        this.getBasicDetailsFields(),          // Step 1
+        this.getManufacturingCapabilitiesFields() // Step 2
+      ];
+      
+      // Add icon wrapper to all error messages for validation
+      this.addValidationIconToErrorMessages(this.stepFields);
+    }, error => {
+      console.error('Error loading country list:', error);
+      // Initialize with empty country list if there's an error
+      this.countryList = [];
+      this.stepFields = [
+        this.getBasicDetailsFields(),          // Step 1
+        this.getManufacturingCapabilitiesFields() // Step 2
+      ];
+      this.addValidationIconToErrorMessages(this.stepFields);
+    });
   }
 
   // Handle phone verification event
@@ -246,7 +336,7 @@ export class SupplierOnboardingComponent implements OnInit {
           {
             className: 'col-md-4 mb-2',
             key: 'country',
-            type: 'select',
+            type: 'searchable-select',
             templateOptions: {
               label: 'Country',
               required: true,
@@ -258,13 +348,27 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             hooks: {
               onInit: (field) => {
-                // Update options when country list changes
-                this.commonService.getData('/api/resource/Country?limit=0').subscribe((res: any) => {
-                  field.templateOptions!.options = res.data.map((country: any) => ({
+                // Country list should be already loaded at this point
+                const options = field.templateOptions?.options;
+                const optionsLength = Array.isArray(options) ? options.length : 0;
+                console.log('Country field initialized with options:', optionsLength);
+                
+                // If empty, try to update it once more
+                if (optionsLength === 0 && this.countryList.length > 0) {
+                  field.templateOptions!.options = this.countryList.map((country: any) => ({
                     label: country.name,
                     value: country.name
                   }));
                   field.formControl?.updateValueAndValidity();
+                }
+                
+                // Watch for country changes to update state dropdown
+                field.formControl?.valueChanges.subscribe(selectedCountry => {
+                  console.log('Selected country:', selectedCountry);
+                  if (selectedCountry) {
+                    this.selectedCountry = selectedCountry;
+                    this.getStates(selectedCountry);
+                  }
                 });
               }
             },
@@ -277,20 +381,27 @@ export class SupplierOnboardingComponent implements OnInit {
           {
             className: 'col-md-4 mb-2',
             key: 'state',
-            type: 'select',
+            type: 'searchable-select',
             templateOptions: {
               label: 'State',
               required: true,
               placeholder: 'Select state',
-              options: [
-                { label: 'Delhi', value: 'delhi' },
-                { label: 'Maharashtra', value: 'maharashtra' },
-                { label: 'Karnataka', value: 'karnataka' },
-                { label: 'Tamil Nadu', value: 'tamil_nadu' },
-                { label: 'Uttar Pradesh', value: 'uttar_pradesh' }
-              ]
+              options: this.stateList || []
             },
-            hooks: {},
+            hooks: {
+              onInit: (field) => {
+                // If country changes, this field will be updated by updateStateDropdownOptions
+                console.log('State field initialized');
+                
+                // Watch for state changes to update city dropdown
+                field.formControl?.valueChanges.subscribe(selectedState => {
+                  console.log('Selected state:', selectedState);
+                  // if (selectedState && this.selectedCountry) {
+                  //   this.getCities(this.selectedCountry, selectedState);
+                  // }
+                });
+              }
+            },
             validation: {
               messages: {
                 required: 'Please select a state'
@@ -306,13 +417,22 @@ export class SupplierOnboardingComponent implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'City',
-              placeholder: 'Enter your city',
-              required: true
+              placeholder: 'Please enter your city',
+              required: true,
+              options: []
+            },
+            hooks: {
+              onInit: (field) => {
+                console.log('City field initialized');
+              }
             },
             validation: {
               messages: {
-                required: 'Please enter your city'
+                required: 'Please select a city'
               }
+            },
+            expressionProperties: {
+              'templateOptions.disabled': '!model.state'
             }
           }
         ]
@@ -423,10 +543,11 @@ export class SupplierOnboardingComponent implements OnInit {
           {
             className: 'col-md-4 mb-2',
             key: 'primaryManufacturingProcess',
-            type: 'select',
+            type: 'p-multiselect',
+            defaultValue: [],
             templateOptions: {
               label: 'Primary Manufacturing Process',
-              placeholder: 'Select manufacturing process',
+              placeholder: 'Select manufacturing processes',
               required: true,
               options: [
                 { label: 'CNC Machining', value: 'cnc_machining' },
@@ -434,11 +555,13 @@ export class SupplierOnboardingComponent implements OnInit {
                 { label: 'Sheet Metal Fabrication', value: 'sheet_metal_fabrication' },
                 { label: '3D Printing', value: '3d_printing' },
                 { label: 'Die Casting', value: 'die_casting' }
-              ]
+              ],
+              filter: true,
+              showToggleAll: true
             },
             validation: {
               messages: {
-                required: 'Please select a manufacturing process'
+                required: 'Please select at least one manufacturing process'
               }
             }
           }
@@ -469,35 +592,49 @@ export class SupplierOnboardingComponent implements OnInit {
           }
         ]
       },
+      // Added Documentation Guidelines Component
       {
-        fieldGroupClassName: 'mt-4',
-        fieldGroup: [
-          {
-            template: `
-              <div class="documentation-guidelines p-3 mb-4 rounded">
-                <h5 class="mb-3"><i class="pi pi-info-circle me-2"></i> Documentation Guidelines</h5>
-                <p class="mb-3">To help us make quick and accurate decision-making, we encourage you to upload comprehensive and relevant documentation. A well-documented profile significantly increases your visibility and enhances your chances of being shortlisted for business opportunities.</p>
-                <p class="mb-3">We highly recommend uploading a single ZIP file containing all supporting documents. However, individual file uploads are also accepted for your convenience.</p>
-                <p class="mb-3">Please ensure the inclusion of the following key documents, where applicable:</p>
-                <ul class="mb-3">
-                  <li><strong>Manufacturing Facility Details</strong> – Photos, videos, or formal documentation showcasing your production facilities</li>
-                  <li><strong>Machinery Information</strong> – Makes, models, and specifications of key equipment in use</li>
-                  <li><strong>Product Portfolio</strong> – A detailed list of products or services you currently manufacture</li>
-                  <li><strong>Certifications</strong> – Copies of relevant quality, safety, environmental, or industry-specific certifications</li>
-                </ul>
-                <p>Providing a complete set of documents enhances our ability to assess your capabilities thoroughly and match you with suitable business opportunities.</p>
+        template: `
+          <div class="card mt-4 mb-4 border-0 bg-light">
+            <div class="card-body">
+              <div class="d-flex align-items-start">
+                <i class="pi pi-info-circle text-primary me-2 mt-1" style="font-size: 1.2rem;"></i>
+                <div>
+                  <h5 class="documentation-title">Documentation Guidelines</h5>
+                  <p class="mb-3">To help us evaluate your profile more accurately and expedite decision-making, we encourage you to upload comprehensive and relevant documentation. A well-documented profile significantly increases your visibility and improves your chances of being shortlisted for relevant opportunities.</p>
+                  
+                  <p class="mb-2">We highly recommend uploading a single ZIP file containing all supporting documents. However, individual file uploads are also supported for your convenience.</p>
+                  
+                  <p class="mb-2">Please ensure the inclusion of the following key documents, where applicable:</p>
+                  
+                  <ul>
+                    <li><strong>Manufacturing Facility Details</strong> – Photos, videos, or formal documentation showcasing your infrastructure.</li>
+                    <li><strong>Machinery Information</strong> – Make, model, and specifications of key equipment in use.</li>
+                    <li><strong>Product Portfolio</strong> – A detailed list or brochure of products currently manufactured.</li>
+                    <li><strong>Certifications</strong> – Copies of relevant quality, safety, environmental, or industry-specific certifications.</li>
+                  </ul>
+                  
+                  <p>Providing a complete set of documents enhances our ability to assess your capabilities thoroughly and match you with suitable business opportunities.</p>
+                </div>
               </div>
-            `
-          },
-          {
-            key: 'companyDocuments',
-            type: 'custom',
-            templateOptions: {
-              label: 'Company Documents'
-            },
-            template: `<app-file-upload [formControl]="form.get('companyDocuments')"></app-file-upload>`
+            </div>
+          </div>
+        `
+      },
+      {
+        key: 'companyDocuments',
+        type: 'file-upload',
+        className: 'col-12 mb-2',
+        templateOptions: {
+          label: 'Company Documents',
+          description: 'Upload documents that will help us evaluate your profile more accurately and expedite decision-making',
+          required: true
+        },
+        validation: {
+          messages: {
+            required: 'Please upload documents'
           }
-        ]
+        }
       }
     ];
   }
@@ -596,13 +733,13 @@ export class SupplierOnboardingComponent implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
-        detail: 'Your supplier onboarding application has been received. Redirecting to detailed information form.',
+        detail: 'Your supplier onboarding application has been received. Redirecting to verification page.',
         life: 3000
       });
       
-      // Navigate to L2 form after 3 seconds
+      // Navigate to verification page after 3 seconds
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
+        this.router.navigate(['/wefab/supplier/supplier-verification']);
       }, 3000);
     }, (err) => {
       console.error('Error submitting form:', err);
@@ -684,5 +821,74 @@ export class SupplierOnboardingComponent implements OnInit {
         field.className += ' has-validation-icon';
       }
     });
+  }
+
+  // Method to get cities based on country and state
+  getCities(country: string, state: string) {
+    let endPoint = `/api/resource/pq_city?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"], ["state_title", "=", "${state}"]]`;
+    console.log('Fetching cities for country:', country, 'and state:', state);
+    
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      console.log('Cities API response:', res);
+      if (res && res.data) {
+        // Extract unique cities from the response
+        const cities = [...new Set(res.data.map((item: any) => item.city_title))];
+        
+        const cityList = cities.map((city: any) => ({
+          label: city,
+          value: city
+        }));
+        
+        console.log('City list updated:', cityList);
+        
+        // Update the city dropdown options
+        this.updateCityDropdownOptions(cityList);
+      }
+    }, error => {
+      console.error('Error fetching cities:', error);
+    });
+  }
+  
+  // Method to update city dropdown options
+  updateCityDropdownOptions(cityList: any[]) {
+    // Find the city field in the form
+    if (this.stepFields && this.stepFields.length > 0) {
+      const basicDetailsFields = this.stepFields[0];
+      
+      // Find the row containing country, state, city fields
+      const addressRow = basicDetailsFields.find((fieldGroup: any) => 
+        fieldGroup.fieldGroup && 
+        fieldGroup.fieldGroup.some((field: any) => field.key === 'country')
+      );
+      
+      if (addressRow && addressRow.fieldGroup) {
+        // Find the city field
+        const cityField = addressRow.fieldGroup.find((field: any) => field.key === 'city');
+        
+        if (cityField && cityField.templateOptions) {
+          // Update the options
+          cityField.templateOptions.options = cityList;
+          
+          // Reset the city value if it's not in the new options
+          const cityControl = this.form.get('city');
+          if (cityControl && cityControl.value) {
+            const cityExists = cityList.some(
+              (option: any) => option.value === cityControl.value
+            );
+            
+            if (!cityExists) {
+              cityControl.setValue('');
+            }
+          }
+          
+          // Force update the UI
+          setTimeout(() => {
+            if (cityField.formControl) {
+              cityField.formControl.updateValueAndValidity();
+            }
+          });
+        }
+      }
+    }
   }
 }

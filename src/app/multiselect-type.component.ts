@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
   imports: [CommonModule, ReactiveFormsModule, FormlyModule, MultiSelectModule],
   template: `
     <div class="mb-3">
-      <label *ngIf="props['label']" class="form-label">
+      <label *ngIf="props['label']" class="form-label d-flex align-items-baseline">
         {{ props['label'] }}
         <span class="text-danger" *ngIf="props['required']">*</span>
       </label>

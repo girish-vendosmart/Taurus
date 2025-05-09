@@ -721,7 +721,7 @@ export class SupplierOnboardingL3Component implements OnInit {
         
         // Here you might redirect to a supplier dashboard or confirmation page
         setTimeout(() => {
-          this.router.navigate(['/wefab/supplier/supplier-onboarding-review']);
+          this.router.navigate(['/wefab/supplier/onboarding-complete']);
         }, 3000);
       }, (err: any) => {
         this.messageService.add({

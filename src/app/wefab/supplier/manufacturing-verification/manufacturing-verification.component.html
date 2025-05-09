@@ -1,0 +1,73 @@
+<div class="container-fluid py-5">
+  <div class="verification-container">
+    <h2 class="verification-title">Verifying Manufacturing Information</h2>
+    <p class="verification-subtitle">Please wait while we verify your manufacturing capabilities</p>
+
+    <!-- Progress line animation -->
+    <div class="progress-line-container">
+      <div class="progress-line"></div>
+    </div>
+
+    <div class="verification-steps">
+      <!-- Geolocation Verification -->
+      <div class="verification-step">
+        <div class="step-icon" [ngClass]="{'completed': verificationStatus.geolocation === 'completed'}">
+          <i class="pi" [ngClass]="{'pi-check': verificationStatus.geolocation === 'completed', 'pi-spinner pi-spin': verificationStatus.geolocation === 'verifying'}"></i>
+        </div>
+        <div class="step-icon-secondary">
+          <i class="pi pi-map-marker"></i>
+        </div>
+        <div class="step-content">
+          <h4 class="step-title">Geolocation Verification</h4>
+          <p class="step-description">Verifying geolocation match with your Manufacturing Facility</p>
+          <p class="verification-success" *ngIf="verificationStatus.geolocation === 'completed'">Verification successful</p>
+        </div>
+      </div>
+
+      <!-- Manufacturing Capability -->
+      <div class="verification-step">
+        <div class="step-icon" [ngClass]="{'completed': verificationStatus.capability === 'completed'}">
+          <i class="pi" [ngClass]="{'pi-check': verificationStatus.capability === 'completed', 'pi-spinner pi-spin': verificationStatus.capability === 'verifying'}"></i>
+        </div>
+        <div class="step-icon-secondary">
+          <i class="pi pi-cog"></i>
+        </div>
+        <div class="step-content">
+          <h4 class="step-title">Manufacturing Capability</h4>
+          <p class="step-description">Assessing the Manufacturing Capability</p>
+          <p class="verification-success" *ngIf="verificationStatus.capability === 'completed'">Verification successful</p>
+        </div>
+      </div>
+
+      <!-- Machine Detection -->
+      <div class="verification-step">
+        <div class="step-icon" [ngClass]="{'completed': verificationStatus.machineDetection === 'completed'}">
+          <i class="pi" [ngClass]="{'pi-check': verificationStatus.machineDetection === 'completed', 'pi-spinner pi-spin': verificationStatus.machineDetection === 'verifying'}"></i>
+        </div>
+        <div class="step-icon-secondary">
+          <i class="pi pi-desktop"></i>
+        </div>
+        <div class="step-content">
+          <h4 class="step-title">Machine Detection</h4>
+          <p class="step-description">Detecting Machines in your uploaded images</p>
+          <p class="verification-success" *ngIf="verificationStatus.machineDetection === 'completed'">Verification successful</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- All Verifications Complete -->
+    <div class="verification-complete-box" *ngIf="verificationComplete">
+      <div class="complete-header">
+        <div class="complete-icon">
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <h4 class="complete-title">All Verifications Complete</h4>
+      </div>
+      <p class="complete-message">Your manufacturing information has been successfully verified. You will be redirected to the next section shortly.</p>
+      <div class="complete-actions">
+        <button class="btn-back" (click)="goBack()">Back</button>
+        <button class="btn-continue" (click)="continue()">Continue</button>
+      </div>
+    </div>
+  </div>
+</div> 
