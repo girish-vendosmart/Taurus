@@ -89,6 +89,7 @@ export class SupplierOnboardingComponent implements OnInit {
   countryList: any = []
   selectedCountry: any;
   stateList: any;
+  getCompanyProfile: any;
   
   constructor(
     private fb: FormBuilder, 
@@ -201,6 +202,46 @@ export class SupplierOnboardingComponent implements OnInit {
         }
       }
     ];
+  }
+
+
+  getL1Data(supplierId:any) {
+  let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      debugger
+      this.getCompanyProfile = JSON.parse(res.data.company_profile)
+      this.phoneVerified = this.getCompanyProfile.phone_verified
+      console.log(this.getCompanyProfile)
+      this.patchValueForm()
+    })
+  }
+
+  patchValueForm(fields?:any) {
+    if (!this.getCompanyProfile) {
+      return;
+    }
+    
+    // Update the model with the values from getCompanyProfile
+    this.model = {
+      ...this.getCompanyProfile
+    };
+    
+    // If we have a country value, trigger the state list fetch
+    if (this.model.country) {
+      this.selectedCountry = this.model.country;
+      this.getStates(this.model.country);
+    }
+    
+    // Handle the "Same as Registered Address" checkbox logic
+    if (this.model.sameAsRegistered && this.model.registeredAddress) {
+      this.model.manufacturingFacilityAddress = this.model.registeredAddress;
+    }
+    
+    // Mark form as pristine after patching values
+    setTimeout(() => {
+      this.form.markAsPristine();
+      console.log('Form patched with stored data:', this.model);
+    });
   }
 
   // New method to load countries then initialize form
@@ -509,7 +550,7 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroupClassName: 'row align-items-end',
         fieldGroup: [
           {
-            className: 'col-md-4 mb-2',
+            className: 'col-md-6 mb-2',
             key: 'primaryContactName',
             type: 'input',
             templateOptions: {
@@ -524,15 +565,26 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           },
           {
-            className: 'col-md-4 mb-2',
+            className: 'col-md-6 mb-2',
             key: 'phoneNumber',
             type: 'phone-otp',
+            defaultValue: this.model.phoneNumber,
             templateOptions: {
               label: 'Phone Number',
               required: true,
               placeholder: 'Enter phone number',
               countryCode: '91',
-              parentComponent: this
+              parentComponent: this,
+              isVerified: this.phoneVerified
+            },
+            hooks: {
+              onInit: (field) => {
+                // Ensure the verified state is properly set
+                if (this.phoneVerified) {
+                  console.log('Phone is already verified, updating field display');
+                  field.templateOptions!['isVerified'] = true;
+                }
+              }
             },
             validation: {
               messages: {
@@ -540,31 +592,31 @@ export class SupplierOnboardingComponent implements OnInit {
               }
             }
           },
-          {
-            className: 'col-md-4 mb-2',
-            key: 'primaryManufacturingProcess',
-            type: 'p-multiselect',
-            defaultValue: [],
-            templateOptions: {
-              label: 'Primary Manufacturing Process',
-              placeholder: 'Select manufacturing processes',
-              required: true,
-              options: [
-                { label: 'CNC Machining', value: 'cnc_machining' },
-                { label: 'Injection Molding', value: 'injection_molding' },
-                { label: 'Sheet Metal Fabrication', value: 'sheet_metal_fabrication' },
-                { label: '3D Printing', value: '3d_printing' },
-                { label: 'Die Casting', value: 'die_casting' }
-              ],
-              filter: true,
-              showToggleAll: true
-            },
-            validation: {
-              messages: {
-                required: 'Please select at least one manufacturing process'
-              }
-            }
-          }
+          // {
+          //   className: 'col-md-4 mb-2',
+          //   key: 'primaryManufacturingProcess',
+          //   type: 'p-multiselect',
+          //   defaultValue: [],
+          //   templateOptions: {
+          //     label: 'Primary Manufacturing Process',
+          //     placeholder: 'Select manufacturing processes',
+          //     required: true,
+          //     options: [
+          //       { label: 'CNC Machining', value: 'cnc_machining' },
+          //       { label: 'Injection Molding', value: 'injection_molding' },
+          //       { label: 'Sheet Metal Fabrication', value: 'sheet_metal_fabrication' },
+          //       { label: '3D Printing', value: '3d_printing' },
+          //       { label: 'Die Casting', value: 'die_casting' }
+          //     ],
+          //     filter: true,
+          //     showToggleAll: true
+          //   },
+          //   validation: {
+          //     messages: {
+          //       required: 'Please select at least one manufacturing process'
+          //     }
+          //   }
+          // }
         ]
       },
       {
@@ -651,7 +703,7 @@ export class SupplierOnboardingComponent implements OnInit {
     
     // Check if the current step is valid
     if (this.isStepValid(formlyFields)) {
-      // For step 1 to 2, check if phone verification is required
+      // For step 1 to 2, check if phone verification is required (only if not already verified)
       if (this.activeStepIndex === 1 && !this.phoneVerified) {
         this.messageService.add({
           severity: 'error',
@@ -720,6 +772,7 @@ export class SupplierOnboardingComponent implements OnInit {
       company_name: data.legalBusinessName,
       primary_email_id: data.primaryEmailId,
       onboarding_status: 'Under Review',
+      phone_verified: this.phoneVerified,
       company_profile: JSON.stringify(data)
     }
     return body
@@ -727,6 +780,8 @@ export class SupplierOnboardingComponent implements OnInit {
 
   postSupplierOnboardingL1() {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L1';
+    this.model.phone_verified = this.phoneVerified;
+    console.log(this.model)
     let body = this.updateData(this.model);
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
       sessionStorage.setItem('supplier_id', res.data.name)

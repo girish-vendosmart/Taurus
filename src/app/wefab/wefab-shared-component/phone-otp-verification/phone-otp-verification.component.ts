@@ -8,6 +8,14 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { CommonService } from '../../shared/common.service';
 import { FirebaseService } from '../../../core/services/firebase.service';
+import { DropdownModule } from 'primeng/dropdown';
+
+interface Country {
+  name: string;
+  code: string;
+  emoji: string;  // Using emoji flags instead of image assets
+}
+
 @Component({
   selector: 'app-phone-otp-verification',
   standalone: true,
@@ -18,7 +26,8 @@ import { FirebaseService } from '../../../core/services/firebase.service';
     ButtonModule,
     InputTextModule,
     DialogModule,
-    ToastModule
+    ToastModule,
+    DropdownModule
   ],
   providers: [
     MessageService,
@@ -34,22 +43,55 @@ import { FirebaseService } from '../../../core/services/firebase.service';
         {{ label }}
         <span class="text-danger" *ngIf="required">*</span>
       </label>
-      <div class="input-group">
-        <span class="input-group-text">+{{ countryCode }}</span>
-        <input 
-          type="text" 
-          [formControl]="phoneControl"
-          class="form-control" 
-          [placeholder]="placeholder"
-          (blur)="markAsTouched()">
-        <button 
-          type="button" 
-          class="btn btn-primary verify-otp-button" 
-          [disabled]="isVerified || !phoneControl.value || phoneControl.invalid"
-          (click)="sendOTP()">
-          {{ isVerified ? 'Verified' : 'Verify OTP' }}
-        </button>
+      <div class="phone-input-container">
+        <!-- Country Dropdown -->
+        <div class="country-selector">
+          <p-dropdown 
+            [options]="countries" 
+            [(ngModel)]="selectedCountry" 
+            optionLabel="name"
+            [disabled]="_isVerified"
+            styleClass="country-dropdown">
+            <ng-template pTemplate="selectedItem">
+              <div class="country-item selected-country">
+                <span class="flag-emoji">{{ selectedCountry.emoji }}</span>
+                <span class="country-code">+{{ selectedCountry.code }}</span>
+              </div>
+            </ng-template>
+            <ng-template let-country pTemplate="item">
+              <div class="country-item">
+                <span class="flag-emoji">{{ country.emoji }}</span>
+                <span>{{ country.name }} (+{{ country.code }})</span>
+              </div>
+            </ng-template>
+          </p-dropdown>
+        </div>
+        
+        <!-- Phone Input Field -->
+        <div class="phone-field">
+          <input 
+            type="text" 
+            [formControl]="phoneControl"
+            class="form-control phone-input" 
+            [placeholder]="placeholder"
+            [readonly]="_isVerified"
+            (blur)="markAsTouched()">
+        </div>
+        
+        <!-- Verify OTP Button -->
+        <div class="verify-button-container">
+          <button 
+            type="button" 
+            class="btn verify-otp-button"
+            [ngClass]="{'verified': _isVerified, 'error': verificationError}" 
+            [disabled]="!phoneControl.value || phoneControl.invalid || _isVerified"
+            [style.backgroundColor]="_isVerified ? '#28a745' : (verificationError ? '#dc3545' : '#1a3a60')"
+            (click)="sendOTP()">
+            {{ _isVerified ? 'Verified' : (verificationError ? 'Failed' : 'VERIFY OTP') }}
+          </button>
+        </div>
       </div>
+      
       <div class="invalid-feedback d-block phone-otp-error" *ngIf="phoneControl.invalid && phoneControl.touched">
         <i class="pi pi-exclamation-triangle" style="margin-right: 0.4rem;"></i>
         {{ errorMessage }}
@@ -94,59 +136,121 @@ import { FirebaseService } from '../../../core/services/firebase.service';
     </p-dialog>
   `,
   styles: [`
-    .form-label {
+    :host ::ng-deep {
+      .p-dropdown {
+        border-radius: 4px;
+        width: 125px !important;
+        height: 40px;
         display: flex;
-        flex-wrap: nowrap;
         align-items: center;
+        background-color: #ffffff;
+        border: 1px solid #ced4da;
+      }
+      
+      .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+        padding: 0.5rem 1rem;
+      }
+
+      .p-dropdown .p-dropdown-label {
+        padding: 0.5rem;
+      }
+
+      .p-dropdown .p-dropdown-trigger {
+        width: 2rem;
+      }
     }
+    
+    .form-label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
     .phone-field-wrapper {
-      .input-group {
+      .phone-input-container {
         display: flex;
-        flex-wrap: nowrap;
-        .input-group-text {
-          background-color: var(--blueprint-blue, #0066cc);
-          color: white;
-          border-color: var(--blueprint-blue, #0066cc);
+        gap: 10px;
+        align-items: stretch;
+      }
+      
+      .country-selector {
+        flex-shrink: 0;
+      }
+      
+      .phone-field {
+        flex-grow: 1;
+      }
+      
+      .verify-button-container {
+        flex-shrink: 0;
+      }
+      
+      .flag-emoji {
+        font-size: 16px;
+        margin-right: 6px;
+      }
+      
+      .country-item {
+        display: flex;
+        align-items: center;
+      }
+
+      .selected-country {
+        display: flex;
+        align-items: center;
+        
+        .country-code {
           font-weight: 500;
-          border-top-left-radius: 8px;
-          border-bottom-left-radius: 8px;
+          color: #333;
+          margin-left: 2px;
+        }
+      }
+      
+      .phone-input {
+        width: 100%;
+        height: 40px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 0.5rem 0.75rem;
+        
+        &:focus {
+          box-shadow: none;
+          border-color: #80bdff;
+        }
+      }
+      
+      .verify-otp-button {
+        border-radius: 4px;
+        white-space: nowrap;
+        background-color: #1a3a60; /* Default navy blue color */
+        color: white;
+        border: none;
+        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+        font-size: 0.875rem;
+        min-width: 120px;
+        height: 40px;
+        
+        &:hover:not(:disabled) {
+          background-color: #15304f;
         }
         
-        .form-control {
-          border-radius: 0;
-          border-left: 0;
-          
-          &:focus {
-            box-shadow: none;
-            border-color: var(--material-finish-silver, #cccccc);
-          }
+        &:disabled {
+          opacity: 0.7;
         }
         
-        .verify-otp-button {
-          border-top-right-radius: 8px;
-          border-bottom-right-radius: 8px;
-          border-top-left-radius: 0;
-          border-bottom-left-radius: 0;
-          white-space: nowrap;
-          background-color: var(--blueprint-blue, #0066cc);
-          color: white;
-          border-color: var(--blueprint-blue, #0066cc);
-          
-          &:hover:not(:disabled) {
-            background-color: var(--blueprint-blue-dark, #0052a3);
-            border-color: var(--blueprint-blue-dark, #0052a3);
-          }
-          
-          &:disabled {
-            background-color: var(--blueprint-blue-light, #66a3ff);
-            border-color: var(--blueprint-blue-light, #66a3ff);
-            opacity: 0.7;
-          }
+        &.verified {
+          background-color: #28a745; /* Green for verified state */
+        }
+        
+        &.error {
+          background-color: #dc3545; /* Red for error state */
         }
       }
       
       .phone-otp-error {
-        color: var(--safety-orange, #ff6b6b) !important;
+        color: #ff6b6b !important;
         font-size: 0.8rem;
         margin-top: 0.3rem;
         display: flex !important;
@@ -157,37 +261,97 @@ import { FirebaseService } from '../../../core/services/firebase.service';
 })
 export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccessor {
   @Input() label: any = 'Phone Number';
-  @Input() placeholder: any = 'Enter phone number';
+  @Input() placeholder: any = 'Phone number';
   @Input() required: any = false;
   @Input() countryCode: any = '91';
   @Input() errorMessage: any = 'Please enter a valid phone number';
+  @Input() set isVerified(value: boolean) {
+    if (value === true) {
+      this._isVerified = true;
+      this.verified.emit(true);
+      
+      // If we have a FormControl and it's not already disabled, disable it
+      if (this.phoneControl && !this.phoneControl.disabled) {
+        this.phoneControl.disable({ emitEvent: false });
+      }
+    }
+  }
+  get isVerified(): boolean {
+    return this._isVerified;
+  }
   
   @Output() verified = new EventEmitter<boolean>();
   
   phoneControl = new FormControl('');
-  isVerified = false;
+  _isVerified = false;
+  verificationError = false;
   showOtpDialog = false;
   otpValue: string = '';
+  
+  countries: Country[] = [
+    { name: 'India', code: '91', emoji: '🇮🇳' },
+    { name: 'United States', code: '1', emoji: '🇺🇸' },
+    { name: 'United Kingdom', code: '44', emoji: '🇬🇧' },
+    { name: 'Australia', code: '61', emoji: '🇦🇺' },
+    { name: 'Canada', code: '1', emoji: '🇨🇦' },
+    { name: 'China', code: '86', emoji: '🇨🇳' },
+    { name: 'Germany', code: '49', emoji: '🇩🇪' },
+    { name: 'France', code: '33', emoji: '🇫🇷' },
+    { name: 'Japan', code: '81', emoji: '🇯🇵' },
+    { name: 'UAE', code: '971', emoji: '🇦🇪' },
+    { name: 'Singapore', code: '65', emoji: '🇸🇬' },
+    { name: 'Malaysia', code: '60', emoji: '🇲🇾' },
+  ];
+  
+  selectedCountry: Country;
   
   private onChange: (value: any) => void = () => {};
   private onTouched: () => void = () => {};
   confirmationResult: any;
   
-  constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService) {}
+  constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService) {
+    // Set default country to India or use the provided countryCode
+    this.selectedCountry = this.countries.find(c => c.code === this.countryCode) || this.countries[0];
+    
+    // If created in verified state (from parent's phoneVerified=true), set visually verified
+    if (this._isVerified) {
+      setTimeout(() => {
+        this.phoneControl.disable({ emitEvent: false });
+      });
+    }
+  }
   
   ngOnInit(): void {
+    // If already set as verified through input property, ensure component state matches
+    if (this._isVerified) {
+      this.phoneControl.disable({ emitEvent: false });
+    }
+    
     // Initialize with initial value if needed
     this.phoneControl.valueChanges.subscribe(value => {
       this.onChange(value);
       // Reset verification if phone number changes
-      if (this.isVerified) {
-        this.isVerified = false;
+      if (this._isVerified) {
+        this._isVerified = false;
         this.verified.emit(false);
       }
     });
+    
+    // Set the default country based on the input
+    if (this.countryCode) {
+      const country = this.countries.find(c => c.code === this.countryCode);
+      if (country) {
+        this.selectedCountry = country;
+      }
+    }
   }
   
   async sendOTP() {
+    // If already verified, don't proceed
+    if (this._isVerified) {
+      return;
+    }
+    
     if (!this.phoneControl.value) {
       this.messageService.add({
         severity: 'error',
@@ -199,23 +363,16 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     }
 
     try {
-      // Create a unique ID for the recaptcha container
-      // const recaptchaContainerId = 'recaptcha-container-' + new Date().getTime();
+      // Reset verification states when attempting a new verification
+      this._isVerified = false;
+      this.verificationError = false;
       
-      // // Create the container element if it doesn't exist
-      // let container = document.getElementById(recaptchaContainerId);
-      // if (!container) {
-      //   container = document.createElement('div');
-      //   container.id = recaptchaContainerId;
-      //   document.body.appendChild(container);
-      // }
+      // Using the selected country code for sending OTP
+      const phoneNumber = `+${this.selectedCountry.code}${this.phoneControl.value}`;
+      console.log(`Sending OTP to: ${phoneNumber}`);
       
-      // // Call the updated method with the container ID
-      // this.confirmationResult = await this.firebaseService.sendPhoneVerificationCode(
-      //   '+' + this.countryCode + this.phoneControl.value, 
-      //   recaptchaContainerId
-      // );
-      
+      // Here we would typically call the Firebase or other OTP service
+      // For now we just open the dialog
       this.showOtpDialog = true;
     } catch (error: any) {
       console.error('Error sending OTP:', error);
@@ -225,21 +382,37 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
         detail: error.message || 'Failed to send verification code',
         life: 5000
       });
+      this.verificationError = true;
     }
   }
   
   verifyOTP(): void {
     // Mock function to simulate verifying OTP
     if (this.otpValue && this.otpValue.length === 6) {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Verified',
-        detail: 'Your phone number has been successfully verified.',
-        life: 3000
-      });
-      this.showOtpDialog = false;
-      this.isVerified = true;
-      this.verified.emit(true);
+      // Simulate successful verification
+      if (this.otpValue === '123456') { // For demo purposes
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Verified',
+          detail: 'Your phone number has been successfully verified.',
+          life: 3000
+        });
+        this.showOtpDialog = false;
+        this._isVerified = true;
+        this.verificationError = false;
+        this.verified.emit(true);
+      } else {
+        // Simulate failed verification
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Verification Failed',
+          detail: 'Invalid OTP code. Please try again.',
+          life: 3000
+        });
+        this.verificationError = true;
+        this._isVerified = false;
+        this.verified.emit(false);
+      }
     } else {
       this.messageService.add({
         severity: 'error',
@@ -261,6 +434,11 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   writeValue(value: any): void {
     if (value !== undefined) {
       this.phoneControl.setValue(value, { emitEvent: false });
+      
+      // If the phone is already verified, don't allow changing the value
+      if (this._isVerified) {
+        this.phoneControl.disable({ emitEvent: false });
+      }
     }
   }
   
@@ -279,4 +457,4 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
       this.phoneControl.enable();
     }
   }
-} 
+}

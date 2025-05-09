@@ -21,6 +21,7 @@ import { PhoneOtpVerificationComponent } from './wefab/wefab-shared-component/ph
         [required]="props.required ?? false"
         [placeholder]="props.placeholder ?? 'Enter phone number'"
         [countryCode]="props['countryCode'] ?? '91'"
+        [isVerified]="props['isVerified'] ?? false"
         (verified)="onPhoneVerified($event)"
         [class.is-invalid]="showError">
       </app-phone-otp-verification>
