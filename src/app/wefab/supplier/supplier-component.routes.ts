@@ -9,6 +9,7 @@ import { SupplierProfileReviewComponent } from './supplier-profile-review/suppli
 import { SupplierVerificationComponent } from './supplier-verification/supplier-verification.component';
 import { ManufacturingVerificationComponent } from './manufacturing-verification/manufacturing-verification.component';
 import { SupplierOnboardingCompleteComponent } from './supplier-onboarding-complete/supplier-onboarding-complete.component';
+import { AuthGuard } from '../../core/guards/auth.guard';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
@@ -21,35 +22,43 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
             },
             { 
                 path: 'supplier-onboarding', 
-                component: SupplierOnboardingComponent
+                component: SupplierOnboardingComponent,
+                canActivate: [AuthGuard]
             },
             {
                 path: 'supplier-verification',
-                component: SupplierVerificationComponent
+                component: SupplierVerificationComponent,
+                canActivate: [AuthGuard]
             },
             {
                 path: 'manufacturing-verification',
-                component: ManufacturingVerificationComponent
+                component: ManufacturingVerificationComponent,
+                canActivate: [AuthGuard]
             },
             {
                 path: 'supplier-onboarding-l2',
-                component: SupplierOnboardingL2Component
+                component: SupplierOnboardingL2Component,
+                canActivate: [AuthGuard]
             },
             {
                 path: 'supplier-onboarding-l3',
-                component: SupplierOnboardingL3Component
+                component: SupplierOnboardingL3Component,
+                canActivate: [AuthGuard]
             },
             {
                 path: 'supplier-onboarding-review',
-                component: SupplierOnboardingReviewComponent
+                component: SupplierOnboardingReviewComponent,
+                canActivate: [AuthGuard]
             },
             {
                 path: 'profile-review',
-                component: SupplierProfileReviewComponent
+                component: SupplierProfileReviewComponent,
+                canActivate: [AuthGuard]
             },
             {
                 path: 'onboarding-complete',
-                component: SupplierOnboardingCompleteComponent
+                component: SupplierOnboardingCompleteComponent,
+                canActivate: [AuthGuard]
             }
         ]
     }

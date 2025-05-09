@@ -285,11 +285,9 @@ export class SupplierOnboardingReviewComponent implements OnInit {
         life: 5000
       });
       
-      // Display a thank you message and maybe redirect to a dashboard
+      // Navigate to the completion page
       setTimeout(() => {
-        // Uncomment the line below when ready to redirect
-        // this.router.navigate(['/wefab/supplier/dashboard']);
-        console.log('Onboarding completed successfully with static data');
+        this.router.navigate(['/wefab/supplier/onboarding-complete']);
       }, 3000);
     }, 1000); // Reduced to 1 second for faster demo
   }
