@@ -27,7 +27,7 @@ import { HttpEventType } from '@angular/common/http';
         <div class="upload-text">
           <p><strong>Click to upload</strong> or drag and drop</p>
           <p class="text-muted small">
-            {{ props['accept'] ? 'Accepted file types: ' + props['accept'] : 'All file types supported' }} (max 100MB)
+            {{ props['acceptedTypes'] || props['accept'] ? 'Accepted file types: ' + (props['acceptedTypes'] || props['accept']) : 'All file types supported' }} (max 100MB)
           </p>
         </div>
       </div>
@@ -38,7 +38,7 @@ import { HttpEventType } from '@angular/common/http';
         style="display: none;" 
         (change)="onFileSelected($event)"
         [multiple]="props['multiple'] || false"
-        [accept]="props['accept'] || ''"
+        [accept]="props['acceptedTypes'] || props['accept'] || ''"
       />
       
       <!-- File type error message -->
@@ -287,8 +287,8 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     if (event.dataTransfer?.files.length) {
       this.fileTypeError = ''; // Reset any previous error
       
-      // Check file types if accept is specified
-      if (this.props['accept'] && !this.validateFileTypes(event.dataTransfer.files)) {
+      // Check file types if accept or acceptedTypes is specified
+      if ((this.props['accept'] || this.props['acceptedTypes']) && !this.validateFileTypes(event.dataTransfer.files)) {
         return; // Stop if validation fails
       }
       
@@ -301,8 +301,8 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     if (input.files?.length) {
       this.fileTypeError = ''; // Reset any previous error
       
-      // Check file types if accept is specified
-      if (this.props['accept'] && !this.validateFileTypes(input.files)) {
+      // Check file types if accept or acceptedTypes is specified
+      if ((this.props['accept'] || this.props['acceptedTypes']) && !this.validateFileTypes(input.files)) {
         input.value = ''; // Clear the input
         return; // Stop if validation fails
       }
@@ -313,11 +313,17 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   
   // Add this method to validate file types
   validateFileTypes(files: FileList): boolean {
-    if (!this.props['accept']) {
+    if (!this.props['accept'] && !this.props['acceptedTypes']) {
       return true; // No restrictions
     }
     
-    const acceptedTypes = this.props['accept'].split(',').map((type: string) => type.trim().toLowerCase());
+    // Use acceptedTypes if available, otherwise fall back to accept
+    const acceptAttribute = this.props['acceptedTypes'] || this.props['accept'];
+    if (!acceptAttribute) {
+      return true;
+    }
+    
+    const acceptedTypes = acceptAttribute.split(',').map((type: string) => type.trim().toLowerCase());
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -343,7 +349,12 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
       });
       
       if (!extensionMatch && !mimeTypeMatch) {
-        this.fileTypeError = `File type not allowed: ${file.name}. Please upload only ${this.props['accept']} files.`;
+        // Use custom error message if provided
+        if (this.props['fileTypeErrorMessage']) {
+          this.fileTypeError = this.props['fileTypeErrorMessage'];
+        } else {
+          this.fileTypeError = `File type not allowed: ${file.name}. Please upload only ${acceptAttribute} files.`;
+        }
         return false;
       }
     }

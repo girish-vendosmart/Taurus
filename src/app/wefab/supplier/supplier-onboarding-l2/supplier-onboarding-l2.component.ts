@@ -347,8 +347,10 @@ export class SupplierOnboardingL2Component implements OnInit {
                   className: 'col-12 mb-2',
                   templateOptions: {
                     label: 'Machine Photos',
-                    description: 'Upload photos of this machine (max 10MB per file)',
-                    required: true
+                    description: 'Upload photos of this machine (max 10MB per file, PNG and JPEG only)',
+                    required: true,
+                    acceptedTypes: '.png,.jpg,.jpeg',
+                    fileTypeErrorMessage: 'Only PNG and JPEG files are accepted'
                   },
                   validation: {
                     messages: {
@@ -438,8 +440,10 @@ export class SupplierOnboardingL2Component implements OnInit {
                       type: 'file-upload',
                       templateOptions: {
                         label: 'Certificate Document',
-                        description: 'Upload certificate document (PDF preferred)',
-                        required: true
+                        description: 'Upload certificate document (PNG and JPEG only)',
+                        required: true,
+                        acceptedTypes: '.png,.jpg,.jpeg',
+                        fileTypeErrorMessage: 'Only PNG and JPEG files are accepted'
                       },
                       validation: {
                         messages: {
@@ -552,7 +556,10 @@ export class SupplierOnboardingL2Component implements OnInit {
         templateOptions: {
           label: 'Facility Photos',
           required: true,
-          multiple: true
+          multiple: true,
+          acceptedTypes: '.png,.jpg,.jpeg',
+          fileTypeErrorMessage: 'Only PNG and JPEG files are accepted',
+          description: 'Upload at least 3 photos of your facility (PNG and JPEG only)'
         },
         validation: {
           messages: {
@@ -655,7 +662,7 @@ export class SupplierOnboardingL2Component implements OnInit {
   postSupplierOnboardingL2() {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L2';
     let body = this.updateData(this.model);
-    this.commonService.putData(endPoint, body).subscribe((res: any) => {
+    this.commonService.postData(endPoint, body).subscribe((res: any) => {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
