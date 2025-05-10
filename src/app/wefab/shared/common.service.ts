@@ -113,6 +113,30 @@ export class CommonService {
         });
     }
 
+    // Upload document file 
+    uploadFile(uploadData: File): Observable<any> {
+        // Create headers with Authorization token
+        const headers = new HttpHeaders({
+            'Authorization': 'Token c82020f17e1fd10:f34acaf7862dc9c',
+            'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryUR06wJQlnzrMPphp'
+        });
+
+        const formData = new FormData();
+        formData.append('file', uploadData);
+        formData.append('file_name', uploadData.name);
+        debugger;
+        console.log(formData);
+        return this.http.post(
+        `${this.baseUrl}/api/method/upload_file`,
+        formData,
+        {   
+            headers,
+            reportProgress: true,
+            observe: 'events',
+        }
+        );
+    }
+
 
 
 }

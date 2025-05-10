@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FieldType, FieldTypeConfig, FormlyModule } from '@ngx-formly/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FileUploadComponent } from './wefab/supplier/supplier-onboarding/file-upload.component';
+import { CommonService } from './wefab/shared/common.service';
 
 @Component({
   selector: 'formly-field-file-upload',
@@ -159,6 +160,11 @@ import { FileUploadComponent } from './wefab/supplier/supplier-onboarding/file-u
   `]
 })
 export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> {
+
+  constructor (private commonService: CommonService) {
+    super();
+  }
+
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
   uploadedFiles: File[] = [];
   
@@ -182,7 +188,22 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> {
   }
   
   onFileSelected(event: Event): void {
-    const files = (event.target as HTMLInputElement).files;
+    const files:any = (event.target as HTMLInputElement).files;
+
+    let selectedFiles:any = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      selectedFiles.push(file);
+    }
+    // if (selectedFiles) {
+    //   selectedFiles.forEach((file:any) => {
+    //     this.commonService.uploadFile(file).subscribe((response) => {
+    //       console.log("File uploaded successfully", response)
+    //     })
+    //   })
+    // }
+
     if (files && files.length > 0) {
       this.updateFiles(files);
     }
