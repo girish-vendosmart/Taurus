@@ -119,6 +119,7 @@ export class SupplierOnboardingL3Component implements OnInit {
   
   isBrowser: boolean;
   isMobile: boolean = false;
+  getFinancialData: any;
   
   constructor(
     private fb: FormBuilder, 
@@ -212,6 +213,53 @@ export class SupplierOnboardingL3Component implements OnInit {
     
     // Apply the sticky position based on the screen size
     this.updateStickyNavigation();
+
+    // Check if we're in edit mode
+    const route = this.router.url;
+    if (route.includes('editMode=true')) {
+      const supplierId = sessionStorage.getItem('supplier_id');
+      if (supplierId) {
+        debugger
+        this.getL3Data(supplierId);
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Supplier ID not found. Please try again.',
+          life: 3000
+        });
+        this.router.navigate(['/wefab/supplier/supplier-verification']);
+      }
+    }
+  }
+
+  getL3Data(supplierId:any) {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + supplierId
+      this.commonService.getData(endPoint).subscribe((res: any) => {
+        debugger
+        this.getFinancialData = JSON.parse(res.data.company_profile)
+        console.log(this.getFinancialData)
+        this.patchValueForm()
+      })
+  }
+
+  patchValueForm() {
+    if (!this.getFinancialData) {
+      return;
+    }
+    
+    // Update the model with the values from getFinancialData
+    this.model = {
+      ...this.getFinancialData
+    };
+    
+    // Mark form as pristine after patching values
+    setTimeout(() => {
+      this.form.markAsPristine();
+      console.log('Form patched with stored data:', this.model);
+    });
+    
+    
   }
 
   // Added method to update sticky navigation based on screen size
@@ -788,9 +836,10 @@ export class SupplierOnboardingL3Component implements OnInit {
   submit() {
     if (this.form.valid) {
       console.log('Form submitted:', this.model);
+      debugger
       let body = this.updateData(this.model);
 
-      this.commonService.postData('/api/resource/wfb_supplier_onboarding_L3', body).subscribe((res: any) => {
+      this.commonService.putData('/api/resource/wfb_supplier_onboarding_L3', body).subscribe((res: any) => {
         this.messageService.add({
           severity: 'success', 
           summary: 'Onboarding Complete', 
