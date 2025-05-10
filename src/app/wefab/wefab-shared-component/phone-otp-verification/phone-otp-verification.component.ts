@@ -8,8 +8,18 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { CommonService } from '../../shared/common.service';
 import { FirebaseService } from '../../../core/services/firebase.service';
-import { DropdownModule } from 'primeng/dropdown';
+import { DropdownModule } from 'primeng/dropdown'
+import { getAuth } from 'firebase/auth';
 
+import { 
+  Auth, 
+  RecaptchaVerifier, 
+  PhoneAuthProvider, 
+  signInWithCredential,
+  signInWithPhoneNumber
+} from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+import { environment } from '../../../../enviornments/enviornment';
 interface Country {
   name: string;
   code: string;
@@ -308,6 +318,9 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   private onChange: (value: any) => void = () => {};
   private onTouched: () => void = () => {};
   confirmationResult: any;
+  private auth: Auth;
+  private recaptchaVerifier: RecaptchaVerifier | null = null;
+
   
   constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService) {
     // Set default country to India or use the provided countryCode
@@ -319,6 +332,9 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
         this.phoneControl.disable({ emitEvent: false });
       });
     }
+
+    const app = initializeApp(environment.firebaseConfig);
+    this.auth = getAuth(app);
   }
   
   ngOnInit(): void {
@@ -362,57 +378,56 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
       return;
     }
 
-    try {
-      // Reset verification states when attempting a new verification
-      this._isVerified = false;
-      this.verificationError = false;
-      
-      // Using the selected country code for sending OTP
-      const phoneNumber = `+${this.selectedCountry.code}${this.phoneControl.value}`;
-      console.log(`Sending OTP to: ${phoneNumber}`);
-      
-      // Here we would typically call the Firebase or other OTP service
-      // For now we just open the dialog
+    this.commonService.sendOTP(this.phoneControl.value).then((result) => {
+      console.log("OTP sent successfully", result)
       this.showOtpDialog = true;
-    } catch (error: any) {
-      console.error('Error sending OTP:', error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: error.message || 'Failed to send verification code',
-        life: 5000
-      });
-      this.verificationError = true;
-    }
+    }).catch((error) => {
+      console.log("Error sending OTP", error)
+    })
   }
   
   verifyOTP(): void {
     // Mock function to simulate verifying OTP
     if (this.otpValue && this.otpValue.length === 6) {
-      // Simulate successful verification
-      if (this.otpValue === '123456') { // For demo purposes
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Verified',
-          detail: 'Your phone number has been successfully verified.',
-          life: 3000
-        });
+
+      this.commonService.verifyOTP(this.otpValue).then((result) => {
+        console.log("OTP verified successfully", result)
         this.showOtpDialog = false;
         this._isVerified = true;
-        this.verificationError = false;
         this.verified.emit(true);
-      } else {
-        // Simulate failed verification
+      }).catch((error) => {
+        console.log("Error verifying OTP", error)
         this.messageService.add({
           severity: 'error',
-          summary: 'Verification Failed',
-          detail: 'Invalid OTP code. Please try again.',
+          summary: 'Invalid OTP',
+          detail: 'Please enter a valid 6-digit OTP code.',
           life: 3000
         });
-        this.verificationError = true;
-        this._isVerified = false;
-        this.verified.emit(false);
-      }
+      })
+      // Simulate successful verification
+      // if (this.otpValue === '123456') { // For demo purposes
+      //   this.messageService.add({
+      //     severity: 'success',
+      //     summary: 'Verified',
+      //     detail: 'Your phone number has been successfully verified.',
+      //     life: 3000
+      //   });
+      //   this.showOtpDialog = false;
+      //   this._isVerified = true;
+      //   this.verificationError = false;
+      //   this.verified.emit(true);
+      // } else {
+      //   // Simulate failed verification
+      //   this.messageService.add({
+      //     severity: 'error',
+      //     summary: 'Verification Failed',
+      //     detail: 'Invalid OTP code. Please try again.',
+      //     life: 3000
+      //   });
+      //   this.verificationError = true;
+      //   this._isVerified = false;
+      //   this.verified.emit(false);
+      // }
     } else {
       this.messageService.add({
         severity: 'error',

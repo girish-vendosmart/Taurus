@@ -5,15 +5,33 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../../enviornments/enviornment';
 import { Router } from '@angular/router';
 import { FirebaseService } from '../../core/services/firebase.service';
+import { getAuth } from 'firebase/auth';
+
+import { 
+  Auth, 
+  RecaptchaVerifier, 
+  PhoneAuthProvider, 
+  signInWithCredential,
+  signInWithPhoneNumber
+} from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
 
 @Injectable({
     providedIn: 'root'
 })
 
-export class CommonService {
-    private firebaseService = inject(FirebaseService);
 
-    constructor(private http: HttpClient) {}
+
+export class CommonService {
+    private auth: Auth;
+     private recaptchaVerifier: RecaptchaVerifier | null = null;
+    private firebaseService = inject(FirebaseService);
+    confirmationResult: any;
+
+    constructor(private http: HttpClient) {
+        const app = initializeApp(environment.firebaseConfig);
+        this.auth = getAuth(app);
+    }
 
     baseUrl = environment.apiUrl;
 
@@ -41,9 +59,9 @@ export class CommonService {
         );
     }
 
-    sendOTP(phoneNumber: string) {
-        return this.firebaseService.sendPhoneVerificationCode(phoneNumber, 'recaptcha-container');
-    }
+    // sendOTP(phoneNumber: string) {
+    //     return this.firebaseService.sendPhoneVerificationCode(phoneNumber, 'recaptcha-container');
+    // }
     
     // Send OTP to phone number
     // async sendOTP(phoneNumber: string) {
@@ -61,4 +79,40 @@ export class CommonService {
     //         throw error;
     //     }
     // }
+
+
+    initRecaptcha(buttonId: string) {
+        this.recaptchaVerifier = new RecaptchaVerifier(this.auth, buttonId, {
+          size: 'invisible'
+        });
+      }
+    
+    // Send OTP to phone number
+    sendOTP(phoneNumber: string): Promise<string> {
+        if (!this.recaptchaVerifier) {
+            return Promise.reject('Recaptcha verifier is not initialized');
+        }
+        
+        return signInWithPhoneNumber(this.auth, phoneNumber, this.recaptchaVerifier)
+            .then((confirmationResult) => {
+            this.confirmationResult = confirmationResult;
+            return 'OTP sent successfully';
+            });
+    }
+
+    // Verify OTP
+    verifyOTP(otp: string): Promise<any> {
+        if (!this.confirmationResult) {
+        return Promise.reject('No verification code was sent');
+        }
+        
+        return this.confirmationResult.confirm(otp)
+        .then((result: any) => {
+            // User signed in successfully
+            return result.user;
+        });
+    }
+
+
+
 }
