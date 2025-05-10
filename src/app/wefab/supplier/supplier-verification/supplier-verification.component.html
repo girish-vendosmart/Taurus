@@ -117,7 +117,12 @@
             <p class="error-message">Your information is currently under review. Our team will contact you once the verification is complete. Please check your email inbox for updates.</p>
           </div>
           <div class="error-actions">
-            <button class="btn-review" (click)="viewReviewPage()">View Review Page</button>
+            <button class="btn-edit" (click)="editVerification()">
+              <i class="pi pi-pencil me-2"></i>Edit Information
+            </button>
+            <button class="btn-review" (click)="viewReviewPage()">
+              <i class="pi pi-eye me-2"></i>View Review Page
+            </button>
           </div>
         </div>
 

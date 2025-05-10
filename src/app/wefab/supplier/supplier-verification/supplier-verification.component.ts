@@ -14,7 +14,7 @@ import { RouterModule, Router } from '@angular/router';
 })
 export class SupplierVerificationComponent implements OnInit {
 
-  verificationCurrentStatus: boolean = true;
+  verificationCurrentStatus: boolean = false;
   // Initialize all steps to under review
   verificationStatus = {
     credentials: 'under_review',
@@ -71,6 +71,13 @@ export class SupplierVerificationComponent implements OnInit {
   }
 
   viewReviewPage(): void {
-    this.router.navigate(['/wefab/supplier/review']);
+    this.router.navigate(['/wefab/supplier/profile-review']);
+  }
+
+  editVerification(): void {
+    // Navigate to the form with edit mode
+    this.router.navigate(['/wefab/supplier/supplier-onboarding'], {
+      queryParams: { mode: 'edit' }
+    });
   }
 } 
