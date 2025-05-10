@@ -94,10 +94,16 @@ interface Country {
             type="button" 
             class="btn verify-otp-button"
             [ngClass]="{'verified': _isVerified, 'error': verificationError}" 
-            [disabled]="!phoneControl.value || phoneControl.invalid || _isVerified"
+            [disabled]="!phoneControl.value || phoneControl.invalid || _isVerified || isLoading"
             [style.backgroundColor]="_isVerified ? '#28a745' : (verificationError ? '#dc3545' : '#1a3a60')"
             (click)="sendOTP()">
-            {{ _isVerified ? 'Verified' : (verificationError ? 'Failed' : 'VERIFY OTP') }}
+            <span *ngIf="isLoading">
+                <i class="pi pi-spin pi-spinner" style="margin-right: 0.5rem"></i>
+                Sending...
+            </span>
+            <span *ngIf="!isLoading">
+                {{ _isVerified ? 'Verified' : (verificationError ? 'Failed' : 'VERIFY OTP') }}
+            </span>
           </button>
         </div>
       </div>
@@ -320,6 +326,8 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   confirmationResult: any;
   private auth: Auth;
   private recaptchaVerifier: RecaptchaVerifier | null = null;
+  private recaptchaContainerId = 'recaptcha-container';
+  isLoading = false;
 
   
   constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService) {
@@ -360,6 +368,14 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
         this.selectedCountry = country;
       }
     }
+    
+    // Initialize reCAPTCHA container once
+    let container = document.getElementById(this.recaptchaContainerId);
+    if (!container) {
+        container = document.createElement('div');
+        container.id = this.recaptchaContainerId;
+        document.body.appendChild(container);
+    }
   }
   
   async sendOTP() {
@@ -374,21 +390,13 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     }
 
     try {
-      // Create a unique ID for the recaptcha container
-      const recaptchaContainerId = 'recaptcha-container-' + new Date().getTime();
+      // Show loading state
+      this.isLoading = true;
       
-      // Create the container element if it doesn't exist
-      let container = document.getElementById(recaptchaContainerId);
-      if (!container) {
-        container = document.createElement('div');
-        container.id = recaptchaContainerId;
-        document.body.appendChild(container);
-      }
-      
-      // Call the updated method with the container ID
+      // Use the pre-initialized container
       this.confirmationResult = await this.firebaseService.sendPhoneVerificationCode(
         '+' + this.countryCode + this.phoneControl.value, 
-        recaptchaContainerId
+        this.recaptchaContainerId
       );
       
       this.showOtpDialog = true;
@@ -400,6 +408,8 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
         detail: error.message || 'Failed to send verification code',
         life: 5000
       });
+    } finally {
+      this.isLoading = false;
     }
   }
   
