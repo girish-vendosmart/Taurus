@@ -363,11 +363,6 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   }
   
   async sendOTP() {
-    // If already verified, don't proceed
-    if (this._isVerified) {
-      return;
-    }
-    
     if (!this.phoneControl.value) {
       this.messageService.add({
         severity: 'error',
@@ -378,56 +373,48 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
       return;
     }
 
-    this.commonService.sendOTP(this.phoneControl.value).then((result) => {
-      console.log("OTP sent successfully", result)
+    try {
+      // Create a unique ID for the recaptcha container
+      const recaptchaContainerId = 'recaptcha-container-' + new Date().getTime();
+      
+      // Create the container element if it doesn't exist
+      let container = document.getElementById(recaptchaContainerId);
+      if (!container) {
+        container = document.createElement('div');
+        container.id = recaptchaContainerId;
+        document.body.appendChild(container);
+      }
+      
+      // Call the updated method with the container ID
+      this.confirmationResult = await this.firebaseService.sendPhoneVerificationCode(
+        '+' + this.countryCode + this.phoneControl.value, 
+        recaptchaContainerId
+      );
+      
       this.showOtpDialog = true;
-    }).catch((error) => {
-      console.log("Error sending OTP", error)
-    })
+    } catch (error: any) {
+      console.error('Error sending OTP:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.message || 'Failed to send verification code',
+        life: 5000
+      });
+    }
   }
   
   verifyOTP(): void {
     // Mock function to simulate verifying OTP
     if (this.otpValue && this.otpValue.length === 6) {
-
-      this.commonService.verifyOTP(this.otpValue).then((result) => {
-        console.log("OTP verified successfully", result)
-        this.showOtpDialog = false;
-        this._isVerified = true;
-        this.verified.emit(true);
-      }).catch((error) => {
-        console.log("Error verifying OTP", error)
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Invalid OTP',
-          detail: 'Please enter a valid 6-digit OTP code.',
-          life: 3000
-        });
-      })
-      // Simulate successful verification
-      // if (this.otpValue === '123456') { // For demo purposes
-      //   this.messageService.add({
-      //     severity: 'success',
-      //     summary: 'Verified',
-      //     detail: 'Your phone number has been successfully verified.',
-      //     life: 3000
-      //   });
-      //   this.showOtpDialog = false;
-      //   this._isVerified = true;
-      //   this.verificationError = false;
-      //   this.verified.emit(true);
-      // } else {
-      //   // Simulate failed verification
-      //   this.messageService.add({
-      //     severity: 'error',
-      //     summary: 'Verification Failed',
-      //     detail: 'Invalid OTP code. Please try again.',
-      //     life: 3000
-      //   });
-      //   this.verificationError = true;
-      //   this._isVerified = false;
-      //   this.verified.emit(false);
-      // }
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Verified',
+        detail: 'Your phone number has been successfully verified.',
+        life: 3000
+      });
+      this.showOtpDialog = false;
+      this.isVerified = true;
+      this.verified.emit(true);
     } else {
       this.messageService.add({
         severity: 'error',
