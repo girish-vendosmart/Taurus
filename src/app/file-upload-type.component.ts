@@ -26,7 +26,9 @@ import { HttpEventType } from '@angular/common/http';
         </div>
         <div class="upload-text">
           <p><strong>Click to upload</strong> or drag and drop</p>
-          <p class="text-muted small">All file types supported (max 100MB)</p>
+          <p class="text-muted small">
+            {{ props['accept'] ? 'Accepted file types: ' + props['accept'] : 'All file types supported' }} (max 100MB)
+          </p>
         </div>
       </div>
       
@@ -36,7 +38,13 @@ import { HttpEventType } from '@angular/common/http';
         style="display: none;" 
         (change)="onFileSelected($event)"
         [multiple]="props['multiple'] || false"
+        [accept]="props['accept'] || ''"
       />
+      
+      <!-- File type error message -->
+      <div *ngIf="fileTypeError" class="text-danger small mt-1">
+        {{ fileTypeError }}
+      </div>
       
       <!-- Display uploaded files -->
       <div *ngIf="uploadedFiles.length > 0" class="uploaded-files mt-3">
@@ -188,6 +196,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   }
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
   uploadedFiles: any[] = []; // Changed from File[] to any[] to accommodate url property
+  fileTypeError: string = ''; // Add this line for file type error
   
   ngOnInit() {
     // Initialize uploadedFiles if there's a value already
@@ -275,19 +284,71 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     event.preventDefault();
     event.stopPropagation();
     
-    if (event.dataTransfer && event.dataTransfer.files.length) {
-      const fileList = event.dataTransfer.files;
-      this.updateFiles(fileList);
+    if (event.dataTransfer?.files.length) {
+      this.fileTypeError = ''; // Reset any previous error
+      
+      // Check file types if accept is specified
+      if (this.props['accept'] && !this.validateFileTypes(event.dataTransfer.files)) {
+        return; // Stop if validation fails
+      }
+      
+      this.updateFiles(event.dataTransfer.files);
     }
   }
   
   onFileSelected(event: Event): void {
-    const files = (event.target as HTMLInputElement).files;
-    
-    if (files && files.length > 0) {
-      // Add files to UI and upload them to get URLs
-      this.updateFiles(files);
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.fileTypeError = ''; // Reset any previous error
+      
+      // Check file types if accept is specified
+      if (this.props['accept'] && !this.validateFileTypes(input.files)) {
+        input.value = ''; // Clear the input
+        return; // Stop if validation fails
+      }
+      
+      this.updateFiles(input.files);
     }
+  }
+  
+  // Add this method to validate file types
+  validateFileTypes(files: FileList): boolean {
+    if (!this.props['accept']) {
+      return true; // No restrictions
+    }
+    
+    const acceptedTypes = this.props['accept'].split(',').map((type: string) => type.trim().toLowerCase());
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileName = file.name.toLowerCase();
+      const fileType = file.type.toLowerCase();
+      
+      // Check for extension match (e.g., .zip)
+      const extensionMatch = acceptedTypes.some((type: string) => 
+        type.startsWith('.') && fileName.endsWith(type)
+      );
+      
+      // Check for MIME type match (e.g., application/zip)
+      const mimeTypeMatch = acceptedTypes.some((type: string) => {
+        if (!type.startsWith('.')) {
+          if (type.endsWith('/*')) {
+            // Handle wildcard MIME types (e.g., image/*)
+            const baseType = type.substring(0, type.length - 1);
+            return fileType.startsWith(baseType);
+          }
+          return fileType === type;
+        }
+        return false;
+      });
+      
+      if (!extensionMatch && !mimeTypeMatch) {
+        this.fileTypeError = `File type not allowed: ${file.name}. Please upload only ${this.props['accept']} files.`;
+        return false;
+      }
+    }
+    
+    return true;
   }
   
   updateFiles(fileList: FileList): void {

@@ -83,6 +83,9 @@ export class SupplierOnboardingComponent implements OnInit {
   // Phone verification state
   phoneVerified = false;
 
+  // Add this property for configurable file types
+  acceptedDocumentTypes: string = '.zip'; 
+
   @ViewChild('verifyOtpButton') verifyOtpButtonTemplate!: TemplateRef<any>;
 
   isBrowser: boolean;
@@ -697,8 +700,9 @@ export class SupplierOnboardingComponent implements OnInit {
         className: 'col-12 mb-2',
         templateOptions: {
           label: 'Company Documents',
-          description: 'Upload documents that will help us evaluate your profile more accurately and expedite decision-making',
-          required: true
+          description: 'Upload documents that will help us evaluate your profile more accurately and expedite decision-making (Only ZIP files are accepted)',
+          required: true,
+          accept: this.acceptedDocumentTypes
         },
         validation: {
           messages: {
