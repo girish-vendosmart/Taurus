@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { CommonService } from '../../shared/common.service';
 
 @Component({
   selector: 'app-supplier-verification',
@@ -24,18 +25,29 @@ export class SupplierVerificationComponent implements OnInit {
 
   verificationComplete = false;
   verificationError = false;
+  supplierId: string | null | undefined;
 
   constructor(
-    private router: Router
+    private router: Router,
+    private commonService: CommonService
   ) { }
 
   ngOnInit(): void {
     // Start the verification animation sequence
-    this.simulateVerification();
+    this.supplierId = sessionStorage.getItem('supplier_id');
+    this.getL1Verification();
+    // this.simulateVerification();
+  }
+
+  getL1Verification() {
+    let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=${this.supplierId}`
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? true : false;
+      this.simulateVerification()
+    })
   }
 
   simulateVerification(): void {
-    debugger
     if (this.verificationCurrentStatus) {
       // If verification is successful, simulate the steps
       setTimeout(() => {
