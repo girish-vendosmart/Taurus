@@ -133,7 +133,6 @@ export class CommonService {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
             'Authorization': 'Token c82020f17e1fd10:f34acaf7862dc9c',
-            'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryUR06wJQlnzrMPphp'
         });
 
         const formData = new FormData();

@@ -96,7 +96,6 @@ export class SupplierOnboardingL2Component implements OnInit {
   }
 
   ngOnInit(): void {
-    debugger
     // Initialize step fields
     this.stepFields = [
       this.getManufacturingCapabilitiesFields(),
@@ -123,7 +122,6 @@ export class SupplierOnboardingL2Component implements OnInit {
     if (route.includes('editMode=true')) {
       const supplierId = sessionStorage.getItem('supplier_id');
       if (supplierId) {
-        debugger
         this.getL2Data(supplierId);
       } else {
         this.messageService.add({
@@ -137,31 +135,114 @@ export class SupplierOnboardingL2Component implements OnInit {
     }
   }
 
-  getL2Data(supplierId:any) {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId
-      this.commonService.getData(endPoint).subscribe((res: any) => {
-        debugger
-        this.getManufacturerData = JSON.parse(res.data.company_profile)
-        console.log(this.getManufacturerData)
-        this.patchValueForm()
-      })
+  getL2Data(supplierId: any) {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId;
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      this.getManufacturerData = JSON.parse(res.data.company_profile);
+      console.log('Retrieved data:', this.getManufacturerData);
+      this.patchValueForm();
+    });
   }
 
-  patchValueForm(fields?:any) {
+  patchValueForm() {
     if (!this.getManufacturerData) {
       return;
     }
     
-    // Update the model with the values from getManufacturerData
-    this.model = {
-      ...this.getManufacturerData
-    };
+    // Create a deep copy of the manufacturer data
+    const processedData = JSON.parse(JSON.stringify(this.getManufacturerData));
     
-    // Mark form as pristine after patching values
+    // Process file uploads in machines array
+    if (processedData.machines && Array.isArray(processedData.machines)) {
+      processedData.machines.forEach((machine: any) => {
+        // Transform machinePhotos to the format expected by file-upload component
+        if (machine.machinePhotos && typeof machine.machinePhotos === 'object' && !Array.isArray(machine.machinePhotos)) {
+          // If it's a single file object
+          this.transformFileObject(machine, 'machinePhotos');
+        }
+      });
+    }
+    
+    // Process certifications array for certificate documents
+    if (processedData.certifications && Array.isArray(processedData.certifications)) {
+      processedData.certifications.forEach((cert: any) => {
+        // Transform certificateDocument to the format expected by file-upload component
+        if (cert.certificateDocument && typeof cert.certificateDocument === 'object' && !Array.isArray(cert.certificateDocument)) {
+          this.transformFileObject(cert, 'certificateDocument');
+        }
+      });
+    }
+    
+    // Process facilityPhotos if exists
+    if (processedData.facilityPhotos) {
+      if (Array.isArray(processedData.facilityPhotos)) {
+        // If it's already an array, ensure each item has the correct format
+        processedData.facilityPhotos = processedData.facilityPhotos.map((photo: any) => {
+          return this.createFileObjectFromData(photo);
+        });
+      } else if (typeof processedData.facilityPhotos === 'object') {
+        // If it's a single object, transform it to an array
+        processedData.facilityPhotos = [this.createFileObjectFromData(processedData.facilityPhotos)];
+      }
+    }
+    
+    // Update the model with the processed values
+    this.model = processedData;
+    
+    // Force form control update after model is set
     setTimeout(() => {
+      this.form.patchValue(this.model);
       this.form.markAsPristine();
-      console.log('Form patched with stored data:', this.model);
+      console.log('Form patched with processed data:', this.model);
     });
+  }
+
+  /**
+   * Transforms a file object in the parent object at the specified key
+   */
+  transformFileObject(parentObj: any, fileKey: string) {
+    if (parentObj[fileKey]) {
+      parentObj[fileKey] = this.createFileObjectFromData(parentObj[fileKey]);
+    }
+  }
+
+  /**
+   * Creates a properly formatted file object that works with the file-upload component
+   */
+  createFileObjectFromData(fileData: any): any {
+    // Check if the file data is already in the correct format
+    if (fileData && typeof fileData === 'object') {
+      // Ensure it has all the required properties
+      const fileObj: any = {
+        name: fileData.name || 'document',
+        size: fileData.size || 0,
+        type: fileData.type || 'application/octet-stream',
+        url: fileData.url || fileData.file_url || ''
+      };
+      
+      // If it already has a lastModified property, use it
+      if (fileData.lastModified) {
+        fileObj.lastModified = fileData.lastModified;
+      } else {
+        // Otherwise, set it to now
+        fileObj.lastModified = Date.now();
+      }
+      
+      return fileObj;
+    }
+    
+    // If it's just a URL string, create a minimalist file object
+    if (typeof fileData === 'string') {
+      return {
+        name: fileData.split('/').pop() || 'document',
+        size: 0,
+        type: 'application/octet-stream',
+        url: fileData,
+        lastModified: Date.now()
+      };
+    }
+    
+    return fileData;
   }
 
   // Getter to make accessing the current step's fields easy in template
@@ -562,13 +643,13 @@ export class SupplierOnboardingL2Component implements OnInit {
   }
 
   updateData(data:any) {
-    console.log(data)
+    console.log(data);
     let body = {
       supplier_company_id: sessionStorage.getItem('supplier_id'),
       onboarding_status: 'Under Review',
       company_profile: JSON.stringify(data)
-    }
-    return body
+    };
+    return body;
   }
 
   postSupplierOnboardingL2() {
@@ -604,17 +685,6 @@ export class SupplierOnboardingL2Component implements OnInit {
     if (this.form.valid) {
       console.log('L2 Form submitted successfully', this.model);
       this.postSupplierOnboardingL2();
-      // this.messageService.add({
-      //   severity: 'success',
-      //   summary: 'Form Submitted Successfully',
-      //   detail: 'Your detailed supplier information has been received. Redirecting to financial information form.',
-      //   life: 3000
-      // });
-      
-      // // Navigate to L3 form after 3 seconds
-      // setTimeout(() => {
-      //   this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
-      // }, 3000);
     } else {
       this.messageService.add({
         severity: 'error',
@@ -624,4 +694,4 @@ export class SupplierOnboardingL2Component implements OnInit {
       });
     }
   }
-} 
+}
