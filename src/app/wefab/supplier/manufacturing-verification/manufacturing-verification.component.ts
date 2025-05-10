@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { CommonService } from '../../shared/common.service';
 
 @Component({
   selector: 'app-manufacturing-verification',
@@ -21,14 +22,38 @@ export class ManufacturingVerificationComponent implements OnInit {
   };
 
   verificationComplete = false;
+  supplierId: any;
+  verificationCurrentStatus: boolean = false;
 
   constructor(
-    private router: Router
+    private router: Router,
+    private commonService: CommonService
   ) { }
 
   ngOnInit(): void {
-    // Activate the verification animation by default
-    this.simulateVerification();
+    // Get supplier ID and verification status
+    this.supplierId = sessionStorage.getItem('supplier_id');
+    this.getL2Verification();
+  }
+
+  getL2Verification() {
+    let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=${this.supplierId}`;
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? false : true;
+      
+      // Only simulate verification if not approved
+      if (!this.verificationCurrentStatus) {
+        this.simulateVerification();
+      } else {
+        // If verification is approved, set all steps to completed
+        this.verificationStatus = {
+          geolocation: 'completed',
+          capability: 'completed',
+          machineDetection: 'completed'
+        };
+        this.verificationComplete = true;
+      }
+    });
   }
 
   simulateVerification(): void {
@@ -62,8 +87,21 @@ export class ManufacturingVerificationComponent implements OnInit {
     this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
   }
 
-  // Navigate back to the onboarding L2 form
-  goBack() {
-    this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
+  // Navigate to L2 form in edit mode
+  editL2Form() {
+    this.router.navigate(['/wefab/supplier/supplier-onboarding-l2'], { 
+      queryParams: { 
+        editMode: true 
+      } 
+    });
+  }
+
+  // Navigate to L2 review form
+  reviewL2Form() {
+    this.router.navigate(['/wefab/supplier/profile-review'], { 
+      queryParams: { 
+        tab : 'manufacturing'
+      } 
+    });
   }
 } 

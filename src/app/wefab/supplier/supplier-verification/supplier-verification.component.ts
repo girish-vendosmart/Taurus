@@ -42,7 +42,7 @@ export class SupplierVerificationComponent implements OnInit {
   getL1Verification() {
     let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=${this.supplierId}`
     this.commonService.getData(endPoint).subscribe((res: any) => {
-      this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? true : false;
+      this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? false : true;
       this.simulateVerification()
     })
   }

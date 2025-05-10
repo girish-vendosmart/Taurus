@@ -4,6 +4,8 @@ $accent-color: #234b8e; // Blue accent color
 $text-color: #333;
 $light-bg: #f8f9fa;
 $border-color: #e0e0e0;
+// Colors for under review
+$review-color: #f39c12; // Orange/amber for under review status
 
 .verification-container {
   background-color: #fff;
@@ -296,5 +298,39 @@ $border-color: #e0e0e0;
 
   &:hover {
     background-color: darken($primary-color, 10%);
+  }
+}
+
+// Under review verification status
+.verification-under-review {
+  color: $review-color;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 8px 0 0;
+  display: flex;
+  align-items: center;
+  
+  &:before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    background-color: $review-color;
+    border-radius: 50%;
+    margin-right: 8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='8' x2='12' y2='12'%3E%3C/line%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'%3E%3C/line%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 12px;
+  }
+}
+
+// Under review box
+.under-review-box {
+  background-color: #fff8e1;
+  border: 1px solid #ffe0b2;
+  
+  .under-review-icon {
+    color: $review-color;
+    background-color: rgba($review-color, 0.1);
   }
 } 

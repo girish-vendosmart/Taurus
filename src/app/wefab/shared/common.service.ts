@@ -59,6 +59,21 @@ export class CommonService {
         );
     }
 
+    putData(endPoint: string, body: any, params?: HttpParams) {
+        // Create headers with Authorization token
+        const headers = new HttpHeaders({
+            'Authorization': 'Token c82020f17e1fd10:f34acaf7862dc9c',
+            'Content-Type': 'application/json'
+        });
+    
+        // Return the HTTP request with headers, body and params
+        return this.http.put(
+            `${this.baseUrl}${endPoint}`,
+            body,
+            { headers, params }
+        );
+    }
+
     // sendOTP(phoneNumber: string) {
     //     return this.firebaseService.sendPhoneVerificationCode(phoneNumber, 'recaptcha-container');
     // }

@@ -82,6 +82,7 @@ export class SupplierOnboardingL2Component implements OnInit {
   stepFields: FormlyFieldConfig[][] = [];
   
   isBrowser: boolean;
+  getManufacturerData: any;
   
   constructor(
     private fb: FormBuilder, 
@@ -95,6 +96,7 @@ export class SupplierOnboardingL2Component implements OnInit {
   }
 
   ngOnInit(): void {
+    debugger
     // Initialize step fields
     this.stepFields = [
       this.getManufacturingCapabilitiesFields(),
@@ -115,6 +117,51 @@ export class SupplierOnboardingL2Component implements OnInit {
         }
       }
     ];
+
+    // Check if we're in edit mode
+    const route = this.router.url;
+    if (route.includes('editMode=true')) {
+      const supplierId = sessionStorage.getItem('supplier_id');
+      if (supplierId) {
+        debugger
+        this.getL2Data(supplierId);
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Supplier ID not found. Please try again.',
+          life: 3000
+        });
+        this.router.navigate(['/wefab/supplier/supplier-verification']);
+      }
+    }
+  }
+
+  getL2Data(supplierId:any) {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId
+      this.commonService.getData(endPoint).subscribe((res: any) => {
+        debugger
+        this.getManufacturerData = JSON.parse(res.data.company_profile)
+        console.log(this.getManufacturerData)
+        this.patchValueForm()
+      })
+  }
+
+  patchValueForm(fields?:any) {
+    if (!this.getManufacturerData) {
+      return;
+    }
+    
+    // Update the model with the values from getManufacturerData
+    this.model = {
+      ...this.getManufacturerData
+    };
+    
+    // Mark form as pristine after patching values
+    setTimeout(() => {
+      this.form.markAsPristine();
+      console.log('Form patched with stored data:', this.model);
+    });
   }
 
   // Getter to make accessing the current step's fields easy in template
@@ -527,7 +574,7 @@ export class SupplierOnboardingL2Component implements OnInit {
   postSupplierOnboardingL2() {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L2';
     let body = this.updateData(this.model);
-    this.commonService.postData(endPoint, body).subscribe((res: any) => {
+    this.commonService.putData(endPoint, body).subscribe((res: any) => {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
