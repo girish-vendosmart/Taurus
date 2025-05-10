@@ -839,7 +839,7 @@ export class SupplierOnboardingL3Component implements OnInit {
       debugger
       let body = this.updateData(this.model);
 
-      this.commonService.putData('/api/resource/wfb_supplier_onboarding_L3', body).subscribe((res: any) => {
+      this.commonService.postData('/api/resource/wfb_supplier_onboarding_L3', body).subscribe((res: any) => {
         this.messageService.add({
           severity: 'success', 
           summary: 'Onboarding Complete', 

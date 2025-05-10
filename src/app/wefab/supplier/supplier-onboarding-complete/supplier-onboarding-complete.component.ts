@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
+import { CommonService } from '../../shared/common.service';
 
 @Component({
   selector: 'app-supplier-onboarding-complete',
@@ -19,8 +20,9 @@ import { RippleModule } from 'primeng/ripple';
 export class SupplierOnboardingCompleteComponent implements OnInit {
   // Flag to determine whether verification is complete or under review
   verificationCurrentStatus: boolean = false;
+  supplierId: any = sessionStorage.getItem('supplier_id');
   
-  constructor(private router: Router) { }
+  constructor(private router: Router, private commonService: CommonService) { }
   
   ngOnInit(): void {
     // In a real application, you would fetch the verification status from an API
@@ -30,19 +32,37 @@ export class SupplierOnboardingCompleteComponent implements OnInit {
   
   // In a real implementation, this method would call an API to check the verification status
   checkVerificationStatus(): void {
-    // Mock implementation - in a real app, you would retrieve this from your backend
-    // For example:
-    // this.apiService.getVerificationStatus().subscribe(result => {
-    //   this.verificationCurrentStatus = result.isVerified;
-    // });
+    // // Mock implementation - in a real app, you would retrieve this from your backend
+    // // For example:
+    // // this.apiService.getVerificationStatus().subscribe(result => {
+    // //   this.verificationCurrentStatus = result.isVerified;
+    // // });
     
-    // For demo purposes, we're keeping it as false (under review)
-    this.verificationCurrentStatus = false;
+    // // For demo purposes, we're keeping it as false (under review)
+    // this.verificationCurrentStatus = false;
+
+    let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${this.supplierId}`;
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? false : true;
+      
+      // Only simulate verification if not approved
+      // if (!this.verificationCurrentStatus) {
+      //   this.simulateVerification();
+      // } else {
+      //   // If verification is approved, set all steps to completed
+      //   this.verificationStatus = {
+      //     geolocation: 'completed',
+      //     capability: 'completed',
+      //     machineDetection: 'completed'
+      //   };
+      //   this.verificationComplete = true;
+      // }
+    });
   }
   
   // Navigate to the profile review page
   goToReview(): void {
-    this.router.navigate(['/wefab/supplier/profile-review?tab=financial']);
+    this.router.navigate(['/wefab/supplier/profile-review']);
   }
   
   // Edit information if needed - navigate to the L3 onboarding form in edit mode
