@@ -202,6 +202,23 @@ export class SupplierOnboardingComponent implements OnInit {
         }
       }
     ];
+
+    // Check if we're in edit mode
+    const route = this.router.url;
+    if (route.includes('mode=edit')) {
+      const supplierId = sessionStorage.getItem('supplier_id');
+      if (supplierId) {
+        this.getL1Data(supplierId);
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Supplier ID not found. Please try again.',
+          life: 3000
+        });
+        this.router.navigate(['/wefab/supplier/supplier-verification']);
+      }
+    }
   }
 
 
@@ -211,6 +228,7 @@ export class SupplierOnboardingComponent implements OnInit {
       debugger
       this.getCompanyProfile = JSON.parse(res.data.company_profile)
       this.phoneVerified = this.getCompanyProfile.phone_verified
+      debugger
       console.log(this.getCompanyProfile)
       this.patchValueForm()
     })
