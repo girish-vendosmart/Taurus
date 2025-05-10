@@ -6,6 +6,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
+import { CommonService } from '../../shared/common.service';
 
 interface VerificationStatus {
   phoneVerified: boolean;
@@ -44,6 +45,7 @@ interface CompletionStatus {
 export class SupplierProfileReviewComponent implements OnInit {
   status: string = 'Pending';
   lastUpdated: Date = new Date(2025, 4, 8); // May 8, 2025
+  supplierId: any = sessionStorage.getItem('supplier_id');
   
   // Contact information
   contactEmail: string = 'contact@wefabsolutions.com';
@@ -163,6 +165,7 @@ export class SupplierProfileReviewComponent implements OnInit {
   
   // Flag to check if running in browser environment
   private isBrowser: boolean;
+  getCompanyProfile: any;
   
   // Overall completion percentage
   get completionPercentage(): number {
@@ -175,6 +178,7 @@ export class SupplierProfileReviewComponent implements OnInit {
   constructor(
     private router: Router,
     private messageService: MessageService,
+    private commonservice: CommonService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -252,6 +256,7 @@ export class SupplierProfileReviewComponent implements OnInit {
   }
   
   changeLevelTab(tab: string): void {
+    debugger
     this.activeLevelTab = tab;
     
     // Reset the secondary tab when changing level tabs
@@ -268,6 +273,10 @@ export class SupplierProfileReviewComponent implements OnInit {
       } catch (error) {
         console.error('Error updating URL:', error);
       }
+    }
+
+    if(tab === 'basic') {
+      this.getL1Data(this.supplierId)
     }
     
     // Show toast for tab change
@@ -377,4 +386,13 @@ export class SupplierProfileReviewComponent implements OnInit {
   changeFinancialTab(tab: string): void {
     this.financialTab = tab;
   }
+
+  getL1Data(supplierId:any) {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
+      this.commonservice.getData(endPoint).subscribe((res: any) => {
+        this.getCompanyProfile = JSON.parse(res.data.company_profile)
+        debugger
+        console.log(this.getCompanyProfile)
+      })
+    }
 } 

@@ -67,29 +67,29 @@
             <div class="review-row">
               <div class="review-col">
                 <div class="field-label">Legal Business Name <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ companyName }}</div>
+                <div class="field-value">{{ getCompanyProfile.legalBusinessName }}</div>
               </div>
               <div class="review-col">
                 <div class="field-label">GSTIN <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ gstin }}</div>
+                <div class="field-value">{{ getCompanyProfile.gstinNumber }}</div>
               </div>
             </div>
             
             <div class="review-row">
               <div class="review-col">
                 <div class="field-label">Country</div>
-                <div class="field-value">{{ country }}</div>
+                <div class="field-value">{{ getCompanyProfile.country }}</div>
               </div>
               <div class="review-col">
                 <div class="field-label">Registered Address <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ registeredAddress }}</div>
+                <div class="field-value">{{ getCompanyProfile.registeredAddress }}</div>
               </div>
             </div>
             
             <div class="review-row">
               <div class="review-col">
                 <div class="field-label">Manufacturing Facility Address <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ manufacturingAddress }}</div>
+                <div class="field-value">{{ getCompanyProfile.manufacturingFacilityAddress }}</div>
               </div>
             </div>
           </div>
@@ -101,11 +101,11 @@
             <div class="review-row">
               <div class="review-col">
                 <div class="field-label">Primary Contact Name <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ primaryContactName }}</div>
+                <div class="field-value">{{ getCompanyProfile.primaryContactName }}</div>
               </div>
               <div class="review-col">
                 <div class="field-label">Phone Number <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ phoneNumber }}</div>
+                <div class="field-value">{{ getCompanyProfile.phoneNumber }}</div>
               </div>
             </div>
             
@@ -123,11 +123,11 @@
             <div class="review-row">
               <div class="review-col">
                 <div class="field-label">Website URL</div>
-                <div class="field-value">{{ websiteUrl }}</div>
+                <div class="field-value">{{ getCompanyProfile.websiteURL }}</div>
               </div>
               <div class="review-col">
                 <div class="field-label">LinkedIn URL</div>
-                <div class="field-value">{{ linkedinUrl }}</div>
+                <div class="field-value">{{ getCompanyProfile.linkedinURL }}</div>
               </div>
             </div>
           </div>
