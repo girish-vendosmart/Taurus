@@ -22,13 +22,15 @@
                  [ngClass]="{
                    'verifying': verificationStatus.credentials === 'verifying',
                    'completed': verificationStatus.credentials === 'completed',
-                   'failed': verificationStatus.credentials === 'failed'
+                   'failed': verificationStatus.credentials === 'failed',
+                   'under-review': verificationStatus.credentials === 'under_review'
                  }">
               <i class="pi" 
                  [ngClass]="{
                    'pi-spinner pi-spin': verificationStatus.credentials === 'verifying',
                    'pi-check': verificationStatus.credentials === 'completed',
-                   'pi-times': verificationStatus.credentials === 'failed'
+                   'pi-times': verificationStatus.credentials === 'failed',
+                   'pi-clock': verificationStatus.credentials === 'under_review'
                  }"></i>
             </div>
             <div class="shield-icon">
@@ -40,6 +42,7 @@
               <p class="verification-success" *ngIf="verificationStatus.credentials === 'completed'">Verification successful</p>
               <p class="verification-in-progress" *ngIf="verificationStatus.credentials === 'verifying'">Verification in progress...</p>
               <p class="verification-error" *ngIf="verificationStatus.credentials === 'failed'">Verification failed. Please contact support.</p>
+              <p class="verification-under-review" *ngIf="verificationStatus.credentials === 'under_review'">Under review</p>
             </div>
           </div>
 
@@ -49,13 +52,15 @@
                  [ngClass]="{
                    'verifying': verificationStatus.contact === 'verifying',
                    'completed': verificationStatus.contact === 'completed',
-                   'failed': verificationStatus.contact === 'failed'
+                   'failed': verificationStatus.contact === 'failed',
+                   'under-review': verificationStatus.contact === 'under_review'
                  }">
               <i class="pi" 
                  [ngClass]="{
                    'pi-spinner pi-spin': verificationStatus.contact === 'verifying',
                    'pi-check': verificationStatus.contact === 'completed',
-                   'pi-times': verificationStatus.contact === 'failed'
+                   'pi-times': verificationStatus.contact === 'failed',
+                   'pi-clock': verificationStatus.contact === 'under_review'
                  }"></i>
             </div>
             <div class="user-icon">
@@ -67,6 +72,7 @@
               <p class="verification-success" *ngIf="verificationStatus.contact === 'completed'">Verification successful</p>
               <p class="verification-in-progress" *ngIf="verificationStatus.contact === 'verifying'">Verification in progress...</p>
               <p class="verification-error" *ngIf="verificationStatus.contact === 'failed'">Verification failed. Please check your details.</p>
+              <p class="verification-under-review" *ngIf="verificationStatus.contact === 'under_review'">Under review</p>
             </div>
           </div>
 
@@ -76,13 +82,15 @@
                  [ngClass]="{
                    'verifying': verificationStatus.documents === 'verifying',
                    'completed': verificationStatus.documents === 'completed',
-                   'failed': verificationStatus.documents === 'failed'
+                   'failed': verificationStatus.documents === 'failed',
+                   'under-review': verificationStatus.documents === 'under_review'
                  }">
               <i class="pi" 
                  [ngClass]="{
                    'pi-spinner pi-spin': verificationStatus.documents === 'verifying',
                    'pi-check': verificationStatus.documents === 'completed',
-                   'pi-times': verificationStatus.documents === 'failed'
+                   'pi-times': verificationStatus.documents === 'failed',
+                   'pi-clock': verificationStatus.documents === 'under_review'
                  }"></i>
             </div>
             <div class="document-icon">
@@ -94,6 +102,7 @@
               <p class="verification-success" *ngIf="verificationStatus.documents === 'completed'">Verification successful</p>
               <p class="verification-in-progress" *ngIf="verificationStatus.documents === 'verifying'">Verification in progress...</p>
               <p class="verification-error" *ngIf="verificationStatus.documents === 'failed'">Required documents missing or incomplete.</p>
+              <p class="verification-under-review" *ngIf="verificationStatus.documents === 'under_review'">Under review</p>
             </div>
           </div>
         </div>
@@ -104,11 +113,11 @@
             <i class="pi pi-times-circle"></i>
           </div>
           <div class="error-content">
-            <h4 class="error-title">Verification Incomplete</h4>
-            <p class="error-message">We've detected some issues with your information. You can choose to continue to further sections; however, our team will contact you for verification. Please check your email inbox for more information.</p>
+            <h4 class="error-title">Verification Under Review</h4>
+            <p class="error-message">Your information is currently under review. Our team will contact you once the verification is complete. Please check your email inbox for updates.</p>
           </div>
           <div class="error-actions">
-            <button class="btn-continue" (click)="continueAnyway()">Continue Anyway</button>
+            <button class="btn-review" (click)="viewReviewPage()">View Review Page</button>
           </div>
         </div>
 
@@ -119,10 +128,15 @@
           </div>
           <div class="success-content">
             <h4 class="success-title">Verification Complete</h4>
-            <p class="success-message">All your information has been successfully verified. You will be redirected to the next step.</p>
+            <p class="success-message">All your information has been successfully verified. You can proceed to the next step or review your submission.</p>
           </div>
           <div class="success-actions">
-            <button class="btn-success" (click)="continueAnyway()">Continue</button>
+            <button class="btn-review" (click)="viewReviewPage()">
+              <i class="pi pi-eye me-2"></i>View Review Page
+            </button>
+            <button class="btn-success" (click)="continueAnyway()">
+              <i class="pi pi-arrow-right me-2"></i>Continue
+            </button>
           </div>
         </div>
       </div>
