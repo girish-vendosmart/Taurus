@@ -1,45 +1,63 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { CommonService } from '../../shared/common.service';
+
+interface Supplier {
+  name: string;
+  company_name: string;
+  primary_email_id: string;
+  primary_phone_number: string;
+  onboarding_status: string;
+  company_profile: string;
+}
 
 @Component({
   selector: 'app-manage-suppliers',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule, ButtonModule, CardModule],
   template: `
-    <div class="manage-suppliers">
+    <div class="suppliers-container">
       <div class="header">
         <h1>Manage Suppliers</h1>
-        <button class="add-supplier-btn">
-          <i class="fas fa-plus"></i> Add New Supplier
-        </button>
+        <button pButton label="Add New Supplier" icon="pi pi-plus" class="p-button-primary"></button>
       </div>
 
       <div class="suppliers-grid">
-        <div class="supplier-card" *ngFor="let supplier of suppliers">
-          <div class="supplier-info">
-            <h3>{{supplier.name}}</h3>
-            <p class="category">{{supplier.category}}</p>
-            <p class="status" [ngClass]="supplier.status.toLowerCase()">
-              {{supplier.status}}
-            </p>
+        <p-card *ngFor="let supplier of suppliers" class="supplier-card">
+          <ng-template pTemplate="header">
+            <div class="supplier-header">
+              <h3>{{ supplier.company_name }}</h3>
+              <span class="status-badge" [ngClass]="supplier.onboarding_status.toLowerCase()">
+                {{ supplier.onboarding_status }}
+              </span>
+            </div>
+          </ng-template>
+
+          <div class="supplier-details">
+            <p><strong>ID:</strong> {{ supplier.name }}</p>
+            <p><strong>Email:</strong> {{ supplier.primary_email_id }}</p>
+            <p><strong>Phone:</strong> {{ supplier.primary_phone_number }}</p>
           </div>
-          <div class="supplier-actions">
-            <button class="action-btn view">
-              <i class="fas fa-eye"></i> View
-            </button>
-            <button class="action-btn edit">
-              <i class="fas fa-edit"></i> Edit
-            </button>
-            <button class="action-btn delete">
-              <i class="fas fa-trash"></i> Delete
-            </button>
-          </div>
-        </div>
+
+          <ng-template pTemplate="footer">
+            <div class="supplier-actions">
+              <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text" 
+                      pTooltip="View Details" tooltipPosition="top"></button>
+              <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text" 
+                      pTooltip="Edit" tooltipPosition="top"></button>
+              <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
+                      pTooltip="Delete" tooltipPosition="top"></button>
+            </div>
+          </ng-template>
+        </p-card>
       </div>
     </div>
   `,
   styles: [`
-    .manage-suppliers {
+    .suppliers-container {
       padding: 2rem;
     }
 
@@ -50,23 +68,6 @@ import { CommonModule } from '@angular/common';
       margin-bottom: 2rem;
     }
 
-    .add-supplier-btn {
-      background-color: #2ecc71;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background-color 0.3s;
-
-      &:hover {
-        background-color: #27ae60;
-      }
-    }
-
     .suppliers-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -74,111 +75,80 @@ import { CommonModule } from '@angular/common';
     }
 
     .supplier-card {
-      background: white;
-      border-radius: 8px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      height: 100%;
     }
 
-    .supplier-info {
-      margin-bottom: 1rem;
+    .supplier-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+    }
 
-      h3 {
-        margin: 0 0 0.5rem 0;
-        color: #2c3e50;
-      }
+    .supplier-header h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #333;
+    }
 
-      .category {
-        color: #7f8c8d;
-        margin: 0 0 0.5rem 0;
-      }
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
 
-      .status {
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.875rem;
-        margin: 0;
+    .status-badge.in-progress {
+      background-color: #fff3cd;
+      color: #856404;
+    }
 
-        &.active {
-          background-color: #e8f5e9;
-          color: #2e7d32;
-        }
+    .status-badge.completed {
+      background-color: #d4edda;
+      color: #155724;
+    }
 
-        &.pending {
-          background-color: #fff3e0;
-          color: #ef6c00;
-        }
+    .status-badge.rejected {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
 
-        &.inactive {
-          background-color: #ffebee;
-          color: #c62828;
-        }
-      }
+    .supplier-details {
+      padding: 1rem 0;
+    }
+
+    .supplier-details p {
+      margin: 0.5rem 0;
+      color: #666;
     }
 
     .supplier-actions {
       display: flex;
+      justify-content: flex-end;
       gap: 0.5rem;
-
-      .action-btn {
-        flex: 1;
-        padding: 8px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        transition: background-color 0.3s;
-
-        &.view {
-          background-color: #3498db;
-          color: white;
-
-          &:hover {
-            background-color: #2980b9;
-          }
-        }
-
-        &.edit {
-          background-color: #f1c40f;
-          color: white;
-
-          &:hover {
-            background-color: #f39c12;
-          }
-        }
-
-        &.delete {
-          background-color: #e74c3c;
-          color: white;
-
-          &:hover {
-            background-color: #c0392b;
-          }
-        }
-      }
     }
   `]
 })
-export class ManageSuppliersComponent {
-  suppliers = [
-    {
-      name: 'ABC Manufacturing',
-      category: 'Electronics',
-      status: 'Active'
-    },
-    {
-      name: 'XYZ Industries',
-      category: 'Textiles',
-      status: 'Pending'
-    },
-    {
-      name: 'Global Suppliers Ltd',
-      category: 'Automotive',
-      status: 'Inactive'
-    }
-  ];
+export class ManageSuppliersComponent implements OnInit {
+  suppliers: Supplier[] = [];
+
+  constructor(private commonService: CommonService) {}
+
+  ngOnInit() {
+    this.loadSuppliers();
+  }
+
+  loadSuppliers() {
+    const endPoint = '/api/resource/wfb_supplier_onboarding_L1?fields=["*"]';
+    this.commonService.getData(endPoint).subscribe({
+      next: (response: any) => {
+        this.suppliers = response.data;
+      },
+      error: (error) => {
+        console.error('Error loading suppliers:', error);
+      }
+    });
+  }
 } 
