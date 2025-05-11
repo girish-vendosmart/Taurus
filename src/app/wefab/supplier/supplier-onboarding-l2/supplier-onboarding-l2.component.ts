@@ -149,100 +149,261 @@ export class SupplierOnboardingL2Component implements OnInit {
       return;
     }
     
+    console.log('Original data:', this.getManufacturerData);
+    
     // Create a deep copy of the manufacturer data
     const processedData = JSON.parse(JSON.stringify(this.getManufacturerData));
     
-    // Process file uploads in machines array
+    // Process machines array - handle all properties including file uploads
     if (processedData.machines && Array.isArray(processedData.machines)) {
-      processedData.machines.forEach((machine: any) => {
-        // Transform machinePhotos to the format expected by file-upload component
-        if (machine.machinePhotos && typeof machine.machinePhotos === 'object' && !Array.isArray(machine.machinePhotos)) {
-          // If it's a single file object
-          this.transformFileObject(machine, 'machinePhotos');
-        }
-      });
-    }
-    
-    // Process certifications array for certificate documents
-    if (processedData.certifications && Array.isArray(processedData.certifications)) {
-      processedData.certifications.forEach((cert: any) => {
-        // Transform certificateDocument to the format expected by file-upload component
-        if (cert.certificateDocument && typeof cert.certificateDocument === 'object' && !Array.isArray(cert.certificateDocument)) {
-          this.transformFileObject(cert, 'certificateDocument');
-        }
-      });
-    }
-    
-    // Process facilityPhotos if exists
-    if (processedData.facilityPhotos) {
-      if (Array.isArray(processedData.facilityPhotos)) {
-        // If it's already an array, ensure each item has the correct format
-        processedData.facilityPhotos = processedData.facilityPhotos.map((photo: any) => {
-          return this.createFileObjectFromData(photo);
-        });
-      } else if (typeof processedData.facilityPhotos === 'object') {
-        // If it's a single object, transform it to an array
-        processedData.facilityPhotos = [this.createFileObjectFromData(processedData.facilityPhotos)];
+      // Ensure at least one empty machine if none exists
+      if (processedData.machines.length === 0) {
+        processedData.machines = [{}];
       }
+      
+      processedData.machines.forEach((machine: any, index: number) => {
+        // Force single machine photo to be an array if it exists
+        if (machine.machinePhotos) {
+          let photoFiles = [];
+          
+          // If it's already an array, process each item
+          if (Array.isArray(machine.machinePhotos)) {
+            photoFiles = machine.machinePhotos.map((photo: any) => this.convertToFileObject(photo));
+          } 
+          // If it's a single object, convert and wrap in array
+          else if (typeof machine.machinePhotos === 'object') {
+            photoFiles = [this.convertToFileObject(machine.machinePhotos)];
+          }
+          // If it's a URL string
+          else if (typeof machine.machinePhotos === 'string') {
+            photoFiles = [this.convertToFileObject(machine.machinePhotos)];
+          }
+          
+          machine.machinePhotos = photoFiles;
+          console.log(`Machine ${index} photos:`, machine.machinePhotos);
+        }
+      });
+    } else {
+      // Initialize with empty array if machines don't exist
+      processedData.machines = [{}];
+    }
+    
+    // Process certifications array - handle all properties including file uploads
+    if (processedData.certifications && Array.isArray(processedData.certifications)) {
+      // Ensure at least one empty certification if none exists
+      if (processedData.certifications.length === 0) {
+        processedData.certifications = [{}];
+      }
+      
+      processedData.certifications.forEach((cert: any, index: number) => {
+        // Force single certificate document to be an array if it exists
+        if (cert.certificateDocument) {
+          let docFiles = [];
+          
+          // If it's already an array, process each item
+          if (Array.isArray(cert.certificateDocument)) {
+            docFiles = cert.certificateDocument.map((doc: any) => this.convertToFileObject(doc));
+          } 
+          // If it's a single object, convert and wrap in array
+          else if (typeof cert.certificateDocument === 'object') {
+            docFiles = [this.convertToFileObject(cert.certificateDocument)];
+          }
+          // If it's a URL string
+          else if (typeof cert.certificateDocument === 'string') {
+            docFiles = [this.convertToFileObject(cert.certificateDocument)];
+          }
+          
+          cert.certificateDocument = docFiles;
+          console.log(`Certification ${index} document:`, cert.certificateDocument);
+        }
+      });
+    } else {
+      // Initialize with empty array if certifications don't exist
+      processedData.certifications = [{}];
+    }
+    
+    // Process facility photos
+    if (processedData.facilityPhotos) {
+      let facilityFiles = [];
+      
+      // If it's already an array, process each item
+      if (Array.isArray(processedData.facilityPhotos)) {
+        facilityFiles = processedData.facilityPhotos.map((photo: any) => this.convertToFileObject(photo));
+      } 
+      // If it's a single object, convert and wrap in array
+      else if (typeof processedData.facilityPhotos === 'object') {
+        facilityFiles = [this.convertToFileObject(processedData.facilityPhotos)];
+      }
+      // If it's a URL string
+      else if (typeof processedData.facilityPhotos === 'string') {
+        facilityFiles = [this.convertToFileObject(processedData.facilityPhotos)];
+      }
+      
+      processedData.facilityPhotos = facilityFiles;
+      console.log('Facility photos:', processedData.facilityPhotos);
     }
     
     // Update the model with the processed values
     this.model = processedData;
+    console.log('Final processed model:', this.model);
     
-    // Force form control update after model is set
+    // Reset the form to match our model structure
+    this.form = this.fb.group({});
+    
+    // Force update after a delay to ensure components are ready
     setTimeout(() => {
+      // Patch the form with processed data
       this.form.patchValue(this.model);
-      this.form.markAsPristine();
-      console.log('Form patched with processed data:', this.model);
-    });
-  }
-
-  /**
-   * Transforms a file object in the parent object at the specified key
-   */
-  transformFileObject(parentObj: any, fileKey: string) {
-    if (parentObj[fileKey]) {
-      parentObj[fileKey] = this.createFileObjectFromData(parentObj[fileKey]);
-    }
-  }
-
-  /**
-   * Creates a properly formatted file object that works with the file-upload component
-   */
-  createFileObjectFromData(fileData: any): any {
-    // Check if the file data is already in the correct format
-    if (fileData && typeof fileData === 'object') {
-      // Ensure it has all the required properties
-      const fileObj: any = {
-        name: fileData.name || 'document',
-        size: fileData.size || 0,
-        type: fileData.type || 'application/octet-stream',
-        url: fileData.url || fileData.file_url || ''
-      };
       
-      // If it already has a lastModified property, use it
-      if (fileData.lastModified) {
-        fileObj.lastModified = fileData.lastModified;
-      } else {
-        // Otherwise, set it to now
-        fileObj.lastModified = Date.now();
+      // Explicitly set form control values for file uploads to ensure they are recognized properly
+      this.setFormControlsDirectly();
+      
+      this.form.markAsPristine();
+      console.log('Form patched with processed data');
+    }, 800);  // Increased timeout for component initialization
+  }
+  
+  /**
+   * Directly sets form control values for file uploads to ensure proper initialization
+   */
+  private setFormControlsDirectly() {
+    if (this.form && this.model) {
+      // Directly set machine photos in form controls
+      if (this.model.machines && Array.isArray(this.model.machines)) {
+        this.model.machines.forEach((machine: any, machineIndex: number) => {
+          if (machine.machinePhotos && machine.machinePhotos.length > 0) {
+            const controlPath = `machines.${machineIndex}.machinePhotos`;
+            const control = this.form.get(controlPath);
+            if (control) {
+              // Set the value directly and mark as dirty to force update
+              control.setValue(machine.machinePhotos);
+              control.markAsDirty();
+              console.log(`Directly set control for ${controlPath}:`, machine.machinePhotos);
+            }
+          }
+        });
       }
       
-      return fileObj;
+      // Directly set certification documents in form controls
+      if (this.model.certifications && Array.isArray(this.model.certifications)) {
+        this.model.certifications.forEach((cert: any, certIndex: number) => {
+          if (cert.certificateDocument && cert.certificateDocument.length > 0) {
+            const controlPath = `certifications.${certIndex}.certificateDocument`;
+            const control = this.form.get(controlPath);
+            if (control) {
+              // Set the value directly and mark as dirty to force update
+              control.setValue(cert.certificateDocument);
+              control.markAsDirty();
+              console.log(`Directly set control for ${controlPath}:`, cert.certificateDocument);
+            }
+          }
+        });
+      }
+      
+      // Directly set facility photos in form control
+      if (this.model.facilityPhotos && this.model.facilityPhotos.length > 0) {
+        const control = this.form.get('facilityPhotos');
+        if (control) {
+          // Set the value directly and mark as dirty to force update
+          control.setValue(this.model.facilityPhotos);
+          control.markAsDirty();
+          console.log('Directly set control for facilityPhotos:', this.model.facilityPhotos);
+        }
+      }
     }
+  }
+
+  /**
+   * Converts any file representation to a file-like object that works with the FormlyFieldFileUploadComponent
+   */
+  convertToFileObject(fileData: any): any {
+    // Handle null/undefined
+    if (!fileData) return null;
     
-    // If it's just a URL string, create a minimalist file object
+    let fileObject = null;
+    
+    // Handle by type
     if (typeof fileData === 'string') {
-      return {
-        name: fileData.split('/').pop() || 'document',
+      // For string URL
+      const fileName = this.getFileNameFromUrl(fileData);
+      const fileType = this.getFileTypeFromUrl(fileName);
+      
+      fileObject = {
+        name: fileName,
         size: 0,
-        type: 'application/octet-stream',
-        url: fileData,
-        lastModified: Date.now()
+        type: fileType,
+        lastModified: Date.now(),
+        url: fileData
+      };
+    } else if (typeof fileData === 'object') {
+      // For file objects
+      fileObject = {
+        name: fileData.name || fileData.fileName || 'document',
+        size: fileData.size || 0,
+        type: fileData.type || fileData.fileType || this.getFileTypeFromUrl(fileData.name || 'document'),
+        lastModified: fileData.lastModified || Date.now(),
+        url: fileData.url || fileData.file_url || ''
       };
     }
     
-    return fileData;
+    // Return null if we couldn't create a valid file object
+    if (!fileObject) return null;
+    
+    console.log('Converted file object:', fileObject);
+    return fileObject;
+  }
+  
+  /**
+   * Helper function to extract filename from URL - matches FormlyFieldFileUploadComponent
+   */
+  private getFileNameFromUrl(url: string): string {
+    if (!url) return 'File';
+    
+    // Extract filename from URL path
+    const urlParts = url.split('/');
+    let fileName = urlParts[urlParts.length - 1];
+    
+    // Remove query parameters if any
+    if (fileName.includes('?')) {
+      fileName = fileName.split('?')[0];
+    }
+    
+    // Decode URI components
+    try {
+      return decodeURIComponent(fileName) || 'File';
+    } catch (e) {
+      return 'File';
+    }
+  }
+  
+  /**
+   * Helper function to determine file type from name - matches FormlyFieldFileUploadComponent
+   */
+  private getFileTypeFromUrl(fileName: string): string {
+    if (!fileName) return 'application/octet-stream';
+    
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    
+    // Return appropriate MIME type based on extension
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'pdf':
+        return 'application/pdf';
+      case 'doc':
+        return 'application/msword';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case 'xls':
+        return 'application/vnd.ms-excel';
+      case 'xlsx':
+        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      default:
+        return 'application/octet-stream';
+    }
   }
 
   // Getter to make accessing the current step's fields easy in template
