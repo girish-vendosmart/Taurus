@@ -592,7 +592,7 @@ export class SupplierOnboardingComponent implements OnInit {
             defaultValue: this.model.phoneNumber,
             templateOptions: {
               label: 'Phone Number',
-              required: true,
+              required: false,
               placeholder: 'Enter phone number',
               countryCode: '91',
               parentComponent: this,
