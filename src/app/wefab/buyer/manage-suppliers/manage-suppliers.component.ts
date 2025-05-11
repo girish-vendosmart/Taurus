@@ -3,6 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { CommonService } from '../../shared/common.service';
 
 interface Supplier {
@@ -17,12 +22,24 @@ interface Supplier {
 @Component({
   selector: 'app-manage-suppliers',
   standalone: true,
-  imports: [CommonModule, RouterModule, ButtonModule, CardModule],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    ButtonModule, 
+    CardModule, 
+    DialogModule,
+    InputTextModule,
+    ReactiveFormsModule,
+    ToastModule
+  ],
+  providers: [MessageService],
   template: `
+    <p-toast></p-toast>
+    
     <div class="suppliers-container">
       <div class="header">
         <h1>Manage Suppliers</h1>
-        <button pButton label="Add New Supplier" icon="pi pi-plus" class="p-button-primary"></button>
+        <button pButton label="Add New Supplier" icon="pi pi-plus" class="p-button-primary" (click)="showInviteDialog()"></button>
       </div>
 
       <div class="suppliers-grid">
@@ -55,6 +72,53 @@ interface Supplier {
         </p-card>
       </div>
     </div>
+
+    <p-dialog 
+      [(visible)]="inviteDialogVisible" 
+      [style]="{width: '450px'}" 
+      header="Invite New Supplier" 
+      [modal]="true"
+      [draggable]="false"
+      [resizable]="false"
+      (onHide)="onDialogHide()">
+      <form [formGroup]="inviteForm" (ngSubmit)="onSubmit()" class="invite-form">
+        <div class="field">
+          <label for="supplier_name">Supplier Name</label>
+          <input id="supplier_name" type="text" pInputText formControlName="supplier_name" 
+                 [ngClass]="{'ng-invalid ng-dirty': inviteForm.get('supplier_name')?.invalid && inviteForm.get('supplier_name')?.touched}"
+                 placeholder="Enter supplier name">
+          <small class="p-error" *ngIf="inviteForm.get('supplier_name')?.invalid && inviteForm.get('supplier_name')?.touched">
+            Supplier name is required
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="supplier_email_id">Email Address</label>
+          <input id="supplier_email_id" type="email" pInputText formControlName="supplier_email_id"
+                 [ngClass]="{'ng-invalid ng-dirty': inviteForm.get('supplier_email_id')?.invalid && inviteForm.get('supplier_email_id')?.touched}"
+                 placeholder="Enter email address">
+          <small class="p-error" *ngIf="inviteForm.get('supplier_email_id')?.invalid && inviteForm.get('supplier_email_id')?.touched">
+            Please enter a valid email address
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="company_name">Company Name</label>
+          <input id="company_name" type="text" pInputText formControlName="company_name"
+                 [ngClass]="{'ng-invalid ng-dirty': inviteForm.get('company_name')?.invalid && inviteForm.get('company_name')?.touched}"
+                 placeholder="Enter company name">
+          <small class="p-error" *ngIf="inviteForm.get('company_name')?.invalid && inviteForm.get('company_name')?.touched">
+            Company name is required
+          </small>
+        </div>
+
+        <div class="dialog-footer">
+          <button pButton type="button" label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideInviteDialog()"></button>
+          <button pButton type="submit" label="Send Invitation" icon="pi pi-check" class="p-button-primary" 
+                  [disabled]="inviteForm.invalid || isSubmitting"></button>
+        </div>
+      </form>
+    </p-dialog>
   `,
   styles: [`
     .suppliers-container {
@@ -129,12 +193,54 @@ interface Supplier {
       justify-content: flex-end;
       gap: 0.5rem;
     }
+
+    .invite-form {
+      .field {
+        margin-bottom: 1.5rem;
+
+        label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+        }
+
+        input {
+          width: 100%;
+          padding: 0.5rem;
+        }
+
+        small {
+          display: block;
+          margin-top: 0.25rem;
+        }
+      }
+    }
+
+    .dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 2rem;
+    }
   `]
 })
 export class ManageSuppliersComponent implements OnInit {
   suppliers: Supplier[] = [];
+  inviteDialogVisible = false;
+  inviteForm: FormGroup;
+  isSubmitting = false;
 
-  constructor(private commonService: CommonService) {}
+  constructor(
+    private commonService: CommonService,
+    private fb: FormBuilder,
+    private messageService: MessageService
+  ) {
+    this.inviteForm = this.fb.group({
+      supplier_email_id: ['', [Validators.required, Validators.email]],
+      supplier_name: ['', Validators.required],
+      company_name: ['', Validators.required]
+    });
+  }
 
   ngOnInit() {
     this.loadSuppliers();
@@ -148,7 +254,54 @@ export class ManageSuppliersComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading suppliers:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load suppliers'
+        });
       }
     });
+  }
+
+  showInviteDialog() {
+    this.inviteDialogVisible = true;
+  }
+
+  hideInviteDialog() {
+    this.inviteDialogVisible = false;
+  }
+
+  onDialogHide() {
+    this.inviteForm.reset();
+  }
+
+  onSubmit() {
+    if (this.inviteForm.valid) {
+      this.isSubmitting = true;
+      const endPoint = '/api/resource/wfb_supplier_invitation';
+      
+      this.commonService.postData(endPoint, this.inviteForm.value).subscribe({
+        next: (response) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Supplier invitation sent successfully'
+          });
+          this.hideInviteDialog();
+          this.loadSuppliers(); // Refresh the list
+        },
+        error: (error) => {
+          console.error('Error inviting supplier:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error.error?.message || 'Failed to send invitation'
+          });
+        },
+        complete: () => {
+          this.isSubmitting = false;
+        }
+      });
+    }
   }
 } 
