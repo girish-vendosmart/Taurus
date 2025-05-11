@@ -848,7 +848,7 @@ export class SupplierOnboardingL2Component implements OnInit {
   }
 
   putSupplierOnboardingL2() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2';
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + sessionStorage.getItem('supplier_id');
     let body = this.updateData(this.model);
     this.commonService.putData(endPoint, body).subscribe((res: any) => {
       this.messageService.add({
