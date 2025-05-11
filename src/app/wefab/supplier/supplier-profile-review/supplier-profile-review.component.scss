@@ -50,6 +50,11 @@ $safety-orange: #F26830;
         color: $safety-orange;
         font-weight: 500;
       }
+
+      .status-completed {
+        color: $process-green;
+        font-weight: 500;
+      }
     }
   }
   
@@ -1283,4 +1288,32 @@ $safety-orange: #F26830;
       }
     }
   }
+
+  .section-subtitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+  }
+  
+  .industries-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    
+    .industry-tag {
+      background-color: rgba($blueprint-blue, 0.1);
+      color: $blueprint-blue;
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: rgba($blueprint-blue, 0.15);
+      }
+    }
+  }
+  
 } 

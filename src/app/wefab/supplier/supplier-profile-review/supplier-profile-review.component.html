@@ -3,7 +3,7 @@
   <div class="review-header">
     <div class="header-left">
       <h1 class="review-title">Supplier Profile Review</h1>
-      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: <span class="status-pending">{{ status }}</span></p>
+      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: <span class="status-pending">{{ getCurrentDataStatus }}</span></p>
     </div>
     <div class="header-actions">
       <button type="button" class="btn btn-outline-primary return-btn" (click)="returnToForm()">
@@ -154,21 +154,16 @@
         <!-- Machine Details Tab -->
         <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'machines'">
           <div class="machines-container">
-            <div class="machine-card" *ngFor="let machine of machines">
+            <div class="machine-card" *ngFor="let machine of manufacturingData.machines">
               <div class="machine-image">
-                <img [src]="machine.photoUrl" [alt]="machine.name" class="machine-photo">
+                <img [src]="machine.machinePhotos" [alt]="machine.make" class="machine-photo">
               </div>
               <div class="machine-details">
-                <h3 class="machine-name">{{ machine.name }}</h3>
+                <h3 class="machine-name">{{ machine.make }}</h3>
                 <div class="machine-info">
-                  <p class="machine-type"><strong>Type:</strong> {{ machine.type }}</p>
+                  <p class="machine-type"><strong>Model:</strong> {{ machine.model }}</p>
                   <p class="machine-quantity"><strong>Quantity:</strong> {{ machine.quantity }} units</p>
-                  <p class="machine-description">{{ machine.description }}</p>
-                </div>
-                <div class="machine-actions">
-                  <button class="view-specs-btn">
-                    <i class="pi pi-file-pdf"></i> View Specifications
-                  </button>
+                  <p class="machine-description"><strong>Specifications:</strong> {{ machine.specifications }} </p>
                 </div>
               </div>
             </div>
@@ -178,14 +173,14 @@
         <!-- Facility Verification Tab -->
         <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'facility'">
           <div class="facility-photos-container">
-            <div class="facility-photo-card" *ngFor="let photo of facilityPhotos">
+            <div class="facility-photo-card" *ngFor="let photo of manufacturingData.facilityPhotos">
               <div class="facility-photo">
-                <img [src]="photo.photoUrl" [alt]="photo.title" class="facility-image">
+                <img [src]="photo" [alt]="'facility photo'" class="facility-image">
               </div>
-              <div class="facility-photo-details">
+              <!-- <div class="facility-photo-details">
                 <h3 class="facility-photo-title">{{ photo.title }}</h3>
                 <p class="facility-photo-description">{{ photo.description }}</p>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -193,16 +188,15 @@
         <!-- Certifications Tab -->
         <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'certifications'">
           <div class="certifications-container">
-            <div class="certification-card" *ngFor="let cert of certifications">
+            <div class="certification-card" *ngFor="let cert of manufacturingData.certifications">
               <div class="certification-image">
-                <img [src]="cert.photoUrl" [alt]="cert.name" class="certification-photo">
+                <img [src]="cert.certificateDocument" [alt]="cert.certificationName" class="certification-photo">
               </div>
               <div class="certification-details">
-                <h3 class="certification-name">{{ cert.name }}</h3>
+                <h3 class="certification-name">{{ cert.certificationName }}</h3>
                 <div class="certification-info">
-                  <p class="certification-issuer"><strong>Issuer:</strong> {{ cert.issuer }}</p>
-                  <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expiryDate | date:'mediumDate' }}</p>
-                  <p class="certification-description">{{ cert.description }}</p>
+                  <p class="certification-issuer"><strong>Certification Body:</strong> {{ cert.certifyingBody }}</p>
+                  <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expirationDate | date:'mediumDate' }}</p>
                 </div>
                 <div class="certification-status">
                   <span class="status-badge verified">
@@ -220,24 +214,19 @@
             <div class="capacity-row">
               <div class="capacity-col">
                 <div class="field-label">Production Capacity Utilization</div>
-                <div class="field-value">{{ productionCapacity }}%</div>
+                <div class="field-value">{{ manufacturingData.productionCapacity }}%</div>
               </div>
               <div class="capacity-col">
                 <div class="field-label">Industries Served</div>
-                <div class="field-value">{{ industriesServed.join(', ') }}</div>
-              </div>
-            </div>
-            
-            <div class="industries-section">
-              <h3 class="section-subtitle">Industries Served</h3>
-              <div class="industries-tags">
-                <span class="industry-tag" *ngFor="let industry of industriesServed">{{ industry }}</span>
+                <div class="industries-tags">
+                  <span class="industry-tag" *ngFor="let industry of manufacturingData.industries">{{ industry }}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
+
       <!-- Financial Tab Content -->
       <div class="tab-content" *ngIf="activeLevelTab === 'financial'">
         <div class="section-header">
@@ -265,22 +254,18 @@
               <div class="review-row">
                 <div class="review-col">
                   <div class="field-label">Annual Revenue (2024)</div>
-                  <div class="field-value">{{ financialData.year2024Revenue }}</div>
+                  <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2024 }}</div>
                 </div>
                 <div class="review-col">
                   <div class="field-label">Annual Revenue (2023)</div>
-                  <div class="field-value">{{ financialData.year2023Revenue }}</div>
+                  <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2023 }}</div>
                 </div>
               </div>
               
               <div class="review-row">
                 <div class="review-col">
                   <div class="field-label">Annual Revenue (2022)</div>
-                  <div class="field-value">{{ financialData.year2022Revenue }}</div>
-                </div>
-                <div class="review-col">
-                  <div class="field-label">Currency</div>
-                  <div class="field-value">INR (₹)</div>
+                  <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2022 }}</div>
                 </div>
               </div>
             </div>
@@ -290,11 +275,11 @@
               <div class="review-row">
                 <div class="review-col">
                   <div class="field-label">Credit Rating Provider</div>
-                  <div class="field-value">CRISIL</div>
+                  <div class="field-value">{{ newFinancialData.companyFinancials.creditRatingProvider }}</div>
                 </div>
                 <div class="review-col">
                   <div class="field-label">Tax Compliance</div>
-                  <div class="field-value"><i class="pi pi-check-circle verified-icon"></i> Compliant</div>
+                  <div class="field-value"><i class="pi pi-check-circle verified-icon"></i>{{ newFinancialData.companyFinancials.taxCompliant }}</div>
                 </div>
               </div>
             </div>
@@ -304,35 +289,60 @@
               <div class="review-row">
                 <div class="review-col">
                   <div class="field-label">General Liability</div>
-                  <div class="field-value">₹5,00,00,000</div>
+                  <div class="field-value">{{ newFinancialData.insuranceCoverage.generalLiabilityInsurance }}</div>
                 </div>
                 <div class="review-col">
                   <div class="field-label">Product Liability</div>
-                  <div class="field-value">₹2,50,00,000</div>
+                  <div class="field-value">{{ newFinancialData.insuranceCoverage.productLiabilityInsurance }}</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
         
         <!-- Additional Information Tab Content -->
         <div class="financial-tab-content" *ngIf="financialTab === 'additional'">
           <div class="additional-info">
+            <!-- Digital Presence -->
+            <div class="review-info-container">
+              <h3>Digital Presence</h3>
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Company Website</div>
+                  <div class="field-value">{{ newFinancialData.additionalInformation.websites.website}}</div>
+                </div>
+              </div>
+            </div>
+            <!-- Operational Metrics -->
+            <div class="review-info-container">
+              <h3>Operational Metrics</h3>
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Total Number of Employees</div>
+                  <div class="field-value">{{ newFinancialData.additionalInformation.totalEmployees}}</div>
+                </div>
+                <div class="review-col">
+                  <div class="field-label">Year of Establishment</div>
+                  <div class="field-value">{{ newFinancialData.additionalInformation.foundedYear}}</div>
+                </div>
+              </div>
+            </div>
             <div class="review-info-container">
               <h3>Business Terms</h3>
               <div class="review-row">
                 <div class="review-col">
                   <div class="field-label">Lead Time (Days)</div>
-                  <div class="field-value">14</div>
+                  <div class="field-value">{{ newFinancialData.additionalInformation.leadTime}}</div>
                 </div>
                 <div class="review-col">
                   <div class="field-label">Minimum Order Quantity</div>
-                  <div class="field-value">50 units</div>
+                  <div class="field-value">{{newFinancialData.additionalInformation.minimumOrderQuantity}}</div>
                 </div>
               </div>
             </div>
             
-            <div class="review-info-container">
+            <!-- <div class="review-info-container">
               <h3>Additional Capabilities</h3>
               <div class="review-row">
                 <div class="review-col">
@@ -350,7 +360,7 @@
                   <div class="field-value">3 Active Partners</div>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>

@@ -166,6 +166,10 @@ export class SupplierProfileReviewComponent implements OnInit {
   // Flag to check if running in browser environment
   private isBrowser: boolean;
   getCompanyProfile: any;
+  manufacturingData: any;
+  newFinancialData: any;
+  getL1CurrentDataStatus: any;
+  getCurrentDataStatus: any;
   
   // Overall completion percentage
   get completionPercentage(): number {
@@ -262,6 +266,7 @@ export class SupplierProfileReviewComponent implements OnInit {
     // Reset the secondary tab when changing level tabs
     if (tab === 'financial') {
       this.activeTab = 'revenue';
+      this.getL3Data(this.supplierId)
     }
     
     // Update URL with the active tab without navigation - only if in browser
@@ -277,6 +282,11 @@ export class SupplierProfileReviewComponent implements OnInit {
 
     if(tab === 'basic') {
       this.getL1Data(this.supplierId)
+      this.getL1DataStatus(this.supplierId)
+    }
+
+    if(tab === 'manufacturing') {
+      this.getL2Data(this.supplierId)
     }
     
     // Show toast for tab change
@@ -395,4 +405,27 @@ export class SupplierProfileReviewComponent implements OnInit {
         console.log(this.getCompanyProfile)
       })
     }
+
+    getL2Data(supplierId:any) {
+      let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId
+        this.commonservice.getData(endPoint).subscribe((res: any) => {
+          this.manufacturingData = JSON.parse(res.data.company_profile)
+        })
+      }
+
+      getL3Data(supplierId:any) {
+        let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + supplierId
+          this.commonservice.getData(endPoint).subscribe((res: any) => {
+            this.newFinancialData = JSON.parse(res.data.company_profile)
+            debugger
+            console.log(this.newFinancialData)
+          })
+        }
+
+        getL1DataStatus(supplierId:any) {
+          let endPoint = '/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=' + supplierId
+            this.commonservice.getData(endPoint).subscribe((res: any) => {
+              this.getCurrentDataStatus = res.data.approval_status
+            })
+        }
 } 
