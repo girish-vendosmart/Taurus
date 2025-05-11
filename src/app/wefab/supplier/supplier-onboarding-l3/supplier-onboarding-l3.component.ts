@@ -216,10 +216,10 @@ export class SupplierOnboardingL3Component implements OnInit {
 
     // Check if we're in edit mode
     const route = this.router.url;
-    if (route.includes('editMode=true')) {
+    if (route.includes('mode=edit')) {
       const supplierId = sessionStorage.getItem('supplier_id');
       if (supplierId) {
-        debugger
+        
         this.getL3Data(supplierId);
       } else {
         this.messageService.add({
@@ -236,7 +236,7 @@ export class SupplierOnboardingL3Component implements OnInit {
   getL3Data(supplierId:any) {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + supplierId
       this.commonService.getData(endPoint).subscribe((res: any) => {
-        debugger
+        
         this.getFinancialData = JSON.parse(res.data.company_profile)
         console.log(this.getFinancialData)
         this.patchValueForm()
@@ -253,13 +253,31 @@ export class SupplierOnboardingL3Component implements OnInit {
       ...this.getFinancialData
     };
     
+    // Ensure arrays are properly initialized
+    if (!this.model.additionalInformation.productionFacilities || 
+        !Array.isArray(this.model.additionalInformation.productionFacilities) || 
+        this.model.additionalInformation.productionFacilities.length === 0) {
+      this.model.additionalInformation.productionFacilities = [{
+        facilityName: '',
+        facilityLocation: ''
+      }];
+    }
+    
+    if (!this.model.additionalInformation.references || 
+        !Array.isArray(this.model.additionalInformation.references) || 
+        this.model.additionalInformation.references.length === 0) {
+      this.model.additionalInformation.references = [{
+        companyName: '',
+        contactName: '',
+        email: ''
+      }];
+    }
+    
     // Mark form as pristine after patching values
     setTimeout(() => {
       this.form.markAsPristine();
       console.log('Form patched with stored data:', this.model);
     });
-    
-    
   }
 
   // Added method to update sticky navigation based on screen size
@@ -321,7 +339,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'companyFinancials.annualRevenue2024',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (2024) (INR) *',
+              label: 'Annual Revenue (This Year) (INR) *',
               required: true,
               type: 'text',
               placeholder: '12359'
@@ -337,7 +355,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'companyFinancials.annualRevenue2023',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (2023) (INR) *',
+              label: 'Annual Revenue (Last Year) (INR) *',
               required: true,
               type: 'text',
               placeholder: '9876'
@@ -362,7 +380,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'companyFinancials.annualRevenue2022',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (2022) (INR) *',
+              label: 'Annual Revenue (Two Years Ago) (INR) *',
               required: true,
               type: 'text',
               placeholder: '09876r'
@@ -550,7 +568,9 @@ export class SupplierOnboardingL3Component implements OnInit {
             fieldArray: {
               fieldGroup: [
                 {
-                  template: `<div class="mt-3 mb-1"><h6>Item 1</h6></div>`
+                  expressionProperties: {
+                    'template': 'return "<div class=\'mt-3 mb-1\'><h6>Item " + (field.parent.index + 1) + "</h6></div>";'
+                  }
                 },
                 {
                   fieldGroupClassName: 'row',
@@ -658,7 +678,9 @@ export class SupplierOnboardingL3Component implements OnInit {
             fieldArray: {
               fieldGroup: [
                 {
-                  template: `<div class="mt-3 mb-1"><h6>Item 1</h6></div>`
+                  expressionProperties: {
+                    'template': 'return "<div class=\'mt-3 mb-1\'><h6>Item " + (field.parent.index + 1) + "</h6></div>";'
+                  }
                 },
                 {
                   fieldGroupClassName: 'row',
@@ -748,10 +770,6 @@ export class SupplierOnboardingL3Component implements OnInit {
         // If validation fails, mark all required fields as touched to show errors
         this.markFieldsAsTouched(this.currentFields);
         
-        // Log validation errors to console for debugging
-        console.log('Form validation failed. Current fields:', this.currentFields);
-        console.log('Form errors:', this.form.errors);
-        
         // Show error message to user
         this.messageService.add({
           severity: 'error', 
@@ -825,25 +843,116 @@ export class SupplierOnboardingL3Component implements OnInit {
   }
 
   updateData(data:any) {
+    // Make sure arrays are preserved in the data
+    const formData = { ...data };
+    
+    if (!formData.additionalInformation) {
+      formData.additionalInformation = {};
+    }
+    
+    // Ensure these are arrays
+    const repeatingFields = ['productionFacilities', 'references'];
+    repeatingFields.forEach(field => {
+      if (!Array.isArray(formData.additionalInformation[field])) {
+        formData.additionalInformation[field] = 
+          this.model.additionalInformation[field] || [];
+      }
+    });
+    
+    // Create final body to send
     let body = {
       supplier_company_id: sessionStorage.getItem('supplier_id'),
       onboarding_status: 'Under Review',
-      company_profile: JSON.stringify(data)
-    } 
-    return body
+      company_profile: JSON.stringify(formData)
+    }
+    
+    return body;
   }
 
   submit() {
     if (this.form.valid) {
-      console.log('Form submitted:', this.model);
       debugger
-      let body = this.updateData(this.model);
+      console.log(this.model)
+      // Get complete form data before submission
+      const formValues = this.form.getRawValue();
+      
+      // Get original form model and preserve array structures
+      debugger
+      const fullModel = { ...this.model };
+      
+      // Merge with form values to ensure all data is captured
+      // This will pull in the arrays properly
+      const mergedData = this.mergeDeep(fullModel, formValues);
+      
+      console.log('Form submitted:', mergedData);
+      
+      let body = this.updateData(mergedData);
 
+      // Use the existing POST or PUT methods as needed
       this.commonService.postData('/api/resource/wfb_supplier_onboarding_L3', body).subscribe((res: any) => {
         this.messageService.add({
           severity: 'success', 
           summary: 'Onboarding Complete', 
           detail: 'Thank you! Your supplier onboarding process has been completed successfully. We will review your information and contact you shortly.'
+        });
+        
+        // Here you might redirect to a supplier dashboard or confirmation page
+        setTimeout(() => {
+          this.router.navigate(['/wefab/supplier/onboarding-complete']);
+        }, 3000);
+      }, (err: any) => {
+        this.putSupplierOnboardingL3()
+      });
+    } else {
+      this.markFieldsAsTouched(this.stepFields.flat());
+      this.messageService.add({
+        severity: 'error', 
+        summary: 'Validation Error', 
+        detail: 'Please fill in all required fields correctly.'
+      });
+    }
+  }
+
+  // Helper method to deeply merge objects while preserving arrays
+  mergeDeep(target: any, source: any) {
+    const isObject = (obj: any) => obj && typeof obj === 'object';
+    
+    if (!isObject(target) || !isObject(source)) {
+      return source;
+    }
+    
+    Object.keys(source).forEach(key => {
+      if (isObject(source[key])) {
+        if (!target[key]) Object.assign(target, { [key]: {} });
+        this.mergeDeep(target[key], source[key]);
+      } else {
+        Object.assign(target, { [key]: source[key] });
+      }
+    });
+    
+    return target;
+  }
+
+  putSupplierOnboardingL3() {
+    if (this.form.valid) {
+      // Get complete form data before submission
+      const formValues = this.form.getRawValue();
+      
+      // Get original form model and preserve array structures
+      const fullModel = { ...this.model };
+      
+      // Merge with form values to ensure all data is captured
+      const mergedData = this.mergeDeep(fullModel, formValues);
+      
+      console.log('Form updated:', mergedData);
+      
+      let body = this.updateData(mergedData);
+
+      this.commonService.putData('/api/resource/wfb_supplier_onboarding_L3', body).subscribe((res: any) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Update Successful',
+          detail: 'Your data has been updated successfully. We will review the changes and get back to you if necessary.'
         });
         
         // Here you might redirect to a supplier dashboard or confirmation page

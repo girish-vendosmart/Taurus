@@ -170,6 +170,16 @@ export class SupplierProfileReviewComponent implements OnInit {
   newFinancialData: any;
   getL1CurrentDataStatus: any;
   getCurrentDataStatus: any;
+  getCurrentL1DataStatus: any;
+  getCurrentL2DataStatus: any;
+  getCurrentL3DataStatus: any;
+  getDocumentSummaryData: any;
+  numberOfMachinePhoto: number = 0
+  numberOfFacilityPhoto: number = 0
+  numberOfCertificationPhoto: number = 0
+  getDocumentSummaryL1Data: any;
+  phoneVerifiedStatus: any = false
+  numberOfCompanyDocuments: number = 0
   
   // Overall completion percentage
   get completionPercentage(): number {
@@ -186,6 +196,10 @@ export class SupplierProfileReviewComponent implements OnInit {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
+    this.getL1Data(this.supplierId)
+    this.getL1DataStatus(this.supplierId)
+    this.getDocumentSummary(this.supplierId)
+    this.getL1DocumentSummary(this.supplierId)
   }
 
   ngOnInit(): void {
@@ -217,23 +231,23 @@ export class SupplierProfileReviewComponent implements OnInit {
   }
   
   navigateToEdit(): void {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Edit Profile',
-      detail: 'Navigating to edit profile',
-      life: 3000
-    });
     
     // Navigate to appropriate edit page based on active tab
     switch (this.activeLevelTab) {
       case 'basic':
-        this.router.navigate(['/wefab/supplier/supplier-onboarding']);
+        this.router.navigate(['/wefab/supplier/supplier-onboarding'], {
+          queryParams: { mode: 'edit' }
+        });
         break;
       case 'manufacturing':
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l2'], {
+      queryParams: { mode: 'edit' }
+    });
         break;
       case 'financial':
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3'], {
+      queryParams: { mode: 'edit' }
+    });
         break;
       default:
         this.router.navigate(['/wefab/supplier/supplier-onboarding']);
@@ -267,6 +281,7 @@ export class SupplierProfileReviewComponent implements OnInit {
     if (tab === 'financial') {
       this.activeTab = 'revenue';
       this.getL3Data(this.supplierId)
+      this.getL3DataStatus(this.supplierId)
     }
     
     // Update URL with the active tab without navigation - only if in browser
@@ -287,6 +302,7 @@ export class SupplierProfileReviewComponent implements OnInit {
 
     if(tab === 'manufacturing') {
       this.getL2Data(this.supplierId)
+      this.getL2DataStatus(this.supplierId)
     }
     
     // Show toast for tab change
@@ -397,6 +413,27 @@ export class SupplierProfileReviewComponent implements OnInit {
     this.financialTab = tab;
   }
 
+  getDocumentSummary(supplierId:any) {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId
+      this.commonservice.getData(endPoint).subscribe((res: any) => {
+        this.getDocumentSummaryData = JSON.parse(res.data.company_profile)
+        this.numberOfMachinePhoto = this.getDocumentSummaryData.machines.length
+        this.numberOfFacilityPhoto = this.getDocumentSummaryData.certifications.length
+        this.numberOfCertificationPhoto = this.getDocumentSummaryData.facilityPhotos.length
+        console.log(this.getDocumentSummaryData)
+      })
+    }
+
+    getL1DocumentSummary(supplierId:any) {
+      let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
+        this.commonservice.getData(endPoint).subscribe((res: any) => {
+          this.getDocumentSummaryL1Data = JSON.parse(res.data.company_profile)
+          this.phoneVerifiedStatus = this.getDocumentSummaryL1Data.phone_verified
+          this.numberOfCompanyDocuments = 1
+          console.log(this.getDocumentSummaryData)
+        })
+      }
+
   getL1Data(supplierId:any) {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
@@ -423,9 +460,26 @@ export class SupplierProfileReviewComponent implements OnInit {
         }
 
         getL1DataStatus(supplierId:any) {
+          let endPoint = '/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=' + supplierId
+            this.commonservice.getData(endPoint).subscribe((res: any) => {
+              this.getCurrentDataStatus = res.data.approval_status
+              this.getCurrentL1DataStatus = res.data.approval_status
+            })
+        }
+
+        getL2DataStatus(supplierId:any) {
+          let endPoint = '/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=' + supplierId
+            this.commonservice.getData(endPoint).subscribe((res: any) => {
+              this.getCurrentDataStatus = res.data.approval_status
+              this.getCurrentL2DataStatus = res.data.approval_status
+            })
+        }
+
+        getL3DataStatus(supplierId:any) {
           let endPoint = '/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=' + supplierId
             this.commonservice.getData(endPoint).subscribe((res: any) => {
               this.getCurrentDataStatus = res.data.approval_status
+              this.getCurrentL3DataStatus = res.data.approval_status
             })
         }
 } 

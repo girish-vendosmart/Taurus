@@ -91,7 +91,7 @@ export class ManufacturingVerificationComponent implements OnInit {
   editL2Form() {
     this.router.navigate(['/wefab/supplier/supplier-onboarding-l2'], { 
       queryParams: { 
-        editMode: true 
+        mode: 'edit'
       } 
     });
   }

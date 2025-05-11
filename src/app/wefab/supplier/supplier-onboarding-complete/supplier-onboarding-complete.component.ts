@@ -69,7 +69,7 @@ export class SupplierOnboardingCompleteComponent implements OnInit {
   editInformation(): void {
     this.router.navigate(['/wefab/supplier/supplier-onboarding-l3'], { 
       queryParams: { 
-        editMode: true 
+        mode: 'edit'
       } 
     });
   }

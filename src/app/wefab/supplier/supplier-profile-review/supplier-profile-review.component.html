@@ -3,12 +3,13 @@
   <div class="review-header">
     <div class="header-left">
       <h1 class="review-title">Supplier Profile Review</h1>
-      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: <span class="status-pending">{{ getCurrentDataStatus }}</span></p>
+      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: <span class="status-pending" *ngIf="getCurrentDataStatus === 'Under Review'" >{{ getCurrentDataStatus }}</span>
+        <span class="status-completed" *ngIf="getCurrentDataStatus === 'Approved'" >{{ getCurrentDataStatus }}</span></p>
     </div>
     <div class="header-actions">
-      <button type="button" class="btn btn-outline-primary return-btn" (click)="returnToForm()">
+      <!-- <button type="button" class="btn btn-outline-primary return-btn" (click)="returnToForm()">
         Return to Form
-      </button>
+      </button> -->
       <!-- <button type="button" class="btn btn-icon" (click)="printProfile()">
         <i class="pi pi-print"></i> Print
       </button>
@@ -50,8 +51,8 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'basic'">
         <div class="section-header">
           <h2>Basic Information</h2>
-          <button class="edit-section-btn">
-            <i class="pi pi-pencil"></i>
+          <button class="edit-section-btn" *ngIf="getCurrentL1DataStatus === 'Under Review'" (click)="navigateToEdit()">
+            <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
         </div>
         
@@ -138,8 +139,8 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'manufacturing'">
         <div class="section-header">
           <h2>Manufacturing Capabilities</h2>
-          <button class="edit-section-btn">
-            <i class="pi pi-pencil"></i>
+          <button class="edit-section-btn" *ngIf="getCurrentL2DataStatus === 'Under Review'" (click)="navigateToEdit()">
+            <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
         </div>
         
@@ -231,8 +232,8 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'financial'">
         <div class="section-header">
           <h2>Financial & Additional Information</h2>
-          <button class="edit-section-btn">
-            <i class="pi pi-pencil"></i>
+          <button class="edit-section-btn" *ngIf="getCurrentL3DataStatus === 'Under Review'" (click)="navigateToEdit()">
+            <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
         </div>
         
@@ -253,18 +254,18 @@
               <h3>Annual Revenue (Last 3 Years)</h3>
               <div class="review-row">
                 <div class="review-col">
-                  <div class="field-label">Annual Revenue (2024)</div>
+                  <div class="field-label">Annual Revenue (This Year)</div>
                   <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2024 }}</div>
                 </div>
                 <div class="review-col">
-                  <div class="field-label">Annual Revenue (2023)</div>
+                  <div class="field-label">Annual Revenue (Last Year)</div>
                   <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2023 }}</div>
                 </div>
               </div>
               
               <div class="review-row">
                 <div class="review-col">
-                  <div class="field-label">Annual Revenue (2022)</div>
+                  <div class="field-label">Annual Revenue (Two Years Ago)</div>
                   <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2022 }}</div>
                 </div>
               </div>
@@ -435,19 +436,19 @@
         <ul class="document-list">
           <li class="document-item">
             <span class="document-label">Company Documents:</span>
-            <span class="document-count">{{ documentSummary.companyDocuments }}</span>
+            <span class="document-count">{{ numberOfCompanyDocuments }}</span>
           </li>
           <li class="document-item">
             <span class="document-label">Machine Photos:</span>
-            <span class="document-count">{{ documentSummary.machinePhotos }}</span>
+            <span class="document-count">{{ numberOfMachinePhoto }}</span>
           </li>
           <li class="document-item">
             <span class="document-label">Facility Photos:</span>
-            <span class="document-count">{{ documentSummary.facilityPhotos }}</span>
+            <span class="document-count">{{ numberOfFacilityPhoto }}</span>
           </li>
           <li class="document-item">
             <span class="document-label">Certifications:</span>
-            <span class="document-count">{{ documentSummary.certifications }}</span>
+            <span class="document-count">{{ numberOfCertificationPhoto }}</span>
           </li>
         </ul>
       </div>

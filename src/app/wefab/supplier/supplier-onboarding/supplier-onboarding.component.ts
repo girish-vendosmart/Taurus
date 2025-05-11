@@ -820,6 +820,36 @@ export class SupplierOnboardingComponent implements OnInit {
       }, 3000);
     }, (err) => {
       console.error('Error submitting form:', err);
+      this.putSupplierOnboardingL1()
+      // this.messageService.add({
+      //   severity: 'error',
+      //   summary: 'Submission Error',
+      //   detail: err.error?.message || 'An error occurred while submitting the form. Please try again later.',
+      //   life: 5000
+      // });
+    });
+  }
+
+  putSupplierOnboardingL1() {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L1';
+    this.model.phone_verified = this.phoneVerified;
+    console.log(this.model)
+    let body = this.updateData(this.model);
+    this.commonService.putData(endPoint, body).subscribe((res: any) => {
+      sessionStorage.setItem('supplier_id', res.data.name)
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Update Successful',
+        detail: 'Your supplier information has been updated. Redirecting to the verification page.',
+        life: 3000
+      });      
+      
+      // Navigate to verification page after 3 seconds
+      setTimeout(() => {
+        this.router.navigate(['/wefab/supplier/supplier-verification']);
+      }, 3000);
+    }, (err) => {
+      console.error('Error submitting form:', err);
       this.messageService.add({
         severity: 'error',
         summary: 'Submission Error',
