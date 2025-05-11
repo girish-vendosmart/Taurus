@@ -2,14 +2,14 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-buyer-dashboard',
+  selector: 'app-wefabTeam-dashboard',
   standalone: true,
   imports: [CommonModule],
   template: `
     <div class="dashboard-content">
-      <h1>Buyer Dashboard</h1>
+      <h1>WefabTeam Dashboard</h1>
       <div class="welcome-section">
-        <h2>Welcome to your Buyer Dashboard</h2>
+        <h2>Welcome to your WefabTeam Dashboard</h2>
         <p>Manage your purchases and track your orders here.</p>
       </div>
       <div class="dashboard-grid">
@@ -72,6 +72,6 @@ import { CommonModule } from '@angular/common';
     }
   `]
 })
-export class BuyerDashboardComponent {
+export class WefabTeamDashboardComponent {
   constructor() {}
 } 

@@ -6,13 +6,13 @@ import { HttpClient } from '@angular/common/http';
 import { error } from 'console';
 
 @Component({
-  selector: 'app-buyerlogin-component',
+  selector: 'app-wefabTeamlogin-component',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './buyerlogin-component.component.html',
-  styleUrl: './buyerlogin-component.component.scss'
+  templateUrl: './wefabTeamlogin-component.component.html',
+  styleUrl: './wefabTeamlogin-component.component.scss'
 })
-export class BuyerloginComponentComponent {
+export class WefabTeamloginComponentComponent {
   loginForm: FormGroup;
   showPassword = false;
   loginError = '';
@@ -47,7 +47,7 @@ export class BuyerloginComponentComponent {
       this.http.post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyB6l9WmhjQhmNYXQKryWvuGr3Rp3V45fOM', obj).subscribe((res: any) => {
         this.loginError = '';
         sessionStorage.setItem('token', 'c82020f17e1fd10:f34acaf7862dc9c');
-        this.router.navigate(['/wefab/buyer/dashboard']);
+        this.router.navigate(['/wefab/wefabTeam/dashboard']);
       }, (err: any) => {
         // Handle different authentication error cases
         if (err.error && err.error.error) {

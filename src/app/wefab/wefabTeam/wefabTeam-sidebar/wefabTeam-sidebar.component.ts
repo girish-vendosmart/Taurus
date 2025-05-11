@@ -3,36 +3,36 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-buyer-sidebar',
+  selector: 'app-wefabTeam-sidebar',
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
     <div class="sidebar">
       <div class="sidebar-header">
-        <h2>Buyer Portal</h2>
+        <h2>WefabTeam Portal</h2>
       </div>
       <nav class="sidebar-nav">
         <ul>
           <li>
-            <a routerLink="/wefab/buyer/dashboard" routerLinkActive="active">
+            <a routerLink="/wefab/wefabTeam/dashboard" routerLinkActive="active">
               <i class="bi bi-house-door"></i>
               Dashboard
             </a>
           </li>
           <li>
-            <a routerLink="/wefab/buyer/manage-suppliers" routerLinkActive="active">
+            <a routerLink="/wefab/wefabTeam/manage-suppliers" routerLinkActive="active">
               <i class="bi bi-people"></i>
               Manage Suppliers
             </a>
           </li>
           <li>
-            <a routerLink="/wefab/buyer/orders" routerLinkActive="active">
+            <a routerLink="/wefab/wefabTeam/orders" routerLinkActive="active">
               <i class="bi bi-cart"></i>
               Orders
             </a>
           </li>
           <li>
-            <a routerLink="/wefab/buyer/profile" routerLinkActive="active">
+            <a routerLink="/wefab/wefabTeam/profile" routerLinkActive="active">
               <i class="bi bi-person"></i>
               Profile
             </a>
@@ -102,6 +102,6 @@ import { RouterModule } from '@angular/router';
     }
   `]
 })
-export class BuyerSidebarComponent {
+export class WefabTeamSidebarComponent {
   constructor() {}
 } 

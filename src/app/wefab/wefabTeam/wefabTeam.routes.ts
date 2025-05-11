@@ -1,12 +1,12 @@
 import { Routes } from '@angular/router';
-import { BuyerDashboardComponent } from './buyer-dashboard/buyer-dashboard.component';
+import { WefabTeamDashboardComponent } from './wefabTeam-dashboard/wefabTeam-dashboard.component';
 import { ManageSuppliersComponent } from './manage-suppliers/manage-suppliers.component';
-import { BuyerLayoutComponent } from './buyer-layout/buyer-layout.component';
+import { WefabTeamLayoutComponent } from './wefabTeam-layout/wefabTeam-layout.component';
 
-export const BUYER_ROUTES: Routes = [
+export const WEFAB_TEAM_ROUTES: Routes = [
   {
     path: '',
-    component: BuyerLayoutComponent,
+    component: WefabTeamLayoutComponent,
     children: [
       {
         path: '',
@@ -15,7 +15,7 @@ export const BUYER_ROUTES: Routes = [
       },
       {
         path: 'dashboard',
-        component: BuyerDashboardComponent
+        component: WefabTeamDashboardComponent
       },
       {
         path: 'manage-suppliers',

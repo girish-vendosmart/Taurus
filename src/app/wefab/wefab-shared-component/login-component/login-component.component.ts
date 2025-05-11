@@ -63,7 +63,7 @@ export class LoginComponentComponent {
                   if (response.data.user_type === 'supplier') {
                     this.router.navigate(['/wefab/supplier/supplier-onboarding']);
                   } else if (response.data.user_type === 'wefab_team') {
-                    this.router.navigate(['/wefab/buyer/dashboard']);
+                    this.router.navigate(['/wefab/wefabTeam/dashboard']);
                   } else {
                     this.loginError = 'Invalid user type';
                     this.loginForm.get('password')?.reset();

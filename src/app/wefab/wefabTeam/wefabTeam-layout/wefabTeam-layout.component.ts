@@ -1,22 +1,22 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { BuyerSidebarComponent } from '../buyer-sidebar/buyer-sidebar.component';
+import { WefabTeamSidebarComponent } from '../wefabTeam-sidebar/wefabTeam-sidebar.component';
 
 @Component({
-  selector: 'app-buyer-layout',
+  selector: 'app-wefabTeam-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, BuyerSidebarComponent],
+  imports: [CommonModule, RouterModule, WefabTeamSidebarComponent],
   template: `
-    <div class="buyer-layout">
-      <app-buyer-sidebar></app-buyer-sidebar>
+    <div class="wefabTeam-layout">
+      <app-wefabTeam-sidebar></app-wefabTeam-sidebar>
       <div class="main-content">
         <router-outlet></router-outlet>
       </div>
     </div>
   `,
   styles: [`
-    .buyer-layout {
+    .wefabTeam-layout {
       display: flex;
       min-height: 100vh;
       width: 100%;
@@ -30,6 +30,6 @@ import { BuyerSidebarComponent } from '../buyer-sidebar/buyer-sidebar.component'
     }
   `]
 })
-export class BuyerLayoutComponent {
+export class WefabTeamLayoutComponent {
   constructor() {}
 } 
