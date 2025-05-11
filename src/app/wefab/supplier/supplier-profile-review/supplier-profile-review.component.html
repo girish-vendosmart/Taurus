@@ -3,8 +3,8 @@
   <div class="review-header">
     <div class="header-left">
       <h1 class="review-title">Supplier Profile Review</h1>
-      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: <span class="status-pending" *ngIf="getCurrentDataStatus === 'Under Review'" >{{ getCurrentDataStatus }}</span>
-        <span class="status-completed" *ngIf="getCurrentDataStatus === 'Approved'" >{{ getCurrentDataStatus }}</span></p>
+      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: <span class="status-pending" *ngIf="mainCurrentDataStatusTrack === 'Under Review'" >{{ mainCurrentDataStatusTrack }}</span>
+        <span class="status-completed" *ngIf="mainCurrentDataStatusTrack === 'Approved'" >{{ getCurrentDataStatus }}</span></p>
     </div>
     <div class="header-actions">
       <!-- <button type="button" class="btn btn-outline-primary return-btn" (click)="returnToForm()">
@@ -29,19 +29,23 @@
       <div class="levels-tabs">
         <button class="level-tab" [class.active]="activeLevelTab === 'basic'" (click)="changeLevelTab('basic')">
           <div class="level-badge">
-            <i class="pi pi-check-circle"></i>
+            <i class="pi pi-check-circle" *ngIf="getCurrentL1DataStatus === 'Approved'" ></i>
+            <i class="pi pi-exclamation-triangle" style="color: orange;" *ngIf="getCurrentL1DataStatus === 'Under Review'" ></i>
             <span>L1: Basic Information</span>
           </div>
         </button>
         <button class="level-tab" [class.active]="activeLevelTab === 'manufacturing'" (click)="changeLevelTab('manufacturing')">
           <div class="level-badge">
-            <i class="pi pi-check-circle"></i>
+            <i class="pi pi-check-circle" *ngIf="getCurrentL2DataStatus === 'Approved'" ></i>
+            <i class="pi pi-exclamation-triangle" style="color: orange;" *ngIf="getCurrentL2DataStatus === 'Under Review'" ></i>
             <span>L2: Manufacturing</span>
           </div>
         </button>
         <button class="level-tab" [class.active]="activeLevelTab === 'financial'" (click)="changeLevelTab('financial')">
+
           <div class="level-badge">
-            <i class="pi pi-check-circle"></i>
+            <i class="pi pi-check-circle" *ngIf="getCurrentL3DataStatus === 'Approved'" ></i>
+            <i class="pi pi-exclamation-triangle" style="color: orange;" *ngIf="getCurrentL3DataStatus === 'Under Review'" ></i>
             <span>L3: Financial & Additional</span>
           </div>
         </button>
@@ -157,7 +161,7 @@
           <div class="machines-container">
             <div class="machine-card" *ngFor="let machine of manufacturingData.machines">
               <div class="machine-image">
-                <img [src]="machine.machinePhotos" [alt]="machine.make" class="machine-photo">
+                <img [src]="machine.machinePhotos[0].url" [alt]="machine.make" class="machine-photo">
               </div>
               <div class="machine-details">
                 <h3 class="machine-name">{{ machine.make }}</h3>
@@ -176,7 +180,7 @@
           <div class="facility-photos-container">
             <div class="facility-photo-card" *ngFor="let photo of manufacturingData.facilityPhotos">
               <div class="facility-photo">
-                <img [src]="photo" [alt]="'facility photo'" class="facility-image">
+                <img [src]="photo.url" [alt]="'facility photo'" class="facility-image">
               </div>
               <!-- <div class="facility-photo-details">
                 <h3 class="facility-photo-title">{{ photo.title }}</h3>
@@ -191,7 +195,7 @@
           <div class="certifications-container">
             <div class="certification-card" *ngFor="let cert of manufacturingData.certifications">
               <div class="certification-image">
-                <img [src]="cert.certificateDocument" [alt]="cert.certificationName" class="certification-photo">
+                <img [src]="cert.certificateDocument[0].url" [alt]="cert.certificationName" class="certification-photo">
               </div>
               <div class="certification-details">
                 <h3 class="certification-name">{{ cert.certificationName }}</h3>
@@ -459,23 +463,34 @@
           <i class="pi pi-check-circle"></i>
           Verification Status
         </h2>
+
+
         
         <ul class="verification-list">
           <li class="verification-item">
-            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.phoneVerified"></i>
-            <span class="verification-label">Phone Number Verified</span>
-          </li>
-          <li class="verification-item pending">
-            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="verificationStatus.gstinVerificationPending"></i>
-            <span class="verification-label">GSTIN Verification Pending</span>
+            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.phone_number_verification"></i>
+            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!verificationStatus.phone_number_verification"></i>
+            <span *ngIf="verificationStatus.phone_number_verification">Phone Number Verified</span>
+            <span class="verification-label" *ngIf="!verificationStatus.phone_number_verification">Phone Number Verification Pending</span>
+
           </li>
           <li class="verification-item">
-            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.addressVerified"></i>
-            <span class="verification-label">Address Verified</span>
+            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus?.gst_verification_status"></i>
+            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!verificationStatus?.gst_verification_status"></i>
+            <span *ngIf="verificationStatus?.gst_verification_status">GSTIN Verified</span>
+            <span class="verification-label" *ngIf="!verificationStatus?.gst_verification_status">GSTIN Verification Pending</span>
           </li>
-          <li class="verification-item pending">
-            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="verificationStatus.facilityPhotosPending"></i>
-            <span class="verification-label">Facility Photos Pending Review</span>
+          <li class="verification-item">
+            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.address_verification"></i>
+            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!verificationStatus.address_verification"></i>
+            <span class="verification-label" *ngIf="verificationStatus.address_verification">Address Verified</span>
+            <span class="verification-label" *ngIf="!verificationStatus.address_verification">Address Verification Pending</span>
+          </li>
+          <li class="verification-item">
+            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.machine_photo_verification"></i>
+            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!verificationStatus.machine_photo_verification"></i>
+            <span class="verification-label" *ngIf="verificationStatus.machine_photo_verification">Facility Photos Verified</span>
+            <span class="verification-label" *ngIf="!verificationStatus.machine_photo_verification">Facility Photos Pending Review</span>
           </li>
         </ul>
       </div>

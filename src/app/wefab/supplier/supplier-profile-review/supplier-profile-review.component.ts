@@ -7,13 +7,7 @@ import { MessageService } from 'primeng/api';
 import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
 import { CommonService } from '../../shared/common.service';
-
-interface VerificationStatus {
-  phoneVerified: boolean;
-  gstinVerificationPending: boolean;
-  addressVerified: boolean;
-  facilityPhotosPending: boolean;
-}
+import e from 'express';
 
 interface DocumentSummary {
   companyDocuments: number;
@@ -90,12 +84,7 @@ export class SupplierProfileReviewComponent implements OnInit {
   };
   
   // Verification Status
-  verificationStatus: VerificationStatus = {
-    phoneVerified: true,
-    gstinVerificationPending: true,
-    addressVerified: true,
-    facilityPhotosPending: true
-  };
+  verificationStatus: any = {}
   
   // Financial Data
   financialData = {
@@ -180,6 +169,7 @@ export class SupplierProfileReviewComponent implements OnInit {
   getDocumentSummaryL1Data: any;
   phoneVerifiedStatus: any = false
   numberOfCompanyDocuments: number = 0
+  mainCurrentDataStatusTrack: string = ''
   
   // Overall completion percentage
   get completionPercentage(): number {
@@ -227,7 +217,16 @@ export class SupplierProfileReviewComponent implements OnInit {
           this.changeManufacturingTab(mtab);
         }
       }
+
+      this.getVerificationStatus(this.supplierId)
     }
+  }
+
+  getVerificationStatus(supplierId: string): void {
+    this.commonservice.getData('/api/method/proq_buyer.wefab.api.supplier.onboarding.get_verification_status?supplier_company_id=SUP-000314' + supplierId).subscribe((res: any) => {
+      debugger
+      this.verificationStatus = res.data
+    })
   }
   
   navigateToEdit(): void {
@@ -274,7 +273,6 @@ export class SupplierProfileReviewComponent implements OnInit {
   }
   
   changeLevelTab(tab: string): void {
-    debugger
     this.activeLevelTab = tab;
     
     // Reset the secondary tab when changing level tabs
@@ -438,7 +436,6 @@ export class SupplierProfileReviewComponent implements OnInit {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
         this.getCompanyProfile = JSON.parse(res.data.company_profile)
-        debugger
         console.log(this.getCompanyProfile)
       })
     }
@@ -454,7 +451,6 @@ export class SupplierProfileReviewComponent implements OnInit {
         let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + supplierId
           this.commonservice.getData(endPoint).subscribe((res: any) => {
             this.newFinancialData = JSON.parse(res.data.company_profile)
-            debugger
             console.log(this.newFinancialData)
           })
         }
@@ -464,6 +460,8 @@ export class SupplierProfileReviewComponent implements OnInit {
             this.commonservice.getData(endPoint).subscribe((res: any) => {
               this.getCurrentDataStatus = res.data.approval_status
               this.getCurrentL1DataStatus = res.data.approval_status
+              this.mainCurrentDataStatus()
+              this.getL2DataStatus(supplierId)
             })
         }
 
@@ -472,6 +470,8 @@ export class SupplierProfileReviewComponent implements OnInit {
             this.commonservice.getData(endPoint).subscribe((res: any) => {
               this.getCurrentDataStatus = res.data.approval_status
               this.getCurrentL2DataStatus = res.data.approval_status
+              this.mainCurrentDataStatus()
+              this.getL3DataStatus(supplierId)
             })
         }
 
@@ -480,6 +480,21 @@ export class SupplierProfileReviewComponent implements OnInit {
             this.commonservice.getData(endPoint).subscribe((res: any) => {
               this.getCurrentDataStatus = res.data.approval_status
               this.getCurrentL3DataStatus = res.data.approval_status
+              this.mainCurrentDataStatus()
             })
+        }
+
+        mainCurrentDataStatus() {
+          if(this.getCurrentL1DataStatus === 'Under Review') {
+             this.mainCurrentDataStatusTrack = 'Under Review'
+          }
+          else if(this.getCurrentL2DataStatus === 'Under Review') {
+            this.mainCurrentDataStatusTrack = 'Under Review'
+          }
+          else if(this.getCurrentL3DataStatus === 'Under Review') {
+            this.mainCurrentDataStatusTrack = 'Under Review'
+          } else {
+            this.mainCurrentDataStatusTrack = 'Approved'
+          }
         }
 } 
