@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
@@ -9,6 +9,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { CommonService } from '../../shared/common.service';
+import { TabViewModule } from 'primeng/tabview';
 
 interface Supplier {
   name: string;
@@ -30,7 +31,8 @@ interface Supplier {
     DialogModule,
     InputTextModule,
     ReactiveFormsModule,
-    ToastModule
+    ToastModule,
+    TabViewModule
   ],
   providers: [MessageService],
   template: `
@@ -38,39 +40,71 @@ interface Supplier {
     
     <div class="suppliers-container">
       <div class="header">
-        <h1>Manage Suppliers</h1>
-        <button pButton label="Add New Supplier" icon="pi pi-plus" class="p-button-primary" (click)="showInviteDialog()"></button>
+        <h1>Manage your vendors</h1>
+        <button pButton label="Invite Vendor" icon="pi pi-plus" class="p-button-primary" (click)="showInviteDialog()"></button>
       </div>
-
-      <div class="suppliers-grid">
-        <p-card *ngFor="let supplier of suppliers" class="supplier-card">
-          <ng-template pTemplate="header">
-            <div class="supplier-header">
-              <h3>{{ supplier.company_name }}</h3>
-              <span class="status-badge" [ngClass]="supplier.onboarding_status.toLowerCase()">
-                {{ supplier.onboarding_status }}
-              </span>
-            </div>
-          </ng-template>
-
-          <div class="supplier-details">
-            <p><strong>ID:</strong> {{ supplier.name }}</p>
-            <p><strong>Email:</strong> {{ supplier.primary_email_id }}</p>
-            <p><strong>Phone:</strong> {{ supplier.primary_phone_number }}</p>
-          </div>
-
-          <ng-template pTemplate="footer">
-            <div class="supplier-actions">
-              <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text" 
-                      pTooltip="View Details" tooltipPosition="top"></button>
-              <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text" 
-                      pTooltip="Edit" tooltipPosition="top"></button>
-              <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
-                      pTooltip="Delete" tooltipPosition="top"></button>
-            </div>
-          </ng-template>
-        </p-card>
-      </div>
+      <p-tabView>
+        <p-tabPanel header="Active Suppliers">
+          <table class="suppliers-table">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Contact</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let supplier of suppliers">
+                <td>
+                  <div>{{ supplier.company_name }}</div>
+                  <div class="sub-id">{{ supplier.name }}</div>
+                </td>
+                <td>
+                  <div>{{ supplier.primary_email_id }}</div>
+                  <div class="sub-id">{{ supplier.primary_phone_number }}</div>
+                </td>
+                <td><span class="status-badge">{{ supplier.onboarding_status }}</span></td>
+                <td>0</td>
+                <td>
+                  <a class="action-link" (click)="viewSupplierProfile(supplier)">View</a>
+                  <a class="action-link">Evaluate</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </p-tabPanel>
+        <p-tabPanel header="Invited Suppliers">
+          <table class="suppliers-table">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Contact</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let invite of invitedSuppliers">
+                <td>
+                  <div>{{ invite.company_name }}</div>
+                  <div class="sub-id">{{ invite.name }}</div>
+                </td>
+                <td>
+                  <div>{{ invite.supplier_email_id }}</div>
+                </td>
+                <td><span class="status-badge">Invited</span></td>
+                <td>0</td>
+                <td>
+                  <a class="action-link">Resend</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </p-tabPanel>
+      </p-tabView>
     </div>
 
     <p-dialog 
@@ -114,8 +148,18 @@ interface Supplier {
 
         <div class="dialog-footer">
           <button pButton type="button" label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideInviteDialog()"></button>
-          <button pButton type="submit" label="Send Invitation" icon="pi pi-check" class="p-button-primary" 
-                  [disabled]="inviteForm.invalid || isSubmitting"></button>
+          <button
+            pButton
+            type="submit"
+            class="p-button-primary"
+            [disabled]="inviteForm.invalid || isSubmitting">
+            <ng-container *ngIf="isSubmitting">
+              <i class="pi pi-spin pi-spinner" style="margin-right: 8px;"></i> Sending...
+            </ng-container>
+            <ng-container *ngIf="!isSubmitting">
+              Send Invitation
+            </ng-container>
+          </button>
         </div>
       </form>
     </p-dialog>
@@ -222,10 +266,39 @@ interface Supplier {
       gap: 0.5rem;
       margin-top: 2rem;
     }
+
+    .suppliers-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+    }
+    .suppliers-table th, .suppliers-table td {
+      border: 1px solid #e0e0e0;
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    .suppliers-table th {
+      background: #f8f9fa;
+      font-weight: 600;
+    }
+    .sub-id {
+      color: #888;
+      font-size: 0.85em;
+    }
+    .action-link {
+      color: #007bff;
+      cursor: pointer;
+      margin-right: 1rem;
+      text-decoration: underline;
+    }
+    .action-link:last-child {
+      margin-right: 0;
+    }
   `]
 })
 export class ManageSuppliersComponent implements OnInit {
   suppliers: Supplier[] = [];
+  invitedSuppliers: any[] = [];
   inviteDialogVisible = false;
   inviteForm: FormGroup;
   isSubmitting = false;
@@ -233,7 +306,8 @@ export class ManageSuppliersComponent implements OnInit {
   constructor(
     private commonService: CommonService,
     private fb: FormBuilder,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router
   ) {
     this.inviteForm = this.fb.group({
       supplier_email_id: ['', [Validators.required, Validators.email]],
@@ -244,6 +318,7 @@ export class ManageSuppliersComponent implements OnInit {
 
   ngOnInit() {
     this.loadSuppliers();
+    this.loadInvitedSuppliers();
   }
 
   loadSuppliers() {
@@ -258,6 +333,23 @@ export class ManageSuppliersComponent implements OnInit {
           severity: 'error',
           summary: 'Error',
           detail: 'Failed to load suppliers'
+        });
+      }
+    });
+  }
+
+  loadInvitedSuppliers() {
+    const endPoint = '/api/resource/wfb_supplier_invitation?fields=["*"]';
+    this.commonService.getData(endPoint).subscribe({
+      next: (response: any) => {
+        this.invitedSuppliers = response.data;
+      },
+      error: (error) => {
+        console.error('Error loading invited suppliers:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load invited suppliers'
         });
       }
     });
@@ -288,7 +380,8 @@ export class ManageSuppliersComponent implements OnInit {
             detail: 'Supplier invitation sent successfully'
           });
           this.hideInviteDialog();
-          this.loadSuppliers(); // Refresh the list
+          this.loadSuppliers();
+          this.loadInvitedSuppliers(); // Refresh invited list
         },
         error: (error) => {
           console.error('Error inviting supplier:', error);
@@ -303,5 +396,9 @@ export class ManageSuppliersComponent implements OnInit {
         }
       });
     }
+  }
+
+  viewSupplierProfile(supplier: Supplier) {
+    this.router.navigate(['/wefab/wefabTeam/manage-suppliers', supplier.name]);
   }
 } 
