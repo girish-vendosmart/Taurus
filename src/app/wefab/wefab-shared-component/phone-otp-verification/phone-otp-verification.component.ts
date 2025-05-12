@@ -1,9 +1,10 @@
-import { Component, EventEmitter, Input, OnInit, Output, forwardRef } from '@angular/core';
+// phone-otp-verification.component.ts
+
+import { Component, EventEmitter, Input, OnInit, Output, forwardRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, FormControl, FormsModule, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { CommonService } from '../../shared/common.service';
@@ -20,6 +21,7 @@ import {
 } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { environment } from '../../../../enviornments/enviornment';
+
 interface Country {
   name: string;
   code: string;
@@ -35,7 +37,6 @@ interface Country {
     ReactiveFormsModule,
     ButtonModule,
     InputTextModule,
-    DialogModule,
     ToastModule,
     DropdownModule
   ],
@@ -112,44 +113,35 @@ interface Country {
         <i class="pi pi-exclamation-triangle" style="margin-right: 0.4rem;"></i>
         {{ errorMessage }}
       </div>
-    </div>
-
-    <!-- OTP Verification Dialog -->
-    <p-dialog 
-      [(visible)]="showOtpDialog" 
-      [modal]="true" 
-      header="OTP Verification" 
-      [draggable]="false" 
-      [resizable]="false"
-      [style]="{ width: '400px' }"
-      [closeOnEscape]="true"
-      [dismissableMask]="true">
-      <div class="p-fluid">
-        <div class="field mb-4">
-          <label for="otp" class="block mb-2">Enter 6-digit OTP</label>
-          <p class="text-muted mb-3 small">We've sent a verification code to your mobile number</p>
-          <div class="otp-input-container">
+      
+      <!-- Inline OTP Verification Section (Replaces Dialog) -->
+      <div class="otp-verification-section" *ngIf="showOtpDialog">
+        <div class="otp-verification-content">
+          <div class="otp-header">
+            <h5 class="mb-2">Enter 6-digit OTP</h5>
+            <p class="text-muted mb-3">We've sent a verification code to your mobile number</p>
+          </div>
+          <div class="otp-input-wrapper">
             <input 
               type="text" 
-              class="p-inputtext w-100" 
-              id="otp" 
+              class="form-control otp-input" 
               [(ngModel)]="otpValue" 
               maxlength="6"
               placeholder="Enter verification code"
               autocomplete="off" />
+              
+            <button 
+              type="button" 
+              class="btn verify-btn"
+              [disabled]="!otpValue || otpValue.length !== 6 || isVerifying"
+              (click)="verifyOTP()">
+              <i *ngIf="isVerifying" class="pi pi-spin pi-spinner" style="margin-right: 0.5rem"></i>
+              {{ isVerifying ? 'Verifying...' : 'Verify OTP' }}
+            </button>
           </div>
         </div>
       </div>
-      <ng-template pTemplate="footer">
-        <button 
-          type="button" 
-          pButton 
-          label="Verify OTP" 
-          (click)="verifyOTP()"
-          [disabled]="!otpValue || otpValue.length !== 6"
-          class="p-button-primary"></button>
-      </ng-template>
-    </p-dialog>
+    </div>
   `,
   styles: [`
     :host ::ng-deep {
@@ -234,12 +226,17 @@ interface Country {
           box-shadow: none;
           border-color: #80bdff;
         }
+        
+        &[readonly] {
+          background-color: #f8f9fa;
+          cursor: not-allowed;
+        }
       }
       
       .verify-otp-button {
         border-radius: 4px;
         white-space: nowrap;
-        background-color: #1a3a60; /* Default navy blue color */
+        background-color: #1a3a60;
         color: white;
         border: none;
         font-weight: 500;
@@ -257,11 +254,11 @@ interface Country {
         }
         
         &.verified {
-          background-color: #28a745; /* Green for verified state */
+          background-color: #28a745;
         }
         
         &.error {
-          background-color: #dc3545; /* Red for error state */
+          background-color: #dc3545;
         }
       }
       
@@ -271,6 +268,79 @@ interface Country {
         margin-top: 0.3rem;
         display: flex !important;
         align-items: center;
+      }
+      
+      /* New styles for inline OTP verification */
+      .otp-verification-section {
+        margin-top: 15px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        animation: fadeIn 0.3s ease-in-out;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .otp-verification-content {
+        .otp-header {
+          h5 {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.3rem;
+            font-size: 1rem;
+          }
+          
+          p {
+            color: #6c757d;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+          }
+        }
+        
+        .otp-input-wrapper {
+          display: flex;
+          gap: 10px;
+          
+          .otp-input {
+            flex-grow: 1;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 0.5rem 0.75rem;
+            height: 40px;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            text-align: center;
+            
+            &:focus {
+              box-shadow: none;
+              border-color: #80bdff;
+            }
+          }
+          
+          .verify-btn {
+            background-color: #1a3a60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0 1.5rem;
+            height: 40px;
+            font-weight: 500;
+            white-space: nowrap;
+            
+            &:hover:not(:disabled) {
+              background-color: #15304f;
+            }
+            
+            &:disabled {
+              opacity: 0.7;
+            }
+          }
+        }
       }
     }
   `]
@@ -328,9 +398,10 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   private recaptchaVerifier: RecaptchaVerifier | null = null;
   private recaptchaContainerId = 'recaptcha-container';
   isLoading = false;
-
+  isVerifying = false;
+  verificationId: string = '';
   
-  constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService) {
+  constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService, private cdr: ChangeDetectorRef) {
     // Set default country to India or use the provided countryCode
     this.selectedCountry = this.countries.find(c => c.code === this.countryCode) || this.countries[0];
     
@@ -378,7 +449,7 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     }
   }
   
-  async sendOTP() {
+  sendOTP() {
     if (!this.phoneControl.value) {
       this.messageService.add({
         severity: 'error',
@@ -389,50 +460,84 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
       return;
     }
 
-    try {
-      // Show loading state
-      this.isLoading = true;
-      
-      // Use the pre-initialized container
-      this.confirmationResult = await this.firebaseService.sendPhoneVerificationCode(
-        '+' + this.countryCode + this.phoneControl.value, 
-        this.recaptchaContainerId
-      );
-      
-      this.showOtpDialog = true;
-    } catch (error: any) {
-      console.error('Error sending OTP:', error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: error.message || 'Failed to send verification code',
-        life: 5000
-      });
-    } finally {
-      this.isLoading = false;
-    }
+    this.isLoading = true;
+    this.firebaseService.sendPhoneVerificationCode(
+      '+' + this.selectedCountry.code + this.phoneControl.value,
+      'recaptcha-container'
+    ).then((res:any) => {
+      console.log(res);
+      if(res.verificationId) {
+        this.verificationId = res.verificationId;
+        this.isLoading = false;
+        this.showOtpDialog = true;
+        this.cdr.detectChanges();
+      }
+    }, (err:any) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error', 
+          detail: err.message || 'Failed to send verification code',
+          life: 5000
+        });
+        this.isLoading = false;
+        this.cdr.detectChanges();
+    });
   }
   
   verifyOTP(): void {
-    // Mock function to simulate verifying OTP
-    if (this.otpValue && this.otpValue.length === 6) {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Verified',
-        detail: 'Your phone number has been successfully verified.',
-        life: 3000
-      });
-      this.showOtpDialog = false;
-      this.isVerified = true;
-      this.verified.emit(true);
-    } else {
+    if (!this.otpValue || this.otpValue.length !== 6) {
       this.messageService.add({
         severity: 'error',
         summary: 'Invalid OTP',
         detail: 'Please enter a valid 6-digit OTP code.',
         life: 3000
       });
+      return;
     }
+    
+    this.isVerifying = true;
+    
+    // Use the confirmation result directly since the FirebaseService's sendPhoneVerificationCode method returns it
+    if (!this.verificationId) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Verification Failed',
+        detail: 'Verification ID not found. Please try again.',
+        life: 3000
+      });
+      this.isVerifying = false;
+      return;
+    }
+
+    const credential = PhoneAuthProvider.credential(this.verificationId, this.otpValue);
+    signInWithCredential(this.auth, credential)
+      .then(() => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Verified',
+          detail: 'Your phone number has been successfully verified.',
+          life: 3000
+        });
+        
+        this.showOtpDialog = false;
+        this._isVerified = true;
+        this.verified.emit(true);
+        
+        // Disable the phone control to prevent further changes
+        this.phoneControl.disable({ emitEvent: false });
+        this.isVerifying = false;
+        this.cdr.detectChanges();
+      })
+      .catch((error: any) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Verification Failed',
+          detail: error.message || 'Failed to verify OTP. Please try again.',
+          life: 3000
+        });
+        this.isVerifying = false;
+        this.cdr.detectChanges();
+      });
   }
   
   // Method to mark the control as touched
@@ -465,7 +570,7 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   setDisabledState(isDisabled: boolean): void {
     if (isDisabled) {
       this.phoneControl.disable();
-    } else {
+    } else if (!this._isVerified) { // Only enable if not verified
       this.phoneControl.enable();
     }
   }
