@@ -1317,3 +1317,24 @@ $safety-orange: #F26830;
   }
   
 } 
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.process-tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e7f1ff;
+  color: #0062cc;
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

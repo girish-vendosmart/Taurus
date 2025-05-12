@@ -497,4 +497,17 @@ export class SupplierProfileReviewComponent implements OnInit {
             this.mainCurrentDataStatusTrack = 'Approved'
           }
         }
+
+        isArray(value: any): boolean {
+          return Array.isArray(value);
+        }
+        
+        formatProcessName(process: string): string {
+          // Convert snake_case or kebab-case to Title Case
+          return process
+            .replace(/[_-]/g, ' ')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+        }
 } 

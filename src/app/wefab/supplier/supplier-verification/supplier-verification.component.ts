@@ -32,6 +32,10 @@ export class SupplierVerificationComponent implements OnInit {
     private commonService: CommonService
   ) { }
 
+  // Add these properties to track rejection status
+  isRejected = false;
+  rejectionReasons: any = {};
+
   ngOnInit(): void {
     // Start the verification animation sequence
     this.supplierId = sessionStorage.getItem('supplier_id');
@@ -42,8 +46,23 @@ export class SupplierVerificationComponent implements OnInit {
   getL1Verification() {
     let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=${this.supplierId}`
     this.commonService.getData(endPoint).subscribe((res: any) => {
-      this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? false : true;
-      this.simulateVerification()
+      // Add property to track rejection status
+      this.isRejected = res.data.approval_status === 'Rejected';
+      
+      // If status is "Rejected", set verificationCurrentStatus to false
+      // This maintains backward compatibility with the rest of the code
+      if (this.isRejected) {
+        this.verificationCurrentStatus = false;
+        // Store rejection reasons if provided
+        if (res.data.rejection_reasons) {
+          this.rejectionReasons = res.data.rejection_reasons;
+        }
+      } else {
+        // Original logic for Under Review vs Approved
+        this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? false : true;
+      }
+      
+      this.simulateVerification();
     })
   }
 

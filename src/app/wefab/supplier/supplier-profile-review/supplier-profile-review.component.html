@@ -86,6 +86,17 @@
                 <div class="field-value">{{ getCompanyProfile.country }}</div>
               </div>
               <div class="review-col">
+                <div class="field-label">State </div>
+                <div class="field-value">{{ getCompanyProfile.state }}</div>
+              </div>
+            </div>
+
+            <div class="review-row">
+              <div class="review-col">
+                <div class="field-label">City </div>
+                <div class="field-value">{{ getCompanyProfile.city }}</div>
+              </div>
+              <div class="review-col">
                 <div class="field-label">Registered Address </div>
                 <div class="field-value">{{ getCompanyProfile.registeredAddress }}</div>
               </div>
@@ -99,6 +110,7 @@
             </div>
           </div>
         </div>
+
         
         <!-- Contact Information Tab Content -->
         <div class="basic-tab-content" *ngIf="basicInfoTab === 'contact'">
@@ -116,8 +128,20 @@
             
             <div class="review-row">
               <div class="review-col">
-                <div class="field-label">Primary Manufacturing Process </div>
-                <div class="field-value">{{ primaryManufacturingProcess }}</div>
+                <div class="field-label">Primary Manufacturing Process</div>
+                <div class="field-value tags-container">
+                  <!-- If it's a single string -->
+                  <span class="process-tag" *ngIf="!isArray(getCompanyProfile.primaryManufacturingProcess)">
+                    {{ formatProcessName(getCompanyProfile.primaryManufacturingProcess) }}
+                  </span>
+                  
+                  <!-- If it's an array of strings -->
+                  <ng-container *ngIf="isArray(getCompanyProfile.primaryManufacturingProcess)">
+                    <span class="process-tag" *ngFor="let process of getCompanyProfile.primaryManufacturingProcess">
+                      {{ formatProcessName(process) }}
+                    </span>
+                  </ng-container>
+                </div>
               </div>
               <div class="review-col">
                 <div class="field-label">Email</div>
