@@ -198,42 +198,43 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   uploadedFiles: any[] = []; // Changed from File[] to any[] to accommodate url property
   fileTypeError: string = ''; // Add this line for file type error
   
-  ngOnInit() {
-    // Initialize uploadedFiles if there's a value already
-
-    setTimeout(() => {
-      if (this.formControl.value) {
-        debugger
-        if (Array.isArray(this.formControl.value)) {
-          // Handle array of files
-          this.uploadedFiles = this.formControl.value.map(file => {
-            // If the file is just a URL string
-            if (typeof file === 'string') {
-              return {
-                name: this.getFileNameFromUrl(file),
-                size: 0,
-                type: this.getFileTypeFromUrl(file),
-                url: file
-              };
-            }
-            // If it's already a file object with url
-            return file;
-          });
-        } else if (typeof this.formControl.value === 'string') {
-          // Handle single string URL
-          this.uploadedFiles = [{
-            name: this.getFileNameFromUrl(this.formControl.value),
-            size: 0,
-            type: this.getFileTypeFromUrl(this.formControl.value),
-            url: this.formControl.value
-          }];
-        } else {
-          // Handle single file object
-          this.uploadedFiles = [this.formControl.value];
-        }
-      }
-    }, 1000)
+  ngOnInit(): void {
+    if (this.formControl) {
+      this.initializeUploadedFiles(this.formControl.value); // handle initial value
+  
+      this.formControl.valueChanges.subscribe(value => {
+        this.initializeUploadedFiles(value); // react to further changes
+      });
+    }
   }
+  
+  initializeUploadedFiles(value: any): void {
+    if (Array.isArray(value)) {
+      this.uploadedFiles = value.map(file => {
+        if (typeof file === 'string') {
+          return {
+            name: this.getFileNameFromUrl(file),
+            size: 0,
+            type: this.getFileTypeFromUrl(file),
+            url: file
+          };
+        }
+        return file;
+      });
+    } else if (typeof value === 'string') {
+      this.uploadedFiles = [{
+        name: this.getFileNameFromUrl(value),
+        size: 0,
+        type: this.getFileTypeFromUrl(value),
+        url: value
+      }];
+    } else if (value) {
+      this.uploadedFiles = [value];
+    } else {
+      this.uploadedFiles = [];
+    }
+  }
+  
   
   // Helper methods to extract filename and type from URL
   getFileNameFromUrl(url: string): string {
