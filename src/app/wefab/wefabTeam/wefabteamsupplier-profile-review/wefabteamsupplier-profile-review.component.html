@@ -3,12 +3,13 @@
   <div class="review-header">
     <div class="header-left">
       <h1 class="review-title">Supplier Profile Review</h1>
-      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: <span class="status-pending">{{ status }}</span></p>
+      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: <span class="status-pending" *ngIf="mainCurrentDataStatusTrack === 'Under Review'" >{{ mainCurrentDataStatusTrack }}</span>
+        <span class="status-completed" *ngIf="mainCurrentDataStatusTrack === 'Approved'" >{{ getCurrentDataStatus }}</span></p>
     </div>
     <div class="header-actions">
-      <button type="button" class="btn btn-outline-primary return-btn" (click)="returnToForm()">
+      <!-- <button type="button" class="btn btn-outline-primary return-btn" (click)="returnToForm()">
         Return to Form
-      </button>
+      </button> -->
       <!-- <button type="button" class="btn btn-icon" (click)="printProfile()">
         <i class="pi pi-print"></i> Print
       </button>
@@ -28,19 +29,23 @@
       <div class="levels-tabs">
         <button class="level-tab" [class.active]="activeLevelTab === 'basic'" (click)="changeLevelTab('basic')">
           <div class="level-badge">
-            <i class="pi pi-check-circle"></i>
+            <i class="pi pi-check-circle" *ngIf="getCurrentL1DataStatus === 'Approved'" ></i>
+            <i class="pi pi-exclamation-triangle" style="color: orange;" *ngIf="getCurrentL1DataStatus === 'Under Review'" ></i>
             <span>L1: Basic Information</span>
           </div>
         </button>
         <button class="level-tab" [class.active]="activeLevelTab === 'manufacturing'" (click)="changeLevelTab('manufacturing')">
           <div class="level-badge">
-            <i class="pi pi-check-circle"></i>
+            <i class="pi pi-check-circle" *ngIf="getCurrentL2DataStatus === 'Approved'" ></i>
+            <i class="pi pi-exclamation-triangle" style="color: orange;" *ngIf="getCurrentL2DataStatus === 'Under Review'" ></i>
             <span>L2: Manufacturing</span>
           </div>
         </button>
         <button class="level-tab" [class.active]="activeLevelTab === 'financial'" (click)="changeLevelTab('financial')">
+
           <div class="level-badge">
-            <i class="pi pi-check-circle"></i>
+            <i class="pi pi-check-circle" *ngIf="getCurrentL3DataStatus === 'Approved'" ></i>
+            <i class="pi pi-exclamation-triangle" style="color: orange;" *ngIf="getCurrentL3DataStatus === 'Under Review'" ></i>
             <span>L3: Financial & Additional</span>
           </div>
         </button>
@@ -50,309 +55,388 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'basic'">
         <div class="section-header">
           <h2>Basic Information</h2>
-          <button class="edit-section-btn">
-            <i class="pi pi-pencil"></i>
+          <button class="edit-section-btn" *ngIf="getCurrentL1DataStatus === 'Under Review'" (click)="navigateToEdit()">
+            <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
         </div>
         
-        <!-- Add horizontal tab navigation for Basic Information - remove Manufacturing Overview and Documentation tabs -->
-        <div class="basic-info-tabs">
-          <a href="javascript:void(0)" class="basic-tab" [class.active]="basicInfoTab === 'company'" (click)="changeBasicInfoTab('company')">Company Details</a>
-          <a href="javascript:void(0)" class="basic-tab" [class.active]="basicInfoTab === 'contact'" (click)="changeBasicInfoTab('contact')">Contact Information</a>
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="isLoadingL1 && !l1Error">
+          <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+          <p>Loading basic information...</p>
         </div>
-        
-        <!-- Company Details Tab Content -->
-        <div class="basic-tab-content" *ngIf="basicInfoTab === 'company'">
-          <div class="review-info-container">
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Legal Business Name <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ getCompanyProfile.legalBusinessName }}</div>
+
+        <!-- Error State -->
+        <div class="warning-state" *ngIf="l1Error">
+          <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #ffa726"></i>
+          <p>No data found</p>
+        </div>
+
+        <!-- Content when data is available -->
+        <ng-container *ngIf="!isLoadingL1 && !l1Error">
+          <!-- Add horizontal tab navigation for Basic Information - remove Manufacturing Overview and Documentation tabs -->
+          <div class="basic-info-tabs">
+            <a href="javascript:void(0)" class="basic-tab" [class.active]="basicInfoTab === 'company'" (click)="changeBasicInfoTab('company')">Company Details</a>
+            <a href="javascript:void(0)" class="basic-tab" [class.active]="basicInfoTab === 'contact'" (click)="changeBasicInfoTab('contact')">Contact Information</a>
+          </div>
+          
+          <!-- Company Details Tab Content -->
+          <div class="basic-tab-content" *ngIf="basicInfoTab === 'company'">
+            <div class="review-info-container">
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Legal Business Name </div>
+                  <div class="field-value">{{ getCompanyProfile.legalBusinessName }}</div>
+                </div>
+                <div class="review-col">
+                  <div class="field-label">GSTIN </div>
+                  <div class="field-value">{{ getCompanyProfile.gstinNumber }}</div>
+                </div>
               </div>
-              <div class="review-col">
-                <div class="field-label">GSTIN <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ getCompanyProfile.gstinNumber }}</div>
+              
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Country</div>
+                  <div class="field-value">{{ getCompanyProfile.country }}</div>
+                </div>
+                <div class="review-col">
+                  <div class="field-label">State </div>
+                  <div class="field-value">{{ getCompanyProfile.state }}</div>
+                </div>
               </div>
-            </div>
-            
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Country</div>
-                <div class="field-value">{{ getCompanyProfile.country }}</div>
+
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">City </div>
+                  <div class="field-value">{{ getCompanyProfile.city }}</div>
+                </div>
+                <div class="review-col">
+                  <div class="field-label">Registered Address </div>
+                  <div class="field-value">{{ getCompanyProfile.registeredAddress }}</div>
+                </div>
               </div>
-              <div class="review-col">
-                <div class="field-label">Registered Address <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ getCompanyProfile.registeredAddress }}</div>
-              </div>
-            </div>
-            
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Manufacturing Facility Address <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ getCompanyProfile.manufacturingFacilityAddress }}</div>
+              
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Manufacturing Facility Address </div>
+                  <div class="field-value">{{ getCompanyProfile.manufacturingFacilityAddress }}</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- Contact Information Tab Content -->
-        <div class="basic-tab-content" *ngIf="basicInfoTab === 'contact'">
-          <div class="review-info-container">
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Primary Contact Name <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ getCompanyProfile.primaryContactName }}</div>
+
+          
+          <!-- Contact Information Tab Content -->
+          <div class="basic-tab-content" *ngIf="basicInfoTab === 'contact'">
+            <div class="review-info-container">
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Primary Contact Name </div>
+                  <div class="field-value">{{ getCompanyProfile.primaryContactName }}</div>
+                </div>
+                <div class="review-col">
+                  <div class="field-label">Phone Number </div>
+                  <div class="field-value">{{ getCompanyProfile.phoneNumber }}</div>
+                </div>
               </div>
-              <div class="review-col">
-                <div class="field-label">Phone Number <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ getCompanyProfile.phoneNumber }}</div>
+              
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Primary Manufacturing Process</div>
+                  <div class="field-value tags-container">
+                    <!-- If it's a single string -->
+                    <span class="process-tag" *ngIf="!isArray(getCompanyProfile.primaryManufacturingProcess)">
+                      {{ formatProcessName(getCompanyProfile.primaryManufacturingProcess) }}
+                    </span>
+                    
+                    <!-- If it's an array of strings -->
+                    <ng-container *ngIf="isArray(getCompanyProfile.primaryManufacturingProcess)">
+                      <span class="process-tag" *ngFor="let process of getCompanyProfile.primaryManufacturingProcess">
+                        {{ formatProcessName(process) }}
+                      </span>
+                    </ng-container>
+                  </div>
+                </div>
+                <div class="review-col">
+                  <div class="field-label">Email</div>
+                  <div class="field-value">{{ contactEmail }}</div>
+                </div>
               </div>
-            </div>
-            
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Primary Manufacturing Process <i class="pi pi-check-circle verified-icon"></i></div>
-                <div class="field-value">{{ primaryManufacturingProcess }}</div>
-              </div>
-              <div class="review-col">
-                <div class="field-label">Email</div>
-                <div class="field-value">{{ contactEmail }}</div>
-              </div>
-            </div>
-            
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Website URL</div>
-                <div class="field-value">{{ getCompanyProfile.websiteURL }}</div>
-              </div>
-              <div class="review-col">
-                <div class="field-label">LinkedIn URL</div>
-                <div class="field-value">{{ getCompanyProfile.linkedinURL }}</div>
+              
+              <div class="review-row">
+                <div class="review-col">
+                  <div class="field-label">Website URL</div>
+                  <div class="field-value">{{ getCompanyProfile.websiteURL }}</div>
+                </div>
+                <div class="review-col">
+                  <div class="field-label">LinkedIn URL</div>
+                  <div class="field-value">{{ getCompanyProfile.linkedinURL }}</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </ng-container>
       </div>
       
       <!-- Manufacturing Tab Content -->
       <div class="tab-content" *ngIf="activeLevelTab === 'manufacturing'">
         <div class="section-header">
           <h2>Manufacturing Capabilities</h2>
-          <button class="edit-section-btn">
-            <i class="pi pi-pencil"></i>
+          <button class="edit-section-btn" *ngIf="getCurrentL2DataStatus === 'Under Review'" (click)="navigateToEdit()">
+            <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
         </div>
         
-        <!-- Manufacturing Tabs Navigation -->
-        <div class="manufacturing-tabs">
-          <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'machines'" (click)="changeManufacturingTab('machines')">Machine Details</a>
-          <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'facility'" (click)="changeManufacturingTab('facility')">Facility Verification</a>
-          <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'certifications'" (click)="changeManufacturingTab('certifications')">Certifications</a>
-          <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'capacity'" (click)="changeManufacturingTab('capacity')">Production Capacity</a>
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="isLoadingL2 && !l2Error">
+          <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+          <p>Loading manufacturing information...</p>
         </div>
-        
-        <!-- Machine Details Tab -->
-        <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'machines'">
-          <div class="machines-container">
-            <div class="machine-card" *ngFor="let machine of machines">
-              <div class="machine-image">
-                <img [src]="machine.photoUrl" [alt]="machine.name" class="machine-photo">
-              </div>
-              <div class="machine-details">
-                <h3 class="machine-name">{{ machine.name }}</h3>
-                <div class="machine-info">
-                  <p class="machine-type"><strong>Type:</strong> {{ machine.type }}</p>
-                  <p class="machine-quantity"><strong>Quantity:</strong> {{ machine.quantity }} units</p>
-                  <p class="machine-description">{{ machine.description }}</p>
-                </div>
-                <div class="machine-actions">
-                  <button class="view-specs-btn">
-                    <i class="pi pi-file-pdf"></i> View Specifications
-                  </button>
-                </div>
-              </div>
-            </div>
+
+        <!-- Error State -->
+        <div class="warning-state" *ngIf="l2Error">
+          <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #ffa726"></i>
+          <p>No data found</p>
+        </div>
+
+        <!-- Content when data is available -->
+        <ng-container *ngIf="!isLoadingL2 && !l2Error">
+          <!-- Manufacturing Tabs Navigation -->
+          <div class="manufacturing-tabs">
+            <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'machines'" (click)="changeManufacturingTab('machines')">Machine Details</a>
+            <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'facility'" (click)="changeManufacturingTab('facility')">Facility Verification</a>
+            <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'certifications'" (click)="changeManufacturingTab('certifications')">Certifications</a>
+            <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'capacity'" (click)="changeManufacturingTab('capacity')">Production Capacity</a>
           </div>
-        </div>
-        
-        <!-- Facility Verification Tab -->
-        <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'facility'">
-          <div class="facility-photos-container">
-            <div class="facility-photo-card" *ngFor="let photo of facilityPhotos">
-              <div class="facility-photo">
-                <img [src]="photo.photoUrl" [alt]="photo.title" class="facility-image">
-              </div>
-              <div class="facility-photo-details">
-                <h3 class="facility-photo-title">{{ photo.title }}</h3>
-                <p class="facility-photo-description">{{ photo.description }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Certifications Tab -->
-        <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'certifications'">
-          <div class="certifications-container">
-            <div class="certification-card" *ngFor="let cert of certifications">
-              <div class="certification-image">
-                <img [src]="cert.photoUrl" [alt]="cert.name" class="certification-photo">
-              </div>
-              <div class="certification-details">
-                <h3 class="certification-name">{{ cert.name }}</h3>
-                <div class="certification-info">
-                  <p class="certification-issuer"><strong>Issuer:</strong> {{ cert.issuer }}</p>
-                  <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expiryDate | date:'mediumDate' }}</p>
-                  <p class="certification-description">{{ cert.description }}</p>
+          
+          <!-- Machine Details Tab -->
+          <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'machines'">
+            <div class="machines-container">
+              <div class="machine-card" *ngFor="let machine of manufacturingData.machines">
+                <div class="machine-image">
+                  <img [src]="machine.machinePhotos[0].url" [alt]="machine.make" class="machine-photo">
                 </div>
-                <div class="certification-status">
-                  <span class="status-badge verified">
-                    <i class="pi pi-check-circle"></i> Verified
-                  </span>
+                <div class="machine-details">
+                  <h3 class="machine-name">{{ machine.make }}</h3>
+                  <div class="machine-info">
+                    <p class="machine-type"><strong>Model:</strong> {{ machine.model }}</p>
+                    <p class="machine-quantity"><strong>Quantity:</strong> {{ machine.quantity }} units</p>
+                    <p class="machine-description"><strong>Specifications:</strong> {{ machine.specifications }} </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- Production Capacity Tab -->
-        <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'capacity'">
-          <div class="production-capacity-container">
-            <div class="capacity-row">
-              <div class="capacity-col">
-                <div class="field-label">Production Capacity Utilization</div>
-                <div class="field-value">{{ productionCapacity }}%</div>
-              </div>
-              <div class="capacity-col">
-                <div class="field-label">Industries Served</div>
-                <div class="field-value">{{ industriesServed.join(', ') }}</div>
-              </div>
-            </div>
-            
-            <div class="industries-section">
-              <h3 class="section-subtitle">Industries Served</h3>
-              <div class="industries-tags">
-                <span class="industry-tag" *ngFor="let industry of industriesServed">{{ industry }}</span>
+          
+          <!-- Facility Verification Tab -->
+          <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'facility'">
+            <div class="facility-photos-container">
+              <div class="facility-photo-card" *ngFor="let photo of manufacturingData.facilityPhotos">
+                <div class="facility-photo">
+                  <img [src]="photo.url" [alt]="'facility photo'" class="facility-image">
+                </div>
+                <!-- <div class="facility-photo-details">
+                  <h3 class="facility-photo-title">{{ photo.title }}</h3>
+                  <p class="facility-photo-description">{{ photo.description }}</p>
+                </div> -->
               </div>
             </div>
           </div>
-        </div>
+          
+          <!-- Certifications Tab -->
+          <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'certifications'">
+            <div class="certifications-container">
+              <div class="certification-card" *ngFor="let cert of manufacturingData.certifications">
+                <div class="certification-image">
+                  <img [src]="cert.certificateDocument[0].url" [alt]="cert.certificationName" class="certification-photo">
+                </div>
+                <div class="certification-details">
+                  <h3 class="certification-name">{{ cert.certificationName }}</h3>
+                  <div class="certification-info">
+                    <p class="certification-issuer"><strong>Certification Body:</strong> {{ cert.certifyingBody }}</p>
+                    <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expirationDate | date:'mediumDate' }}</p>
+                  </div>
+                  <div class="certification-status">
+                    <span class="status-badge verified">
+                      <i class="pi pi-check-circle"></i> Verified
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Production Capacity Tab -->
+          <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'capacity'">
+            <div class="production-capacity-container">
+              <div class="capacity-row">
+                <div class="capacity-col">
+                  <div class="field-label">Production Capacity Utilization</div>
+                  <div class="field-value">{{ manufacturingData.productionCapacity }}%</div>
+                </div>
+                <div class="capacity-col">
+                  <div class="field-label">Industries Served</div>
+                  <div class="industries-tags">
+                    <span class="industry-tag" *ngFor="let industry of manufacturingData.industries">{{ industry }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
       </div>
-      
+
       <!-- Financial Tab Content -->
       <div class="tab-content" *ngIf="activeLevelTab === 'financial'">
         <div class="section-header">
           <h2>Financial & Additional Information</h2>
-          <button class="edit-section-btn">
-            <i class="pi pi-pencil"></i>
+          <button class="edit-section-btn" *ngIf="getCurrentL3DataStatus === 'Under Review'" (click)="navigateToEdit()">
+            <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
         </div>
         
-        <!-- Financial & Additional Sub-tabs Navigation -->
-        <div class="financial-tabs">
-          <a href="javascript:void(0)" class="financial-tab" [class.active]="financialTab === 'financial'" (click)="changeFinancialTab('financial')">Financial Overview</a>
-          <a href="javascript:void(0)" class="financial-tab" [class.active]="financialTab === 'additional'" (click)="changeFinancialTab('additional')">Additional Information</a>
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="isLoadingL3 && !l3Error">
+          <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+          <p>Loading financial information...</p>
         </div>
-        
-        <!-- Financial Overview Tab Content -->
-        <div class="financial-tab-content" *ngIf="financialTab === 'financial'">
-          <div class="financial-overview-section">
-            <div class="note-text">
-              <span class="note-label">Note:</span> Financial information is confidential and is only shared with verified clients when necessary for business purposes.
-            </div>
 
-            <div class="review-info-container">
-              <h3>Annual Revenue (Last 3 Years)</h3>
-              <div class="review-row">
-                <div class="review-col">
-                  <div class="field-label">Annual Revenue (2024)</div>
-                  <div class="field-value">{{ financialData.year2024Revenue }}</div>
+        <!-- Error State -->
+        <div class="warning-state" *ngIf="l3Error">
+          <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #ffa726"></i>
+          <p>No data found</p>
+        </div>
+
+        <!-- Content when data is available -->
+        <ng-container *ngIf="!isLoadingL3 && !l3Error">
+          <!-- Financial & Additional Sub-tabs Navigation -->
+          <div class="financial-tabs">
+            <a href="javascript:void(0)" class="financial-tab" [class.active]="financialTab === 'financial'" (click)="changeFinancialTab('financial')">Financial Overview</a>
+            <a href="javascript:void(0)" class="financial-tab" [class.active]="financialTab === 'additional'" (click)="changeFinancialTab('additional')">Additional Information</a>
+          </div>
+          
+          <!-- Financial Overview Tab Content -->
+          <div class="financial-tab-content" *ngIf="financialTab === 'financial'">
+            <div class="financial-overview-section">
+              <div class="note-text">
+                <span class="note-label">Note:</span> Financial information is confidential and is only shared with verified clients when necessary for business purposes.
+              </div>
+
+              <div class="review-info-container">
+                <h3>Annual Revenue (Last 3 Years)</h3>
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Annual Revenue (This Year)</div>
+                    <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2024 }}</div>
+                  </div>
+                  <div class="review-col">
+                    <div class="field-label">Annual Revenue (Last Year)</div>
+                    <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2023 }}</div>
+                  </div>
                 </div>
-                <div class="review-col">
-                  <div class="field-label">Annual Revenue (2023)</div>
-                  <div class="field-value">{{ financialData.year2023Revenue }}</div>
+                
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Annual Revenue (Two Years Ago)</div>
+                    <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2022 }}</div>
+                  </div>
                 </div>
               </div>
               
-              <div class="review-row">
-                <div class="review-col">
-                  <div class="field-label">Annual Revenue (2022)</div>
-                  <div class="field-value">{{ financialData.year2022Revenue }}</div>
-                </div>
-                <div class="review-col">
-                  <div class="field-label">Currency</div>
-                  <div class="field-value">INR (₹)</div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="review-info-container">
-              <h3>Credit Information</h3>
-              <div class="review-row">
-                <div class="review-col">
-                  <div class="field-label">Credit Rating Provider</div>
-                  <div class="field-value">CRISIL</div>
-                </div>
-                <div class="review-col">
-                  <div class="field-label">Tax Compliance</div>
-                  <div class="field-value"><i class="pi pi-check-circle verified-icon"></i> Compliant</div>
+              <div class="review-info-container">
+                <h3>Credit Information</h3>
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Credit Rating Provider</div>
+                    <div class="field-value">{{ newFinancialData.companyFinancials.creditRatingProvider }}</div>
+                  </div>
+                  <div class="review-col">
+                    <div class="field-label">Tax Compliance</div>
+                    <div class="field-value"><i class="pi pi-check-circle verified-icon"></i>{{ newFinancialData.companyFinancials.taxCompliant }}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="review-info-container">
-              <h3>Insurance Coverage</h3>
-              <div class="review-row">
-                <div class="review-col">
-                  <div class="field-label">General Liability</div>
-                  <div class="field-value">₹5,00,00,000</div>
-                </div>
-                <div class="review-col">
-                  <div class="field-label">Product Liability</div>
-                  <div class="field-value">₹2,50,00,000</div>
+              
+              <div class="review-info-container">
+                <h3>Insurance Coverage</h3>
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">General Liability</div>
+                    <div class="field-value">{{ newFinancialData.insuranceCoverage.generalLiabilityInsurance }}</div>
+                  </div>
+                  <div class="review-col">
+                    <div class="field-label">Product Liability</div>
+                    <div class="field-value">{{ newFinancialData.insuranceCoverage.productLiabilityInsurance }}</div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- Additional Information Tab Content -->
-        <div class="financial-tab-content" *ngIf="financialTab === 'additional'">
-          <div class="additional-info">
-            <div class="review-info-container">
-              <h3>Business Terms</h3>
-              <div class="review-row">
-                <div class="review-col">
-                  <div class="field-label">Lead Time (Days)</div>
-                  <div class="field-value">14</div>
-                </div>
-                <div class="review-col">
-                  <div class="field-label">Minimum Order Quantity</div>
-                  <div class="field-value">50 units</div>
+
+          
+          <!-- Additional Information Tab Content -->
+          <div class="financial-tab-content" *ngIf="financialTab === 'additional'">
+            <div class="additional-info">
+              <!-- Digital Presence -->
+              <div class="review-info-container">
+                <h3>Digital Presence</h3>
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Company Website</div>
+                    <div class="field-value">{{ newFinancialData.additionalInformation.websites.website}}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="review-info-container">
-              <h3>Additional Capabilities</h3>
-              <div class="review-row">
-                <div class="review-col">
-                  <div class="field-label">Export Experience</div>
-                  <div class="field-value">Yes, 5+ years</div>
-                </div>
-                <div class="review-col">
-                  <div class="field-label">Custom Design Services</div>
-                  <div class="field-value">Available</div>
-                </div>
-              </div>
-              <div class="review-row">
-                <div class="review-col">
-                  <div class="field-label">Supply Chain Partnerships</div>
-                  <div class="field-value">3 Active Partners</div>
+              <!-- Operational Metrics -->
+              <div class="review-info-container">
+                <h3>Operational Metrics</h3>
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Total Number of Employees</div>
+                    <div class="field-value">{{ newFinancialData.additionalInformation.totalEmployees}}</div>
+                  </div>
+                  <div class="review-col">
+                    <div class="field-label">Year of Establishment</div>
+                    <div class="field-value">{{ newFinancialData.additionalInformation.foundedYear}}</div>
+                  </div>
                 </div>
               </div>
+              <div class="review-info-container">
+                <h3>Business Terms</h3>
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Lead Time (Days)</div>
+                    <div class="field-value">{{ newFinancialData.additionalInformation.leadTime}}</div>
+                  </div>
+                  <div class="review-col">
+                    <div class="field-label">Minimum Order Quantity</div>
+                    <div class="field-value">{{newFinancialData.additionalInformation.minimumOrderQuantity}}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- <div class="review-info-container">
+                <h3>Additional Capabilities</h3>
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Export Experience</div>
+                    <div class="field-value">Yes, 5+ years</div>
+                  </div>
+                  <div class="review-col">
+                    <div class="field-label">Custom Design Services</div>
+                    <div class="field-value">Available</div>
+                  </div>
+                </div>
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Supply Chain Partnerships</div>
+                    <div class="field-value">3 Active Partners</div>
+                  </div>
+                </div>
+              </div> -->
             </div>
           </div>
-        </div>
+        </ng-container>
       </div>
 
       <!-- Credit Profile Tab Content (this section is no longer necessary) -->
@@ -425,19 +509,19 @@
         <ul class="document-list">
           <li class="document-item">
             <span class="document-label">Company Documents:</span>
-            <span class="document-count">{{ documentSummary.companyDocuments }}</span>
+            <span class="document-count">{{ numberOfCompanyDocuments }}</span>
           </li>
           <li class="document-item">
             <span class="document-label">Machine Photos:</span>
-            <span class="document-count">{{ documentSummary.machinePhotos }}</span>
+            <span class="document-count">{{ numberOfMachinePhoto }}</span>
           </li>
           <li class="document-item">
             <span class="document-label">Facility Photos:</span>
-            <span class="document-count">{{ documentSummary.facilityPhotos }}</span>
+            <span class="document-count">{{ numberOfFacilityPhoto }}</span>
           </li>
           <li class="document-item">
             <span class="document-label">Certifications:</span>
-            <span class="document-count">{{ documentSummary.certifications }}</span>
+            <span class="document-count">{{ numberOfCertificationPhoto }}</span>
           </li>
         </ul>
       </div>
@@ -448,29 +532,80 @@
           <i class="pi pi-check-circle"></i>
           Verification Status
         </h2>
-        
-        <ul class="verification-list">
-          <li class="verification-item">
-            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.phoneVerified"></i>
-            <span class="verification-label">Phone Number Verified</span>
-          </li>
-          <li class="verification-item pending">
-            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="verificationStatus.gstinVerificationPending"></i>
-            <span class="verification-label">GSTIN Verification Pending</span>
-          </li>
-          <li class="verification-item">
-            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.addressVerified"></i>
-            <span class="verification-label">Address Verified</span>
-          </li>
-          <li class="verification-item pending">
-            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="verificationStatus.facilityPhotosPending"></i>
-            <span class="verification-label">Facility Photos Pending Review</span>
-          </li>
-        </ul>
+
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="isLoadingVerification && !verificationError">
+          <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+          <p>Loading verification status...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="warning-state" *ngIf="verificationError">
+          <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #ffa726"></i>
+          <p>No data found</p>
+        </div>
+
+        <!-- Content when data is available -->
+        <ng-container *ngIf="!isLoadingVerification && !verificationError">
+          <ul class="verification-list">
+            <li class="verification-item">
+              <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.phone_number_verification"></i>
+              <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!verificationStatus.phone_number_verification"></i>
+              <span *ngIf="verificationStatus.phone_number_verification">Phone Number Verified</span>
+              <span class="verification-label" *ngIf="!verificationStatus.phone_number_verification">Phone Number Verification Pending</span>
+
+            </li>
+            <li class="verification-item">
+              <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus?.gst_verification_status"></i>
+              <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!verificationStatus?.gst_verification_status"></i>
+              <span *ngIf="verificationStatus?.gst_verification_status">GSTIN Verified</span>
+              <span class="verification-label" *ngIf="!verificationStatus?.gst_verification_status">GSTIN Verification Pending</span>
+            </li>
+            <li class="verification-item">
+              <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.address_verification"></i>
+              <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!verificationStatus.address_verification"></i>
+              <span class="verification-label" *ngIf="verificationStatus.address_verification">Address Verified</span>
+              <span class="verification-label" *ngIf="!verificationStatus.address_verification">Address Verification Pending</span>
+            </li>
+            <li class="verification-item">
+              <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.machine_photo_verification"></i>
+              <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!verificationStatus.machine_photo_verification"></i>
+              <span class="verification-label" *ngIf="verificationStatus.machine_photo_verification">Facility Photos Verified</span>
+              <span class="verification-label" *ngIf="!verificationStatus.machine_photo_verification">Facility Photos Pending Review</span>
+            </li>
+          </ul>
+        </ng-container>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Toast messages -->
-<p-toast position="top-right"></p-toast> 
+<p-toast position="top-right"></p-toast>
+
+<!-- Add these styles to your component's SCSS file -->
+<style>
+.loading-state, .warning-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  min-height: 200px;
+}
+
+.loading-state i, .warning-state i {
+  margin-bottom: 1rem;
+}
+
+.warning-state p {
+  color: #ffa726;
+  margin: 0;
+}
+
+.loading-state p {
+  color: #666;
+  margin: 0;
+}
+</style> 
