@@ -825,9 +825,7 @@ export class SupplierOnboardingL2Component implements OnInit {
     return body;
   }
 
-  postSupplierOnboardingL2() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2';
-    let body = this.updateData(this.model);
+  postDataFunction(endPoint: string, body: any) {
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
       this.messageService.add({
         severity: 'success',
@@ -841,8 +839,8 @@ export class SupplierOnboardingL2Component implements OnInit {
         this.router.navigate(['/wefab/supplier/manufacturing-verification']);
       }, 3000);
     }, (err:any) => {
-      console.error('Error submitting form:', err);
-      this.putSupplierOnboardingL2()
+      endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + sessionStorage.getItem('supplier_id');
+      this.putDataFunction(endPoint, body);
       // this.messageService.add({
       //   severity: 'error',
       //   summary: 'Submission Error',
@@ -850,6 +848,36 @@ export class SupplierOnboardingL2Component implements OnInit {
       //   life: 5000
       // });
     });
+  }
+
+  putDataFunction(endPoint: string, body: any) {
+    this.commonService.putData(endPoint, body).subscribe((res: any) => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Update Successful',
+        detail: 'Your supplier information has been updated. We are reviewing the changes and will proceed with verification shortly.',
+        life: 3000
+      });      
+      
+      // Navigate to manufacturing verification after 3 seconds
+      setTimeout(() => {
+        this.router.navigate(['/wefab/supplier/manufacturing-verification']);
+      }, 3000);
+    }, (err:any) => {
+      console.error('Error submitting form:', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Submission Error',
+        detail: err.error?.message || 'An error occurred while submitting the form. Please try again later.',
+        life: 5000
+      });
+    });
+  }
+
+  postSupplierOnboardingL2() {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L2';
+    let body = this.updateData(this.model);
+    this.postDataFunction(endPoint, body);
   }
 
   putSupplierOnboardingL2() {

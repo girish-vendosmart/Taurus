@@ -26,6 +26,7 @@
         <button class="level-tab" [class.active]="activeLevelTab === 'manufacturing'" (click)="changeLevelTab('manufacturing')"
           [disabled]="getCurrentL1DataStatus === 'Rejected'">
           <div class="level-badge">
+            <i class="pi pi-times-circle" style="color: red;" *ngIf="getCurrentL2DataStatus === 'Rejected'" ></i>
             <i class="pi pi-check-circle" *ngIf="getCurrentL2DataStatus === 'Approved'"></i>
             <i class="pi pi-exclamation-triangle" style="color: orange;" *ngIf="getCurrentL2DataStatus === 'Under Review'"></i>
             <span>L2: Manufacturing</span>
@@ -188,15 +189,30 @@
           <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'machines'">
             <div class="machines-container">
               <div class="machine-card" *ngFor="let machine of manufacturingData.machines">
-                <div class="machine-image">
-                  <img [src]="machine.machinePhotos" [alt]="machine.make" class="machine-photo">
+                <div *ngIf="!isMachineDocumentArray(machine)">
+                  <div class="machine-image">
+                    <img [src]="machine.machinePhotos" [alt]="machine.make" class="machine-photo">
+                  </div>
+                  <div class="machine-details">
+                    <h3 class="machine-name">{{ machine.make }}</h3>
+                    <div class="machine-info">
+                      <p class="machine-type"><strong>Model:</strong> {{ machine.model }}</p>
+                      <p class="machine-quantity"><strong>Quantity:</strong> {{ machine.quantity }} units</p>
+                      <p class="machine-description"><strong>Specifications:</strong> {{ machine.specifications }} </p>
+                    </div>
+                  </div>
                 </div>
-                <div class="machine-details">
-                  <h3 class="machine-name">{{ machine.make }}</h3>
-                  <div class="machine-info">
-                    <p class="machine-type"><strong>Model:</strong> {{ machine.model }}</p>
-                    <p class="machine-quantity"><strong>Quantity:</strong> {{ machine.quantity }} units</p>
-                    <p class="machine-description"><strong>Specifications:</strong> {{ machine.specifications }} </p>
+                <div *ngIf="isMachineDocumentArray(machine)">
+                  <div class="machine-image">
+                    <img [src]="machine.machinePhotos[0].url" [alt]="machine.make" class="machine-photo">
+                  </div>
+                  <div class="machine-details">
+                    <h3 class="machine-name">{{ machine.make }}</h3>
+                    <div class="machine-info">
+                      <p class="machine-type"><strong>Model:</strong> {{ machine.model }}</p>
+                      <p class="machine-quantity"><strong>Quantity:</strong> {{ machine.quantity }} units</p>
+                      <p class="machine-description"><strong>Specifications:</strong> {{ machine.specifications }} </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -208,7 +224,8 @@
             <div class="facility-photos-container">
               <div class="facility-photo-card" *ngFor="let photo of manufacturingData.facilityPhotos">
                 <div class="facility-photo">
-                  <img [src]="photo" [alt]="'facility photo'" class="facility-image">
+                  <img [src]="photo.url" [alt]="'facility photo'" class="facility-image" *ngIf="photo.url">
+                  <img [src]="photo" [alt]="'facility photo'" class="facility-image" *ngIf="!photo.url">
                 </div>
               </div>
             </div>
@@ -218,19 +235,38 @@
           <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'certifications'">
             <div class="certifications-container">
               <div class="certification-card" *ngFor="let cert of manufacturingData.certifications">
-                <div class="certification-image">
-                  <img [src]="cert.certificateDocument" [alt]="cert.certificationName" class="certification-photo">
-                </div>
-                <div class="certification-details">
-                  <h3 class="certification-name">{{ cert.certificationName }}</h3>
-                  <div class="certification-info">
-                    <p class="certification-issuer"><strong>Certification Body:</strong> {{ cert.certifyingBody }}</p>
-                    <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expirationDate | date:'mediumDate' }}</p>
+                <div *ngIf="!isCertificateDocumentArray(cert)">
+                  <div class="certification-image">
+                    <img [src]="cert.certificateDocument" [alt]="cert.certificationName" class="certification-photo">
                   </div>
-                  <div class="certification-status">
-                    <span class="status-badge verified">
-                      <i class="pi pi-check-circle"></i> Verified
-                    </span>
+                  <div class="certification-details">
+                    <h3 class="certification-name">{{ cert.certificationName }}</h3>
+                    <div class="certification-info">
+                      <p class="certification-issuer"><strong>Certification Body:</strong> {{ cert.certifyingBody }}</p>
+                      <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expirationDate | date:'mediumDate' }}</p>
+                    </div>
+                    <div class="certification-status">
+                      <span class="status-badge verified">
+                        <i class="pi pi-check-circle"></i> Verified
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="isCertificateDocumentArray(cert)">
+                  <div class="certification-image">
+                    <img [src]="cert.certificateDocument[0].url" [alt]="cert.certificationName" class="certification-photo">
+                  </div>
+                  <div class="certification-details">
+                    <h3 class="certification-name">{{ cert.certificationName }}</h3>
+                    <div class="certification-info">
+                      <p class="certification-issuer"><strong>Certification Body:</strong> {{ cert.certifyingBody }}</p>
+                      <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expirationDate | date:'mediumDate' }}</p>
+                    </div>
+                    <div class="certification-status">
+                      <span class="status-badge verified">
+                        <i class="pi pi-check-circle"></i> Verified
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

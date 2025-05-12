@@ -376,8 +376,8 @@ export class SupplierProfileReviewComponent implements OnInit {
       this.commonservice.getData(endPoint).subscribe((res: any) => {
         this.getDocumentSummaryData = JSON.parse(res.data.company_profile)
         this.numberOfMachinePhoto = this.getDocumentSummaryData.machines.length
-        this.numberOfFacilityPhoto = this.getDocumentSummaryData.certifications.length
-        this.numberOfCertificationPhoto = this.getDocumentSummaryData.facilityPhotos.length
+        this.numberOfFacilityPhoto = this.getDocumentSummaryData.facilityPhotos.length
+        this.numberOfCertificationPhoto = this.getDocumentSummaryData.certifications.length
         console.log(this.getDocumentSummaryData)
       })
     }
@@ -457,18 +457,19 @@ export class SupplierProfileReviewComponent implements OnInit {
           }
           else if(this.getCurrentL3DataStatus === 'Under Review') {
             this.mainCurrentDataStatusTrack = 'L3 Under Review'
-          } else if(this.getCurrentL1DataStatus === 'Approved') {
-            this.mainCurrentDataStatusTrack = 'L1 Approved'
-          } else if(this.getCurrentL2DataStatus === 'Approved') {
-            this.mainCurrentDataStatusTrack = 'L2 Approved'
-          } else if(this.getCurrentL3DataStatus === 'Approved') {
-            this.mainCurrentDataStatusTrack = 'L3 Approved'
-          } else if(this.getCurrentL1DataStatus === 'Rejected') {
-            this.mainCurrentDataStatusTrack = 'L1 Rejected'
           } else if(this.getCurrentL2DataStatus === 'Rejected') {
             this.mainCurrentDataStatusTrack = 'L2 Rejected'
           } else if(this.getCurrentL3DataStatus === 'Rejected') {
             this.mainCurrentDataStatusTrack = 'L3 Rejected'
+          } else if(this.getCurrentL1DataStatus === 'Rejected') {
+            this.mainCurrentDataStatusTrack = 'L1 Rejected'
+          } 
+          else if(this.getCurrentL3DataStatus === 'Approved') {
+            this.mainCurrentDataStatusTrack = 'L3 Approved'
+          } else if(this.getCurrentL2DataStatus === 'Approved') {
+            this.mainCurrentDataStatusTrack = 'L2 Approved'
+          } else if(this.getCurrentL1DataStatus === 'Approved') {
+            this.mainCurrentDataStatusTrack = 'L1 Approved'
           }
         }
 
@@ -484,4 +485,13 @@ export class SupplierProfileReviewComponent implements OnInit {
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
         }
+
+        isCertificateDocumentArray(cert: any): boolean {
+          return Array.isArray(cert.certificateDocument);
+        }
+
+        isMachineDocumentArray(machine: any): boolean {
+          return Array.isArray(machine.machinePhotos);
+        }
+        
 } 

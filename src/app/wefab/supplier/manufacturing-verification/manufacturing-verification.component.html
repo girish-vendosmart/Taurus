@@ -1,16 +1,12 @@
 <div class="container-fluid py-5">
   <div class="verification-container">
-    <h2 class="verification-title">Verifying Manufacturing Information</h2>
-    <p class="verification-subtitle" *ngIf="!verificationCurrentStatus">Please wait while we verify your manufacturing capabilities</p>
-    <p class="verification-subtitle" *ngIf="verificationCurrentStatus">Your manufacturing information has been verified</p>
-
-    <!-- Progress line animation only shown when verifying and not under review -->
-    <div class="progress-line-container" *ngIf="!verificationCurrentStatus && !verificationComplete">
-      <div class="progress-line"></div>
-    </div>
+    <h2 class="verification-title">Manufacturing Information</h2>
+    <p class="verification-subtitle" *ngIf="!verificationCurrentStatus && !isRejected">Please wait while we verify your manufacturing capabilities</p>
+    <p class="verification-subtitle" *ngIf="verificationCurrentStatus && !isRejected">Your manufacturing information has been verified</p>
+    <p class="verification-subtitle" *ngIf="isRejected">Your manufacturing information has been rejected</p>
 
     <!-- Under Review Display -->
-    <div class="verification-steps" *ngIf="!verificationCurrentStatus">
+    <div class="verification-steps" *ngIf="!verificationCurrentStatus && !isRejected">
       <!-- Geolocation Verification -->
       <div class="verification-step">
         <div class="step-icon" [ngClass]="{'completed': false}">
@@ -58,7 +54,7 @@
     </div>
 
     <!-- Verification Complete Steps - Only shown when verification is true -->
-    <div class="verification-steps" *ngIf="verificationCurrentStatus">
+    <div class="verification-steps" *ngIf="verificationCurrentStatus && !isRejected">
       <!-- Geolocation Verification -->
       <div class="verification-step">
         <div class="step-icon completed">
@@ -105,8 +101,75 @@
       </div>
     </div>
 
+     <!-- Verification Rejected Steps - Only shown when isRejected is true -->
+    <div class="verification-steps rejection-steps" *ngIf="isRejected">
+      <!-- Credentials Verification -->
+      <div class="verification-step">
+        <div class="step-icon rejected">
+          <i class="pi pi-times"></i>
+        </div>
+        <div class="step-icon-secondary">
+          <i class="pi pi-map-marker"></i>
+        </div>
+        <div class="step-content">
+          <h4 class="step-title">Geolocation Verification</h4>
+          <p class="step-description">Verifying geolocation match with your Manufacturing Facility</p>
+          <p class="verification-rejected">Verification failed</p>
+        </div>
+      </div>
+
+      <!-- Primary Contact -->
+      <div class="verification-step">
+        <div class="step-icon rejected">
+          <i class="pi pi-times"></i>
+        </div>
+        <div class="step-icon-secondary">
+          <i class="pi pi-cog"></i>
+        </div>
+        <div class="step-content">
+          <h4 class="step-title">Manufacturing Capability</h4>
+          <p class="step-description">Assessing the Manufacturing Capability</p>
+          <p class="verification-rejected">Verification failed</p>
+        </div>
+      </div>
+
+      <!-- Documents -->
+      <div class="verification-step">
+        <div class="step-icon rejected">
+          <i class="pi pi-times"></i>
+        </div>
+        <div class="step-icon-secondary">
+          <i class="pi pi-desktop"></i>
+        </div>
+        <div class="step-content">
+          <h4 class="step-title">Machine Detection</h4>
+          <p class="step-description">Detecting Machines in your uploaded images</p>
+          <p class="verification-rejected">Verification failed</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verification Rejected Box - Only shown when rejected -->
+    <div class="verification-complete-box rejected-box" *ngIf="isRejected">
+      <div class="complete-header">
+        <div class="complete-icon rejected-icon">
+          <i class="pi pi-exclamation-triangle"></i>
+        </div>
+        <h4 class="complete-title">Verification Issues Found</h4>
+      </div>
+      <p class="complete-message">We found some issues with your submission that need to be fixed. Please correct these
+        issues before proceeding.</p>
+      <div class="complete-actions">
+        <button class="btn-back" (click)="reviewL2Form()">Review</button>
+      </div>
+      <p class="rejection-note">
+        <i class="pi pi-info-circle"></i>
+        You must fix all verification issues before proceeding to the next step.
+      </p>
+    </div>
+
     <!-- Under Review Actions Box -->
-    <div class="verification-complete-box under-review-box" *ngIf="!verificationCurrentStatus">
+    <div class="verification-complete-box under-review-box" *ngIf="!verificationCurrentStatus && !isRejected">
       <div class="complete-header">
         <div class="complete-icon under-review-icon">
           <i class="pi pi-clock"></i>
@@ -121,7 +184,7 @@
     </div>
 
     <!-- All Verifications Complete Box -->
-    <div class="verification-complete-box" *ngIf="verificationCurrentStatus">
+    <div class="verification-complete-box" *ngIf="verificationCurrentStatus && !isRejected">
       <div class="complete-header">
         <div class="complete-icon">
           <i class="pi pi-check-circle"></i>

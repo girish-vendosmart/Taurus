@@ -24,6 +24,8 @@ export class ManufacturingVerificationComponent implements OnInit {
   verificationComplete = false;
   supplierId: any;
   verificationCurrentStatus: boolean = false;
+  verificationCurrentStatusName: any;
+  isRejected: boolean = false
 
   constructor(
     private router: Router,
@@ -39,19 +41,15 @@ export class ManufacturingVerificationComponent implements OnInit {
   getL2Verification() {
     let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=${this.supplierId}`;
     this.commonService.getData(endPoint).subscribe((res: any) => {
+      this.isRejected = res.data.approval_status === 'Rejected';
       this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? false : true;
       
       // Only simulate verification if not approved
-      if (!this.verificationCurrentStatus) {
-        this.simulateVerification();
+      if (this.isRejected) {
+        this.verificationCurrentStatus = false;
       } else {
-        // If verification is approved, set all steps to completed
-        this.verificationStatus = {
-          geolocation: 'completed',
-          capability: 'completed',
-          machineDetection: 'completed'
-        };
-        this.verificationComplete = true;
+        // Original logic for Under Review vs Approved
+        this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? false : true;
       }
     });
   }

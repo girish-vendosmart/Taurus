@@ -334,3 +334,80 @@ $review-color: #f39c12; // Orange/amber for under review status
     background-color: rgba($review-color, 0.1);
   }
 } 
+
+// Colors for rejections
+$error-color: #e74c3c; // Red color for rejection status
+
+// Rejected steps
+.step-icon {
+  &.rejected {
+    background-color: $error-color;
+    color: white;
+    animation: pulse 1.5s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 5px rgba($error-color, 0.2); }
+  100% { transform: scale(1); }
+}
+
+// Rejection status text
+.verification-rejected {
+  color: $error-color;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 8px 0 0;
+  display: flex;
+  align-items: center;
+  
+  &:before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    background-color: $error-color;
+    border-radius: 50%;
+    margin-right: 8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 12px;
+  }
+}
+
+// Rejected box
+.rejected-box {
+  background-color: #fee8e7;
+  border: 1px solid #fad7d3;
+  
+  .rejected-icon {
+    color: $error-color;
+    background-color: rgba($error-color, 0.1);
+  }
+  
+  .btn-edit-rejected {
+    background-color: $error-color;
+    
+    &:hover {
+      background-color: darken($error-color, 10%);
+    }
+  }
+}
+
+// Message at bottom of rejected box
+.rejection-note {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: rgba($error-color, 0.05);
+  color: darken($error-color, 10%);
+  
+  i {
+    margin-right: 8px;
+    font-size: 14px;
+  }
+}
