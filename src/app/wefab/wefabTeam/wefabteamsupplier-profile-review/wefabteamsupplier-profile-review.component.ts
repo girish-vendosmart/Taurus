@@ -203,7 +203,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   getVerificationStatus(supplierId: string): void {
     this.isLoadingVerification = true;
     this.verificationError = false;
-    this.commonservice.getData('/api/method/proq_buyer.wefab.api.supplier.onboarding.get_verification_status?supplier_company_id=SUP-000314' + supplierId).subscribe({
+    this.commonservice.getData('/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_and_verification_status?supplier_company_id=SUP-000314' + supplierId).subscribe({
       next: (res: any) => {
         if (res.data) {
           this.verificationStatus = res.data;
@@ -540,5 +540,161 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
+  }
+
+  approveL1() {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + this.supplierId;
+    let payload = {
+      "onboarding_status": "Approved"
+    };
+    this.commonservice.putData(endPoint, payload).subscribe({
+      next: (res: any) => {
+        this.getL1DataStatus(this.supplierId);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Basic Information has been approved',
+          life: 3000
+        });
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to approve Basic Information',
+          life: 3000
+        });
+      }
+    });
+  }
+
+  rejectL1() {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + this.supplierId;
+    let payload = {
+      "onboarding_status": "Rejected"
+    };
+    this.commonservice.putData(endPoint, payload).subscribe({
+      next: (res: any) => {
+        this.getL1DataStatus(this.supplierId);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Basic Information has been rejected',
+          life: 3000
+        });
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to reject Basic Information',
+          life: 3000
+        });
+      }
+    });
+  }
+
+  approveL2() {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + this.supplierId;
+    let payload = {
+      "onboarding_status": "Approved"
+    };
+    this.commonservice.putData(endPoint, payload).subscribe({
+      next: (res: any) => {
+        this.getL2DataStatus(this.supplierId);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Manufacturing Capabilities has been approved',
+          life: 3000
+        });
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to approve Manufacturing Capabilities',
+          life: 3000
+        });
+      }
+    });
+  }
+
+  rejectL2() {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + this.supplierId;
+    let payload = {
+      "onboarding_status": "Rejected"
+    };
+    this.commonservice.putData(endPoint, payload).subscribe({
+      next: (res: any) => {
+        this.getL2DataStatus(this.supplierId);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Manufacturing Capabilities has been rejected',
+          life: 3000
+        });
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to reject Manufacturing Capabilities',
+          life: 3000
+        });
+      }
+    });
+  }
+
+  approveL3() {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + this.supplierId;
+    let payload = {
+      "onboarding_status": "Approved"
+    };
+    this.commonservice.putData(endPoint, payload).subscribe({
+      next: (res: any) => {
+        this.getL3DataStatus(this.supplierId);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Financial Information has been approved',
+          life: 3000
+        });
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to approve Financial Information',
+          life: 3000
+        });
+      }
+    });
+  }
+
+  rejectL3() {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + this.supplierId;
+    let payload = {
+      "onboarding_status": "Rejected"
+    };
+    this.commonservice.putData(endPoint, payload).subscribe({
+      next: (res: any) => {
+        this.getL3DataStatus(this.supplierId);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Financial Information has been rejected',
+          life: 3000
+        });
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to reject Financial Information',
+          life: 3000
+        });
+      }
+    });
   }
 } 

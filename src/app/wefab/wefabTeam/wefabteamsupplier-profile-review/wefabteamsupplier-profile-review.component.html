@@ -3,8 +3,16 @@
   <div class="review-header">
     <div class="header-left">
       <h1 class="review-title">Supplier Profile Review</h1>
-      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: <span class="status-pending" *ngIf="mainCurrentDataStatusTrack === 'Under Review'" >{{ mainCurrentDataStatusTrack }}</span>
-        <span class="status-completed" *ngIf="mainCurrentDataStatusTrack === 'Approved'" >{{ getCurrentDataStatus }}</span></p>
+      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: 
+        <span [ngClass]="{
+          'status-not-started': verificationStatus.onboarding_status?.includes('Not Started'),
+          'status-under-review': verificationStatus.onboarding_status?.includes('Under Review'),
+          'status-approved': verificationStatus.onboarding_status?.includes('Approved'),
+          'status-rejected': verificationStatus.onboarding_status?.includes('Rejected')
+        }">
+          {{ verificationStatus.onboarding_status }}
+        </span>
+      </p>
     </div>
     <div class="header-actions">
       <!-- <button type="button" class="btn btn-outline-primary return-btn" (click)="returnToForm()">
@@ -55,9 +63,24 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'basic'">
         <div class="section-header">
           <h2>Basic Information</h2>
-          <button class="edit-section-btn" *ngIf="getCurrentL1DataStatus === 'Under Review'" (click)="navigateToEdit()">
-            <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
-          </button>
+          <div class="header-actions">
+            <span [ngClass]="{
+              'status-not-started': getCurrentL1DataStatus?.includes('Not Started'),
+              'status-under-review': getCurrentL1DataStatus?.includes('Under Review'),
+              'status-approved': getCurrentL1DataStatus?.includes('Approved'),
+              'status-rejected': getCurrentL1DataStatus?.includes('Rejected')
+            }">
+              {{ getCurrentL1DataStatus }}
+            </span>
+            <div class="approval-buttons" *ngIf="getCurrentL1DataStatus === 'Under Review'">
+              <button class="btn btn-success approve-btn" (click)="approveL1()">
+                <i class="pi pi-check-circle"></i> Approve
+              </button>
+              <button class="btn btn-danger reject-btn" (click)="rejectL1()">
+                <i class="pi pi-times-circle"></i> Reject
+              </button>
+            </div>
+          </div>
         </div>
         
         <!-- Loading State -->
@@ -182,9 +205,24 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'manufacturing'">
         <div class="section-header">
           <h2>Manufacturing Capabilities</h2>
-          <button class="edit-section-btn" *ngIf="getCurrentL2DataStatus === 'Under Review'" (click)="navigateToEdit()">
-            <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
-          </button>
+          <div class="header-actions">
+            <span [ngClass]="{
+              'status-not-started': getCurrentL2DataStatus?.includes('Not Started'),
+              'status-under-review': getCurrentL2DataStatus?.includes('Under Review'),
+              'status-approved': getCurrentL2DataStatus?.includes('Approved'),
+              'status-rejected': getCurrentL2DataStatus?.includes('Rejected')
+            }">
+              {{ getCurrentL2DataStatus }}
+            </span>
+            <div class="approval-buttons" *ngIf="getCurrentL2DataStatus === 'Under Review'">
+              <button class="btn btn-success approve-btn" (click)="approveL2()">
+                <i class="pi pi-check-circle"></i> Approve
+              </button>
+              <button class="btn btn-danger reject-btn" (click)="rejectL2()">
+                <i class="pi pi-times-circle"></i> Reject
+              </button>
+            </div>
+          </div>
         </div>
         
         <!-- Loading State -->
@@ -290,9 +328,24 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'financial'">
         <div class="section-header">
           <h2>Financial & Additional Information</h2>
-          <button class="edit-section-btn" *ngIf="getCurrentL3DataStatus === 'Under Review'" (click)="navigateToEdit()">
-            <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
-          </button>
+          <div class="header-actions">
+            <span [ngClass]="{
+              'status-not-started': getCurrentL3DataStatus?.includes('Not Started'),
+              'status-under-review': getCurrentL3DataStatus?.includes('Under Review'),
+              'status-approved': getCurrentL3DataStatus?.includes('Approved'),
+              'status-rejected': getCurrentL3DataStatus?.includes('Rejected')
+            }">
+              {{ getCurrentL3DataStatus }}
+            </span>
+            <div class="approval-buttons" *ngIf="getCurrentL3DataStatus === 'Under Review'">
+              <button class="btn btn-success approve-btn" (click)="approveL3()">
+                <i class="pi pi-check-circle"></i> Approve
+              </button>
+              <button class="btn btn-danger reject-btn" (click)="rejectL3()">
+                <i class="pi pi-times-circle"></i> Reject
+              </button>
+            </div>
+          </div>
         </div>
         
         <!-- Loading State -->
@@ -608,4 +661,105 @@
   color: #666;
   margin: 0;
 }
+
+.section-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  min-width: 0;
+  flex-shrink: 0;
+  flex-grow: 0;
+  width: auto;
+  overflow: visible !important;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: normal;
+  min-width: 0;
+  max-width: 200px;
+  flex-shrink: 1;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  margin: 0;
+  width: auto;
+}
+
+.approval-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.approve-btn, .reject-btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.approve-btn {
+  background-color: #4caf50;
+  border-color: #4caf50;
+  color: white;
+}
+
+.reject-btn {
+  background-color: #f44336;
+  border-color: #f44336;
+  color: white;
+}
+
+.approve-btn:hover {
+  background-color: #43a047;
+  border-color: #43a047;
+}
+
+.reject-btn:hover {
+  background-color: #e53935;
+  border-color: #e53935;
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 0.5rem;
+  }
+  .status-badge {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* For best results, move these to your component's SCSS/CSS file */
+.status-not-started { color: #757575 !important; }
+.status-under-review { color: #e65100 !important; }
+.status-approved { color: #2e7d32 !important; }
+.status-rejected { color: #c62828 !important; }
 </style> 
