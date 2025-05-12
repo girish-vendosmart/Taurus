@@ -259,6 +259,11 @@
     display: inline-flex; 
     align-items: center;
     line-height: 1.2; // Added for better vertical spacing of label text itself
+
+
+    ::ng-deep .ng-star-inserted {
+      color: red;
+    }
     
     .text-danger { // Asterisk
       margin-left: 3px;

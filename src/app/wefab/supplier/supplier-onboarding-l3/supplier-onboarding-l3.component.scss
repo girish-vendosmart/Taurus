@@ -95,6 +95,12 @@ $success-green: $process-green;
   text-transform: uppercase;
 }
 
+.form-label {
+  ::ng-deep .ng-star-inserted {
+    color: red !important;
+  }
+}
+
 // Step navigation styling
 .steps-container {
   display: flex;

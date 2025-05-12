@@ -339,7 +339,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'companyFinancials.annualRevenue2024',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (This Year) (INR) *',
+              label: 'Annual Revenue (This Year) (INR)',
               required: true,
               type: 'text',
               placeholder: '12359'
@@ -355,7 +355,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'companyFinancials.annualRevenue2023',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (Last Year) (INR) *',
+              label: 'Annual Revenue (Last Year) (INR)',
               required: true,
               type: 'text',
               placeholder: '9876'
@@ -380,7 +380,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'companyFinancials.annualRevenue2022',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (Two Years Ago) (INR) *',
+              label: 'Annual Revenue (Two Years Ago) (INR)',
               required: true,
               type: 'text',
               placeholder: '09876r'
@@ -494,7 +494,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                 key: 'website',
                 type: 'input',
                 templateOptions: {
-                  label: 'Company Website *',
+                  label: 'Company Website',
                   placeholder: 'Enter company website URL',
                   required: true
                 },
@@ -524,7 +524,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                 type: 'input',
                 templateOptions: {
                   type: 'number',
-                  label: 'Total Number of Employees *',
+                  label: 'Total Number of Employees',
                   placeholder: 'Enter number of employees',
                   min: 1,
                   required: true
@@ -541,7 +541,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                 type: 'input',
                 templateOptions: {
                   type: 'number',
-                  label: 'Year Founded *',
+                  label: 'Year Founded',
                   placeholder: 'Enter year company was founded',
                   min: 1900,
                   max: new Date().getFullYear(),
@@ -580,7 +580,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                       key: 'facilityName',
                       type: 'input',
                       templateOptions: {
-                        label: 'Facility Name *',
+                        label: 'Facility Name',
                         placeholder: 'Enter facility name',
                         required: true
                       },
@@ -595,7 +595,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                       key: 'facilityLocation',
                       type: 'input',
                       templateOptions: {
-                        label: 'Location *',
+                        label: 'Location',
                         placeholder: 'Enter facility location',
                         required: true
                       },
@@ -628,7 +628,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                 type: 'input',
                 templateOptions: {
                   type: 'number',
-                  label: 'Average Lead Time (Days) *',
+                  label: 'Average Lead Time (Days)',
                   placeholder: 'Enter average production lead time in days',
                   min: 1,
                   required: true
@@ -645,7 +645,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                 type: 'input',
                 templateOptions: {
                   type: 'number',
-                  label: 'Minimum Order Quantity *',
+                  label: 'Minimum Order Quantity',
                   placeholder: 'Enter minimum order quantity',
                   min: 0,
                   required: true
@@ -690,7 +690,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                       key: 'companyName',
                       type: 'input',
                       templateOptions: {
-                        label: 'Company Name *',
+                        label: 'Company Name',
                         placeholder: 'Enter company name',
                         required: true
                       },
@@ -705,7 +705,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                       key: 'contactName',
                       type: 'input',
                       templateOptions: {
-                        label: 'Contact Name *',
+                        label: 'Contact Name',
                         placeholder: 'Enter contact person name',
                         required: true
                       },
@@ -726,7 +726,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                       type: 'input',
                       templateOptions: {
                         type: 'email',
-                        label: 'Email *',
+                        label: 'Email',
                         placeholder: 'Enter contact email',
                         required: true
                       },

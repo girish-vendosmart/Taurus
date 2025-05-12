@@ -253,6 +253,10 @@
     color: $precision-black;
     margin-bottom: 0.4rem;
     font-size: 1.05rem;
+
+    ::ng-deep .ng-star-inserted {
+      color: red;
+    }
     
     .text-danger {
       margin-left: 3px;
