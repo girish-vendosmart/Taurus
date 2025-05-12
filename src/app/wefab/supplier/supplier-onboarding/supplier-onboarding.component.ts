@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions, FormlyExtension } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import { Router } from '@angular/router';
-
 // PrimeNG imports
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -19,18 +18,14 @@ import { MessageService } from 'primeng/api';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
-
 // Import FileUploadComponent
 import { FileUploadComponent } from './file-upload.component';
 // Import MultiFileUploadComponent
 import { MultiFileUploadComponent } from './multi-file-upload.component';
-
 // Import PhoneOtpVerificationComponent
 import { PhoneOtpVerificationComponent } from '../../wefab-shared-component/phone-otp-verification/phone-otp-verification.component';
 import { CommonService } from '../../shared/common.service';
-
 import { PMultiSelectGroupComponent } from '../../../p-multiSelect-group.component'
-
 // GST Validator function
 export function gstValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
@@ -43,7 +38,6 @@ export function gstValidator(control: AbstractControl): ValidationErrors | null 
   
   return gstPattern.test(value) ? null : { 'gstFormat': true };
 }
-
 @Component({
   selector: 'app-supplier-onboarding',
   standalone: true,
@@ -85,17 +79,16 @@ export class SupplierOnboardingComponent implements OnInit {
   
   // Phone verification state
   phoneVerified = false;
-
   // Add this property for configurable file types
   acceptedDocumentTypes: string = '.zip'; 
-
   @ViewChild('verifyOtpButton') verifyOtpButtonTemplate!: TemplateRef<any>;
-
   isBrowser: boolean;
-  countryList: any = []
+  countryList: any = [];
   selectedCountry: any;
-  stateList: any;
+  selectedState: any; // Add this to track the selected state
+  stateList: any = []; // Initialize as empty array
   getCompanyProfile: any;
+  stateFieldInitialized = false; // Flag to track state field initialization
   
   constructor(
     private fb: FormBuilder, 
@@ -113,11 +106,13 @@ export class SupplierOnboardingComponent implements OnInit {
     let endPoint = '/api/resource/Country?limit=300';
     this.commonService.getData(endPoint).subscribe((res: any) => {
       this.countryList = res.data;
-    })
+    });
   }
 
   getStates(country: any) {
-    let endPoint = `/api/resource/pq_city?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"]]`
+    if (!country) return;
+    
+    let endPoint = `/api/resource/pq_city?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"]]`;
     console.log('Fetching states for country:', country);
     
     this.commonService.getData(endPoint).subscribe((res: any) => {
@@ -133,8 +128,31 @@ export class SupplierOnboardingComponent implements OnInit {
         
         console.log('State list updated:', this.stateList);
         
-        // Update the state dropdown options
-        this.updateStateDropdownOptions();
+        // After state list is loaded, now set the selected state if we have one
+        if (this.selectedState) {
+          console.log('Setting selected state from stored value:', this.selectedState);
+          
+          // Use setTimeout to ensure the UI has time to update
+          setTimeout(() => {
+            // Update the model directly
+            this.model.state = this.selectedState;
+            
+            // Also update the form control
+            const stateControl = this.form.get('state');
+            if (stateControl) {
+              stateControl.setValue(this.selectedState);
+              stateControl.markAsDirty();
+              stateControl.updateValueAndValidity();
+              console.log('State control updated with:', this.selectedState);
+            }
+            
+            // Update the state dropdown options and mark as dirty
+            this.updateStateDropdownOptions(true);
+          }, 200);
+        }
+
+        this.updateStateDropdownOptions(true);
+
       } else {
         this.stateList = [];
       }
@@ -144,8 +162,8 @@ export class SupplierOnboardingComponent implements OnInit {
     });
   }
 
-  // Method to update state dropdown options
-  updateStateDropdownOptions() {
+  // Method to update state dropdown options with an option to force selection
+  updateStateDropdownOptions(forceSelection: boolean = false) {
     // Find the state field in the form
     if (this.stepFields && this.stepFields.length > 0) {
       const basicDetailsFields = this.stepFields[0];
@@ -164,16 +182,11 @@ export class SupplierOnboardingComponent implements OnInit {
           // Update the options
           stateField.templateOptions.options = this.stateList;
           
-          // Reset the state value if it's not in the new options
-          const stateControl = this.form.get('state');
-          if (stateControl && stateControl.value) {
-            const stateExists = this.stateList.some(
-              (option: any) => option.value === stateControl.value
-            );
-            
-            if (!stateExists) {
-              stateControl.setValue('');
-            }
+          // If forceSelection and we have a selectedState, make sure it's applied
+          if (forceSelection && this.selectedState && stateField.formControl) {
+            console.log('Forcing state selection to:', this.selectedState);
+            stateField.formControl.setValue(this.selectedState);
+            stateField.formControl.markAsDirty();
           }
           
           // Force update the UI
@@ -208,7 +221,7 @@ export class SupplierOnboardingComponent implements OnInit {
         }
       }
     ];
-
+    
     // Check if we're in edit mode
     const route = this.router.url;
     if (route.includes('mode=edit')) {
@@ -225,38 +238,52 @@ export class SupplierOnboardingComponent implements OnInit {
         this.router.navigate(['/wefab/supplier/supplier-verification']);
       }
     }
-
-    this.patchEmailId()
+    this.patchEmailId();
   }
 
   patchEmailId() {
-    this.model.primary_email_id = sessionStorage.getItem('primary_email_id')
+    this.model.primary_email_id = sessionStorage.getItem('primary_email_id');
     
     setTimeout(() => {
       this.form.markAsPristine();
     }, 1000);
-    // this.commonService.getData(endPoint).subscribe((res: any) => {
-    //   debugger
-    //   this.getCompanyProfile = JSON.parse(res.data.company_profile)
-    //   this.phoneVerified = this.getCompanyProfile.phone_verified
-    // })
   }
 
-  getL1Data(supplierId:any) {
-  let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
+  getL1Data(supplierId: any) {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId;
     this.commonService.getData(endPoint).subscribe((res: any) => {
-      debugger
-      this.getCompanyProfile = JSON.parse(res.data.company_profile)
-      this.phoneVerified = this.getCompanyProfile.phone_verified
-      debugger
-      console.log(this.getCompanyProfile)
-      this.patchValueForm()
-    })
+      console.log('L1 Data response:', res);
+      if (res && res.data && res.data.company_profile) {
+        try {
+          this.getCompanyProfile = JSON.parse(res.data.company_profile);
+          this.phoneVerified = this.getCompanyProfile.phone_verified;
+          console.log('Company profile loaded:', this.getCompanyProfile);
+          
+          // Wait for the form to be initialized before patching values
+          setTimeout(() => {
+            this.patchValueForm();
+          }, 500);
+        } catch (e) {
+          console.error('Error parsing company profile:', e);
+        }
+      }
+    }, error => {
+      console.error('Error fetching L1 data:', error);
+    });
   }
 
-  patchValueForm(fields?:any) {
+  patchValueForm() {
     if (!this.getCompanyProfile) {
+      console.log('No company profile to patch');
       return;
+    }
+    
+    console.log('Patching form with values:', this.getCompanyProfile);
+    
+    // First, store the state if it exists
+    if (this.getCompanyProfile.state) {
+      this.selectedState = this.getCompanyProfile.state;
+      console.log('Stored selected state:', this.selectedState);
     }
     
     // Update the model with the values from getCompanyProfile
@@ -267,6 +294,7 @@ export class SupplierOnboardingComponent implements OnInit {
     // If we have a country value, trigger the state list fetch
     if (this.model.country) {
       this.selectedCountry = this.model.country;
+      console.log('Setting selected country and fetching states:', this.selectedCountry);
       this.getStates(this.model.country);
     }
     
@@ -275,11 +303,21 @@ export class SupplierOnboardingComponent implements OnInit {
       this.model.manufacturingFacilityAddress = this.model.registeredAddress;
     }
     
+    // Apply values directly to form controls where possible
+    Object.keys(this.model).forEach(key => {
+      const control = this.form.get(key);
+      if (control && key !== 'state') { // Skip state as we handle it specially
+        control.setValue(this.model[key]);
+        control.markAsDirty();
+        control.updateValueAndValidity();
+      }
+    });
+    
     // Mark form as pristine after patching values
     setTimeout(() => {
       this.form.markAsPristine();
       console.log('Form patched with stored data:', this.model);
-    });
+    }, 1000);
   }
 
   // New method to load countries then initialize form
@@ -459,9 +497,16 @@ export class SupplierOnboardingComponent implements OnInit {
                 
                 // Watch for country changes to update state dropdown
                 field.formControl?.valueChanges.subscribe(selectedCountry => {
-                  console.log('Selected country:', selectedCountry);
+                  console.log('Country changed to:', selectedCountry);
                   if (selectedCountry) {
                     this.selectedCountry = selectedCountry;
+                    
+                    // Clear the state when country changes
+                    if (field.form?.get('state')) {
+                      field.form.get('state')!.setValue(null);
+                    }
+                    
+                    // Get states for the new country
                     this.getStates(selectedCountry);
                   }
                 });
@@ -485,15 +530,25 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             hooks: {
               onInit: (field) => {
-                // If country changes, this field will be updated by updateStateDropdownOptions
                 console.log('State field initialized');
+                this.stateFieldInitialized = true;
                 
-                // Watch for state changes to update city dropdown
+                // If we already have a selected state, set it
+                if (this.selectedState && field.formControl) {
+                  console.log('Setting state to previously selected value:', this.selectedState);
+                  setTimeout(() => {
+                    field.formControl!.setValue(this.selectedState);
+                    field.formControl!.markAsDirty();
+                    field.formControl!.updateValueAndValidity();
+                  }, 200);
+                }
+                
+                // Watch for state changes
                 field.formControl?.valueChanges.subscribe(selectedState => {
-                  console.log('Selected state:', selectedState);
-                  // if (selectedState && this.selectedCountry) {
-                  //   this.getCities(this.selectedCountry, selectedState);
-                  // }
+                  console.log('State changed to:', selectedState);
+                  if (selectedState) {
+                    this.selectedState = selectedState;
+                  }
                 });
               }
             },
@@ -693,31 +748,6 @@ export class SupplierOnboardingComponent implements OnInit {
               }
             }
           }
-          // {
-          //   className: 'col-md-4 mb-2',
-          //   key: 'primaryManufacturingProcess',
-          //   type: 'p-multiselect',
-          //   defaultValue: [],
-          //   templateOptions: {
-          //     label: 'Primary Manufacturing Process',
-          //     placeholder: 'Select manufacturing processes',
-          //     required: true,
-          //     options: [
-          //       { label: 'CNC Machining', value: 'cnc_machining' },
-          //       { label: 'Injection Molding', value: 'injection_molding' },
-          //       { label: 'Sheet Metal Fabrication', value: 'sheet_metal_fabrication' },
-          //       { label: '3D Printing', value: '3d_printing' },
-          //       { label: 'Die Casting', value: 'die_casting' }
-          //     ],
-          //     filter: true,
-          //     showToggleAll: true
-          //   },
-          //   validation: {
-          //     messages: {
-          //       required: 'Please select at least one manufacturing process'
-          //     }
-          //   }
-          // }
         ]
       },
       {
@@ -867,27 +897,22 @@ export class SupplierOnboardingComponent implements OnInit {
     
     return isValid;
   }
-
-  updateData(data:any) {
-    console.log(data)
+  
+  updateData(data: any) {
+    console.log('Preparing data for submission:', data);
     let body = {
       company_name: data.company_name,
       primary_email_id: data.primary_email_id,
       onboarding_status: 'Under Review',
       phone_verified: this.phoneVerified,
       company_profile: JSON.stringify(data)
-    }
-    return body
+    };
+    return body;
   }
 
-  postSupplierOnboardingL1() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L1';
-    this.model.phone_verified = this.phoneVerified;
-    console.log(this.model)
-    debugger
-    let body = this.updateData(this.model);
+  postDataFunction(endPoint:any, body: any) {
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
-      sessionStorage.setItem('supplier_id', res.data.name)
+      sessionStorage.setItem('supplier_id', res.data.name);
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
@@ -901,23 +926,12 @@ export class SupplierOnboardingComponent implements OnInit {
       }, 3000);
     }, (err) => {
       console.error('Error submitting form:', err);
-      this.putSupplierOnboardingL1()
-      // this.messageService.add({
-      //   severity: 'error',
-      //   summary: 'Submission Error',
-      //   detail: err.error?.message || 'An error occurred while submitting the form. Please try again later.',
-      //   life: 5000
-      // });
     });
   }
 
-  putSupplierOnboardingL1() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L1';
-    this.model.phone_verified = this.phoneVerified;
-    console.log(this.model)
-    let body = this.updateData(this.model);
+  putDataFunction(endPoint:any, body: any) {
     this.commonService.putData(endPoint, body).subscribe((res: any) => {
-      sessionStorage.setItem('supplier_id', res.data.name)
+      sessionStorage.setItem('supplier_id', res.data.name);
       this.messageService.add({
         severity: 'success',
         summary: 'Update Successful',
@@ -928,9 +942,9 @@ export class SupplierOnboardingComponent implements OnInit {
       // Navigate to verification page after 3 seconds
       setTimeout(() => {
         this.router.navigate(['/wefab/supplier/supplier-verification']);
-      }, 3000);
+      }, 2000);
     }, (err) => {
-      console.error('Error submitting form:', err);
+      console.error('Error updating form:', err);
       this.messageService.add({
         severity: 'error',
         summary: 'Submission Error',
@@ -939,7 +953,29 @@ export class SupplierOnboardingComponent implements OnInit {
       });
     });
   }
-
+  
+  postSupplierOnboardingL1() {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L1';
+    this.model.phone_verified = this.phoneVerified;
+    console.log('Submitting form data:', this.model);
+    let body = this.updateData(this.model);
+    // Check if we have a supplier_id
+    let supplier_id = sessionStorage.getItem('supplier_id');
+    if(supplier_id) {
+       endPoint = '/api/resource/wfb_supplier_onboarding_L1/'  + sessionStorage.getItem('supplier_id')  
+       this.putDataFunction(endPoint, body);
+    } else {
+      this.postDataFunction(endPoint, body);
+    }
+  }
+  
+  putSupplierOnboardingL1() {
+    let endPoint = '/api/resource/wfb_supplier_onboarding_L1/'  + sessionStorage.getItem('supplier_id');
+    this.model.phone_verified = this.phoneVerified;
+    console.log('Updating existing form data:', this.model);
+    let body = this.updateData(this.model);
+  }
+  
   submit() {
     if (this.form.valid) {
       console.log('Form submitted successfully', this.model);
@@ -954,15 +990,15 @@ export class SupplierOnboardingComponent implements OnInit {
       });
     }
   }
-
+  
   sendOTP() {
     console.log('Sending OTP');
   }
-
+  
   verifyOTP() {
     console.log('Verifying OTP');
   }
-
+  
   // Add this method to the component
   addValidationIconToErrorMessages(fields: FormlyFieldConfig[][]) {
     fields.forEach(step => {
@@ -1010,7 +1046,7 @@ export class SupplierOnboardingComponent implements OnInit {
       }
     });
   }
-
+  
   // Method to get cities based on country and state
   getCities(country: string, state: string) {
     let endPoint = `/api/resource/pq_city?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"], ["state_title", "=", "${state}"]]`;

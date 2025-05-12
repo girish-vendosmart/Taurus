@@ -421,7 +421,9 @@ export class SupplierProfileReviewComponent implements OnInit {
               this.getCurrentDataStatus = res.data.approval_status
               this.getCurrentL1DataStatus = res.data.approval_status
               this.mainCurrentDataStatus()
-              this.getL2DataStatus(supplierId)
+              if(this.getCurrentL1DataStatus === 'Approved') {
+                this.getL2DataStatus(supplierId)
+              }
             })
         }
 
@@ -431,7 +433,9 @@ export class SupplierProfileReviewComponent implements OnInit {
               this.getCurrentDataStatus = res.data.approval_status
               this.getCurrentL2DataStatus = res.data.approval_status
               this.mainCurrentDataStatus()
-              this.getL3DataStatus(supplierId)
+              if(this.getCurrentL2DataStatus === 'Approved') {
+                this.getL3DataStatus(supplierId)
+              }
             })
         }
 
@@ -446,15 +450,19 @@ export class SupplierProfileReviewComponent implements OnInit {
 
         mainCurrentDataStatus() {
           if(this.getCurrentL1DataStatus === 'Under Review') {
-             this.mainCurrentDataStatusTrack = 'Under Review'
+             this.mainCurrentDataStatusTrack = 'L1 Under Review'
           }
           else if(this.getCurrentL2DataStatus === 'Under Review') {
-            this.mainCurrentDataStatusTrack = 'Under Review'
+            this.mainCurrentDataStatusTrack = 'L2 Under Review'
           }
           else if(this.getCurrentL3DataStatus === 'Under Review') {
-            this.mainCurrentDataStatusTrack = 'Under Review'
-          } else {
-            this.mainCurrentDataStatusTrack = 'Approved'
+            this.mainCurrentDataStatusTrack = 'L3 Under Review'
+          } else if(this.getCurrentL1DataStatus === 'Approved') {
+            this.mainCurrentDataStatusTrack = 'L1 Approved'
+          } else if(this.getCurrentL2DataStatus === 'Approved') {
+            this.mainCurrentDataStatusTrack = 'L2 Approved'
+          } else if(this.getCurrentL3DataStatus === 'Approved') {
+            this.mainCurrentDataStatusTrack = 'L3 Approved'
           }
         }
 
