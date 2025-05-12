@@ -38,7 +38,7 @@ export class CommonService {
     getData(endPoint: string, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': 'Token c82020f17e1fd10:f34acaf7862dc9c',
+            'Authorization': `Token ${sessionStorage.getItem('token')}`,
             'Content-Type': 'application/json'
         });
         return this.http.get(`${this.baseUrl}${endPoint}`, { headers, params });
@@ -47,7 +47,7 @@ export class CommonService {
     postData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': 'Token c82020f17e1fd10:f34acaf7862dc9c',
+            'Authorization': `Token ${sessionStorage.getItem('token')}`,
             'Content-Type': 'application/json'
         });
     
@@ -62,7 +62,7 @@ export class CommonService {
     putData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': 'Token c82020f17e1fd10:f34acaf7862dc9c',
+            'Authorization': `Token ${sessionStorage.getItem('token')}`,
             'Content-Type': 'application/json'
         });
     
@@ -132,7 +132,7 @@ export class CommonService {
     uploadFile(uploadData: File): Observable<any> {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': 'Token c82020f17e1fd10:f34acaf7862dc9c',
+            'Authorization': `Token ${sessionStorage.getItem('token')}`,
         });
 
         const formData = new FormData();
