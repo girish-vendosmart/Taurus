@@ -14,6 +14,7 @@ import { FormlyFieldFileUploadComponent } from './file-upload-type.component';
 import { FormlyFieldRangeSliderComponent } from './range-slider-type.component';
 import { FormlyFieldDropdownComponent } from './dropdown-type.component';
 import { FormlyFieldSearchableSelectComponent } from './searchable-select-type.component';
+import { PMultiSelectGroupComponent } from './p-multiSelect-group.component';
 
 import { routes } from './app.routes';
 
@@ -26,6 +27,7 @@ export const appConfig: ApplicationConfig = {
       ReactiveFormsModule,
       FormlyModule.forRoot({
         types: [
+          { name: 'p-multiselect-group', component: PMultiSelectGroupComponent },
           { name: 'repeat', component: FormlyRepeatTypeComponent },
           { name: 'file', component: FormlyFieldFileComponent },
           { name: 'file-upload', component: FormlyFieldFileUploadComponent },

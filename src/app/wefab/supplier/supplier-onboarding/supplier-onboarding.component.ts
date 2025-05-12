@@ -29,6 +29,8 @@ import { MultiFileUploadComponent } from './multi-file-upload.component';
 import { PhoneOtpVerificationComponent } from '../../wefab-shared-component/phone-otp-verification/phone-otp-verification.component';
 import { CommonService } from '../../shared/common.service';
 
+import { PMultiSelectGroupComponent } from '../../../p-multiSelect-group.component'
+
 // GST Validator function
 export function gstValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
@@ -63,7 +65,8 @@ export function gstValidator(control: AbstractControl): ValidationErrors | null 
     InputNumberModule,
     FileUploadComponent,
     PhoneOtpVerificationComponent,
-    MultiFileUploadComponent
+    MultiFileUploadComponent,
+    PMultiSelectGroupComponent
   ],
   providers: [MessageService],
   templateUrl: './supplier-onboarding.component.html',
@@ -561,7 +564,7 @@ export class SupplierOnboardingComponent implements OnInit {
             });
           }
         }
-      }
+      },
     ];
   }
 
@@ -592,7 +595,7 @@ export class SupplierOnboardingComponent implements OnInit {
             defaultValue: this.model.phoneNumber,
             templateOptions: {
               label: 'Phone Number',
-              required: false,
+              required: true,
               placeholder: 'Enter phone number',
               countryCode: '91',
               parentComponent: this,
@@ -613,6 +616,53 @@ export class SupplierOnboardingComponent implements OnInit {
               }
             }
           },
+          {
+            className: 'col-md-4 mb-2',
+            key: 'primaryManufacturingProcess',
+            type: 'p-multiselect-group', // Use the multiselect-group type
+            defaultValue: [], // For multiselect, initialize as an empty array
+            templateOptions: {
+              label: 'Primary Manufacturing Process',
+              placeholder: 'Select your primary manufacturing process',
+              required: true,
+              groups: [
+                {
+                  label: 'Process Types',
+                  items: [
+                    { label: 'CNC Machining', value: 'cnc_machining' },
+                    { label: 'Injection Molding', value: 'injection_molding' },
+                    { label: 'Sheet Metal Fabrication', value: 'sheet_metal_fabrication' }
+                  ]
+                },
+                {
+                  label: 'Advanced Manufacturing',
+                  items: [
+                    { label: '3D Printing', value: '3d_printing' },
+                    { label: 'Die Casting', value: 'die_casting' },
+                    { label: 'Laser Cutting', value: 'laser_cutting' }
+                  ]
+                },
+                {
+                  label: 'Surface Treatment',
+                  items: [
+                    { label: 'Anodizing', value: 'anodizing' },
+                    { label: 'Powder Coating', value: 'powder_coating' },
+                    { label: 'Heat Treatment', value: 'heat_treatment' }
+                  ]
+                }
+              ],
+              optionGroupLabel: 'label',
+              optionGroupChildren: 'items',
+              filter: true,
+              showToggleAll: true,
+              description: 'Select all manufacturing capabilities that apply to your business'
+            },
+            validation: {
+              messages: {
+                required: 'Please select at least one manufacturing capability'
+              }
+            }
+          }
           // {
           //   className: 'col-md-4 mb-2',
           //   key: 'primaryManufacturingProcess',
@@ -803,6 +853,7 @@ export class SupplierOnboardingComponent implements OnInit {
   postSupplierOnboardingL1() {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L1';
     this.model.phone_verified = this.phoneVerified;
+    debugger
     console.log(this.model)
     let body = this.updateData(this.model);
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
