@@ -4,21 +4,9 @@
     <div class="header-left">
       <h1 class="review-title">Supplier Profile Review</h1>
       <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: <span class="status-pending" *ngIf="mainCurrentDataStatusTrack.includes('Under Review')" >{{ mainCurrentDataStatusTrack }}</span>
-        <span class="status-completed" *ngIf="mainCurrentDataStatusTrack.includes('Approved')" >{{ mainCurrentDataStatusTrack }}</span></p>
+        <span class="status-completed" *ngIf="mainCurrentDataStatusTrack.includes('Approved')" >{{ mainCurrentDataStatusTrack }}</span> <span class="status-rejected" *ngIf="mainCurrentDataStatusTrack.includes('Rejected')" >{{ mainCurrentDataStatusTrack }}</span></p>
     </div>
     <div class="header-actions">
-      <!-- <button type="button" class="btn btn-outline-primary return-btn" (click)="returnToForm()">
-        Return to Form
-      </button> -->
-      <!-- <button type="button" class="btn btn-icon" (click)="printProfile()">
-        <i class="pi pi-print"></i> Print
-      </button>
-      <button type="button" class="btn btn-icon" (click)="exportProfile()">
-        <i class="pi pi-download"></i> Export
-      </button>
-      <button type="button" class="btn btn-primary edit-btn" (click)="navigateToEdit()">
-        <i class="pi pi-pencil"></i> Edit
-      </button> -->
     </div>
   </div>
 
@@ -29,19 +17,22 @@
       <div class="levels-tabs">
         <button class="level-tab" [class.active]="activeLevelTab === 'basic'" (click)="changeLevelTab('basic')">
           <div class="level-badge">
+            <i class="pi pi-times-circle" style="color: red;" *ngIf="getCurrentL1DataStatus === 'Rejected'" ></i>
             <i class="pi pi-check-circle" *ngIf="getCurrentL1DataStatus === 'Approved'" ></i>
             <i class="pi pi-exclamation-triangle" style="color: orange;" *ngIf="getCurrentL1DataStatus === 'Under Review'" ></i>
             <span>L1: Basic Information</span>
           </div>
         </button>
-        <button class="level-tab" [class.active]="activeLevelTab === 'manufacturing'" (click)="changeLevelTab('manufacturing')">
+        <button class="level-tab" [class.active]="activeLevelTab === 'manufacturing'" (click)="changeLevelTab('manufacturing')"
+          [disabled]="getCurrentL1DataStatus === 'Rejected'">
           <div class="level-badge">
-            <i class="pi pi-check-circle" *ngIf="getCurrentL2DataStatus === 'Approved'" ></i>
-            <i class="pi pi-exclamation-triangle" style="color: orange;" *ngIf="getCurrentL2DataStatus === 'Under Review'" ></i>
+            <i class="pi pi-check-circle" *ngIf="getCurrentL2DataStatus === 'Approved'"></i>
+            <i class="pi pi-exclamation-triangle" style="color: orange;" *ngIf="getCurrentL2DataStatus === 'Under Review'"></i>
             <span>L2: Manufacturing</span>
           </div>
         </button>
-        <button class="level-tab" [class.active]="activeLevelTab === 'financial'" (click)="changeLevelTab('financial')">
+
+        <button class="level-tab" [class.active]="activeLevelTab === 'financial'" (click)="changeLevelTab('financial')" [disabled]="getCurrentL1DataStatus === 'Rejected' || getCurrentL2DataStatus === 'Rejected'">
           <div class="level-badge">
             <i class="pi pi-check-circle" *ngIf="getCurrentL3DataStatus === 'Approved'" ></i>
             <i class="pi pi-exclamation-triangle" style="color: orange;" *ngIf="getCurrentL3DataStatus === 'Under Review'" ></i>

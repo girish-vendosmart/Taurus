@@ -463,6 +463,12 @@ export class SupplierProfileReviewComponent implements OnInit {
             this.mainCurrentDataStatusTrack = 'L2 Approved'
           } else if(this.getCurrentL3DataStatus === 'Approved') {
             this.mainCurrentDataStatusTrack = 'L3 Approved'
+          } else if(this.getCurrentL1DataStatus === 'Rejected') {
+            this.mainCurrentDataStatusTrack = 'L1 Rejected'
+          } else if(this.getCurrentL2DataStatus === 'Rejected') {
+            this.mainCurrentDataStatusTrack = 'L2 Rejected'
+          } else if(this.getCurrentL3DataStatus === 'Rejected') {
+            this.mainCurrentDataStatusTrack = 'L3 Rejected'
           }
         }
 

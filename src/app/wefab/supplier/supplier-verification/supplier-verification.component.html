@@ -1,14 +1,10 @@
 <div class="container-fluid py-5">
   <div class="verification-container">
-    <h2 class="verification-title">Verifying Supplier Basic Information</h2>
-    <p class="verification-subtitle" *ngIf="!verificationCurrentStatus">Please wait while we verify the information you
+    <h2 class="verification-title">Supplier Basic Information</h2>
+    <p class="verification-subtitle" *ngIf="!verificationCurrentStatus && !isRejected">Please wait while we verify the information you
       provided</p>
-    <p class="verification-subtitle" *ngIf="verificationCurrentStatus">Your information has been verified</p>
-
-    <!-- Progress line animation only shown when verifying and not under review -->
-    <div class="progress-line-container" *ngIf="!verificationCurrentStatus && !verificationComplete">
-      <div class="progress-line"></div>
-    </div>
+    <p class="verification-subtitle" *ngIf="verificationCurrentStatus && !isRejected">Your information has been verified</p>
+    <p class="verification-subtitle" *ngIf="isRejected">Your information has been rejected</p>
 
     <!-- Under Review Display -->
     <div class="verification-steps" *ngIf="!verificationCurrentStatus && !isRejected">
