@@ -115,12 +115,21 @@ interface Country {
       </div>
       
       <!-- Inline OTP Verification Section (Replaces Dialog) -->
-      <div class="otp-verification-section" *ngIf="showOtpDialog">
+      <div class="otp-verification-section" *ngIf="showOtpDialog" [ngClass]="{'has-error': otpError}">
         <div class="otp-verification-content">
           <div class="otp-header">
             <h5 class="mb-2">Enter 6-digit OTP</h5>
-            <p class="text-muted mb-3">We've sent a verification code to your mobile number</p>
+            <p class="text-muted mb-3">
+              We've sent a verification code to +{{ selectedCountry.code }} {{ phoneControl.value }}
+            </p>
           </div>
+          
+          <!-- OTP Error Message -->
+          <div class="otp-error-message" *ngIf="otpError">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>{{ otpErrorMessage }}</span>
+          </div>
+          
           <div class="otp-input-wrapper">
             <input 
               type="text" 
@@ -128,7 +137,8 @@ interface Country {
               [(ngModel)]="otpValue" 
               maxlength="6"
               placeholder="Enter verification code"
-              autocomplete="off" />
+              autocomplete="off"
+              [ngClass]="{'is-invalid': otpError}" />
               
             <button 
               type="button" 
@@ -137,6 +147,32 @@ interface Country {
               (click)="verifyOTP()">
               <i *ngIf="isVerifying" class="pi pi-spin pi-spinner" style="margin-right: 0.5rem"></i>
               {{ isVerifying ? 'Verifying...' : 'Verify OTP' }}
+            </button>
+          </div>
+          
+          <!-- Resend OTP timer and button -->
+          <div class="resend-otp-container mt-3">
+            <span *ngIf="resendTimer > 0" class="resend-timer">
+              Resend OTP in {{ resendTimer }} seconds
+            </span>
+            <button 
+              *ngIf="resendTimer === 0" 
+              type="button" 
+              class="btn-link resend-btn"
+              [disabled]="isLoading"
+              (click)="resendOTP()">
+              <i *ngIf="isLoading" class="pi pi-spin pi-spinner" style="margin-right: 0.3rem"></i>
+              Resend OTP
+            </button>
+          </div>
+          
+          <!-- Cancel Button -->
+          <div class="cancel-container text-end mt-2">
+            <button 
+              type="button" 
+              class="btn-link cancel-btn"
+              (click)="cancelVerification()">
+              Cancel
             </button>
           </div>
         </div>
@@ -279,6 +315,11 @@ interface Country {
         border-radius: 6px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         animation: fadeIn 0.3s ease-in-out;
+        
+        &.has-error {
+          border-color: #ffcdd2;
+          background-color: #fff5f5;
+        }
       }
       
       @keyframes fadeIn {
@@ -302,6 +343,22 @@ interface Country {
           }
         }
         
+        .otp-error-message {
+          display: flex;
+          align-items: center;
+          background-color: #ffebee;
+          border-radius: 4px;
+          padding: 8px 12px;
+          margin-bottom: 12px;
+          color: #d32f2f;
+          font-size: 0.85rem;
+          
+          i {
+            margin-right: 8px;
+            font-size: 14px;
+          }
+        }
+        
         .otp-input-wrapper {
           display: flex;
           gap: 10px;
@@ -319,6 +376,11 @@ interface Country {
             &:focus {
               box-shadow: none;
               border-color: #80bdff;
+            }
+            
+            &.is-invalid {
+              border-color: #dc3545;
+              background-image: none;
             }
           }
           
@@ -338,6 +400,52 @@ interface Country {
             
             &:disabled {
               opacity: 0.7;
+            }
+          }
+        }
+        
+        .resend-otp-container {
+          display: flex;
+          justify-content: center;
+          font-size: 0.85rem;
+          
+          .resend-timer {
+            color: #6c757d;
+          }
+          
+          .resend-btn {
+            color: #1a3a60;
+            background: none;
+            border: none;
+            padding: 0;
+            text-decoration: underline;
+            cursor: pointer;
+            
+            &:hover:not(:disabled) {
+              color: #15304f;
+            }
+            
+            &:disabled {
+              opacity: 0.7;
+              cursor: not-allowed;
+            }
+          }
+        }
+        
+        .cancel-container {
+          margin-top: 10px;
+          
+          .cancel-btn {
+            color: #6c757d;
+            background: none;
+            border: none;
+            padding: 0;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.85rem;
+            
+            &:hover {
+              color: #495057;
             }
           }
         }
@@ -373,6 +481,12 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   verificationError = false;
   showOtpDialog = false;
   otpValue: string = '';
+  
+  // New properties for OTP error handling
+  otpError = false;
+  otpErrorMessage: string = '';
+  resendTimer: number = 0;
+  private resendTimerInterval: any;
   
   countries: Country[] = [
     { name: 'India', code: '91', emoji: '🇮🇳' },
@@ -449,6 +563,13 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     }
   }
   
+  ngOnDestroy(): void {
+    // Clear the resend timer interval when component is destroyed
+    if (this.resendTimerInterval) {
+      clearInterval(this.resendTimerInterval);
+    }
+  }
+  
   sendOTP() {
     if (!this.phoneControl.value) {
       this.messageService.add({
@@ -461,6 +582,10 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     }
 
     this.isLoading = true;
+    // Reset OTP error state
+    this.otpError = false;
+    this.otpErrorMessage = '';
+    
     this.firebaseService.sendPhoneVerificationCode(
       '+' + this.selectedCountry.code + this.phoneControl.value,
       'recaptcha-container'
@@ -470,6 +595,8 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
         this.verificationId = res.verificationId;
         this.isLoading = false;
         this.showOtpDialog = true;
+        // Start the resend timer
+        this.startResendTimer();
         this.cdr.detectChanges();
       }
     }, (err:any) => {
@@ -480,31 +607,32 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
           life: 5000
         });
         this.isLoading = false;
+        this.verificationError = true;
         this.cdr.detectChanges();
+        
+        // Reset verification error after 3 seconds
+        setTimeout(() => {
+          this.verificationError = false;
+          this.cdr.detectChanges();
+        }, 3000);
     });
   }
   
   verifyOTP(): void {
     if (!this.otpValue || this.otpValue.length !== 6) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Invalid OTP',
-        detail: 'Please enter a valid 6-digit OTP code.',
-        life: 3000
-      });
+      this.otpError = true;
+      this.otpErrorMessage = 'Please enter a valid 6-digit OTP code.';
       return;
     }
     
     this.isVerifying = true;
+    // Reset OTP error state
+    this.otpError = false;
     
     // Use the confirmation result directly since the FirebaseService's sendPhoneVerificationCode method returns it
     if (!this.verificationId) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Verification Failed',
-        detail: 'Verification ID not found. Please try again.',
-        life: 3000
-      });
+      this.otpError = true;
+      this.otpErrorMessage = 'Verification ID not found. Please try again.';
       this.isVerifying = false;
       return;
     }
@@ -526,18 +654,83 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
         // Disable the phone control to prevent further changes
         this.phoneControl.disable({ emitEvent: false });
         this.isVerifying = false;
+        
+        // Clear the resend timer
+        if (this.resendTimerInterval) {
+          clearInterval(this.resendTimerInterval);
+        }
+        
         this.cdr.detectChanges();
       })
       .catch((error: any) => {
+        // Handle OTP verification failure
+        this.isVerifying = false;
+        this.otpError = true;
+        this.otpErrorMessage = this.getReadableErrorMessage(error.message) || 'Invalid verification code. Please try again.';
+        
         this.messageService.add({
           severity: 'error',
           summary: 'Verification Failed',
-          detail: error.message || 'Failed to verify OTP. Please try again.',
+          detail: this.otpErrorMessage,
           life: 3000
         });
-        this.isVerifying = false;
+        
         this.cdr.detectChanges();
       });
+  }
+  
+  // Get user-friendly error messages
+  private getReadableErrorMessage(errorMessage: string): string {
+    if (errorMessage.includes('invalid-verification-code')) {
+      return 'The verification code you entered is invalid. Please try again.';
+    } else if (errorMessage.includes('code-expired')) {
+      return 'The verification code has expired. Please request a new code.';
+    } else if (errorMessage.includes('too-many-requests')) {
+      return 'Too many unsuccessful attempts. Please try again later.';
+    }
+    return errorMessage;
+  }
+  
+  // Start the resend timer (60 seconds)
+  private startResendTimer(): void {
+    this.resendTimer = 60;
+    
+    // Clear any existing interval
+    if (this.resendTimerInterval) {
+      clearInterval(this.resendTimerInterval);
+    }
+    
+    this.resendTimerInterval = setInterval(() => {
+      this.resendTimer--;
+      
+      if (this.resendTimer <= 0) {
+        clearInterval(this.resendTimerInterval);
+      }
+      
+      this.cdr.detectChanges();
+    }, 1000);
+  }
+  
+  // Resend OTP method
+  resendOTP(): void {
+    // Clear previous OTP
+    this.otpValue = '';
+    this.otpError = false;
+    
+    // Reuse the sendOTP method
+    this.sendOTP();
+  }
+  
+  // Cancel verification
+  cancelVerification(): void {
+    this.showOtpDialog = false;
+    this.otpValue = '';
+    this.otpError = false;
+    
+    // Clear the resend timer
+    if (this.resendTimerInterval) {
+      clearInterval(this.resendTimerInterval);
+    }
   }
   
   // Method to mark the control as touched
