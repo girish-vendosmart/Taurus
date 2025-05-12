@@ -562,14 +562,14 @@ export class SupplierOnboardingL3Component implements OnInit {
             type: 'repeat',
             templateOptions: {
               label: 'Production Facilities',
-              addText: '+ Add Item',
+              addText: '+ Add Facility',
               min: 1
             },
             fieldArray: {
               fieldGroup: [
                 {
                   expressionProperties: {
-                    'template': 'return "<div class=\'mt-3 mb-1\'><h6>Item " + (field.parent.index + 1) + "</h6></div>";'
+                    'template': 'return "<div class=\'mt-3 mb-1\'><h6>Facility " + (field.parent.index + 1) + "</h6></div>";'
                   }
                 },
                 {

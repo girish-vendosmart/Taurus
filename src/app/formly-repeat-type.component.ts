@@ -51,6 +51,8 @@ export class FormlyRepeatTypeComponent extends FieldArrayType {
     const key = this.field.key as string;
     if (key === 'machines') return 'Machine';
     if (key === 'certifications') return 'Certification';
+    if (key === 'productionFacilities') return 'Facility';
+    if (key === 'references') return 'Reference';
     return 'Item';
   }
 
@@ -59,6 +61,8 @@ export class FormlyRepeatTypeComponent extends FieldArrayType {
     const key = this.field.key as string;
     if (key === 'machines') return `Machine ${index + 1}`;
     if (key === 'certifications') return `Certification ${index + 1}`;
+    if (key === 'productionFacilities') return `Facility ${index + 1}`;
+    if (key === 'references') return `Reference ${index + 1}`;
     return `Item ${index + 1}`;
   }
 

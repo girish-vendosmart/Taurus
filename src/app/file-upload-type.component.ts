@@ -200,35 +200,39 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   
   ngOnInit() {
     // Initialize uploadedFiles if there's a value already
-    if (this.formControl.value) {
-      if (Array.isArray(this.formControl.value)) {
-        // Handle array of files
-        this.uploadedFiles = this.formControl.value.map(file => {
-          // If the file is just a URL string
-          if (typeof file === 'string') {
-            return {
-              name: this.getFileNameFromUrl(file),
-              size: 0,
-              type: this.getFileTypeFromUrl(file),
-              url: file
-            };
-          }
-          // If it's already a file object with url
-          return file;
-        });
-      } else if (typeof this.formControl.value === 'string') {
-        // Handle single string URL
-        this.uploadedFiles = [{
-          name: this.getFileNameFromUrl(this.formControl.value),
-          size: 0,
-          type: this.getFileTypeFromUrl(this.formControl.value),
-          url: this.formControl.value
-        }];
-      } else {
-        // Handle single file object
-        this.uploadedFiles = [this.formControl.value];
+
+    setTimeout(() => {
+      if (this.formControl.value) {
+        debugger
+        if (Array.isArray(this.formControl.value)) {
+          // Handle array of files
+          this.uploadedFiles = this.formControl.value.map(file => {
+            // If the file is just a URL string
+            if (typeof file === 'string') {
+              return {
+                name: this.getFileNameFromUrl(file),
+                size: 0,
+                type: this.getFileTypeFromUrl(file),
+                url: file
+              };
+            }
+            // If it's already a file object with url
+            return file;
+          });
+        } else if (typeof this.formControl.value === 'string') {
+          // Handle single string URL
+          this.uploadedFiles = [{
+            name: this.getFileNameFromUrl(this.formControl.value),
+            size: 0,
+            type: this.getFileTypeFromUrl(this.formControl.value),
+            url: this.formControl.value
+          }];
+        } else {
+          // Handle single file object
+          this.uploadedFiles = [this.formControl.value];
+        }
       }
-    }
+    }, 1000)
   }
   
   // Helper methods to extract filename and type from URL
@@ -363,6 +367,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   }
   
   updateFiles(fileList: FileList): void {
+    debugger
     // Convert FileList to array and update the form
     if (this.props['multiple']) {
       // For multiple file upload, add to existing files
@@ -432,6 +437,8 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
         }
       );
     }
+
+    debugger
     
     // Update form control value immediately with files (URLs will be updated later)
     if (this.props['multiple']) {
@@ -451,6 +458,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     } else {
       // For single file, determine format based on previous value
       if (typeof this.formControl.value === 'string') {
+        debugger
         const url = this.uploadedFiles.length > 0 && this.uploadedFiles[0].url 
           ? this.uploadedFiles[0].url 
           : null;

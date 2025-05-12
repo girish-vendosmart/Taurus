@@ -1,16 +1,27 @@
-// Import variables from the main theme
 @import '../../../../assets/scss/variables.scss';
+
+// Header badge
+.header-badge {
+  display: inline-block;
+  background-color: $blueprint-blue;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-weight: $font-weight-semibold;
+  margin-top: 1rem;
+  box-shadow: 0 4px 8px rgba($blueprint-blue, 0.3);
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+// Import variables from the main theme
 
 :host {
   display: block;
   background-color: $technical-white;
   min-height: 100vh;
 }
-
-// Local color variables - using the imported values to ensure consistency
-$light-gray: $technical-white;
-$border-color: $material-finish-silver;
-$success-green: $process-green;
 
 // Card styling
 .card {
@@ -37,33 +48,31 @@ $success-green: $process-green;
   }
 }
 
-// Improved left navigation panel sticky styles
-.supplier-onboarding-content {
-  .col-md-3 {
-    position: sticky;
-    top: 20px;
-    align-self: flex-start;
-    height: fit-content;
-    z-index: 10; // Ensure sticky element appears above other content
+// Left navigation panel styles
+.col-md-3 {
+  padding-right: 1.25rem;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+  
+  .card {
+    background: linear-gradient(145deg, #ffffff, #f8fbff);
+    border-left: 4px solid $blueprint-blue;
+    height: auto;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 0;
     
-    .card {
-      background: linear-gradient(145deg, #ffffff, #f8fbff);
-      border-left: 4px solid $blueprint-blue;
-      height: auto;
-      display: inline-block;
-      width: 100%;
-      margin-bottom: 0;
-      
-      .card-body {
-        padding: 1.25rem 1.5rem;
-      }
-      
-      .card-title {
-        font-size: 1.25rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid rgba($blueprint-blue, 0.1);
-        margin-bottom: 1.5rem;
-      }
+    .card-body {
+      padding: 1.25rem 1.5rem;
+    }
+    
+    .card-title {
+      font-size: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba($blueprint-blue, 0.1);
+      margin-bottom: 1.5rem;
     }
   }
 }
@@ -77,27 +86,6 @@ $success-green: $process-green;
     .card-body {
       padding: 2rem;
     }
-  }
-}
-
-// Header badge
-.header-badge {
-  display: inline-block;
-  background-color: $blueprint-blue;
-  color: white;
-  padding: 0.5rem 1.5rem;
-  border-radius: 20px;
-  font-weight: $font-weight-semibold;
-  margin-top: 1rem;
-  box-shadow: 0 4px 8px rgba($blueprint-blue, 0.3);
-  font-size: 0.9rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.form-label {
-  ::ng-deep .ng-star-inserted {
-    color: red !important;
   }
 }
 
@@ -193,67 +181,6 @@ $success-green: $process-green;
   }
 }
 
-// Overall onboarding progress
-.onboarding-progress {
-  background-color: rgba($blueprint-blue, 0.05);
-  border-radius: 10px;
-  padding: 1.25rem;
-  
-  .onboarding-progress-title {
-    font-weight: $font-weight-medium;
-    margin-bottom: 1rem;
-    color: $blueprint-blue;
-    font-size: 0.95rem;
-  }
-  
-  .onboarding-progress-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    
-    .onboarding-step {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      
-      .onboarding-step-indicator {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background-color: $material-finish-silver;
-      }
-      
-      .onboarding-step-label {
-        font-size: 0.85rem;
-        color: $machine-gray;
-      }
-      
-      &.completed {
-        .onboarding-step-indicator {
-          background-color: $success-green;
-        }
-        
-        .onboarding-step-label {
-          color: darken($machine-gray, 15%);
-          font-weight: $font-weight-medium;
-        }
-      }
-      
-      &.active {
-        .onboarding-step-indicator {
-          background-color: $blueprint-blue;
-          box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.2);
-        }
-        
-        .onboarding-step-label {
-          color: $blueprint-blue;
-          font-weight: $font-weight-semibold;
-        }
-      }
-    }
-  }
-}
-
 // Progress bar styling
 .progress-container {
   display: flex;
@@ -308,98 +235,700 @@ $success-green: $process-green;
   }
 }
 
-.text-machine-gray {
-  color: $machine-gray;
-}
-
-// Section headers
-.section-header {
-  h4 {
-    color: $blueprint-blue;
-    font-weight: $font-weight-semibold;
-    margin-bottom: 0.5rem;
-    position: relative;
-    display: inline-block;
+// Form styling enhancements - Adapted from L1 and refined for L2
+:host ::ng-deep {
+  // Input fields (Matches L1)
+  .form-control, .form-select, .p-inputtext {
+    border: 1px solid $material-finish-silver;
+    border-radius: 8px;
+    padding: 0.8rem 1.2rem; 
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: rgba($technical-white, 0.8);
+    width: 100%;
     
-    &::after {
-      content: '';
-      display: block;
-      width: 40px;
-      height: 3px;
-      background-color: $blueprint-blue;
-      margin-top: 0.5rem;
-      border-radius: 2px;
+    &:hover {
+      border-color: lighten($blueprint-blue, 20%);
+      background-color: rgba($technical-white, 1);
+    }
+    
+    &:focus {
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
+      background-color: #fff;
+      outline: none;
+    }
+    
+    &::placeholder {
+      color: lighten($machine-gray, 20%);
+      font-style: italic;
+      opacity: 0.7;
     }
   }
   
-  p {
-    margin-bottom: 0;
-    font-size: 0.95rem;
+  // Labels (Matches L1, plus inline-flex for asterisk)
+  .form-label {
+    font-weight: $font-weight-medium;
+    color: $precision-black;
+    margin-bottom: 0.6rem; 
+    font-size: 0.9rem; 
+    display: inline-flex; 
+    align-items: center;
+    line-height: 1.2; // Added for better vertical spacing of label text itself
+
+
+    ::ng-deep .ng-star-inserted {
+      color: red;
+      margin-left: 5px;
+    }
+    
+    .text-danger { // Asterisk
+      margin-left: 3px;
+      font-size: 1.1em; 
+      position: relative;
+      top: 0px; 
+      line-height: 1; 
+    }
+  }
+  
+  // Field descriptions (Matches L1 general idea)
+  .form-text, .field-description { // Combined for consistency
+    font-size: 0.85rem; // L1 doesn't have .field-description but this is a common pattern
     color: $machine-gray;
+    margin-top: 0.25rem; // Reduced from L1's 0.4rem to be tighter
+    margin-bottom: 0.25rem; // Added to control space below description
+    font-style: italic;
+    display: block; // Ensure it takes its own line
+  }
+  
+  // Checkboxes and radio buttons (Matches L1)
+  .form-check {
+    margin-bottom: 0.75rem;
+    padding-left: 1.8rem;
+    
+    .form-check-input {
+      width: 1.1rem;
+      height: 1.1rem;
+      margin-left: -1.8rem;
+      margin-top: 0.25rem;
+      border: 2px solid $material-finish-silver;
+      transition: all 0.2s ease;
+      
+      &:checked {
+        background-color: $blueprint-blue;
+        border-color: $blueprint-blue;
+        box-shadow: 0 0 0 2px rgba($blueprint-blue, 0.2);
+      }
+      
+      &:focus {
+        box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
+      }
+    }
+    
+    .form-check-label {
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+  }
+  
+  // Buttons (General button styles, can be from L1 or base theme)
+  .btn {
+    font-weight: $font-weight-medium;
+    padding: 0.7rem 1.8rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    
+    &:active {
+      transform: translateY(1px);
+    }
+    
+    .pi {
+      font-size: 0.85rem;
+    }
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, $blueprint-blue, darken($blueprint-blue, 8%));
+    border-color: $blueprint-blue;
+    box-shadow: 0 4px 10px rgba($blueprint-blue, 0.3);
+    
+    &:hover, &:focus {
+      background: linear-gradient(135deg, darken($blueprint-blue, 5%), darken($blueprint-blue, 15%));
+      border-color: darken($blueprint-blue, 10%);
+      box-shadow: 0 6px 15px rgba($blueprint-blue, 0.4);
+      transform: translateY(-2px);
+    }
+  }
+  
+  .btn-outline-secondary {
+    color: $machine-gray;
+    border: 1px solid $machine-gray;
+    background-color: transparent;
+    
+    &:hover, &:focus {
+      background-color: $machine-gray;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba($machine-gray, 0.25);
+    }
+  }
+
+  .btn-outline-primary {
+    color: $blueprint-blue;
+    border: 1px solid $blueprint-blue;
+    background-color: transparent;
+    
+    &:hover, &:focus {
+      background-color: rgba($blueprint-blue, 0.1);
+      color: darken($blueprint-blue, 10%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba($blueprint-blue, 0.25);
+    }
+  }
+
+  .btn-outline-danger {
+    color: $safety-orange;
+    border: 1px solid $safety-orange;
+    background-color: transparent;
+    padding: 0.4rem 0.6rem;
+    
+    &:hover, &:focus {
+      background-color: rgba($safety-orange, 0.1);
+      color: darken($safety-orange, 10%);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba($safety-orange, 0.25);
+    }
+  }
+  
+  // File upload specific spacing (L2 specific)
+  formly-field-file-upload {
+    .formly-field { // The wrapper formly creates for this custom type
+        margin-bottom: 0.5rem !important; // Reduce space below the whole file upload block
+    }
+    .form-label { // Label for the file upload
+        margin-bottom: 0.25rem !important;
+    }
+    app-file-upload, .file-upload-wrapper { // The component itself
+        margin-top: 0.15rem !important;
+        margin-bottom: 0.15rem !important;
+    }
+    .file-upload { // The actual dropzone area
+        padding: 1rem !important;
+        margin: 0 !important; // No extra margin for the dropzone itself
+        min-height: auto; // Let content define height
+        p { margin-bottom: 0.25rem !important; font-size: 0.85rem !important; } // Tighter text in dropzone
+    }
+    .form-text { // Description for file upload
+        margin-top: 0.15rem !important;
+        font-size: 0.8rem !important;
+    }
+  }
+
+  // Range slider specific spacing (L2 specific)
+  formly-field-range-slider {
+    .formly-field {
+        margin-bottom: 0.5rem !important; // Reduce space below the whole range slider block
+    }
+    .form-label { // Label for the range slider
+        margin-bottom: 0.25rem !important;
+    }
+    .field-description { // Description for range slider
+        margin-top: 0.1rem !important;
+        margin-bottom: 0.2rem !important;
+        font-size: 0.8rem !important;
+    }
+    .p-slider {
+      margin-top: 0.2rem !important;
+      margin-bottom: 0.1rem !important; // Space below slider before labels
+    }
+    .slider-labels { // Min/Max labels
+      margin-top: 0 !important;
+      font-size: 0.75rem !important;
+    }
+  }
+  
+  // Section header styling (L2 specific, made compact)
+  .section-header {
+    margin-bottom: 0.75rem; // Space below the entire header group
+    h4 {
+      font-size: 1.2rem; // Slightly smaller section titles
+      margin-bottom: 0.15rem; 
+      padding-bottom: 0.15rem; 
+      &::after { // Thinner underline
+        height: 2px;
+        width: 30px;
+        margin-top: 0.2rem;
+      }
+    }
+    p {
+      font-size: 0.9rem; 
+      margin-bottom: 0.15rem; 
+    }
+  }
+  
+  // Ensure PrimeNG calendar popup isn't overly padded if it becomes an issue
+  .p-datepicker {
+    padding: 0.5rem !important;
+    td > span {
+        padding: 0.25rem !important;
+    }
+  }
+
+  // Form field spacing (Matches L1)
+  .formly-field {
+    margin-bottom: 1rem; 
+    animation: fadeIn 0.4s ease;
+  }
+  
+  // Row field groups (Matches L1)
+  .row {
+    margin-left: -15px;
+    margin-right: -15px;
+    margin-bottom: 1rem; 
+    
+    [class*="col-"] {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  }
+  
+  // Textarea fields (Matches L1)
+  textarea.form-control {
+    min-height: 80px; // Slightly reduced from L1's 100px for compactness
+  }
+  
+  // Repeatable section styling (L2 specific, made compact)
+  .repeatable-section-item {
+    margin-bottom: 1rem !important; 
+    .card {
+        border: 1px solid #e0e0e0; // Lighter border for less visual weight
+        box-shadow: none !important; // Remove shadow for flatter/tighter look
+        &:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05) !important; // Subtle hover
+        }
+    }
+    .card-header {
+      background-color: #f8f9fa !important; // Lighter header
+      padding: 0.5rem 1rem !important; 
+      border-bottom: 1px solid #e0e0e0 !important;
+      h5 {
+        font-size: 0.95rem !important; // Smaller title in repeat section
+        font-weight: $font-weight-semibold !important;
+        margin-bottom: 0 !important;
+      }
+    }
+    .card-body {
+      padding: 0.75rem 1rem !important; // Tighter padding inside repeated item cards
+      // Fields inside will use the 1rem margin-bottom from .formly-field
+    }
+  }
+  .repeatable-section-add {
+      margin-top: 0.5rem !important; // Reduce space above "Add" button
+      .btn-outline-primary {
+          padding: 0.5rem 1rem !important; // Smaller add button
+          font-size: 0.8rem !important;
+      }
+  }
+  
+  // Select dropdown
+  .p-dropdown {
+    width: 100%;
+    border-radius: 8px;
+    
+    .p-dropdown-label {
+      padding: 0.95rem 1.2rem;
+      font-size: 1rem;
+    }
+    
+    .p-dropdown-trigger {
+      width: 3.2rem;
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+    
+    .p-dropdown-panel {
+      border-radius: 8px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+      
+      .p-dropdown-items {
+        padding: 0.5rem 0;
+        
+        .p-dropdown-item {
+          padding: 0.75rem 1.2rem;
+          
+          &:hover {
+            background-color: rgba($blueprint-blue, 0.05);
+          }
+          
+          &.p-highlight {
+            background-color: rgba($blueprint-blue, 0.15);
+            color: $blueprint-blue;
+          }
+        }
+      }
+    }
+  }
+  
+  // MultiSelect dropdown styling
+  .p-multiselect {
+    width: 100%;
+    border-radius: 8px;
+    background-color: rgba($technical-white, 0.8);
+    border: 1px solid $material-finish-silver;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      border-color: lighten($blueprint-blue, 20%);
+      background-color: rgba($technical-white, 1);
+    }
+    
+    &.p-focus {
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
+      background-color: #fff;
+    }
+    
+    .p-multiselect-label-container {
+      .p-multiselect-label {
+        padding: 0.85rem 1.2rem;
+        font-size: 1rem;
+      }
+      
+      .p-placeholder {
+        color: lighten($machine-gray, 20%);
+        font-style: italic;
+        opacity: 0.7;
+      }
+    }
+    
+    .p-multiselect-trigger {
+      width: 3.2rem;
+    }
+    
+    .p-multiselect-panel {
+      border-radius: 8px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+      
+      .p-multiselect-header {
+        padding: 0.75rem 1.2rem;
+        border-bottom: 1px solid rgba($blueprint-blue, 0.1);
+        
+        .p-multiselect-filter-container {
+          margin-bottom: 0;
+          
+          .p-inputtext {
+            padding: 0.6rem 1rem;
+          }
+          
+          .p-multiselect-filter-icon {
+            right: 0.75rem;
+            color: $machine-gray;
+          }
+        }
+        
+        .p-checkbox {
+          .p-checkbox-box {
+            border: 2px solid $material-finish-silver;
+            border-radius: 4px;
+            
+            &.p-highlight {
+              background-color: $blueprint-blue;
+              border-color: $blueprint-blue;
+            }
+            
+            .p-checkbox-icon {
+              font-size: 0.75rem;
+            }
+          }
+        }
+      }
+      
+      .p-multiselect-items {
+        padding: 0.5rem 0;
+        
+        .p-multiselect-item {
+          padding: 0.75rem 1.2rem;
+          transition: all 0.2s ease;
+          
+          &:hover {
+            background-color: rgba($blueprint-blue, 0.05);
+          }
+          
+          &.p-highlight {
+            background-color: rgba($blueprint-blue, 0.15);
+            color: $blueprint-blue;
+          }
+          
+          .p-checkbox {
+            margin-right: 0.75rem;
+            
+            .p-checkbox-box {
+              border: 2px solid $material-finish-silver;
+              border-radius: 4px;
+              transition: all 0.2s ease;
+              
+              &.p-highlight {
+                background-color: $blueprint-blue;
+                border-color: $blueprint-blue;
+              }
+              
+              .p-checkbox-icon {
+                font-size: 0.75rem;
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // Style for selected tokens
+    .p-multiselect-token {
+      background-color: rgba($blueprint-blue, 0.15);
+      color: $blueprint-blue;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      margin-right: 0.5rem;
+      
+      .p-multiselect-token-icon {
+        margin-left: 0.5rem;
+        color: $blueprint-blue;
+        
+        &:hover {
+          color: darken($blueprint-blue, 15%);
+        }
+      }
+    }
+  }
+  
+  // Error messages
+  .p-error, .text-danger {
+    color: $safety-orange !important;
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
+    display: block;
+    font-weight: $font-weight-medium;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  // Validation icons
+  .is-valid {
+    border-color: $process-green !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
   }
 }
 
-/* Rest of your SCSS remains the same */
-
-// Additional Information section styling - MODIFIED
-.additional-info-content {
-  padding: 0.5rem;
-
-  .section {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    border-left: 3px solid $blueprint-blue;
-    
-    &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-    
-    .section-title {
-      color: $blueprint-blue;
-      font-size: 1.2rem;
-      font-weight: $font-weight-semibold;
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.8rem;
-      border-bottom: 1px solid rgba($blueprint-blue, 0.1);
-      position: relative;
+// Toast styling
+:host ::ng-deep {
+  .p-toast {
+    .p-toast-message {
+      border-radius: 8px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+      border: none;
       
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        width: 60px;
-        height: 3px;
-        background-color: $blueprint-blue;
-        border-radius: 3px;
+      &.p-toast-message-success {
+        background-color: lighten($process-green, 48%);
+        border-left: 4px solid $process-green;
+        color: darken($process-green, 15%);
+        
+        .p-toast-message-icon,
+        .p-toast-icon-close {
+          color: $process-green;
+        }
+      }
+      
+      &.p-toast-message-error {
+        background-color: lighten($safety-orange, 40%);
+        border-left: 4px solid $safety-orange;
+        color: darken($safety-orange, 15%);
+        
+        .p-toast-message-icon,
+        .p-toast-icon-close {
+          color: $safety-orange;
+        }
+      }
+      
+      .p-toast-message-content {
+        padding: 0.5rem 0;
+        
+        .p-toast-summary {
+          font-weight: $font-weight-semibold;
+          font-size: 1rem;
+        }
+        
+        .p-toast-detail {
+          margin-top: 0.25rem;
+          font-size: 0.9rem;
+        }
       }
     }
   }
 }
 
-// Supplier onboarding content container - MODIFIED
-.supplier-onboarding-content {
-  display: flex;
-  flex-wrap: wrap;
-  min-height: 100vh;
-  position: relative;
-}
-
-// Container fluid styles
+// Container styling
 .container-fluid {
-  overflow-x: hidden; // Prevent horizontal scrollbar
-  min-height: 100vh; // Ensure the container takes up full viewport height
+  padding: 1.5rem 2rem;
 }
 
-// Media queries for responsive behavior
-@media (max-width: 768px) {
-  .supplier-onboarding-content .col-md-3 {
-    position: relative; // Disable sticky on mobile
-    top: 0;
-    width: 100%;
-    margin-bottom: 1rem;
+// Adjust the row spacing for better balance
+.row {
+  margin-bottom: 1.5rem;
+}
+
+// Add some space between the left and right columns
+.col-md-3 {
+  padding-right: 1rem;
+}
+
+.col-md-9 {
+  padding-left: 1rem;
+  .card .card-body {
+    padding: 1.5rem;
   }
 }
+
+// Form section title
+h3.text-blueprint-blue {
+  font-size: 1.5rem;
+  font-weight: $font-weight-semibold;
+  position: relative;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba($blueprint-blue, 0.1);
+  margin-bottom: 1.5rem;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background-color: $blueprint-blue;
+    border-radius: 3px;
+  }
+}
+
+// Media queries for responsive design
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 1.5rem 1rem;
+  }
+  
+  .card .card-body {
+    padding: 1.25rem;
+  }
+  
+  .steps-container {
+    gap: 1.5rem;
+  }
+  
+  h3.text-blueprint-blue {
+    font-size: 1.3rem;
+  }
+  
+  // Multiselect responsive adjustments
+  :host ::ng-deep {
+    .p-multiselect-panel {
+      width: 90vw !important;
+      left: 5vw !important;
+    }
+  }
+}
+
+// Specific overrides for L2 form repeat sections
+.repeatable-section-item {
+  margin-bottom: 1rem !important;
+  .card-header {
+    padding: 0.6rem 1rem !important;
+    h5 {
+      font-size: 1rem !important;
+    }
+  }
+  .card-body {
+    padding: 1rem !important;
+  }
+}
+
+// Reduce space for file upload type and range slider
+formly-field-file-upload,
+formly-field-range-slider {
+  .formly-field {
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+// Adjustments for range slider layout
+formly-field-range-slider {
+  .p-slider,
+  .slider-labels {
+    margin-top: 0.25rem;
+  }
+  .field-description {
+    margin-bottom: 0.15rem !important;
+    margin-top: 0.15rem !important;
+    font-size: 0.8rem !important;
+  }
+  .form-label {
+    margin-bottom: 0.15rem !important;
+  }
+}
+
+// Row field groups
+.row {
+  margin-left: -15px;
+  margin-right: -15px;
+  margin-bottom: 0.75rem;
+  
+  [class*="col-"] {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
+// Adjustments for file upload type and range slider
+formly-field-file-upload,
+formly-field-range-slider {
+  .formly-field {
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+// Adjustments for file upload type and range slider
+app-file-upload,
+formly-field-file-upload .file-upload-wrapper {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+formly-field-file-upload .file-upload {
+  padding: 1rem !important;
+  margin: 0.25rem 0 !important;
+}
+
+// Adjustments for range slider layout
+formly-field-range-slider {
+  .form-label {
+    margin-bottom: 0.25rem !important;
+  }
+  .field-description {
+    margin-bottom: 0.25rem !important;
+    margin-top: 0.15rem !important;
+    font-size: 0.8rem !important;
+  }
+  .p-slider,
+  .slider-labels {
+    margin-top: 0.25rem;
+  }
+} 
