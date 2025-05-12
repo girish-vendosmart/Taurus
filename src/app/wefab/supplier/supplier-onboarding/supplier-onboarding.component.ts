@@ -225,8 +225,22 @@ export class SupplierOnboardingComponent implements OnInit {
         this.router.navigate(['/wefab/supplier/supplier-verification']);
       }
     }
+
+    this.patchEmailId()
   }
 
+  patchEmailId() {
+    this.model.primary_email_id = sessionStorage.getItem('primary_email_id')
+    
+    setTimeout(() => {
+      this.form.markAsPristine();
+    }, 1000);
+    // this.commonService.getData(endPoint).subscribe((res: any) => {
+    //   debugger
+    //   this.getCompanyProfile = JSON.parse(res.data.company_profile)
+    //   this.phoneVerified = this.getCompanyProfile.phone_verified
+    // })
+  }
 
   getL1Data(supplierId:any) {
   let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
@@ -314,8 +328,8 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-6 mb-2',
-            key: 'legalBusinessName',
+            className: 'col-md-4 mb-2',
+            key: 'company_name',
             type: 'input',
             templateOptions: {
               label: 'Legal Business Name',
@@ -329,7 +343,23 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           },
           {
-            className: 'col-md-6 mb-3',
+            className: 'col-md-4 mb-2',
+            key: 'primary_email_id',
+            type: 'input',
+            templateOptions: {
+              label: 'Email Id',
+              placeholder: 'Please enter your email id',
+              required: true,
+              disabled: true // 👈 this disables the field
+            },
+            validation: {
+              messages: {
+                required: 'Please enter your email id'
+              }
+            }
+          },
+          {
+            className: 'col-md-4 mb-3',
             fieldGroup: [
               {
                 key: 'gstinNumber',
@@ -841,8 +871,8 @@ export class SupplierOnboardingComponent implements OnInit {
   updateData(data:any) {
     console.log(data)
     let body = {
-      company_name: data.legalBusinessName,
-      primary_email_id: data.primaryEmailId,
+      company_name: data.company_name,
+      primary_email_id: data.primary_email_id,
       onboarding_status: 'Under Review',
       phone_verified: this.phoneVerified,
       company_profile: JSON.stringify(data)
@@ -853,8 +883,8 @@ export class SupplierOnboardingComponent implements OnInit {
   postSupplierOnboardingL1() {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L1';
     this.model.phone_verified = this.phoneVerified;
-    debugger
     console.log(this.model)
+    debugger
     let body = this.updateData(this.model);
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
       sessionStorage.setItem('supplier_id', res.data.name)

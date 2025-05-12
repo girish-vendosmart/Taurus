@@ -1,3 +1,4 @@
+
 <div class="profile-review-container">
   <!-- Header Section -->
   <div class="review-header">
@@ -72,7 +73,7 @@
             <div class="review-row">
               <div class="review-col">
                 <div class="field-label">Legal Business Name </div>
-                <div class="field-value">{{ getCompanyProfile.legalBusinessName }}</div>
+                <div class="field-value">{{ getCompanyProfile.company_name }}</div>
               </div>
               <div class="review-col">
                 <div class="field-label">GSTIN </div>
@@ -145,7 +146,7 @@
               </div>
               <div class="review-col">
                 <div class="field-label">Email</div>
-                <div class="field-value">{{ contactEmail }}</div>
+                <div class="field-value">{{ getCompanyProfile.primary_email_id }}</div>
               </div>
             </div>
             
@@ -185,7 +186,7 @@
           <div class="machines-container">
             <div class="machine-card" *ngFor="let machine of manufacturingData.machines">
               <div class="machine-image">
-                <img [src]="machine.machinePhotos[0].url" [alt]="machine.make" class="machine-photo">
+                <img [src]="machine.machinePhotos" [alt]="machine.make" class="machine-photo">
               </div>
               <div class="machine-details">
                 <h3 class="machine-name">{{ machine.make }}</h3>
@@ -204,7 +205,7 @@
           <div class="facility-photos-container">
             <div class="facility-photo-card" *ngFor="let photo of manufacturingData.facilityPhotos">
               <div class="facility-photo">
-                <img [src]="photo.url" [alt]="'facility photo'" class="facility-image">
+                <img [src]="photo" [alt]="'facility photo'" class="facility-image">
               </div>
               <!-- <div class="facility-photo-details">
                 <h3 class="facility-photo-title">{{ photo.title }}</h3>
@@ -219,7 +220,7 @@
           <div class="certifications-container">
             <div class="certification-card" *ngFor="let cert of manufacturingData.certifications">
               <div class="certification-image">
-                <img [src]="cert.certificateDocument[0].url" [alt]="cert.certificationName" class="certification-photo">
+                <img [src]="cert.certificateDocument" [alt]="cert.certificationName" class="certification-photo">
               </div>
               <div class="certification-details">
                 <h3 class="certification-name">{{ cert.certificationName }}</h3>

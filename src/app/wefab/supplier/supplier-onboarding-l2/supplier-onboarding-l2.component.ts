@@ -162,7 +162,6 @@ export class SupplierOnboardingL2Component implements OnInit {
       }
       
       processedData.machines.forEach((machine: any, index: number) => {
-        // Force single machine photo to be an array if it exists
         if (machine.machinePhotos) {
           let photoFiles = [];
           
@@ -250,7 +249,7 @@ export class SupplierOnboardingL2Component implements OnInit {
     // Reset the form to match our model structure
     this.form = this.fb.group({});
     
-    // Force update after a delay to ensure components are ready
+    // Force update after a longer delay to ensure components are ready
     setTimeout(() => {
       // Patch the form with processed data
       this.form.patchValue(this.model);
@@ -260,7 +259,30 @@ export class SupplierOnboardingL2Component implements OnInit {
       
       this.form.markAsPristine();
       console.log('Form patched with processed data');
-    }, 800);  // Increased timeout for component initialization
+    }, 1500);  // Increased timeout for component initialization
+  }
+
+  /**
+   * Attempts to set a form control value with multiple retries if the control isn't found immediately
+   */
+  private setControlWithRetry(path: string, value: any, maxRetries: number, currentRetry: number = 0) {
+    const control = this.form.get(path);
+    
+    if (control) {
+      // Successfully found control, set the value
+      control.setValue(value);
+      control.markAsDirty();
+      console.log(`Successfully set control for ${path} (attempt ${currentRetry + 1})`);
+    } else if (currentRetry < maxRetries) {
+      // Control not found yet, retry after a delay
+      console.log(`Control not found for ${path}, retrying... (${currentRetry + 1}/${maxRetries})`);
+      setTimeout(() => {
+        this.setControlWithRetry(path, value, maxRetries, currentRetry + 1);
+      }, 400 * (currentRetry + 1)); // Increasing delay with each retry
+    } else {
+      // Max retries reached
+      console.error(`Failed to set control for ${path} after ${maxRetries} attempts`);
+    }
   }
   
   /**
@@ -268,47 +290,30 @@ export class SupplierOnboardingL2Component implements OnInit {
    */
   private setFormControlsDirectly() {
     if (this.form && this.model) {
-      // Directly set machine photos in form controls
+      // Directly set machine photos in form controls with retry logic
       if (this.model.machines && Array.isArray(this.model.machines)) {
         this.model.machines.forEach((machine: any, machineIndex: number) => {
           if (machine.machinePhotos && machine.machinePhotos.length > 0) {
-            const controlPath = `machines.${machineIndex}.machinePhotos`;
-            const control = this.form.get(controlPath);
-            if (control) {
-              // Set the value directly and mark as dirty to force update
-              control.setValue(machine.machinePhotos);
-              control.markAsDirty();
-              console.log(`Directly set control for ${controlPath}:`, machine.machinePhotos);
-            }
+            // Use retry mechanism instead of direct set
+            this.setControlWithRetry(`machines.${machineIndex}.machinePhotos`, machine.machinePhotos, 6);
           }
         });
       }
       
-      // Directly set certification documents in form controls
+      // Directly set certification documents in form controls with retry logic
       if (this.model.certifications && Array.isArray(this.model.certifications)) {
         this.model.certifications.forEach((cert: any, certIndex: number) => {
           if (cert.certificateDocument && cert.certificateDocument.length > 0) {
-            const controlPath = `certifications.${certIndex}.certificateDocument`;
-            const control = this.form.get(controlPath);
-            if (control) {
-              // Set the value directly and mark as dirty to force update
-              control.setValue(cert.certificateDocument);
-              control.markAsDirty();
-              console.log(`Directly set control for ${controlPath}:`, cert.certificateDocument);
-            }
+            // Use retry mechanism instead of direct set
+            this.setControlWithRetry(`certifications.${certIndex}.certificateDocument`, cert.certificateDocument, 6);
           }
         });
       }
       
-      // Directly set facility photos in form control
+      // Directly set facility photos in form control with retry logic
       if (this.model.facilityPhotos && this.model.facilityPhotos.length > 0) {
-        const control = this.form.get('facilityPhotos');
-        if (control) {
-          // Set the value directly and mark as dirty to force update
-          control.setValue(this.model.facilityPhotos);
-          control.markAsDirty();
-          console.log('Directly set control for facilityPhotos:', this.model.facilityPhotos);
-        }
+        // Use retry mechanism instead of direct set
+        this.setControlWithRetry('facilityPhotos', this.model.facilityPhotos, 6);
       }
     }
   }

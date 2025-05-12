@@ -322,7 +322,7 @@ export class ManageSuppliersComponent implements OnInit {
   }
 
   loadSuppliers() {
-    const endPoint = '/api/resource/wfb_supplier_onboarding_L1?fields=["*"]';
+    const endPoint = '/api/resource/wfb_supplier_onboarding_L1?fields=["*"]&limit_page_length=0';
     this.commonService.getData(endPoint).subscribe({
       next: (response: any) => {
         this.suppliers = response.data;
