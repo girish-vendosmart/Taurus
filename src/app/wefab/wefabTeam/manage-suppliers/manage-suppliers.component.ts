@@ -399,6 +399,7 @@ export class ManageSuppliersComponent implements OnInit {
   }
 
   viewSupplierProfile(supplier: Supplier) {
-    this.router.navigate(['/wefab/wefabTeam/manage-suppliers', supplier.name]);
+    sessionStorage.setItem('supplier_id', supplier.name);
+    this.router.navigate(['/wefab/supplier/profile-review']);
   }
 } 

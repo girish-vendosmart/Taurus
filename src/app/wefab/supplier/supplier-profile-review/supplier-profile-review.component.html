@@ -58,6 +58,14 @@
           <button class="edit-section-btn" *ngIf="getCurrentL1DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
+          <div class="approval-buttons" *ngIf="getCurrentL1DataStatus === 'Under Review' && userType === 'wefab_team'">
+            <button class="btn btn-success approve-btn" (click)="approve('L1')">
+              <i class="pi pi-check-circle"></i> Approve
+            </button>
+            <button class="btn btn-danger reject-btn" (click)="reject('L1')">
+              <i class="pi pi-times-circle"></i> Reject
+            </button>
+          </div>
         </div>
 
         <!-- Add horizontal tab navigation for Basic Information - remove Manufacturing Overview and Documentation tabs -->
@@ -207,6 +215,14 @@
           <button class="edit-section-btn" *ngIf="getCurrentL2DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
+          <div class="approval-buttons" *ngIf="getCurrentL2DataStatus === 'Under Review' && userType === 'wefab_team'">
+            <button class="btn btn-success approve-btn" (click)="approve('L2')">
+              <i class="pi pi-check-circle"></i> Approve
+            </button>
+            <button class="btn btn-danger reject-btn" (click)="reject('L2')">
+              <i class="pi pi-times-circle"></i> Reject
+            </button>
+          </div>
         </div>
 
         <!-- Zero State for Manufacturing Section -->
@@ -214,11 +230,13 @@
           <div class="zero-state-content">
             <i class="pi pi-cog zero-state-icon"></i>
             <h3>No Manufacturing Data Available</h3>
-            <p>Provide details about your manufacturing capabilities, machinery, facility, and certifications to enhance
-              your supplier profile.</p>
-            <button class="btn btn-primary add-data-btn" (click)="navigateToEdit()">
-              <i class="pi pi-plus"></i> Add Manufacturing Details
-            </button>
+            <div *ngIf="userType === 'supplier'">
+              <p>Provide details about your manufacturing capabilities, machinery, facility, and certifications to enhance
+                your supplier profile.</p>
+              <button class="btn btn-primary add-data-btn" (click)="navigateToEdit()">
+                <i class="pi pi-plus"></i> Add Manufacturing Details
+              </button>
+            </div>
           </div>
         </div>
 
@@ -243,7 +261,7 @@
               <div class="machine-card" *ngFor="let machine of manufacturingData.machines">
                 <div *ngIf="!isMachineDocumentArray(machine)">
                   <div class="machine-image">
-                    <img [src]="machine.machinePhotos" [alt]="machine.make" class="machine-photo">
+                    <img [src]="machine.machinePhotos.url" [alt]="machine.make" class="machine-photo">
                   </div>
                   <div class="machine-details">
                     <h3 class="machine-name">{{ machine.make }}</h3>
@@ -356,6 +374,14 @@
           <button class="edit-section-btn" *ngIf="getCurrentL3DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
+          <div class="approval-buttons" *ngIf="getCurrentL3DataStatus === 'Under Review' && userType === 'wefab_team'">
+            <button class="btn btn-success approve-btn" (click)="approve('L3')">
+              <i class="pi pi-check-circle"></i> Approve
+            </button>
+            <button class="btn btn-danger reject-btn" (click)="reject('L3')">
+              <i class="pi pi-times-circle"></i> Reject
+            </button>
+          </div>
         </div>
 
         <!-- Zero State for Financial Section -->
@@ -363,11 +389,13 @@
           <div class="zero-state-content">
             <i class="pi pi-chart-bar zero-state-icon"></i>
             <h3>No Financial Data Available</h3>
-            <p>Complete your profile by adding financial details and additional business information to increase
-              credibility with potential buyers.</p>
-            <button class="btn btn-primary add-data-btn" (click)="navigateToEdit()">
+            <div *ngIf="userType === 'supplier'">
+              <p>Complete your profile by adding financial details and additional business information to increase
+                credibility with potential buyers.</p>
+              <button class="btn btn-primary add-data-btn" (click)="navigateToEdit()">
               <i class="pi pi-plus"></i> Add Financial Details
             </button>
+            </div>
           </div>
         </div>
 

@@ -557,4 +557,67 @@ export class SupplierProfileReviewComponent implements OnInit {
           return parts[parts.length - 1].toUpperCase();
         }
         
+
+        approve(level: string) {
+          let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
+          let payload = {
+            "onboarding_status": "Approved"
+          };
+          this.commonservice.putData(endPoint, payload).subscribe({
+            next: (res: any) => {
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: level === 'L1' ? 'Basic Information has been approved' : level === 'L2' ? 'Manufacturing Capabilities has been approved' : 'Financial & Additional has been approved',
+                life: 3000
+              });
+              this.getStatusForm(level, this.supplierId)
+            },
+            error: (error) => {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: level === 'L1' ? 'Failed to approve Basic Information' : level === 'L2' ? 'Failed to approve Manufacturing Capabilities' : 'Failed to approve Financial & Additional',
+                life: 3000
+              });
+            }
+          });
+        }
+
+        getStatusForm(level:string, supplierId:any) {
+          if(level === 'L1') {
+            this.getL1DataStatus(supplierId)
+          } else if(level === 'L2') {
+            this.getL2DataStatus(supplierId)
+          } else if(level === 'L3') {
+            this.getL3DataStatus(supplierId)
+          }
+        }
+
+        reject(level: string) {
+          let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
+          let payload = {
+            "onboarding_status": "Rejected"
+          };
+          this.commonservice.putData(endPoint, payload).subscribe({
+            next: (res: any) => {
+              this.getL1DataStatus(this.supplierId);
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: level === 'L1' ? 'Basic Information has been rejected' : level === 'L2' ? 'Manufacturing Capabilities has been rejected' : 'Financial & Additional has been rejected',
+                life: 3000
+              });
+              this.getStatusForm(level, this.supplierId)
+            },
+            error: (error) => {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: level === 'L1' ? 'Failed to reject Basic Information' : level === 'L2' ? 'Failed to reject Manufacturing Capabilities' : 'Failed to reject Financial & Additional',
+                life: 3000
+              });
+            }
+          });
+        }
 } 
