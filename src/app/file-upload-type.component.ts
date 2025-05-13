@@ -66,18 +66,6 @@ import { HttpEventType } from '@angular/common/http';
             <div class="file-name" [title]="file.name">{{ file.name }}</div>
             <div class="file-size">{{ formatFileSize(file.size) }}</div>
           </div>
-          
-          <!-- Action buttons -->
-          // <div class="file-actions">
-          //   <button type="button" class="btn-action btn-download" *ngIf="file.url" 
-          //           (click)="downloadFile(file.url, file.name, $event)" title="Download">
-          //     <i class="pi pi-download"></i>
-          //   </button>
-          //   <button type="button" class="btn-action btn-view" *ngIf="file.url" 
-          //           (click)="viewFile(file.url, $event)" title="View">
-          //     <i class="pi pi-eye"></i>
-          //   </button>
-          // </div>
         </div>
       </div>
       
