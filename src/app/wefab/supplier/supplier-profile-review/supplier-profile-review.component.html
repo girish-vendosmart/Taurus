@@ -66,6 +66,8 @@
             (click)="changeBasicInfoTab('company')">Company Details</a>
           <a href="javascript:void(0)" class="basic-tab" [class.active]="basicInfoTab === 'contact'"
             (click)="changeBasicInfoTab('contact')">Contact Information</a>
+          <a href="javascript:void(0)" class="basic-tab" [class.active]="basicInfoTab === 'companyDocuments'"
+            (click)="changeBasicInfoTab('companyDocuments')">Company Documents</a>
         </div>
 
         <!-- Company Details Tab Content -->
@@ -159,6 +161,39 @@
               <div class="review-col">
                 <div class="field-label">LinkedIn URL</div>
                 <div class="field-value">{{ getCompanyProfile.linkedinURL }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Company Documents Tab Content   -->
+        <div class="basic-tab-content" *ngIf="basicInfoTab === 'companyDocuments'">
+          <div class="documents-container">
+            <div class="document-cards-row">
+              <div class="document-card" *ngFor="let document of getCompanyProfile.companyDocuments">
+                <div class="document-preview">
+                  <!-- Image files -->
+                  <img *ngIf="isImageFile(document.url)" [src]="document.url" [alt]="document.make" class="document-image">
+                  
+                  <!-- PDF files -->
+                  <div *ngIf="isPdfFile(document.url)" class="document-icon pdf-icon">
+                    <i class="fas fa-file-pdf"></i>
+                  </div>
+                  
+                  <!-- DOC/DOCX files -->
+                  <div *ngIf="isDocFile(document.url)" class="document-icon doc-icon">
+                    <i class="fas fa-file-word"></i>
+                  </div>
+                  
+                  <!-- Other file types -->
+                  <div *ngIf="isOtherFile(document.url)" class="document-icon other-icon">
+                    <i class="fas fa-file-alt"></i>
+                  </div>
+                </div>
+                <div class="document-info">
+                  <div class="document-name">{{getDocumentName(document.url)}}</div>
+                  <div class="document-type">{{getDocumentType(document.url)}}</div>
+                </div>
               </div>
             </div>
           </div>

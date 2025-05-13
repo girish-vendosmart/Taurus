@@ -5,6 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FileUploadComponent } from './wefab/supplier/supplier-onboarding/file-upload.component';
 import { CommonService } from './wefab/shared/common.service';
 import { HttpEventType } from '@angular/common/http';
+
 @Component({
   selector: 'formly-field-file-upload',
   standalone: true,
@@ -37,7 +38,7 @@ import { HttpEventType } from '@angular/common/http';
         #fileInput
         style="display: none;" 
         (change)="onFileSelected($event)"
-        [multiple]="props['multiple'] || false"
+        [multiple]="props['multiple'] === true"
         [accept]="props['acceptedTypes'] || props['accept'] || ''"
       />
       
@@ -46,19 +47,32 @@ import { HttpEventType } from '@angular/common/http';
         {{ fileTypeError }}
       </div>
       
-      <!-- Display uploaded files -->
-      <div *ngIf="uploadedFiles.length > 0" class="uploaded-files mt-3">
-        <div *ngFor="let file of uploadedFiles; let i = index" class="uploaded-file-item">
-          <div class="file-info">
-            <i class="pi pi-file me-2"></i>
-            <span class="file-name">{{ file.name }}</span>
-            <span class="file-size">({{ formatFileSize(file.size) }})</span>
+      <!-- Display uploaded files in a horizontal grid -->
+      <div *ngIf="uploadedFiles.length > 0" class="uploaded-files-grid mt-3">
+        <div *ngFor="let file of uploadedFiles; let i = index" class="file-card">
+          <!-- File type icon -->
+          <div class="file-icon" [ngClass]="getFileIconClass(file.type || getFileTypeFromUrl(file.url))">
+            <i [class]="getFileIconClass(file.type || getFileTypeFromUrl(file.url))"></i>
           </div>
+          
+          <!-- File info -->
+          <div class="file-details">
+            <div class="file-name" [title]="file.name">{{ file.name }}</div>
+            <div class="file-size">{{ formatFileSize(file.size) }}</div>
+          </div>
+          
+          <!-- Action buttons -->
           <div class="file-actions">
-            <button type="button" class="btn-view" *ngIf="file.url" (click)="viewFile(file.url, $event)">
+            <button type="button" class="btn-action btn-download" *ngIf="file.url" 
+                    (click)="downloadFile(file.url, file.name, $event)" title="Download">
+              <i class="pi pi-download"></i>
+            </button>
+            <button type="button" class="btn-action btn-view" *ngIf="file.url" 
+                    (click)="viewFile(file.url, $event)" title="View">
               <i class="pi pi-eye"></i>
             </button>
-            <button type="button" class="btn-remove" (click)="removeFile(i, $event)">
+            <button type="button" class="btn-action btn-remove" 
+                    (click)="removeFile(i, $event)" title="Remove">
               <i class="pi pi-times"></i>
             </button>
           </div>
@@ -119,58 +133,88 @@ import { HttpEventType } from '@angular/common/http';
       color: #6b7280;
     }
     
-    .uploaded-files {
-      margin-top: 1rem;
+    /* New horizontal grid layout */
+    .uploaded-files-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      width: 100%;
     }
     
-    .uploaded-file-item {
+    .file-card {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 1rem;
+      flex-direction: column;
       background-color: #f8f9fa;
-      border-radius: 4px;
-      margin-bottom: 0.5rem;
+      border-radius: 8px;
       border: 1px solid #eee;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      height: 100%;
     }
     
-    .file-info {
+    .file-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+    
+    .file-icon {
       display: flex;
       align-items: center;
-      overflow: hidden;
-      flex: 1;
+      justify-content: center;
+      height: 80px;
+      background-color: #f1f5f9;
+    }
+    
+    .file-icon i {
+      font-size: 2rem;
+    }
+    
+    .file-details {
+      padding: 10px;
+      flex-grow: 1;
     }
     
     .file-name {
       font-weight: 500;
-      margin-right: 0.5rem;
+      color: #333;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      margin-bottom: 4px;
     }
     
     .file-size {
+      font-size: 0.75rem;
       color: #6c757d;
-      font-size: 0.85rem;
     }
     
     .file-actions {
       display: flex;
-      align-items: center;
+      padding: 8px;
+      border-top: 1px solid #eee;
+      background-color: #fff;
     }
     
-    .btn-view, .btn-remove {
+    .btn-action {
       background: none;
       border: none;
       cursor: pointer;
-      padding: 0.25rem;
+      padding: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      margin-left: 5px;
+      border-radius: 4px;
+      margin-right: 6px;
+      flex: 1;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-download {
+      color: #198754;
+    }
+    
+    .btn-download:hover {
+      background-color: rgba(25, 135, 84, 0.1);
     }
     
     .btn-view {
@@ -188,30 +232,60 @@ import { HttpEventType } from '@angular/common/http';
     .btn-remove:hover {
       background-color: rgba(220, 53, 69, 0.1);
     }
+    
+    /* File type icon colors */
+    .file-icon-pdf {
+      color: #e74c3c;
+    }
+    
+    .file-icon-doc, .file-icon-docx {
+      color: #4285f4;
+    }
+    
+    .file-icon-xls, .file-icon-xlsx {
+      color: #0f9d58;
+    }
+    
+    .file-icon-image {
+      color: #ff9800;
+    }
+    
+    .file-icon-default {
+      color: #7f8c8d;
+    }
   `]
 })
 export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> implements OnInit {
-  constructor (private commonService: CommonService) {
+  constructor(private commonService: CommonService) {
     super();
   }
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
-  uploadedFiles: any[] = []; // Changed from File[] to any[] to accommodate url property
-  fileTypeError: string = ''; // Add this line for file type error
+  uploadedFiles: any[] = []; // Store file objects with url property
+  fileTypeError: string = '';
   
   ngOnInit(): void {
-    if (this.formControl) {
-      this.initializeUploadedFiles(this.formControl.value); // handle initial value
-  
-      this.formControl.valueChanges.subscribe(value => {
-        this.initializeUploadedFiles(value); // react to further changes
-      });
-    }
+    // Initialize uploadedFiles from form control value
+    this.initializeUploadedFiles(this.formControl?.value);
+    
+    // Listen for further changes to form control
+    this.formControl?.valueChanges.subscribe(value => {
+      if (value !== this.uploadedFiles) {
+        this.initializeUploadedFiles(value);
+      }
+    });
   }
   
   initializeUploadedFiles(value: any): void {
+    if (!value) {
+      this.uploadedFiles = [];
+      return;
+    }
+    
     if (Array.isArray(value)) {
+      // Handle array values (for multiple file upload)
       this.uploadedFiles = value.map(file => {
         if (typeof file === 'string') {
+          // If the value is a URL string
           return {
             name: this.getFileNameFromUrl(file),
             size: 0,
@@ -219,25 +293,27 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
             url: file
           };
         }
+        // If the value is a file object
         return file;
       });
     } else if (typeof value === 'string') {
+      // Handle string value (URL for single file upload)
       this.uploadedFiles = [{
         name: this.getFileNameFromUrl(value),
         size: 0,
         type: this.getFileTypeFromUrl(value),
         url: value
       }];
-    } else if (value) {
-      this.uploadedFiles = [value];
     } else {
-      this.uploadedFiles = [];
+      // Handle object value (file object for single file upload)
+      this.uploadedFiles = [value];
     }
   }
   
-  
   // Helper methods to extract filename and type from URL
   getFileNameFromUrl(url: string): string {
+    if (!url) return 'File';
+    
     // Extract filename from URL path
     const urlParts = url.split('/');
     let fileName = urlParts[urlParts.length - 1];
@@ -256,6 +332,8 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   }
   
   getFileTypeFromUrl(url: string): string {
+    if (!url) return 'application/octet-stream';
+    
     const fileName = this.getFileNameFromUrl(url);
     const extension = fileName.split('.').pop()?.toLowerCase() || '';
     
@@ -274,6 +352,36 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     };
     
     return mimeTypes[extension] || 'application/octet-stream';
+  }
+  
+  // Get appropriate icon class based on file type
+  getFileIconClass(mimeType: string): string {
+    if (!mimeType) return 'pi pi-file file-icon-default';
+    
+    // Image files
+    if (mimeType.startsWith('image/')) {
+      return 'pi pi-image file-icon-image';
+    }
+    
+    // PDF files
+    if (mimeType === 'application/pdf') {
+      return 'pi pi-file-pdf file-icon-pdf';
+    }
+    
+    // Word documents
+    if (mimeType === 'application/msword' || 
+        mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      return 'pi pi-file-word file-icon-doc';
+    }
+    
+    // Excel files
+    if (mimeType === 'application/vnd.ms-excel' || 
+        mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      return 'pi pi-file-excel file-icon-xls';
+    }
+    
+    // Default file icon
+    return 'pi pi-file file-icon-default';
   }
   
   triggerFileInput(): void {
@@ -316,7 +424,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     }
   }
   
-  // Add this method to validate file types
+  // Validate file types
   validateFileTypes(files: FileList): boolean {
     if (!this.props['accept'] && !this.props['acceptedTypes']) {
       return true; // No restrictions
@@ -368,109 +476,103 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   }
   
   updateFiles(fileList: FileList): void {
-    debugger
-    // Convert FileList to array and update the form
-    if (this.props['multiple']) {
+    // Convert FileList to array
+    const newFiles = Array.from(fileList).map(file => ({
+      ...file,
+      name: file.name,
+      size: file.size,
+      type: file.type
+    }));
+    
+    // Update uploadedFiles based on multiple/single mode
+    if (this.props['multiple'] === true) {
       // For multiple file upload, add to existing files
-      const newFiles = Array.from(fileList).map(file => ({
-        ...file,
-        name: file.name,
-        size: file.size,
-        type: file.type
-      }));
       this.uploadedFiles = [...this.uploadedFiles, ...newFiles];
     } else {
       // For single file upload, replace existing file
-      const newFiles = Array.from(fileList).map(file => ({
-        ...file,
-        name: file.name,
-        size: file.size,
-        type: file.type
-      }));
-      this.uploadedFiles = newFiles;
+      this.uploadedFiles = [...newFiles];
     }
     
-    // Upload each file to get the actual URL from the server
-    for (let i = 0; i < fileList.length; i++) {
-      const file = fileList[i];
-      this.commonService.uploadFile(file).subscribe(
-        (event) => {
-          // Check if it's a HttpResponse final event (response complete)
-          if (event.type === HttpEventType.Response) {
-            const response = event.body;
-            console.log("File uploaded successfully in updateFiles", response);
-            const index = this.uploadedFiles.findIndex(f => f.name === file.name);
-            if (index !== -1 && response && response.message && response.message.file_url) {
-              // Update URL based on server response
-              this.uploadedFiles[index].url = response.message.file_url;
+    // Update form control immediately with current value (URLs will be updated later)
+    this.updateFormControlValue();
+    
+    // Upload each file to get the URL from the server
+    Array.from(fileList).forEach((file, index) => {
+      const fileIndex = this.props['multiple'] === true 
+        ? this.uploadedFiles.findIndex(f => f.name === file.name && f.size === file.size)
+        : 0;
+      
+      if (fileIndex !== -1) {
+        this.commonService.uploadFile(file).subscribe(
+          (event) => {
+            // Check if it's a HttpResponse final event
+            if (event.type === HttpEventType.Response) {
+              const response = event.body;
+              console.log("File uploaded successfully:", response);
               
-              // Update form control value - this is the key change
-              if (this.props['multiple']) {
-                // For multiple files, we store either the URLs or the file objects with URLs
-                const urlsOnly = this.formControl.value === 'filesOnly' ? false : true;
-                if (urlsOnly) {
-                  // Store just the URLs in an array
-                  const urls = this.uploadedFiles
-                    .filter(f => f.url)
-                    .map(f => f.url);
-                  this.formControl.setValue(urls);
-                } else {
-                  // Store the full file objects
-                  this.formControl.setValue(this.uploadedFiles);
-                }
-              } else {
-                // For single file, decide whether to store just the URL or the file object
-                const urlOnly = this.formControl.value === 'fileOnly' ? false : true;
-                if (urlOnly) {
-                  this.formControl.setValue(response.message.file_url);
-                } else {
-                  this.formControl.setValue(this.uploadedFiles[0]);
-                }
+              if (response && response.message && response.message.file_url) {
+                // Update URL based on server response
+                this.uploadedFiles[fileIndex].url = response.message.file_url;
+                
+                // Update form control value with updated URLs
+                this.updateFormControlValue();
               }
-              
-              // Force change detection to ensure view button appears
-              this.formControl.markAsDirty();
             }
+          },
+          (error) => {
+            console.error("Error uploading file:", error);
           }
-        },
-        (error) => {
-          console.error("Error uploading file in updateFiles:", error);
-        }
-      );
-    }
-
-    debugger
+        );
+      }
+    });
     
-    // Update form control value immediately with files (URLs will be updated later)
-    if (this.props['multiple']) {
-      // Store either URLs or file objects based on what was used before
-      if (Array.isArray(this.formControl.value) && 
-          this.formControl.value.length > 0 && 
-          typeof this.formControl.value[0] === 'string') {
-        // Previously stored just URLs, continue with that approach
+    this.formControl.markAsTouched();
+  }
+  
+  // Helper method to update form control value consistently
+  updateFormControlValue(): void {
+    if (!this.formControl) return;
+    
+    if (this.props['multiple'] === true) {
+      // Determine whether to store URLs or file objects
+      const storeUrlsOnly = 
+        // Explicit option
+        this.props['storeUrlsOnly'] === true ||
+        // Infer from existing value type
+        (Array.isArray(this.formControl.value) && 
+         this.formControl.value.length > 0 && 
+         typeof this.formControl.value[0] === 'string');
+      
+      if (storeUrlsOnly) {
+        // Store just the URLs in an array
         const urls = this.uploadedFiles
           .filter(f => f.url)
           .map(f => f.url);
         this.formControl.setValue(urls);
       } else {
-        // Store the file objects
-        this.formControl.setValue(this.uploadedFiles);
+        // Store the full file objects
+        this.formControl.setValue([...this.uploadedFiles]);
       }
     } else {
-      // For single file, determine format based on previous value
-      if (typeof this.formControl.value === 'string') {
-        debugger
-        const url = this.uploadedFiles.length > 0 && this.uploadedFiles[0].url 
-          ? this.uploadedFiles[0].url 
-          : null;
-        this.formControl.setValue(url);
+      // Single file upload
+      const storeUrlOnly = 
+        // Explicit option
+        this.props['storeUrlOnly'] === true ||
+        // Infer from existing value type
+        typeof this.formControl.value === 'string';
+      
+      if (this.uploadedFiles.length === 0) {
+        this.formControl.setValue(null);
+      } else if (storeUrlOnly) {
+        // Store just the URL string
+        this.formControl.setValue(this.uploadedFiles[0].url || null);
       } else {
         // Store the file object
-        this.formControl.setValue(this.uploadedFiles.length > 0 ? this.uploadedFiles[0] : null);
+        this.formControl.setValue(this.uploadedFiles[0]);
       }
     }
     
-    this.formControl.markAsTouched();
+    this.formControl.markAsDirty();
   }
   
   removeFile(index: number, event: Event): void {
@@ -480,12 +582,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     this.uploadedFiles.splice(index, 1);
     
     // Update form control value
-    if (this.uploadedFiles.length === 0) {
-      this.formControl.setValue(null);
-    } else {
-      this.formControl.setValue(this.props['multiple'] ? 
-        this.uploadedFiles : this.uploadedFiles[0]);
-    }
+    this.updateFormControlValue();
     
     // Reset file input if all files removed
     if (this.uploadedFiles.length === 0) {
@@ -494,6 +591,8 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   }
   
   formatFileSize(size: number): string {
+    if (size === 0) return '';  // Handle unknown size for existing files
+    
     if (size < 1024) {
       return size + ' B';
     } else if (size < 1024 * 1024) {
@@ -512,5 +611,26 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     } else {
       console.warn('Cannot open file: URL is empty or undefined');
     }
+  }
+  
+  // New method to download files
+  downloadFile(url: string, fileName: string, event: Event): void {
+    event.stopPropagation(); // Prevent triggering fileInput click
+    
+    if (!url || url.trim() === '') {
+      console.warn('Cannot download file: URL is empty or undefined');
+      return;
+    }
+    
+    // Create an anchor element and trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName || 'download';
+    link.target = '_blank';
+    
+    // Append to body, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 }

@@ -525,5 +525,35 @@ export class SupplierProfileReviewComponent implements OnInit {
         isMachineDocumentArray(machine: any): boolean {
           return Array.isArray(machine.machinePhotos);
         }
+
+        isImageFile(url: string): boolean {
+          return /\.(jpeg|jpg|gif|png|webp|bmp)$/i.test(url);
+        }
+        
+        isPdfFile(url: string): boolean {
+          return /\.pdf$/i.test(url);
+        }
+        
+        isDocFile(url: string): boolean {
+          return /\.(doc|docx)$/i.test(url);
+        }
+        
+        isOtherFile(url: string): boolean {
+          return !this.isImageFile(url) && !this.isPdfFile(url) && !this.isDocFile(url);
+        }
+        
+        getDocumentName(url: string): string {
+          // Extract filename from URL
+          const parts = url.split('/');
+          const filename = parts[parts.length - 1];
+          // Remove extension and decode URL
+          return decodeURIComponent(filename.split('.')[0]);
+        }
+        
+        getDocumentType(url: string): string {
+          // Extract extension from URL
+          const parts = url.split('.');
+          return parts[parts.length - 1].toUpperCase();
+        }
         
 } 
