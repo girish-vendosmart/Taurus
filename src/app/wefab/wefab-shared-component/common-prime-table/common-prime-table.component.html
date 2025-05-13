@@ -1,1 +1,147 @@
-<p>common-prime-table works!</p>
+<div class="card common-table-card">
+  <!-- Table Title -->
+  <div class="card-header" *ngIf="showTitle">
+    <h3 class="card-title">{{ title }}</h3>
+  </div>
+  
+  <!-- Table Controls -->
+  <div class="table-controls">
+    <!-- Global Search -->
+    <div class="search-container" *ngIf="showGlobalFilter">
+      <span class="p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input 
+          type="text" 
+          pInputText 
+          [(ngModel)]="globalFilterValue" 
+          (input)="dt.filterGlobal(globalFilterValue, 'contains')" 
+          placeholder="Search..."
+          class="global-filter"
+        />
+      </span>
+      <button 
+        pButton 
+        type="button" 
+        icon="pi pi-filter-slash" 
+        class="p-button-outlined p-button-sm" 
+        (click)="clear()" 
+        [disabled]="!globalFilterValue"
+      ></button>
+    </div>
+  </div>
+  
+  <!-- PrimeNG Table -->
+  <p-table 
+    #dt 
+    [value]="data" 
+    [columns]="columns"
+    [rows]="rows" 
+    [paginator]="paginator" 
+    [loading]="loading"
+    [rowsPerPageOptions]="rowsPerPageOptions"
+    [totalRecords]="totalRecords"
+    [globalFilterFields]="globalFilterFields"
+    columnResizeMode="expand"
+    [rowHover]="true"
+    [showCurrentPageReport]="true"
+    [responsive]="true"
+    styleClass="p-datatable-sm p-datatable-gridlines"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    [selectionMode]="selectionMode"
+    [(selection)]="selectedItems"
+    (onRowSelect)="onRowSelect($event)"
+    (onRowUnselect)="onRowUnselect($event)"
+    (onPage)="onPageChange($event)"
+    (onSort)="onSortChange($event)"
+    [sortField]="sortField"
+    [sortOrder]="sortOrder">
+    
+    <!-- Header Template -->
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th *ngFor="let col of columns" 
+            [pSortableColumn]="col.sortable ? col.field : undefined"
+            [style.width]="col.width">
+          <div class="header-cell-container">
+            <span class="header-title">{{col.header}}</span>
+            <p-sortIcon *ngIf="col.sortable" [field]="col.field"></p-sortIcon>
+          </div>
+        </th>
+      </tr>
+      <!-- Filter Row -->
+      <tr>
+        <th *ngFor="let col of columns">
+          <input *ngIf="col.filterable" pInputText type="text" 
+                (input)="onColumnFilter($event, col.field)" 
+                class="column-filter" 
+                placeholder="Search {{col.header}}">
+        </th>
+      </tr>
+    </ng-template>
+    
+    <!-- Body Template -->
+    <ng-template pTemplate="body" let-rowData let-columns="columns">
+      <tr [pSelectableRow]="rowData">
+        <td *ngFor="let col of columns" [style.width]="col.width" class="bordered-cell">
+          <!-- Link format -->
+          <ng-container *ngIf="col.isLink">
+            <a [routerLink]="getRouteLink(rowData)" 
+               class="link-style"
+               (click)="onLinkClick(rowData)">
+              {{ rowData[col.field] }}
+            </a>
+          </ng-container>
+          
+          <!-- Status column with tags -->
+          <ng-container *ngIf="!col.isLink && col.field === 'status'">
+            <p-tag 
+              [value]="rowData[col.field]" 
+              [severity]="getStatusSeverity(rowData[col.field])">
+            </p-tag>
+          </ng-container>
+          
+          <!-- Progress column with progress bar -->
+          <ng-container *ngIf="!col.isLink && col.field === 'progress'">
+            <div class="progress-wrapper">
+              <div class="progress">
+                <div class="progress-bar" 
+                     [ngClass]="{'bg-success': rowData[col.field] >= 70, 
+                               'bg-warning': rowData[col.field] >= 30 && rowData[col.field] < 70,
+                               'bg-danger': rowData[col.field] < 30}"
+                     [style.width.%]="rowData[col.field]">
+                </div>
+              </div>
+              <span class="progress-value">{{rowData[col.field]}}%</span>
+            </div>
+          </ng-container>
+          
+          <!-- Date column -->
+          <ng-container *ngIf="!col.isLink && col.field === 'startDate'">
+            {{ formatDate(rowData[col.field]) }}
+          </ng-container>
+          
+          <!-- Budget column with currency format -->
+          <ng-container *ngIf="!col.isLink && col.field === 'budget'">
+            {{ formatCurrency(rowData[col.field]) }}
+          </ng-container>
+          
+          <!-- Default format for other columns -->
+          <ng-container *ngIf="!col.isLink && 
+                            col.field !== 'status' && 
+                            col.field !== 'progress' && 
+                            col.field !== 'startDate' && 
+                            col.field !== 'budget'">
+            {{ rowData[col.field] }}
+          </ng-container>
+        </td>
+      </tr>
+    </ng-template>
+    
+    <!-- Empty Message Template -->
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="100%" class="empty-message">No records found</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
