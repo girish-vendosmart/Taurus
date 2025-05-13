@@ -56,9 +56,14 @@ import { HttpEventType } from '@angular/common/http';
             <i class="pi pi-times"></i>
           </button>
           
-          <!-- File type icon -->
+          <!-- File type icon or thumbnail for images -->
           <div class="file-icon" [ngClass]="getFileIconClass(file.type || getFileTypeFromUrl(file.url))">
-            <i [class]="getFileIconClass(file.type || getFileTypeFromUrl(file.url))"></i>
+            <img *ngIf="isImageFile(file.type || getFileTypeFromUrl(file.url)) && file.url" 
+                 [src]="file.url" 
+                 alt="Thumbnail" 
+                 class="file-thumbnail">
+            <i *ngIf="!isImageFile(file.type || getFileTypeFromUrl(file.url)) || !file.url" 
+               [class]="getFileIconClass(file.type || getFileTypeFromUrl(file.url))"></i>
           </div>
           
           <!-- File info -->
@@ -165,10 +170,17 @@ import { HttpEventType } from '@angular/common/http';
       justify-content: center;
       height: 80px;
       background-color: #f1f5f9;
+      overflow: hidden;
     }
     
     .file-icon i {
       font-size: 2rem;
+    }
+    
+    .file-thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     
     .file-details {
@@ -711,5 +723,10 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   // Prevent closing when clicking on the image itself
   preventClose(event: Event): void {
     event.stopPropagation();
+  }
+
+  // Check if file is an image
+  isImageFile(mimeType: string): boolean {
+    return mimeType.startsWith('image/');
   }
 }
