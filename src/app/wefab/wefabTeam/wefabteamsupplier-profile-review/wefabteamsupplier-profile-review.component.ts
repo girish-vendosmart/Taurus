@@ -490,7 +490,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
     let endPoint = '/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
         this.getCurrentDataStatus = res.data.approval_status
-        this.getCurrentL1DataStatus = res.data.approval_status
+        this.getCurrentL1DataStatus = res.data.approval_statuson
         this.mainCurrentDataStatus()
         this.getL2DataStatus(supplierId)
       })
