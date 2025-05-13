@@ -3,7 +3,7 @@
   <div class="review-header">
     <div class="header-left">
       <h1 class="review-title">Supplier Profile Review</h1>
-      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: <span
+      <p class="review-subtitle">Status: <span
           class="status-pending" *ngIf="mainCurrentDataStatusTrack.includes('Under Review')">{{
           mainCurrentDataStatusTrack }}</span>
         <span class="status-completed" *ngIf="mainCurrentDataStatusTrack.includes('Approved')">{{
