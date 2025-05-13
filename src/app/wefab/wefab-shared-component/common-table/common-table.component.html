@@ -1,0 +1,109 @@
+<div class="card m-3">
+  <div class="table-header" *ngIf="showGlobalFilter">
+    <span class="p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input type="text" pInputText [(ngModel)]="globalFilterValue" 
+        (input)="onGlobalFilterChange($event)" placeholder="Search..." />
+    </span>
+  </div>
+
+  <div class="common-table-wrapper">
+    <p-table 
+      #dt 
+      [value]="data" 
+      [rows]="rows" 
+      [paginator]="paginator" 
+      [loading]="loading"
+      [rowsPerPageOptions]="rowsPerPageOptions"
+      [totalRecords]="totalRecords"
+      [globalFilterFields]="globalFilterFields"
+      [filterDelay]="0"
+      [rowHover]="true"
+      [showCurrentPageReport]="true"
+      styleClass="p-datatable-sm"
+      [responsive]="true"
+      [resizableColumns]="false"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      [selectionMode]="selectionMode"
+      [(selection)]="selectedItems"
+      (onRowSelect)="onRowSelect($event)"
+      (onRowUnselect)="onRowUnselect($event)"
+      (onPage)="onPageChange($event)"
+      (onSort)="onSortChange($event)"
+      [sortField]="sortField"
+      [sortOrder]="sortOrder">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th *ngFor="let col of columns" 
+              [pSortableColumn]="col.sortable ? col.field : undefined" 
+              [style.width]="col.width" 
+              class="header-cell">
+            <div class="header-content">
+              <span class="header-title">{{col.header}}</span>
+              <div class="header-icons">
+                <p-sortIcon *ngIf="col.sortable" [field]="col.field"></p-sortIcon>
+                <button *ngIf="col.filterable" pButton 
+                        class="p-button-text p-button-rounded p-button-sm icon-only"
+                        icon="pi pi-filter">
+                </button>
+              </div>
+            </div>
+          </th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-rowData>
+        <tr [pSelectableRow]="rowData" class="table-row">
+          <td *ngFor="let col of columns; let i = index" class="data-cell">
+            <ng-container *ngIf="col.isLink">
+              <a [routerLink]="getRouteLink(rowData)" 
+                 class="link-style"
+                 (click)="onLinkClick(rowData)">
+                {{ col.formatter ? col.formatter(rowData[col.field], rowData) : rowData[col.field] }}
+              </a>
+            </ng-container>
+            
+            <ng-container *ngIf="!col.isLink">
+              <ng-container [ngSwitch]="col.field">
+                <ng-container *ngSwitchCase="'status'">
+                  <p-tag [value]="rowData[col.field]" [severity]="getTagSeverity(rowData[col.field])"></p-tag>
+                </ng-container>
+                <ng-container *ngSwitchCase="'created_at'">
+                  {{ formatDate(rowData[col.field]) }}
+                </ng-container>
+                <ng-container *ngSwitchCase="'creation'">
+                  {{ formatDate(rowData[col.field]) }}
+                </ng-container>
+                <ng-container *ngSwitchCase="'modified'">
+                  {{ formatDate(rowData[col.field]) }}
+                </ng-container>
+                <ng-container *ngSwitchDefault>
+                  {{ rowData[col.field] }}
+                </ng-container>
+              </ng-container>
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="100%" class="text-center empty-message">No records found</td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="paginatorleft">
+        <ng-container *ngIf="getPaginationInfo() as info">
+          <div class="pagination-info">
+            Showing {{info.first}} to {{info.last}} of {{info.total}} entries
+          </div>
+        </ng-container>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<ng-template #customTemplate let-rowData let-field="field" let-column="column">
+  <!-- Custom template for specific fields, to be overridden by parent component -->
+</ng-template>
