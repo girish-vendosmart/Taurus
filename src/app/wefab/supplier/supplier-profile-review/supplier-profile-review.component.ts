@@ -40,6 +40,7 @@ export class SupplierProfileReviewComponent implements OnInit {
   status: string = 'Pending';
   lastUpdated: Date = new Date(2025, 4, 8); // May 8, 2025
   supplierId: any = sessionStorage.getItem('supplier_id');
+  userType: any = sessionStorage.getItem('user_type');
   
   // Contact information
   contactEmail: string = 'contact@wefabsolutions.com';

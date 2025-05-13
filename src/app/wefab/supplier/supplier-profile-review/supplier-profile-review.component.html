@@ -55,7 +55,7 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'basic'">
         <div class="section-header">
           <h2>Basic Information</h2>
-          <button class="edit-section-btn" *ngIf="getCurrentL1DataStatus === 'Under Review'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="getCurrentL1DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
         </div>
@@ -204,7 +204,7 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'manufacturing'">
         <div class="section-header">
           <h2>Manufacturing Capabilities</h2>
-          <button class="edit-section-btn" *ngIf="getCurrentL2DataStatus === 'Under Review'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="getCurrentL2DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
         </div>
@@ -353,7 +353,7 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'financial'">
         <div class="section-header">
           <h2>Financial & Additional Information</h2>
-          <button class="edit-section-btn" *ngIf="getCurrentL3DataStatus === 'Under Review'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="getCurrentL3DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
         </div>

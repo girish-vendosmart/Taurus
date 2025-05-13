@@ -59,6 +59,7 @@ export class LoginComponentComponent {
                 if (response && response.data && response.data.token) {
                   sessionStorage.setItem('token', response.data.token);
                   sessionStorage.setItem('primary_email_id', response.data.email_id);
+                  sessionStorage.setItem('user_type', response.data.user_type);
                   
                   // Navigate based on user type
                   if (response.data.user_type === 'supplier') {
