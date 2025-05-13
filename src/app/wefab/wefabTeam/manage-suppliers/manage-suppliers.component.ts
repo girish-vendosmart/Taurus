@@ -117,12 +117,12 @@ interface Supplier {
       (onHide)="onDialogHide()">
       <form [formGroup]="inviteForm" (ngSubmit)="onSubmit()" class="invite-form">
         <div class="field">
-          <label for="supplier_name">Supplier Name</label>
+          <label for="supplier_name">Contact Person Name</label>
           <input id="supplier_name" type="text" pInputText formControlName="supplier_name" 
                  [ngClass]="{'ng-invalid ng-dirty': inviteForm.get('supplier_name')?.invalid && inviteForm.get('supplier_name')?.touched}"
-                 placeholder="Enter supplier name">
+                 placeholder="Enter contact person name">
           <small class="p-error" *ngIf="inviteForm.get('supplier_name')?.invalid && inviteForm.get('supplier_name')?.touched">
-            Supplier name is required
+            Contact Person name is required
           </small>
         </div>
 

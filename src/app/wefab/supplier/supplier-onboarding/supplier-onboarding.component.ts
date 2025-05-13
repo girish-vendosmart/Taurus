@@ -606,25 +606,6 @@ export class SupplierOnboardingComponent implements OnInit {
               }
             }
           },
-          {
-            className: 'col-md-6 mb-2',
-            key: 'manufacturingFacilityAddress',
-            type: 'textarea',
-            templateOptions: {
-              label: 'Manufacturing Facility Address',
-              placeholder: 'Enter your manufacturing facility address',
-              required: true,
-              rows: 1
-            },
-            validation: {
-              messages: {
-                required: 'Please enter your manufacturing facility address'
-              }
-            },
-            expressionProperties: {
-              'templateOptions.disabled': 'model.sameAsRegistered'
-            }
-          }
         ]
       },
       {
@@ -923,7 +904,7 @@ export class SupplierOnboardingComponent implements OnInit {
       
       // Navigate to verification page after 3 seconds
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-verification']);
+        this.router.navigate(['/wefab/supplier/supplier-onboarding/l2']);
       }, 3000);
     }, (err) => {
       console.error('Error submitting form:', err);

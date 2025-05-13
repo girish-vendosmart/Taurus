@@ -49,7 +49,13 @@ import { HttpEventType } from '@angular/common/http';
       
       <!-- Display uploaded files in a horizontal grid -->
       <div *ngIf="uploadedFiles.length > 0" class="uploaded-files-grid mt-3">
-        <div *ngFor="let file of uploadedFiles; let i = index" class="file-card">
+        <div *ngFor="let file of uploadedFiles; let i = index" class="file-card" (click)="handleFileCardClick(file, $event)">
+          <!-- Remove button at top right corner -->
+          <button type="button" class="btn-action btn-remove" 
+                  (click)="removeFile(i, $event)" title="Remove">
+            <i class="pi pi-times"></i>
+          </button>
+          
           <!-- File type icon -->
           <div class="file-icon" [ngClass]="getFileIconClass(file.type || getFileTypeFromUrl(file.url))">
             <i [class]="getFileIconClass(file.type || getFileTypeFromUrl(file.url))"></i>
@@ -62,20 +68,26 @@ import { HttpEventType } from '@angular/common/http';
           </div>
           
           <!-- Action buttons -->
-          <div class="file-actions">
-            <button type="button" class="btn-action btn-download" *ngIf="file.url" 
-                    (click)="downloadFile(file.url, file.name, $event)" title="Download">
-              <i class="pi pi-download"></i>
-            </button>
-            <button type="button" class="btn-action btn-view" *ngIf="file.url" 
-                    (click)="viewFile(file.url, $event)" title="View">
-              <i class="pi pi-eye"></i>
-            </button>
-            <button type="button" class="btn-action btn-remove" 
-                    (click)="removeFile(i, $event)" title="Remove">
-              <i class="pi pi-times"></i>
-            </button>
-          </div>
+          // <div class="file-actions">
+          //   <button type="button" class="btn-action btn-download" *ngIf="file.url" 
+          //           (click)="downloadFile(file.url, file.name, $event)" title="Download">
+          //     <i class="pi pi-download"></i>
+          //   </button>
+          //   <button type="button" class="btn-action btn-view" *ngIf="file.url" 
+          //           (click)="viewFile(file.url, $event)" title="View">
+          //     <i class="pi pi-eye"></i>
+          //   </button>
+          // </div>
+        </div>
+      </div>
+      
+      <!-- Image Preview Modal -->
+      <div *ngIf="previewImage" class="file-preview-modal" (click)="closePreview($event)">
+        <div class="modal-content" (click)="preventClose($event)">
+          <button class="modal-close" (click)="closePreview($event)">
+            <i class="pi pi-times"></i>
+          </button>
+          <img [src]="previewImage" alt="File preview" />
         </div>
       </div>
       
@@ -150,6 +162,8 @@ import { HttpEventType } from '@angular/common/http';
       overflow: hidden;
       transition: all 0.2s ease;
       height: 100%;
+      position: relative;
+      cursor: pointer;
     }
     
     .file-card:hover {
@@ -227,10 +241,23 @@ import { HttpEventType } from '@angular/common/http';
     
     .btn-remove {
       color: #dc3545;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      margin: 0;
     }
     
     .btn-remove:hover {
-      background-color: rgba(220, 53, 69, 0.1);
+      background-color: rgba(220, 53, 69, 0.2);
     }
     
     /* File type icon colors */
@@ -253,6 +280,43 @@ import { HttpEventType } from '@angular/common/http';
     .file-icon-default {
       color: #7f8c8d;
     }
+
+    /* Image preview modal */
+    .file-preview-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      position: relative;
+    }
+
+    .modal-content img {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      color: white;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
   `]
 })
 export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> implements OnInit {
@@ -262,6 +326,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
   uploadedFiles: any[] = []; // Store file objects with url property
   fileTypeError: string = '';
+  previewImage: string | null = null;
   
   ngOnInit(): void {
     // Initialize uploadedFiles from form control value
@@ -632,5 +697,31 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  // Handle click on file card
+  handleFileCardClick(file: any, event: Event): void {
+    // Don't do anything if clicking on buttons
+    const target = event.target as HTMLElement;
+    if (target.closest('button')) {
+      return;
+    }
+    
+    // Only open preview for image files
+    const fileType = file.type || this.getFileTypeFromUrl(file.url);
+    if (fileType.startsWith('image/') && file.url) {
+      this.previewImage = file.url;
+      event.stopPropagation();
+    }
+  }
+  
+  // Close preview when clicking outside the image
+  closePreview(event: Event): void {
+    this.previewImage = null;
+  }
+  
+  // Prevent closing when clicking on the image itself
+  preventClose(event: Event): void {
+    event.stopPropagation();
   }
 }
