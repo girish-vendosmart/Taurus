@@ -83,18 +83,20 @@
                 </formly-form>
                 
                 <!-- Form Navigation Buttons -->
-                <div class="d-flex justify-content-between mt-3">
-                  <button 
-                    *ngIf="activeStepIndex > 0"
-                    type="button" 
-                    class="btn btn-outline-secondary px-3"
-                    (click)="prevStep()">
-                    <i class="pi pi-arrow-left me-2"></i> Previous
-                  </button>
+                <div class="d-flex justify-content-between flex-wrap mt-3">
+                  <div>
+                    <button 
+                      *ngIf="activeStepIndex > 0"
+                      type="button" 
+                      class="btn btn-outline-secondary px-3 me-2 mb-2"
+                      (click)="prevStep()">
+                      <i class="pi pi-arrow-left me-2"></i> Previous
+                    </button>
+                  </div>
                   
                   <button 
                     type="button" 
-                    class="btn btn-primary px-3 ms-auto"
+                    class="btn btn-primary px-3 mb-2"
                     (click)="nextStep()">
                     {{ activeStepIndex < steps.length - 1 ? 'Next' : 'Submit' }}
                     <i *ngIf="activeStepIndex < steps.length - 1" class="pi pi-arrow-right ms-2"></i>

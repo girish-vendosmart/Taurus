@@ -90,6 +90,9 @@ export class SupplierOnboardingComponent implements OnInit {
   getCompanyProfile: any;
   stateFieldInitialized = false; // Flag to track state field initialization
   
+  // New property to check if supplier already exists
+  hasExistingSupplier = false;
+  
   constructor(
     private fb: FormBuilder, 
     private messageService: MessageService,
@@ -221,6 +224,12 @@ export class SupplierOnboardingComponent implements OnInit {
         }
       }
     ];
+    
+    // Check if supplier_id exists in session storage
+    const supplierId = sessionStorage.getItem('supplier_id');
+    if (supplierId) {
+      this.hasExistingSupplier = true;
+    }
     
     // Check if we're in edit mode
     const route = this.router.url;
@@ -895,6 +904,7 @@ export class SupplierOnboardingComponent implements OnInit {
   postDataFunction(endPoint:any, body: any) {
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
       sessionStorage.setItem('supplier_id', res.data.name);
+      this.hasExistingSupplier = true;
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
@@ -904,7 +914,7 @@ export class SupplierOnboardingComponent implements OnInit {
       
       // Navigate to verification page after 3 seconds
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-onboarding/l2']);
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
       }, 3000);
     }, (err) => {
       console.error('Error submitting form:', err);
@@ -914,6 +924,7 @@ export class SupplierOnboardingComponent implements OnInit {
   putDataFunction(endPoint:any, body: any) {
     this.commonService.putData(endPoint, body).subscribe((res: any) => {
       sessionStorage.setItem('supplier_id', res.data.name);
+      this.hasExistingSupplier = true;
       this.messageService.add({
         severity: 'success',
         summary: 'Update Successful',
@@ -922,9 +933,10 @@ export class SupplierOnboardingComponent implements OnInit {
       });      
       
       // Navigate to verification page after 3 seconds
-      setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-verification']);
-      }, 2000);
+      this.router.navigate(['/wefab/supplier/supplier-onboarding-l2'], { 
+        queryParams: { mode: 'edit' }
+      });
+
     }, (err) => {
       console.error('Error updating form:', err);
       this.messageService.add({
@@ -1095,6 +1107,23 @@ export class SupplierOnboardingComponent implements OnInit {
           });
         }
       }
+    }
+  }
+
+  // Add a method to navigate to supplier review page
+  navigateToReviewPage() {
+    const supplierId = sessionStorage.getItem('supplier_id');
+    if (supplierId) {
+      this.router.navigate(['/wefab/supplier/supplier-verification'], {
+        queryParams: { supplier_id: supplierId }
+      });
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Supplier ID not found. Please try again.',
+        life: 3000
+      });
     }
   }
 }

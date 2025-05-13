@@ -836,7 +836,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       
       // Navigate to manufacturing verification after 3 seconds
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/manufacturing-verification']);
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
       }, 3000);
     }, (err:any) => {
       endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + sessionStorage.getItem('supplier_id');
@@ -861,8 +861,9 @@ export class SupplierOnboardingL2Component implements OnInit {
       
       // Navigate to manufacturing verification after 3 seconds
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/manufacturing-verification']);
-      }, 3000);
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3'], { 
+          queryParams: { mode: 'edit' }
+        });      }, 3000);
     }, (err:any) => {
       console.error('Error submitting form:', err);
       this.messageService.add({
@@ -893,7 +894,9 @@ export class SupplierOnboardingL2Component implements OnInit {
       
       // Navigate to manufacturing verification after 3 seconds
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/manufacturing-verification']);
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3'], { 
+          queryParams: { mode: 'edit' }
+        });
       }, 3000);
     }, (err:any) => {
       console.error('Error submitting form:', err);

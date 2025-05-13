@@ -213,7 +213,7 @@ export class SupplierProfileReviewComponent implements OnInit {
   }
 
   getVerificationStatus(supplierId: string): void {
-    this.commonservice.getData('/api/method/proq_buyer.wefab.api.supplier.onboarding.get_verification_status?supplier_company_id=SUP-000314' + supplierId).subscribe((res: any) => {
+    this.commonservice.getData('/api/method/proq_buyer.wefab.api.supplier.onboarding.get_verification_status?supplier_company_id=' + supplierId).subscribe((res: any) => {
       debugger
       this.verificationStatus = res.data
     })
