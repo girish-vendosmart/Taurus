@@ -130,6 +130,35 @@ export class SupplierProfileReviewComponent implements OnInit {
   phoneVerifiedStatus: any = false
   numberOfCompanyDocuments: number = 0
   mainCurrentDataStatusTrack: string = ''
+
+  // First, let's add a method to update the completion status based on approval status
+  updateCompletionStatus(): void {
+    // Reset completion status
+    this.completionStatus = {
+      basicInformation: 0,
+      manufacturingCapabilities: 0,
+      financialAdditional: 0
+    };
+    
+    // Update based on current approval status
+    if (this.getCurrentL1DataStatus === 'Approved') {
+      this.completionStatus.basicInformation = 100;
+    } else if (this.getCurrentL1DataStatus === 'Under Review') {
+      this.completionStatus.basicInformation = 50;
+    }
+    
+    if (this.getCurrentL2DataStatus === 'Approved') {
+      this.completionStatus.manufacturingCapabilities = 100;
+    } else if (this.getCurrentL2DataStatus === 'Under Review') {
+      this.completionStatus.manufacturingCapabilities = 50;
+    }
+    
+    if (this.getCurrentL3DataStatus === 'Approved') {
+      this.completionStatus.financialAdditional = 100;
+    } else if (this.getCurrentL3DataStatus === 'Under Review') {
+      this.completionStatus.financialAdditional = 50;
+    }
+  }
   
   // Overall completion percentage
   get completionPercentage(): number {
@@ -421,6 +450,7 @@ export class SupplierProfileReviewComponent implements OnInit {
               this.getCurrentDataStatus = res.data.approval_status
               this.getCurrentL1DataStatus = res.data.approval_status
               this.mainCurrentDataStatus()
+              this.updateCompletionStatus()
               if(this.getCurrentL1DataStatus === 'Approved') {
                 this.getL2DataStatus(supplierId)
               }
@@ -433,6 +463,7 @@ export class SupplierProfileReviewComponent implements OnInit {
               this.getCurrentDataStatus = res.data.approval_status
               this.getCurrentL2DataStatus = res.data.approval_status
               this.mainCurrentDataStatus()
+              this.updateCompletionStatus()
               if(this.getCurrentL2DataStatus === 'Approved') {
                 this.getL3DataStatus(supplierId)
               }
@@ -445,6 +476,7 @@ export class SupplierProfileReviewComponent implements OnInit {
               this.getCurrentDataStatus = res.data.approval_status
               this.getCurrentL3DataStatus = res.data.approval_status
               this.mainCurrentDataStatus()
+              this.updateCompletionStatus()
             })
         }
 
