@@ -62,7 +62,7 @@ export class LoginComponentComponent {
                   
                   // Navigate based on user type
                   if (response.data.user_type === 'supplier') {
-                    this.router.navigate(['/wefab/supplier/supplier-onboarding']);
+                    sessionStorage.setItem('supplier_id', response.data.supplier_info.supplier_company_id);
                     this.router.navigate([response.data.route_link]);
                   } else if (response.data.user_type === 'wefab_team') {
                     this.router.navigate(['/wefab/wefabTeam/dashboard']);
