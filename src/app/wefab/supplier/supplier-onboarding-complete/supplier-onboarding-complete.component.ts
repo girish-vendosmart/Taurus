@@ -21,6 +21,7 @@ export class SupplierOnboardingCompleteComponent implements OnInit {
   // Flag to determine whether verification is complete or under review
   verificationCurrentStatus: boolean = false;
   supplierId: any = sessionStorage.getItem('supplier_id');
+  isRejected: boolean = false
   
   constructor(private router: Router, private commonService: CommonService) { }
   
@@ -44,6 +45,8 @@ export class SupplierOnboardingCompleteComponent implements OnInit {
     let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${this.supplierId}`;
     this.commonService.getData(endPoint).subscribe((res: any) => {
       this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? false : true;
+
+      this.isRejected = res.data.approval_status === 'Rejected';
       
       // Only simulate verification if not approved
       // if (!this.verificationCurrentStatus) {
@@ -61,12 +64,12 @@ export class SupplierOnboardingCompleteComponent implements OnInit {
   }
   
   // Navigate to the profile review page
-  goToReview(): void {
+  viewReviewPage(): void {
     this.router.navigate(['/wefab/supplier/profile-review']);
   }
   
   // Edit information if needed - navigate to the L3 onboarding form in edit mode
-  editInformation(): void {
+  editVerification(): void {
     this.router.navigate(['/wefab/supplier/supplier-onboarding-l3'], { 
       queryParams: { 
         mode: 'edit'

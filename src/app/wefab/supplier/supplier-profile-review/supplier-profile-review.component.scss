@@ -1018,3 +1018,75 @@
   color: #6b7280;
   font-style: italic;
 }
+
+/* Facility styling for Additional Information Tab */
+
+/* Production Facilities section */
+.facilities-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.facility-card {
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.facility-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.facility-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.facility-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.facility-location {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.facility-location i {
+  color: #ef4444;
+  font-size: 0.8rem;
+}
+
+/* Empty state for facilities */
+.empty-message {
+  text-align: center;
+  padding: 1.5rem;
+  color: #6b7280;
+  font-style: italic;
+  background-color: #f9fafb;
+  border-radius: 6px;
+  border: 1px dashed #e5e7eb;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+  .facilities-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animation for facility cards */
+.facility-card {
+  animation: fadeIn 0.3s ease-out;
+}
