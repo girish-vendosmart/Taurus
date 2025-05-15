@@ -932,9 +932,7 @@ export class SupplierOnboardingComponent implements OnInit {
       });      
       
       // Navigate to verification page after 3 seconds
-      this.router.navigate(['/wefab/supplier/supplier-onboarding-l2'], { 
-        queryParams: { mode: 'edit' }
-      });
+      this.router.navigateByUrl('/wefab/supplier/profile-review')
 
     }, (err) => {
       console.error('Error updating form:', err);

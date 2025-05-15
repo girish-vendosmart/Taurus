@@ -4,7 +4,7 @@ import { FieldType, FieldTypeConfig, FormlyModule } from '@ngx-formly/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FileUploadComponent } from './wefab/supplier/supplier-onboarding/file-upload.component';
 import { CommonService } from './wefab/shared/common.service';
-import { HttpEventType } from '@angular/common/http';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'formly-field-file-upload',
@@ -57,7 +57,13 @@ import { HttpEventType } from '@angular/common/http';
           </button>
           
           <!-- File type icon or thumbnail for images -->
-          <div class="file-icon" [ngClass]="getFileIconClass(file.type || getFileTypeFromUrl(file.url))">
+          <div class="file-icon" 
+               [ngClass]="[
+                 getFileIconClass(file.type || getFileTypeFromUrl(file.url)),
+                 isFileUploading(file) ? 'uploading' : '',
+                 isFileUploaded(file) ? 'uploaded' : '',
+                 isFileUploadFailed(file) ? 'error' : ''
+               ]">
             <img *ngIf="isImageFile(file.type || getFileTypeFromUrl(file.url)) && file.url" 
                  [src]="file.url" 
                  alt="Thumbnail" 
@@ -83,7 +89,24 @@ import { HttpEventType } from '@angular/common/http';
                   {{ file.progress }}%
                 </div>
               </div>
-              <small class="text-muted">Uploading...</small>
+              <small class="upload-status uploading">
+                <i class="pi pi-spinner pi-spin mr-1"></i> Uploading...
+              </small>
+            </div>
+            
+            <!-- Success indicator -->
+            <div *ngIf="isFileUploaded(file)" class="file-upload-success">
+              <small class="upload-status success">
+                <i class="pi pi-check-circle mr-1"></i> Upload complete
+              </small>
+            </div>
+            
+            <!-- Error indicator -->
+            <div *ngIf="isFileUploadFailed(file)" class="file-upload-error">
+              <small class="upload-status error">
+                <i class="pi pi-exclamation-circle mr-1"></i> 
+                {{ file.errorMessage || 'Upload failed' }}
+              </small>
             </div>
           </div>
         </div>
@@ -364,6 +387,85 @@ import { HttpEventType } from '@angular/common/http';
       from { background-position: 1rem 0; }
       to { background-position: 0 0; }
     }
+    
+    /* Upload status styles */
+    .upload-status {
+      display: flex;
+      align-items: center;
+      font-size: 0.75rem;
+      padding: 2px 0;
+    }
+    
+    .upload-status i {
+      margin-right: 4px;
+    }
+    
+    .upload-status.uploading {
+      color: #2563eb;
+    }
+    
+    .upload-status.success {
+      color: #10b981;
+    }
+    
+    .upload-status.error {
+      color: #ef4444;
+    }
+    
+    .file-upload-success, .file-upload-error {
+      margin-top: 8px;
+    }
+    
+    .file-icon {
+      position: relative;
+    }
+    
+    /* Status indicators on file icon */
+    .file-icon::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      right: -5px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: 2px solid #fff;
+      display: none;
+    }
+    
+    .file-icon.uploading::after {
+      display: block;
+      background-color: #2563eb;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>');
+      background-size: 12px;
+      background-position: center;
+      background-repeat: no-repeat;
+      animation: spin 1.5s linear infinite;
+    }
+    
+    .file-icon.uploaded::after {
+      display: block;
+      background-color: #10b981;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+      background-size: 12px;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    
+    .file-icon.error::after {
+      display: block;
+      background-color: #ef4444;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>');
+      background-size: 12px;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
   `]
 })
 export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> implements OnInit {
@@ -402,11 +504,21 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
             name: this.getFileNameFromUrl(file),
             size: 0,
             type: this.getFileTypeFromUrl(file),
-            url: file
+            url: file,
+            uploading: false,
+            uploaded: true,
+            error: false,
+            progress: 100
           };
         }
         // If the value is a file object
-        return file;
+        return {
+          ...file,
+          uploading: file.uploading || false,
+          uploaded: file.uploaded !== undefined ? file.uploaded : (file.url ? true : false),
+          error: file.error || false,
+          progress: file.progress || (file.url ? 100 : 0)
+        };
       });
     } else if (typeof value === 'string') {
       // Handle string value (URL for single file upload)
@@ -414,11 +526,22 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
         name: this.getFileNameFromUrl(value),
         size: 0,
         type: this.getFileTypeFromUrl(value),
-        url: value
+        url: value,
+        uploading: false,
+        uploaded: true,
+        error: false,
+        progress: 100
       }];
     } else {
       // Handle object value (file object for single file upload)
-      this.uploadedFiles = [value];
+      const file = value;
+      this.uploadedFiles = [{
+        ...file,
+        uploading: file.uploading || false,
+        uploaded: file.uploaded !== undefined ? file.uploaded : (file.url ? true : false),
+        error: file.error || false,
+        progress: file.progress || (file.url ? 100 : 0)
+      }];
     }
   }
   
@@ -588,79 +711,200 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   }
   
   updateFiles(fileList: FileList): void {
-    // Convert FileList to array
-    const newFiles = Array.from(fileList).map(file => ({
-      ...file,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      uploading: true,
-      progress: 0
-    }));
-    
-    // Update uploadedFiles based on multiple/single mode
     if (this.props['multiple'] === true) {
-      // For multiple file upload, add to existing files
-      this.uploadedFiles = [...this.uploadedFiles, ...newFiles];
+      // For multiple file upload
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        const fileObj = {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          uploading: true,  // Mark as uploading
+          uploaded: false,  // Not yet uploaded
+          error: false,     // No error yet
+          progress: 0       // Initialize progress at 0
+        };
+        
+        // Add to array immediately with uploading state
+        this.uploadedFiles.push(fileObj);
+        
+        // Start the upload
+        this.uploadFile(file, this.uploadedFiles.length - 1);
+      }
     } else {
-      // For single file upload, replace existing file
-      this.uploadedFiles = [...newFiles];
+      // For single file upload
+      const file = fileList[0];
+      const fileObj = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        uploading: true,  // Mark as uploading
+        uploaded: false,  // Not yet uploaded
+        error: false,     // No error yet
+        progress: 0       // Initialize progress at 0
+      };
+      
+      // Replace existing files with new one in uploading state
+      this.uploadedFiles = [fileObj];
+      
+      // Start the upload
+      this.uploadFile(file, 0);
     }
     
-    // Update form control immediately with current value (URLs will be updated later)
+    // Update form control value
     this.updateFormControlValue();
-    
-    // Upload each file to get the URL from the server
-    Array.from(fileList).forEach((file, index) => {
-      const fileIndex = this.props['multiple'] === true 
-        ? this.uploadedFiles.findIndex(f => f.name === file.name && f.size === file.size)
-        : 0;
-      
-      if (fileIndex !== -1) {
-        this.commonService.uploadFile(file).subscribe(
-          (event) => {
-            // Track progress events
-            if (event.type === HttpEventType.UploadProgress && event.total) {
-              // Calculate progress percentage
-              const progress = Math.round(100 * event.loaded / event.total);
-              this.uploadedFiles[fileIndex].progress = progress;
-            }
-            
-            // Check if it's a HttpResponse final event
-            if (event.type === HttpEventType.Response) {
-              const response = event.body;
-              console.log("File uploaded successfully:", response);
-              
-              if (response && response.message && response.message.file_url) {
-                // Update file object with URL and mark as complete
-                this.uploadedFiles[fileIndex].url = response.message.file_url;
-                this.uploadedFiles[fileIndex].uploading = false;
-                this.uploadedFiles[fileIndex].progress = 100;
-                
-                // Update form control value with updated URLs
-                this.updateFormControlValue();
-              }
-            }
-          },
-          (error) => {
-            console.error("Error uploading file:", error);
-            // Mark file as failed
-            if (fileIndex !== -1) {
-              this.uploadedFiles[fileIndex].uploading = false;
-              this.uploadedFiles[fileIndex].uploadFailed = true;
-              this.uploadedFiles[fileIndex].errorMessage = 'Upload failed';
-            }
-          }
-        );
-      }
-    });
-    
-    this.formControl.markAsTouched();
   }
   
-  // Helper method to check if a file is currently uploading
+  // New method to handle file upload with progress tracking
+  uploadFile(file: File, fileIndex: number): void {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('file_name', file.name);
+    
+    // Debug logging
+    console.log('Starting file upload:', file.name);
+    
+    this.commonService.uploadFileWithProgress(formData).subscribe({
+      next: (event: any) => {
+        console.log('Upload event type:', event.type, 'Event:', event);
+        
+        switch (event.type) {
+          case HttpEventType.Sent:
+            console.log('Request sent to server');
+            break;
+            
+          case HttpEventType.UploadProgress:
+            if (event.total) {
+              const percentDone = Math.round(100 * event.loaded / event.total);
+              console.log(`Upload progress: ${percentDone}%`);
+              this.uploadedFiles[fileIndex].progress = percentDone;
+              this.uploadedFiles[fileIndex].uploading = true;
+              this.uploadedFiles[fileIndex].uploaded = false;
+              
+              // Force change detection
+              this.uploadedFiles = [...this.uploadedFiles];
+              this.updateFormControlValue();
+            }
+            break;
+            
+          case HttpEventType.ResponseHeader:
+            // Got response headers, check if successful
+            if (event.status === 200 || event.status === 201) {
+              console.log('Upload successful (from headers):', event.status);
+              this.uploadedFiles[fileIndex].uploading = false;
+              this.uploadedFiles[fileIndex].uploaded = true;
+              this.uploadedFiles[fileIndex].progress = 100;
+              
+              // Force change detection
+              this.uploadedFiles = [...this.uploadedFiles];
+              this.updateFormControlValue();
+            }
+            break;
+            
+          case HttpEventType.DownloadProgress:
+            // Not typically used for uploads
+            console.log('Download progress event during upload');
+            break;
+            
+          case HttpEventType.Response:
+            console.log('Full response received:', event.body);
+            
+            // Always mark as complete when we get a full response
+            this.uploadedFiles[fileIndex].uploading = false;
+            this.uploadedFiles[fileIndex].uploaded = true;
+            this.uploadedFiles[fileIndex].progress = 100;
+            
+            // Set URL if available in response
+            if (event.body) {
+              if (event.body.url) {
+                this.uploadedFiles[fileIndex].url = event.body.url;
+              } else if (typeof event.body === 'string') {
+                // Try to parse if string
+                try {
+                  const parsed = JSON.parse(event.body);
+                  if (parsed && parsed.url) {
+                    this.uploadedFiles[fileIndex].url = parsed.url;
+                  }
+                } catch (e) {
+                  // If not JSON, treat as direct URL
+                  this.uploadedFiles[fileIndex].url = event.body;
+                }
+              } else if (event.body.message && typeof event.body.message === 'string') {
+                // Some APIs return message with URL
+                this.uploadedFiles[fileIndex].url = event.body.message;
+              } else if (event.body.file_url) {
+                // Some APIs use file_url
+                this.uploadedFiles[fileIndex].url = event.body.file_url;
+              }
+            }
+            
+            // Force change detection
+            this.uploadedFiles = [...this.uploadedFiles];
+            this.updateFormControlValue();
+            break;
+            
+          default:
+            console.log('Unknown event type:', event.type);
+            // For safety, mark as complete if it's not a progress event
+            if (event.type !== HttpEventType.UploadProgress) {
+              this.uploadedFiles[fileIndex].uploading = false;
+              this.uploadedFiles[fileIndex].uploaded = true;
+              this.uploadedFiles[fileIndex].progress = 100;
+              
+              // Force change detection
+              this.uploadedFiles = [...this.uploadedFiles];
+              this.updateFormControlValue();
+            }
+        }
+      },
+      error: (error: any) => {
+        console.error('Upload error:', error);
+        // Mark as failed
+        this.uploadedFiles[fileIndex].uploading = false;
+        this.uploadedFiles[fileIndex].uploaded = false;
+        this.uploadedFiles[fileIndex].error = true;
+        this.uploadedFiles[fileIndex].errorMessage = 'Failed to upload: ' + (error.message || 'Unknown error');
+        
+        // Force change detection
+        this.uploadedFiles = [...this.uploadedFiles];
+        this.updateFormControlValue();
+      },
+      complete: () => {
+        console.log('Upload subscription complete for file:', file.name);
+        // Ensure upload is marked as complete if the complete callback fires
+        if (this.uploadedFiles[fileIndex].uploading) {
+          this.uploadedFiles[fileIndex].uploading = false;
+          this.uploadedFiles[fileIndex].uploaded = true;
+          this.uploadedFiles[fileIndex].progress = 100;
+          
+          // Force change detection
+          this.uploadedFiles = [...this.uploadedFiles];
+          this.updateFormControlValue();
+        }
+      }
+    });
+  }
+
+  // Helper to check if a file is currently uploading
   isFileUploading(file: any): boolean {
-    return file.uploading === true;
+    // Explicit check for uploading flag
+    return file && file.uploading === true;
+  }
+  
+  // Helper to check if a file has been uploaded successfully
+  isFileUploaded(file: any): boolean {
+    // Check for explicit uploaded flag
+    if (file && file.uploaded === true) return true;
+    
+    // Fallback: if file has URL but no explicit status, consider it uploaded
+    if (file && file.url && file.uploading !== true && file.error !== true) return true;
+    
+    return false;
+  }
+  
+  // Helper to check if a file upload has failed
+  isFileUploadFailed(file: any): boolean {
+    return file && file.error === true;
   }
   
   // Helper method to update form control value consistently

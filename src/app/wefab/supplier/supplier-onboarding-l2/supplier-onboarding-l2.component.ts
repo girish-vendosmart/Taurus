@@ -861,9 +861,8 @@ export class SupplierOnboardingL2Component implements OnInit {
       
       // Navigate to manufacturing verification after 3 seconds
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3'], { 
-          queryParams: { mode: 'edit' }
-        });      }, 3000);
+        this.router.navigateByUrl('/wefab/supplier/profile-review')
+      }, 3000);
     }, (err:any) => {
       console.error('Error submitting form:', err);
       this.messageService.add({
@@ -894,9 +893,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       
       // Navigate to manufacturing verification after 3 seconds
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3'], { 
-          queryParams: { mode: 'edit' }
-        });
+        this.router.navigateByUrl('/wefab/supplier/profile-review')
       }, 3000);
     }, (err:any) => {
       console.error('Error submitting form:', err);

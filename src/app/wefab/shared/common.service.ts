@@ -151,6 +151,22 @@ export class CommonService {
         );
     }
 
+    // Upload document file with progress tracking - handles FormData directly
+    uploadFileWithProgress(formData: FormData): Observable<any> {
+        // Create headers with Authorization token
+        const headers = new HttpHeaders({
+            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+        });
 
+        return this.http.post(
+        `${this.baseUrl}/api/method/upload_file`,
+        formData,
+        {   
+            headers,
+            reportProgress: true,
+            observe: 'events',
+        }
+        );
+    }
 
 }

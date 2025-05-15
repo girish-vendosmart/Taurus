@@ -7,6 +7,7 @@ import { MessageService } from 'primeng/api';
 import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
 import { CommonService } from '../../shared/common.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import e from 'express';
 
 interface DocumentSummary {
@@ -132,6 +133,9 @@ export class SupplierProfileReviewComponent implements OnInit {
   numberOfCompanyDocuments: number = 0
   mainCurrentDataStatusTrack: string = ''
 
+  // Add new properties for document preview
+  previewDocument: string | null = null;
+  
   // First, let's add a method to update the completion status based on approval status
   updateCompletionStatus(): void {
     // Reset completion status
@@ -173,11 +177,11 @@ export class SupplierProfileReviewComponent implements OnInit {
     private router: Router,
     private messageService: MessageService,
     private commonservice: CommonService,
+    private sanitizer: DomSanitizer,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     this.getL1Data(this.supplierId)
-    this.getL1DataStatus(this.supplierId)
     this.getDocumentSummary(this.supplierId)
     this.getL1DocumentSummary(this.supplierId)
   }
@@ -292,14 +296,6 @@ export class SupplierProfileReviewComponent implements OnInit {
       this.getL2Data(this.supplierId)
       this.getL2DataStatus(this.supplierId)
     }
-    
-    // Show toast for tab change
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Tab Changed',
-      detail: `Viewing ${this.getTabDisplayName(tab)} information`,
-      life: 2000
-    });
   }
   
   changeTab(tab: string): void {
@@ -354,13 +350,7 @@ export class SupplierProfileReviewComponent implements OnInit {
       }
     }
     
-    // Show toast for tab change
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Tab Changed',
-      detail: `Viewing ${tab === 'company' ? 'Company Details' : 'Contact Information'}`,
-      life: 2000
-    });
+    
   }
   
   changeManufacturingTab(tab: string): void {
@@ -378,13 +368,6 @@ export class SupplierProfileReviewComponent implements OnInit {
       }
     }
     
-    // Show toast for tab change
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Tab Changed',
-      detail: `Viewing ${this.getManufacturingTabName(tab)}`,
-      life: 2000
-    });
   }
   
   getManufacturingTabName(tab: string): string {
@@ -426,7 +409,7 @@ export class SupplierProfileReviewComponent implements OnInit {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
         this.getCompanyProfile = JSON.parse(res.data.company_profile)
-        console.log(this.getCompanyProfile)
+        this.getL1DataStatus(this.supplierId)
       })
     }
 
@@ -434,6 +417,7 @@ export class SupplierProfileReviewComponent implements OnInit {
       let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId
         this.commonservice.getData(endPoint).subscribe((res: any) => {
           this.manufacturingData = JSON.parse(res.data.company_profile)
+          this.getL2DataStatus(supplierId)
         })
       }
 
@@ -441,7 +425,7 @@ export class SupplierProfileReviewComponent implements OnInit {
         let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + supplierId
           this.commonservice.getData(endPoint).subscribe((res: any) => {
             this.newFinancialData = JSON.parse(res.data.company_profile)
-            console.log(this.newFinancialData)
+            this.getL3DataStatus(supplierId)
           })
         }
 
@@ -450,11 +434,7 @@ export class SupplierProfileReviewComponent implements OnInit {
             this.commonservice.getData(endPoint).subscribe((res: any) => {
               this.getCurrentDataStatus = res.data.approval_status
               this.getCurrentL1DataStatus = res.data.approval_status
-              this.mainCurrentDataStatus()
-              this.updateCompletionStatus()
-              if(this.getCurrentL1DataStatus === 'Approved') {
-                this.getL2DataStatus(supplierId)
-              }
+              this.getL2Data(supplierId)
             })
         }
 
@@ -463,11 +443,7 @@ export class SupplierProfileReviewComponent implements OnInit {
             this.commonservice.getData(endPoint).subscribe((res: any) => {
               this.getCurrentDataStatus = res.data.approval_status
               this.getCurrentL2DataStatus = res.data.approval_status
-              this.mainCurrentDataStatus()
-              this.updateCompletionStatus()
-              if(this.getCurrentL2DataStatus === 'Approved') {
-                this.getL3DataStatus(supplierId)
-              }
+              this.getL3Data(supplierId)
             })
         }
 
@@ -620,4 +596,77 @@ export class SupplierProfileReviewComponent implements OnInit {
             }
           });
         }
+
+  /**
+   * View a document in the preview overlay
+   */
+  viewDocument(url: string, event: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    
+    if (!url) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Document URL is not available'
+      });
+      return;
+    }
+    
+    this.previewDocument = url;
+  }
+  
+  /**
+   * Close the document preview overlay
+   */
+  closeDocumentPreview(): void {
+    this.previewDocument = null;
+  }
+  
+  /**
+   * Download a document
+   */
+  downloadDocument(url: string, event: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    
+    if (!url) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Document URL is not available'
+      });
+      return;
+    }
+    
+    // Create a temporary anchor element to trigger the download
+    const link = document.createElement('a');
+    link.href = url;
+    
+    // Extract filename from URL
+    const filename = this.getDocumentName(url);
+    link.download = filename;
+    
+    // Append to body, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Document download started'
+    });
+  }
+  
+  /**
+   * Sanitize a URL for safe use in iframes
+   */
+  getSafeUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
 } 

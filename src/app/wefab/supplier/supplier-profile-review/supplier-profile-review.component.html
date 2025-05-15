@@ -180,6 +180,16 @@
             <div class="document-cards-row">
               <div class="document-card" *ngFor="let document of getCompanyProfile.companyDocuments">
                 <div class="document-preview">
+                  <!-- Document action buttons -->
+                  <div class="document-actions">
+                    <button class="action-button view-button" (click)="viewDocument(document.url, $event)">
+                      <i class="pi pi-eye"></i>
+                    </button>
+                    <button class="action-button download-button" (click)="downloadDocument(document.url, $event)">
+                      <i class="pi pi-download"></i>
+                    </button>
+                  </div>
+                  
                   <!-- Image files -->
                   <img *ngIf="isImageFile(document.url)" [src]="document.url" [alt]="document.make" class="document-image">
                   
@@ -196,6 +206,14 @@
                   <!-- Other file types -->
                   <div *ngIf="isOtherFile(document.url)" class="document-icon other-icon">
                     <i class="fas fa-file-alt"></i>
+                  </div>
+                  
+                  <!-- Upload progress indicator (shown during upload) -->
+                  <div class="upload-progress-container" *ngIf="document.uploading">
+                    <div class="progress-text">Uploading... {{document.progress || 0}}%</div>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar" [style.width.%]="document.progress || 0"></div>
+                    </div>
                   </div>
                 </div>
                 <div class="document-info">
@@ -259,29 +277,65 @@
           <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'machines'">
             <div class="machines-container">
               <div class="machine-card" *ngFor="let machine of manufacturingData.machines">
+                <!-- For non-array machine photos -->
                 <div *ngIf="!isMachineDocumentArray(machine)">
                   <div class="machine-image">
+                    <!-- Document action buttons - positioned at the top right corner -->
+                    <div class="document-actions">
+                      <button class="action-button view-button" (click)="viewDocument(machine.machinePhotos.url, $event)" title="View">
+                        <i class="pi pi-eye"></i>
+                      </button>
+                      <button class="action-button download-button" (click)="downloadDocument(machine.machinePhotos.url, $event)" title="Download">
+                        <i class="pi pi-download"></i>
+                      </button>
+                    </div>
                     <img [src]="machine.machinePhotos.url" [alt]="machine.make" class="machine-photo">
+                    
+                    <!-- Upload progress indicator (shown during upload) -->
+                    <div class="upload-progress-container" *ngIf="machine.machinePhotos.uploading">
+                      <div class="progress-text">Uploading... {{machine.machinePhotos.progress || 0}}%</div>
+                      <div class="progress-bar-container">
+                        <div class="progress-bar" [style.width.%]="machine.machinePhotos.progress || 0"></div>
+                      </div>
+                    </div>
                   </div>
                   <div class="machine-details">
                     <h3 class="machine-name">{{ machine.make }}</h3>
                     <div class="machine-info">
                       <p class="machine-type"><strong>Model:</strong> {{ machine.model }}</p>
                       <p class="machine-quantity"><strong>Quantity:</strong> {{ machine.quantity }} units</p>
-                      <p class="machine-description"><strong>Specifications:</strong> {{ machine.specifications }} </p>
+                      <p class="machine-description"><strong>Specifications:</strong> {{ machine.specifications }}</p>
                     </div>
                   </div>
                 </div>
+                <!-- For array machine photos -->
                 <div *ngIf="isMachineDocumentArray(machine)">
                   <div class="machine-image">
+                    <!-- Document action buttons - positioned at the top right corner -->
+                    <div class="document-actions">
+                      <button class="action-button view-button" (click)="viewDocument(machine.machinePhotos[0].url, $event)" title="View">
+                        <i class="pi pi-eye"></i>
+                      </button>
+                      <button class="action-button download-button" (click)="downloadDocument(machine.machinePhotos[0].url, $event)" title="Download">
+                        <i class="pi pi-download"></i>
+                      </button>
+                    </div>
                     <img [src]="machine.machinePhotos[0].url" [alt]="machine.make" class="machine-photo">
+                    
+                    <!-- Upload progress indicator (shown during upload) -->
+                    <div class="upload-progress-container" *ngIf="machine.machinePhotos[0].uploading">
+                      <div class="progress-text">Uploading... {{machine.machinePhotos[0].progress || 0}}%</div>
+                      <div class="progress-bar-container">
+                        <div class="progress-bar" [style.width.%]="machine.machinePhotos[0].progress || 0"></div>
+                      </div>
+                    </div>
                   </div>
                   <div class="machine-details">
                     <h3 class="machine-name">{{ machine.make }}</h3>
                     <div class="machine-info">
                       <p class="machine-type"><strong>Model:</strong> {{ machine.model }}</p>
                       <p class="machine-quantity"><strong>Quantity:</strong> {{ machine.quantity }} units</p>
-                      <p class="machine-description"><strong>Specifications:</strong> {{ machine.specifications }} </p>
+                      <p class="machine-description"><strong>Specifications:</strong> {{ machine.specifications }}</p>
                     </div>
                   </div>
                 </div>
@@ -294,8 +348,25 @@
             <div class="facility-photos-container">
               <div class="facility-photo-card" *ngFor="let photo of manufacturingData.facilityPhotos">
                 <div class="facility-photo">
+                  <!-- Document action buttons - positioned at the top right corner -->
+                  <div class="document-actions">
+                    <button class="action-button view-button" (click)="viewDocument(photo.url || photo, $event)" title="View">
+                      <i class="pi pi-eye"></i>
+                    </button>
+                    <button class="action-button download-button" (click)="downloadDocument(photo.url || photo, $event)" title="Download">
+                      <i class="pi pi-download"></i>
+                    </button>
+                  </div>
                   <img [src]="photo.url" [alt]="'facility photo'" class="facility-image" *ngIf="photo.url">
                   <img [src]="photo" [alt]="'facility photo'" class="facility-image" *ngIf="!photo.url">
+                  
+                  <!-- Upload progress indicator (shown during upload) -->
+                  <div class="upload-progress-container" *ngIf="photo.uploading">
+                    <div class="progress-text">Uploading... {{photo.progress || 0}}%</div>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar" [style.width.%]="photo.progress || 0"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -307,7 +378,24 @@
               <div class="certification-card" *ngFor="let cert of manufacturingData.certifications">
                 <div *ngIf="!isCertificateDocumentArray(cert)">
                   <div class="certification-image">
-                    <img [src]="cert.certificateDocument" [alt]="cert.certificationName" class="certification-photo">
+                    <!-- Document action buttons - positioned at the top right corner -->
+                    <div class="document-actions">
+                      <button class="action-button view-button" (click)="viewDocument(cert.certificateDocument.url, $event)" title="View">
+                        <i class="pi pi-eye"></i>
+                      </button>
+                      <button class="action-button download-button" (click)="downloadDocument(cert.certificateDocument.url, $event)" title="Download">
+                        <i class="pi pi-download"></i>
+                      </button>
+                    </div>
+                    <img [src]="cert.certificateDocument.url" [alt]="cert.certificationName" class="certification-photo">
+                    
+                    <!-- Upload progress indicator (shown during upload) -->
+                    <div class="upload-progress-container" *ngIf="cert.certificateDocument.uploading">
+                      <div class="progress-text">Uploading... {{cert.certificateDocument.progress || 0}}%</div>
+                      <div class="progress-bar-container">
+                        <div class="progress-bar" [style.width.%]="cert.certificateDocument.progress || 0"></div>
+                      </div>
+                    </div>
                   </div>
                   <div class="certification-details">
                     <h3 class="certification-name">{{ cert.certificationName }}</h3>
@@ -325,8 +413,25 @@
                 </div>
                 <div *ngIf="isCertificateDocumentArray(cert)">
                   <div class="certification-image">
+                    <!-- Document action buttons - positioned at the top right corner -->
+                    <div class="document-actions">
+                      <button class="action-button view-button" (click)="viewDocument(cert.certificateDocument[0].url, $event)" title="View">
+                        <i class="pi pi-eye"></i>
+                      </button>
+                      <button class="action-button download-button" (click)="downloadDocument(cert.certificateDocument[0].url, $event)" title="Download">
+                        <i class="pi pi-download"></i>
+                      </button>
+                    </div>
                     <img [src]="cert.certificateDocument[0].url" [alt]="cert.certificationName"
                       class="certification-photo">
+                    
+                    <!-- Upload progress indicator (shown during upload) -->
+                    <div class="upload-progress-container" *ngIf="cert.certificateDocument[0].uploading">
+                      <div class="progress-text">Uploading... {{cert.certificateDocument[0].progress || 0}}%</div>
+                      <div class="progress-bar-container">
+                        <div class="progress-bar" [style.width.%]="cert.certificateDocument[0].progress || 0"></div>
+                      </div>
+                    </div>
                   </div>
                   <div class="certification-details">
                     <h3 class="certification-name">{{ cert.certificationName }}</h3>
@@ -696,6 +801,19 @@
         </ul>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- File Preview Overlay - add this at the end of the component -->
+<div class="file-preview-overlay" *ngIf="previewDocument">
+  <div class="file-preview-content">
+    <button class="close-preview" (click)="closeDocumentPreview()">
+      <i class="pi pi-times"></i>
+    </button>
+    <!-- Images -->
+    <img *ngIf="isImageFile(previewDocument)" [src]="previewDocument" alt="Document preview">
+    <!-- PDFs -->
+    <iframe *ngIf="isPdfFile(previewDocument)" [src]="getSafeUrl(previewDocument)" width="800" height="600" frameborder="0"></iframe>
   </div>
 </div>
 
