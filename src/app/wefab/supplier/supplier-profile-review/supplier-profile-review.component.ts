@@ -388,6 +388,7 @@ export class SupplierProfileReviewComponent implements OnInit {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
         this.getDocumentSummaryData = JSON.parse(res.data.company_profile)
+        debugger
         this.numberOfMachinePhoto = this.getDocumentSummaryData.machines.length
         this.numberOfFacilityPhoto = this.getDocumentSummaryData.facilityPhotos.length
         this.numberOfCertificationPhoto = this.getDocumentSummaryData.certifications.length
@@ -398,9 +399,12 @@ export class SupplierProfileReviewComponent implements OnInit {
     getL1DocumentSummary(supplierId:any) {
       let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
         this.commonservice.getData(endPoint).subscribe((res: any) => {
+          debugger
           this.getDocumentSummaryL1Data = JSON.parse(res.data.company_profile)
           this.phoneVerifiedStatus = this.getDocumentSummaryL1Data.phone_verified
-          this.numberOfCompanyDocuments = 1
+          this.numberOfCompanyDocuments = this.getDocumentSummaryL1Data.companyDocuments.length
+          debugger
+          console.log(this.numberOfCompanyDocuments)
           console.log(this.getDocumentSummaryData)
         })
       }

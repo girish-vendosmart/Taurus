@@ -913,6 +913,7 @@ export class SupplierOnboardingComponent implements OnInit {
       phone_verified: this.phoneVerified,
       company_profile: JSON.stringify(data)
     };
+    debugger
     return body;
   }
 
@@ -996,6 +997,7 @@ export class SupplierOnboardingComponent implements OnInit {
     
     // Check if we have a supplier_id
     let supplier_id = sessionStorage.getItem('supplier_id');
+    body = this.updateData(this.model);
     if(supplier_id) {
       endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplier_id;
       this.putDataFunction(endPoint, body);

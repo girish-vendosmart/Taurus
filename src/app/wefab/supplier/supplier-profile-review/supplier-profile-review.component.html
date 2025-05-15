@@ -110,14 +110,7 @@
               </div>
               <div class="review-col">
                 <div class="field-label">Registered Address </div>
-                <div class="field-value">{{ getCompanyProfile.registeredAddress }}</div>
-              </div>
-            </div>
-
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Manufacturing Facility Address </div>
-                <div class="field-value">{{ getCompanyProfile.manufacturingFacilityAddress }}</div>
+                <div class="field-value">{{ getCompanyProfile.registeredAddress.fullAddress }}</div>
               </div>
             </div>
           </div>
@@ -738,7 +731,6 @@
           <i class="pi pi-file"></i>
           Document Summary
         </h2>
-
         <ul class="document-list">
           <li class="document-item">
             <span class="document-label">Company Documents:</span>
