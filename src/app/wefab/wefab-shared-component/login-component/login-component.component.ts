@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { CommonService } from '../../shared/common.service';
 import { FirebaseService } from '../../../core/services/firebase.service';
+import { ActivatedRoute } from '@angular/router';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-login-component',
@@ -16,17 +18,44 @@ export class LoginComponentComponent {
   loginForm: FormGroup;
   showPassword = false;
   loginError = '';
+  emailId: any;
+  companyId: any;
   
   constructor(
     private fb: FormBuilder, 
     private router: Router, 
     private commonService: CommonService,
-    private firebaseService: FirebaseService
+    private firebaseService: FirebaseService,
+    private route: ActivatedRoute
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
+  }
+
+  ngOnInit(): void {
+    const currentUrl = window.location.href;
+    console.log('Current URL:', currentUrl);
+
+      // Get just the query string part (everything after the ?)
+      const queryString = window.location.search;
+      console.log('Query string:', queryString);
+      let queryData:any = this.parseQueryString(queryString)
+      console.log("Query Data", queryData)
+
+      if(queryData.email_id && queryData.company_name) {
+        this.emailId = queryData.email_id
+        this.companyId = queryData.company_name
+      }
+
+      if(this.emailId) {
+        this.loginForm.get('email')?.setValue(this.emailId)
+      } 
+
+      if(this.companyId) {
+        sessionStorage.setItem('company_id', this.companyId)
+      }
   }
   
   togglePasswordVisibility() {
@@ -117,4 +146,24 @@ export class LoginComponentComponent {
       });
     }
   }
+
+  parseQueryString(queryString: string) {
+    // Remove the leading '?' if it exists
+    const str = queryString.startsWith('?') ? queryString.substring(1) : queryString;
+    
+    // Split by '&' to get key-value pairs
+    const pairs = str.split('&');
+    
+    // Create an object to store the parameters
+    const params: Record<string, string> = {};
+    
+    // Parse each key-value pair
+    pairs.forEach(pair => {
+      const [key, value] = pair.split('=');
+      params[key] = decodeURIComponent(value || '');
+    });
+    
+    return params;
+  }
+  
 }
