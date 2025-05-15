@@ -70,6 +70,21 @@ import { HttpEventType } from '@angular/common/http';
           <div class="file-details">
             <div class="file-name" [title]="file.name">{{ file.name }}</div>
             <div class="file-size">{{ formatFileSize(file.size) }}</div>
+            
+            <!-- Loading indicator -->
+            <div *ngIf="isFileUploading(file)" class="file-upload-progress">
+              <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                     role="progressbar" 
+                     [style.width]="(file.progress || 0) + '%'"
+                     [attr.aria-valuenow]="file.progress || 0" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100">
+                  {{ file.progress }}%
+                </div>
+              </div>
+              <small class="text-muted">Uploading...</small>
+            </div>
           </div>
         </div>
       </div>
@@ -317,6 +332,38 @@ import { HttpEventType } from '@angular/common/http';
       font-size: 1.5rem;
       cursor: pointer;
     }
+    
+    /* File upload progress styles */
+    .file-upload-progress {
+      margin-top: 8px;
+    }
+    
+    .progress {
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+      background-color: #e9ecef;
+      margin-bottom: 4px;
+    }
+    
+    .progress-bar {
+      background-color: #2563eb;
+      transition: width 0.2s ease;
+    }
+    
+    .progress-bar-striped {
+      background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+      background-size: 1rem 1rem;
+    }
+    
+    .progress-bar-animated {
+      animation: progress-bar-stripes 1s linear infinite;
+    }
+    
+    @keyframes progress-bar-stripes {
+      from { background-position: 1rem 0; }
+      to { background-position: 0 0; }
+    }
   `]
 })
 export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> implements OnInit {
@@ -546,7 +593,9 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
       ...file,
       name: file.name,
       size: file.size,
-      type: file.type
+      type: file.type,
+      uploading: true,
+      progress: 0
     }));
     
     // Update uploadedFiles based on multiple/single mode
@@ -570,14 +619,23 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
       if (fileIndex !== -1) {
         this.commonService.uploadFile(file).subscribe(
           (event) => {
+            // Track progress events
+            if (event.type === HttpEventType.UploadProgress && event.total) {
+              // Calculate progress percentage
+              const progress = Math.round(100 * event.loaded / event.total);
+              this.uploadedFiles[fileIndex].progress = progress;
+            }
+            
             // Check if it's a HttpResponse final event
             if (event.type === HttpEventType.Response) {
               const response = event.body;
               console.log("File uploaded successfully:", response);
               
               if (response && response.message && response.message.file_url) {
-                // Update URL based on server response
+                // Update file object with URL and mark as complete
                 this.uploadedFiles[fileIndex].url = response.message.file_url;
+                this.uploadedFiles[fileIndex].uploading = false;
+                this.uploadedFiles[fileIndex].progress = 100;
                 
                 // Update form control value with updated URLs
                 this.updateFormControlValue();
@@ -586,12 +644,23 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
           },
           (error) => {
             console.error("Error uploading file:", error);
+            // Mark file as failed
+            if (fileIndex !== -1) {
+              this.uploadedFiles[fileIndex].uploading = false;
+              this.uploadedFiles[fileIndex].uploadFailed = true;
+              this.uploadedFiles[fileIndex].errorMessage = 'Upload failed';
+            }
           }
         );
       }
     });
     
     this.formControl.markAsTouched();
+  }
+  
+  // Helper method to check if a file is currently uploading
+  isFileUploading(file: any): boolean {
+    return file.uploading === true;
   }
   
   // Helper method to update form control value consistently
