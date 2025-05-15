@@ -64,7 +64,18 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
   constructor(private zone: NgZone, private messageService: MessageService) {}
   
   ngOnInit(): void {
-    this.loadGoogleMapsScript();
+    // Check if Google Maps API is already loaded
+    if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+      this.isLoaded = true;
+      // Wait for view initialization to setup autocomplete
+      setTimeout(() => {
+        if (this.addressInput) {
+          this.setupPlacesAutocomplete();
+        }
+      });
+    } else {
+      this.loadGoogleMapsScript();
+    }
     
     // When search control changes, call the onChange callback
     this.searchControl.valueChanges.subscribe(value => {
@@ -77,8 +88,36 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
   }
   
   private loadGoogleMapsScript(): void {
+    // Check if script already exists in the document
     if (window.document.getElementById('google-maps-script')) {
-      this.setupPlacesAutocomplete();
+      // Wait to make sure the script is fully loaded
+      if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+        this.isLoaded = true;
+        this.setupPlacesAutocomplete();
+      } else {
+        // Set up a check for Google API availability
+        const checkGoogleInterval = setInterval(() => {
+          if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+            clearInterval(checkGoogleInterval);
+            this.isLoaded = true;
+            this.loadingScript = false;
+            this.setupPlacesAutocomplete();
+          }
+        }, 100);
+        
+        // Clear interval after 10 seconds to prevent infinite checking
+        setTimeout(() => {
+          clearInterval(checkGoogleInterval);
+          if (!this.isLoaded) {
+            this.loadingScript = false;
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Google Maps API failed to initialize'
+            });
+          }
+        }, 10000);
+      }
       return;
     }
     
@@ -111,78 +150,90 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
   }
   
   private setupPlacesAutocomplete(): void {
-    if (!this.addressInput || !google || !google.maps || !google.maps.places) {
+    if (!this.addressInput || !this.addressInput.nativeElement) {
+      // Wait for the view to be initialized
+      setTimeout(() => this.setupPlacesAutocomplete(), 100);
+      return;
+    }
+    
+    if (!google || !google.maps || !google.maps.places) {
+      // Wait for Google API to be fully loaded
       setTimeout(() => this.setupPlacesAutocomplete(), 100);
       return;
     }
     
     this.zone.run(() => {
-      this.autocompleteInstance = new google.maps.places.Autocomplete(this.addressInput.nativeElement, {
-        fields: ['address_components', 'formatted_address', 'geometry', 'name', 'place_id']
-      });
-      
-      this.autocompleteInstance.addListener('place_changed', () => {
-        this.zone.run(() => {
-          const place = this.autocompleteInstance.getPlace();
-          
-          if (!place.geometry) {
-            return;
-          }
-          
-          // Parse address components
-          const addressData: AddressData = {
-            fullAddress: place.formatted_address,
-            placeId: place.place_id,
-            streetNumber: '',
-            street: '',
-            city: '',
-            state: '',
-            stateCode: '',
-            postalCode: '',
-            country: '',
-            countryCode: '',
-            location: {
-              lat: place.geometry.location.lat(),
-              lng: place.geometry.location.lng()
-            }
-          };
-          
-          // Extract address components
-          if (place.address_components) {
-            place.address_components.forEach((component: any) => {
-              const types = component.types;
-              
-              if (types.includes('street_number')) {
-                addressData.streetNumber = component.long_name;
-              } else if (types.includes('route')) {
-                addressData.street = component.long_name;
-              } else if (types.includes('locality')) {
-                addressData.city = component.long_name;
-              } else if (types.includes('administrative_area_level_1')) {
-                addressData.state = component.long_name;
-                addressData.stateCode = component.short_name;
-              } else if (types.includes('postal_code')) {
-                addressData.postalCode = component.long_name;
-              } else if (types.includes('country')) {
-                addressData.country = component.long_name;
-                addressData.countryCode = component.short_name;
-              }
-            });
-          }
-          
-          this.selectedAddress = addressData;
-          
-          // Call the ControlValueAccessor callbacks
-          this.onChange(addressData);
-          this.onTouched();
-          
-          // Emit the address select event
-          this.addressSelect.emit(addressData);
-          
-          // Update the input field with the formatted address
-          this.searchControl.setValue(addressData.fullAddress, { emitEvent: false });
+      try {
+        this.autocompleteInstance = new google.maps.places.Autocomplete(this.addressInput.nativeElement, {
+          fields: ['address_components', 'formatted_address', 'geometry', 'name', 'place_id']
         });
-      });
+        
+        this.autocompleteInstance.addListener('place_changed', () => {
+          this.zone.run(() => {
+            const place = this.autocompleteInstance.getPlace();
+            
+            if (!place.geometry) {
+              return;
+            }
+            
+            // Parse address components
+            const addressData: AddressData = {
+              fullAddress: place.formatted_address,
+              placeId: place.place_id,
+              streetNumber: '',
+              street: '',
+              city: '',
+              state: '',
+              stateCode: '',
+              postalCode: '',
+              country: '',
+              countryCode: '',
+              location: {
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng()
+              }
+            };
+            
+            // Extract address components
+            if (place.address_components) {
+              place.address_components.forEach((component: any) => {
+                const types = component.types;
+                
+                if (types.includes('street_number')) {
+                  addressData.streetNumber = component.long_name;
+                } else if (types.includes('route')) {
+                  addressData.street = component.long_name;
+                } else if (types.includes('locality')) {
+                  addressData.city = component.long_name;
+                } else if (types.includes('administrative_area_level_1')) {
+                  addressData.state = component.long_name;
+                  addressData.stateCode = component.short_name;
+                } else if (types.includes('postal_code')) {
+                  addressData.postalCode = component.long_name;
+                } else if (types.includes('country')) {
+                  addressData.country = component.long_name;
+                  addressData.countryCode = component.short_name;
+                }
+              });
+            }
+            
+            this.selectedAddress = addressData;
+            
+            // Call the ControlValueAccessor callbacks
+            this.onChange(addressData);
+            this.onTouched();
+            
+            // Emit the address select event
+            this.addressSelect.emit(addressData);
+            
+            // Update the input field with the formatted address
+            this.searchControl.setValue(addressData.fullAddress, { emitEvent: false });
+          });
+        });
+      } catch (error) {
+        console.error('Error setting up Places Autocomplete:', error);
+        this.loadingScript = false;
+      }
     });
   }
   
