@@ -218,7 +218,6 @@ export class SupplierProfileReviewComponent implements OnInit {
 
   getVerificationStatus(supplierId: string): void {
     this.commonservice.getData('/api/method/proq_buyer.wefab.api.supplier.onboarding.get_verification_status?supplier_company_id=' + supplierId).subscribe((res: any) => {
-      debugger
       this.verificationStatus = res.data
     })
   }
@@ -399,11 +398,9 @@ export class SupplierProfileReviewComponent implements OnInit {
     getL1DocumentSummary(supplierId:any) {
       let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
         this.commonservice.getData(endPoint).subscribe((res: any) => {
-          debugger
           this.getDocumentSummaryL1Data = JSON.parse(res.data.company_profile)
           this.phoneVerifiedStatus = this.getDocumentSummaryL1Data.phone_verified
           this.numberOfCompanyDocuments = this.getDocumentSummaryL1Data.companyDocuments.length
-          debugger
           console.log(this.numberOfCompanyDocuments)
           console.log(this.getDocumentSummaryData)
         })

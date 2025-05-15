@@ -833,6 +833,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
       // Update the UI with the simulated progress
       if (this.uploadedFiles[fileIndex]) {
         this.uploadedFiles[fileIndex].progress = simulatedProgress;
+        this.uploadedFiles[fileIndex].fileId = file.name
         this.uploadedFiles = [...this.uploadedFiles];
         this.updateFormControlValue();
       } else {
@@ -864,6 +865,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
           
           // Extract file URL from response
           let fileUrl = null;
+          let fileId = null;
           try {
             if (event.body) {
               console.log(`Upload response (${fileIndex}):`, event.body);
@@ -879,6 +881,10 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
                 fileUrl = event.body;
               } else if (event.body.message && typeof event.body.message === 'string') {
                 fileUrl = event.body.message;
+              }
+
+              if(event.body.message && event.body.message.name) {
+                 fileId = event.body.message.name
               }
             }
           } catch (err) {
