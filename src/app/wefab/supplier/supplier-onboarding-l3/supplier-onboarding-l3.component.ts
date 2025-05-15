@@ -721,7 +721,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                   fieldGroupClassName: 'row',
                   fieldGroup: [
                     {
-                      className: 'col-md-12',
+                      className: 'col-md-6',
                       key: 'email',
                       type: 'input',
                       templateOptions: {
@@ -898,7 +898,7 @@ export class SupplierOnboardingL3Component implements OnInit {
         
         // Here you might redirect to a supplier dashboard or confirmation page
         setTimeout(() => {
-          this.router.navigate(['/wefab/supplier/onboarding-complete']);
+          this.router.navigate(['/wefab/supplier/profile-review']);
         }, 3000);
       }, (err: any) => {
         this.putSupplierOnboardingL3()
@@ -957,7 +957,7 @@ export class SupplierOnboardingL3Component implements OnInit {
         
         // Here you might redirect to a supplier dashboard or confirmation page
         setTimeout(() => {
-          this.router.navigate(['/wefab/supplier/onboarding-complete']);
+          this.router.navigate(['/wefab/supplier/profile-review']);
         }, 3000);
       }, (err: any) => {
         this.messageService.add({

@@ -830,7 +830,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
-        detail: 'Your detailed supplier information has been received. Starting manufacturing verification process.',
+        detail: 'Your information has been saved. Redirecting to the next step of the onboarding process.',
         life: 3000
       });
       
@@ -855,7 +855,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Update Successful',
-        detail: 'Your supplier information has been updated. We are reviewing the changes and will proceed with verification shortly.',
+        detail: 'Your supplier information has been updated. Redirecting to the next step of the onboarding process.',
         life: 3000
       });      
       

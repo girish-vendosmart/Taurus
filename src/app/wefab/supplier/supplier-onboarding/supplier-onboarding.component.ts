@@ -908,10 +908,9 @@ export class SupplierOnboardingComponent implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Form Submitted Successfully',
-        detail: 'Your supplier onboarding application has been received. Redirecting to verification page.',
+        detail: 'Your information has been saved. Redirecting to the next step of the onboarding process.',
         life: 3000
       });
-      
       // Navigate to verification page after 3 seconds
       setTimeout(() => {
         this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
@@ -928,7 +927,7 @@ export class SupplierOnboardingComponent implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Update Successful',
-        detail: 'Your supplier information has been updated. Redirecting to the verification page.',
+        detail: 'Your supplier information has been updated. Redirecting to the next step of the onboarding process.',
         life: 3000
       });      
       
