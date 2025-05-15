@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FieldType, FieldTypeConfig, FormlyModule } from '@ngx-formly/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -506,7 +506,7 @@ import { HttpEventType, HttpResponse } from '@angular/common/http';
   `]
 })
 export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> implements OnInit {
-  constructor(private commonService: CommonService) {
+  constructor(private commonService: CommonService, private cdr: ChangeDetectorRef, private ngZone: NgZone) {
     super();
   }
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
@@ -792,7 +792,35 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     this.updateFormControlValue();
   }
   
-  // New method to handle file upload with progress tracking
+  // Helper function to consistently finalize the upload process with proper change detection
+  private finalizeUpload(fileIndex: number, fileUrl?: string, fileId?: string): void {
+    // Ensure we run in NgZone to trigger change detection
+    this.ngZone.run(() => {
+      if (!this.uploadedFiles[fileIndex]) return;
+      
+      // Mark as complete and update URL
+      this.uploadedFiles[fileIndex].progress = 100;
+      this.uploadedFiles[fileIndex].uploading = false;
+      this.uploadedFiles[fileIndex].uploaded = true;
+      
+      if (fileUrl) {
+        this.uploadedFiles[fileIndex].url = fileUrl;
+      }
+      if (fileId) {
+        this.uploadedFiles[fileIndex].fileId = fileId;
+      }
+      
+      // Force change detection by creating a new array reference
+      this.uploadedFiles = [...this.uploadedFiles];
+      this.updateFormControlValue();
+      
+      // Explicitly trigger change detection
+      this.cdr.detectChanges();
+      
+      console.log(`Upload complete for file (${fileIndex}):`, this.uploadedFiles[fileIndex]);
+    });
+  }
+  
   uploadFile(file: File, fileIndex: number): void {
     const formData = new FormData();
     formData.append('file', file);
@@ -813,37 +841,36 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     // Force change detection for initial state
     this.uploadedFiles = [...this.uploadedFiles];
     this.updateFormControlValue();
+    this.cdr.detectChanges(); // Force immediate UI update
     
     // Debug logging
     console.log('Starting file upload:', file.name, 'size:', file.size, 'index:', fileIndex);
     
-    // Instead of using observable events which are unreliable, 
-    // we'll implement a more direct approach that works consistently
-    
     // Immediately start a deterministic progress animation
     let simulatedProgress = 0;
     const progressInterval = setInterval(() => {
-      simulatedProgress += 5;
-      
-      // Don't go to 100% until we know the upload is complete
-      if (simulatedProgress > 95) {
-        simulatedProgress = 95;
-      }
-      
-      // Update the UI with the simulated progress
-      if (this.uploadedFiles[fileIndex]) {
-        this.uploadedFiles[fileIndex].progress = simulatedProgress;
-        this.uploadedFiles[fileIndex].fileId = file.name
-        this.uploadedFiles = [...this.uploadedFiles];
-        this.updateFormControlValue();
-      } else {
-        // File was removed during upload, stop the interval
-        clearInterval(progressInterval);
-      }
+      this.ngZone.run(() => {
+        simulatedProgress += 5;
+        
+        // Cap at 95% until we know the upload is complete
+        if (simulatedProgress > 95) {
+          simulatedProgress = 95;
+        }
+        
+        // Update the UI with the simulated progress
+        if (this.uploadedFiles[fileIndex]) {
+          this.uploadedFiles[fileIndex].progress = simulatedProgress;
+          this.uploadedFiles = [...this.uploadedFiles]; // Create new array reference for change detection
+          this.updateFormControlValue();
+          this.cdr.detectChanges(); // Force immediate UI update
+        } else {
+          // File was removed during upload, stop the interval
+          clearInterval(progressInterval);
+        }
+      });
     }, 100);
     
     // Create a timeout to simulate a minimum upload time
-    // This ensures users always see some progress animation
     const minUploadTime = setTimeout(() => {
       // Do nothing - this just ensures there's a minimum time
       // before the upload is marked as complete
@@ -860,7 +887,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
         
         // Only handle the final response event
         if (event && event.type === HttpEventType.Response) {
-          // Wait for the minimum upload time
+          // Clear the interval immediately
           clearInterval(progressInterval);
           
           // Extract file URL from response
@@ -871,7 +898,6 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
               console.log(`Upload response (${fileIndex}):`, event.body);
               
               if (event.body.message && event.body.message.file_url) {
-                // Standard format
                 fileUrl = event.body.message.file_url;
               } else if (event.body.url) {
                 fileUrl = event.body.url;
@@ -884,34 +910,18 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
               }
 
               if(event.body.message && event.body.message.name) {
-                 fileId = event.body.message.name
+                fileId = event.body.message.name;
               }
             }
           } catch (err) {
             console.error('Error parsing response:', err);
           }
           
-          // Wait for the minimum time to complete before updating UI
+          // Don't use the finalizeUpload immediately to force UI to update correctly
+          // Set a very short timeout to allow the UI thread to complete any pending work
           setTimeout(() => {
-            // Skip if file was removed during upload
-            if (!this.uploadedFiles[fileIndex]) return;
-            
-            // Mark as complete and update URL
-            this.uploadedFiles[fileIndex].progress = 100;
-            this.uploadedFiles[fileIndex].uploading = false;
-            this.uploadedFiles[fileIndex].uploaded = true;
-            
-            if (fileUrl) {
-              this.uploadedFiles[fileIndex].url = fileUrl;
-              console.log(`Set URL for file ${fileIndex}:`, fileUrl);
-            }
-            
-            // Force change detection
-            this.uploadedFiles = [...this.uploadedFiles];
-            this.updateFormControlValue();
-            
-            console.log(`Upload complete for file (${fileIndex}):`, this.uploadedFiles[fileIndex]);
-          }, 200);
+            this.finalizeUpload(fileIndex, fileUrl, fileId);
+          }, 0);
         }
       },
       error: (error) => {
@@ -922,22 +932,26 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
         // Skip if file was removed during upload
         if (!this.uploadedFiles[fileIndex]) return;
         
-        // Mark as failed
-        this.uploadedFiles[fileIndex].progress = 0;
-        this.uploadedFiles[fileIndex].uploading = false;
-        this.uploadedFiles[fileIndex].uploaded = false;
-        this.uploadedFiles[fileIndex].error = true;
-        this.uploadedFiles[fileIndex].errorMessage = 'Upload failed: ' + (error.message || 'Unknown error');
-        
-        // Force change detection
-        this.uploadedFiles = [...this.uploadedFiles];
-        this.updateFormControlValue();
+        // Use NgZone to ensure change detection is triggered
+        this.ngZone.run(() => {
+          // Mark as failed
+          this.uploadedFiles[fileIndex].progress = 0;
+          this.uploadedFiles[fileIndex].uploading = false;
+          this.uploadedFiles[fileIndex].uploaded = false;
+          this.uploadedFiles[fileIndex].error = true;
+          this.uploadedFiles[fileIndex].errorMessage = 'Upload failed: ' + (error.message || 'Unknown error');
+          
+          // Force change detection
+          this.uploadedFiles = [...this.uploadedFiles];
+          this.updateFormControlValue();
+          this.cdr.detectChanges();
+        });
       },
       complete: () => {
         // This might not be called in some cases, so we don't rely on it
         console.log(`Upload stream completed for file (${fileIndex})`);
         
-        // Let's do a final check after a delay to make sure the file upload is properly completed
+        // Let's do a final check to make sure the file upload is properly completed
         setTimeout(() => {
           clearInterval(progressInterval);
           clearTimeout(minUploadTime);
@@ -952,14 +966,8 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
           // If we somehow get here and the file isn't marked as uploaded yet,
           // force it to completed state as a fallback
           console.log(`Force completing upload for file (${fileIndex})`);
-          this.uploadedFiles[fileIndex].progress = 100;
-          this.uploadedFiles[fileIndex].uploading = false;
-          this.uploadedFiles[fileIndex].uploaded = true;
-          
-          // Force change detection
-          this.uploadedFiles = [...this.uploadedFiles];
-          this.updateFormControlValue();
-        }, 2000); // Wait 2 seconds to make sure
+          this.finalizeUpload(fileIndex);
+        }, 500); // Reduced from 1 second to 500ms for faster fallback
       }
     });
   }
