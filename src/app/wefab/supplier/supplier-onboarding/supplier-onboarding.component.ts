@@ -617,29 +617,29 @@ export class SupplierOnboardingComponent implements OnInit {
           },
         ]
       },
-      {
-        key: 'sameAsRegistered',
-        type: 'checkbox',
-        className: 'mb-2',
-        defaultValue: false,
-        templateOptions: {
-          label: 'Manufacturing Facility Address is Same as Registered Address'
-        },
-        hooks: {
-          onInit: (field) => {
-            field.formControl?.valueChanges.subscribe(value => {
-              const manufacturingAddressField = field.form?.get('manufacturingFacilityAddress');
-              if (value && manufacturingAddressField) {
-                const registeredAddress = field.form?.get('registeredAddress')?.value;
-                manufacturingAddressField.setValue(registeredAddress);
-                manufacturingAddressField.disable();
-              } else if (manufacturingAddressField) {
-                manufacturingAddressField.enable();
-              }
-            });
-          }
-        }
-      },
+      // {
+      //   key: 'sameAsRegistered',
+      //   type: 'checkbox',
+      //   className: 'mb-2',
+      //   defaultValue: false,
+      //   templateOptions: {
+      //     label: 'Manufacturing Facility Address is Same as Registered Address'
+      //   },
+      //   hooks: {
+      //     onInit: (field) => {
+      //       field.formControl?.valueChanges.subscribe(value => {
+      //         const manufacturingAddressField = field.form?.get('manufacturingFacilityAddress');
+      //         if (value && manufacturingAddressField) {
+      //           const registeredAddress = field.form?.get('registeredAddress')?.value;
+      //           manufacturingAddressField.setValue(registeredAddress);
+      //           manufacturingAddressField.disable();
+      //         } else if (manufacturingAddressField) {
+      //           manufacturingAddressField.enable();
+      //         }
+      //       });
+      //     }
+      //   }
+      // },
     ];
   }
 
