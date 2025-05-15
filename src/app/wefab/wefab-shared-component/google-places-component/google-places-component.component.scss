@@ -1,0 +1,163 @@
+@import '../../../../assets/scss/variables.scss';
+
+.google-places-container {
+  font-family: $font-family-sans-serif;
+  margin-bottom: 1.25rem;
+  
+  .location-container {
+    width: 100%;
+    
+    .location-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: $font-weight-medium;
+      font-size: $font-size-base;
+      color: $precision-black;
+    }
+    
+    .location-textarea {
+      width: 100%;
+      min-height: 3.5rem;
+      padding: 0.625rem 0.75rem;
+      font-size: $font-size-base;
+      color: $precision-black;
+      background-color: #FFFFFF;
+      border: 1px solid $material-finish-silver;
+      border-radius: 0.25rem;
+      transition: all 0.2s ease-in-out;
+      resize: vertical;
+      line-height: 1.5;
+      font-family: $font-family-sans-serif;
+      
+      &::placeholder {
+        color: lighten($machine-gray, 20%);
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: rgba($blueprint-blue, 0.5);
+        box-shadow: 0 0 0 1px rgba($blueprint-blue, 0.15);
+      }
+      
+      &:hover:not(:disabled):not(:focus) {
+        border-color: darken($material-finish-silver, 10%);
+      }
+      
+      &:disabled {
+        background-color: lighten($material-finish-silver, 8%);
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+    }
+    
+    .loading-indicator {
+      font-size: $font-size-xs;
+      color: $machine-gray;
+      margin-top: 0.5rem;
+      
+      i {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+  
+  // Selected address card styles
+  .selected-address-card {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #FFFFFF;
+    border: 1px solid $material-finish-silver;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 3px rgba($precision-black, 0.05);
+    
+    .address-title {
+      font-weight: $font-weight-medium;
+      font-size: $font-size-base;
+      color: $precision-black;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid $material-finish-silver;
+      padding-bottom: 0.5rem;
+    }
+    
+    .address-details {
+      font-size: $font-size-sm;
+      color: $machine-gray;
+      margin-bottom: 0.5rem;
+      
+      div {
+        margin-bottom: 0.25rem;
+      }
+    }
+    
+    .address-coordinates {
+      display: flex;
+      align-items: center;
+      font-size: $font-size-xs;
+      color: $machine-gray;
+      margin-top: 0.25rem;
+      
+      i {
+        margin-right: 0.5rem;
+        color: $blueprint-blue;
+        font-size: 0.75rem;
+      }
+    }
+  }
+}
+
+// Custom Google Places Autocomplete dropdown styles
+:host ::ng-deep .pac-container {
+  font-family: $font-family-sans-serif;
+  border-radius: 0.25rem;
+  border: 1px solid $material-finish-silver;
+  box-shadow: 0 4px 10px rgba($precision-black, 0.1);
+  margin-top: 0.25rem;
+  padding: 0.5rem 0;
+  z-index: 9999;
+  
+  &:after {
+    display: none; // Remove Google logo
+  }
+  
+  .pac-item {
+    padding: 0.5rem 1rem;
+    border-top: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    
+    &:hover {
+      background-color: rgba($blueprint-blue, 0.05);
+    }
+    
+    .pac-icon {
+      margin-top: 3px;
+      margin-right: 10px;
+    }
+    
+    .pac-item-query {
+      font-size: $font-size-base;
+      color: $precision-black;
+    }
+    
+    .pac-matched {
+      font-weight: $font-weight-semibold;
+    }
+    
+    span:not(.pac-item-query):not(.pac-matched) {
+      font-size: $font-size-sm;
+      color: $machine-gray;
+    }
+  }
+  
+  .pac-logo:after {
+    display: none;
+  }
+}
+
+// Improve focus state for accessibility
+:host ::ng-deep .p-focus {
+  outline: 0 none;
+  outline-offset: 0;
+  box-shadow: 0 0 0 0.15rem rgba($blueprint-blue, 0.25);
+  border-color: $blueprint-blue;
+}

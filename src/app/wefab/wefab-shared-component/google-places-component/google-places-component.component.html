@@ -1,0 +1,37 @@
+<div class="google-places-container">
+  <p-toast position="top-right"></p-toast>
+  
+  <div class="location-container">
+    <label *ngIf="label" class="location-label">
+      {{ label }}
+    </label>
+    
+    <textarea 
+      #addressInput
+      class="location-textarea" 
+      [formControl]="searchControl"
+      [placeholder]="placeholder"
+      [disabled]="disabled || loadingScript"
+      autocomplete="off"
+      aria-label="Search for an address"
+      rows="2"></textarea>
+      
+    <div *ngIf="loadingScript" class="loading-indicator">
+      <i class="pi pi-spin pi-spinner"></i> Loading...
+    </div>
+  </div>
+  
+  <!-- Selected Address Display -->
+  <div *ngIf="selectedAddress" class="selected-address-card">
+    <div class="address-title">
+      {{ selectedAddress.fullAddress }}
+    </div>
+    <div class="address-details">
+      <div>{{ selectedAddress.city || '' }}, {{ selectedAddress.stateCode || '' }} {{ selectedAddress.postalCode || '' }}</div>
+      <div>{{ selectedAddress.country }}</div>
+    </div>
+    <div class="address-coordinates" *ngIf="selectedAddress.location">
+      <i class="pi pi-map-marker"></i> {{ selectedAddress.location.lat }}, {{ selectedAddress.location.lng }}
+    </div>
+  </div>
+</div>

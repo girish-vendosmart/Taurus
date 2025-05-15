@@ -15,6 +15,7 @@ import { FormlyFieldRangeSliderComponent } from './range-slider-type.component';
 import { FormlyFieldDropdownComponent } from './dropdown-type.component';
 import { FormlyFieldSearchableSelectComponent } from './searchable-select-type.component';
 import { PMultiSelectGroupComponent } from './p-multiSelect-group.component';
+import { FormlyFieldGooglePlacesComponent } from './google-places-type.component';
 
 import { routes } from './app.routes';
 
@@ -36,6 +37,7 @@ export const appConfig: ApplicationConfig = {
           { name: 'range-slider', component: FormlyFieldRangeSliderComponent },
           { name: 'p-dropdown', component: FormlyFieldDropdownComponent },
           { name: 'searchable-select', component: FormlyFieldSearchableSelectComponent },
+          { name: 'google-places', component: FormlyFieldGooglePlacesComponent },
         ],
         wrappers: [
           { name: 'panel', component: PanelWrapperComponent },

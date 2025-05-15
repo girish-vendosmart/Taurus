@@ -294,39 +294,52 @@ export class SupplierOnboardingComponent implements OnInit {
       this.selectedState = this.getCompanyProfile.state;
       console.log('Stored selected state:', this.selectedState);
     }
+
+    // Special handling for registeredAddress if it's a string (old format)
+    if (this.getCompanyProfile.registeredAddress && typeof this.getCompanyProfile.registeredAddress === 'string') {
+      // Convert to new format compatible with Google Places component
+      this.getCompanyProfile.registeredAddress = {
+        fullAddress: this.getCompanyProfile.registeredAddress,
+        placeId: '',
+        streetNumber: '',
+        street: '',
+        city: this.getCompanyProfile.city || '',
+        state: this.getCompanyProfile.state || '',
+        stateCode: '',
+        postalCode: '',
+        country: this.getCompanyProfile.country || '',
+        countryCode: '',
+        location: {
+          lat: 0,
+          lng: 0
+        }
+      };
+    }
     
     // Update the model with the values from getCompanyProfile
     this.model = {
+      ...this.model,
       ...this.getCompanyProfile
     };
     
-    // If we have a country value, trigger the state list fetch
-    if (this.model.country) {
-      this.selectedCountry = this.model.country;
-      console.log('Setting selected country and fetching states:', this.selectedCountry);
-      this.getStates(this.model.country);
+    console.log('Model updated with values:', this.model);
+    
+    // If the country is selected, load the states for that country
+    if (this.getCompanyProfile.country) {
+      this.selectedCountry = this.getCompanyProfile.country;
+      this.getStates(this.selectedCountry);
     }
     
-    // Handle the "Same as Registered Address" checkbox logic
-    if (this.model.sameAsRegistered && this.model.registeredAddress) {
-      this.model.manufacturingFacilityAddress = this.model.registeredAddress;
+    // Set phone verification status
+    if (this.getCompanyProfile.phone_verified) {
+      this.phoneVerified = true;
     }
     
-    // Apply values directly to form controls where possible
-    Object.keys(this.model).forEach(key => {
-      const control = this.form.get(key);
-      if (control && key !== 'state') { // Skip state as we handle it specially
-        control.setValue(this.model[key]);
-        control.markAsDirty();
-        control.updateValueAndValidity();
-      }
-    });
-    
-    // Mark form as pristine after patching values
+    // Give the form time to update
     setTimeout(() => {
-      this.form.markAsPristine();
-      console.log('Form patched with stored data:', this.model);
-    }, 1000);
+      this.form.markAsDirty();
+      console.log('Final form model:', this.model);
+    }, 500);
   }
 
   // New method to load countries then initialize form
@@ -600,21 +613,23 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-6 mb-2',
+            className: 'col-md-6 mb-3',
             key: 'registeredAddress',
-            type: 'textarea',
+            type: 'google-places',
             templateOptions: {
               label: 'Registered Address',
-              placeholder: 'Enter your registered address',
-              required: true,
-              rows: 1
+              placeholder: 'Search for your registered address',
+              required: true
+            },
+            expressionProperties: {
+              'templateOptions.disabled': 'formState.disabled'
             },
             validation: {
               messages: {
-                required: 'Please enter your registered address'
+                required: 'Please select a registered address'
               }
             }
-          },
+          }
         ]
       },
       // {
@@ -946,15 +961,44 @@ export class SupplierOnboardingComponent implements OnInit {
   }
   
   postSupplierOnboardingL1() {
+    let companyProfile = { ...this.form.value };
+    
+    // Extract city, state, and country from the registeredAddress if it has the new format
+    if (companyProfile.registeredAddress && typeof companyProfile.registeredAddress === 'object') {
+      // Store the structured registeredAddress
+      const addressData = companyProfile.registeredAddress;
+      
+      // Update the city, state, and country from the address components
+      if (!companyProfile.city && addressData.city) {
+        companyProfile.city = addressData.city;
+      }
+      
+      if (!companyProfile.state && addressData.state) {
+        companyProfile.state = addressData.state;
+      }
+      
+      if (!companyProfile.country && addressData.country) {
+        companyProfile.country = addressData.country;
+      }
+    }
+    
+    // Ensure phone verification status is included
+    companyProfile.phone_verified = this.phoneVerified;
+    
+    // Create the body for the API
+    let body = {
+      company_profile: JSON.stringify(companyProfile)
+    };
+    
+    console.log('Submitting L1 data:', body);
+    
     let endPoint = '/api/resource/wfb_supplier_onboarding_L1';
-    this.model.phone_verified = this.phoneVerified;
-    console.log('Submitting form data:', this.model);
-    let body = this.updateData(this.model);
+    
     // Check if we have a supplier_id
     let supplier_id = sessionStorage.getItem('supplier_id');
     if(supplier_id) {
-       endPoint = '/api/resource/wfb_supplier_onboarding_L1/'  + sessionStorage.getItem('supplier_id')  
-       this.putDataFunction(endPoint, body);
+      endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplier_id;
+      this.putDataFunction(endPoint, body);
     } else {
       this.postDataFunction(endPoint, body);
     }
