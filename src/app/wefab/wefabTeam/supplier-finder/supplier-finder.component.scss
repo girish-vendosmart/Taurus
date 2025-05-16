@@ -181,10 +181,12 @@
 }
 
 .results-container {
-  max-width: 1000px;
-  width: 100%;
+  // max-width: 1000px;
+  width: 90%;
   margin: 0 auto;
   padding-top: 2rem;
+  margin-left: 50px;
+  margin-right: 50px;
 }
 
 // Loading spinner
@@ -237,6 +239,8 @@
     th, td {
       padding: 1rem;
       text-align: left;
+      vertical-align: top;
+      word-break: break-word;
     }
     
     th {
@@ -272,89 +276,191 @@
     .company-info {
       display: flex;
       flex-direction: column;
+      gap: 0.5rem;
       
       .name {
         font-weight: $font-weight-medium;
         color: $blueprint-blue;
-        margin-bottom: 0.25rem;
       }
       
-      .website {
-        font-size: 0.8rem;
-        color: $machine-gray;
-      }
-    }
-    
-    .location-info {
-      display: flex;
-      align-items: center;
-      
-      i {
-        color: $machine-gray;
-        margin-right: 0.5rem;
-        font-size: 0.9rem;
-      }
-    }
-    
-    .rating {
-      display: flex;
-      align-items: center;
-      
-      i {
-        color: $safety-orange;
-        margin-right: 0.5rem;
-      }
-    }
-    
-    .match-score {
-      font-weight: $font-weight-medium;
-      color: $machine-gray;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      display: inline-block;
-      
-      &.high-match {
-        background-color: rgba($process-green, 0.1);
-        color: $process-green;
-      }
-      
-      &.medium-match {
-        background-color: rgba($safety-orange, 0.1);
-        color: $safety-orange;
-      }
-    }
-    
-    .services {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      
-      .service-tag {
-        font-size: 0.8rem;
-        background-color: rgba($blueprint-blue, 0.06);
+      .website-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
         color: $blueprint-blue;
-        padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        white-space: nowrap;
-      }
-      
-      .more-tag {
-        font-size: 0.75rem;
-        color: $machine-gray;
+        text-decoration: none;
+        transition: color 0.2s;
+        
+        &:hover {
+          color: darken($blueprint-blue, 10%);
+          text-decoration: underline;
+        }
+        
+        i {
+          font-size: 0.9rem;
+        }
       }
     }
   }
 }
 
 .results-header {
-  border-bottom: 1px solid $material-finish-silver;
-  padding-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   
-  .results-count {
+  div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.9rem;
-    color: $machine-gray;
-    margin-bottom: 0;
+    
+    i {
+      color: $machine-gray;
+    }
+  }
+}
+
+.verification-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  background-color: rgba($machine-gray, 0.1);
+  color: $machine-gray;
+  
+  &.verified {
+    background-color: rgba($process-green, 0.1);
+    color: $process-green;
+  }
+}
+
+.send-invitation-btn {
+  background-color: $blueprint-blue !important;
+  border-color: $blueprint-blue !important;
+  
+  &:hover {
+    background-color: darken($blueprint-blue, 5%) !important;
+    border-color: darken($blueprint-blue, 5%) !important;
+  }
+  
+  &:disabled {
+    background-color: rgba($blueprint-blue, 0.5) !important;
+    border-color: rgba($blueprint-blue, 0.5) !important;
+  }
+}
+
+.invitation-dialog-content {
+  .selected-suppliers-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba($material-finish-silver, 0.3);
+    
+    i {
+      font-size: 1.5rem;
+      color: $blueprint-blue;
+    }
+    
+    h3 {
+      margin: 0;
+      color: $precision-black;
+      font-size: 1.2rem;
+    }
+  }
+  
+  .selected-suppliers-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 1rem 0;
+    
+    .supplier-item {
+      padding: 1rem;
+      border: 1px solid rgba($material-finish-silver, 0.3);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      background-color: rgba($technical-white, 0.5);
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .supplier-info {
+        .company-name {
+          font-weight: $font-weight-medium;
+          color: $blueprint-blue;
+          margin-bottom: 0.5rem;
+        }
+        
+        .contact-details {
+          font-size: 0.9rem;
+          color: $machine-gray;
+          
+          i {
+            margin-right: 0.5rem;
+          }
+        }
+      }
+    }
+  }
+  
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba($material-finish-silver, 0.3);
+    
+    .cancel-btn {
+      color: $machine-gray !important;
+      
+      &:hover {
+        background-color: rgba($machine-gray, 0.1) !important;
+      }
+    }
+    
+    .send-btn {
+      background-color: $blueprint-blue !important;
+      border-color: $blueprint-blue !important;
+      
+      &:hover {
+        background-color: darken($blueprint-blue, 5%) !important;
+        border-color: darken($blueprint-blue, 5%) !important;
+      }
+    }
+  }
+}
+
+// Checkbox styling
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: $blueprint-blue;
+}
+
+// Toast styling
+::ng-deep .p-toast {
+  .p-toast-message {
+    &.p-toast-message-success {
+      background: rgba($process-green, 0.1);
+      border: 1px solid $process-green;
+      color: $process-green;
+      
+      .p-toast-message-icon {
+        color: $process-green;
+      }
+    }
   }
 }
 
