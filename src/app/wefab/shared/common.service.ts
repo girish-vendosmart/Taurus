@@ -138,7 +138,6 @@ export class CommonService {
         const formData = new FormData();
         formData.append('file', uploadData);
         formData.append('file_name', uploadData.name);
-        debugger;
         console.log(formData);
         return this.http.post(
         `${this.baseUrl}/api/method/upload_file`,
@@ -167,6 +166,14 @@ export class CommonService {
             observe: 'events',
         }
         );
+    }
+
+    getMachineAnalysis(machineId: string) {
+        return this.http.get(`http://localhost:3000/analyzeMachineImage?file_id=${machineId}`)
+    }
+
+    getFacilityAnalysis(machineId: string, address: string) {
+        return this.http.get(`http://localhost:3000/factoryGeoVerification?file_id=${machineId}&factory_address_string=${address}`)
     }
 
 }

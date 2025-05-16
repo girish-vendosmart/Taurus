@@ -267,202 +267,200 @@
           </div>
 
           <!-- Machine Details Tab -->
-          <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'machines'">
-            <div class="machines-container">
+          <!-- Machines Container (already in your code) -->
+          <div class="machines-container">
+            <ng-container *ngIf="manufacturingTab === 'machines'">
               <div class="machine-card" *ngFor="let machine of manufacturingData.machines">
-                <!-- For non-array machine photos -->
-                <div *ngIf="!isMachineDocumentArray(machine)">
-                  <div class="machine-image">
-                    <!-- Document action buttons - positioned at the top right corner -->
-                    <div class="document-actions">
-                      <button class="action-button view-button" (click)="viewDocument(machine.machinePhotos.url, $event)" title="View">
-                        <i class="pi pi-eye"></i>
-                      </button>
-                      <button class="action-button download-button" (click)="downloadDocument(machine.machinePhotos.url, $event)" title="Download">
-                        <i class="pi pi-download"></i>
-                      </button>
-                    </div>
-                    <img [src]="machine.machinePhotos.url" [alt]="machine.make" class="machine-photo">
-                    
-                    <!-- Upload progress indicator (shown during upload) -->
-                    <div class="upload-progress-container" *ngIf="machine.machinePhotos.uploading">
-                      <div class="progress-text">Uploading... {{machine.machinePhotos.progress || 0}}%</div>
-                      <div class="progress-bar-container">
-                        <div class="progress-bar" [style.width.%]="machine.machinePhotos.progress || 0"></div>
-                      </div>
-                    </div>
+                <div class="machine-photo-container">
+                  <img [src]="machine.machinePhotos.url" 
+                      [alt]="machine.make" 
+                      class="machine-photo"
+                      loading="lazy">
+                  <div class="verification-status" 
+                      [ngClass]="{'verified': machine.machinePhotos.machine_status, 
+                                  'not-verified': !machine.machinePhotos.machine_status}">
+                    <i *ngIf="machine.machinePhotos.machine_status" 
+                      class="pi pi-check-circle" 
+                      pTooltip="Verified Machine"
+                      tooltipPosition="top">
+                    </i>
+                    <i *ngIf="!machine.machinePhotos.machine_status" 
+                      class="pi pi-times-circle" 
+                      pTooltip="Not Verified"
+                      tooltipPosition="top">
+                    </i>
                   </div>
-                  <div class="machine-details">
-                    <h3 class="machine-name">{{ machine.make }}</h3>
-                    <div class="machine-info">
-                      <p class="machine-type"><strong>Model:</strong> {{ machine.model }}</p>
-                      <p class="machine-quantity"><strong>Quantity:</strong> {{ machine.quantity }} units</p>
-                      <p class="machine-description"><strong>Specifications:</strong> {{ machine.specifications }}</p>
+                  <!-- This is the comment section that will now be properly styled -->
+                  <div class="machine-comment" 
+                      *ngIf="machine.machinePhotos.machine_status_comment">
+                    <div class="comment-content">
+                      <i class="pi pi-comment comment-icon"></i>
+                      <span class="comment-text">{{ machine.machinePhotos.machine_status_comment }}</span>
                     </div>
                   </div>
                 </div>
-                <!-- For array machine photos -->
-                <div *ngIf="isMachineDocumentArray(machine)">
-                  <div class="machine-image">
-                    <!-- Document action buttons - positioned at the top right corner -->
-                    <div class="document-actions">
-                      <button class="action-button view-button" (click)="viewDocument(machine.machinePhotos[0].url, $event)" title="View">
-                        <i class="pi pi-eye"></i>
-                      </button>
-                      <button class="action-button download-button" (click)="downloadDocument(machine.machinePhotos[0].url, $event)" title="Download">
-                        <i class="pi pi-download"></i>
-                      </button>
-                    </div>
-                    <img [src]="machine.machinePhotos[0].url" [alt]="machine.make" class="machine-photo">
-                    
-                    <!-- Upload progress indicator (shown during upload) -->
-                    <div class="upload-progress-container" *ngIf="machine.machinePhotos[0].uploading">
-                      <div class="progress-text">Uploading... {{machine.machinePhotos[0].progress || 0}}%</div>
-                      <div class="progress-bar-container">
-                        <div class="progress-bar" [style.width.%]="machine.machinePhotos[0].progress || 0"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="machine-details">
-                    <h3 class="machine-name">{{ machine.make }}</h3>
-                    <div class="machine-info">
-                      <p class="machine-type"><strong>Model:</strong> {{ machine.model }}</p>
-                      <p class="machine-quantity"><strong>Quantity:</strong> {{ machine.quantity }} units</p>
-                      <p class="machine-description"><strong>Specifications:</strong> {{ machine.specifications }}</p>
-                    </div>
+                <div class="machine-details">
+                  <h3 class="machine-name">{{ machine.make }}</h3>
+                  <div class="machine-info">
+                    <p>
+                      <strong>Model:</strong>
+                      <span>{{ machine.model }}</span>
+                    </p>
+                    <p>
+                      <strong>Quantity:</strong>
+                      <span>{{ machine.quantity }} units</span>
+                    </p>
+                    <p>
+                      <strong>Specifications:</strong>
+                      <span>{{ machine.specifications }}</span>
+                    </p>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </ng-container>
 
-          <!-- Facility Verification Tab -->
-          <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'facility'">
-            <div class="facility-photos-container">
-              <div class="facility-photo-card" *ngFor="let photo of manufacturingData.facilityPhotos">
-                <div class="facility-photo">
-                  <!-- Document action buttons - positioned at the top right corner -->
+            <!-- Facility Verification Tab -->
+            <ng-container *ngIf="manufacturingTab === 'facility'">
+              <div class="machine-card" *ngFor="let facility of manufacturingData.facilityPhotos">
+                <div class="machine-photo-container">
+                  <!-- Document action buttons -->
                   <div class="document-actions">
-                    <button class="action-button view-button" (click)="viewDocument(photo.url || photo, $event)" title="View">
+                    <button class="action-button view-button" (click)="viewDocument(facility.url, $event)" title="View">
                       <i class="pi pi-eye"></i>
                     </button>
-                    <button class="action-button download-button" (click)="downloadDocument(photo.url || photo, $event)" title="Download">
+                    <button class="action-button download-button" (click)="downloadDocument(facility.url, $event)" title="Download">
                       <i class="pi pi-download"></i>
                     </button>
                   </div>
-                  <img [src]="photo.url" [alt]="'facility photo'" class="facility-image" *ngIf="photo.url">
-                  <img [src]="photo" [alt]="'facility photo'" class="facility-image" *ngIf="!photo.url">
-                  
-                  <!-- Upload progress indicator (shown during upload) -->
-                  <div class="upload-progress-container" *ngIf="photo.uploading">
-                    <div class="progress-text">Uploading... {{photo.progress || 0}}%</div>
-                    <div class="progress-bar-container">
-                      <div class="progress-bar" [style.width.%]="photo.progress || 0"></div>
+                  <img [src]="facility.url" 
+                      [alt]="facility.make" 
+                      class="machine-photo"
+                      loading="lazy">
+                  <!-- Verification status -->
+                  <div class="verification-status" 
+                      [ngClass]="{'verified': facility.facility_status, 
+                                  'not-verified': !facility.facility_status}">
+                    <i *ngIf="facility.facility_status" 
+                      class="pi pi-check-circle" 
+                      pTooltip="Verified facility"
+                      tooltipPosition="top">
+                    </i>
+                    <i *ngIf="!facility.facility_status" 
+                      class="pi pi-times-circle" 
+                      pTooltip="Not Verified"
+                      tooltipPosition="top">
+                    </i>
+                  </div>
+                   <!-- This is the comment section that will now be properly styled -->
+                  <div class="machine-comment" *ngIf="facility.facility_comment">
+                    <div class="comment-content">
+                      <i class="pi pi-comment comment-icon"></i>
+                      <span class="comment-text">{{ facility.facility_comment }}</span>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </ng-container>
 
-          <!-- Certifications Tab -->
-          <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'certifications'">
-            <div class="certifications-container">
-              <div class="certification-card" *ngFor="let cert of manufacturingData.certifications">
-                <div *ngIf="!isCertificateDocumentArray(cert)">
-                  <div class="certification-image">
-                    <!-- Document action buttons - positioned at the top right corner -->
-                    <div class="document-actions">
-                      <button class="action-button view-button" (click)="viewDocument(cert.certificateDocument.url, $event)" title="View">
-                        <i class="pi pi-eye"></i>
-                      </button>
-                      <button class="action-button download-button" (click)="downloadDocument(cert.certificateDocument.url, $event)" title="Download">
-                        <i class="pi pi-download"></i>
-                      </button>
+            <!-- Certifications Tab -->
+            <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'certifications'">
+              <div class="certifications-container">
+                <div class="certification-card" *ngFor="let cert of manufacturingData.certifications">
+                  <div *ngIf="!isCertificateDocumentArray(cert)">
+                    <div class="certification-image">
+                      <!-- Document action buttons - positioned at the top right corner -->
+                      <div class="document-actions">
+                        <button class="action-button view-button" (click)="viewDocument(cert.certificateDocument.url, $event)" title="View">
+                          <i class="pi pi-eye"></i>
+                        </button>
+                        <button class="action-button download-button" (click)="downloadDocument(cert.certificateDocument.url, $event)" title="Download">
+                          <i class="pi pi-download"></i>
+                        </button>
+                      </div>
+                      <img [src]="cert.certificateDocument.url" [alt]="cert.certificationName" class="certification-photo">
+                      
+                      <!-- Upload progress indicator (shown during upload) -->
+                      <div class="upload-progress-container" *ngIf="cert.certificateDocument.uploading">
+                        <div class="progress-text">Uploading... {{cert.certificateDocument.progress || 0}}%</div>
+                        <div class="progress-bar-container">
+                          <div class="progress-bar" [style.width.%]="cert.certificateDocument.progress || 0"></div>
+                        </div>
+                      </div>
                     </div>
-                    <img [src]="cert.certificateDocument.url" [alt]="cert.certificationName" class="certification-photo">
-                    
-                    <!-- Upload progress indicator (shown during upload) -->
-                    <div class="upload-progress-container" *ngIf="cert.certificateDocument.uploading">
-                      <div class="progress-text">Uploading... {{cert.certificateDocument.progress || 0}}%</div>
-                      <div class="progress-bar-container">
-                        <div class="progress-bar" [style.width.%]="cert.certificateDocument.progress || 0"></div>
+                    <div class="certification-details">
+                      <h3 class="certification-name">{{ cert.certificationName }}</h3>
+                      <div class="certification-info">
+                        <p class="certification-issuer"><strong>Certification Body:</strong> {{ cert.certifyingBody }}</p>
+                        <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expirationDate |
+                          date:'mediumDate' }}</p>
+                      </div>
+                      <div class="certification-status">
+                        <span class="status-badge verified">
+                          <i class="pi pi-check-circle"></i> Verified
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <div class="certification-details">
-                    <h3 class="certification-name">{{ cert.certificationName }}</h3>
-                    <div class="certification-info">
-                      <p class="certification-issuer"><strong>Certification Body:</strong> {{ cert.certifyingBody }}</p>
-                      <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expirationDate |
-                        date:'mediumDate' }}</p>
+                  <div *ngIf="isCertificateDocumentArray(cert)">
+                    <div class="certification-image">
+                      <!-- Document action buttons - positioned at the top right corner -->
+                      <div class="document-actions">
+                        <button class="action-button view-button" (click)="viewDocument(cert.certificateDocument.url, $event)" title="View">
+                          <i class="pi pi-eye"></i>
+                        </button>
+                        <button class="action-button download-button" (click)="downloadDocument(cert.certificateDocument.url, $event)" title="Download">
+                          <i class="pi pi-download"></i>
+                        </button>
+                      </div>
+                      <img [src]="cert.certificateDocument.url" [alt]="cert.certificationName"
+                        class="certification-photo">
+                      
+                      <!-- Upload progress indicator (shown during upload) -->
+                      <div class="upload-progress-container" *ngIf="cert.certificateDocument.uploading">
+                        <div class="progress-text">Uploading... {{cert.certificateDocument.progress || 0}}%</div>
+                        <div class="progress-bar-container">
+                          <div class="progress-bar" [style.width.%]="cert.certificateDocument.progress || 0"></div>
+                        </div>
+                      </div>
                     </div>
-                    <div class="certification-status">
-                      <span class="status-badge verified">
-                        <i class="pi pi-check-circle"></i> Verified
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div *ngIf="isCertificateDocumentArray(cert)">
-                  <div class="certification-image">
-                    <!-- Document action buttons - positioned at the top right corner -->
-                    <div class="document-actions">
-                      <button class="action-button view-button" (click)="viewDocument(cert.certificateDocument[0].url, $event)" title="View">
-                        <i class="pi pi-eye"></i>
-                      </button>
-                      <button class="action-button download-button" (click)="downloadDocument(cert.certificateDocument[0].url, $event)" title="Download">
-                        <i class="pi pi-download"></i>
-                      </button>
-                    </div>
-                    <img [src]="cert.certificateDocument[0].url" [alt]="cert.certificationName"
-                      class="certification-photo">
-                    
-                    <!-- Upload progress indicator (shown during upload) -->
-                    <div class="upload-progress-container" *ngIf="cert.certificateDocument[0].uploading">
-                      <div class="progress-text">Uploading... {{cert.certificateDocument[0].progress || 0}}%</div>
-                      <div class="progress-bar-container">
-                        <div class="progress-bar" [style.width.%]="cert.certificateDocument[0].progress || 0"></div>
+                    <div class="certification-details">
+                      <h3 class="certification-name">{{ cert.certificationName }}</h3>
+                      <div class="certification-info">
+                        <p class="certification-issuer"><strong>Certification Body:</strong> {{ cert.certifyingBody }}</p>
+                        <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expirationDate |
+                          date:'mediumDate' }}</p>
+                      </div>
+                      <div class="certification-status">
+                        <span class="status-badge verified">
+                          <i class="pi pi-check-circle"></i> Verified
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <div class="certification-details">
-                    <h3 class="certification-name">{{ cert.certificationName }}</h3>
-                    <div class="certification-info">
-                      <p class="certification-issuer"><strong>Certification Body:</strong> {{ cert.certifyingBody }}</p>
-                      <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expirationDate |
-                        date:'mediumDate' }}</p>
-                    </div>
-                    <div class="certification-status">
-                      <span class="status-badge verified">
-                        <i class="pi pi-check-circle"></i> Verified
-                      </span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Production Capacity Tab -->
-          <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'capacity'">
-            <div class="production-capacity-container">
-              <div class="capacity-row">
-                <div class="capacity-col">
-                  <div class="field-label">Production Capacity Utilization</div>
-                  <div class="field-value">{{ manufacturingData.productionCapacity }}%</div>
-                </div>
-                <div class="capacity-col">
-                  <div class="field-label">Industries Served</div>
-                  <div class="industries-tags">
-                    <span class="industry-tag" *ngFor="let industry of manufacturingData.industries">{{ industry
-                      }}</span>
+            <!-- Production Capacity Tab -->
+            <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'capacity'">
+              <div class="production-capacity-container">
+                <div class="capacity-row">
+                  <div class="capacity-col">
+                    <div class="field-label">Production Capacity Utilization</div>
+                    <div class="field-value">{{ manufacturingData.productionCapacity }}%</div>
+                  </div>
+                  <div class="capacity-col">
+                    <div class="field-label">Industries Served</div>
+                    <div class="industries-tags">
+                      <span class="industry-tag" *ngFor="let industry of manufacturingData.industries">{{ industry
+                        }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+      </div>
       </div>
 
       <!-- Financial Tab Content -->

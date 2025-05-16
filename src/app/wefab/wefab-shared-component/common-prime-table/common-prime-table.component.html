@@ -130,8 +130,29 @@
                             col.field !== 'status' && 
                             col.field !== 'progress' && 
                             col.field !== 'startDate' && 
-                            col.field !== 'budget'">
+                            col.field !== 'budget' &&
+                            !col.isAction">
             {{ rowData[col.field] }}
+          </ng-container>
+
+          <!-- Action column -->
+          <ng-container *ngIf="col.isAction">
+            <div class="action-buttons">
+              <ng-container *ngFor="let action of col.actions">
+                <button *ngIf="isActionVisible(action, rowData)"
+                        pButton
+                        type="button"
+                        [icon]="action.icon"
+                        [label]="action.label"
+                        [disabled]="action.disabled"
+                        [ngClass]="'p-button-' + (action.severity || 'secondary')"
+                        class="p-button-sm"
+                        (click)="action.onClick(rowData)"
+                        [pTooltip]="action.label"
+                        tooltipPosition="top">
+                </button>
+              </ng-container>
+            </div>
           </ng-container>
         </td>
       </tr>

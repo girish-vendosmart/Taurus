@@ -809,7 +809,8 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
       if (fileId) {
         this.uploadedFiles[fileIndex].fileId = fileId;
       }
-      
+
+      console.log('this.uploadedFiles', this.uploadedFiles)
       // Force change detection by creating a new array reference
       this.uploadedFiles = [...this.uploadedFiles];
       this.updateFormControlValue();
@@ -879,6 +880,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     // Now actually perform the upload
     this.commonService.uploadFileWithProgress(formData).subscribe({
       next: (event: any) => {
+        console.log('event', event)
         // We're mostly ignoring server progress events since they're unreliable
         // Just log for debugging
         if (event && event.type) {

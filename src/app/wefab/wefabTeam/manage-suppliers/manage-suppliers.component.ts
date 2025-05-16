@@ -110,7 +110,7 @@ interface Supplier {
     <p-dialog 
       [(visible)]="inviteDialogVisible" 
       [style]="{width: '450px'}" 
-      header="Invite New Supplier" 
+      header="Invite Supplier" 
       [modal]="true"
       [draggable]="false"
       [resizable]="false"

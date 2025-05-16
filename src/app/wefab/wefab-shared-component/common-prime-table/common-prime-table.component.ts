@@ -24,6 +24,17 @@ export interface Column {
   formatter?: (value: any, row: any) => string;
   isLink?: boolean;
   routePath?: string;
+  isAction?: boolean;
+  actions?: Action[];
+}
+
+export interface Action {
+  label: string;
+  icon: string;
+  severity?: 'success' | 'info' | 'warning' | 'danger' | 'secondary';
+  disabled?: boolean;
+  visible?: boolean | ((row: any) => boolean);
+  onClick: (row: any) => void;
 }
 
 @Component({
@@ -66,12 +77,16 @@ export class CommonPrimeTableComponent implements OnInit {
   @Input() showTitle: boolean = true;
   @Input() title: string = 'Data Table';
   @Input() routePrefix: string = '/detail/';
+  @Input() actionColumnWidth: string = '120px';
+  @Input() showActionColumn: boolean = false;
+  @Input() actionColumnPosition: 'start' | 'end' = 'end';
 
   @Output() rowSelect = new EventEmitter<any>();
   @Output() rowUnselect = new EventEmitter<any>();
   @Output() pageChange = new EventEmitter<any>();
   @Output() sortChange = new EventEmitter<any>();
   @Output() linkClick = new EventEmitter<any>();
+  @Output() actionClick = new EventEmitter<{action: Action, row: any}>();
 
   selectedItems: any[] = [];
   globalFilterValue: string = '';
@@ -168,7 +183,33 @@ export class CommonPrimeTableComponent implements OnInit {
     { field: 'progress', header: 'Progress', sortable: true, width: '10%' },
     { field: 'startDate', header: 'Start Date', sortable: true, width: '15%' },
     { field: 'budget', header: 'Budget', sortable: true, width: '15%' },
-    { field: 'location', header: 'Location', sortable: true, filterable: true, width: '15%' }
+    { field: 'location', header: 'Location', sortable: true, filterable: true, width: '15%' },
+    { 
+      field: 'actions', 
+      header: 'Actions', 
+      isAction: true, 
+      width: '120px',
+      actions: [
+        {
+          label: 'Resend',
+          icon: 'pi pi-send',
+          severity: 'info',
+          onClick: (row) => this.onActionClick(row, 'resend')
+        },
+        {
+          label: 'Edit',
+          icon: 'pi pi-pencil',
+          severity: 'warning',
+          onClick: (row) => this.onActionClick(row, 'edit')
+        },
+        {
+          label: 'Delete',
+          icon: 'pi pi-trash',
+          severity: 'danger',
+          onClick: (row) => this.onActionClick(row, 'delete')
+        }
+      ]
+    }
   ];
 
   ngOnInit() {
@@ -253,5 +294,23 @@ export class CommonPrimeTableComponent implements OnInit {
       currency: 'USD',
       minimumFractionDigits: 0
     }).format(value);
+  }
+
+  onActionClick(row: any, actionType: string) {
+    const action = this.columns
+      .find(col => col.isAction)
+      ?.actions
+      ?.find(a => a.label.toLowerCase() === actionType.toLowerCase());
+    
+    if (action) {
+      this.actionClick.emit({ action, row });
+    }
+  }
+
+  isActionVisible(action: Action, row: any): boolean {
+    if (typeof action.visible === 'function') {
+      return action.visible(row);
+    }
+    return action.visible !== false;
   }
 }

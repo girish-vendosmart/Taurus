@@ -913,7 +913,6 @@ export class SupplierOnboardingComponent implements OnInit {
       phone_verified: this.phoneVerified,
       company_profile: JSON.stringify(data)
     };
-    debugger
     return body;
   }
 

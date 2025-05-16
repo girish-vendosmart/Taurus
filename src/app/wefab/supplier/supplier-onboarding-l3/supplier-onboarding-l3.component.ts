@@ -871,13 +871,11 @@ export class SupplierOnboardingL3Component implements OnInit {
 
   submit() {
     if (this.form.valid) {
-      debugger
       console.log(this.model)
       // Get complete form data before submission
       const formValues = this.form.getRawValue();
       
       // Get original form model and preserve array structures
-      debugger
       const fullModel = { ...this.model };
       
       // Merge with form values to ensure all data is captured

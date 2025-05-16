@@ -9,6 +9,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { CommonService } from '../../shared/common.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import e from 'express';
+import { forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 interface DocumentSummary {
   companyDocuments: number;
@@ -387,7 +389,6 @@ export class SupplierProfileReviewComponent implements OnInit {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
         this.getDocumentSummaryData = JSON.parse(res.data.company_profile)
-        debugger
         this.numberOfMachinePhoto = this.getDocumentSummaryData.machines.length
         this.numberOfFacilityPhoto = this.getDocumentSummaryData.facilityPhotos.length
         this.numberOfCertificationPhoto = this.getDocumentSummaryData.certifications.length
@@ -414,10 +415,50 @@ export class SupplierProfileReviewComponent implements OnInit {
       })
     }
 
+    updateMachineData() {
+      this.manufacturingData.machines.forEach((machine: any) => {
+        console.log('machine', machine)
+        let fileId = machine.machinePhotos.fileId
+        console.log('fileId', fileId)
+        this.commonservice.getMachineAnalysis(fileId).subscribe((res: any) => {
+          if (!res.message.machine_image && !res.message.within_facility) {
+            machine.machinePhotos.machine_status = false
+            machine.machinePhotos.machine_status_comment = res.message.verification_comment
+          } else if (res.message.machine_image && !res.message.within_facility) {
+            machine.machinePhotos.machine_status = false
+            machine.machinePhotos.machine_status_comment = res.message.verification_comment
+          } else if (res.message.machine_image && res.message.within_facility) {
+            machine.machinePhotos.machine_status = true
+            machine.machinePhotos.machine_status_comment = res.message.verification_comment
+          }
+        })
+        this.updateFacilityData()
+      })
+    }
+
+    updateFacilityData() {
+      this.manufacturingData.facilityPhotos.forEach((facility: any) => {
+        let fileId = facility.fileId
+        console.log('fileId', fileId)
+        this.commonservice.getFacilityAnalysis(fileId, this.getCompanyProfile.registeredAddress.fullAddress).subscribe((res: any) => {
+          console.log(res)
+          if(res.message.verification_status) {
+             facility.facility_status = true;
+             facility.facility_comment = res.message.verification_comment
+          } else {  
+            facility.facility_status = false;
+            facility.facility_comment = res.message.verification_comment
+          }
+        })
+      })
+    }
+
     getL2Data(supplierId:any) {
       let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId
         this.commonservice.getData(endPoint).subscribe((res: any) => {
           this.manufacturingData = JSON.parse(res.data.company_profile)
+          console.log("Manufacturing data ", this.manufacturingData)
+          this.updateMachineData()
           this.getL2DataStatus(supplierId)
         })
       }

@@ -139,6 +139,31 @@
   border: 1px solid $material-finish-silver !important;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+  align-items: center;
+
+  .p-button {
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0.5rem;
+    
+    &.p-button-sm {
+      font-size: 0.875rem;
+    }
+
+    .p-button-icon {
+      font-size: 0.875rem;
+    }
+
+    &:not(:last-child) {
+      margin-right: 0.25rem;
+    }
+  }
+}
+
 :host ::ng-deep {
   // PrimeNG Table Styles
   .p-datatable {
