@@ -149,6 +149,9 @@
     min-width: 2rem;
     height: 2rem;
     padding: 0.5rem;
+    background: none !important;
+    box-shadow: none !important;
+    border: none !important;
     
     &.p-button-sm {
       font-size: 0.875rem;
@@ -161,7 +164,25 @@
     &:not(:last-child) {
       margin-right: 0.25rem;
     }
+    
+    &:hover, &:focus {
+      background: none !important;
+      box-shadow: none !important;
+    }
   }
+
+  // Ensure the ellipsis icon is visible
+  .p-button .pi {
+    color: #495057 !important;
+    font-size: 1.25rem !important;
+  }
+}
+
+.action-buttons .p-button .p-button-icon.pi.pi-ellipsis-v {
+  color: #222 !important;
+  opacity: 1 !important;
+  font-size: 1.5rem !important;
+  border: 1px solid red !important; /* DEBUG: Remove after confirming visibility */
 }
 
 :host ::ng-deep {

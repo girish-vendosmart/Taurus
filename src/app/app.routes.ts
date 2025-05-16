@@ -9,9 +9,6 @@ export const routes: Routes = [
   { path: '', redirectTo: 'wefab', pathMatch: 'full' },
   { path : 'common-table', component : CommonPrimeTableComponent},
   { path: 'google-places', component: GooglePlacesComponentComponent},
-  // { path: 'test', component: TestComponentsComponent },
-  // { path: 'supplier-onboarding', component: SupplierOnboardingComponentsTsComponent },
-  // { path: 'file-explorer', component: FileExplorerComponent },
   {
     path: 'wefab',
     loadChildren: () => import('./wefab/wefab-component.routes').then(m => m.WEFAB_ROUTES)

@@ -3,6 +3,7 @@ import { WefabTeamDashboardComponent } from './wefabTeam-dashboard/wefabTeam-das
 import { ManageSuppliersComponent } from './manage-suppliers/manage-suppliers.component';
 import { WefabTeamLayoutComponent } from './wefabTeam-layout/wefabTeam-layout.component';
 import { WefabteamsupplierProfileReviewComponent } from './wefabteamsupplier-profile-review/wefabteamsupplier-profile-review.component';
+import { SupplierFinderComponent } from '../wefabTeam/supplier-finder/supplier-finder.component';
 
 export const WEFAB_TEAM_ROUTES: Routes = [
   {
@@ -21,6 +22,10 @@ export const WEFAB_TEAM_ROUTES: Routes = [
       {
         path: 'manage-suppliers',
         component: ManageSuppliersComponent
+      },
+      {
+        path: 'supplier-finder',
+        component: SupplierFinderComponent
       },
       {
         path: 'manage-suppliers/:id',

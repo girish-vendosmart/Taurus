@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { getAuth } from 'firebase/auth';
 
+
 import { 
   Auth, 
   RecaptchaVerifier, 
@@ -42,6 +43,21 @@ export class CommonService {
             'Content-Type': 'application/json'
         });
         return this.http.get(`${this.baseUrl}${endPoint}`, { headers, params });
+    }
+
+    getCSVData(endPoint: string, params?: HttpParams) {
+        // Create headers with Authorization token
+        const headers = new HttpHeaders({
+            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+            'Accept': 'text/csv, application/csv' // Tell server we want CSV
+        });
+        
+        // Use responseType: 'text' to get the raw CSV string
+        return this.http.get(`${this.baseUrl}${endPoint}`, { 
+            headers, 
+            params,
+            responseType: 'text' // Critical for receiving CSV data
+        });
     }
 
     postData(endPoint: string, body: any, params?: HttpParams) {
@@ -175,5 +191,8 @@ export class CommonService {
     getFacilityAnalysis(machineId: string, address: string) {
         return this.http.get(`http://localhost:3000/factoryGeoVerification?file_id=${machineId}&factory_address_string=${address}`)
     }
+    
+
+    
 
 }

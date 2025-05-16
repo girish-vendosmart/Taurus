@@ -2,7 +2,7 @@ import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import { PanelWrapperComponent } from './formly.config';
@@ -26,6 +26,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     importProvidersFrom(
       ReactiveFormsModule,
+      FormsModule,
       FormlyModule.forRoot({
         types: [
           { name: 'p-multiselect-group', component: PMultiSelectGroupComponent },

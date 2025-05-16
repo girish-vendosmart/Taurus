@@ -138,20 +138,15 @@
           <!-- Action column -->
           <ng-container *ngIf="col.isAction">
             <div class="action-buttons">
-              <ng-container *ngFor="let action of col.actions">
-                <button *ngIf="isActionVisible(action, rowData)"
-                        pButton
-                        type="button"
-                        [icon]="action.icon"
-                        [label]="action.label"
-                        [disabled]="action.disabled"
-                        [ngClass]="'p-button-' + (action.severity || 'secondary')"
-                        class="p-button-sm"
-                        (click)="action.onClick(rowData)"
-                        [pTooltip]="action.label"
-                        tooltipPosition="top">
-                </button>
-              </ng-container>
+              <button
+                pButton
+                type="button"
+                icon="pi pi-ellipsis-v"
+                class="p-button-secondary p-button-sm"
+                (click)="onActionClick(rowData, 'menu')"
+                pTooltip="Actions"
+                tooltipPosition="top">
+              </button>
             </div>
           </ng-container>
         </td>
