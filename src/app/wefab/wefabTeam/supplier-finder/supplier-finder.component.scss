@@ -181,7 +181,7 @@
 }
 
 .results-container {
-  max-width: 1200px;
+  max-width: 1000px;
   width: 100%;
   margin: 0 auto;
   padding-top: 2rem;
@@ -228,11 +228,7 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
   background-color: $technical-white;
-  margin-bottom: 1rem;
-  
-  &.full-width {
-    width: 100%;
-  }
+  margin-bottom: 2rem;
   
   .suppliers-table {
     width: 100%;
@@ -252,22 +248,6 @@
       top: 0;
       z-index: 1;
       border-bottom: 1px solid rgba($material-finish-silver, 0.5);
-    }
-    
-    .form-check {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      
-      .form-check-input {
-        cursor: pointer;
-        border-color: rgba($machine-gray, 0.4);
-        
-        &:checked {
-          background-color: $blueprint-blue;
-          border-color: $blueprint-blue;
-        }
-      }
     }
     
     .supplier-row {
@@ -301,37 +281,7 @@
       
       .website {
         font-size: 0.8rem;
-        color: $blueprint-blue;
-        text-decoration: none;
-        margin-bottom: 0.25rem;
-        
-        &:hover {
-          text-decoration: underline;
-        }
-      }
-      
-      .company-type {
-        font-size: 0.8rem;
         color: $machine-gray;
-        font-style: italic;
-      }
-    }
-    
-    .contact-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      
-      .phone, .email {
-        display: flex;
-        align-items: center;
-        font-size: 0.85rem;
-        
-        i {
-          color: $machine-gray;
-          margin-right: 0.5rem;
-          font-size: 0.9rem;
-        }
       }
     }
     
@@ -343,58 +293,6 @@
         color: $machine-gray;
         margin-right: 0.5rem;
         font-size: 0.9rem;
-      }
-    }
-    
-    .established {
-      font-size: 0.9rem;
-      
-      .year {
-        font-weight: $font-weight-medium;
-      }
-      
-      .years-active {
-        color: $machine-gray;
-        font-size: 0.8rem;
-      }
-    }
-    
-    .verification-status {
-      display: flex;
-      align-items: center;
-      font-size: 0.85rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      
-      &.verified {
-        background-color: rgba($process-green, 0.1);
-        color: $process-green;
-        
-        i {
-          color: $process-green;
-        }
-      }
-      
-      &.partially-verified {
-        background-color: rgba($safety-orange, 0.1);
-        color: $safety-orange;
-        
-        i {
-          color: $safety-orange;
-        }
-      }
-      
-      &.limited-verification {
-        background-color: rgba($machine-gray, 0.1);
-        color: $machine-gray;
-        
-        i {
-          color: $machine-gray;
-        }
-      }
-      
-      i {
-        margin-right: 0.5rem;
       }
     }
     
@@ -427,24 +325,22 @@
     }
     
     .services {
-      .service-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        
-        .service-tag {
-          font-size: 0.8rem;
-          background-color: rgba($blueprint-blue, 0.06);
-          color: $blueprint-blue;
-          padding: 0.25rem 0.75rem;
-          border-radius: 12px;
-          white-space: nowrap;
-        }
-        
-        .more-tag {
-          font-size: 0.75rem;
-          color: $machine-gray;
-        }
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      
+      .service-tag {
+        font-size: 0.8rem;
+        background-color: rgba($blueprint-blue, 0.06);
+        color: $blueprint-blue;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        white-space: nowrap;
+      }
+      
+      .more-tag {
+        font-size: 0.75rem;
+        color: $machine-gray;
       }
     }
   }
@@ -455,39 +351,10 @@
   padding-bottom: 0.75rem;
   margin-bottom: 1rem;
   
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  
   .results-count {
     font-size: 0.9rem;
     color: $machine-gray;
     margin-bottom: 0;
-  }
-}
-
-.table-actions {
-  display: flex;
-  gap: 0.75rem;
-  
-  .btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    
-    i {
-      font-size: 1rem;
-    }
-    
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
   }
 }
 
@@ -575,203 +442,6 @@
       font-size: 1rem;
       max-width: 400px;
       margin: 0 auto;
-    }
-  }
-}
-
-// Contact Modal
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba($precision-black, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-}
-
-.contact-modal {
-  background-color: $technical-white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  width: 100%;
-  max-width: 550px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  animation: modalSlideIn 0.3s ease-out;
-  
-  @keyframes modalSlideIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .modal-header {
-    padding: 1.25rem;
-    border-bottom: 1px solid $material-finish-silver;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    h3 {
-      font-size: 1.2rem;
-      font-weight: $font-weight-semibold;
-      color: $blueprint-blue;
-      margin: 0;
-    }
-    
-    .close-btn {
-      background: transparent;
-      border: none;
-      color: $machine-gray;
-      cursor: pointer;
-      font-size: 1.2rem;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.2s;
-      
-      &:hover {
-        background-color: rgba($material-finish-silver, 0.3);
-        color: $precision-black;
-      }
-    }
-  }
-  
-  .modal-body {
-    padding: 1.25rem;
-    overflow-y: auto;
-    
-    p {
-      color: $machine-gray;
-      margin-bottom: 1rem;
-    }
-    
-    .selected-suppliers-list {
-      max-height: 300px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      
-      .selected-supplier {
-        padding: 1rem;
-        border-radius: 8px;
-        background-color: rgba($blueprint-blue, 0.03);
-        border: 1px solid rgba($blueprint-blue, 0.1);
-        
-        h4 {
-          font-size: 1rem;
-          font-weight: $font-weight-medium;
-          margin: 0 0 0.5rem 0;
-          color: $blueprint-blue;
-        }
-        
-        p {
-          font-size: 0.9rem;
-          margin: 0;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          
-          i {
-            color: $machine-gray;
-          }
-        }
-      }
-    }
-  }
-  
-  .modal-footer {
-    padding: 1.25rem;
-    border-top: 1px solid $material-finish-silver;
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    
-    .btn {
-      padding: 0.6rem 1.25rem;
-      font-size: 0.95rem;
-      
-      &.btn-primary {
-        background-color: $blueprint-blue;
-        border-color: $blueprint-blue;
-        
-        &:hover {
-          background-color: darken($blueprint-blue, 5%);
-        }
-      }
-    }
-  }
-}
-
-// Toast Message
-.toast-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1100;
-  animation: toastSlideIn 0.3s ease-out;
-  
-  @keyframes toastSlideIn {
-    from {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  
-  .toast-message {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1.25rem;
-    border-radius: 6px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-    min-width: 200px;
-    max-width: 350px;
-    
-    &.success {
-      background-color: rgba($process-green, 0.1);
-      border-left: 4px solid $process-green;
-      
-      i {
-        color: $process-green;
-      }
-    }
-    
-    &.error {
-      background-color: rgba($safety-orange, 0.1);
-      border-left: 4px solid $safety-orange;
-      
-      i {
-        color: $safety-orange;
-      }
-    }
-    
-    i {
-      font-size: 1.2rem;
-      margin-right: 0.75rem;
-    }
-    
-    span {
-      font-size: 0.95rem;
-      color: $precision-black;
     }
   }
 }

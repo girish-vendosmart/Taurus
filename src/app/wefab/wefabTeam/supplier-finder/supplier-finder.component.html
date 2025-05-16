@@ -1,234 +1,182 @@
 <div class="search-page">
   <div class="background-pattern"></div>
   <div class="search-container">
-    <div class="logo-container text-center">
-      <h1 class="brand-logo">We<span>Fab</span> Supplier Finder</h1>
-      <p class="tagline">Find the best manufacturing partners for your project</p>
+    <div class="logo-container text-center mb-4">
+      <h1 class="brand-logo mb-0">Supplier Finder</h1>
+      <p class="tagline text-machine-gray">Find the perfect manufacturing partner for your project</p>
     </div>
 
     <!-- {{searchData | json}} -->
 
     
     <div class="search-box-container">
-      <form class="search-form" (ngSubmit)="searchSuppliers()">
-        <div class="search-box">
-          <i class="bi bi-search search-icon"></i>
-          <input type="text" class="search-input" placeholder="Search for manufacturing suppliers, services, or capabilities..." [(ngModel)]="searchQuery" name="search" autocomplete="off">
-          <div class="search-actions" *ngIf="searchQuery">
-            <button type="button" class="btn-clear" (click)="clearSearch()">
-              <i class="bi bi-x-circle"></i>
-            </button>
-          </div>
-        </div>
-        
-        <div class="d-flex justify-content-center mt-3 search-buttons">
-          <button type="submit" class="btn btn-primary btn-search">
-            <i class="bi bi-search me-2"></i> Search
+      <div class="search-box">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="search-input"
+          placeholder="What are you looking for? (e.g., CNC machining, injection molding...)" [value]="searchQuery"
+          (input)="searchQuery = $any($event.target).value" (keyup.enter)="searchSuppliers()">
+        <div class="search-actions">
+          <button class="btn-clear" *ngIf="searchQuery" (click)="clearSearch()">
+            <i class="bi bi-x-lg"></i>
           </button>
         </div>
-      </form>
+      </div>
+      <div class="search-buttons mt-4 text-center">
+        <button class="btn btn-primary btn-search" (click)="searchSuppliers()">
+          Search
+        </button>
+      </div>
     </div>
 
-    <div class="popular-categories" *ngIf="!searchData">
-      <p class="category-heading text-muted">Popular searches:</p>
+    <div class="popular-categories" *ngIf="!hasSearched">
+      <p class="category-heading text-machine-gray">Popular categories:</p>
       <div class="category-tags">
-        <div class="category-tag" *ngFor="let category of popularCategories" (click)="selectCategory(category)">{{ category }}</div>
+        <button class="category-tag" (click)="searchByCategory('CNC Machining')">CNC Machining</button>
+        <button class="category-tag" (click)="searchByCategory('Injection Molding')">Injection Molding</button>
+        <button class="category-tag" (click)="searchByCategory('Sheet Metal')">Sheet Metal</button>
+        <button class="category-tag" (click)="searchByCategory('3D Printing')">3D Printing</button>
+        <button class="category-tag" (click)="searchByCategory('Plastic Parts')">Plastic Parts</button>
       </div>
     </div>
   </div>
 
-  <div class="results-container mt-4" *ngIf="isLoading || searchData?.length > 0">
-    <div class="results-header">
-      <div class="header-content">
-        <p class="results-count" *ngIf="searchData?.length">Found {{ searchData.length }} suppliers for "{{ searchQuery }}"</p>
-        <div class="table-actions ml-auto" *ngIf="searchData?.length">
-          <button class="btn btn-outline-secondary" [disabled]="!hasSelectedItems()" (click)="exportSelected()">
-            <i class="bi bi-download"></i> Export Selected
-          </button>
-          <button class="btn btn-outline-primary" [disabled]="!hasSelectedItems()" (click)="showContactModal = true">
-            <i class="bi bi-envelope"></i> Contact Selected
-          </button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Loading spinner -->
+  <div class="results-container" *ngIf="hasSearched">
+    <!-- Loading state -->
     <div class="loading-container" *ngIf="isLoading">
       <div class="loader-spinner">
         <div class="spinner"></div>
       </div>
-      <p class="loading-text">Searching for suppliers...</p>
+      <p class="loading-text text-machine-gray">Searching for suppliers...</p>
+    </div>
+
+    <!-- When API results are available -->
+    <div *ngIf="!isLoading && searchData && searchData.length > 0">
+      <div class="results-header">
+        <p class="results-count text-machine-gray">{{ searchData.length }} suppliers found</p>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="suppliers-table">
+          <thead>
+            <tr>
+              <th>Supplier Name</th>
+              <th>Location</th>
+              <th>Rating</th>
+              <th>Match Score</th>
+              <th>Services</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let supplier of searchData" class="supplier-row">
+              <td class="supplier-name">
+                <div class="company-info">
+                  <span class="name">{{ supplier.name || supplier.supplier_name || 'N/A' }}</span>
+                  <span class="website" *ngIf="supplier.website">{{ supplier.website }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="location-info">
+                  <i class="bi bi-geo-alt"></i>
+                  <span>{{ supplier.location || supplier.city || 'Location not available' }}, {{ supplier.country || 'India' }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="rating">
+                  <i class="bi bi-star-fill"></i>
+                  <span>{{ supplier.rating || '4.5' }}/5</span>
+                </div>
+              </td>
+              <td>
+                <div class="match-score" [ngClass]="{'high-match': supplier.match_score >= 80, 'medium-match': supplier.match_score >= 60 && supplier.match_score < 80}">
+                  {{ supplier.match_score || supplier.match || '90' }}%
+                </div>
+              </td>
+              <td>
+                <div class="services">
+                  <span class="service-tag" *ngFor="let service of (supplier.services || supplier.specialties || supplier.capabilities || '').split(',').slice(0, 2)">
+                    {{ service.trim() || 'N/A' }}
+                  </span>
+                  <span class="more-tag" *ngIf="(supplier.services || supplier.specialties || supplier.capabilities || '').split(',').length > 2">
+                    +{{ (supplier.services || supplier.specialties || supplier.capabilities || '').split(',').length - 2 }} more
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- When no suppliers found in results -->
+    <div class="empty-results" *ngIf="!isLoading && searchData && searchData.length === 0">
+      <div class="empty-state">
+        <i class="bi bi-search-heart fs-1 text-blueprint-blue"></i>
+        <h2 class="mt-3">No suppliers found</h2>
+        <p class="text-machine-gray">Try adjusting your search terms or browse our categories below</p>
+      </div>
     </div>
     
-    <!-- Results table -->
-    <div class="table-responsive full-width" *ngIf="!isLoading && searchData?.length">
-      <table class="table suppliers-table">
-        <thead>
-          <tr>
-            <th width="50">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="selectAll" (change)="toggleSelectAll()">
-                <label class="form-check-label" for="selectAll"></label>
-              </div>
-            </th>
-            <th>Company</th>
-            <th>Contact</th>
-            <th>Location</th>
-            <th>Established</th>
-            <th>Verification</th>
-            <th>Rating</th>
-            <th>Match</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="supplier-row" *ngFor="let supplier of searchData">
-            <td>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" [id]="'supplier-' + sanitizeForId(supplier['Company Name'])" [(ngModel)]="supplier.selected">
-              </div>
-            </td>
-            <td>
-              <div class="company-info">
-                <div class="name">{{ supplier['Company Name'] }}</div>
-                <a href="{{ supplier.Website }}" target="_blank" class="website" *ngIf="supplier.Website">{{ supplier.Website }}</a>
-                <div class="company-type" *ngIf="supplier['Company Type']">{{ supplier['Company Type'] }}</div>
-              </div>
-            </td>
-            <td>
-              <div class="contact-info">
-                <div class="phone" *ngIf="supplier.Phone">
-                  <i class="bi bi-telephone"></i> {{ supplier.Phone }}
-                </div>
-                <div class="email" *ngIf="supplier.Email">
-                  <i class="bi bi-envelope"></i> {{ supplier.Email }}
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="location-info" *ngIf="supplier.Location">
-                <i class="bi bi-geo-alt"></i> {{ supplier.Location }}
-              </div>
-            </td>
-            <td>
-              <div class="established" *ngIf="supplier['Established Year']">
-                <div class="year">{{ supplier['Established Year'] }}</div>
-                <div class="years-active">({{ currentYear - supplier['Established Year'] }} years)</div>
-              </div>
-            </td>
-            <td>
-              <div class="verification-status" [ngClass]="{
-                'verified': supplier['Verification Status'] === 'Verified',
-                'partially-verified': supplier['Verification Status'] === 'Partially Verified',
-                'limited-verification': supplier['Verification Status'] === 'Limited Verification'
-              }">
-                <i class="bi" [ngClass]="{
-                  'bi-check-circle-fill': supplier['Verification Status'] === 'Verified',
-                  'bi-patch-check-fill': supplier['Verification Status'] === 'Partially Verified',
-                  'bi-shield': supplier['Verification Status'] === 'Limited Verification'
-                }"></i>
-                {{ supplier['Verification Status'] }}
-              </div>
-            </td>
-            <td>
-              <div class="rating" *ngIf="supplier.Rating">
-                <i class="bi bi-star-fill"></i> {{ supplier.Rating }}/5
-              </div>
-            </td>
-            <td>
-              <div class="match-score" [ngClass]="{'high-match': supplier['Match Score'] >= 80, 'medium-match': supplier['Match Score'] >= 60 && supplier['Match Score'] < 80}">
-                {{ supplier['Match Score'] }}%
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  
-  <!-- Empty state -->
-  <div class="empty-results" *ngIf="!isLoading && searchData?.length === 0 && searchQuery">
-    <div class="empty-state">
-      <i class="bi bi-search text-muted mb-3"></i>
-      <h2>No suppliers found</h2>
-      <p class="text-muted">We couldn't find any suppliers matching your search criteria. Try adjusting your search or browse our popular categories.</p>
-    </div>
-  </div>
-  
-  <!-- Contact Modal -->
-  <div class="modal-overlay" *ngIf="showContactModal">
-    <div class="contact-modal">
-      <div class="modal-header">
-        <h3>Contact Selected Suppliers</h3>
-        <button class="close-btn" (click)="showContactModal = false">
-          <i class="bi bi-x"></i>
-        </button>
+    <!-- When still using mock data -->
+    <div *ngIf="!isLoading && (!searchData || searchData.length === 0) && suppliers && suppliers.length > 0">
+      <div class="results-header">
+        <p class="results-count text-machine-gray">{{ suppliers.length }} suppliers found</p>
       </div>
-      <div class="modal-body">
-        <p>You have selected the following suppliers to contact:</p>
-        <div class="selected-suppliers-list">
-          <div class="selected-supplier" *ngFor="let supplier of getSelectedSuppliers()">
-            <h4>{{ supplier['Company Name'] }}</h4>
-            <p *ngIf="supplier.Email">
-              <i class="bi bi-envelope"></i> {{ supplier.Email }}
-            </p>
-            <p *ngIf="supplier.Location">
-              <i class="bi bi-geo-alt"></i> {{ supplier.Location }}
-            </p>
+      
+      <div class="supplier-list">
+        <div class="supplier-card" *ngFor="let supplier of suppliers">
+          <h3 class="supplier-name">{{ supplier.name }}</h3>
+          <p class="supplier-description">{{ supplier.description }}</p>
+          <div class="supplier-details">
+            <span class="supplier-location"><i class="bi bi-geo-alt"></i> {{ supplier.location }}</span>
+            <span class="supplier-rating">
+              <i class="bi bi-star-fill"></i> {{ supplier.rating }}/5
+            </span>
+          </div>
+          <div class="supplier-specialties">
+            <span class="specialty-tag" *ngFor="let specialty of supplier.specialties">{{ specialty }}</span>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline-secondary" (click)="showContactModal = false">Cancel</button>
-        <button class="btn btn-primary" (click)="sendInvitation()">Send Invitation</button>
+    </div>
+  </div>
+
+  <div class="features-section" *ngIf="!hasSearched">
+    <div class="feature-row">
+      <div class="feature-card">
+        <div class="feature-icon text-blueprint-blue">
+          <i class="bi bi-building-check"></i>
+        </div>
+        <h3>Vetted Suppliers</h3>
+        <p>All suppliers undergo our rigorous verification process</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon text-process-green">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <h3>Quality Assured</h3>
+        <p>Suppliers meet industry standards for quality and reliability</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon text-safety-orange">
+          <i class="bi bi-globe"></i>
+        </div>
+        <h3>Global Network</h3>
+        <p>Access suppliers from around the world for your specific needs</p>
       </div>
     </div>
   </div>
-  
-  <!-- Toast Message -->
-  <div class="toast-container" *ngIf="showToast">
-    <div class="toast-message success">
-      <i class="bi bi-check-circle"></i>
-      <span>Invitation Sent Successfully</span>
+
+  <footer class="page-footer" *ngIf="!hasSearched">
+    <div class="footer-content">
+      <p>© 2023 WeFab. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">How it works</a>
+        <a href="#">For Suppliers</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
     </div>
-  </div>
+  </footer>
 </div>
-
-<div class="features-section" *ngIf="!hasSearched">
-  <div class="feature-row">
-    <div class="feature-card">
-      <div class="feature-icon text-blueprint-blue">
-        <i class="bi bi-building-check"></i>
-      </div>
-      <h3>Vetted Suppliers</h3>
-      <p>All suppliers undergo our rigorous verification process</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon text-process-green">
-        <i class="bi bi-shield-check"></i>
-      </div>
-      <h3>Quality Assured</h3>
-      <p>Suppliers meet industry standards for quality and reliability</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon text-safety-orange">
-        <i class="bi bi-globe"></i>
-      </div>
-      <h3>Global Network</h3>
-      <p>Access suppliers from around the world for your specific needs</p>
-    </div>
-  </div>
-</div>
-
-<footer class="page-footer" *ngIf="!hasSearched">
-  <div class="footer-content">
-    <p>© 2023 WeFab. All rights reserved.</p>
-    <div class="footer-links">
-      <a href="#">How it works</a>
-      <a href="#">For Suppliers</a>
-      <a href="#">Privacy Policy</a>
-      <a href="#">Terms of Service</a>
-    </div>
-  </div>
-</footer>

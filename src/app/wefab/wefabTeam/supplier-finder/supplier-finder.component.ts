@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommonService } from '../../shared/common.service';
-import * as XLSX from 'xlsx';
 
 // Interface for supplier data
 interface Supplier {
@@ -21,25 +20,12 @@ interface Supplier {
   templateUrl: './supplier-finder.component.html',
   styleUrl: './supplier-finder.component.scss'
 })
-export class SupplierFinderComponent implements OnInit {
+export class SupplierFinderComponent {
   // Search functionality
   searchQuery: string = '';
   hasSearched: boolean = false;
   suppliers: Supplier[] = [];
   isLoading: boolean = false;
-  searchData: any[] = [];
-  currentYear = new Date().getFullYear();
-  showContactModal: boolean = false;
-  showToast: boolean = false;
-  
-  popularCategories: string[] = [
-    'CNC Machining',
-    'Injection Molding',
-    'Sheet Metal',
-    '3D Printing',
-    'Electronics Manufacturing',
-    'Plastic Parts'
-  ];
 
   // Mock data - in real app, this would come from a service
   mockSuppliers: Supplier[] = [
@@ -68,14 +54,11 @@ export class SupplierFinderComponent implements OnInit {
       rating: 4.7
     }
   ];
+  searchData: any[] = [];
 
   constructor(private service: CommonService) {
     // Initialize with all suppliers
     this.suppliers = [...this.mockSuppliers];
-  }
-
-  ngOnInit(): void {
-    // Initialize component
   }
 
   searchSuppliers() {
@@ -98,10 +81,6 @@ export class SupplierFinderComponent implements OnInit {
     this.service.getCSVData(endPoint).subscribe(
       (res:any) => {
         this.searchData = this.parseCSV(res);
-        // Initialize selected property for all suppliers
-        this.searchData.forEach(supplier => {
-          supplier.selected = false;
-        });
         this.isLoading = false;
       },
       (error) => {
@@ -121,46 +100,6 @@ export class SupplierFinderComponent implements OnInit {
   searchByCategory(category: string) {
     this.searchQuery = category;
     this.searchSuppliers();
-  }
-
-  // Helper function for select all checkbox
-  toggleSelectAll(event: any) {
-    const isChecked = event.target.checked;
-    this.searchData.forEach(supplier => {
-      supplier.selected = isChecked;
-    });
-  }
-  
-  // Helper function to check if any items are selected
-  hasSelectedItems(): boolean {
-    return this.searchData.some(supplier => supplier.selected);
-  }
-
-  // Helper function to get services as an array
-  getServices(servicesString: string): string[] {
-    if (!servicesString) return [];
-    return servicesString.split(',').map(service => service.trim()).filter(service => service);
-  }
-
-  // Helper function to sanitize strings for IDs
-  sanitizeForId(text: string | undefined): string {
-    if (!text) return 'unknown';
-    return text.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-  }
-
-  // Helper function to get verification label
-  getVerificationLabel(verificationStatus: string): string {
-    if (!verificationStatus) return 'Unverified';
-    
-    if (verificationStatus.toLowerCase().includes('high confidence')) {
-      return 'Verified';
-    } else if (verificationStatus.toLowerCase().includes('medium confidence')) {
-      return 'Partially Verified';
-    } else if (verificationStatus.toLowerCase().includes('low confidence')) {
-      return 'Limited Verification';
-    }
-    
-    return 'Unverified';
   }
 
   parseCSV(csv: string) {
@@ -226,65 +165,5 @@ export class SupplierFinderComponent implements OnInit {
     value = value.replace(/""/g, '"');
 
     return value;
-  }
-
-  getSelectedSuppliers(): any[] {
-    return this.searchData.filter(supplier => supplier.selected);
-  }
-
-  exportSelected(): void {
-    const selectedSuppliers = this.getSelectedSuppliers();
-    
-    if (selectedSuppliers.length === 0) {
-      return;
-    }
-    
-    // Create a new workbook
-    const wb = XLSX.utils.book_new();
-    
-    // Create a worksheet from the selected data
-    const cleanData = selectedSuppliers.map(supplier => {
-      // Create a clean copy without the 'selected' property
-      const cleanSupplier = { ...supplier };
-      delete cleanSupplier.selected;
-      return cleanSupplier;
-    });
-    
-    const ws = XLSX.utils.json_to_sheet(cleanData);
-    
-    // Add the worksheet to the workbook
-    XLSX.utils.book_append_sheet(wb, ws, 'Selected Suppliers');
-    
-    // Generate xlsx file and trigger download
-    XLSX.writeFile(wb, 'WeFab_Selected_Suppliers.xlsx');
-  }
-
-  sendInvitation(): void {
-    const selectedSuppliers = this.getSelectedSuppliers();
-    
-    if (selectedSuppliers.length === 0) {
-      return;
-    }
-    
-    // Format data as specified
-    const invitationData = {
-      suppliers: selectedSuppliers.map(supplier => ({
-        name: supplier['Company Name'],
-        email: supplier.Email || '',
-        message: `We would like to invite ${supplier['Company Name']} to collaborate on our manufacturing project.`
-      }))
-    };
-    
-    // In a real application, this would be an API call
-    console.log('Sending invitation data:', invitationData);
-    
-    // Close modal and show success toast
-    this.showContactModal = false;
-    this.showToast = true;
-    
-    // Auto-hide toast after 3 seconds
-    setTimeout(() => {
-      this.showToast = false;
-    }, 3000);
   }
 }
