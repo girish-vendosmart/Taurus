@@ -51,6 +51,7 @@ export class LoginComponentComponent {
 
       if(this.emailId) {
         this.loginForm.get('email')?.setValue(this.emailId)
+        this.loginForm.get('email')?.disable();
       } 
 
       if(this.companyId) {

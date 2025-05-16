@@ -42,6 +42,10 @@
           {{ loginError }}
         </div>
 
+        <div class="button-container" *ngIf="companyId">
+          <p class="login-message">Login to join the wefab supplier network</p>
+        </div>
+
         <button type="submit" class="sign-in-btn" [disabled]="!loginForm.valid">SIGN IN</button>
 
         <div class="terms">
