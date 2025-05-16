@@ -2,6 +2,10 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommonService } from '../../shared/common.service';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 // Interface for supplier data
 interface Supplier {
@@ -13,10 +17,17 @@ interface Supplier {
   rating: number;
 }
 
+interface SelectedSupplier {
+  supplier_email_id: string;
+  supplier_name: string;
+  company_name: string;
+}
+
 @Component({
   selector: 'app-supplier-finder',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DialogModule, ButtonModule, ToastModule],
+  providers: [MessageService],
   templateUrl: './supplier-finder.component.html',
   styleUrl: './supplier-finder.component.scss'
 })
@@ -26,6 +37,9 @@ export class SupplierFinderComponent {
   hasSearched: boolean = false;
   suppliers: Supplier[] = [];
   isLoading: boolean = false;
+  selectedSuppliers: Set<string> = new Set();
+  showInvitationDialog: boolean = false;
+  selectedSuppliersList: SelectedSupplier[] = [];
 
   // Mock data - in real app, this would come from a service
   mockSuppliers: Supplier[] = [
@@ -56,11 +70,72 @@ export class SupplierFinderComponent {
   ];
   searchData: any[] = [];
 
-  constructor(private service: CommonService) {
+  constructor(private service: CommonService, private messageService: MessageService) {
     // Initialize with all suppliers
     this.suppliers = [...this.mockSuppliers];
   }
 
+  toggleSupplierSelection(supplier: any) {
+    const supplierId = supplier['Company Name'];
+    if (this.selectedSuppliers.has(supplierId)) {
+      this.selectedSuppliers.delete(supplierId);
+    } else {
+      this.selectedSuppliers.add(supplierId);
+    }
+  }
+
+  toggleSelectAll(event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    if (checkbox.checked) {
+      this.searchData.forEach(supplier => {
+        this.selectedSuppliers.add(supplier['Company Name']);
+      });
+    } else {
+      this.selectedSuppliers.clear();
+    }
+  }
+
+  isSupplierSelected(supplier: any): boolean {
+    return this.selectedSuppliers.has(supplier['Company Name']);
+  }
+
+  openInvitationDialog() {
+    this.selectedSuppliersList = this.searchData
+      .filter(supplier => this.selectedSuppliers.has(supplier['Company Name']))
+      .map(supplier => ({
+        supplier_email_id: supplier['Primary Email'],
+        supplier_name: supplier['Company Name'],
+        company_name: supplier['Company Name']
+      }));
+    this.showInvitationDialog = true;
+  }
+
+  sendInvitations() {
+    const invitationData = {
+      supplier_invitations: this.selectedSuppliersList
+    };
+    
+    // Here you would typically make an API call to send the invitations
+    console.log('Sending invitations:', invitationData);
+    this.sendInvitation(invitationData);
+
+  }
+
+  sendInvitation(invitationData:any) {
+    let endPoint = `/api/resource/wfb_bulk_supplier_invitation`;
+    this.service.postData(endPoint, invitationData).subscribe(
+      (res:any) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Invitations sent successfully'
+        });
+        
+        this.showInvitationDialog = false;
+        this.selectedSuppliers.clear();
+      }
+    );
+  }
   searchSuppliers() {
     this.hasSearched = true;
     // Filter suppliers based on search query
