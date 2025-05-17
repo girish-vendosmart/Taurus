@@ -1,0 +1,84 @@
+.user-list-panel {
+  background: #fff;
+  color: #1A1D21;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #D1D5DB;
+}
+.user-list-header {
+  padding: 24px 20px 12px 20px;
+  background: #fff;
+  border-bottom: 1px solid #F6F7F9;
+}
+.user-list-header h3 {
+  color: #1A1D21;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.5px;
+}
+.search-bar {
+  width: 100%;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #D1D5DB;
+  background: #F6F7F9;
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+.section-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: #545A64;
+  text-transform: uppercase;
+  margin: 16px 0 8px 20px;
+  letter-spacing: 1px;
+}
+.user-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.user-list-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  cursor: pointer;
+  border-radius: 12px;
+  margin: 2px 8px;
+  transition: background 0.2s;
+}
+.user-list-item.selected, .user-list-item:hover {
+  background: #F6F7F9;
+}
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  margin-right: 16px;
+  object-fit: cover;
+  border: 2px solid #D1D5DB;
+}
+.user-info {
+  flex: 1;
+}
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1A1D21;
+}
+.user-last-message {
+  font-size: 14px;
+  color: #545A64;
+  margin-top: 2px;
+}
+.badge {
+  background: #FF5722;
+  color: #fff;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 8px;
+} 

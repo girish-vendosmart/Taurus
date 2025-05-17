@@ -1,0 +1,24 @@
+.wefab-chat-container {
+  display: flex;
+  height: 100vh;
+  background-color: #F6F7F9; // Technical White
+  font-family: 'Inter', sans-serif;
+}
+
+.chat-user-list {
+  width: 320px;
+  padding: 0;
+  border-right: 1px solid #D1D5DB;
+  background: none;
+  color: inherit;
+  overflow-y: auto;
+}
+
+.chat-window {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  background: #F6F7F9;
+  min-width: 0;
+  min-height: 0;
+} 

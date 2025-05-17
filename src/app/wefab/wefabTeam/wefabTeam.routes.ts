@@ -30,6 +30,10 @@ export const WEFAB_TEAM_ROUTES: Routes = [
       {
         path: 'manage-suppliers/:id',
         component: WefabteamsupplierProfileReviewComponent
+      },
+      {
+        path: 'chat',
+        loadChildren: () => import('./chat/chat.routes').then(m => m.default)
       }
     ]
   }

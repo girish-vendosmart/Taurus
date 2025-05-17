@@ -25,6 +25,12 @@ import { RouterModule } from '@angular/router';
               Manage Suppliers
             </a>
           </li>
+          <li>
+            <a routerLink="/wefab/wefabTeam/chat" routerLinkActive="active">
+              <i class="bi bi-chat-dots"></i>
+              Messages
+            </a>
+          </li>
         </ul>
       </nav>
     </div>

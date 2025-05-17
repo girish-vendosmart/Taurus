@@ -1,0 +1,6 @@
+[
+  { "id": 1, "sender": "Matriks Studio", "type": "image", "content": { "url": "assets/mock/dashboard-reference.jpg", "name": "dashboard-reference.jpg" }, "timestamp": "2024-06-01T22:25:00" },
+  { "id": 2, "sender": "Nopals", "type": "text", "content": "Wahhh gaskeun ini mahh 🔥", "timestamp": "2024-06-01T22:30:00" },
+  { "id": 3, "sender": "Matriks Studio", "type": "file", "content": { "name": "dashboard-specs.pdf", "url": "assets/files/dashboard-specs.pdf", "size": "2.3 MB" }, "timestamp": "2024-06-01T22:35:00" },
+  { "id": 4, "sender": "Matriks Studio", "type": "file", "content": { "name": "design-guidelines.docx", "url": "assets/files/design-guidelines.docx", "size": "1.8 MB" }, "timestamp": "2024-06-01T22:36:00" }
+] 
