@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 
 interface OnboardingStep {
   id: number;
@@ -34,21 +35,21 @@ export class SupplierOnboardingStatusComponent {
       id: 2,
       title: 'Manufacturing Capabilities',
       description: 'Production capacity, facilities, and quality certifications',
-      status: 'completed',
-      progress: 100,
-      icon: 'check'
+      status: 'in-progress',
+      progress: 50,
+      icon: 'clock'
     },
     {
       id: 3,
       title: 'Financial Information',
       description: 'Detailed financial statements and banking information',
-      status: 'completed',
-      progress: 100,
-      icon: 'check'
+      status: 'pending',
+      progress: 0,
+      icon: 'lock'
     }
   ];
 
-  constructor() {
+  constructor(private router: Router) {
     this.calculateOverallProgress();
   }
 
@@ -62,14 +63,14 @@ export class SupplierOnboardingStatusComponent {
 
   continueOnboarding(stepId: number): void {
     console.log(`Continuing to step ${stepId}`);
-    // Navigate to the appropriate step
-    // this.router.navigate(['/supplier/onboarding', stepId]);
+    this.router.navigate(['/supplier/supplier-onboarding', stepId]);
   }
 
   viewDetails(stepId: number): void {
     console.log(`Viewing details for step ${stepId}`);
     // Navigate to view the details of the completed step
     // this.router.navigate(['/supplier/onboarding', stepId, 'details']);
+    this.router.navigate(['/supplier/profile-review']);
   }
 
   getStatusLabel(status: string): string {
