@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-supplier-onboarding-welcome-component',
@@ -12,7 +13,7 @@ import { RouterModule } from '@angular/router';
 export class SupplierOnboardingWelcomeComponentComponent {
   supplierName: string = '';
 
-  constructor() {
+  constructor(private router: Router) {
     // You might want to get the supplier name from a service or route parameter
     this.supplierName = 'Supplier';
   }
@@ -20,6 +21,7 @@ export class SupplierOnboardingWelcomeComponentComponent {
   startOnboarding(): void {
     // Navigate to the first onboarding step
     console.log('Starting onboarding process');
+    this.router.navigate(['/wefab/supplier/supplier-onboarding']);
     // You would typically use Router to navigate
     // this.router.navigate(['/supplier/onboarding/step1']);
   }
