@@ -137,6 +137,8 @@ export class SupplierProfileReviewComponent implements OnInit {
 
   // Add new properties for document preview
   previewDocument: string | null = null;
+  registeredLng: any;
+  registeredLat: any;
   
   // First, let's add a method to update the completion status based on approval status
   updateCompletionStatus(): void {
@@ -219,7 +221,7 @@ export class SupplierProfileReviewComponent implements OnInit {
   }
 
   getVerificationStatus(supplierId: string): void {
-    this.commonservice.getData('/api/method/proq_buyer.wefab.api.supplier.onboarding.get_verification_status?supplier_company_id=' + supplierId).subscribe((res: any) => {
+    this.commonservice.getData('/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_and_verification_status?supplier_company_id=' + supplierId).subscribe((res: any) => {
       this.verificationStatus = res.data
     })
   }
@@ -410,7 +412,12 @@ export class SupplierProfileReviewComponent implements OnInit {
   getL1Data(supplierId:any) {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
+        console.log("L1 Data ", res)
         this.getCompanyProfile = JSON.parse(res.data.company_profile)
+        debugger
+        console.log("L1 Data ", this.getCompanyProfile)
+        this.registeredLat = this.getCompanyProfile.registered_lat;
+        this.registeredLng = this.getCompanyProfile.registered_lng;
         this.getL1DataStatus(this.supplierId)
       })
     }
@@ -419,17 +426,23 @@ export class SupplierProfileReviewComponent implements OnInit {
       this.manufacturingData.machines.forEach((machine: any) => {
         console.log('machine', machine)
         let fileId = machine.machinePhotos.fileId
+        debugger
         console.log('fileId', fileId)
-        this.commonservice.getMachineAnalysis(fileId).subscribe((res: any) => {
-          if (!res.message.machine_image && !res.message.within_facility) {
+        console.log('registeredLat', this.registeredLat)
+        console.log('registeredLng', this.registeredLng)
+        let endPoint = `/api/method/proq_buyer.api.supplier_onboarding.machine_image_verification.machine_identification.analyze_machine_image?file_id=${fileId}&facility_lat=${this.registeredLat}&facility_lon=${this.registeredLng}`
+        this.commonservice.getData(endPoint).subscribe((res: any) => {
+          debugger
+          console.log("Machine Analysis ", res)
+          if (!res.data.machine_image && !res.data.within_facility) {
             machine.machinePhotos.machine_status = false
-            machine.machinePhotos.machine_status_comment = res.message.verification_comment
-          } else if (res.message.machine_image && !res.message.within_facility) {
+            machine.machinePhotos.machine_status_comment = res.data.verification_comment
+          } else if (res.data.machine_image && !res.data.within_facility) {
             machine.machinePhotos.machine_status = false
-            machine.machinePhotos.machine_status_comment = res.message.verification_comment
-          } else if (res.message.machine_image && res.message.within_facility) {
+            machine.machinePhotos.machine_status_comment = res.data.verification_comment
+          } else if (res.data.machine_image && res.data.within_facility) {
             machine.machinePhotos.machine_status = true
-            machine.machinePhotos.machine_status_comment = res.message.verification_comment
+            machine.machinePhotos.machine_status_comment = res.data.verification_comment
           }
         })
         this.updateFacilityData()
@@ -440,14 +453,14 @@ export class SupplierProfileReviewComponent implements OnInit {
       this.manufacturingData.facilityPhotos.forEach((facility: any) => {
         let fileId = facility.fileId
         console.log('fileId', fileId)
-        this.commonservice.getFacilityAnalysis(fileId, this.getCompanyProfile.registeredAddress.fullAddress).subscribe((res: any) => {
-          console.log(res)
-          if(res.message.verification_status) {
+        let endpoint = `/api/method/proq_buyer.api.supplier_onboarding.machine_image_verification.machine_identification.factory_geolocation_verification?file_id=${fileId}&registered_address_lat=${this.registeredLat}&registered_address_lon=${this.registeredLng}`
+        this.commonservice.getData(endpoint).subscribe((res: any) => {
+          if(res.data.verification_status) {
              facility.facility_status = true;
-             facility.facility_comment = res.message.verification_comment
+             facility.facility_comment = res.data.verification_comment
           } else {  
             facility.facility_status = false;
-            facility.facility_comment = res.message.verification_comment
+            facility.facility_comment = res.data.verification_comment
           }
         })
       })

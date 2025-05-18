@@ -829,7 +829,7 @@ export class SupplierOnboardingComponent implements OnInit {
         className: 'col-12 mb-2',
         templateOptions: {
           label: 'Company Documents',
-          description: 'Upload documents that will help us evaluate your profile more accurately and expedite decision-making (Only ZIP files are accepted)',
+          description: 'Upload documents that will help us evaluate your profile more accurately and expedite decision-making',
           required: true,
           acceptedTypes: '.png,.jpg,.jpeg,.pdf,.doc,.docx',
           multiple: true
@@ -924,6 +924,8 @@ export class SupplierOnboardingComponent implements OnInit {
       company_name: data.company_name,
       primary_email_id: data.primary_email_id,
       onboarding_status: 'Under Review',
+      registered_lat: data.registeredAddress.location.lat,
+      registered_lng: data.registeredAddress.location.lng, 
       phone_verified: this.phoneVerified,
       company_profile: JSON.stringify(data)
     };
@@ -1010,6 +1012,9 @@ export class SupplierOnboardingComponent implements OnInit {
     
     // Check if we have a supplier_id
     let supplier_id = sessionStorage.getItem('supplier_id');
+    this.model.phone_verified = this.phoneVerified;
+    this.model.registered_lat = this.model.registeredAddress.location.lat;
+    this.model.registered_lng = this.model.registeredAddress.location.lng;
     body = this.updateData(this.model);
     if(supplier_id) {
       endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplier_id;
@@ -1028,6 +1033,7 @@ export class SupplierOnboardingComponent implements OnInit {
   
   submit() {
     if (this.form.valid) {
+      debugger
       console.log('Form submitted successfully', this.model);
       this.postSupplierOnboardingL1();
     } else {
