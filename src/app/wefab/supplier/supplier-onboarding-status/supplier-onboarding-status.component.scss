@@ -1,89 +1,283 @@
-// Variables
-$primary-color: #3b82f6;  // Blue
+// Variables (using the same ones from the welcome component for consistency)
+$primary-color: #3b82f6;
 $primary-light: #dbeafe;
 $primary-dark: #1d4ed8;
-$success-color: #10b981;  // Green
-$success-light: #d1fae5;
-$warning-color: #f59e0b;  // Amber
-$warning-light: #fef3c7;
-$neutral-color: #94a3b8;  // Slate
-$neutral-light: #f1f5f9;
 $text-primary: #1e293b;
 $text-secondary: #64748b;
-$background-color: #f8fafc;
+$background-color: #f1f5f9;
 $card-bg: #ffffff;
-$border-radius: 8px;
-$box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-$transition: all 0.2s ease;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$pending-color: #94a3b8;
+$border-radius: 10px;
+$box-shadow: 0 6px 15px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -6px rgba(0, 0, 0, 0.04);
+$transition: all 0.3s ease;
 
 // Main container
 .onboarding-status-container {
   display: flex;
   justify-content: center;
   padding: 2rem;
-  min-height: 100vh;
   background-color: $background-color;
+  min-height: 90vh;
   font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
 }
 
-// Card container
 .onboarding-status-card {
   width: 100%;
-  max-width: 800px;
-  background-color: transparent;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 // Header section
-.onboarding-header {
-  margin-bottom: 1.5rem;
+.header-section {
   text-align: center;
+  margin-bottom: 1rem;
   
   h1 {
-    color: $text-primary;
     font-size: 1.75rem;
     font-weight: 700;
-    margin: 0 0 0.5rem;
+    color: $text-primary;
+    margin-bottom: 0.75rem;
   }
   
-  .onboarding-description {
+  .subtitle {
     color: $text-secondary;
     font-size: 0.95rem;
-    line-height: 1.5;
     max-width: 600px;
     margin: 0 auto;
+    line-height: 1.5;
   }
 }
 
-// Overall progress section
-.overall-progress-section {
+// Progress overview
+.progress-overview {
+  background-color: $card-bg;
+  padding: 1.5rem;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  margin-bottom: 0.5rem;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  
+  .progress-label {
+    font-weight: 600;
+    font-size: 1rem;
+    color: $text-primary;
+  }
+  
+  .progress-percentage {
+    color: $primary-color;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+}
+
+// Steps container
+.steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.step-card {
   background-color: $card-bg;
   border-radius: $border-radius;
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 1.5rem;
   box-shadow: $box-shadow;
+  overflow: hidden;
+  transition: $transition;
+  position: relative;
   
-  .progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
+  &.completed {
+    border-left: 5px solid $success-color;
     
-    .progress-label {
-      color: $text-primary;
-      font-weight: 600;
-      font-size: 1rem;
+    .step-icon {
+      background-color: $success-color;
+      color: white;
     }
+  }
+  
+  &.Under Review {
+    border-left: 5px solid $primary-color;
     
-    .progress-percentage {
-      color: $primary-color;
-      font-weight: 700;
-      font-size: 1rem;
+    .step-icon {
+      background-color: $primary-color;
+      color: white;
+    }
+  }
+  
+  &.pending, &.locked {
+    border-left: 5px solid $pending-color;
+    
+    .step-icon {
+      background-color: #e2e8f0;
+      color: $text-secondary;
     }
   }
 }
 
-// Progress bar - only for overall progress
+.step-content {
+  padding: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  
+  @media (max-width: 640px) {
+    flex-direction: column;
+    
+    .step-status {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+    }
+  }
+}
+
+.step-icon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+  
+  svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+  }
+  
+  .step-number {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+}
+
+.step-details {
+  flex: 1;
+  
+  .step-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0 0 0.4rem;
+  }
+  
+  .step-description {
+    font-size: 0.85rem;
+    color: $text-secondary;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+.step-status {
+  margin-left: auto;
+  
+  .status-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    
+    .completed & {
+      background-color: rgba($success-color, 0.1);
+      color: $success-color;
+    }
+    
+    .in-progress & {
+      background-color: rgba($primary-color, 0.1);
+      color: $primary-color;
+    }
+    
+    .pending & {
+      background-color: rgba($pending-color, 0.1);
+      color: $pending-color;
+    }
+    
+    .locked & {
+      background-color: rgba($pending-color, 0.1);
+      color: $pending-color;
+    }
+  }
+}
+
+.step-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+// Buttons
+.primary-button, .secondary-button {
+  padding: 0.6rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: $transition;
+  cursor: pointer;
+  border: none;
+  
+  &:focus {
+    outline: none;
+  }
+}
+
+.primary-button {
+  background-color: $primary-color;
+  color: white;
+  
+  &:hover {
+    background-color: $primary-dark;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba($primary-color, 0.2);
+  }
+  
+  .arrow {
+    margin-left: 0.5rem;
+    font-size: 1rem;
+    transition: $transition;
+  }
+  
+  &:hover .arrow {
+    transform: translateX(3px);
+  }
+}
+
+.secondary-button {
+  background-color: white;
+  color: $primary-color;
+  border: 1px solid #e2e8f0;
+  
+  &:hover {
+    border-color: $primary-light;
+    background-color: $primary-light;
+    color: $primary-dark;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+}
+
+// Progress bar
 .progress-bar {
+  width: 100%;
   height: 8px;
   background-color: #e2e8f0;
   border-radius: 4px;
@@ -92,211 +286,5 @@ $transition: all 0.2s ease;
   .progress {
     height: 100%;
     background-color: $primary-color;
-    border-radius: 4px;
-    transition: width 0.5s ease;
-  }
-}
-
-// Onboarding steps
-.onboarding-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  
-  .step-card {
-    display: flex;
-    background-color: $card-bg;
-    border-radius: $border-radius;
-    box-shadow: $box-shadow;
-    overflow: hidden;
-    border-left: 4px solid #cbd5e1;
-    transition: $transition;
-    
-    &:hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-    
-    &.completed {
-      border-left-color: $success-color;
-    }
-    
-    &.in-progress {
-      border-left-color: $primary-color;
-    }
-    
-    &.pending, &.locked {
-      border-left-color: #cbd5e1;
-    }
-  }
-}
-
-// Step icon
-.step-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  border-radius: 50%;
-  margin: 1.25rem 0 0 1.25rem;
-  background-color: $neutral-light;
-  color: $neutral-color;
-  font-weight: 600;
-  
-  svg {
-    width: 20px;
-    height: 20px;
-    stroke: currentColor;
-    stroke-width: 2.5;
-  }
-  
-  &.completed {
-    background-color: $success-light;
-    color: $success-color;
-  }
-  
-  &.in-progress {
-    background-color: $primary-light;
-    color: $primary-color;
-  }
-}
-
-// Step content
-.step-content {
-  flex: 1;
-  padding: 1.25rem 1.5rem 1.25rem 1rem;
-  
-  .step-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    
-    h2 {
-      color: $text-primary;
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin: 0;
-    }
-  }
-  
-  .step-description {
-    color: $text-secondary;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    margin: 0 0 1.5rem;
-  }
-  
-  .step-actions {
-    display: flex;
-    justify-content: flex-end;
-  }
-}
-
-// Status badge
-.status-badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  
-  &.completed {
-    background-color: $success-light;
-    color: $success-color;
-  }
-  
-  &.in-progress {
-    background-color: $primary-light;
-    color: $primary-color;
-  }
-  
-  &.pending {
-    background-color: $neutral-light;
-    color: $neutral-color;
-  }
-  
-  &.locked {
-    background-color: $neutral-light;
-    color: $neutral-color;
-  }
-}
-
-// Action buttons
-.action-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: $transition;
-  border: none;
-  
-  &.view-details {
-    background-color: #f1f5f9;
-    color: $text-secondary;
-    
-    &:hover {
-      background-color: #e2e8f0;
-    }
-  }
-  
-  &.continue {
-    background-color: $primary-color;
-    color: white;
-    
-    svg {
-      width: 16px;
-      height: 16px;
-      margin-left: 0.5rem;
-      stroke: currentColor;
-      stroke-width: 2.5;
-    }
-    
-    &:hover {
-      background-color: $primary-dark;
-    }
-  }
-}
-
-// Status labels
-.status-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: $text-secondary;
-  
-  &.pending {
-    color: $neutral-color;
-  }
-  
-  &.locked {
-    color: $neutral-color;
-  }
-}
-
-@media (max-width: 768px) {
-  .onboarding-status-container {
-    padding: 1rem;
-  }
-  
-  .step-card {
-    flex-direction: column;
-    
-    .step-icon {
-      margin: 1rem auto 0;
-    }
-    
-    .step-content {
-      padding: 1rem;
-      
-      .step-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-      }
-    }
   }
 }

@@ -7,9 +7,8 @@ interface OnboardingStep {
   title: string;
   description: string;
   status: 'completed' | 'in-progress' | 'pending' | 'locked';
-  progress: number;
+  progress?: number;
   icon: string;
-  borderColor: string;
 }
 
 @Component({
@@ -20,7 +19,7 @@ interface OnboardingStep {
   styleUrl: './supplier-onboarding-status.component.scss'
 })
 export class SupplierOnboardingStatusComponent {
-  overallProgress: number = 55;
+  overallProgress: number = 0;
   
   onboardingSteps: OnboardingStep[] = [
     {
@@ -29,58 +28,62 @@ export class SupplierOnboardingStatusComponent {
       description: 'Company details, contact information, and basic financial data',
       status: 'completed',
       progress: 100,
-      icon: 'check_circle',
-      borderColor: '#10b981' // green color
+      icon: 'check'
     },
     {
       id: 2,
       title: 'Manufacturing Capabilities',
       description: 'Production capacity, facilities, and quality certifications',
-      status: 'in-progress',
-      progress: 65,
-      icon: 'timer',
-      borderColor: '#3b82f6' // blue color
+      status: 'completed',
+      progress: 100,
+      icon: 'check'
     },
     {
       id: 3,
       title: 'Financial Information',
       description: 'Detailed financial statements and banking information',
-      status: 'pending',
-      progress: 0,
-      icon: '3',
-      borderColor: '#cbd5e1' // gray color
+      status: 'completed',
+      progress: 100,
+      icon: 'check'
     }
   ];
 
-  constructor() {}
-
-  getStatusText(status: string): string {
-    switch(status) {
-      case 'completed': return 'Completed';
-      case 'in-progress': return 'In Progress';
-      case 'pending': return 'Pending';
-      case 'locked': return 'Locked';
-      default: return '';
-    }
+  constructor() {
+    this.calculateOverallProgress();
   }
 
-  calculateOverallProgress(): number {
+  calculateOverallProgress(): void {
     const totalSteps = this.onboardingSteps.length;
-    const completedStepsWeight = this.onboardingSteps.filter(step => step.status === 'completed').length;
-    const inProgressStepsWeight = this.onboardingSteps.filter(step => step.status === 'in-progress').length * 0.5;
-    
-    return Math.round(((completedStepsWeight + inProgressStepsWeight) / totalSteps) * 100);
+    const completedProgress = this.onboardingSteps.reduce(
+      (total, step) => total + (step.progress || 0), 0
+    );
+    this.overallProgress = Math.round(completedProgress / (totalSteps * 100) * 100);
   }
 
   continueOnboarding(stepId: number): void {
     console.log(`Continuing to step ${stepId}`);
-    // Navigate to the specific step
-    // this.router.navigate(['/supplier/onboarding/step', stepId]);
+    // Navigate to the appropriate step
+    // this.router.navigate(['/supplier/onboarding', stepId]);
   }
 
-  viewStepDetails(stepId: number): void {
+  viewDetails(stepId: number): void {
     console.log(`Viewing details for step ${stepId}`);
-    // Navigate to the step details page
-    // this.router.navigate(['/supplier/onboarding/step', stepId, 'details']);
+    // Navigate to view the details of the completed step
+    // this.router.navigate(['/supplier/onboarding', stepId, 'details']);
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'completed':
+        return 'APPROVED';
+      case 'in-progress':
+        return 'UNDER REVIEW';
+      case 'pending':
+        return 'NOT STARTED';
+      case 'locked':
+        return 'LOCKED';
+      default:
+        return status.toUpperCase();
+    }
   }
 }
