@@ -4,6 +4,7 @@ import { FieldType, FieldTypeConfig, FormlyModule } from '@ngx-formly/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { GstVerifyFieldComponent } from './wefab/supplier/supplier-onboarding/gst-verify-field.component';
 import { MessageService } from 'primeng/api';
+import { CommonService } from '../app/wefab/shared/common.service';
 
 @Component({
   selector: 'formly-field-gst-verify',
@@ -25,6 +26,7 @@ import { MessageService } from 'primeng/api';
         [description]="props.description ?? ''"
         [isVerified]="props['isVerified'] ?? false"
         (verified)="onGstVerified($event)"
+        (companyNameChanged)="onCompanyNameChanged($event)"
         [class.is-invalid]="showError">
       </app-gst-verify-field>
       
@@ -39,6 +41,13 @@ export class FormlyFieldGstVerifyComponent extends FieldType<FieldTypeConfig> {
   onGstVerified(verified: boolean) {
     if (this.props['parentComponent'] && this.props['parentComponent'].onGstVerified) {
       this.props['parentComponent'].onGstVerified(verified);
+    }
+  }
+
+  onCompanyNameChanged(companyName: string) {
+    debugger;
+    if (this.props['parentComponent'] && this.props['parentComponent'].onCompanyNameChanged) {
+      this.props['parentComponent'].onCompanyNameChanged(companyName);
     }
   }
 } 

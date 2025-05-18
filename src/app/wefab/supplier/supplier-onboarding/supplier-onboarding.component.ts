@@ -31,6 +31,7 @@ import { GstVerifyFieldComponent } from './gst-verify-field.component';
 // Import the FormlyFieldGstVerifyComponent
 import { FormlyFieldGstVerifyComponent } from '../../../gst-verify-type.component';
 // GST Validator function
+import { ChangeDetectorRef } from '@angular/core';
 export function gstValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
   
@@ -106,6 +107,7 @@ export class SupplierOnboardingComponent implements OnInit {
     private messageService: MessageService,
     private renderer: Renderer2,
     private router: Router,
+    private cdr: ChangeDetectorRef,
     private commonService: CommonService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
@@ -1185,6 +1187,26 @@ export class SupplierOnboardingComponent implements OnInit {
   onGstVerified(verified: boolean): void {
     this.gstVerified = verified;
     console.log('GST verification status:', verified);
+  }
+
+  onCompanyNameChanged(companyName: string) {
+    console.log('onCompanyNameChanged called with:', companyName);
+    
+    if (companyName) {
+      this.model.company_name = companyName;
+      
+      // If using reactive forms:
+      // this.form.patchValue({
+      //   company_name: companyName
+      // });
+      
+      console.log('Company name updated to:', this.model.company_name);
+      
+      // Force change detection if needed
+      this.cdr.detectChanges();
+    } else {
+      console.error('Received empty company name');
+    }
   }
 
   // ... existing verifyGST method but make it call a GST verification service or API
