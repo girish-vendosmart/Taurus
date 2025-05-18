@@ -1,0 +1,64 @@
+<div class="onboarding-status-container">
+  <div class="onboarding-status-card">
+    <div class="onboarding-header">
+      <h1>Supplier Onboarding</h1>
+      <p class="onboarding-description">
+        Track your progress through our supplier onboarding process. Complete all three levels to finalize your registration.
+      </p>
+    </div>
+
+    <div class="overall-progress-section">
+      <div class="progress-header">
+        <span class="progress-label">Overall Progress</span>
+        <span class="progress-percentage">{{overallProgress}}%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress" [style.width.%]="overallProgress"></div>
+      </div>
+    </div>
+
+    <div class="onboarding-steps">
+      <div *ngFor="let step of onboardingSteps" class="step-card" [ngClass]="step.status" [style.border-left-color]="step.borderColor">
+        <div class="step-icon" [ngClass]="step.status">
+          <span *ngIf="step.status === 'completed'">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </span>
+          <span *ngIf="step.status === 'in-progress'">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </span>
+          <span *ngIf="step.status === 'pending' || step.status === 'locked'">{{step.icon}}</span>
+        </div>
+
+        <div class="step-content">
+          <div class="step-header">
+            <h2>{{step.title}}</h2>
+            <div class="status-badge" [ngClass]="step.status">
+              {{getStatusText(step.status)}}
+            </div>
+          </div>
+          <p class="step-description">{{step.description}}</p>
+
+          <div class="step-actions">
+            <button *ngIf="step.status === 'completed'" class="action-button view-details" (click)="viewStepDetails(step.id)">
+              View Details
+            </button>
+            <button *ngIf="step.status === 'in-progress'" class="action-button continue" (click)="continueOnboarding(step.id)">
+              Continue
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+            </button>
+            <div *ngIf="step.status === 'pending'" class="status-label pending">Pending</div>
+            <div *ngIf="step.status === 'locked'" class="status-label locked">Locked</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
