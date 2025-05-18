@@ -502,50 +502,178 @@
       }
     }
   }
+  
+  // GST Verification Button Styles
+  .btn-verify-gst {
+    background: linear-gradient(135deg, $blueprint-blue, darken($blueprint-blue, 8%));
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: $font-weight-medium;
+    border-radius: 0 6px 6px 0;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba($blueprint-blue, 0.2);
+    
+    &:hover {
+      background: linear-gradient(135deg, darken($blueprint-blue, 5%), darken($blueprint-blue, 15%));
+      box-shadow: 0 4px 8px rgba($blueprint-blue, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    &:active {
+      transform: translateY(1px);
+    }
+    
+    &:disabled {
+      background: linear-gradient(135deg, lighten($blueprint-blue, 20%), lighten($blueprint-blue, 10%));
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  }
+
+  // Adjust input field when it has an addon
+  .formly-field-input {
+    .input-group {
+      .form-control {
+        border-right: none;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+    }
+  }
 }
 
-// Toast styling
+// Custom Toast Styling
 :host ::ng-deep {
   .p-toast {
+    opacity: 1 !important;
+    
     .p-toast-message {
       border-radius: 8px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-      padding: 1rem;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
       border: none;
+      margin-bottom: 1rem;
       
-      &.p-toast-message-success {
-        background-color: lighten($process-green, 48%);
-        border-left: 4px solid $process-green;
-        color: darken($process-green, 15%);
+      &.p-toast-message-success,
+      &.custom-toast-success {
+        background-color: #e8f5e9;
+        border-left: 4px solid #28a745;
         
         .p-toast-message-icon,
         .p-toast-icon-close {
-          color: $process-green;
+          color: #28a745;
+        }
+        
+        .p-toast-summary {
+          color: #28a745;
+        }
+        
+        .p-toast-detail {
+          color: #2e7d32;
         }
       }
       
       &.p-toast-message-error {
-        background-color: lighten($safety-orange, 40%);
-        border-left: 4px solid $safety-orange;
-        color: darken($safety-orange, 15%);
+        background-color: #ffebee;
+        border-left: 4px solid #dc3545;
         
         .p-toast-message-icon,
         .p-toast-icon-close {
-          color: $safety-orange;
+          color: #dc3545;
+        }
+        
+        .p-toast-summary {
+          color: #dc3545;
+        }
+        
+        .p-toast-detail {
+          color: #c62828;
+        }
+      }
+      
+      &.p-toast-message-warn,
+      &.custom-toast-warn {
+        background-color: #fff8e1;
+        border-left: 4px solid #ffc107;
+        
+        .p-toast-message-icon,
+        .p-toast-icon-close {
+          color: #ffc107;
+        }
+        
+        .p-toast-summary {
+          color: #ff8f00;
+        }
+        
+        .p-toast-detail {
+          color: #ef6c00;
+        }
+      }
+      
+      &.p-toast-message-info {
+        background-color: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        
+        .p-toast-message-icon,
+        .p-toast-icon-close {
+          color: #2196f3;
+        }
+        
+        .p-toast-summary {
+          color: #1976d2;
+        }
+        
+        .p-toast-detail {
+          color: #0d47a1;
         }
       }
       
       .p-toast-message-content {
-        padding: 0.5rem 0;
+        padding: 1rem;
+        display: flex;
+        align-items: flex-start;
         
-        .p-toast-summary {
-          font-weight: $font-weight-semibold;
-          font-size: 1rem;
+        .p-toast-message-icon {
+          font-size: 1.5rem;
+          margin-right: 0.75rem;
         }
         
-        .p-toast-detail {
-          margin-top: 0.25rem;
-          font-size: 0.9rem;
+        .p-toast-message-text {
+          flex: 1;
+          
+          .p-toast-summary {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+          }
+          
+          .p-toast-detail {
+            font-size: 0.9rem;
+            line-height: 1.4;
+          }
+        }
+        
+        .p-toast-icon-close {
+          width: 1.5rem;
+          height: 1.5rem;
+          border-radius: 50%;
+          background: transparent;
+          transition: background-color 0.2s;
+          
+          &:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+          }
+          
+          &:focus {
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+            outline: none;
+          }
         }
       }
     }

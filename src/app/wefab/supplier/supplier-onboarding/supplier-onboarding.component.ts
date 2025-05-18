@@ -26,6 +26,10 @@ import { MultiFileUploadComponent } from './multi-file-upload.component';
 import { PhoneOtpVerificationComponent } from '../../wefab-shared-component/phone-otp-verification/phone-otp-verification.component';
 import { CommonService } from '../../shared/common.service';
 import { PMultiSelectGroupComponent } from '../../../p-multiSelect-group.component'
+// Import GstVerifyFieldComponent
+import { GstVerifyFieldComponent } from './gst-verify-field.component';
+// Import the FormlyFieldGstVerifyComponent
+import { FormlyFieldGstVerifyComponent } from '../../../gst-verify-type.component';
 // GST Validator function
 export function gstValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
@@ -60,7 +64,9 @@ export function gstValidator(control: AbstractControl): ValidationErrors | null 
     FileUploadComponent,
     PhoneOtpVerificationComponent,
     MultiFileUploadComponent,
-    PMultiSelectGroupComponent
+    PMultiSelectGroupComponent,
+    GstVerifyFieldComponent,
+    FormlyFieldGstVerifyComponent
   ],
   providers: [MessageService],
   templateUrl: './supplier-onboarding.component.html',
@@ -79,6 +85,8 @@ export class SupplierOnboardingComponent implements OnInit {
   
   // Phone verification state
   phoneVerified = false;
+  // GST verification state
+  gstVerified = false;
   // Add this property for configurable file types
   acceptedDocumentTypes: string = '.zip'; 
   @ViewChild('verifyOtpButton') verifyOtpButtonTemplate!: TemplateRef<any>;
@@ -226,28 +234,30 @@ export class SupplierOnboardingComponent implements OnInit {
     ];
     
     // Check if supplier_id exists in session storage
-    const supplierId = sessionStorage.getItem('supplier_id');
-    if (supplierId) {
-      this.hasExistingSupplier = true;
-    }
-    
-    // Check if we're in edit mode
-    const route = this.router.url;
-    if (route.includes('mode=edit')) {
+    if (this.isBrowser) {
       const supplierId = sessionStorage.getItem('supplier_id');
       if (supplierId) {
-        this.getL1Data(supplierId);
-      } else {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Supplier ID not found. Please try again.',
-          life: 3000
-        });
-        this.router.navigate(['/wefab/supplier/supplier-verification']);
+        this.hasExistingSupplier = true;
       }
+      
+      // Check if we're in edit mode
+      const route = this.router.url;
+      if (route.includes('mode=edit')) {
+        const supplierId = sessionStorage.getItem('supplier_id');
+        if (supplierId) {
+          this.getL1Data(supplierId);
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Supplier ID not found. Please try again.',
+            life: 3000
+          });
+          this.router.navigate(['/wefab/supplier/supplier-verification']);
+        }
+      }
+      this.patchEmailId();
     }
-    this.patchEmailId();
   }
 
   patchEmailId() {
@@ -388,47 +398,18 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-4 mb-2',
-            key: 'company_name',
-            type: 'input',
-            templateOptions: {
-              label: 'Legal Business Name',
-              placeholder: 'Your company\'s registered name',
-              required: true
-            },
-            validation: {
-              messages: {
-                required: 'Please enter legal business name'
-              }
-            }
-          },
-          {
-            className: 'col-md-4 mb-2',
-            key: 'primary_email_id',
-            type: 'input',
-            templateOptions: {
-              label: 'Email Id',
-              placeholder: 'Please enter your email id',
-              required: true,
-              disabled: true // 👈 this disables the field
-            },
-            validation: {
-              messages: {
-                required: 'Please enter your email id'
-              }
-            }
-          },
-          {
-            className: 'col-md-4 mb-3',
+            className: 'col-md-6 mb-3',
             fieldGroup: [
               {
                 key: 'gstinNumber',
-                type: 'input',
+                type: 'gst-verify',
                 templateOptions: {
                   label: 'GSTIN',
                   placeholder: '22AAAAA0000A1Z5',
                   required: true,
-                  description: 'Format: 2 digits + 10-character PAN + 1 entity code + Z + 1 checksum'
+                  description: 'Format: 2 digits + 10-character PAN + 1 entity code + Z + 1 checksum',
+                  parentComponent: this,
+                  isVerified: this.gstVerified
                 },
                 validators: {
                   validation: [gstValidator]
@@ -482,6 +463,60 @@ export class SupplierOnboardingComponent implements OnInit {
                 }
               }
             ]
+          },
+          {
+            className: 'col-md-6 mb-2',
+            key: 'company_name',
+            type: 'input',
+            templateOptions: {
+              label: 'Legal Business Name',
+              placeholder: 'Your company\'s registered name',
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'Please enter legal business name'
+              }
+            }
+          },
+        ]
+      },
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6 mb-2',
+            key: 'primary_email_id',
+            type: 'input',
+            templateOptions: {
+              label: 'Email Id',
+              placeholder: 'Please enter your email id',
+              required: true,
+              disabled: true // 👈 this disables the field
+            },
+            validation: {
+              messages: {
+                required: 'Please enter your email id'
+              }
+            }
+          },
+          {
+            className: 'col-md-6 mb-3',
+            key: 'registeredAddress',
+            type: 'google-places',
+            templateOptions: {
+              label: 'Registered Address',
+              placeholder: 'Search for your registered address',
+              required: true
+            },
+            expressionProperties: {
+              'templateOptions.disabled': 'formState.disabled'
+            },
+            validation: {
+              messages: {
+                required: 'Please select a registered address'
+              }
+            }
           }
         ]
       },
@@ -605,29 +640,6 @@ export class SupplierOnboardingComponent implements OnInit {
             },
             expressionProperties: {
               'templateOptions.disabled': '!model.state'
-            }
-          }
-        ]
-      },
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
-          {
-            className: 'col-md-6 mb-3',
-            key: 'registeredAddress',
-            type: 'google-places',
-            templateOptions: {
-              label: 'Registered Address',
-              placeholder: 'Search for your registered address',
-              required: true
-            },
-            expressionProperties: {
-              'templateOptions.disabled': 'formState.disabled'
-            },
-            validation: {
-              messages: {
-                required: 'Please select a registered address'
-              }
             }
           }
         ]
@@ -1167,5 +1179,35 @@ export class SupplierOnboardingComponent implements OnInit {
         life: 3000
       });
     }
+  }
+
+  // Handle GST verification event
+  onGstVerified(verified: boolean): void {
+    this.gstVerified = verified;
+    console.log('GST verification status:', verified);
+  }
+
+  // ... existing verifyGST method but make it call a GST verification service or API
+  verifyGST(gstNumber: string) {
+    if (!gstNumber) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please enter a GST number first',
+        life: 3000
+      });
+      return;
+    }
+
+    // Add your GST verification logic here
+    console.log('Verifying GST number:', gstNumber);
+    
+    // For now, just show a success message
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Verification',
+      detail: 'GST verification in progress...',
+      life: 3000
+    });
   }
 }
