@@ -11,6 +11,7 @@ import { ManufacturingVerificationComponent } from './manufacturing-verification
 import { SupplierOnboardingCompleteComponent } from './supplier-onboarding-complete/supplier-onboarding-complete.component';
 import { AuthGuard } from '../../core/guards/auth.guard';
 import { SupplierOnboardingWelcomeComponentComponent } from './supplier-onboarding-welcome-component/supplier-onboarding-welcome-component.component';
+import { SupplierOnboardingStatusComponent } from './supplier-onboarding-status/supplier-onboarding-status.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
@@ -64,6 +65,11 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
              {
                 path: 'supplier-onboarding-welcome',
                 component: SupplierOnboardingWelcomeComponentComponent,
+                canActivate: [AuthGuard]
+             },
+             {
+                path: 'supplier-onboarding-status',
+                component: SupplierOnboardingStatusComponent,
                 canActivate: [AuthGuard]
              }
         ]
