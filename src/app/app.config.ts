@@ -16,14 +16,17 @@ import { FormlyFieldDropdownComponent } from './dropdown-type.component';
 import { FormlyFieldSearchableSelectComponent } from './searchable-select-type.component';
 import { PMultiSelectGroupComponent } from './p-multiSelect-group.component';
 import { FormlyFieldGooglePlacesComponent } from './google-places-type.component';
+import { FormlyFieldGstVerifyComponent } from './gst-verify-type.component';
 
 import { routes } from './app.routes';
+import { provideClientHydration } from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(),
     provideAnimations(),
+    provideClientHydration(),
     importProvidersFrom(
       ReactiveFormsModule,
       FormsModule,
@@ -39,6 +42,7 @@ export const appConfig: ApplicationConfig = {
           { name: 'p-dropdown', component: FormlyFieldDropdownComponent },
           { name: 'searchable-select', component: FormlyFieldSearchableSelectComponent },
           { name: 'google-places', component: FormlyFieldGooglePlacesComponent },
+          { name: 'gst-verify', component: FormlyFieldGstVerifyComponent }
         ],
         wrappers: [
           { name: 'panel', component: PanelWrapperComponent },
