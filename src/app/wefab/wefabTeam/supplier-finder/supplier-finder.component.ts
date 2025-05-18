@@ -6,6 +6,8 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
 // Interface for supplier data
 interface Supplier {
@@ -27,8 +29,8 @@ interface SelectedSupplier {
 @Component({
   selector: 'app-supplier-finder',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, ButtonModule, ToastModule],
-  providers: [MessageService],
+  imports: [CommonModule, FormsModule, DialogModule, ButtonModule, ToastModule, ConfirmDialogModule],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './supplier-finder.component.html',
   styleUrl: './supplier-finder.component.scss'
 })
@@ -71,7 +73,7 @@ export class SupplierFinderComponent {
   ];
   searchData: any[] = [];
 
-  constructor(private service: CommonService, private messageService: MessageService) {
+  constructor(private service: CommonService, private messageService: MessageService, private confirmationService: ConfirmationService) {
     // Initialize with all suppliers
     this.suppliers = [...this.mockSuppliers];
   }
@@ -107,9 +109,21 @@ export class SupplierFinderComponent {
         supplier_email_id: supplier['Primary Email'],
         supplier_name: supplier['Company Name'],
         company_name: supplier['Company Name'],
-        phone_number: supplier['Phone Number'] || ''
+        phone_number: supplier['Primary Phone'] || ''
       }));
-    this.showInvitationDialog = true;
+    
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to send the invitation to selected supplier(s)?',
+      header: 'Confirmation',
+      acceptLabel: 'Yes',
+      rejectLabel: 'No',
+      accept: () => {
+        this.sendInvitations();
+      },
+      reject: () => {
+        // Do nothing if rejected
+      }
+    });
   }
 
   sendInvitations() {
