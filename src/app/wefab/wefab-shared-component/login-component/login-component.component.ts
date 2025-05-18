@@ -101,7 +101,7 @@ export class LoginComponentComponent {
                     }
                     // this.router.navigate([response.data.route_link]);
                   } else if (response.data.user_type === 'wefab_team') {
-                    this.router.navigate(['/wefab/wefabTeam/dashboard']);
+                    this.router.navigate(['/wefab/wefabTeam/supplier-finder']);
                   } else {
                     this.loginError = 'Invalid user type';
                     this.loginForm.get('password')?.reset();

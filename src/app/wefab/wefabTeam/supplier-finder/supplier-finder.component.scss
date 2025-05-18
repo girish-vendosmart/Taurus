@@ -644,3 +644,104 @@ input[type="checkbox"] {
     }
   }
 }
+
+:host ::ng-deep .custom-confirm-dialog {
+  .p-dialog-header {
+    background-color: $technical-white;
+    border-bottom: 1px solid $material-finish-silver;
+    padding: 1rem 1.5rem;
+
+    .p-dialog-title {
+      color: $precision-black;
+      font-weight: $font-weight-bold;
+      font-size: 1.3rem;
+    }
+    
+    .p-dialog-header-icon {
+      color: $machine-gray;
+      
+      &:hover {
+        background-color: rgba($material-finish-silver, 0.3);
+        color: $precision-black;
+      }
+    }
+  }
+
+  .p-dialog-content {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+
+    .p-confirm-dialog-icon {
+      color: #1a3a60;
+      font-size: 1.75rem;
+      margin-right: 1rem;
+    }
+
+    .p-confirm-dialog-message {
+      font-size: 1rem;
+      line-height: 1.5;
+      color: $precision-black;
+    }
+  }
+
+  .p-dialog-footer {
+    border-top: 1px solid $material-finish-silver;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    .p-button {
+      min-width: 100px;
+      font-weight: $font-weight-medium;
+      border-radius: 4px;
+    }
+
+    .p-button-primary {
+      background-color: #1a3a60 !important;
+      border-color: #1a3a60 !important;
+
+      &:hover {
+        background-color: darken(#1a3a60, 5%) !important;
+        border-color: darken(#1a3a60, 5%) !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    .p-button-secondary {
+      color: $machine-gray;
+      border-color: $material-finish-silver;
+      
+      &:hover {
+        background-color: rgba($material-finish-silver, 0.2);
+        border-color: $material-finish-silver;
+      }
+    }
+  }
+}
+
+:host ::ng-deep {
+  .confirm-accept-btn {
+    background-color: #1a3a60 !important;
+    border-color: #1a3a60 !important;
+    color: white !important;
+    
+    &:hover {
+      background-color: darken(#1a3a60, 5%) !important;
+      border-color: darken(#1a3a60, 5%) !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    }
+  }
+  
+  .confirm-reject-btn {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #495057;
+    
+    &:hover {
+      background-color: #e9ecef;
+      border-color: #ced4da;
+    }
+  }
+}
