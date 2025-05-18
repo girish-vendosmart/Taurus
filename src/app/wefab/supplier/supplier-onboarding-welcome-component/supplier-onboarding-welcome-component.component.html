@@ -1,0 +1,64 @@
+<div class="onboarding-welcome-container">
+  <div class="welcome-card">
+    <div class="welcome-header">
+      <h1>Welcome to Our Supplier Portal</h1>
+    </div>
+    
+    <div class="welcome-content">
+      <div class="welcome-image">
+        <img src="https://img.freepik.com/free-vector/business-team-putting-together-jigsaw-puzzle-isolated-flat-vector-illustration-cartoon-partners-working-connection-teamwork-partnership-cooperation-concept_74855-9814.jpg" alt="Welcome Illustration">
+      </div>
+      
+      <div class="welcome-text">
+        <h2>Hello, {{supplierName}}!</h2>
+        <p>We're excited to have you join our supplier network. This onboarding process will help us set up your account and get you ready to start working with us.</p>
+        
+        <div class="onboarding-benefits">
+          <h3 class="benefits-title">What you'll gain:</h3>
+          
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                <polyline points="16 7 22 7 22 13"></polyline>
+              </svg>
+            </div>
+            <div class="benefit-text">
+              <h3>Grow Your Business</h3>
+              <p>Connect with new clients and expand your market reach.</p>
+            </div>
+          </div>
+          
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+              </svg>
+            </div>
+            <div class="benefit-text">
+              <h3>Streamlined Workflow</h3>
+              <p>Manage orders, invoices, and communication all in one place.</p>
+            </div>
+          </div>
+          
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <div class="benefit-text">
+              <h3>Faster Payments</h3>
+              <p>Get paid quickly with our efficient payment processing.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="welcome-footer">
+      <p class="time-estimate">This process takes approximately 5-10 minutes to complete.</p>
+      <button class="primary-button" (click)="startOnboarding()">Get Started</button>
+    </div>
+  </div>
+</div>

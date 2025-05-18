@@ -10,6 +10,7 @@ import { SupplierVerificationComponent } from './supplier-verification/supplier-
 import { ManufacturingVerificationComponent } from './manufacturing-verification/manufacturing-verification.component';
 import { SupplierOnboardingCompleteComponent } from './supplier-onboarding-complete/supplier-onboarding-complete.component';
 import { AuthGuard } from '../../core/guards/auth.guard';
+import { SupplierOnboardingWelcomeComponentComponent } from './supplier-onboarding-welcome-component/supplier-onboarding-welcome-component.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
@@ -59,7 +60,12 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
                 path: 'onboarding-complete',
                 component: SupplierOnboardingCompleteComponent,
                 canActivate: [AuthGuard]
-            }
+            },
+             {
+                path: 'supplier-onboarding-welcome',
+                component: SupplierOnboardingWelcomeComponentComponent,
+                canActivate: [AuthGuard]
+             }
         ]
     }
 ]
