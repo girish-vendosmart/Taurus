@@ -52,12 +52,11 @@
           </div>
         </div>
 
-
         <div class="step-actions">
-          <button *ngIf="step.status === 'completed' && currentOnboardingPage === step.id" class="secondary-button" (click)="viewDetails(step.id)">
+          <button *ngIf="step.status === 'completed' && step.id === 3" class="secondary-button" (click)="viewDetails(step.id)">
             Go To Profile Review
           </button>
-          <button *ngIf="step.status === 'in-progress' && currentOnboardingPage === step.id" class="secondary-button" (click)="viewDetails(step.id)">
+          <button *ngIf="step.status === 'in-progress' && step.id === 3" class="secondary-button" (click)="viewDetails(step.id)">
             View Details
           </button>
           <button *ngIf="step.status === 'in-progress' && currentOnboardingPage === step.id && step.id !== 3" class="primary-button" (click)="continueOnboarding(step.id)">
