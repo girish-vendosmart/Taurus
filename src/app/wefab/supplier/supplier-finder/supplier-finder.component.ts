@@ -243,4 +243,4 @@ export class SupplierFinderComponent {
 
     return value;
   }
-}
+} 
