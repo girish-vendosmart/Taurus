@@ -94,7 +94,12 @@ export class LoginComponentComponent {
                   // Navigate based on user type
                   if (response.data.user_type === 'supplier') {
                     sessionStorage.setItem('supplier_id', response.data.supplier_info.supplier_company_id);
-                    this.router.navigate([response.data.route_link]);
+                    if(!response.data.supplier_info.supplier_company_id) {
+                      this.router.navigate(['/wefab/supplier/supplier-onboarding-welcome']);
+                    } else {
+                      this.router.navigate(['/wefab/supplier/supplier-onboarding-status']);
+                    }
+                    // this.router.navigate([response.data.route_link]);
                   } else if (response.data.user_type === 'wefab_team') {
                     this.router.navigate(['/wefab/wefabTeam/dashboard']);
                   } else {
