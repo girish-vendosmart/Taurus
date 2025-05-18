@@ -52,14 +52,14 @@ import { CommonService } from '../../shared/common.service';
             class="btn verify-gst-button"
             [ngClass]="{'verified': _isVerified, 'error': verificationError}" 
             [disabled]="!gstControl.value || gstControl.invalid || _isVerified || isLoading"
-            [style.backgroundColor]="_isVerified ? '#28a745' : (verificationError ? '#dc3545' : '#1a3a60')"
+            [style.backgroundColor]="_isVerified ? '#28a745' : (verificationError ? '#f59e0b' : '#1a3a60')"
             (click)="verifyGST()">
             <span *ngIf="isLoading">
                 <i class="pi pi-spin pi-spinner" style="margin-right: 0.5rem"></i>
                 Verifying...
             </span>
             <span *ngIf="!isLoading">
-                {{ _isVerified ? 'Verified' : (verificationError ? 'Failed' : 'VERIFY GST') }}
+                {{ _isVerified ? 'Verified' : (verificationError ? 'ReVerify' : 'VERIFY GST') }}
             </span>
           </button>
         </div>
@@ -208,7 +208,7 @@ import { CommonService } from '../../shared/common.service';
         }
         
         &.error {
-          background-color: #dc3545;
+          background-color: #f59e0b;
         }
       }
       
@@ -397,6 +397,7 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
   @Input() errorMessage: string = 'Please enter a valid GST number';
   @Input() description: string = 'Format: 2 digits + 10-character PAN + 1 entity code + Z + 1 checksum';
   companyGstDetials: any;
+  companyName: any;
   
   @Input() set isVerified(value: boolean) {
     if (value === true) {
@@ -450,6 +451,9 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
   }
   
   verifyGST() {
+    // Reset verification error state when starting a new verification
+    this.verificationError = false;
+    
     if (!this.gstControl.value) {
       this.messageService.add({
         severity: 'error',
@@ -515,6 +519,8 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
           businessType: this.companyGstDetials.dty || this.companyGstDetials.businessType || 'Not Available',
           registrationDate: this.companyGstDetials.rgdt || this.companyGstDetials.registrationDate || 'Not Available'
         };
+
+        this.companyName = this.companyDetails.legalName;
         
         console.log('Mapped company details:', this.companyDetails);
         
@@ -608,7 +614,7 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
       this.renderer.removeClass(document.body, 'modal-open');
     }
     
-    // Show error toast
+    // Show toast message
     this.messageService.add({
       severity: 'warn',
       summary: 'Verification Rejected',
@@ -620,10 +626,8 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
     // Mark as error
     this.verificationError = true;
     
-    // Reset error state after 3 seconds
-    setTimeout(() => {
-      this.verificationError = false;
-    }, 3000);
+    // Don't reset error state automatically - keep the "ReVerify" button visible
+    // The error state will be reset when the user tries to verify again or changes the GST number
   }
   
   writeValue(value: any): void {
