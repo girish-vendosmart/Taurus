@@ -412,6 +412,9 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
   }
   
   @Output() verified = new EventEmitter<boolean>();
+  @Output() verifiedDetails = new EventEmitter<any>();
+  @Output() companyDetailsVerified = new EventEmitter<any>();
+  @Output() companyNameChanged = new EventEmitter<string>();
   
   gstControl = new FormControl('');
   _isVerified = false;
@@ -591,6 +594,12 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
     // Mark as verified
     this._isVerified = true;
     this.verified.emit(true);
+    
+    // Emit the company name to parent component
+    if (this.companyDetails && this.companyDetails.legalName) {
+      console.log('Emitting company name:', this.companyDetails.legalName);
+      this.companyNameChanged.emit(this.companyDetails.legalName);
+    }
     
     // Disable the control after verification
     this.gstControl.disable({ emitEvent: false });
