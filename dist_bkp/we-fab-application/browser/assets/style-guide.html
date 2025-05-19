@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WE-FAB Style Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blueprint-blue: #1A3A5F;
+      --technical-white: #F6F7F9;
+      --precision-black: #1A1D21;
+      --machine-gray: #545A64;
+      --material-finish-silver: #D1D5DB;
+      --safety-orange: #FF5722;
+      --process-green: #12856E;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.5;
+      color: var(--precision-black);
+      background-color: var(--technical-white);
+      margin: 0;
+      padding: 0;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--material-finish-silver);
+      padding-bottom: 1rem;
+    }
+    
+    h1 {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--blueprint-blue);
+      margin-bottom: 0.5rem;
+    }
+    
+    h2 {
+      font-size: 30px;
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+    
+    h3 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    h4 {
+      font-size: 20px;
+      font-weight: 500;
+      margin-top: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    section {
+      margin-bottom: 3rem;
+    }
+    
+    .color-palette {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .color-card {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .color-sample {
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .color-info {
+      padding: 1rem;
+      background-color: white;
+    }
+    
+    .color-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .color-hex {
+      font-family: monospace;
+      font-size: 14px;
+      color: var(--machine-gray);
+    }
+    
+    .typography {
+      margin-top: 1.5rem;
+    }
+    
+    .type-sample {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--material-finish-silver);
+    }
+    
+    .type-name {
+      font-size: 14px;
+      color: var(--machine-gray);
+      margin-bottom: 0.5rem;
+    }
+    
+    .display {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    
+    .body-large {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    
+    .body-default {
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    
+    .body-small {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    
+    .caption {
+      font-size: 12px;
+      line-height: 1.3;
+    }
+    
+    .type-specs {
+      font-size: 14px;
+      color: var(--machine-gray);
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>WE-FAB Style Guide</h1>
+      <p class="body-large">Official design system for the WE-FAB application</p>
+    </header>
+    
+    <section>
+      <h2>Color Palette</h2>
+      
+      <h3>Primary Colors</h3>
+      <div class="color-palette">
+        <div class="color-card">
+          <div class="color-sample" style="background-color: #1A3A5F; color: white;">
+            Primary
+          </div>
+          <div class="color-info">
+            <div class="color-name">Blueprint Blue</div>
+            <div class="color-hex">#1A3A5F</div>
+          </div>
+        </div>
+        
+        <div class="color-card">
+          <div class="color-sample" style="background-color: #F6F7F9; color: #1A1D21;">
+            Light
+          </div>
+          <div class="color-info">
+            <div class="color-name">Technical White</div>
+            <div class="color-hex">#F6F7F9</div>
+          </div>
+        </div>
+        
+        <div class="color-card">
+          <div class="color-sample" style="background-color: #1A1D21; color: white;">
+            Dark
+          </div>
+          <div class="color-info">
+            <div class="color-name">Precision Black</div>
+            <div class="color-hex">#1A1D21</div>
+          </div>
+        </div>
+      </div>
+      
+      <h3>Secondary Colors</h3>
+      <div class="color-palette">
+        <div class="color-card">
+          <div class="color-sample" style="background-color: #545A64; color: white;">
+            Secondary
+          </div>
+          <div class="color-info">
+            <div class="color-name">Machine Gray</div>
+            <div class="color-hex">#545A64</div>
+          </div>
+        </div>
+        
+        <div class="color-card">
+          <div class="color-sample" style="background-color: #D1D5DB; color: #1A1D21;">
+            Silver
+          </div>
+          <div class="color-info">
+            <div class="color-name">Material Finish Silver</div>
+            <div class="color-hex">#D1D5DB</div>
+          </div>
+        </div>
+        
+        <div class="color-card">
+          <div class="color-sample" style="background-color: #FF5722; color: white;">
+            Danger
+          </div>
+          <div class="color-info">
+            <div class="color-name">Safety Orange</div>
+            <div class="color-hex">#FF5722</div>
+          </div>
+        </div>
+        
+        <div class="color-card">
+          <div class="color-sample" style="background-color: #12856E; color: white;">
+            Success
+          </div>
+          <div class="color-info">
+            <div class="color-name">Process Green</div>
+            <div class="color-hex">#12856E</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section>
+      <h2>Typography</h2>
+      <p>Our typographic system is based on the <strong>Inter</strong> font family, a versatile and readable typeface suited for technical applications.</p>
+      
+      <div class="typography">
+        <div class="type-sample">
+          <div class="type-name">Display</div>
+          <div class="display">Display Text</div>
+          <div class="type-specs">48px / Bold / Line height: 1.2</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-name">Heading 1</div>
+          <h1>Heading 1</h1>
+          <div class="type-specs">36px / Bold / Line height: 1.2</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-name">Heading 2</div>
+          <h2>Heading 2</h2>
+          <div class="type-specs">30px / Semibold / Line height: 1.25</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-name">Heading 3</div>
+          <h3>Heading 3</h3>
+          <div class="type-specs">24px / Semibold / Line height: 1.3</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-name">Heading 4</div>
+          <h4>Heading 4</h4>
+          <div class="type-specs">20px / Medium / Line height: 1.4</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-name">Body Large</div>
+          <p class="body-large">The quick brown fox jumps over the lazy dog. This is an example of body large text that might be used for important paragraphs or introductory text.</p>
+          <div class="type-specs">16px / Regular / Line height: 1.6</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-name">Body Default</div>
+          <p class="body-default">The quick brown fox jumps over the lazy dog. This is the standard body text used for most content throughout the application.</p>
+          <div class="type-specs">16px / Regular / Line height: 1.5</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-name">Body Small</div>
+          <p class="body-small">The quick brown fox jumps over the lazy dog. Smaller body text used for secondary information or in space-constrained UI elements.</p>
+          <div class="type-specs">14px / Regular / Line height: 1.4</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-name">Caption</div>
+          <p class="caption">The quick brown fox jumps over the lazy dog. Caption text used for labels, helper text, and other auxiliary content.</p>
+          <div class="type-specs">12px / Regular / Line height: 1.3</div>
+        </div>
+      </div>
+    </section>
+    
+    <section>
+      <h2>Font Weights</h2>
+      <div class="typography">
+        <div class="type-sample">
+          <div class="type-name">Regular (400)</div>
+          <p style="font-weight: 400;">The quick brown fox jumps over the lazy dog.</p>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-name">Medium (500)</div>
+          <p style="font-weight: 500;">The quick brown fox jumps over the lazy dog.</p>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-name">Semibold (600)</div>
+          <p style="font-weight: 600;">The quick brown fox jumps over the lazy dog.</p>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-name">Bold (700)</div>
+          <p style="font-weight: 700;">The quick brown fox jumps over the lazy dog.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html> 

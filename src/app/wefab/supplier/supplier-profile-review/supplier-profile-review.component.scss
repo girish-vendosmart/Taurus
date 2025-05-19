@@ -1213,12 +1213,46 @@
 }
 
 .document-icon {
-  font-size: 48px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
+  background-color: #f8f9fa;
+  
+  .pdf-thumbnail, .doc-thumbnail, .other-thumbnail {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    
+    i {
+      margin-bottom: 10px;
+    }
+    
+    .file-extension {
+      font-size: 0.8rem;
+      font-weight: 600;
+      background-color: rgba(0, 0, 0, 0.05);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+  }
+  
+  &.pdf-icon .file-extension {
+    color: #e74c3c;
+  }
+  
+  &.doc-icon .file-extension {
+    color: #2980b9;
+  }
+  
+  &.other-icon .file-extension {
+    color: #7f8c8d;
+  }
 }
 
 .pdf-icon {
@@ -1577,6 +1611,18 @@
           }
         }
       }
+    }
+  }
+}
+
+// Make links in field values stand out
+.field-value {
+  a {
+    color: #2563eb;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
     }
   }
 }
