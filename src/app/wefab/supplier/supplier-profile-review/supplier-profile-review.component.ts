@@ -150,22 +150,19 @@ export class SupplierProfileReviewComponent implements OnInit {
     };
     
     // Update based on current approval status
-    if (this.getCurrentL1DataStatus === 'Approved') {
+    // For Stage 1: Under Review or Approved = 100% complete
+    if (this.getCurrentL1DataStatus === 'Approved' || this.getCurrentL1DataStatus === 'Under Review') {
       this.completionStatus.basicInformation = 100;
-    } else if (this.getCurrentL1DataStatus === 'Under Review') {
-      this.completionStatus.basicInformation = 50;
     }
     
-    if (this.getCurrentL2DataStatus === 'Approved') {
+    // For Stage 2: Under Review or Approved = 100% complete
+    if (this.getCurrentL2DataStatus === 'Approved' || this.getCurrentL2DataStatus === 'Under Review') {
       this.completionStatus.manufacturingCapabilities = 100;
-    } else if (this.getCurrentL2DataStatus === 'Under Review') {
-      this.completionStatus.manufacturingCapabilities = 50;
     }
     
-    if (this.getCurrentL3DataStatus === 'Approved') {
+    // For Stage 3: Under Review or Approved = 100% complete
+    if (this.getCurrentL3DataStatus === 'Approved' || this.getCurrentL3DataStatus === 'Under Review') {
       this.completionStatus.financialAdditional = 100;
-    } else if (this.getCurrentL3DataStatus === 'Under Review') {
-      this.completionStatus.financialAdditional = 50;
     }
   }
   
@@ -514,26 +511,26 @@ export class SupplierProfileReviewComponent implements OnInit {
 
         mainCurrentDataStatus() {
           if(this.getCurrentL1DataStatus === 'Under Review') {
-             this.mainCurrentDataStatusTrack = 'L1 Under Review'
+             this.mainCurrentDataStatusTrack = 'Stage 1: Under Review'
           }
           else if(this.getCurrentL2DataStatus === 'Under Review') {
-            this.mainCurrentDataStatusTrack = 'L2 Under Review'
+            this.mainCurrentDataStatusTrack = 'Stage 2: Under Review'
           }
           else if(this.getCurrentL3DataStatus === 'Under Review') {
-            this.mainCurrentDataStatusTrack = 'L3 Under Review'
+            this.mainCurrentDataStatusTrack = 'Stage 3: Under Review'
           } else if(this.getCurrentL2DataStatus === 'Rejected') {
-            this.mainCurrentDataStatusTrack = 'L2 Rejected'
+            this.mainCurrentDataStatusTrack = 'Stage 2: Rejected'
           } else if(this.getCurrentL3DataStatus === 'Rejected') {
-            this.mainCurrentDataStatusTrack = 'L3 Rejected'
+            this.mainCurrentDataStatusTrack = 'Stage 3: Rejected'
           } else if(this.getCurrentL1DataStatus === 'Rejected') {
-            this.mainCurrentDataStatusTrack = 'L1 Rejected'
+            this.mainCurrentDataStatusTrack = 'Stage 1: Rejected'
           } 
           else if(this.getCurrentL3DataStatus === 'Approved') {
-            this.mainCurrentDataStatusTrack = 'L3 Approved'
+            this.mainCurrentDataStatusTrack = 'Stage 3: Approved'
           } else if(this.getCurrentL2DataStatus === 'Approved') {
-            this.mainCurrentDataStatusTrack = 'L2 Approved'
+            this.mainCurrentDataStatusTrack = 'Stage 2: Approved'
           } else if(this.getCurrentL1DataStatus === 'Approved') {
-            this.mainCurrentDataStatusTrack = 'L1 Approved'
+            this.mainCurrentDataStatusTrack = 'Stage 1: Approved'
           }
         }
 

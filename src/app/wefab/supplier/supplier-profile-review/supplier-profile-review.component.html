@@ -26,7 +26,7 @@
             <i class="pi pi-check-circle" *ngIf="getCurrentL1DataStatus === 'Approved'"></i>
             <i class="pi pi-exclamation-triangle" style="color: orange;"
               *ngIf="getCurrentL1DataStatus === 'Under Review'"></i>
-            <span> Basic Information</span>
+            <span>Stage 1: Basic Information</span>
           </div>
         </button>
         <button class="level-tab" [class.active]="activeLevelTab === 'manufacturing'"
@@ -36,7 +36,7 @@
             <i class="pi pi-check-circle" *ngIf="getCurrentL2DataStatus === 'Approved'"></i>
             <i class="pi pi-exclamation-triangle" style="color: orange;"
               *ngIf="getCurrentL2DataStatus === 'Under Review'"></i>
-            <span>L2: Manufacturing</span>
+            <span>Stage 2: Manufacturing</span>
           </div>
         </button>
 
@@ -46,7 +46,7 @@
             <i class="pi pi-check-circle" *ngIf="getCurrentL3DataStatus === 'Approved'"></i>
             <i class="pi pi-exclamation-triangle" style="color: orange;"
               *ngIf="getCurrentL3DataStatus === 'Under Review'"></i>
-            <span>L3: Financial & Additional</span>
+            <span>Stage 3: Financial & Additional</span>
           </div>
         </button>
       </div>
@@ -157,11 +157,15 @@
             <div class="review-row">
               <div class="review-col">
                 <div class="field-label">Website URL</div>
-                <div class="field-value">{{ getCompanyProfile.websiteURL }}</div>
+                <div class="field-value">
+                  <a [href]="getCompanyProfile.websiteURL" target="_blank" rel="noopener noreferrer">{{ getCompanyProfile.websiteURL }}</a>
+                </div>
               </div>
               <div class="review-col">
                 <div class="field-label">LinkedIn URL</div>
-                <div class="field-value">{{ getCompanyProfile.linkedinURL }}</div>
+                <div class="field-value">
+                  <a [href]="getCompanyProfile.linkedinURL" target="_blank" rel="noopener noreferrer">{{ getCompanyProfile.linkedinURL }}</a>
+                </div>
               </div>
             </div>
           </div>
@@ -188,17 +192,26 @@
                   
                   <!-- PDF files -->
                   <div *ngIf="isPdfFile(document.url)" class="document-icon pdf-icon">
-                    <i class="fas fa-file-pdf"></i>
+                    <div class="pdf-thumbnail">
+                      <i class="pi pi-file-pdf" style="font-size: 3rem; color: #e74c3c;"></i>
+                      <span class="file-extension">PDF</span>
+                    </div>
                   </div>
                   
                   <!-- DOC/DOCX files -->
                   <div *ngIf="isDocFile(document.url)" class="document-icon doc-icon">
-                    <i class="fas fa-file-word"></i>
+                    <div class="doc-thumbnail">
+                      <i class="pi pi-file-word" style="font-size: 3rem; color: #2980b9;"></i>
+                      <span class="file-extension">DOC</span>
+                    </div>
                   </div>
                   
                   <!-- Other file types -->
                   <div *ngIf="isOtherFile(document.url)" class="document-icon other-icon">
-                    <i class="fas fa-file-alt"></i>
+                    <div class="other-thumbnail">
+                      <i class="pi pi-file" style="font-size: 3rem; color: #7f8c8d;"></i>
+                      <span class="file-extension">FILE</span>
+                    </div>
                   </div>
                   
                   <!-- Upload progress indicator (shown during upload) -->
@@ -774,17 +787,17 @@
           </li>
           <li class="verification-item">
             <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.address_verification"></i>
-            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!verificationStatus.address_verification"></i>
-            <span class="verification-label" *ngIf="verificationStatus.address_verification">Address Verified</span>
-            <span class="verification-label" *ngIf="!verificationStatus.address_verification">Address Verification
-              Pending</span>
+            <i class="pi pi-exclamation-triangle pending-icon"
+              *ngIf="!verificationStatus.address_verification"></i>
+            <span *ngIf="verificationStatus.address_verification">Address Verified</span>
+            <span class="verification-label" *ngIf="!verificationStatus.address_verification">Address Verification Pending</span>
           </li>
+          <!-- Machine Photos Verification -->
           <li class="verification-item">
             <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.machine_photo_verification"></i>
             <i class="pi pi-exclamation-triangle pending-icon"
               *ngIf="!verificationStatus.machine_photo_verification"></i>
-            <span class="verification-label" *ngIf="verificationStatus.machine_photo_verification">Facility Photos
-              Verified</span>
+            <span *ngIf="verificationStatus.machine_photo_verification">Facility Photos Verified</span>
             <span class="verification-label" *ngIf="!verificationStatus.machine_photo_verification">Facility Photos
               Pending Review</span>
           </li>
