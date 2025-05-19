@@ -59,7 +59,7 @@ import { CommonService } from '../../shared/common.service';
                 Verifying...
             </span>
             <span *ngIf="!isLoading">
-                {{ _isVerified ? 'Verified' : (verificationError ? 'ReVerify' : 'VERIFY GST') }}
+                {{ _isVerified ? 'Verified' : (verificationError ? 'Re-verify' : 'Verify GST') }}
             </span>
           </button>
         </div>
