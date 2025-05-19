@@ -66,6 +66,7 @@
               <div class="mb-3">
                 <h3 class="text-blueprint-blue">{{ activeStepIndex === 0 ? 'Basic Details' : 'Contact & Capabilities' }}</h3>
                 <p class="text-machine-gray" *ngIf="activeStepIndex === 0">
+                  {{companyName}}
                   Please provide your company information and contact details.
                 </p>
                 <p class="text-machine-gray" *ngIf="activeStepIndex === 1">
