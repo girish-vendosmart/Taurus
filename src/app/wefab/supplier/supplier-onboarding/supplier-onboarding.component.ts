@@ -101,6 +101,7 @@ export class SupplierOnboardingComponent implements OnInit {
   
   // New property to check if supplier already exists
   hasExistingSupplier = false;
+  companyName: any;
   
   constructor(
     private fb: FormBuilder, 
@@ -307,27 +308,9 @@ export class SupplierOnboardingComponent implements OnInit {
       console.log('Stored selected state:', this.selectedState);
     }
 
-    // Special handling for registeredAddress if it's a string (old format)
-    if (this.getCompanyProfile.registeredAddress && typeof this.getCompanyProfile.registeredAddress === 'string') {
-      // Convert to new format compatible with Google Places component
-      this.getCompanyProfile.registeredAddress = {
-        fullAddress: this.getCompanyProfile.registeredAddress,
-        placeId: '',
-        streetNumber: '',
-        street: '',
-        city: this.getCompanyProfile.city || '',
-        state: this.getCompanyProfile.state || '',
-        stateCode: '',
-        postalCode: '',
-        country: this.getCompanyProfile.country || '',
-        countryCode: '',
-        location: {
-          lat: 0,
-          lng: 0
-        }
-      };
-    }
-    
+    // Properly format registeredAddress according to AddressData interface
+    this.formatGooglePlacesAddress();
+
     // Update the model with the values from getCompanyProfile
     this.model = {
       ...this.model,
@@ -347,11 +330,181 @@ export class SupplierOnboardingComponent implements OnInit {
       this.phoneVerified = true;
     }
     
-    // Give the form time to update
+    // Patch form values with a slight delay to ensure form is ready
     setTimeout(() => {
+      // First patch all other fields
+      this.form.patchValue(this.model);
+      
+      // Then handle Google Places separately with specialized approach
+      this.patchGooglePlacesField(0);
+
+      // Mark form as touched/dirty
       this.form.markAsDirty();
       console.log('Final form model:', this.model);
-    }, 500);
+    }, 300);
+  }
+
+  /**
+   * Format the Google Places address data according to the AddressData interface
+   */
+  formatGooglePlacesAddress() {
+    // Check if registeredAddress exists
+    if (!this.getCompanyProfile.registeredAddress) {
+      // Initialize with basic structure if missing
+      this.getCompanyProfile.registeredAddress = {
+        fullAddress: `${this.getCompanyProfile.city || ''}, ${this.getCompanyProfile.state || ''}, ${this.getCompanyProfile.country || ''}`,
+        placeId: '',
+        streetNumber: '',
+        street: '',
+        city: this.getCompanyProfile.city || '',
+        state: this.getCompanyProfile.state || '',
+        stateCode: '',
+        postalCode: '',
+        country: this.getCompanyProfile.country || '',
+        countryCode: '',
+        location: {
+          lat: this.getCompanyProfile.registered_lat || 0,
+          lng: this.getCompanyProfile.registered_lng || 0
+        }
+      };
+      console.log('Created new registeredAddress object:', this.getCompanyProfile.registeredAddress);
+      return;
+    }
+    
+    if (typeof this.getCompanyProfile.registeredAddress === 'string') {
+      // Convert string to proper object
+      const addressText = this.getCompanyProfile.registeredAddress;
+      this.getCompanyProfile.registeredAddress = {
+        fullAddress: addressText,
+        placeId: '',
+        streetNumber: '',
+        street: '',
+        city: this.getCompanyProfile.city || '',
+        state: this.getCompanyProfile.state || '',
+        stateCode: '',
+        postalCode: '',
+        country: this.getCompanyProfile.country || '',
+        countryCode: '',
+        location: {
+          lat: this.getCompanyProfile.registered_lat || 0,
+          lng: this.getCompanyProfile.registered_lng || 0
+        }
+      };
+      console.log('Converted string to registeredAddress object:', this.getCompanyProfile.registeredAddress);
+    } else {
+      // Ensure all required properties exist on the object
+      const address = this.getCompanyProfile.registeredAddress;
+      if (!address.location) {
+        address.location = {
+          lat: this.getCompanyProfile.registered_lat || 0,
+          lng: this.getCompanyProfile.registered_lng || 0
+        };
+      }
+      
+      // Ensure all required string properties exist
+      address.fullAddress = address.fullAddress || `${this.getCompanyProfile.city || ''}, ${this.getCompanyProfile.state || ''}, ${this.getCompanyProfile.country || ''}`;
+      address.placeId = address.placeId || '';
+      address.streetNumber = address.streetNumber || '';
+      address.street = address.street || '';
+      address.city = address.city || this.getCompanyProfile.city || '';
+      address.state = address.state || this.getCompanyProfile.state || '';
+      address.stateCode = address.stateCode || '';
+      address.postalCode = address.postalCode || '';
+      address.country = address.country || this.getCompanyProfile.country || '';
+      address.countryCode = address.countryCode || '';
+      
+      console.log('Validated and fixed registeredAddress object:', this.getCompanyProfile.registeredAddress);
+    }
+  }
+
+  /**
+   * Patch the Google Places field with retry logic
+   * @param retryCount Current retry attempt
+   * @param maxRetries Maximum number of retries
+   */
+  patchGooglePlacesField(retryCount = 0, maxRetries = 5) {
+    // Give up after max retries
+    if (retryCount >= maxRetries) {
+      console.error('Failed to patch Google Places field after maximum retries');
+      return;
+    }
+
+    // Calculate delay with exponential backoff
+    const delay = 300 + (retryCount * 200);
+    
+    setTimeout(() => {
+      try {
+        if (!this.form || !this.getCompanyProfile?.registeredAddress) {
+          console.log(`Retry ${retryCount + 1}: Form or address not ready`);
+          this.patchGooglePlacesField(retryCount + 1, maxRetries);
+          return;
+        }
+
+        // First try direct form control approach - this should work for most cases
+        const addressControl = this.form.get('registeredAddress');
+        if (addressControl) {
+          // Enable the control temporarily if it's disabled
+          const wasDisabled = addressControl.disabled;
+          if (wasDisabled) {
+            addressControl.enable({emitEvent: false});
+          }
+
+          // Set the value
+          console.log(`Setting registeredAddress via form control (attempt ${retryCount + 1}):`, this.getCompanyProfile.registeredAddress);
+          addressControl.setValue(this.getCompanyProfile.registeredAddress);
+          addressControl.markAsDirty();
+          addressControl.updateValueAndValidity({emitEvent: true});
+          
+          // Disable the control again if it was disabled
+          if (wasDisabled) {
+            addressControl.disable({emitEvent: false});
+          }
+        }
+        
+        // Also try to find and update the Formly field directly - this works when the component is defined in Formly
+        if (this.stepFields && this.stepFields.length > 0) {
+          const basicDetailsFields = this.stepFields[0];
+          
+          // Find the row containing registeredAddress field
+          const addressRow = basicDetailsFields.find((fieldGroup: any) => 
+            fieldGroup.fieldGroup && 
+            fieldGroup.fieldGroup.some((field: any) => field.key === 'registeredAddress')
+          );
+          
+          if (addressRow && addressRow.fieldGroup) {
+            // Find the registeredAddress field
+            const addressField = addressRow.fieldGroup.find((field: any) => field.key === 'registeredAddress');
+            
+            if (addressField && addressField.formControl) {
+              console.log(`Found formly field for registeredAddress, patching value directly`, addressField);
+              addressField.formControl.setValue(this.getCompanyProfile.registeredAddress);
+              addressField.formControl.markAsDirty();
+              addressField.formControl.updateValueAndValidity({emitEvent: true});
+              
+              // Access the component instance if possible
+              setTimeout(() => {
+                if (addressField.templateOptions) {
+                  // Ensure the field has the latest data
+                  addressField.templateOptions['_cachedAddress'] = this.getCompanyProfile.registeredAddress;
+                }
+                
+                // Force update the UI
+                this.cdr.detectChanges();
+                this.form.markAsDirty();
+              }, 100);
+            }
+          }
+        }
+        
+        // Force change detection
+        this.cdr.detectChanges();
+        console.log('Address value after all patching attempts:', this.form.get('registeredAddress')?.value);
+        
+      } catch (error) {
+        console.error(`Error patching Google Places field (attempt ${retryCount + 1}):`, error);
+        this.patchGooglePlacesField(retryCount + 1, maxRetries);
+      }
+    }, delay);
   }
 
   // New method to load countries then initialize form
@@ -506,10 +659,12 @@ export class SupplierOnboardingComponent implements OnInit {
             className: 'col-md-6 mb-3',
             key: 'registeredAddress',
             type: 'google-places',
+            defaultValue: this.getCompanyProfile?.registeredAddress || null,
             templateOptions: {
               label: 'Registered Address',
               placeholder: 'Search for your registered address',
-              required: true
+              required: true,
+              _cachedAddress: this.getCompanyProfile?.registeredAddress || null // Store address for direct access
             },
             expressionProperties: {
               'templateOptions.disabled': 'formState.disabled'
@@ -517,6 +672,23 @@ export class SupplierOnboardingComponent implements OnInit {
             validation: {
               messages: {
                 required: 'Please select a registered address'
+              }
+            },
+            hooks: {
+              onInit: (field) => {
+                console.log('Google Places field initialized');
+                // Try to set the value again after field is initialized
+                if (this.getCompanyProfile?.registeredAddress && field.formControl) {
+                  setTimeout(() => {
+                    console.log('Setting address from onInit hook:', this.getCompanyProfile.registeredAddress);
+                    if (field.formControl) {
+                      field.formControl.setValue(this.getCompanyProfile.registeredAddress);
+                      field.formControl.markAsDirty();
+                      field.formControl.updateValueAndValidity({emitEvent: true});
+                      this.cdr.detectChanges();
+                    }
+                  }, 300);
+                }
               }
             }
           }
@@ -731,29 +903,115 @@ export class SupplierOnboardingComponent implements OnInit {
               required: true,
               groups: [
                 {
-                  label: 'Process Types',
+                  label: 'Precision Machining',
                   items: [
-                    { label: 'CNC Machining', value: 'cnc_machining' },
-                    { label: 'Injection Molding', value: 'injection_molding' },
-                    { label: 'Sheet Metal Fabrication', value: 'sheet_metal_fabrication' }
+                    { value: "3axis", label: "3-axis Milling" },
+                    { value: "4axis", label: "4-axis Milling" },
+                    { value: "5axis", label: "5-axis Milling" },
+                    { value: "turning", label: "Turning/Lathe" },
+                    { value: "drilling", label: "Drilling" },
+                    { value: "boring", label: "Boring" },
+                    { value: "grinding", label: "Grinding" },
+                    { value: "wireedm", label: "Wire EDM" },
+                    { value: "sinkeredm", label: "Sinker/Ram EDM" },
+                    { value: "polishing", label: "Polishing" },
+                    { value: "lapping", label: "Lapping" },
+                    { value: "honing", label: "Honing" },
+                    { value: "ultrasonic", label: "Ultrasonic Machining" },
+                    { value: "electrochemical", label: "Electrochemical Machining" },
+                    { value: "waterjet", label: "Waterjet Cutting" },
                   ]
                 },
                 {
-                  label: 'Advanced Manufacturing',
+                  label: '3D Printing',
                   items: [
-                    { label: '3D Printing', value: '3d_printing' },
-                    { label: 'Die Casting', value: 'die_casting' },
-                    { label: 'Laser Cutting', value: 'laser_cutting' }
+                    { value: "dmls", label: "DMLS" },
+                    { value: "slm", label: "SLM" },
+                    { value: "ebm", label: "EBM" },
+                    { value: "binderjet", label: "Binder Jetting" },
+                    { value: "ded", label: "DED" },
+                    { value: "fdm", label: "FDM" },
+                    { value: "sla", label: "SLA" },
+                    { value: "sls", label: "SLS" },
+                    { value: "polyjet", label: "Material Jetting/PolyJet" },
+                    { value: "dlp", label: "DLP" },
+                    { value: "clip", label: "CLIP" },
+                  ]
+                },
+                {
+                  label: 'Casting & Molding',
+                  items: [
+                    { value: "sandcast", label: "Sand Casting" },
+                    { value: "diecast", label: "Die Casting" },
+                    { value: "investment", label: "Investment Casting" },
+                    { value: "permanentmold", label: "Permanent Mold" },
+                    { value: "centrifugal", label: "Centrifugal Casting" },
+                    { value: "injection", label: "Injection Molding" },
+                    { value: "blow", label: "Blow Molding" },
+                    { value: "compression", label: "Compression Molding" },
+                    { value: "rotational", label: "Rotational Molding" },
+                    { value: "thermoforming", label: "Thermoforming" },
+                    { value: "lostfoam", label: "Lost Foam Casting" },
+                    { value: "shell", label: "Shell Molding" },
+                    { value: "vacuum", label: "Vacuum Casting" },
+                  ]
+                },
+                {
+                  label: 'Sheet Metal Works',
+                  items: [
+                    { value: "lasercut", label: "Laser Cutting" },
+                    { value: "plasmacut", label: "Plasma Cutting" },
+                    { value: "waterjetcut", label: "Waterjet Cutting" },
+                    { value: "punching", label: "Punching" },
+                    { value: "blanking", label: "Blanking/Shearing" },
+                    { value: "bending", label: "Bending/Press Brake" },
+                    { value: "rolling", label: "Rolling" },
+                    { value: "stamping", label: "Stamping" },
+                    { value: "deepdraw", label: "Deep Drawing" },
+                    { value: "spinning", label: "Spinning" },
+                    { value: "spotweld", label: "Spot Welding" },
+                    { value: "seamweld", label: "Seam Welding" },
+                    { value: "clinching", label: "Clinching" },
+                    { value: "riveting", label: "Riveting" },
+                  ]
+                },
+                {
+                  label: 'Fabrication',
+                  items: [
+                    { value: "mig", label: "MIG/MAG Welding" },
+                    { value: "tig", label: "TIG Welding" },
+                    { value: "arc", label: "Stick/Arc Welding" },
+                    { value: "laserweld", label: "Laser Welding" },
+                    { value: "ebeam", label: "Electron Beam Welding" },
+                    { value: "mechanical", label: "Mechanical Fastening" },
+                    { value: "adhesive", label: "Adhesive Bonding" },
+                    { value: "brazing", label: "Brazing" },
+                    { value: "soldering", label: "Soldering" },
                   ]
                 },
                 {
                   label: 'Surface Treatment',
                   items: [
-                    { label: 'Anodizing', value: 'anodizing' },
-                    { label: 'Powder Coating', value: 'powder_coating' },
-                    { label: 'Heat Treatment', value: 'heat_treatment' }
+                    { value: "anodizing", label: "Anodizing" },
+                    { value: "plating", label: "Plating" },
+                    { value: "powdercoat", label: "Powder Coating" },
+                    { value: "painting", label: "Painting" },
+                    { value: "blasting", label: "Sandblasting" },
+                    { value: "heattreating", label: "Heat Treating" },
                   ]
-                }
+                },
+                {
+                  label: 'Tool & Die Making',
+                  items: [
+                    { value: "stampingdies", label: "Stamping Dies" },
+{ value: "progressivedies", label: "Progressive Dies" },
+{ value: "forging", label: "Forging Dies" },
+{ value: "drawingdies", label: "Drawing Dies" },
+{ value: "moldmaking", label: "Mold Making" },
+{ value: "fixtures", label: "Fixtures & Jigs" }
+
+                  ]
+                },
               ],
               optionGroupLabel: 'label',
               optionGroupChildren: 'items',
@@ -1015,6 +1273,7 @@ export class SupplierOnboardingComponent implements OnInit {
     this.model.phone_verified = this.phoneVerified;
     this.model.registered_lat = this.model.registeredAddress.location.lat;
     this.model.registered_lng = this.model.registeredAddress.location.lng;
+    this.model.gstVerified = this.gstVerified;
     body = this.updateData(this.model);
     if(supplier_id) {
       endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplier_id;
@@ -1027,13 +1286,15 @@ export class SupplierOnboardingComponent implements OnInit {
   putSupplierOnboardingL1() {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L1/'  + sessionStorage.getItem('supplier_id');
     this.model.phone_verified = this.phoneVerified;
+    this.model.registered_lat = this.model.registeredAddress.location.lat;
+    this.model.registered_lng = this.model.registeredAddress.location.lng;
+    this.model.gstVerified = this.gstVerified;
     console.log('Updating existing form data:', this.model);
     let body = this.updateData(this.model);
   }
   
   submit() {
     if (this.form.valid) {
-      debugger
       console.log('Form submitted successfully', this.model);
       this.postSupplierOnboardingL1();
     } else {
@@ -1197,19 +1458,27 @@ export class SupplierOnboardingComponent implements OnInit {
 
   onCompanyNameChanged(companyName: string) {
     console.log('onCompanyNameChanged called with:', companyName);
+    this.companyName = companyName;
     
-    if (companyName) {
+    if (companyName && this.gstVerified) {
       this.model.company_name = companyName;
       
       // If using reactive forms:
-      // this.form.patchValue({
-      //   company_name: companyName
-      // });
+      this.form.patchValue({
+        company_name: companyName
+      });
+
+       // Disable the field
+       this.form.get('company_name')?.disable({ emitEvent: false });
       
       console.log('Company name updated to:', this.model.company_name);
       
       // Force change detection if needed
       this.cdr.detectChanges();
+
+      setTimeout(() => {
+        this.form.markAsPristine();
+      }, 1000);
     } else {
       console.error('Received empty company name');
     }
