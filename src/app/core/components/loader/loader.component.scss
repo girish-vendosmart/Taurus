@@ -1,31 +1,32 @@
-// Variables based on WeFab style guide
-$blueprint-blue: #1A3A5F;
-$technical-white: #F6F7F9;
-$precision-black: #1A1D21;
-$machine-gray: #545A64;
-$material-finish-silver: #D1D5DB;
+@import "../../../../assets/scss/variables.scss";
 
+/* Absolute positioning to ensure visibility */
 .loader-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba($precision-black, 0.5);
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba($precision-black, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 2147483647 !important; /* Maximum z-index value */
+  pointer-events: all;
 }
 
 .loader-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: $technical-white;
+  background-color: transparent;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  // border-radius: 8px;
+  // box-shadow: 0 4px 12px rgba($precision-black, 0.15);
+  // min-width: 200px;
+  // min-height: 150px;
 }
 
 .spinner {
@@ -47,8 +48,8 @@ $material-finish-silver: #D1D5DB;
 
 .loading-text {
   font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  font-weight: 500;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
   color: $machine-gray;
 }
 

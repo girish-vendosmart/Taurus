@@ -1,6 +1,6 @@
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
@@ -17,6 +17,7 @@ import { FormlyFieldSearchableSelectComponent } from './searchable-select-type.c
 import { PMultiSelectGroupComponent } from './p-multiSelect-group.component';
 import { FormlyFieldGooglePlacesComponent } from './google-places-type.component';
 import { FormlyFieldGstVerifyComponent } from './gst-verify-type.component';
+import { loaderInterceptor } from './core/interceptors/loader.interceptor';
 
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
@@ -24,7 +25,9 @@ import { provideClientHydration } from '@angular/platform-browser';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(
+      withInterceptors([loaderInterceptor])
+    ),
     provideAnimations(),
     provideClientHydration(),
     importProvidersFrom(
