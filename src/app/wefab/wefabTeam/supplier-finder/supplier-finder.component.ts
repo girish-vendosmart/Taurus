@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommonService } from '../../shared/common.service';
@@ -8,6 +8,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
+import { SweetAlertService } from '../../shared/sweet-alert.service'
 
 // Interface for supplier data
 interface Supplier {
@@ -35,6 +36,7 @@ interface SelectedSupplier {
   styleUrl: './supplier-finder.component.scss'
 })
 export class SupplierFinderComponent {
+  private sweetAlert = inject(SweetAlertService);
   // Search functionality
   searchQuery: string = '';
   hasSearched: boolean = false;
@@ -73,7 +75,7 @@ export class SupplierFinderComponent {
   ];
   searchData: any[] = [];
 
-  constructor(private service: CommonService, private messageService: MessageService, private confirmationService: ConfirmationService) {
+  constructor(private service: CommonService, private confirmationService: ConfirmationService) {
     // Initialize with all suppliers
     this.suppliers = [...this.mockSuppliers];
   }
@@ -111,17 +113,17 @@ export class SupplierFinderComponent {
         company_name: supplier['Company Name'],
         phone_number: supplier['Primary Phone'] || ''
       }));
-    
-    this.confirmationService.confirm({
-      message: 'Are you sure you want to send the invitation to selected supplier(s)?',
-      header: 'Confirmation',
-      acceptLabel: 'Yes',
-      rejectLabel: 'No',
-      accept: () => {
+
+    this.sweetAlert.confirm(
+      '',
+      'Are you sure you want to send the invitation to selected supplier(s)?',
+      'question',
+      'Yes',
+      'No'
+    ).then((result:any) => {
+      if (result.isConfirmed) {
+        // User clicked "Yes, Approve"
         this.sendInvitations();
-      },
-      reject: () => {
-        // Do nothing if rejected
       }
     });
   }
@@ -141,11 +143,7 @@ export class SupplierFinderComponent {
     let endPoint = `/api/resource/wfb_bulk_supplier_invitation`;
     this.service.postData(endPoint, invitationData).subscribe(
       (res:any) => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Invitations sent successfully'
-        });
+        this.sweetAlert.success('Request has been approved!');
         
         this.showInvitationDialog = false;
         this.selectedSuppliers.clear();

@@ -16,6 +16,7 @@ export class LoaderService {
   // Show loader
   show(): void {
     this.loadingCount++;
+    console.log('Loader show called. Count:', this.loadingCount);
     this.updateLoadingState();
   }
 
@@ -23,17 +24,29 @@ export class LoaderService {
   hide(): void {
     if (this.loadingCount > 0) {
       this.loadingCount--;
+      console.log('Loader hide called. Count:', this.loadingCount);
       this.updateLoadingState();
     }
   }
 
   // Reset loader (force hide)
   reset(): void {
+    console.log('Loader reset called. Previous count:', this.loadingCount);
     this.loadingCount = 0;
     this.updateLoadingState();
   }
 
+  // Method for testing - shows the loader for specified duration
+  showForDuration(durationMs: number = 2000): void {
+    this.show();
+    setTimeout(() => {
+      this.hide();
+    }, durationMs);
+  }
+
   private updateLoadingState(): void {
-    this.loadingSubject.next(this.loadingCount > 0);
+    const isLoading = this.loadingCount > 0;
+    console.log('Updating loading state to:', isLoading);
+    this.loadingSubject.next(isLoading);
   }
 } 
