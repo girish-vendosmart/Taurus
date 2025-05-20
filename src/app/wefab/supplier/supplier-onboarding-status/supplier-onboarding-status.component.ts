@@ -63,7 +63,6 @@ export class SupplierOnboardingStatusComponent {
   getOnboardingL1Status() {
     let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=${this.supplierCompanyId}`
     this.commonService.getData(endPoint).subscribe((res: any) => {
-      debugger
       console.log(res)
       this.currentOnboardingL1Status = res.data.approval_status
       this.getOnboardingL2Status()

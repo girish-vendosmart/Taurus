@@ -10,6 +10,7 @@
       #addressInput
       class="location-textarea" 
       [formControl]="searchControl"
+      [(ngModel)]="addressText"
       [placeholder]="placeholder"
       [disabled]="disabled || loadingScript"
       autocomplete="off"

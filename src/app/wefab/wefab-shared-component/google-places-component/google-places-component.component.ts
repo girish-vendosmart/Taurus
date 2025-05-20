@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, NgZone, OnInit, Output, ViewChild, forwardRef } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, NgZone, OnInit, Output, SimpleChanges, ViewChild, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
@@ -47,6 +47,7 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
   @Input() placeholder: string = 'Search for places';
   @Input() disabled: boolean = false;
   @Input() label: string = 'Location';
+  @Input() prefillAdress: any;
   
   @Output() addressSelect = new EventEmitter<AddressData | null>();
   @ViewChild('addressInput') addressInput!: ElementRef;
@@ -55,13 +56,20 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
   autocompleteInstance: any;
   isLoaded: boolean = false;
   loadingScript: boolean = false;
-  selectedAddress: AddressData | null = null;
+  selectedAddress: any;
   
   // For ControlValueAccessor
   onChange: any = () => {};
   onTouched: any = () => {};
+  addressText: any= ''
+  prefillAddressDetails: any;
   
   constructor(private zone: NgZone, private messageService: MessageService) {}
+
+  ngOnChanges(changes: any): void {
+    this.prefillAddressDetails = changes.prefillAdress.currentValue
+    this.prefillAddressData(this.prefillAddressDetails)
+  }
   
   ngOnInit(): void {
     // Check if Google Maps API is already loaded
@@ -85,6 +93,17 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
         this.addressSelect.emit(null);
       }
     });
+
+    // this.prefillAddressData();
+    
+  }
+
+  prefillAddressData(addressDetails: any) {
+    // Set the address text directly
+    this.addressText = addressDetails.fullAddress;
+    
+    // Set the selected address object
+    this.selectedAddress = addressDetails;
   }
   
   private loadGoogleMapsScript(): void {

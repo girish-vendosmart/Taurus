@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, SimpleChanges } from '@angular/core';
 import { FieldType, FieldTypeConfig } from '@ngx-formly/core';
 import { GooglePlacesComponentComponent, AddressData } from './wefab/wefab-shared-component/google-places-component/google-places-component.component';
 
@@ -18,15 +18,23 @@ interface GooglePlacesTemplateOptions {
       [label]="to.label || 'Address'"
       [placeholder]="to.placeholder || 'Search for places'"
       [disabled]="to.disabled || formControl.disabled"
+      [prefillAdress]="prefillAdress"
       (addressSelect)="onAddressSelect($event)"
     >
     </app-google-places-component>
   `,
 })
 export class FormlyFieldGooglePlacesComponent extends FieldType<FieldTypeConfig> {
+  prefillAdress: any;
   // Type the template options
   override get to(): GooglePlacesTemplateOptions {
     return this.props as GooglePlacesTemplateOptions;
+  }
+
+  ngOnInit() {
+    this.formControl.valueChanges.subscribe((value) => {
+        this.prefillAdress = value
+    });
   }
 
   onAddressSelect(address: AddressData | null) {

@@ -45,7 +45,6 @@ export class FormlyFieldGstVerifyComponent extends FieldType<FieldTypeConfig> {
   }
 
   onCompanyNameChanged(companyName: string) {
-    debugger;
     if (this.props['parentComponent'] && this.props['parentComponent'].onCompanyNameChanged) {
       this.props['parentComponent'].onCompanyNameChanged(companyName);
     }
