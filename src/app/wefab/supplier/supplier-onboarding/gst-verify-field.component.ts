@@ -460,6 +460,7 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
   verifyGST() {
     // Reset verification error state when starting a new verification
     this.verificationError = false;
+    this.isLoading = true;
     
     if (!this.gstControl.value) {
       this.messageService.add({
@@ -471,98 +472,102 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
       return;
     }
     
-    this.isLoading = false;
-    this.showVerificationDialog = true;
+    // this.isLoading = true;
+    // this.showVerificationDialog = false;
     // this.patchCompanyDetails();
     
-    // let endPoint = `/api/method/proq_buyer.api.supplier_onboarding.gst_verification.verify_gstin?gstin_number=${this.gstControl.value}`;
+    let endPoint = `/api/method/proq_buyer.api.supplier_onboarding.gst_verification.verify_gstin?gstin_number=${this.gstControl.value}`;
 
-    // this.commonService.getData(endPoint).subscribe((res: any) => {
-    //   this.isLoading = false;
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      this.isLoading = false;
+      this.showVerificationDialog = true;
+
+      this.cdr.detectChanges();
       
-    //   // Add debugging to check response structure
-    //   console.log('API Response:', res);
+      // Add debugging to check response structure
+      console.log('API Response:', res);
       
-    //   // Check if the data exists in the expected format
-    //   if (res && res.message && res.message.data) {
-    //     this.companyGstDetials = res.message.data;
-    //     this.patchCompanyDetails();
-    //   } else {
-    //     console.error('Invalid API response format:', res);
-    //     this.messageService.add({
-    //       severity: 'error',
-    //       summary: 'Error',
-    //       detail: 'Invalid response format from server',
-    //       life: 3000
-    //     });
-    //   }
-    // }, (err) => {
-    //   this.isLoading = false;
-    //   console.error('API Error:', err);
+      // Check if the data exists in the expected format
+      if (res && res.message && res.message.data) {
+        this.showVerificationDialog = true;
+        this.companyGstDetials = res.message.data;
+        this.patchCompanyDetails();
+      } else {
+        console.error('Invalid API response format:', res);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Invalid response format from server',
+          life: 3000
+        });
+      }
+    }, (err) => {
+      this.isLoading = false;
+      console.error('API Error:', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to verify GST details. Please try again.',
+        life: 3000
+      });
+      this.verificationError = true;
+      
+      setTimeout(() => {
+        this.verificationError = false;
+      }, 3000);
+    });
+  }
+
+  patchCompanyDetails() {
+    console.log('Patching company details:', this.companyGstDetials);
+    
+    // if (this.companyGstDetials) {
+      try {
+        // Map response data to companyDetails
+        this.companyDetails = {
+          legalName: this.companyGstDetials.lgnm || this.companyGstDetials.legal_name || 'Vendo Smart Technologies Pvt Ltd',
+          gstNumber: this.companyGstDetials.gstin || this.gstControl.value || '22AAAAA0000A1Z5',
+          status: this.companyGstDetials.sts || this.companyGstDetials.status || 'Active',
+          panNumber: this.companyGstDetials.pan || this.companyGstDetials.panNumber || 'DAJPC4150P',
+          address: this.getFormattedAddress() || 'JBR Tech Park, 1st Floor, 1st Main, 1st Cross, Koramangala, Bangalore, Karnataka, India',
+          businessType: this.companyGstDetials.dty || this.companyGstDetials.businessType || 'Private Limited',
+          registrationDate: this.companyGstDetials.rgdt || this.companyGstDetials.registrationDate || '2024-01-01'
+        };
+
+        this.companyName = this.companyDetails.legalName;
+        
+        console.log('Mapped company details:', this.companyDetails);
+        
+        // Force update of the dialog state in the next cycle
+        setTimeout(() => {
+          this.showVerificationDialog = true;
+          this.cdr.detectChanges(); // Force Angular to detect changes
+          console.log('Dialog visibility after CD:', this.showVerificationDialog);
+          
+          // Add no-scroll class to body when modal is open
+          if (this.isBrowser) {
+            this.renderer.addClass(document.body, 'modal-open');
+          }
+        }, 0);
+      } catch (e) {
+        console.error('Error mapping data:', e);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error processing GST data',
+          life: 3000
+        });
+      }
+    // } else {
+    //   console.error('No GST details available');
     //   this.messageService.add({
     //     severity: 'error',
     //     summary: 'Error',
-    //     detail: 'Failed to verify GST details. Please try again.',
+    //     detail: 'No GST details available',
     //     life: 3000
     //   });
-    //   this.verificationError = true;
-      
-    //   setTimeout(() => {
-    //     this.verificationError = false;
-    //   }, 3000);
-    // });
+    // }
   }
-
-  // patchCompanyDetails() {
-  //   console.log('Patching company details:', this.companyGstDetials);
-    
-  //   // if (this.companyGstDetials) {
-  //     try {
-  //       // Map response data to companyDetails
-  //       this.companyDetails = {
-  //         legalName: this.companyGstDetials.lgnm || this.companyGstDetials.legal_name || 'Vendo Smart Technologies Pvt Ltd',
-  //         gstNumber: this.companyGstDetials.gstin || this.gstControl.value || '22AAAAA0000A1Z5',
-  //         status: this.companyGstDetials.sts || this.companyGstDetials.status || 'Active',
-  //         panNumber: this.companyGstDetials.pan || this.companyGstDetials.panNumber || 'DAJPC4150P',
-  //         address: this.getFormattedAddress() || 'JBR Tech Park, 1st Floor, 1st Main, 1st Cross, Koramangala, Bangalore, Karnataka, India',
-  //         businessType: this.companyGstDetials.dty || this.companyGstDetials.businessType || 'Private Limited',
-  //         registrationDate: this.companyGstDetials.rgdt || this.companyGstDetials.registrationDate || '2024-01-01'
-  //       };
-
-  //       this.companyName = this.companyDetails.legalName;
-        
-  //       console.log('Mapped company details:', this.companyDetails);
-        
-  //       // Force update of the dialog state in the next cycle
-  //       setTimeout(() => {
-  //         this.showVerificationDialog = true;
-  //         this.cdr.detectChanges(); // Force Angular to detect changes
-  //         console.log('Dialog visibility after CD:', this.showVerificationDialog);
-          
-  //         // Add no-scroll class to body when modal is open
-  //         if (this.isBrowser) {
-  //           this.renderer.addClass(document.body, 'modal-open');
-  //         }
-  //       }, 0);
-  //     } catch (e) {
-  //       console.error('Error mapping data:', e);
-  //       this.messageService.add({
-  //         severity: 'error',
-  //         summary: 'Error',
-  //         detail: 'Error processing GST data',
-  //         life: 3000
-  //       });
-  //     }
-  //   // } else {
-  //   //   console.error('No GST details available');
-  //   //   this.messageService.add({
-  //   //     severity: 'error',
-  //   //     summary: 'Error',
-  //   //     detail: 'No GST details available',
-  //   //     life: 3000
-  //   //   });
-  //   // }
-  // }
   
   // Helper method to handle different address formats in the API response
   private getFormattedAddress(): string {
