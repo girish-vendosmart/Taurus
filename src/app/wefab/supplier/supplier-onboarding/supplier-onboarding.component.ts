@@ -329,7 +329,13 @@ export class SupplierOnboardingComponent implements OnInit {
     if (this.getCompanyProfile.phone_verified) {
       this.phoneVerified = true;
     }
-    
+
+    if(this.getCompanyProfile.registeredAddress){
+      this.getCompanyProfile.registeredAddress = JSON.parse(this.getCompanyProfile.registeredAddress);
+      this.form.patchValue({
+        registeredAddress: this.getCompanyProfile.registeredAddress
+      })
+    }
     // Patch form values with a slight delay to ensure form is ready
     setTimeout(() => {
       // First patch all other fields
@@ -348,6 +354,7 @@ export class SupplierOnboardingComponent implements OnInit {
    * Format the Google Places address data according to the AddressData interface
    */
   formatGooglePlacesAddress() {
+    console.log('getCompanyProfile', this.getCompanyProfile);
     // Check if registeredAddress exists
     if (!this.getCompanyProfile.registeredAddress) {
       // Initialize with basic structure if missing

@@ -411,7 +411,6 @@ export class SupplierProfileReviewComponent implements OnInit {
       this.commonservice.getData(endPoint).subscribe((res: any) => {
         console.log("L1 Data ", res)
         this.getCompanyProfile = JSON.parse(res.data.company_profile)
-        debugger
         console.log("L1 Data ", this.getCompanyProfile)
         this.registeredLat = this.getCompanyProfile.registered_lat;
         this.registeredLng = this.getCompanyProfile.registered_lng;
@@ -423,13 +422,11 @@ export class SupplierProfileReviewComponent implements OnInit {
       this.manufacturingData.machines.forEach((machine: any) => {
         console.log('machine', machine)
         let fileId = machine.machinePhotos.fileId
-        debugger
         console.log('fileId', fileId)
         console.log('registeredLat', this.registeredLat)
         console.log('registeredLng', this.registeredLng)
         let endPoint = `/api/method/proq_buyer.api.supplier_onboarding.machine_image_verification.machine_identification.analyze_machine_image?file_id=${fileId}&facility_lat=${this.registeredLat}&facility_lon=${this.registeredLng}`
         this.commonservice.getData(endPoint).subscribe((res: any) => {
-          debugger
           console.log("Machine Analysis ", res)
           if (!res.data.machine_image && !res.data.within_facility) {
             machine.machinePhotos.machine_status = false
