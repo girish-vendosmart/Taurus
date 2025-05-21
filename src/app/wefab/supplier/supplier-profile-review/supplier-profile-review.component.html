@@ -34,6 +34,21 @@
               *ngIf="getCurrentL1DataStatus === 'Under Review'"></i>
             <span>Stage 1: Basic Information</span>
           </div>
+          <!-- Three dot menu for Stage 1 -->
+          <div class="tab-actions" *ngIf="userType === 'wefab_team' && (getCurrentL1DataStatus === 'Under Review' || getCurrentL1DataStatus === 'Update Required')">
+            <i class="pi pi-ellipsis-v" (click)="toggleDropdown('L1', $event)" style="cursor: pointer;"></i>
+            <div class="tab-dropdown" [class.visible]="dropdownVisible['L1']">
+              <div class="dropdown-item" (click)="$event.stopPropagation(); approve('L1')">
+                <i class="pi pi-check-circle"></i> Approve
+              </div>
+              <div class="dropdown-item" (click)="$event.stopPropagation(); reject('L1')">
+                <i class="pi pi-times-circle"></i> Reject
+              </div>
+              <div class="dropdown-item" (click)="$event.stopPropagation(); showUpdateRequestDialog('L1')">
+                <i class="pi pi-sync"></i> Request for Update
+              </div>
+            </div>
+          </div>
         </button>
         <button class="level-tab" [class.active]="activeLevelTab === 'manufacturing'"
           (click)="changeLevelTab('manufacturing')" [disabled]="getCurrentL1DataStatus === 'Rejected'">
@@ -44,15 +59,46 @@
               *ngIf="getCurrentL2DataStatus === 'Under Review'"></i>
             <span>Stage 2: Manufacturing</span>
           </div>
+          <!-- Three dot menu for Stage 2 -->
+          <div class="tab-actions" *ngIf="userType === 'wefab_team' && getCurrentL1DataStatus === 'Approved' && (getCurrentL2DataStatus === 'Under Review' || getCurrentL2DataStatus === 'Update Required')">
+            <i class="pi pi-ellipsis-v" (click)="toggleDropdown('L2', $event)" style="cursor: pointer;"></i>
+            <div class="tab-dropdown" [class.visible]="dropdownVisible['L2']">
+              <div class="dropdown-item" (click)="$event.stopPropagation(); approve('L2')">
+                <i class="pi pi-check-circle"></i> Approve
+              </div>
+              <div class="dropdown-item" (click)="$event.stopPropagation(); reject('L2')">
+                <i class="pi pi-times-circle"></i> Reject
+              </div>
+              <div class="dropdown-item" (click)="$event.stopPropagation(); showUpdateRequestDialog('L2')">
+                <i class="pi pi-sync"></i> Request for Update
+              </div>
+            </div>
+          </div>
         </button>
 
         <button class="level-tab" [class.active]="activeLevelTab === 'financial'" (click)="changeLevelTab('financial')"
           [disabled]="getCurrentL1DataStatus === 'Rejected' || getCurrentL2DataStatus === 'Rejected'">
           <div class="level-badge">
+            <i class="pi pi-times-circle" style="color: red;" *ngIf="getCurrentL3DataStatus === 'Rejected'"></i>
             <i class="pi pi-check-circle" *ngIf="getCurrentL3DataStatus === 'Approved'"></i>
             <i class="pi pi-exclamation-triangle" style="color: orange;"
               *ngIf="getCurrentL3DataStatus === 'Under Review'"></i>
             <span>Stage 3: Financial & Additional</span>
+          </div>
+          <!-- Three dot menu for Stage 3 -->
+          <div class="tab-actions" *ngIf="userType === 'wefab_team' && getCurrentL1DataStatus === 'Approved' && getCurrentL2DataStatus === 'Approved' && (getCurrentL3DataStatus === 'Under Review' || getCurrentL3DataStatus === 'Update Required')">
+            <i class="pi pi-ellipsis-v" (click)="toggleDropdown('L3', $event)" style="cursor: pointer;"></i>
+            <div class="tab-dropdown" [class.visible]="dropdownVisible['L3']">
+              <div class="dropdown-item" (click)="$event.stopPropagation(); approve('L3')">
+                <i class="pi pi-check-circle"></i> Approve
+              </div>
+              <div class="dropdown-item" (click)="$event.stopPropagation(); reject('L3')">
+                <i class="pi pi-times-circle"></i> Reject
+              </div>
+              <div class="dropdown-item" (click)="$event.stopPropagation(); showUpdateRequestDialog('L3')">
+                <i class="pi pi-sync"></i> Request for Update
+              </div>
+            </div>
           </div>
         </button>
       </div>
@@ -64,14 +110,6 @@
           <button class="edit-section-btn" *ngIf="getCurrentL1DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
-          <div class="approval-buttons" *ngIf="getCurrentL1DataStatus === 'Under Review' && userType === 'wefab_team'">
-            <button class="btn btn-success approve-btn" (click)="approve('L1')">
-              <i class="pi pi-check-circle"></i> Approve
-            </button>
-            <button class="btn btn-danger reject-btn" (click)="reject('L1')">
-              <i class="pi pi-times-circle"></i> Reject
-            </button>
-          </div>
         </div>
 
         <!-- Combined Basic Information Content -->
@@ -240,14 +278,7 @@
           <button class="edit-section-btn" *ngIf="getCurrentL2DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
-          <div class="approval-buttons" *ngIf="getCurrentL2DataStatus === 'Under Review' && userType === 'wefab_team'">
-            <button class="btn btn-success approve-btn" (click)="approve('L2')">
-              <i class="pi pi-check-circle"></i> Approve
-            </button>
-            <button class="btn btn-danger reject-btn" (click)="reject('L2')">
-              <i class="pi pi-times-circle"></i> Reject
-            </button>
-          </div>
+          
         </div>
 
         <!-- Zero State for Manufacturing Section -->
@@ -493,14 +524,7 @@
           <button class="edit-section-btn" *ngIf="getCurrentL3DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
-          <div class="approval-buttons" *ngIf="getCurrentL3DataStatus === 'Under Review' && userType === 'wefab_team'">
-            <button class="btn btn-success approve-btn" (click)="approve('L3')">
-              <i class="pi pi-check-circle"></i> Approve
-            </button>
-            <button class="btn btn-danger reject-btn" (click)="reject('L3')">
-              <i class="pi pi-times-circle"></i> Reject
-            </button>
-          </div>
+          
         </div>
 
         <!-- Zero State for Financial Section -->
@@ -996,3 +1020,30 @@
 
 <!-- Toast messages -->
 <p-toast position="top-right"></p-toast>
+
+<!-- Update Request Dialog -->
+<div class="update-request-dialog" *ngIf="showUpdateDialog">
+  <div class="update-request-overlay" (click)="cancelUpdateRequest()"></div>
+  <div class="update-request-content">
+    <div class="update-request-header">
+      <h3>Request for Update</h3>
+      <button class="close-dialog" (click)="cancelUpdateRequest()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+    <div class="update-request-body">
+      <p>Please provide a reason for the update request:</p>
+      <textarea 
+        [(ngModel)]="updateRequestComment" 
+        placeholder="Enter your comments here... (e.g., 'Please add more details about your machinery specifications')"
+        rows="5"
+        class="update-comment-textarea"></textarea>
+    </div>
+    <div class="update-request-footer">
+      <button class="btn btn-cancel" (click)="cancelUpdateRequest()">Cancel</button>
+      <button class="btn btn-submit" [disabled]="!updateRequestComment.trim()" (click)="sendUpdateRequest()">
+        <i class="pi pi-send"></i> Send Request
+      </button>
+    </div>
+  </div>
+</div>
