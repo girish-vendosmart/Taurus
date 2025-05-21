@@ -36,33 +36,33 @@
         </div>
 
         <div class="step-actions">
-          <!-- Edit button for any completed or in-progress sections -->
+          <!-- Edit button for in-progress sections -->
           <button *ngIf="step.status === 'in-progress'" 
                   class="secondary-button" 
                   (click)="viewDetails(step)">
             Edit
           </button>
           
-          <!-- Start button for pending sections that are the next to fill -->
-          <button *ngIf="step.status === 'pending' && step.id === nextSectionToFill" 
-                  class="primary-button" 
-                  (click)="continueOnboarding(step.id)">
-            Start
-          </button>
-          
-          <!-- Continue button for in-progress sections -->
-          <button *ngIf="step.status === 'in-progress' && step.id !== 3 && isNextAvailable(step.id)" 
+          <!-- Start button for pending sections that are the next to fill AND no rejected sections exist -->
+          <button *ngIf="step.status === 'pending' && step.id === nextSectionToFill && !hasRejectedSections()" 
                   class="primary-button" 
                   (click)="continueOnboarding(step.id)">
             Continue
           </button>
           
+          <!-- Continue button for in-progress sections - only shown if no rejected sections -->
+          <!-- <button *ngIf="step.status === 'in-progress' && step.id !== 3 && isNextAvailable(step.id) && !hasRejectedSections()" 
+                  class="primary-button" 
+                  (click)="continueOnboarding(step.id)">
+            Continue
+          </button> -->
+          
           <!-- Re-Submit button for rejected sections -->
-          <button *ngIf="step.status === 'rejected'" 
+          <!-- <button *ngIf="step.status === 'rejected'" 
                   class="primary-button" 
                   (click)="continueOnboarding(step.id)">
             Re-Submit
-          </button>
+          </button> -->
         </div>
       </div>
     </div>
@@ -70,7 +70,7 @@
     <!-- Global Profile Review Button when any section is under review -->
     <div *ngIf="shouldShowProfileReviewButton()" class="global-actions">
       <button class="primary-button profile-review-button" (click)="goToProfileReview()">
-        Go To Profile Review
+        View Profile
       </button>
     </div>
   </div>

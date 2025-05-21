@@ -123,15 +123,56 @@ export class SupplierOnboardingStatusComponent {
     });
   }
 
-  // Updated method to determine the next section to fill
+  // Updated method to determine the next section to fill with special handling for rejected sections
   determineNextSection() {
     console.log('Determining next section to fill');
     console.log('L1 Status:', this.currentOnboardingL1Status);
     console.log('L2 Status:', this.currentOnboardingL2Status);
     console.log('L3 Status:', this.currentOnboardingL3Status);
     
-    // Find the first section that is not Approved or Under Review
-    // This will be the next section for the user to complete
+    // First check if any section is rejected - if so, only that section can be worked on
+    if (this.currentOnboardingL1Status === 'Rejected') {
+      this.nextSectionToFill = 1;
+      this.currentOnboardingPage = 1;
+      console.log('Section 1 is rejected, setting nextSectionToFill to 1');
+      return; // Exit early - no other section can be filled until this is fixed
+    } 
+    
+    if (this.currentOnboardingL2Status === 'Rejected') {
+      if (this.currentOnboardingL1Status === 'Approved' || this.currentOnboardingL1Status === 'Under Review') {
+        this.nextSectionToFill = 2;
+        this.currentOnboardingPage = 2;
+        console.log('Section 2 is rejected, setting nextSectionToFill to 2');
+        return; // Exit early - no section after this can be filled
+      } else {
+        this.nextSectionToFill = 1;
+        this.currentOnboardingPage = 1;
+        console.log('Section 2 is rejected but section 1 is not approved, setting nextSectionToFill to 1');
+        return;
+      }
+    }
+    
+    if (this.currentOnboardingL3Status === 'Rejected') {
+      if ((this.currentOnboardingL1Status === 'Approved' || this.currentOnboardingL1Status === 'Under Review') &&
+          (this.currentOnboardingL2Status === 'Approved' || this.currentOnboardingL2Status === 'Under Review')) {
+        this.nextSectionToFill = 3;
+        this.currentOnboardingPage = 3;
+        console.log('Section 3 is rejected, setting nextSectionToFill to 3');
+        return; // Exit early
+      } else if (this.currentOnboardingL1Status !== 'Approved' && this.currentOnboardingL1Status !== 'Under Review') {
+        this.nextSectionToFill = 1;
+        this.currentOnboardingPage = 1;
+        console.log('Section 3 is rejected but section 1 is not approved, setting nextSectionToFill to 1');
+        return;
+      } else {
+        this.nextSectionToFill = 2;
+        this.currentOnboardingPage = 2;
+        console.log('Section 3 is rejected but section 2 is not approved, setting nextSectionToFill to 2');
+        return;
+      }
+    }
+
+    // If no rejections, proceed with normal flow
     if (this.currentOnboardingL1Status !== 'Approved' && this.currentOnboardingL1Status !== 'Under Review') {
       this.nextSectionToFill = 1;
     } else if (this.currentOnboardingL2Status !== 'Approved' && this.currentOnboardingL2Status !== 'Under Review') {
@@ -142,21 +183,10 @@ export class SupplierOnboardingStatusComponent {
       this.nextSectionToFill = null;
     }
 
+    // Set the current page based on the next section to fill
+    this.currentOnboardingPage = this.nextSectionToFill;
+    
     console.log('Next section to fill:', this.nextSectionToFill);
-    
-    // Set the current page based on status logic
-    if (this.currentOnboardingL1Status === 'Rejected') {
-      this.currentOnboardingPage = 1;
-    } else if (this.currentOnboardingL2Status === 'Rejected') {
-      this.currentOnboardingPage = 2;
-    } else if (this.currentOnboardingL3Status === 'Rejected') {
-      this.currentOnboardingPage = 3;
-    } else if (this.nextSectionToFill !== null) {
-      this.currentOnboardingPage = this.nextSectionToFill;
-    } else {
-      this.currentOnboardingPage = null;
-    }
-    
     console.log('Current onboarding page:', this.currentOnboardingPage);
   }
 
@@ -185,7 +215,7 @@ export class SupplierOnboardingStatusComponent {
       },
       'Rejected': { 
         status: 'rejected', 
-        progress: 0, 
+        progress: 100, 
         icon: 'pi pi-times-circle', 
         color: 'rejected' 
       }
@@ -233,9 +263,39 @@ export class SupplierOnboardingStatusComponent {
     console.log('Overall progress:', this.overallProgress);
   }
 
+  // Check if there are any rejected sections in the onboarding process
+  hasRejectedSections(): boolean {
+    return this.onboardingSteps.some(step => step.status === 'rejected');
+  }
+
+  // Check if a specific section has a rejected status
+  isSectionRejected(sectionId: number): boolean {
+    return this.onboardingSteps[sectionId - 1].status === 'rejected';
+  }
+
+  // Check if any section before this one is rejected
+  hasRejectedSectionsBefore(sectionId: number): boolean {
+    for (let i = 0; i < sectionId - 1; i++) {
+      if (this.onboardingSteps[i].status === 'rejected') {
+        return true;
+      }
+    }
+    return false;
+  }
+
   continueOnboarding(stepId: number): void {
     console.log('Continue onboarding for step:', stepId);
     
+    // If any sections are rejected, only allow navigation to the rejected section
+    if (this.hasRejectedSections()) {
+      // Find the first rejected section
+      const rejectedSection = this.onboardingSteps.find(step => step.status === 'rejected');
+      if (rejectedSection && stepId !== rejectedSection.id) {
+        console.log('Cannot continue to step', stepId, 'because section', rejectedSection.id, 'is rejected');
+        return; // Don't navigate if trying to go to a non-rejected section
+      }
+    }
+
     // For Under Review status, redirect to the next section for filling
     // For Rejected status, redirect to the same section for re-submission
     if (this.onboardingSteps[stepId - 1].status === 'in-progress') {
@@ -252,15 +312,28 @@ export class SupplierOnboardingStatusComponent {
     } else if (this.onboardingSteps[stepId - 1].status === 'rejected') {
       // If current section is Rejected, redirect to the same section
       console.log('Section is rejected, redirecting to same section');
-      this.router.navigate([`/wefab/supplier/supplier-onboarding-l${stepId}`]);
+      if (stepId === 1) {
+        this.router.navigate(['/wefab/supplier/supplier-onboarding']);
+      } else {
+        this.router.navigate([`/wefab/supplier/supplier-onboarding-l${stepId}`]);
+      }
     } else {
       // Default behavior - go to the selected section
       console.log('Default behavior, going to selected section');
-      this.router.navigate([`/wefab/supplier/supplier-onboarding-l${stepId}`]);
+      if (stepId === 1) {
+        this.router.navigate(['/wefab/supplier/supplier-onboarding']);
+      } else {
+        this.router.navigate([`/wefab/supplier/supplier-onboarding-l${stepId}`]);
+      }
     }
   }
 
   findNextSectionToFill(currentStep: number): number | null {
+    // If any section is rejected, no next section should be available
+    if (this.hasRejectedSections()) {
+      return null;
+    }
+
     // Find the next section that needs to be filled (Not Started or Rejected)
     for (let i = currentStep; i < this.onboardingSteps.length; i++) {
       const step = this.onboardingSteps[i];
@@ -273,9 +346,16 @@ export class SupplierOnboardingStatusComponent {
 
   // Helper method to check if next section is available
   isNextAvailable(currentStepId: number): boolean {
+    // If any section is rejected, no next section should be available
+    if (this.hasRejectedSections()) {
+      return false;
+    }
+    
     // Check if there's a next section that's not completed or in progress
     for (let i = currentStepId; i < this.onboardingSteps.length; i++) {
-      const step = this.onboardingSteps[i - 1]; // Adjust for 0-based array
+      if (i === this.onboardingSteps.length) break; // Prevent out of bounds
+      
+      const step = this.onboardingSteps[i]; // Get actual step
       if (step.status === 'pending' || step.status === 'rejected') {
         return true;
       }
@@ -300,19 +380,23 @@ export class SupplierOnboardingStatusComponent {
     }
   }
 
-  viewDetails(stepId: any): void {
-    console.log('View details for step:', stepId);
+  viewDetails(step: any): void {
+    console.log('View details for step:', step);
     
-    // Navigate to the specific route with mode=edit query parameter
-    if (stepId.id === 1) {
-      console.log('Navigating to L0');
-      this.router.navigate(['/wefab/supplier/supplier-onboarding'], { queryParams: { mode: 'edit' } });
-    } else if (stepId.id === 2) {
-      console.log('Navigating to L2');
-      this.router.navigate(['/wefab/supplier/supplier-onboarding-l2'], { queryParams: { mode: 'edit' } });
-    } else if (stepId.id === 3) {
-      console.log('Navigating to L3');
-      this.router.navigate(['/wefab/supplier/supplier-onboarding-l3'], { queryParams: { mode: 'edit' } });
+    try {
+      // Navigate to the specific route with mode=edit query parameter
+      if (step.id === 1) {
+        console.log('Navigating to L0');
+        this.router.navigate(['/wefab/supplier/supplier-onboarding'], { queryParams: { mode: 'edit' } });
+      } else if (step.id === 2) {
+        console.log('Navigating to L2');
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l2'], { queryParams: { mode: 'edit' } });
+      } else if (step.id === 3) {
+        console.log('Navigating to L3');
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3'], { queryParams: { mode: 'edit' } });
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
     }
   }
 
@@ -323,6 +407,6 @@ export class SupplierOnboardingStatusComponent {
 
   shouldShowProfileReviewButton(): boolean {
     // Show "Go to Profile Review" button if any section is under review
-    return this.onboardingSteps.some(step => step.status === 'in-progress');
+    return this.onboardingSteps.some(step => step.status === 'in-progress' || step.status === 'rejected' || step.status === 'completed' );
   }
 }
