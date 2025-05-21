@@ -51,7 +51,7 @@
         </button>
       </div>
 
-      <!-- Basic Information Tab Content -->
+      <!-- Basic Information Tab Content - Consolidated View -->
       <div class="tab-content" *ngIf="activeLevelTab === 'basic'">
         <div class="section-header">
           <h2>Basic Information</h2>
@@ -68,163 +68,158 @@
           </div>
         </div>
 
-        <!-- Add horizontal tab navigation for Basic Information - remove Manufacturing Overview and Documentation tabs -->
-        <div class="basic-info-tabs">
-          <a href="javascript:void(0)" class="basic-tab" [class.active]="basicInfoTab === 'company'"
-            (click)="changeBasicInfoTab('company')">Company Details</a>
-          <a href="javascript:void(0)" class="basic-tab" [class.active]="basicInfoTab === 'contact'"
-            (click)="changeBasicInfoTab('contact')">Contact Information</a>
-          <a href="javascript:void(0)" class="basic-tab" [class.active]="basicInfoTab === 'companyDocuments'"
-            (click)="changeBasicInfoTab('companyDocuments')">Company Documents</a>
-        </div>
-
-        <!-- Company Details Tab Content -->
-        <div class="basic-tab-content" *ngIf="basicInfoTab === 'company'">
-          <div class="review-info-container">
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Legal Business Name </div>
-                <div class="field-value">{{ getCompanyProfile.company_name }}</div>
-              </div>
-              <div class="review-col">
-                <div class="field-label">GSTIN </div>
-                <div class="field-value">{{ getCompanyProfile.gstinNumber }}</div>
-              </div>
+        <!-- Combined Basic Information Content -->
+        <div class="consolidated-info">
+          <!-- Company Profile Section -->
+          <div class="info-section">
+            <div class="info-section-header">
+              <h3><i class="pi pi-building"></i> Company Details</h3>
             </div>
-
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Country</div>
-                <div class="field-value">{{ getCompanyProfile.country }}</div>
-              </div>
-              <div class="review-col">
-                <div class="field-label">State </div>
-                <div class="field-value">{{ getCompanyProfile.state }}</div>
-              </div>
-            </div>
-
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">City </div>
-                <div class="field-value">{{ getCompanyProfile.city }}</div>
-              </div>
-              <div class="review-col">
-                <div class="field-label">Registered Address </div>
-                <div class="field-value">{{ getCompanyProfile.registeredAddress.fullAddress }}</div>
+            <div class="info-section-content">
+              <div class="info-grid">
+                <div class="info-card">
+                  <div class="info-label">Legal Business Name</div>
+                  <div class="info-value">{{ getCompanyProfile.company_name }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">GSTIN</div>
+                  <div class="info-value">{{ getCompanyProfile.gstinNumber }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Country</div>
+                  <div class="info-value">{{ getCompanyProfile.country }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">State</div>
+                  <div class="info-value">{{ getCompanyProfile.state }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">City</div>
+                  <div class="info-value">{{ getCompanyProfile.city }}</div>
+                </div>
+                <div class="info-card info-card-large">
+                  <div class="info-label">Registered Address</div>
+                  <div class="info-value">{{ getCompanyProfile.registeredAddress.fullAddress }}</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-
-        <!-- Contact Information Tab Content -->
-        <div class="basic-tab-content" *ngIf="basicInfoTab === 'contact'">
-          <div class="review-info-container">
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Primary Contact Name </div>
-                <div class="field-value">{{ getCompanyProfile.primaryContactName }}</div>
-              </div>
-              <div class="review-col">
-                <div class="field-label">Phone Number </div>
-                <div class="field-value">{{ getCompanyProfile.phoneNumber }}</div>
-              </div>
+          
+          <!-- Contact Information Section -->
+          <div class="info-section">
+            <div class="info-section-header">
+              <h3><i class="pi pi-user"></i> Contact Information</h3>
             </div>
-
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Primary Manufacturing Process</div>
-                <div class="field-value tags-container">
-                  <!-- If it's a single string -->
-                  <span class="process-tag" *ngIf="!isArray(getCompanyProfile.primaryManufacturingProcess)">
-                    {{ formatProcessName(getCompanyProfile.primaryManufacturingProcess) }}
-                  </span>
-
-                  <!-- If it's an array of strings -->
-                  <ng-container *ngIf="isArray(getCompanyProfile.primaryManufacturingProcess)">
-                    <span class="process-tag" *ngFor="let process of getCompanyProfile.primaryManufacturingProcess">
-                      {{ formatProcessName(process) }}
+            <div class="info-section-content">
+              <div class="info-grid">
+                <div class="info-card">
+                  <div class="info-label">Primary Contact Name</div>
+                  <div class="info-value">{{ getCompanyProfile.primaryContactName }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Phone Number</div>
+                  <div class="info-value">{{ getCompanyProfile.phoneNumber }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Email</div>
+                  <div class="info-value">{{ getCompanyProfile.primary_email_id }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Website URL</div>
+                  <div class="info-value">
+                    <a [href]="getCompanyProfile.websiteURL" target="_blank" rel="noopener noreferrer">{{ getCompanyProfile.websiteURL }}</a>
+                  </div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">LinkedIn URL</div>
+                  <div class="info-value">
+                    <a [href]="getCompanyProfile.linkedinURL" target="_blank" rel="noopener noreferrer">{{ getCompanyProfile.linkedinURL }}</a>
+                  </div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Primary Manufacturing Process</div>
+                  <div class="info-value tags-container">
+                    <!-- If it's a single string -->
+                    <span class="process-tag" *ngIf="!isArray(getCompanyProfile.primaryManufacturingProcess)">
+                      {{ formatProcessName(getCompanyProfile.primaryManufacturingProcess) }}
                     </span>
-                  </ng-container>
-                </div>
-              </div>
-              <div class="review-col">
-                <div class="field-label">Email</div>
-                <div class="field-value">{{ getCompanyProfile.primary_email_id }}</div>
-              </div>
-            </div>
 
-            <div class="review-row">
-              <div class="review-col">
-                <div class="field-label">Website URL</div>
-                <div class="field-value">
-                  <a [href]="getCompanyProfile.websiteURL" target="_blank" rel="noopener noreferrer">{{ getCompanyProfile.websiteURL }}</a>
-                </div>
-              </div>
-              <div class="review-col">
-                <div class="field-label">LinkedIn URL</div>
-                <div class="field-value">
-                  <a [href]="getCompanyProfile.linkedinURL" target="_blank" rel="noopener noreferrer">{{ getCompanyProfile.linkedinURL }}</a>
+                    <!-- If it's an array of strings -->
+                    <ng-container *ngIf="isArray(getCompanyProfile.primaryManufacturingProcess)">
+                      <span class="process-tag" *ngFor="let process of getCompanyProfile.primaryManufacturingProcess">
+                        {{ formatProcessName(process) }}
+                      </span>
+                    </ng-container>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Company Documents Tab Content   -->
-        <div class="basic-tab-content" *ngIf="basicInfoTab === 'companyDocuments'">
-          <div class="documents-container">
-            <div class="document-cards-row">
-              <div class="document-card" *ngFor="let document of getCompanyProfile.companyDocuments">
-                <div class="document-preview">
-                  <!-- Document action buttons -->
-                  <div class="document-actions">
-                    <button class="action-button view-button" (click)="viewDocument(document.url, $event)">
-                      <i class="pi pi-eye"></i>
-                    </button>
-                    <button class="action-button download-button" (click)="downloadDocument(document.url, $event)">
-                      <i class="pi pi-download"></i>
-                    </button>
-                  </div>
-                  
-                  <!-- Image files -->
-                  <img *ngIf="isImageFile(document.url)" [src]="document.url" [alt]="document.make" class="document-image">
-                  
-                  <!-- PDF files -->
-                  <div *ngIf="isPdfFile(document.url)" class="document-icon pdf-icon">
-                    <div class="pdf-thumbnail">
-                      <i class="pi pi-file-pdf" style="font-size: 3rem; color: #e74c3c;"></i>
-                      <span class="file-extension">PDF</span>
+          
+          <!-- Company Documents Section -->
+          <div class="info-section">
+            <div class="info-section-header">
+              <h3><i class="pi pi-file"></i> Company Documents</h3>
+            </div>
+            <div class="info-section-content">
+              <div class="documents-gallery">
+                <div class="document-card" *ngFor="let document of getCompanyProfile.companyDocuments">
+                  <div class="document-preview">
+                    <!-- Document action buttons -->
+                    <div class="document-actions">
+                      <button class="action-button view-button" (click)="viewDocument(document.url, $event)" title="View">
+                        <i class="pi pi-eye"></i>
+                      </button>
+                      <button class="action-button download-button" (click)="downloadDocument(document.url, $event)" title="Download">
+                        <i class="pi pi-download"></i>
+                      </button>
+                    </div>
+                    
+                    <!-- Image files -->
+                    <img *ngIf="isImageFile(document.url)" [src]="document.url" [alt]="document.make" class="document-image">
+                    
+                    <!-- PDF files -->
+                    <div *ngIf="isPdfFile(document.url)" class="document-icon pdf-icon">
+                      <div class="pdf-thumbnail">
+                        <i class="pi pi-file-pdf" style="font-size: 3rem; color: #e74c3c;"></i>
+                        <span class="file-extension">PDF</span>
+                      </div>
+                    </div>
+                    
+                    <!-- DOC/DOCX files -->
+                    <div *ngIf="isDocFile(document.url)" class="document-icon doc-icon">
+                      <div class="doc-thumbnail">
+                        <i class="pi pi-file-word" style="font-size: 3rem; color: #2980b9;"></i>
+                        <span class="file-extension">DOC</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Other file types -->
+                    <div *ngIf="isOtherFile(document.url)" class="document-icon other-icon">
+                      <div class="other-thumbnail">
+                        <i class="pi pi-file" style="font-size: 3rem; color: #7f8c8d;"></i>
+                        <span class="file-extension">FILE</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Upload progress indicator (shown during upload) -->
+                    <div class="upload-progress-container" *ngIf="document.uploading">
+                      <div class="progress-text">Uploading... {{document.progress || 0}}%</div>
+                      <div class="progress-bar-container">
+                        <div class="progress-bar" [style.width.%]="document.progress || 0"></div>
+                      </div>
                     </div>
                   </div>
-                  
-                  <!-- DOC/DOCX files -->
-                  <div *ngIf="isDocFile(document.url)" class="document-icon doc-icon">
-                    <div class="doc-thumbnail">
-                      <i class="pi pi-file-word" style="font-size: 3rem; color: #2980b9;"></i>
-                      <span class="file-extension">DOC</span>
-                    </div>
-                  </div>
-                  
-                  <!-- Other file types -->
-                  <div *ngIf="isOtherFile(document.url)" class="document-icon other-icon">
-                    <div class="other-thumbnail">
-                      <i class="pi pi-file" style="font-size: 3rem; color: #7f8c8d;"></i>
-                      <span class="file-extension">FILE</span>
-                    </div>
-                  </div>
-                  
-                  <!-- Upload progress indicator (shown during upload) -->
-                  <div class="upload-progress-container" *ngIf="document.uploading">
-                    <div class="progress-text">Uploading... {{document.progress || 0}}%</div>
-                    <div class="progress-bar-container">
-                      <div class="progress-bar" [style.width.%]="document.progress || 0"></div>
-                    </div>
+                  <div class="document-info">
+                    <div class="document-name">{{getDocumentName(document.url)}}</div>
+                    <div class="document-type">{{getDocumentType(document.url)}}</div>
                   </div>
                 </div>
-                <div class="document-info">
-                  <div class="document-name">{{getDocumentName(document.url)}}</div>
-                  <div class="document-type">{{getDocumentType(document.url)}}</div>
+                
+                <!-- No documents message -->
+                <div class="no-documents-message" *ngIf="!getCompanyProfile.companyDocuments || getCompanyProfile.companyDocuments.length === 0">
+                  <i class="pi pi-file-excel no-docs-icon"></i>
+                  <p>No company documents uploaded yet.</p>
                 </div>
               </div>
             </div>
