@@ -317,7 +317,7 @@
               <div class="manufacturing-grid">
                 <div class="manufacturing-card" *ngFor="let machine of manufacturingData.machines">
                   <div class="manufacturing-image-container">
-                    <img [src]="machine.machinePhotos.url" 
+                    <img [src]="isArray(machine.machinePhotos) ? machine.machinePhotos[0].url : machine.machinePhotos.url"
                         [alt]="machine.make" 
                         class="manufacturing-image"
                         loading="lazy">

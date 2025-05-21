@@ -317,6 +317,9 @@ export class SupplierProfileReviewComponent implements OnInit {
   updateRequestLevel: string = '';
   updateRequestComment: string = '';
 
+  // Add isArray method for use in the template
+  isArray = Array.isArray;
+
   constructor(
     private router: Router,
     private messageService: MessageService,
@@ -675,10 +678,6 @@ export class SupplierProfileReviewComponent implements OnInit {
           }
         }
 
-        isArray(value: any): boolean {
-          return Array.isArray(value);
-        }
-        
         formatProcessName(process: string): string {
           // Convert snake_case or kebab-case to Title Case
           return process

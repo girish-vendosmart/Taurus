@@ -338,7 +338,7 @@ export class SupplierOnboardingL2Component implements OnInit {
         size: 0,
         type: fileType,
         lastModified: Date.now(),
-        url: fileData
+        url: fileData,
       };
     } else if (typeof fileData === 'object') {
       // For file objects
@@ -347,7 +347,8 @@ export class SupplierOnboardingL2Component implements OnInit {
         size: fileData.size || 0,
         type: fileData.type || fileData.fileType || this.getFileTypeFromUrl(fileData.name || 'document'),
         lastModified: fileData.lastModified || Date.now(),
-        url: fileData.url || fileData.file_url || ''
+        url: fileData.url || fileData.file_url || '',
+        file_id: fileData.file_id || ''
       };
     }
     
@@ -902,7 +903,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       //   severity: 'error',
       //   summary: 'Submission Error',
       //   detail: err.error?.message || 'An error occurred while submitting the form. Please try again later.',
-      //   life: 5000
+      //   life: 5000 
       // });
     });
   }
