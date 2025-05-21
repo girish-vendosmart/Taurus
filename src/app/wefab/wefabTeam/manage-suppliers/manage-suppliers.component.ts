@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -18,6 +18,7 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { SweetAlertService } from '../../shared/sweet-alert.service'
 
 interface Supplier {
   name: string;
@@ -165,6 +166,7 @@ interface Supplier {
                              [(ngModel)]="invitedFilters.status" (input)="applyInvitedFilters()">
                     </div>
                   </th>
+                  <th class="actions-column">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -179,6 +181,10 @@ interface Supplier {
                   </td>
                   <td>
                     <span class="status-badge status-pending">Invited</span>
+                  </td>
+                  <td class="actions-column">
+                    <button pButton type="button" icon="pi pi-send" class="menu-button" title="Resend Invitation"
+                      (click)="resendInvitation(invite)"></button>
                   </td>
                 </tr>
               </tbody>
@@ -790,5 +796,9 @@ export class ManageSuppliersComponent implements OnInit {
   viewSupplierProfile(supplier: Supplier) {
     sessionStorage.setItem('supplier_id', supplier.name);
     this.router.navigate(['/wefab/supplier/profile-review']);
+  }
+
+  resendInvitation(invite: any) {
+    // this.sweetAlert.success('Invitation resent successfully');
   }
 } 
