@@ -1774,10 +1774,6 @@
         &.pi-exclamation-triangle {
           color: #f59e0b;
         }
-        
-        &.pi-times-circle {
-          color: $safety-orange;
-        }
       }
       
       span {
@@ -2828,5 +2824,242 @@
   i {
     font-size: 0.85rem;
     color: $blueprint-blue;
+  }
+}
+
+/* Add these styles to create the dropdown menu for the kebab menu */
+
+.level-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tab-actions {
+  position: relative;
+  margin-left: 10px;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-actions .pi-ellipsis-v {
+  font-size: 1.2rem;
+  color: #555;
+  transition: color 0.2s ease;
+}
+
+.tab-actions .pi-ellipsis-v:hover {
+  color: #2196F3;
+}
+
+.tab-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  overflow: hidden;
+  display: none;
+}
+
+/* Show dropdown on hover as backup */
+.tab-actions:hover .tab-dropdown,
+.tab-actions:focus .tab-dropdown,
+.tab-actions:focus-within .tab-dropdown {
+  display: block;
+}
+
+/* Show dropdown when visible class is applied through click */
+.tab-dropdown.visible {
+  display: block;
+}
+
+.dropdown-item {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-item i {
+  margin-right: 8px;
+  font-size: 1rem;
+}
+
+.dropdown-item .pi-check-circle {
+  color: #4CAF50;
+}
+
+.dropdown-item .pi-times-circle {
+  color: #F44336;
+}
+
+.dropdown-item .pi-sync {
+  color: #FF9800;
+}
+
+/* Update Request Dialog Styles */
+.update-request-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100; /* Higher than other elements */
+}
+
+.update-request-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.update-request-content {
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  z-index: 1101; /* Above the overlay */
+  animation: slide-in 0.3s ease;
+}
+
+.update-request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: $blueprint-blue;
+  color: white;
+  
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  
+  .close-dialog {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+.update-request-body {
+  padding: 20px 16px;
+  
+  p {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: $precision-black;
+  }
+  
+  .update-comment-textarea {
+    width: 100%;
+    border: 1px solid $material-finish-silver;
+    border-radius: 4px;
+    padding: 12px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+    
+    &:focus {
+      outline: none;
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 2px rgba($blueprint-blue, 0.2);
+    }
+  }
+}
+
+.update-request-footer {
+  padding: 12px 16px;
+  background-color: $technical-white;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid $material-finish-silver;
+  
+  .btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    &.btn-cancel {
+      background-color: white;
+      border: 1px solid $material-finish-silver;
+      color: $machine-gray;
+      
+      &:hover {
+        background-color: $technical-white;
+        border-color: $machine-gray;
+      }
+    }
+    
+    &.btn-submit {
+      background-color: $blueprint-blue;
+      border: 1px solid $blueprint-blue;
+      color: white;
+      
+      &:hover {
+        background-color: darken($blueprint-blue, 5%);
+      }
+      
+      &:disabled {
+        background-color: lighten($blueprint-blue, 20%);
+        border-color: lighten($blueprint-blue, 20%);
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }

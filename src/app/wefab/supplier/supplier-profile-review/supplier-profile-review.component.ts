@@ -1,5 +1,6 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
@@ -54,6 +55,7 @@ interface ActivityLogItem {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ButtonModule,
     ToastModule,
     RippleModule,
@@ -303,6 +305,18 @@ export class SupplierProfileReviewComponent implements OnInit {
     return Math.round(total / 3);
   }
   
+  // Add this property to track which dropdown is visible
+  dropdownVisible: { [key: string]: boolean } = {
+    'L1': false,
+    'L2': false,
+    'L3': false
+  };
+
+  // Add these properties to the component
+  showUpdateDialog: boolean = false;
+  updateRequestLevel: string = '';
+  updateRequestComment: string = '';
+
   constructor(
     private router: Router,
     private messageService: MessageService,
@@ -314,6 +328,15 @@ export class SupplierProfileReviewComponent implements OnInit {
     this.getL1Data(this.supplierId)
     this.getDocumentSummary(this.supplierId)
     this.getL1DocumentSummary(this.supplierId)
+    
+    // Add click listener to close dropdowns when clicking outside
+    if (this.isBrowser) {
+      document.addEventListener('click', () => {
+        Object.keys(this.dropdownVisible).forEach(key => {
+          this.dropdownVisible[key] = false;
+        });
+      });
+    }
   }
 
   ngOnInit(): void {
@@ -767,6 +790,32 @@ export class SupplierProfileReviewComponent implements OnInit {
           });
         }
 
+        requestUpdate(level: string) {
+          let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
+          let payload = {
+            "onboarding_status": "Update Required"
+          };
+          this.commonservice.putData(endPoint, payload).subscribe({
+            next: (res: any) => {
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: level === 'L1' ? 'Basic Information update has been requested' : level === 'L2' ? 'Manufacturing Capabilities update has been requested' : 'Financial & Additional update has been requested',
+                life: 3000
+              });
+              this.getStatusForm(level, this.supplierId)
+            },
+            error: (error) => {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: level === 'L1' ? 'Failed to request update for Basic Information' : level === 'L2' ? 'Failed to request update for Manufacturing Capabilities' : 'Failed to request update for Financial & Additional',
+                life: 3000
+              });
+            }
+          });
+        }
+
   /**
    * View a document in the preview overlay
    */
@@ -857,7 +906,7 @@ export class SupplierProfileReviewComponent implements OnInit {
   loadActivityTrail(): void {
     // In a real implementation, you'd fetch from API
     // For now, using mock data from the provided format
-    this.commonservice.getData(`/api/method/proq_buyer.wefab.api.supplier.activity.get_activity_trail?supplier_company_id=${this.supplierId}`)
+    this.commonservice.getData(`/api/method/proq_buyer.api.core.versioning.get_new_versions_trail?doctype=wfb_supplier_onboarding_L1&docname=${this.supplierId}`)
       .subscribe({
         next: (res: any) => {
           if (res && res.message && Array.isArray(res.message)) {
@@ -1051,5 +1100,78 @@ export class SupplierProfileReviewComponent implements OnInit {
       default:
         return 'pi-info-circle';
     }
+  }
+
+  // Add this method to toggle dropdown visibility
+  toggleDropdown(level: string, event: Event): void {
+    event.stopPropagation();
+    // Close all other dropdowns
+    Object.keys(this.dropdownVisible).forEach(key => {
+      if (key !== level) {
+        this.dropdownVisible[key] = false;
+      }
+    });
+    // Toggle the current dropdown
+    this.dropdownVisible[level] = !this.dropdownVisible[level];
+  }
+
+  // Add these methods to the component
+  showUpdateRequestDialog(level: string): void {
+    // Close any open dropdowns
+    Object.keys(this.dropdownVisible).forEach(key => {
+      this.dropdownVisible[key] = false;
+    });
+    
+    this.updateRequestLevel = level;
+    this.updateRequestComment = '';
+    this.showUpdateDialog = true;
+  }
+
+  cancelUpdateRequest(): void {
+    this.showUpdateDialog = false;
+    this.updateRequestLevel = '';
+    this.updateRequestComment = '';
+  }
+
+  sendUpdateRequest(): void {
+    if (!this.updateRequestComment.trim()) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please provide a comment for the update request',
+        life: 3000
+      });
+      return;
+    }
+    
+    const level = this.updateRequestLevel;
+    let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
+    let payload = {
+      "onboarding_status": "Update Required",
+      "update_request_comment": this.updateRequestComment
+    };
+    
+    this.commonservice.putData(endPoint, payload).subscribe({
+      next: (res: any) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: level === 'L1' ? 'Basic Information update has been requested' : level === 'L2' ? 'Manufacturing Capabilities update has been requested' : 'Financial & Additional update has been requested',
+          life: 3000
+        });
+        this.getStatusForm(level, this.supplierId);
+        this.showUpdateDialog = false;
+        this.updateRequestLevel = '';
+        this.updateRequestComment = '';
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: level === 'L1' ? 'Failed to request update for Basic Information' : level === 'L2' ? 'Failed to request update for Manufacturing Capabilities' : 'Failed to request update for Financial & Additional',
+          life: 3000
+        });
+      }
+    });
   }
 } 
