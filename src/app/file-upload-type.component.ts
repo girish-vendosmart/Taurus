@@ -880,6 +880,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     // Now actually perform the upload
     this.commonService.uploadFileWithProgress(formData).subscribe({
       next: (event: any) => {
+        debugger
         console.log('event', event)
         // We're mostly ignoring server progress events since they're unreliable
         // Just log for debugging
@@ -911,8 +912,8 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
                 fileUrl = event.body.message;
               }
 
-              if(event.body.message && event.body.message.name) {
-                fileId = event.body.message.name;
+              if(event.body.message && event.body.message.file_id) {
+                fileId = event.body.message.file_id;
               }
             }
           } catch (err) {
@@ -1140,4 +1141,6 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
   isImageFile(mimeType: string): boolean {
     return mimeType.startsWith('image/');
   }
+
+  
 }
