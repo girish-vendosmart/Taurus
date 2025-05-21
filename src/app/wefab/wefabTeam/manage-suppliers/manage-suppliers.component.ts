@@ -520,6 +520,7 @@ interface Supplier {
   `]
 })
 export class ManageSuppliersComponent implements OnInit {
+  private sweetAlert = inject(SweetAlertService);
   suppliers: Supplier[] = [];
   invitedSuppliers: any[] = [];
   filteredSuppliers: Supplier[] = [];
@@ -799,6 +800,16 @@ export class ManageSuppliersComponent implements OnInit {
   }
 
   resendInvitation(invite: any) {
-    // this.sweetAlert.success('Invitation resent successfully');
+    this.sweetAlert.confirm(
+      '',
+      'Are you sure you want to resend the invitation to supplier?',
+      'question',
+      'Yes',
+      'No'
+    ).then((result:any) => {
+      if (result.isConfirmed) {
+        this.sweetAlert.success('Invitation resent successfully');
+      }
+    });
   }
 } 
