@@ -26,6 +26,9 @@ interface Supplier {
   primary_phone_number: string;
   onboarding_status: string;
   company_profile: string;
+  project_type?: string;
+  location?: string;
+  created_at?: string;
 }
 
 @Component({
@@ -59,7 +62,6 @@ interface Supplier {
         <button pButton label="Invite Vendor" icon="pi pi-plus" class="p-button-primary" (click)="showInviteDialog()"></button>
       </div>
 
-      <div class="card">
         <p-tabView>
           <p-tabPanel header="Active Suppliers">
             <table class="suppliers-table">
@@ -95,13 +97,12 @@ interface Supplier {
                              [(ngModel)]="filters.status" (input)="applyFilters()">
                     </div>
                   </th>
-                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let supplier of filteredSuppliers">
                   <td>
-                    <div>{{ supplier.company_name }}</div>
+                  <div class="project-name" (click)="viewSupplierProfile(supplier)">{{ supplier.company_name }}</div>
                     <div class="sub-id">{{ supplier.name }}</div>
                   </td>
                   <td>
@@ -112,13 +113,6 @@ interface Supplier {
                     <span class="status-badge" [ngClass]="getStatusClass(supplier.onboarding_status)">
                       {{ supplier.onboarding_status }}
                     </span>
-                  </td>
-                  <td class="actions-column">
-                    <button type="button" 
-                            class="menu-button"
-                            (click)="actionMenu.toggle($event); selectedSupplier = supplier">
-                      <i class="pi pi-ellipsis-v"></i>
-                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -134,10 +128,6 @@ interface Supplier {
                 <button pButton type="button" label="1" class="p-button-sm p-button-primary"></button>
                 <button pButton type="button" icon="pi pi-angle-right" class="p-button-text p-button-sm"></button>
                 <button pButton type="button" icon="pi pi-angle-double-right" class="p-button-text p-button-sm"></button>
-              </div>
-              <div class="page-size">
-                <span>10</span>
-                <i class="pi pi-chevron-down"></i>
               </div>
             </div>
           </p-tabPanel>
@@ -166,30 +156,29 @@ interface Supplier {
                     </div>
                   </th>
                   <th>
-                    <div class="header-cell">
+                    <div class="header-cell" (click)="sortInvited('status')">
                       <span>Status</span>
-                      <i class="pi pi-sort-alt"></i>
+                      <i class="pi" [ngClass]="getSortIconInvited('status')"></i>
+                    </div>
+                    <div class="filter-row">
+                      <input pInputText type="text" placeholder="Search Status" class="search-input"
+                             [(ngModel)]="invitedFilters.status" (input)="applyInvitedFilters()">
                     </div>
                   </th>
-                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let invite of filteredInvitedSuppliers">
                   <td>
-                    <div>{{ invite.company_name }}</div>
-                    <div class="sub-id">{{ invite.name }}</div>
+                    <div class="project-name">{{ invite.company_name }}</div>
+                    <div class="sub-id">{{ invite.supplier_name }}</div>
                   </td>
                   <td>
                     <div>{{ invite.supplier_email_id }}</div>
+                    <div class="sub-id">{{ invite.creation }}</div>
                   </td>
-                  <td><span class="status-badge status-pending">Invited</span></td>
-                  <td class="actions-column">
-                    <button type="button" 
-                            class="menu-button"
-                            (click)="inviteActionMenu.toggle($event); selectedInvite = invite">
-                      <i class="pi pi-ellipsis-v"></i>
-                    </button>
+                  <td>
+                    <span class="status-badge status-pending">Invited</span>
                   </td>
                 </tr>
               </tbody>
@@ -206,14 +195,9 @@ interface Supplier {
                 <button pButton type="button" icon="pi pi-angle-right" class="p-button-text p-button-sm"></button>
                 <button pButton type="button" icon="pi pi-angle-double-right" class="p-button-text p-button-sm"></button>
               </div>
-              <div class="page-size">
-                <span>10</span>
-                <i class="pi pi-chevron-down"></i>
-              </div>
             </div>
           </p-tabPanel>
         </p-tabView>
-      </div>
     </div>
 
     <!-- Action menus -->
@@ -279,7 +263,7 @@ interface Supplier {
   `,
   styles: [`
     .suppliers-container {
-      padding: 1.5rem;
+      padding: 1.2rem;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
@@ -287,20 +271,21 @@ interface Supplier {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.2rem;
     }
 
     .header h1 {
-      font-size: 1.75rem;
+      font-size: 1.6rem;
       font-weight: 600;
       color: #333;
       margin: 0;
     }
 
     .card {
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      background-color: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      overflow: hidden;
     }
 
     .suppliers-table {
@@ -312,16 +297,28 @@ interface Supplier {
     .suppliers-table th {
       background: #f8f9fa;
       font-weight: 600;
-      padding: 10px 16px;
+      padding: 10px 12px;
       text-align: left;
       color: #495057;
       border: 1px solid #e0e0e0;
     }
 
     .suppliers-table td {
-      padding: 12px 16px;
+      padding: 10px 12px;
       border: 1px solid #e0e0e0;
       vertical-align: middle;
+      text-align: left;
+    }
+
+    .project-name {
+      color: #2563eb;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .project-name:hover {
+      text-decoration: underline;
     }
 
     .header-cell {
@@ -340,7 +337,7 @@ interface Supplier {
       font-size: 0.85rem;
       padding: 6px;
       border-radius: 4px;
-      margin-top: 6px;
+      margin-top: 5px;
     }
 
     .status-badge {
@@ -353,8 +350,8 @@ interface Supplier {
     }
 
     .status-active {
-      background-color: #e7f9ee;
-      color: #1a9b61;
+      background-color: #e8f5e9;
+      color: #1b9b62;
     }
 
     .status-pending {
@@ -368,6 +365,11 @@ interface Supplier {
     }
 
     .status-inprogress {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .status-review {
       background-color: #fff3cd;
       color: #856404;
     }
@@ -393,6 +395,7 @@ interface Supplier {
       cursor: pointer;
       color: #6c757d;
       border-radius: 4px;
+      margin: 0;
     }
 
     .menu-button:hover {
@@ -406,14 +409,17 @@ interface Supplier {
     .sub-id {
       color: #888;
       font-size: 0.85em;
+      text-align: left;
+      margin-top: 3px;
     }
 
     .pagination-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-top: 1px solid #e0e0e0;
+      background-color: #f8f9fa;
     }
 
     .pagination-info {
@@ -424,32 +430,25 @@ interface Supplier {
     .pagination-controls {
       display: flex;
       align-items: center;
+      gap: 4px;
     }
 
     .pagination-controls button {
       margin: 0 2px;
     }
 
-    .page-size {
-      display: flex;
-      align-items: center;
-      padding: 6px 12px;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .page-size span {
-      margin-right: 5px;
+    .pagination-controls .p-button-primary {
+      background-color: #3b82f6;
+      border-color: #3b82f6;
     }
 
     .invite-form .field {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.2rem;
     }
 
     .invite-form .field label {
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       font-weight: 500;
     }
 
@@ -467,7 +466,7 @@ interface Supplier {
       display: flex;
       justify-content: flex-end;
       gap: 0.5rem;
-      margin-top: 2rem;
+      margin-top: 1.5rem;
     }
 
     /* Custom menu styling to match screenshot */
@@ -480,7 +479,7 @@ interface Supplier {
     }
     
     :host ::ng-deep .custom-menu .p-menuitem-link {
-      padding: 0.75rem 1rem !important;
+      padding: 0.7rem 1rem !important;
     }
     
     :host ::ng-deep .custom-menu .p-menuitem-icon {
@@ -495,6 +494,22 @@ interface Supplier {
     
     :host ::ng-deep .custom-menu .p-menuitem-link:hover {
       background-color: #f8f9fa !important;
+    }
+
+    /* PrimeNG component overrides for better alignment */
+    :host ::ng-deep .p-tabview .p-tabview-nav {
+      justify-content: flex-start;
+    }
+
+    :host ::ng-deep .p-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Add some breathing room between rows */
+    .suppliers-table tr:hover {
+      background-color: #f5f9ff;
     }
   `]
 })
@@ -530,7 +545,8 @@ export class ManageSuppliersComponent implements OnInit {
   
   invitedFilters = {
     company: '',
-    contact: ''
+    contact: '',
+    status: ''
   };
 
   // References to menu components
@@ -699,9 +715,10 @@ export class ManageSuppliersComponent implements OnInit {
       return (
         (this.invitedFilters.company === '' || 
           invite.company_name.toLowerCase().includes(this.invitedFilters.company.toLowerCase()) || 
-          (invite.name && invite.name.toLowerCase().includes(this.invitedFilters.company.toLowerCase()))) &&
+          (invite.supplier_name && invite.supplier_name.toLowerCase().includes(this.invitedFilters.company.toLowerCase()))) &&
         (this.invitedFilters.contact === '' || 
-          invite.supplier_email_id.toLowerCase().includes(this.invitedFilters.contact.toLowerCase()))
+          invite.supplier_email_id.toLowerCase().includes(this.invitedFilters.contact.toLowerCase())) &&
+        (this.invitedFilters.status === '' || 'invited'.includes(this.invitedFilters.status.toLowerCase()))
       );
     });
     this.sortInvitedSuppliers();
@@ -731,6 +748,8 @@ export class ManageSuppliersComponent implements OnInit {
       return 'status-completed';
     } else if (status.includes('progress')) {
       return 'status-inprogress';
+    } else if (status.includes('review')) {
+      return 'status-review';
     } else if (status.includes('reject') || status.includes('declined')) {
       return 'status-rejected';
     }
