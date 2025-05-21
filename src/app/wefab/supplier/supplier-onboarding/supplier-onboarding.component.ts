@@ -1096,7 +1096,7 @@ export class SupplierOnboardingComponent implements OnInit {
           label: 'Company Documents',
           description: 'Upload documents that will help us evaluate your profile more accurately and expedite decision-making',
           required: true,
-          acceptedTypes: '.png,.jpg,.jpeg,.pdf,.doc,.docx',
+          acceptedTypes: '.pdf',
           multiple: true
         },
         validation: {

@@ -65,9 +65,9 @@ export class SupplierProfileReviewComponent implements OnInit {
   // Level tabs and section tabs
   activeLevelTab: string = 'basic'; // 'basic', 'manufacturing', 'financial'
   activeTab: string = 'revenue'; // 'revenue', 'credit', 'compliance', etc.
+  // Removing basicInfoTab as we'll now show all info in one view
   basicInfoTab: string = 'company'; // Only 'company' and 'contact' now
-  manufacturingTab: string = 'machines'; // 'machines', 'facility', 
-  // 'certifications', 'capacity'
+  manufacturingTab: string = 'machines'; // 'machines', 'facility', 'certifications', 'capacity'
 
   // Financial Tab
   financialTab: string = 'financial'; // 'financial', 'additional'
@@ -195,14 +195,6 @@ export class SupplierProfileReviewComponent implements OnInit {
       const tab = urlParams.get('tab');
       if (tab) {
         this.changeLevelTab(tab);
-      }
-      
-      // Check for secondary tab in URL
-      const secondaryTab = urlParams.get('secondaryTab');
-      if (secondaryTab && this.activeLevelTab === 'basic') {
-        if (secondaryTab === 'company' || secondaryTab === 'contact') {
-          this.changeBasicInfoTab(secondaryTab);
-        }
       }
       
       // Check for manufacturing tab
