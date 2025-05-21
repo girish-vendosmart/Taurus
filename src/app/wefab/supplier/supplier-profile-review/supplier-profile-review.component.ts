@@ -25,6 +25,30 @@ interface CompletionStatus {
   financialAdditional: number;
 }
 
+// New interface for activity trail
+interface ActivityItem {
+  id: string;
+  date: Date;
+  action: 'Approved' | 'Rejected' | 'Updated' | 'Submitted' | 'Created';
+  title: string;
+  description: string;
+  user: string;
+  level?: string;
+  section?: string;
+  time_since?: string;
+}
+
+// New interface for activity trail based on the provided data format
+interface ActivityLogItem {
+  name: number;
+  user: string;
+  creation: string;
+  time_since: string;
+  data: {
+    changed: string[];
+  };
+}
+
 @Component({
   selector: 'app-supplier-profile-review',
   standalone: true,
@@ -139,6 +163,111 @@ export class SupplierProfileReviewComponent implements OnInit {
   previewDocument: string | null = null;
   registeredLng: any;
   registeredLat: any;
+  
+  // Activity Trail UI state
+  showActivityTrail: boolean = false;
+  
+  // Sample activity trail data - in real implementation, this would be loaded from an API
+  activityTrail: ActivityItem[] = [
+    {
+      id: '1',
+      date: new Date(2023, 11, 20, 15, 30),
+      action: 'Created',
+      title: 'Profile Created',
+      description: 'Supplier profile was created in the system',
+      user: 'Rajesh Kumar'
+    },
+    {
+      id: '2',
+      date: new Date(2023, 11, 21, 10, 15),
+      action: 'Submitted',
+      title: 'Basic Information Submitted',
+      description: 'L1: Basic company information was submitted for review',
+      user: 'Rajesh Kumar',
+      level: 'L1',
+      section: 'Basic Information'
+    },
+    {
+      id: '3',
+      date: new Date(2023, 11, 22, 11, 45),
+      action: 'Approved',
+      title: 'Basic Information Approved',
+      description: 'L1: Basic company information was approved',
+      user: 'WeFab Admin',
+      level: 'L1',
+      section: 'Basic Information'
+    },
+    {
+      id: '4',
+      date: new Date(2023, 11, 25, 9, 30),
+      action: 'Submitted',
+      title: 'Manufacturing Capabilities Submitted',
+      description: 'L2: Manufacturing capabilities information was submitted for review',
+      user: 'Rajesh Kumar',
+      level: 'L2',
+      section: 'Manufacturing Capabilities'
+    },
+    {
+      id: '5',
+      date: new Date(2023, 12, 1, 14, 0),
+      action: 'Updated',
+      title: 'Manufacturing Capabilities Updated',
+      description: 'Added new machine details and certifications',
+      user: 'Rajesh Kumar',
+      level: 'L2',
+      section: 'Manufacturing Capabilities'
+    },
+    {
+      id: '6',
+      date: new Date(2023, 12, 2, 16, 20),
+      action: 'Approved',
+      title: 'Manufacturing Capabilities Approved',
+      description: 'L2: Manufacturing capabilities were verified and approved',
+      user: 'WeFab Admin',
+      level: 'L2',
+      section: 'Manufacturing Capabilities'
+    },
+    {
+      id: '7',
+      date: new Date(2023, 12, 10, 11, 0),
+      action: 'Submitted',
+      title: 'Financial Information Submitted',
+      description: 'L3: Financial information was submitted for review',
+      user: 'Rajesh Kumar',
+      level: 'L3',
+      section: 'Financial Information'
+    },
+    {
+      id: '8',
+      date: new Date(2023, 12, 12, 15, 45),
+      action: 'Rejected',
+      title: 'Financial Information Rejected',
+      description: 'L3: Financial information was rejected. Missing insurance details.',
+      user: 'WeFab Admin',
+      level: 'L3',
+      section: 'Financial Information'
+    },
+    {
+      id: '9',
+      date: new Date(2023, 12, 15, 10, 30),
+      action: 'Updated',
+      title: 'Financial Information Updated',
+      description: 'Added missing insurance documentation and updated credit information',
+      user: 'Rajesh Kumar',
+      level: 'L3',
+      section: 'Financial Information'
+    },
+    {
+      id: '10',
+      date: new Date(2023, 12, 18, 14, 15),
+      action: 'Approved',
+      title: 'Financial Information Approved',
+      description: 'L3: Financial information was verified and approved',
+      user: 'WeFab Admin',
+      level: 'L3',
+      section: 'Financial Information'
+    }
+  ];
   
   // First, let's add a method to update the completion status based on approval status
   updateCompletionStatus(): void {
@@ -709,5 +838,218 @@ export class SupplierProfileReviewComponent implements OnInit {
    */
   getSafeUrl(url: string): SafeResourceUrl {
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  /**
+   * Toggle between profile review and activity trail views
+   */
+  toggleActivityTrail(): void {
+    this.showActivityTrail = !this.showActivityTrail;
+    
+    if (this.showActivityTrail) {
+      this.loadActivityTrail();
+    }
+  }
+  
+  /**
+   * Load activity trail data from API
+   */
+  loadActivityTrail(): void {
+    // In a real implementation, you'd fetch from API
+    // For now, using mock data from the provided format
+    this.commonservice.getData(`/api/method/proq_buyer.wefab.api.supplier.activity.get_activity_trail?supplier_company_id=${this.supplierId}`)
+      .subscribe({
+        next: (res: any) => {
+          if (res && res.message && Array.isArray(res.message)) {
+            this.activityLogs = res.message;
+            // Convert raw activity logs to displayed activity items
+            this.activityTrail = this.parseActivityLogs(this.activityLogs);
+          } else {
+            // Fallback to demo data
+            this.activityLogs = this.getDemoActivityLogs();
+            this.activityTrail = this.parseActivityLogs(this.activityLogs);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading activity trail:', error);
+          // Fallback to demo data
+          this.activityLogs = this.getDemoActivityLogs();
+          this.activityTrail = this.parseActivityLogs(this.activityLogs);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load activity trail data',
+            life: 3000
+          });
+        }
+      });
+  }
+  
+  /**
+   * Get demo activity logs in the provided format
+   */
+  getDemoActivityLogs(): ActivityLogItem[] {
+    return [
+      {
+        name: 986,
+        user: "David",
+        creation: "2025-05-21 16:51:27.753543",
+        time_since: "20 hours ago",
+        data: {
+          changed: [
+            "Company Profile changed from {...} to {...}"  // Shortened for readability
+          ]
+        }
+      },
+      {
+        name: 985,
+        user: "David",
+        creation: "2025-05-21 16:12:53.774990",
+        time_since: "20 hours ago",
+        data: {
+          changed: [
+            "Company Profile changed from {...} to {...}"  // Shortened for readability
+          ]
+        }
+      },
+      {
+        name: 984,
+        user: "Admin",
+        creation: "2025-05-21 15:30:27.123456",
+        time_since: "21 hours ago",
+        data: {
+          changed: [
+            "Profile Status changed from 'Under Review' to 'Approved'"
+          ]
+        }
+      },
+      {
+        name: 983,
+        user: "System",
+        creation: "2025-05-20 14:22:11.334455",
+        time_since: "2 days ago",
+        data: {
+          changed: [
+            "Verified Machine Photos"
+          ]
+        }
+      },
+      {
+        name: 982,
+        user: "Rajesh Kumar",
+        creation: "2025-05-20 10:15:32.112233",
+        time_since: "2 days ago",
+        data: {
+          changed: [
+            "Added new manufacturing capability (5-axis CNC)"
+          ]
+        }
+      }
+    ];
+  }
+  
+  /**
+   * Parse the raw activity logs into displayable activity items
+   */
+  parseActivityLogs(logs: ActivityLogItem[]): ActivityItem[] {
+    return logs.map(log => {
+      // Default values
+      let action: 'Approved' | 'Rejected' | 'Updated' | 'Submitted' | 'Created' = 'Updated';
+      let title = 'Profile Updated';
+      let description = log.data.changed[0] || 'Changes made to profile';
+      
+      // Determine action and title based on the description
+      if (description.includes('changed from') && description.includes('to')) {
+        action = 'Updated';
+        
+        // Extract what was changed from the description
+        const changedField = description.split('changed from')[0].trim();
+        title = `${changedField} Updated`;
+        
+        // Create a cleaner description
+        if (changedField === 'Company Profile') {
+          if (description.includes('machinePhotos')) {
+            description = 'Updated machine details or photos';
+          } else if (description.includes('facilityPhotos')) {
+            description = 'Updated facility photos';
+          } else if (description.includes('certifications')) {
+            description = 'Updated certification information';
+          } else if (description.includes('companyDocuments')) {
+            description = 'Updated company documents';
+          } else {
+            description = 'Updated company profile information';
+          }
+        }
+      } else if (description.includes('changed from') && description.includes('Approved')) {
+        action = 'Approved';
+        title = 'Profile Approved';
+        description = 'Profile status was approved';
+      } else if (description.includes('changed from') && description.includes('Rejected')) {
+        action = 'Rejected';
+        title = 'Profile Rejected';
+        description = 'Profile status was rejected';
+      } else if (description.includes('Verified')) {
+        action = 'Approved';
+        title = 'Verification Complete';
+        description = 'Verification process was completed';
+      } else if (description.includes('Added new')) {
+        action = 'Created';
+        title = 'New Item Added';
+      }
+      
+      // Create the activity item
+      return {
+        id: log.name.toString(),
+        date: new Date(log.creation),
+        action,
+        title,
+        description,
+        user: log.user,
+        time_since: log.time_since
+      };
+    });
+  }
+
+  // Add activityLogs property to store raw log data
+  activityLogs: ActivityLogItem[] = [];
+
+  /**
+   * Get CSS class for status badge based on action type
+   */
+  getStatusColorClass(action: string): string {
+    switch(action) {
+      case 'Approved':
+        return 'status-approved';
+      case 'Rejected':
+        return 'status-rejected';
+      case 'Updated':
+        return 'status-updated';
+      case 'Submitted':
+        return 'status-submitted';
+      case 'Created':
+        return 'status-created';
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Get appropriate icon for action type
+   */
+  getStatusIcon(action: string): string {
+    switch(action) {
+      case 'Approved':
+        return 'pi-check-circle';
+      case 'Rejected':
+        return 'pi-times-circle';
+      case 'Updated':
+        return 'pi-refresh';
+      case 'Submitted':
+        return 'pi-send';
+      case 'Created':
+        return 'pi-plus-circle';
+      default:
+        return 'pi-info-circle';
+    }
   }
 } 
