@@ -174,7 +174,7 @@ export class CommonService {
         });
 
         return this.http.post(
-        `${this.baseUrl}/api/method/upload_file`,
+        `${this.baseUrl}/api/method/proq_buyer.api.supplier_onboarding.geolocation.geolocation_exif.upload_file_preserve_exif`,
         formData,
         {   
             headers,
