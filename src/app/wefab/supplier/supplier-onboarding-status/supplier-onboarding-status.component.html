@@ -39,8 +39,8 @@
           <!-- Edit button for any completed or in-progress sections -->
           <button *ngIf="step.status === 'in-progress'" 
                   class="secondary-button" 
-                  (click)="viewDetails(step.id)">
-            Edit Update
+                  (click)="viewDetails(step)">
+            Edit
           </button>
           
           <!-- Start button for pending sections that are the next to fill -->

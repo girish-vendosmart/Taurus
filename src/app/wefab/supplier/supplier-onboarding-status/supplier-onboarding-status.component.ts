@@ -300,16 +300,19 @@ export class SupplierOnboardingStatusComponent {
     }
   }
 
-  viewDetails(stepId: number): void {
+  viewDetails(stepId: any): void {
     console.log('View details for step:', stepId);
     
     // Navigate to the specific route with mode=edit query parameter
-    if (stepId === 1) {
+    if (stepId.id === 1) {
+      console.log('Navigating to L0');
       this.router.navigate(['/wefab/supplier/supplier-onboarding'], { queryParams: { mode: 'edit' } });
-    } else if (stepId === 2) {
-      this.router.navigate(['/wefab/supplier/supplier-onboarding-l1'], { queryParams: { mode: 'edit' } });
-    } else if (stepId === 3) {
+    } else if (stepId.id === 2) {
+      console.log('Navigating to L2');
       this.router.navigate(['/wefab/supplier/supplier-onboarding-l2'], { queryParams: { mode: 'edit' } });
+    } else if (stepId.id === 3) {
+      console.log('Navigating to L3');
+      this.router.navigate(['/wefab/supplier/supplier-onboarding-l3'], { queryParams: { mode: 'edit' } });
     }
   }
 
