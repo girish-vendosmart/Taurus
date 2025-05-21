@@ -11,9 +11,17 @@
           *ngIf="mainCurrentDataStatusTrack.includes('Rejected')">{{ mainCurrentDataStatusTrack }}</span>
       </p>
     </div>
+    <!-- View Activity Trail Button -->
+    <button class="btn-view-activity" (click)="toggleActivityTrail()" *ngIf="!showActivityTrail">
+      <i class="pi pi-history"></i> View Activity Trail
+    </button>
+    <button class="btn-back" (click)="toggleActivityTrail()" *ngIf="showActivityTrail">
+      <i class="pi pi-arrow-left"></i> Back to Profile
+    </button>
   </div>
 
-  <div class="review-content">
+  <!-- Main Profile Review Content -->
+  <div class="review-content" *ngIf="!showActivityTrail">
     <!-- Left Column -->
     <div class="review-main-content">
       <!-- Level Indicators as Tabs -->
@@ -736,6 +744,170 @@
             <i class="pi pi-check-circle"></i> Approve
           </button>
         </div> -->
+      </div>
+
+      <!-- Document Summary -->
+      <div class="sidebar-section document-summary">
+        <h2>
+          <i class="pi pi-file"></i>
+          Document Summary
+        </h2>
+        <ul class="document-list">
+          <li class="document-item">
+            <span class="document-label">Company Documents:</span>
+            <span class="document-count">{{ numberOfCompanyDocuments }}</span>
+          </li>
+          <li class="document-item">
+            <span class="document-label">Machine Photos:</span>
+            <span class="document-count">{{ numberOfMachinePhoto }}</span>
+          </li>
+          <li class="document-item">
+            <span class="document-label">Facility Photos:</span>
+            <span class="document-count">{{ numberOfFacilityPhoto }}</span>
+          </li>
+          <li class="document-item">
+            <span class="document-label">Certifications:</span>
+            <span class="document-count">{{ numberOfCertificationPhoto }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Verification Status -->
+      <div class="sidebar-section verification-status">
+        <h2>
+          <i class="pi pi-check-circle"></i>
+          Verification Status
+        </h2>
+
+        <ul class="verification-list">
+          <li class="verification-item">
+            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.phone_number_verification"></i>
+            <i class="pi pi-exclamation-triangle pending-icon"
+              *ngIf="!verificationStatus.phone_number_verification"></i>
+            <span *ngIf="verificationStatus.phone_number_verification">Phone Number Verified</span>
+            <span class="verification-label" *ngIf="!verificationStatus.phone_number_verification">Phone Number
+              Verification Pending</span>
+          </li>
+          <li class="verification-item">
+            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus?.gst_verification_status"></i>
+            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!verificationStatus?.gst_verification_status"></i>
+            <span *ngIf="verificationStatus?.gst_verification_status">GSTIN Verified</span>
+            <span class="verification-label" *ngIf="!verificationStatus?.gst_verification_status">GSTIN Verification
+              Pending</span>
+          </li>
+          <li class="verification-item">
+            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.address_verification"></i>
+            <i class="pi pi-exclamation-triangle pending-icon"
+              *ngIf="!verificationStatus.address_verification"></i>
+            <span *ngIf="verificationStatus.address_verification">Address Verified</span>
+            <span class="verification-label" *ngIf="!verificationStatus.address_verification">Address Verification Pending</span>
+          </li>
+          <!-- Machine Photos Verification -->
+          <li class="verification-item">
+            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.machine_photo_verification"></i>
+            <i class="pi pi-exclamation-triangle pending-icon"
+              *ngIf="!verificationStatus.machine_photo_verification"></i>
+            <span *ngIf="verificationStatus.machine_photo_verification">Facility Photos Verified</span>
+            <span class="verification-label" *ngIf="!verificationStatus.machine_photo_verification">Facility Photos
+              Pending Review</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Trail Content -->
+  <div class="review-content" *ngIf="showActivityTrail">
+    <!-- Activity Trail Main Content -->
+    <div class="review-main-content activity-trail-container">
+      <div class="activity-trail-header">
+        <h2><i class="pi pi-history"></i> Activity Trail</h2>
+        <button class="btn-back" (click)="toggleActivityTrail()">
+          <i class="pi pi-arrow-left"></i> Back to Profile
+        </button>
+      </div>
+      
+      <div class="activity-trail-content">
+        <div class="timeline">
+          <!-- Approval activities -->
+          <div class="timeline-item" *ngFor="let activity of activityTrail">
+            <div class="timeline-marker" [ngClass]="getStatusColorClass(activity.action)">
+              <i class="pi" [ngClass]="getStatusIcon(activity.action)"></i>
+            </div>
+            <div class="timeline-content" [ngClass]="getStatusColorClass(activity.action)">
+              <div class="timeline-header">
+                <div class="header-title">
+                  <span class="activity-badge" [ngClass]="getStatusColorClass(activity.action)">
+                    {{activity.action}}
+                  </span>
+                  <span class="activity-title">{{activity.title}}</span>
+                </div>
+                <div class="header-time">
+                  <span class="activity-time">{{activity.time_since || (activity.date | date:'MMM d, y')}}</span>
+                </div>
+              </div>
+              <div class="activity-details">
+                <p class="activity-description">{{activity.description}}</p>
+                <p class="activity-user"><i class="pi pi-user"></i> {{activity.user}}</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Empty state when no activities -->
+          <div class="empty-activity" *ngIf="activityTrail.length === 0">
+            <i class="pi pi-info-circle"></i>
+            <p>No activity records found for this supplier profile.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="review-sidebar">
+      <!-- Profile Completeness -->
+      <div class="sidebar-section profile-completeness">
+        <h2>Profile Completeness</h2>
+
+        <div class="progress-circle">
+          <div class="circle-wrapper">
+            <svg viewBox="0 0 36 36" class="circular-chart">
+              <path class="circle-bg" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="circle" [attr.stroke-dasharray]="completionPercentage + ', 100'" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <text x="18" y="20.35" class="percentage">{{ completionPercentage }}%</text>
+            </svg>
+            <div class="complete-text">Complete</div>
+          </div>
+        </div>
+
+        <div class="completion-details">
+          <div class="completion-item">
+            <span class="item-label">
+              <i class="pi pi-circle-fill basic-info-icon"></i>
+              Basic Information
+            </span>
+            <span class="item-percentage">{{ completionStatus.basicInformation }}%</span>
+          </div>
+
+          <div class="completion-item">
+            <span class="item-label">
+              <i class="pi pi-circle-fill manufacturing-icon"></i>
+              Manufacturing Capabilities
+            </span>
+            <span class="item-percentage">{{ completionStatus.manufacturingCapabilities }}%</span>
+          </div>
+
+          <div class="completion-item">
+            <span class="item-label">
+              <i class="pi pi-circle-fill financial-icon"></i>
+              Financial & Additional
+            </span>
+            <span class="item-percentage">{{ completionStatus.financialAdditional }}%</span>
+          </div>
+        </div>
       </div>
 
       <!-- Document Summary -->

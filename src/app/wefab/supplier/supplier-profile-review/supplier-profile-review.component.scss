@@ -2508,3 +2508,325 @@
   font-size: 14px;
   font-weight: 500;
 }
+
+// Header Styles
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+
+  .header-left {
+    h1 {
+      margin-bottom: 5px;
+    }
+  }
+
+  .btn-view-activity {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: #e9ecef;
+      border-color: #ced4da;
+    }
+    
+    i {
+      font-size: 1rem;
+    }
+  }
+}
+
+// Activity Trail Styles
+.activity-trail-container {
+  background-color: $technical-white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  
+  .activity-trail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid $material-finish-silver;
+    
+    h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: $blueprint-blue;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      
+      i {
+        color: $blueprint-blue;
+        font-size: 0.9rem;
+      }
+    }
+    
+    .btn-back {
+      background-color: $technical-white;
+      border: 1px solid $material-finish-silver;
+      color: $machine-gray;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+      
+      &:hover {
+        background-color: darken($technical-white, 3%);
+        color: $blueprint-blue;
+        border-color: $blueprint-blue;
+      }
+      
+      i {
+        font-size: 0.85rem;
+      }
+    }
+  }
+  
+  .activity-trail-content {
+    padding: 0.5rem 0.75rem;
+    
+    .timeline {
+      position: relative;
+      padding: 0.5rem 0;
+      
+      &:before {
+        content: '';
+        position: absolute;
+        height: 100%;
+        width: 2px;
+        background-color: $material-finish-silver;
+        left: 18px;
+        top: 0;
+      }
+      
+      .timeline-item {
+        position: relative;
+        padding-left: 40px;
+        margin-bottom: 1rem;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        .timeline-marker {
+          position: absolute;
+          left: 12px;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #ffffff;
+          border: 2px solid $machine-gray;
+          z-index: 1;
+          
+          i {
+            font-size: 8px;
+            color: #ffffff;
+          }
+          
+          &.status-approved {
+            background-color: $process-green;
+            border-color: $process-green;
+          }
+          
+          &.status-rejected {
+            background-color: $safety-orange;
+            border-color: $safety-orange;
+          }
+          
+          &.status-updated {
+            background-color: $blueprint-blue;
+            border-color: $blueprint-blue;
+          }
+          
+          &.status-submitted {
+            background-color: $blueprint-blue;
+            border-color: $blueprint-blue;
+          }
+          
+          &.status-created {
+            background-color: $machine-gray;
+            border-color: $machine-gray;
+          }
+        }
+        
+        .timeline-content {
+          background-color: $technical-white;
+          border-radius: 6px;
+          padding: 0.6rem;
+          border-left: 3px solid $machine-gray;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+          transition: all 0.2s ease;
+          
+          &:hover {
+            background-color: darken($technical-white, 2%);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+          }
+          
+          &.status-approved {
+            border-left-color: $process-green;
+          }
+          
+          &.status-rejected {
+            border-left-color: $safety-orange;
+          }
+          
+          &.status-updated {
+            border-left-color: $blueprint-blue;
+          }
+          
+          &.status-submitted {
+            border-left-color: $blueprint-blue;
+          }
+          
+          &.status-created {
+            border-left-color: $machine-gray;
+          }
+          
+          .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.4rem;
+            
+            .header-title {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              
+              .activity-badge {
+                padding: 0.12rem 0.4rem;
+                border-radius: 12px;
+                font-size: 0.65rem;
+                font-weight: 600;
+                color: #ffffff;
+                
+                &.status-approved {
+                  background-color: $process-green;
+                }
+                
+                &.status-rejected {
+                  background-color: $safety-orange;
+                }
+                
+                &.status-updated {
+                  background-color: $blueprint-blue;
+                }
+                
+                &.status-submitted {
+                  background-color: $blueprint-blue;
+                }
+                
+                &.status-created {
+                  background-color: $machine-gray;
+                }
+              }
+              
+              .activity-title {
+                font-weight: 600;
+                font-size: 0.85rem;
+                color: $precision-black;
+              }
+            }
+            
+            .header-time {
+              .activity-time {
+                color: $machine-gray;
+                font-size: 0.7rem;
+                font-style: italic;
+              }
+            }
+          }
+          
+          .activity-details {
+            .activity-description {
+              color: $machine-gray;
+              font-size: 0.8rem;
+              margin-bottom: 0.35rem;
+              line-height: 1.3;
+            }
+            
+            .activity-user {
+              color: $machine-gray;
+              font-size: 0.75rem;
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              margin: 0;
+              
+              i {
+                color: $blueprint-blue;
+                font-size: 0.7rem;
+              }
+            }
+          }
+        }
+      }
+      
+      .empty-activity {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+        color: $machine-gray;
+        
+        i {
+          font-size: 2rem;
+          margin-bottom: 0.75rem;
+          opacity: 0.5;
+          color: $machine-gray;
+        }
+        
+        p {
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}
+
+.btn-view-activity {
+  background-color: $technical-white;
+  border: 1px solid $material-finish-silver;
+  color: $machine-gray;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  
+  &:hover {
+    background-color: darken($technical-white, 3%);
+    color: $blueprint-blue;
+    border-color: $blueprint-blue;
+  }
+  
+  i {
+    font-size: 0.85rem;
+    color: $blueprint-blue;
+  }
+}
