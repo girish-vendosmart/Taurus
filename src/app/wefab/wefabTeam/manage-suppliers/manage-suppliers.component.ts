@@ -601,11 +601,7 @@ export class ManageSuppliersComponent implements OnInit {
         label: 'Resend Invitation',
         icon: 'pi pi-send',
         command: () => {
-          this.messageService.add({ 
-            severity: 'success', 
-            summary: 'Resend', 
-            detail: 'Invitation resent successfully' 
-          });
+          this.sweetAlert.success('Invitation resent successfully!');
         }
       }
     ];
@@ -621,11 +617,7 @@ export class ManageSuppliersComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading suppliers:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load suppliers'
-        });
+        this.sweetAlert.error('Failed to load suppliers');
       }
     });
   }
@@ -640,11 +632,7 @@ export class ManageSuppliersComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading invited suppliers:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load invited suppliers'
-        });
+        this.sweetAlert.error('Failed to load invited suppliers');
       }
     });
   }
@@ -770,22 +758,14 @@ export class ManageSuppliersComponent implements OnInit {
       
       this.commonService.postData(endPoint, this.inviteForm.value).subscribe({
         next: (response) => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Supplier invitation sent successfully'
-          });
+          this.sweetAlert.success('Supplier invitation sent successfully!');
           this.hideInviteDialog();
           this.loadSuppliers();
           this.loadInvitedSuppliers(); // Refresh invited list
         },
         error: (error) => {
           console.error('Error inviting supplier:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: error.error?.message || 'Failed to send invitation'
-          });
+          this.sweetAlert.error('error.error?.message');
         },
         complete: () => {
           this.isSubmitting = false;

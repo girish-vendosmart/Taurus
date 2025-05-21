@@ -143,7 +143,7 @@ export class SupplierFinderComponent {
     let endPoint = `/api/resource/wfb_bulk_supplier_invitation`;
     this.service.postData(endPoint, invitationData).subscribe(
       (res:any) => {
-        this.sweetAlert.success('Request has been approved!');
+        this.sweetAlert.success('Invitation sent successfully!');
         
         this.showInvitationDialog = false;
         this.selectedSuppliers.clear();
