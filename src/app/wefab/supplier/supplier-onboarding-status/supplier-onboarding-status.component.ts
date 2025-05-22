@@ -8,7 +8,7 @@ interface OnboardingStep {
   id: number;
   title: string;
   description: string;
-  status: 'completed' | 'in-progress' | 'pending' | 'locked' | 'rejected';
+  status: 'completed' | 'in-progress' | 'pending' | 'locked' | 'rejected' | 'request-to-update';
   progress?: number;
   icon: string;
   color?: string;
@@ -130,13 +130,20 @@ export class SupplierOnboardingStatusComponent {
     console.log('L2 Status:', this.currentOnboardingL2Status);
     console.log('L3 Status:', this.currentOnboardingL3Status);
     
-    // First check if any section is rejected - if so, only that section can be worked on
+    // First check if any section is rejected or needs update - if so, only that section can be worked on
     if (this.currentOnboardingL1Status === 'Rejected') {
       this.nextSectionToFill = 1;
       this.currentOnboardingPage = 1;
       console.log('Section 1 is rejected, setting nextSectionToFill to 1');
       return; // Exit early - no other section can be filled until this is fixed
     } 
+    
+    if (this.currentOnboardingL1Status === 'Request to Resubmit') {
+      this.nextSectionToFill = 1;
+      this.currentOnboardingPage = 1;
+      console.log('Section 1 needs update, setting nextSectionToFill to 1');
+      return; // Exit early - no other section can be filled until this is fixed
+    }
     
     if (this.currentOnboardingL2Status === 'Rejected') {
       if (this.currentOnboardingL1Status === 'Approved' || this.currentOnboardingL1Status === 'Under Review') {
@@ -148,6 +155,20 @@ export class SupplierOnboardingStatusComponent {
         this.nextSectionToFill = 1;
         this.currentOnboardingPage = 1;
         console.log('Section 2 is rejected but section 1 is not approved, setting nextSectionToFill to 1');
+        return;
+      }
+    }
+    
+    if (this.currentOnboardingL2Status === 'Request to Resubmit') {
+      if (this.currentOnboardingL1Status === 'Approved' || this.currentOnboardingL1Status === 'Under Review') {
+        this.nextSectionToFill = 2;
+        this.currentOnboardingPage = 2;
+        console.log('Section 2 needs update, setting nextSectionToFill to 2');
+        return; // Exit early - no section after this can be filled
+      } else {
+        this.nextSectionToFill = 1;
+        this.currentOnboardingPage = 1;
+        console.log('Section 2 needs update but section 1 is not approved, setting nextSectionToFill to 1');
         return;
       }
     }
@@ -171,8 +192,28 @@ export class SupplierOnboardingStatusComponent {
         return;
       }
     }
+    
+    if (this.currentOnboardingL3Status === 'Request to Resubmit') {
+      if ((this.currentOnboardingL1Status === 'Approved' || this.currentOnboardingL1Status === 'Under Review') &&
+          (this.currentOnboardingL2Status === 'Approved' || this.currentOnboardingL2Status === 'Under Review')) {
+        this.nextSectionToFill = 3;
+        this.currentOnboardingPage = 3;
+        console.log('Section 3 needs update, setting nextSectionToFill to 3');
+        return; // Exit early
+      } else if (this.currentOnboardingL1Status !== 'Approved' && this.currentOnboardingL1Status !== 'Under Review') {
+        this.nextSectionToFill = 1;
+        this.currentOnboardingPage = 1;
+        console.log('Section 3 needs update but section 1 is not approved, setting nextSectionToFill to 1');
+        return;
+      } else {
+        this.nextSectionToFill = 2;
+        this.currentOnboardingPage = 2;
+        console.log('Section 3 needs update but section 2 is not approved, setting nextSectionToFill to 2');
+        return;
+      }
+    }
 
-    // If no rejections, proceed with normal flow
+    // If no rejections or update requests, proceed with normal flow
     if (this.currentOnboardingL1Status !== 'Approved' && this.currentOnboardingL1Status !== 'Under Review') {
       this.nextSectionToFill = 1;
     } else if (this.currentOnboardingL2Status !== 'Approved' && this.currentOnboardingL2Status !== 'Under Review') {
@@ -218,6 +259,12 @@ export class SupplierOnboardingStatusComponent {
         progress: 100, 
         icon: 'pi pi-times-circle', 
         color: 'rejected' 
+      },
+      'Request to Resubmit': { 
+        status: 'request-to-update', 
+        progress: 100, 
+        icon: 'pi pi-pencil', 
+        color: 'request-to-update' 
       }
     };
 
@@ -263,41 +310,45 @@ export class SupplierOnboardingStatusComponent {
     console.log('Overall progress:', this.overallProgress);
   }
 
-  // Check if there are any rejected sections in the onboarding process
+  // Check if there are any rejected or request-to-update sections in the onboarding process
   hasRejectedSections(): boolean {
-    return this.onboardingSteps.some(step => step.status === 'rejected');
+    return this.onboardingSteps.some(step => step.status === 'rejected' || step.status === 'request-to-update');
   }
 
-  // Check if a specific section has a rejected status
-  isSectionRejected(sectionId: number): boolean {
-    return this.onboardingSteps[sectionId - 1].status === 'rejected';
-  }
-
-  // Check if any section before this one is rejected
+  // Check if any section before this one is rejected or needs update
   hasRejectedSectionsBefore(sectionId: number): boolean {
     for (let i = 0; i < sectionId - 1; i++) {
-      if (this.onboardingSteps[i].status === 'rejected') {
+      if (this.onboardingSteps[i].status === 'rejected' || this.onboardingSteps[i].status === 'request-to-update') {
         return true;
       }
     }
     return false;
   }
 
+  // Check if a specific section has a rejected or request-to-update status
+  isSectionRejected(sectionId: number): boolean {
+    return this.onboardingSteps[sectionId - 1].status === 'rejected' || 
+           this.onboardingSteps[sectionId - 1].status === 'request-to-update';
+  }
+
   continueOnboarding(stepId: number): void {
     console.log('Continue onboarding for step:', stepId);
     
-    // If any sections are rejected, only allow navigation to the rejected section
+    // If any sections are rejected or need update, only allow navigation to those sections
     if (this.hasRejectedSections()) {
-      // Find the first rejected section
-      const rejectedSection = this.onboardingSteps.find(step => step.status === 'rejected');
-      if (rejectedSection && stepId !== rejectedSection.id) {
-        console.log('Cannot continue to step', stepId, 'because section', rejectedSection.id, 'is rejected');
-        return; // Don't navigate if trying to go to a non-rejected section
+      // Find the first rejected or request-to-update section
+      const sectionNeedingAction = this.onboardingSteps.find(step => 
+        step.status === 'rejected' || step.status === 'request-to-update');
+      
+      if (sectionNeedingAction && stepId !== sectionNeedingAction.id) {
+        console.log('Cannot continue to step', stepId, 'because section', 
+          sectionNeedingAction.id, 'is', sectionNeedingAction.status);
+        return; // Don't navigate if trying to go to a different section
       }
     }
 
     // For Under Review status, redirect to the next section for filling
-    // For Rejected status, redirect to the same section for re-submission
+    // For Rejected or Request to Resubmit status, redirect to the same section for re-submission
     if (this.onboardingSteps[stepId - 1].status === 'in-progress') {
       // If current section is Under Review, find the next section to fill
       const nextSection = this.findNextSectionToFill(stepId);
@@ -309,9 +360,10 @@ export class SupplierOnboardingStatusComponent {
         console.log('No next section, going to profile review');
         this.router.navigate(['/wefab/supplier/profile-review']);
       }
-    } else if (this.onboardingSteps[stepId - 1].status === 'rejected') {
-      // If current section is Rejected, redirect to the same section
-      console.log('Section is rejected, redirecting to same section');
+    } else if (this.onboardingSteps[stepId - 1].status === 'rejected' || 
+               this.onboardingSteps[stepId - 1].status === 'request-to-update') {
+      // If current section is Rejected or Request to Resubmit, redirect to the same section
+      console.log('Section is', this.onboardingSteps[stepId - 1].status, ', redirecting to same section');
       if (stepId === 1) {
         this.router.navigate(['/wefab/supplier/supplier-onboarding']);
       } else {
@@ -329,15 +381,15 @@ export class SupplierOnboardingStatusComponent {
   }
 
   findNextSectionToFill(currentStep: number): number | null {
-    // If any section is rejected, no next section should be available
+    // If any section is rejected or needs update, no next section should be available
     if (this.hasRejectedSections()) {
       return null;
     }
 
-    // Find the next section that needs to be filled (Not Started or Rejected)
+    // Find the next section that needs to be filled (Not Started, Rejected, or Request to Resubmit)
     for (let i = currentStep; i < this.onboardingSteps.length; i++) {
       const step = this.onboardingSteps[i];
-      if (step.status === 'pending' || step.status === 'rejected') {
+      if (step.status === 'pending' || step.status === 'rejected' || step.status === 'request-to-update') {
         return step.id;
       }
     }
@@ -346,7 +398,7 @@ export class SupplierOnboardingStatusComponent {
 
   // Helper method to check if next section is available
   isNextAvailable(currentStepId: number): boolean {
-    // If any section is rejected, no next section should be available
+    // If any section is rejected or needs update, no next section should be available
     if (this.hasRejectedSections()) {
       return false;
     }
@@ -356,7 +408,7 @@ export class SupplierOnboardingStatusComponent {
       if (i === this.onboardingSteps.length) break; // Prevent out of bounds
       
       const step = this.onboardingSteps[i]; // Get actual step
-      if (step.status === 'pending' || step.status === 'rejected') {
+      if (step.status === 'pending' || step.status === 'rejected' || step.status === 'request-to-update') {
         return true;
       }
     }
@@ -375,6 +427,8 @@ export class SupplierOnboardingStatusComponent {
         return 'LOCKED';
       case 'rejected':
         return 'REJECTED';
+      case 'request-to-update':
+        return 'UPDATE REQUESTED';
       default:
         return status.toUpperCase();
     }

@@ -7,6 +7,7 @@ $material-silver: #D1D5DB;  // Borders, backgrounds
 $safety-orange: #FF5722;    // CTAs, highlights, error states - for rejected
 $process-green: #12856E;    // Success states, progress - for approved
 $warning-yellow: #F59E0B;   // Warning color - for under review
+$update-purple: #9F7AEA;    // Color for request-to-update status
 
 // Additional variables for consistency with existing code
 $text-primary: $precision-black;
@@ -127,6 +128,15 @@ $transition: all 0.3s ease;
     }
   }
   
+  &.request-to-update {
+    border-left: 5px solid $update-purple;
+    
+    .step-icon {
+      background-color: rgba($update-purple, 0.1);
+      color: $update-purple;
+    }
+  }
+  
   &.pending, &.locked {
     border-left: 5px solid $pending-color;
     
@@ -217,6 +227,11 @@ $transition: all 0.3s ease;
     .rejected & {
       background-color: rgba($safety-orange, 0.1);
       color: $safety-orange;
+    }
+    
+    .request-to-update & {
+      background-color: rgba($update-purple, 0.1);
+      color: $update-purple;
     }
     
     .pending &, .locked & {
@@ -340,6 +355,14 @@ $transition: all 0.3s ease;
   
   .step-icon {
     color: $safety-orange;
+  }
+}
+
+.step-card.request-to-update {
+  background-color: rgba($update-purple, 0.03);
+  
+  .step-icon {
+    color: $update-purple;
   }
 }
 

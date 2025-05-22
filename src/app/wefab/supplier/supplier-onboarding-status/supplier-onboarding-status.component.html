@@ -43,26 +43,26 @@
             Edit
           </button>
           
+          <!-- Update button for request-to-update sections -->
+          <button *ngIf="step.status === 'request-to-update'" 
+                  class="primary-button" 
+                  (click)="viewDetails(step)">
+            Update
+          </button>
+          
+          <!-- Re-Submit button for rejected sections -->
+          <button *ngIf="step.status === 'rejected'" 
+                  class="primary-button" 
+                  (click)="viewDetails(step)">
+            Re-Submit
+          </button>
+          
           <!-- Start button for pending sections that are the next to fill AND no rejected sections exist -->
           <button *ngIf="step.status === 'pending' && step.id === nextSectionToFill && !hasRejectedSections()" 
                   class="primary-button" 
                   (click)="continueOnboarding(step.id)">
             Continue
           </button>
-          
-          <!-- Continue button for in-progress sections - only shown if no rejected sections -->
-          <!-- <button *ngIf="step.status === 'in-progress' && step.id !== 3 && isNextAvailable(step.id) && !hasRejectedSections()" 
-                  class="primary-button" 
-                  (click)="continueOnboarding(step.id)">
-            Continue
-          </button> -->
-          
-          <!-- Re-Submit button for rejected sections -->
-          <!-- <button *ngIf="step.status === 'rejected'" 
-                  class="primary-button" 
-                  (click)="continueOnboarding(step.id)">
-            Re-Submit
-          </button> -->
         </div>
       </div>
     </div>
