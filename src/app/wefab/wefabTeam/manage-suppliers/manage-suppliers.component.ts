@@ -570,7 +570,8 @@ export class ManageSuppliersComponent implements OnInit {
     private commonService: CommonService,
     private fb: FormBuilder,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private sweetAlertService: SweetAlertService
   ) {
     this.inviteForm = this.fb.group({
       supplier_email_id: ['', [Validators.required, Validators.email]],
@@ -788,7 +789,7 @@ export class ManageSuppliersComponent implements OnInit {
   }
 
   resendInvitation(invite: any) {
-    this.sweetAlert.confirm(
+    this.sweetAlertService.confirm(
       '',
       'Are you sure you want to resend the invitation to supplier?',
       'question',
@@ -796,9 +797,23 @@ export class ManageSuppliersComponent implements OnInit {
       'No'
     ).then((result:any) => {
       if (result.isConfirmed) {
-        this.sweetAlert.success('Invitation resent successfully');
+        console.log("Invitation ", invite);
+        let data = {
+          company_name: invite.company_name,
+          supplier_email_id: invite.supplier_email_id,
+        }
+        this.commonService.postData('/api/resource/wfb_supplier_invitation', data).subscribe((res: any) => {
+          this.sweetAlert.success('Invitation resent successfully');
+        });
       }
     });
+    // this.sweetAlert.confirm(
+    //   '',
+    // ).then((result:any) => {
+    //   if (result.isConfirmed) {
+    //     this.sweetAlert.success('Invitation resent successfully');
+    //   }
+    // });
   }
 
   accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
