@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { CommonService } from './common.service';
 import { DialogModule } from 'primeng/dialog';
+import { FileUploadService, FileUploadResult } from './file-upload.service';
 
 @Component({
   selector: 'app-conversation-trail',
@@ -20,10 +21,14 @@ export class ConversationTrailComponent implements OnInit {
   newMessage: string = '';
   attachedFile: File | null = null;
   previewImageUrl: string | null = null;
+  selectedFiles: File[] = [];
+  attachments: { file_url: string }[] = [];
+  uploading: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private fileUploadService: FileUploadService
   ) {}
 
   ngOnInit() {
@@ -61,6 +66,7 @@ export class ConversationTrailComponent implements OnInit {
   }
 
   getInitials(name: string): string {
+    if (!name) return '';
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   }
 
@@ -73,18 +79,44 @@ export class ConversationTrailComponent implements OnInit {
   }
 
   onFileSelected(event: any) {
-    this.attachedFile = event.target.files[0];
+    const files: FileList = event.target.files;
+    if (!files || files.length === 0) return;
+    this.uploading = true;
+    const uploadObservables = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      uploadObservables.push(
+        this.fileUploadService.uploadFile(file).toPromise()
+      );
+    }
+    Promise.all(uploadObservables).then((results: (FileUploadResult | undefined)[]) => {
+      results.forEach(result => {
+        if (result && result.success && result.url) {
+          this.attachments.push({ file_url: result.url });
+        }
+      });
+      this.uploading = false;
+    }).catch(() => {
+      this.uploading = false;
+    });
   }
 
-  sendMessage() {
-    if (this.newMessage.trim()) {
-      this.messages.push({
-        sender: this.currentUser,
-        text: this.newMessage,
-        timestamp: new Date()
-      });
+  async sendMessage() {
+    if (!this.newMessage.trim() || this.uploading) return;
+    const payload = {
+      document_id: this.supplierId,
+      sender: this.currentUser, // You may want to use the actual email here
+      comment: this.newMessage,
+      attachment: this.attachments
+    };
+    try {
+      await this.commonService.postData('/api/resource/wfb_supplier_onboarding_messenger', payload).toPromise();
       this.newMessage = '';
-      this.attachedFile = null;
+      this.attachments = [];
+      // Optionally, refresh messages
+      this.fetchMessages();
+    } catch (e) {
+      // Handle error (show toast, etc.)
     }
   }
 
@@ -94,5 +126,9 @@ export class ConversationTrailComponent implements OnInit {
 
   closeImagePreview() {
     this.previewImageUrl = null;
+  }
+
+  removeAttachment(index: number) {
+    this.attachments.splice(index, 1);
   }
 } 

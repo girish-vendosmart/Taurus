@@ -1,13 +1,19 @@
 <div class="conversation-container">
   <div class="send-section">
     <label class="attach-btn">
-      <input type="file" (change)="onFileSelected($event)" hidden>
+      <input type="file" (change)="onFileSelected($event)" multiple hidden>
       <i class="pi pi-paperclip"></i>
     </label>
     <input type="text" [(ngModel)]="newMessage" placeholder="Type a message..." />
-    <button class="send-btn" (click)="sendMessage()">
+    <button class="send-btn" (click)="sendMessage()" [disabled]="uploading">
       <i class="pi pi-send"></i>
     </button>
+  </div>
+  <div *ngIf="attachments.length > 0" class="pending-attachments-list">
+    <div class="pending-attachment-item" *ngFor="let att of attachments; let i = index">
+      <a [href]="att.file_url" target="_blank">{{ att.file_url.split('/').pop() }}</a>
+      <button (click)="removeAttachment(i)" class="remove-btn"><i class="pi pi-times"></i></button>
+    </div>
   </div>
   <div class="messages-section">
     <div class="message" *ngFor="let msg of messages">
