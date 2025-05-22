@@ -19,10 +19,15 @@
     <div class="message" *ngFor="let msg of messages">
       <div class="profile-icon">{{ getInitials(msg.sender) }}</div>
       <div class="message-content">
-        <div class="message-meta-top">
-          <span class="meta-company" *ngIf="msg.company">{{ msg.company }}</span>
-          <span class="meta-user">{{ msg.sender }}</span>
-          <span class="meta-email" *ngIf="msg.email">{{ msg.email }}</span>
+        <div class="message-header">
+          <div class="header-main">
+            <div class="company" *ngIf="msg.company">{{ msg.company }}</div>
+            <div class="user-row">
+              <span class="user-name">{{ msg.sender }}</span>
+            </div>
+            <div class="email" *ngIf="msg.email">{{ msg.email }}</div>
+          </div>
+          <span class="timestamp">{{ msg.timestamp | date:'short' }}</span>
         </div>
         <div class="message-text">{{ msg.text }}</div>
         <div *ngIf="msg.attachments?.length" class="attachments-list">
@@ -40,10 +45,6 @@
             </ng-template>
             <a [href]="file.file_url" target="_blank" class="attachment-filename">{{ file.file_name }}</a>
           </div>
-        </div>
-        <div class="message-meta">
-          <span class="sender">{{ msg.sender }}</span>
-          <span class="timestamp">{{ msg.timestamp | date:'short' }}</span>
         </div>
       </div>
     </div>

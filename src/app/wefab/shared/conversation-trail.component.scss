@@ -40,20 +40,20 @@
   .message {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
     .profile-icon {
-      width: 40px;
-      height: 40px;
-      background: #2563eb;
+      width: 48px;
+      height: 48px;
+      font-size: 1.3rem;
+      margin-right: 1.25rem;
+      margin-top: 0.5rem;
+      background: #2563eb !important;
       color: #fff;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
-      font-size: 1.1rem;
-      margin-right: 0.75rem;
-      flex-shrink: 0;
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -61,15 +61,75 @@
     }
     .message-content {
       background: #fff;
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-      .message-text { margin-bottom: 0.25rem; }
-      .message-meta {
-        font-size: 0.75rem;
-        color: #888;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      padding: 1.25rem 1.5rem;
+      min-width: 300px;
+      max-width: 650px;
+      .message-header {
         display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        .header-main {
+          display: flex;
+          flex-direction: column;
+          gap: 0.15rem;
+        }
+        .company {
+          font-weight: 600;
+          color: #2563eb;
+          font-size: 1.05em;
+          margin-bottom: 0.1rem;
+        }
+        .user-row {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          .user-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #222;
+          }
+        }
+        .email {
+          color: #888;
+          font-size: 0.97em;
+          margin-bottom: 0.1rem;
+        }
+        .timestamp {
+          color: #aaa;
+          font-size: 0.95em;
+          margin-left: 1.5rem;
+          white-space: nowrap;
+        }
+      }
+      .message-text {
+        font-size: 1.05rem;
+        margin-bottom: 0.75rem;
+        color: #222;
+      }
+      .attachments-list {
+        display: flex;
+        flex-direction: column;
         gap: 0.5rem;
+        .attachment-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          background: #f3f4f6;
+          border-radius: 6px;
+          padding: 0.4rem 0.8rem;
+          .attachment-thumb {
+            width: 32px;
+            height: 32px;
+          }
+          .attachment-filename {
+            font-size: 1em;
+            color: #2563eb;
+          }
+        }
       }
     }
   }
