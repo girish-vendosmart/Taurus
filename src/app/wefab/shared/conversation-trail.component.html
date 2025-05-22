@@ -1,0 +1,55 @@
+<div class="conversation-container">
+  <div class="send-section">
+    <label class="attach-btn">
+      <input type="file" (change)="onFileSelected($event)" hidden>
+      <i class="pi pi-paperclip"></i>
+    </label>
+    <input type="text" [(ngModel)]="newMessage" placeholder="Type a message..." />
+    <button class="send-btn" (click)="sendMessage()">
+      <i class="pi pi-send"></i>
+    </button>
+  </div>
+  <div class="messages-section">
+    <div class="message" *ngFor="let msg of messages">
+      <div class="profile-icon">{{ getInitials(msg.sender) }}</div>
+      <div class="message-content">
+        <div class="message-meta-top">
+          <span class="meta-company" *ngIf="msg.company">{{ msg.company }}</span>
+          <span class="meta-user">{{ msg.sender }}</span>
+          <span class="meta-email" *ngIf="msg.email">{{ msg.email }}</span>
+        </div>
+        <div class="message-text">{{ msg.text }}</div>
+        <div *ngIf="msg.attachments?.length" class="attachments-list">
+          <div class="attachment-item" *ngFor="let file of msg.attachments">
+            <ng-container *ngIf="isImageFile(file.file_type); else nonImage">
+              <img [src]="file.file_url" [alt]="file.file_name" class="attachment-thumb" (click)="openImagePreview(file.file_url)" style="cursor:pointer;" />
+            </ng-container>
+            <ng-template #nonImage>
+              <ng-container *ngIf="isPdfFile(file.file_type); else otherFile">
+                <i class="pi pi-file-pdf pdf-icon"></i>
+              </ng-container>
+              <ng-template #otherFile>
+                <i class="pi pi-file file-icon"></i>
+              </ng-template>
+            </ng-template>
+            <a [href]="file.file_url" target="_blank" class="attachment-filename">{{ file.file_name }}</a>
+          </div>
+        </div>
+        <div class="message-meta">
+          <span class="sender">{{ msg.sender }}</span>
+          <span class="timestamp">{{ msg.timestamp | date:'short' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-dialog [(visible)]="!!previewImageUrl"
+          [modal]="true"
+          [closable]="true"
+          [dismissableMask]="true"
+          [style]="{width: '90vw', maxWidth: '900px'}"
+          contentStyle="display:flex;justify-content:center;align-items:center;background:#222;"
+          (onHide)="closeImagePreview()">
+  <img *ngIf="previewImageUrl" [src]="previewImageUrl" alt="Preview" style="max-width: 100%; max-height: 80vh; border-radius: 8px;" />
+</p-dialog> 

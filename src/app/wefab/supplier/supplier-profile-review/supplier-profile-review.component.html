@@ -12,6 +12,9 @@
       </p>
     </div>
     <!-- View Activity Trail Button -->
+    <button class="btn-chat" [routerLink]="['/wefab/supplier/chat', supplierId]" *ngIf="!showActivityTrail">
+      <i class="pi pi-comments"></i> Chat
+    </button>
     <button class="btn-view-activity" (click)="toggleActivityTrail()" *ngIf="!showActivityTrail">
       <i class="pi pi-history"></i> View Activity Trail
     </button>

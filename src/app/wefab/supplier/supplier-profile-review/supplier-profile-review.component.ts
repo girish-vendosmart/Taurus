@@ -12,6 +12,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import e from 'express';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { RouterModule } from '@angular/router';
 
 interface DocumentSummary {
   companyDocuments: number;
@@ -59,7 +60,8 @@ interface ActivityLogItem {
     ButtonModule,
     ToastModule,
     RippleModule,
-    TooltipModule
+    TooltipModule,
+    RouterModule
   ],
   providers: [MessageService],
   templateUrl: './supplier-profile-review.component.html',

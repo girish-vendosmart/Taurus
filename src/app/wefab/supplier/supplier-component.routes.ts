@@ -71,6 +71,11 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
                 path: 'supplier-onboarding-status',
                 component: SupplierOnboardingStatusComponent,
                 canActivate: [AuthGuard]
+             },
+             {
+                path: 'chat/:supplierId',
+                canActivate: [AuthGuard],
+                loadComponent: () => import('../shared/conversation-trail.component').then(m => m.ConversationTrailComponent)
              }
         ]
     }
