@@ -969,8 +969,8 @@ export class SupplierProfileReviewComponent implements OnInit {
     this.commonservice.getData(`/api/method/proq_buyer.api.core.versioning.get_new_versions_trail?doctype=wfb_supplier_onboarding_L1&docname=${this.supplierId}`)
       .subscribe({
         next: (res: any) => {
-          if (res && res.message && Array.isArray(res.message)) {
-            this.activityLogs = res.message;
+          if (res && res.data && Array.isArray(res.data)) {
+            this.activityLogs = res.data;
             // Convert raw activity logs to displayed activity items
             this.activityTrail = this.parseActivityLogs(this.activityLogs);
           } else {
@@ -1152,9 +1152,9 @@ export class SupplierProfileReviewComponent implements OnInit {
       case 'Rejected':
         return 'pi-times-circle';
       case 'Updated':
-        return 'pi-refresh';
+        return 'pi-sync';
       case 'Submitted':
-        return 'pi-send';
+        return 'pi-upload';
       case 'Created':
         return 'pi-plus-circle';
       default:
