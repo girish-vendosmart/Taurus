@@ -315,10 +315,20 @@ export class SupplierOnboardingStatusComponent {
     return this.onboardingSteps.some(step => step.status === 'rejected' || step.status === 'request-to-update');
   }
 
-  // Check if any section before this one is rejected or needs update
+  // Check if any section before this one is rejected
   hasRejectedSectionsBefore(sectionId: number): boolean {
     for (let i = 0; i < sectionId - 1; i++) {
       if (this.onboardingSteps[i].status === 'rejected' || this.onboardingSteps[i].status === 'request-to-update') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Check if any section before this one is rejected (only rejected, not request-to-update)
+  hasPreviousSectionRejected(sectionId: number): boolean {
+    for (let i = 0; i < sectionId - 1; i++) {
+      if (this.onboardingSteps[i].status === 'rejected') {
         return true;
       }
     }
@@ -333,6 +343,12 @@ export class SupplierOnboardingStatusComponent {
 
   continueOnboarding(stepId: number): void {
     console.log('Continue onboarding for step:', stepId);
+    
+    // If any previous section is rejected, don't allow continuing
+    if (this.hasPreviousSectionRejected(stepId)) {
+      console.log('Cannot continue to step', stepId, 'because a previous section is rejected');
+      return;
+    }
     
     // If any sections are rejected or need update, only allow navigation to those sections
     if (this.hasRejectedSections()) {
@@ -436,6 +452,15 @@ export class SupplierOnboardingStatusComponent {
 
   viewDetails(step: any): void {
     console.log('View details for step:', step);
+    
+    // If any previous section is rejected, don't allow viewing details of this section
+    // unless this section itself is rejected or needs update
+    if (this.hasPreviousSectionRejected(step.id) && 
+        step.status !== 'rejected' && 
+        step.status !== 'request-to-update') {
+      console.log('Cannot view details for step', step.id, 'because a previous section is rejected');
+      return;
+    }
     
     try {
       // Navigate to the specific route with mode=edit query parameter

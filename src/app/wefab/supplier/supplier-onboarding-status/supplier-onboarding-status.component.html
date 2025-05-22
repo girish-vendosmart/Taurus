@@ -37,7 +37,7 @@
 
         <div class="step-actions">
           <!-- Edit button for in-progress sections -->
-          <button *ngIf="step.status === 'in-progress'" 
+          <button *ngIf="step.status === 'in-progress' && !hasPreviousSectionRejected(step.id)" 
                   class="secondary-button" 
                   (click)="viewDetails(step)">
             Edit
@@ -48,13 +48,6 @@
                   class="primary-button" 
                   (click)="viewDetails(step)">
             Update
-          </button>
-          
-          <!-- Re-Submit button for rejected sections -->
-          <button *ngIf="step.status === 'rejected'" 
-                  class="primary-button" 
-                  (click)="viewDetails(step)">
-            Re-Submit
           </button>
           
           <!-- Start button for pending sections that are the next to fill AND no rejected sections exist -->
