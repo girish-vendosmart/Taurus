@@ -585,6 +585,8 @@ export class ManageSuppliersComponent implements OnInit {
   ngOnInit() {
     this.loadSuppliers();
     this.loadInvitedSuppliers();
+    this.accessFirebaseTrigger('wfb_supplier_invitation_list_view', 'invitation_list_view');
+    this.accessFirebaseTriggerLoad('wfb_supplier_onboarding_L1_list_view', 'L1_list_view');
   }
 
   initializeMenuItems() {
@@ -796,6 +798,18 @@ export class ManageSuppliersComponent implements OnInit {
       if (result.isConfirmed) {
         this.sweetAlert.success('Invitation resent successfully');
       }
+    });
+  }
+
+  accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
+    this.commonService.commonFirebaseTrigger('wfb_supplier_onboarding_L1_list_view', 'L1_list_view').subscribe((res: any) => {
+      this.loadSuppliers();
+    });
+  }
+
+  accessFirebaseTriggerLoad(doctType_name: string, doctypeId: string) {
+    this.commonService.commonFirebaseTrigger('wfb_supplier_invitation_list_view', 'invitation_list_view').subscribe((res: any) => {
+      this.loadInvitedSuppliers();
     });
   }
 } 
