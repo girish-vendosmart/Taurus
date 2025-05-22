@@ -946,7 +946,9 @@ export class SupplierOnboardingL3Component implements OnInit {
       
       let body = this.updateData(mergedData);
 
-      this.commonService.putData('/api/resource/wfb_supplier_onboarding_L3', body).subscribe((res: any) => {
+      let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + sessionStorage.getItem('supplier_id')
+
+      this.commonService.putData(endPoint, body).subscribe((res: any) => {
         this.messageService.add({
           severity: 'success',
           summary: 'Update Successful',

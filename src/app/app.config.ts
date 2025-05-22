@@ -19,6 +19,14 @@ import { FormlyFieldGooglePlacesComponent } from './google-places-type.component
 import { FormlyFieldGstVerifyComponent } from './gst-verify-type.component';
 import { loaderInterceptor } from './core/interceptors/loader.interceptor';
 
+
+// ADD THESE FIREBASE IMPORTS
+import { initializeApp } from 'firebase/app';
+import { provideFirebaseApp } from '@angular/fire/app';
+import { provideFirestore, getFirestore } from '@angular/fire/firestore';
+import { provideAuth, getAuth } from '@angular/fire/auth';
+import { environment } from '../enviornments/enviornment';
+
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 
@@ -30,6 +38,12 @@ export const appConfig: ApplicationConfig = {
     ),
     provideAnimations(),
     provideClientHydration(),
+
+    // ADD FIREBASE PROVIDERS HERE
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideFirestore(() => getFirestore()),
+    provideAuth(() => getAuth()),
+
     importProvidersFrom(
       ReactiveFormsModule,
       FormsModule,

@@ -17,6 +17,13 @@ import {
 } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 
+import { 
+    Firestore, 
+    doc, 
+    docSnapshots, 
+    DocumentSnapshot 
+  } from '@angular/fire/firestore';
+
 @Injectable({
     providedIn: 'root'
 })
@@ -29,7 +36,7 @@ export class CommonService {
     private firebaseService = inject(FirebaseService);
     confirmationResult: any;
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient,private firestore: Firestore,    ) {
         const app = initializeApp(environment.firebaseConfig);
         this.auth = getAuth(app);
     }
@@ -190,6 +197,12 @@ export class CommonService {
 
     getFacilityAnalysis(machineId: string, address: string) {
         return this.http.get(`http://localhost:3000/factoryGeoVerification?file_id=${machineId}&factory_address_string=${address}`)
+    }
+
+     // Firebase method - now compatible with Angular Fire 17.1.0
+     commonFirebaseTrigger(doctType_name: string, doctypeId: string): Observable<DocumentSnapshot<any>> {
+        const docRef = doc(this.firestore, `${doctType_name}/${doctypeId}`);
+        return docSnapshots(docRef);
     }
     
 

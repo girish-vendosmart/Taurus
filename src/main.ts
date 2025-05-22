@@ -5,9 +5,9 @@ import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import { environment } from './enviornments/enviornment';
 
-// Initialize Firebase manually without using provideFirebaseApp
-import { initializeApp } from 'firebase/app';
-const app = initializeApp(environment.firebaseConfig);
+// Remove manual Firebase initialization
+// import { initializeApp } from 'firebase/app';
+// const app = initializeApp(environment.firebaseConfig);
 
 bootstrapApplication(AppComponent, {
   providers: [

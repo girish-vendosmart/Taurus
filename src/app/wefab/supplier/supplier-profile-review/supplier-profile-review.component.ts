@@ -13,6 +13,8 @@ import { SweetAlertService } from '../../shared/sweet-alert.service'
 import e from 'express';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+
 
 interface DocumentSummary {
   companyDocuments: number;
@@ -67,6 +69,8 @@ interface ActivityLogItem {
   styleUrls: ['./supplier-profile-review.component.scss']
 })
 export class SupplierProfileReviewComponent implements OnInit {
+  private subscription: Subscription = new Subscription();
+
   status: string = 'Pending';
   lastUpdated: Date = new Date(2025, 4, 8); // May 8, 2025
   supplierId: any = sessionStorage.getItem('supplier_id');
@@ -381,6 +385,10 @@ export class SupplierProfileReviewComponent implements OnInit {
       }
 
       this.getVerificationStatus(this.supplierId)
+      this.accessFirebaseTrigger('wfb_supplier_onboarding_L1', this.supplierId)
+      this.accessFirebaseTrigger('wfb_supplier_onboarding_L2', this.supplierId)
+      this.accessFirebaseTrigger('wfb_supplier_onboarding_L3', this.supplierId)
+
     }
   }
 
@@ -1253,4 +1261,14 @@ export class SupplierProfileReviewComponent implements OnInit {
       this.location.back();
     }
   }
+
+  accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
+    this.commonservice.commonFirebaseTrigger(doctType_name, doctypeId).subscribe((res: any) => {
+      this.getL1Data(this.supplierId)
+      this.getL1DataStatus(this.supplierId)
+
+    });
+  }
+
+  
 } 
