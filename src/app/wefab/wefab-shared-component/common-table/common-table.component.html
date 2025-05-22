@@ -67,7 +67,7 @@
             <ng-container *ngIf="!col.isLink">
               <ng-container [ngSwitch]="col.field">
                 <ng-container *ngSwitchCase="'status'">
-                  <p-tag [value]="rowData[col.field]" [severity]="getTagSeverity(rowData[col.field])"></p-tag>
+                  <!-- <p-tag [value]="rowData[col.field]" [severity]="getTagSeverity(rowData[col.field])"></p-tag> -->
                 </ng-container>
                 <ng-container *ngSwitchCase="'created_at'">
                   {{ formatDate(rowData[col.field]) }}

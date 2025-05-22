@@ -6,6 +6,9 @@ import { environment } from '../../../enviornments/enviornment';
 import { Router } from '@angular/router';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { getAuth } from 'firebase/auth';
+import { Firestore, doc, onSnapshot } from '@angular/fire/firestore';
+import { DocumentSnapshot } from '@angular/fire/firestore';
+
 
 
 import { 
@@ -29,7 +32,7 @@ export class CommonService {
     private firebaseService = inject(FirebaseService);
     confirmationResult: any;
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private firestore: Firestore) {
         const app = initializeApp(environment.firebaseConfig);
         this.auth = getAuth(app);
     }
@@ -191,7 +194,21 @@ export class CommonService {
     getFacilityAnalysis(machineId: string, address: string) {
         return this.http.get(`http://localhost:3000/factoryGeoVerification?file_id=${machineId}&factory_address_string=${address}`)
     }
-    
+
+
+    commonFirebaseTrigger(doctType_name: string, doctypeId: string): Observable<DocumentSnapshot<any>> {
+        const docRef = doc(this.firestore, `${doctType_name}/${doctypeId}`);
+        
+        // Use Observable constructor with onSnapshot for Firebase 11.x
+        return new Observable(observer => {
+          const unsubscribe = onSnapshot(docRef, 
+            (snapshot:any) => observer.next(snapshot),
+            (error:any) => observer.error(error)
+          );
+          
+          return () => unsubscribe();
+        });
+      }
 
     
 

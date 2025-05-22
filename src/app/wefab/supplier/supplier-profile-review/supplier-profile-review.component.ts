@@ -12,6 +12,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import e from 'express';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 interface DocumentSummary {
   companyDocuments: number;
@@ -66,6 +67,8 @@ interface ActivityLogItem {
   styleUrls: ['./supplier-profile-review.component.scss']
 })
 export class SupplierProfileReviewComponent implements OnInit {
+  
+  private subscription: Subscription = new Subscription();
   status: string = 'Pending';
   lastUpdated: Date = new Date(2025, 4, 8); // May 8, 2025
   supplierId: any = sessionStorage.getItem('supplier_id');
@@ -270,6 +273,12 @@ export class SupplierProfileReviewComponent implements OnInit {
       section: 'Financial Information'
     }
   ];
+
+  ngOnDestroy() {
+    // Cleanup all subscriptions at once
+    this.subscription.unsubscribe();
+  }
+
   
   // First, let's add a method to update the completion status based on approval status
   updateCompletionStatus(): void {
@@ -361,7 +370,19 @@ export class SupplierProfileReviewComponent implements OnInit {
       }
 
       this.getVerificationStatus(this.supplierId)
+      this.accessCommonFirebaseTrigger()
     }
+  }
+
+  accessCommonFirebaseTrigger() {
+    //  Clear Existing subscription
+    this.subscription.unsubscribe()
+
+    this.subscription = this.commonservice.commonFirebaseTrigger('wfb_supplier_onboarding_L3', this.supplierId).subscribe((doc) => {
+      alert('Firebase Trigger')
+      // this.getL1Data(this.supplierId)
+      // this.getL1DataStatus(this.supplierId)
+    })
   }
 
   getVerificationStatus(supplierId: string): void {
@@ -685,10 +706,6 @@ export class SupplierProfileReviewComponent implements OnInit {
             .split(' ')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
-        }
-
-        isCertificateDocumentArray(cert: any): boolean {
-          return Array.isArray(cert.certificateDocument);
         }
 
         isMachineDocumentArray(machine: any): boolean {
