@@ -290,18 +290,27 @@ export class SupplierProfileReviewComponent implements OnInit {
     };
     
     // Update based on current approval status
-    // For Stage 1: Under Review, Request to Resubmit, or Approved = 100% complete
-    if (this.getCurrentL1DataStatus === 'Approved' || this.getCurrentL1DataStatus === 'Under Review' || this.getCurrentL1DataStatus === 'Request to Resubmit') {
+    // For Stage 1: Consider it complete if data has been submitted (Under Review, Request to Resubmit, Approved, or Rejected)
+    if (this.getCurrentL1DataStatus === 'Approved' || 
+        this.getCurrentL1DataStatus === 'Under Review' || 
+        this.getCurrentL1DataStatus === 'Request to Resubmit' ||
+        this.getCurrentL1DataStatus === 'Rejected') {
       this.completionStatus.basicInformation = 100;
     }
     
-    // For Stage 2: Under Review, Request to Resubmit, or Approved = 100% complete
-    if (this.getCurrentL2DataStatus === 'Approved' || this.getCurrentL2DataStatus === 'Under Review' || this.getCurrentL2DataStatus === 'Request to Resubmit') {
+    // For Stage 2: Consider it complete if data has been submitted (Under Review, Request to Resubmit, Approved, or Rejected)
+    if (this.getCurrentL2DataStatus === 'Approved' || 
+        this.getCurrentL2DataStatus === 'Under Review' || 
+        this.getCurrentL2DataStatus === 'Request to Resubmit' ||
+        this.getCurrentL2DataStatus === 'Rejected') {
       this.completionStatus.manufacturingCapabilities = 100;
     }
     
-    // For Stage 3: Under Review, Request to Resubmit, or Approved = 100% complete
-    if (this.getCurrentL3DataStatus === 'Approved' || this.getCurrentL3DataStatus === 'Under Review' || this.getCurrentL3DataStatus === 'Request to Resubmit') {
+    // For Stage 3: Consider it complete if data has been submitted (Under Review, Request to Resubmit, Approved, or Rejected)
+    if (this.getCurrentL3DataStatus === 'Approved' || 
+        this.getCurrentL3DataStatus === 'Under Review' || 
+        this.getCurrentL3DataStatus === 'Request to Resubmit' ||
+        this.getCurrentL3DataStatus === 'Rejected') {
       this.completionStatus.financialAdditional = 100;
     }
   }

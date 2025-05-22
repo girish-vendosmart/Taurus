@@ -764,14 +764,14 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        color: #4b5563;
+        color: $machine-gray;
         font-size: 0.9rem;
         
         i {
           font-size: 0.65rem;
           
           &.basic-info-icon {
-            color: #3b82f6;
+            color: $blueprint-blue;
           }
           
           &.manufacturing-icon {
@@ -786,8 +786,34 @@
       
       .item-percentage {
         font-weight: 600;
-        color: #1f2937;
+        color: $precision-black;
         font-size: 0.9rem;
+      }
+      
+      .item-status {
+        display: flex;
+        align-items: center;
+        margin-left: 0.5rem;
+        
+        i {
+          font-size: 1rem;
+          
+          &.pi-check-circle {
+            color: $process-green;
+          }
+          
+          &.pi-exclamation-circle {
+            color: #f59e0b; // Amber/warning color
+          }
+          
+          &.pi-times-circle {
+            color: $safety-orange;
+          }
+          
+          &.pi-sync {
+            color: #3b82f6; // Blue for "Request to Resubmit"
+          }
+        }
       }
     }
   }
