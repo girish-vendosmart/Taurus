@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -335,6 +335,7 @@ export class SupplierProfileReviewComponent implements OnInit {
     private commonservice: CommonService,
     private sanitizer: DomSanitizer,
     private sweetAlert: SweetAlertService,
+    private location: Location,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -1233,5 +1234,14 @@ export class SupplierProfileReviewComponent implements OnInit {
   // Add this method to toggle the feedback summary visibility
   toggleFeedbackSummary(): void {
     this.showFeedbackSummary = !this.showFeedbackSummary;
+  }
+
+  /**
+   * Navigate back to the previous page
+   */
+  goBack(): void {
+    if (this.isBrowser) {
+      this.location.back();
+    }
   }
 } 

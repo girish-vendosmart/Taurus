@@ -9,6 +9,32 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
+// Global button styles
+.btn-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  border: 1px solid $material-finish-silver;
+  color: $precision-black;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: $technical-white;
+    color: $blueprint-blue;
+    border-color: $blueprint-blue;
+  }
+  
+  i {
+    font-size: 0.9rem;
+  }
+}
+
 // Header section
 .review-header {
   display: flex;
@@ -16,18 +42,22 @@
   align-items: flex-start;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid $material-finish-silver;
   
   .header-left {
+    .navigation-buttons {
+      margin-bottom: 1rem;
+    }
+    
     .review-title {
       font-size: 1.75rem;
-      color: #333;
+      color: $precision-black;
       margin-bottom: 0.5rem;
       font-weight: 600;
     }
     
     .review-subtitle {
-      color: #6b7280;
+      color: $machine-gray;
       font-size: 0.9rem;
       display: flex;
       align-items: center;
@@ -913,9 +943,16 @@
     flex-direction: column;
     gap: 1rem;
     
-    .header-actions {
+    .header-left {
       width: 100%;
-      justify-content: flex-end;
+      
+      .navigation-buttons {
+        margin-bottom: 0.75rem;
+      }
+    }
+    
+    .btn-view-activity {
+      margin-top: 0.5rem;
     }
   }
   
@@ -1658,6 +1695,10 @@
   border-bottom: 1px solid $material-finish-silver;
   
   .header-left {
+    .navigation-buttons {
+      margin-bottom: 1rem;
+    }
+    
     .review-title {
       font-size: 1.75rem;
       color: $precision-black;
@@ -1694,6 +1735,16 @@
       .status-rejected {
         background-color: #fee2e2;
         color: $safety-orange;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        margin-left: 0.5rem;
+        font-weight: 500;
+        font-size: 0.8rem;
+      }
+
+      .status-update {
+        background-color:#b3e5fc;
+        color: #03a9f5;
         padding: 0.25rem 0.5rem;
         border-radius: 4px;
         margin-left: 0.5rem;
@@ -2224,9 +2275,16 @@
     flex-direction: column;
     gap: 1rem;
     
-    .header-actions {
+    .header-left {
       width: 100%;
-      justify-content: flex-end;
+      
+      .navigation-buttons {
+        margin-bottom: 0.75rem;
+      }
+    }
+    
+    .btn-view-activity {
+      margin-top: 0.5rem;
     }
   }
   
@@ -2239,21 +2297,47 @@
     }
   }
   
-  .consolidated-info {
-    .info-grid {
-      grid-template-columns: 1fr;
-    }
+  .basic-info-tabs,
+  .manufacturing-tabs,
+  .financial-tabs {
+    flex-wrap: wrap;
     
-    .documents-gallery {
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    a {
+      flex: 1;
+      min-width: 120px;
+      text-align: center;
     }
   }
   
-  .approval-buttons {
+  .review-info-container {
+    .review-row {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+  
+  .machines-container,
+  .facility-photos-container,
+  .certifications-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .certification-card {
     flex-direction: column;
     
-    .approve-btn, .reject-btn {
+    .certification-image {
       width: 100%;
+      height: 200px;
+    }
+  }
+  
+  .zero-state-container {
+    padding: 2rem 1rem;
+  }
+  
+  .profile-completeness {
+    .action-buttons {
+      flex-direction: column;
     }
   }
 }
@@ -2562,45 +2646,20 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 1.25rem 1.5rem;
     border-bottom: 1px solid $material-finish-silver;
     
     h2 {
-      margin: 0;
-      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.25rem;
       font-weight: 600;
       color: $blueprint-blue;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      margin: 0;
       
       i {
         color: $blueprint-blue;
-        font-size: 0.9rem;
-      }
-    }
-    
-    .btn-back {
-      background-color: $technical-white;
-      border: 1px solid $material-finish-silver;
-      color: $machine-gray;
-      padding: 0.35rem 0.75rem;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 0.85rem;
-      
-      &:hover {
-        background-color: darken($technical-white, 3%);
-        color: $blueprint-blue;
-        border-color: $blueprint-blue;
-      }
-      
-      i {
-        font-size: 0.85rem;
       }
     }
   }
