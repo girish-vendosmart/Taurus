@@ -61,6 +61,16 @@
         font-weight: 500;
         font-size: 0.8rem;
       }
+
+      .status-update {
+        background-color:#b3e5fc;
+        color: #03a9f5;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        margin-left: 0.5rem;
+        font-weight: 500;
+        font-size: 0.8rem;
+      }
     }
   }
   
@@ -3062,4 +3072,134 @@
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* Resubmit Comment Box Styles */
+.resubmit-comment-box {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #fff3e0; /* Light orange background */
+  border-left: 4px solid #FF5722; /* WE-FAB's safety orange */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.resubmit-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  color: #d84315; /* Darker orange for header */
+  font-weight: 600;
+  font-size: 1.1rem;
+  
+  i {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+  }
+}
+
+.resubmit-message {
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  
+  p {
+    margin: 0;
+    white-space: pre-line; /* Preserve line breaks in comments */
+  }
+}
+
+.resubmit-actions {
+  display: flex;
+  justify-content: flex-end;
+  
+  button {
+    color: #1A3A5F; /* WE-FAB's blueprint blue */
+    border-color: #1A3A5F;
+    
+    &:hover {
+      background-color: rgba(26, 58, 95, 0.1);
+    }
+  }
+}
+
+/* Feedback Summary Styles */
+.feedback-summary-container {
+  margin: 1rem 0;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.feedback-summary-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #eeeeee;
+  }
+  
+  i:first-child {
+    margin-right: 0.75rem;
+    color: #1A3A5F;
+  }
+  
+  span {
+    flex: 1;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  i:last-child {
+    color: #666;
+  }
+}
+
+.feedback-summary-content {
+  padding: 0.5rem 0;
+}
+
+.feedback-item {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.feedback-level {
+  font-weight: 600;
+  color: #1A3A5F;
+  margin-bottom: 0.25rem;
+}
+
+.feedback-status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  background-color: #e0e0e0;
+  color: #333;
+  
+  &.status-resubmit {
+    background-color: #fff3e0;
+    color: #d84315;
+  }
+}
+
+.feedback-comment {
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-line;
 }

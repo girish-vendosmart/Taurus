@@ -14,15 +14,15 @@ import { RouterModule } from '@angular/router';
       <nav class="sidebar-nav">
         <ul>
           <li>
-            <a routerLink="/wefab/wefabTeam/supplier-finder" routerLinkActive="active">
-              <i class="bi bi-people"></i>
-              Supplier Finder
-            </a>
-          </li>
-          <li>
             <a routerLink="/wefab/wefabTeam/manage-suppliers" routerLinkActive="active">
               <i class="bi bi-people"></i>
               Manage Suppliers
+            </a>
+          </li>
+          <li>
+            <a routerLink="/wefab/wefabTeam/supplier-finder" routerLinkActive="active">
+              <i class="pi pi-search"></i>
+              Supplier Finder
             </a>
           </li>
         </ul>

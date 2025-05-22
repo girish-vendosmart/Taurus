@@ -7,8 +7,11 @@
           class="status-pending" *ngIf="mainCurrentDataStatusTrack.includes('Under Review')">{{
           mainCurrentDataStatusTrack }}</span>
         <span class="status-completed" *ngIf="mainCurrentDataStatusTrack.includes('Approved')">{{
-          mainCurrentDataStatusTrack }}</span> <span class="status-rejected"
-          *ngIf="mainCurrentDataStatusTrack.includes('Rejected')">{{ mainCurrentDataStatusTrack }}</span>
+          mainCurrentDataStatusTrack }}</span> 
+        <span class="status-rejected" *ngIf="mainCurrentDataStatusTrack.includes('Rejected')">{{ 
+          mainCurrentDataStatusTrack }}</span>
+        <span class="status-update" *ngIf="mainCurrentDataStatusTrack.includes('Request to Resubmit')">{{ 
+          mainCurrentDataStatusTrack }}</span>
       </p>
     </div>
     <!-- View Activity Trail Button -->
@@ -19,6 +22,41 @@
       <i class="pi pi-arrow-left"></i> Back to Profile
     </button>
   </div>
+
+  <!-- Feedback Summary Section -->
+  <!-- <div *ngIf="hasFeedback" class="feedback-summary-container">
+    <div class="feedback-summary-header" (click)="toggleFeedbackSummary()">
+      <i class="pi pi-comments"></i>
+      <span>Feedback Summary</span>
+      <i class="pi" [ngClass]="showFeedbackSummary ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+    </div>
+    
+    <div *ngIf="showFeedbackSummary" class="feedback-summary-content">
+      <div *ngIf="requestToResubmitCommentL1" class="feedback-item">
+        <div class="feedback-level">Basic Information</div>
+        <div class="feedback-status" [ngClass]="{'status-resubmit': getCurrentL1DataStatus === 'Request to Resubmit'}">
+          {{ getCurrentL1DataStatus }}
+        </div>
+        <div class="feedback-comment">{{ requestToResubmitCommentL1 }}</div>
+      </div>
+      
+      <div *ngIf="requestToResubmitCommentL2" class="feedback-item">
+        <div class="feedback-level">Manufacturing Capabilities</div>
+        <div class="feedback-status" [ngClass]="{'status-resubmit': getCurrentL2DataStatus === 'Request to Resubmit'}">
+          {{ getCurrentL2DataStatus }}
+        </div>
+        <div class="feedback-comment">{{ requestToResubmitCommentL2 }}</div>
+      </div>
+      
+      <div *ngIf="requestToResubmitCommentL3" class="feedback-item">
+        <div class="feedback-level">Financial & Additional</div>
+        <div class="feedback-status" [ngClass]="{'status-resubmit': getCurrentL3DataStatus === 'Request to Resubmit'}">
+          {{ getCurrentL3DataStatus }}
+        </div>
+        <div class="feedback-comment">{{ requestToResubmitCommentL3 }}</div>
+      </div>
+    </div>
+  </div> -->
 
   <!-- Main Profile Review Content -->
   <div class="review-content" *ngIf="!showActivityTrail">
@@ -32,10 +70,12 @@
             <i class="pi pi-check-circle" *ngIf="getCurrentL1DataStatus === 'Approved'"></i>
             <i class="pi pi-exclamation-triangle" style="color: orange;"
               *ngIf="getCurrentL1DataStatus === 'Under Review'"></i>
+            <i class="pi pi-sync" style="color: #3498db;"
+              *ngIf="getCurrentL1DataStatus === 'Request to Resubmit'"></i>
             <span>Stage 1: Basic Information</span>
           </div>
           <!-- Three dot menu for Stage 1 -->
-          <div class="tab-actions" *ngIf="userType === 'wefab_team' && (getCurrentL1DataStatus === 'Under Review' || getCurrentL1DataStatus === 'Update Required')">
+          <div class="tab-actions" *ngIf="userType === 'wefab_team' && (getCurrentL1DataStatus === 'Under Review' || getCurrentL1DataStatus === 'Request to Resubmit')">
             <i class="pi pi-ellipsis-v" (click)="toggleDropdown('L1', $event)" style="cursor: pointer;"></i>
             <div class="tab-dropdown" [class.visible]="dropdownVisible['L1']">
               <div class="dropdown-item" (click)="$event.stopPropagation(); approve('L1')">
@@ -57,10 +97,12 @@
             <i class="pi pi-check-circle" *ngIf="getCurrentL2DataStatus === 'Approved'"></i>
             <i class="pi pi-exclamation-triangle" style="color: orange;"
               *ngIf="getCurrentL2DataStatus === 'Under Review'"></i>
+            <i class="pi pi-sync" style="color: #3498db;"
+              *ngIf="getCurrentL2DataStatus === 'Request to Resubmit'"></i>
             <span>Stage 2: Manufacturing</span>
           </div>
           <!-- Three dot menu for Stage 2 -->
-          <div class="tab-actions" *ngIf="userType === 'wefab_team' && getCurrentL1DataStatus === 'Approved' && (getCurrentL2DataStatus === 'Under Review' || getCurrentL2DataStatus === 'Update Required')">
+          <div class="tab-actions" *ngIf="userType === 'wefab_team' && getCurrentL1DataStatus === 'Approved' && (getCurrentL2DataStatus === 'Under Review' || getCurrentL2DataStatus === 'Request to Resubmit')">
             <i class="pi pi-ellipsis-v" (click)="toggleDropdown('L2', $event)" style="cursor: pointer;"></i>
             <div class="tab-dropdown" [class.visible]="dropdownVisible['L2']">
               <div class="dropdown-item" (click)="$event.stopPropagation(); approve('L2')">
@@ -83,10 +125,12 @@
             <i class="pi pi-check-circle" *ngIf="getCurrentL3DataStatus === 'Approved'"></i>
             <i class="pi pi-exclamation-triangle" style="color: orange;"
               *ngIf="getCurrentL3DataStatus === 'Under Review'"></i>
+            <i class="pi pi-sync" style="color: #3498db;"
+              *ngIf="getCurrentL3DataStatus === 'Request to Resubmit'"></i>
             <span>Stage 3: Financial & Additional</span>
           </div>
           <!-- Three dot menu for Stage 3 -->
-          <div class="tab-actions" *ngIf="userType === 'wefab_team' && getCurrentL1DataStatus === 'Approved' && getCurrentL2DataStatus === 'Approved' && (getCurrentL3DataStatus === 'Under Review' || getCurrentL3DataStatus === 'Update Required')">
+          <div class="tab-actions" *ngIf="userType === 'wefab_team' && getCurrentL1DataStatus === 'Approved' && getCurrentL2DataStatus === 'Approved' && (getCurrentL3DataStatus === 'Under Review' || getCurrentL3DataStatus === 'Request to Resubmit')">
             <i class="pi pi-ellipsis-v" (click)="toggleDropdown('L3', $event)" style="cursor: pointer;"></i>
             <div class="tab-dropdown" [class.visible]="dropdownVisible['L3']">
               <div class="dropdown-item" (click)="$event.stopPropagation(); approve('L3')">
@@ -102,12 +146,30 @@
           </div>
         </button>
       </div>
+      <!-- Resubmit Comment Alert Box -->
+      <div *ngIf="(activeLevelTab === 'basic' && requestToResubmitCommentL1 && getCurrentL1DataStatus === 'Request to Resubmit') || 
+                 (activeLevelTab === 'manufacturing' && requestToResubmitCommentL2 && getCurrentL2DataStatus === 'Request to Resubmit') ||
+                 (activeLevelTab === 'financial' && requestToResubmitCommentL3 && getCurrentL3DataStatus === 'Request to Resubmit')" 
+           class="resubmit-comment-box">
+        <div class="resubmit-header">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span>Resubmission Requested</span>
+        </div>
+        <div class="resubmit-message">
+          <p *ngIf="activeLevelTab === 'basic' && requestToResubmitCommentL1">{{ requestToResubmitCommentL1 }}</p>
+          <p *ngIf="activeLevelTab === 'manufacturing' && requestToResubmitCommentL2">{{ requestToResubmitCommentL2 }}</p>
+          <p *ngIf="activeLevelTab === 'financial' && requestToResubmitCommentL3">{{ requestToResubmitCommentL3 }}</p>
+        </div>
+        <div class="resubmit-actions" *ngIf="userType === 'supplier'">
+          <button pButton type="button" label="Edit & Resubmit" icon="pi pi-pencil" class="p-button-outlined" (click)="navigateToEdit()"></button>
+        </div>
+      </div>
 
       <!-- Basic Information Tab Content - Consolidated View -->
       <div class="tab-content" *ngIf="activeLevelTab === 'basic'">
         <div class="section-header">
           <h2>Basic Information</h2>
-          <button class="edit-section-btn" *ngIf="getCurrentL1DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="(getCurrentL1DataStatus === 'Under Review' || getCurrentL1DataStatus === 'Request to Resubmit') && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
         </div>
@@ -275,7 +337,7 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'manufacturing'">
         <div class="section-header">
           <h2>Manufacturing Capabilities</h2>
-          <button class="edit-section-btn" *ngIf="getCurrentL2DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="(getCurrentL2DataStatus === 'Under Review' || getCurrentL2DataStatus === 'Request to Resubmit') && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
           
@@ -310,6 +372,7 @@
             <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'capacity'"
               (click)="changeManufacturingTab('capacity')">Production Capacity</a>
           </div>
+
 
           <!-- Machine Details Tab -->
           <div class="machines-container">
@@ -521,7 +584,7 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'financial'">
         <div class="section-header">
           <h2>Financial & Additional Information</h2>
-          <button class="edit-section-btn" *ngIf="getCurrentL3DataStatus === 'Under Review' && userType === 'supplier'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="(getCurrentL3DataStatus === 'Under Review' || getCurrentL3DataStatus === 'Request to Resubmit') && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
           

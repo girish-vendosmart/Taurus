@@ -9,6 +9,7 @@ import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
 import { CommonService } from '../../shared/common.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { SweetAlertService } from '../../shared/sweet-alert.service'
 import e from 'express';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -115,6 +116,14 @@ export class SupplierProfileReviewComponent implements OnInit {
   
   // Verification Status
   verificationStatus: any = {}
+  
+  // Request to resubmit comments
+  requestToResubmitCommentL1: string = '';
+  requestToResubmitCommentL2: string = '';
+  requestToResubmitCommentL3: string = '';
+  
+  // Feedback summary controls
+  showFeedbackSummary: boolean = false;
   
   // Financial Data
   financialData = {
@@ -281,18 +290,18 @@ export class SupplierProfileReviewComponent implements OnInit {
     };
     
     // Update based on current approval status
-    // For Stage 1: Under Review or Approved = 100% complete
-    if (this.getCurrentL1DataStatus === 'Approved' || this.getCurrentL1DataStatus === 'Under Review') {
+    // For Stage 1: Under Review, Request to Resubmit, or Approved = 100% complete
+    if (this.getCurrentL1DataStatus === 'Approved' || this.getCurrentL1DataStatus === 'Under Review' || this.getCurrentL1DataStatus === 'Request to Resubmit') {
       this.completionStatus.basicInformation = 100;
     }
     
-    // For Stage 2: Under Review or Approved = 100% complete
-    if (this.getCurrentL2DataStatus === 'Approved' || this.getCurrentL2DataStatus === 'Under Review') {
+    // For Stage 2: Under Review, Request to Resubmit, or Approved = 100% complete
+    if (this.getCurrentL2DataStatus === 'Approved' || this.getCurrentL2DataStatus === 'Under Review' || this.getCurrentL2DataStatus === 'Request to Resubmit') {
       this.completionStatus.manufacturingCapabilities = 100;
     }
     
-    // For Stage 3: Under Review or Approved = 100% complete
-    if (this.getCurrentL3DataStatus === 'Approved' || this.getCurrentL3DataStatus === 'Under Review') {
+    // For Stage 3: Under Review, Request to Resubmit, or Approved = 100% complete
+    if (this.getCurrentL3DataStatus === 'Approved' || this.getCurrentL3DataStatus === 'Under Review' || this.getCurrentL3DataStatus === 'Request to Resubmit') {
       this.completionStatus.financialAdditional = 100;
     }
   }
@@ -325,6 +334,7 @@ export class SupplierProfileReviewComponent implements OnInit {
     private messageService: MessageService,
     private commonservice: CommonService,
     private sanitizer: DomSanitizer,
+    private sweetAlert: SweetAlertService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -556,6 +566,9 @@ export class SupplierProfileReviewComponent implements OnInit {
   getL1Data(supplierId:any) {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
+        if(res.data.comment) {
+          this.requestToResubmitCommentL1 = res.data.comment
+        }
         console.log("L1 Data ", res)
         this.getCompanyProfile = JSON.parse(res.data.company_profile)
         console.log("L1 Data ", this.getCompanyProfile)
@@ -610,6 +623,11 @@ export class SupplierProfileReviewComponent implements OnInit {
     getL2Data(supplierId:any) {
       let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId
         this.commonservice.getData(endPoint).subscribe((res: any) => {
+          debugger
+          console.log("Manufacturing data ", res)
+          if(res.data.comment) {
+            this.requestToResubmitCommentL2 = res.data.comment
+          }
           this.manufacturingData = JSON.parse(res.data.company_profile)
           console.log("Manufacturing data ", this.manufacturingData)
           this.updateMachineData()
@@ -620,6 +638,9 @@ export class SupplierProfileReviewComponent implements OnInit {
       getL3Data(supplierId:any) {
         let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + supplierId
           this.commonservice.getData(endPoint).subscribe((res: any) => {
+            if(res.data.comment) {
+              this.requestToResubmitCommentL3 = res.data.comment
+            }
             this.newFinancialData = JSON.parse(res.data.company_profile)
             this.getL3DataStatus(supplierId)
           })
@@ -657,11 +678,20 @@ export class SupplierProfileReviewComponent implements OnInit {
           if(this.getCurrentL1DataStatus === 'Under Review') {
              this.mainCurrentDataStatusTrack = 'Stage 1: Under Review'
           }
+          else if(this.getCurrentL1DataStatus === 'Request to Resubmit') {
+             this.mainCurrentDataStatusTrack = 'Stage 1: Request to Resubmit'
+          }
           else if(this.getCurrentL2DataStatus === 'Under Review') {
             this.mainCurrentDataStatusTrack = 'Stage 2: Under Review'
           }
+          else if(this.getCurrentL2DataStatus === 'Request to Resubmit') {
+            this.mainCurrentDataStatusTrack = 'Stage 2: Request to Resubmit'
+          }
           else if(this.getCurrentL3DataStatus === 'Under Review') {
             this.mainCurrentDataStatusTrack = 'Stage 3: Under Review'
+          }
+          else if(this.getCurrentL3DataStatus === 'Request to Resubmit') {
+            this.mainCurrentDataStatusTrack = 'Stage 3: Request to Resubmit'
           } else if(this.getCurrentL2DataStatus === 'Rejected') {
             this.mainCurrentDataStatusTrack = 'Stage 2: Rejected'
           } else if(this.getCurrentL3DataStatus === 'Rejected') {
@@ -727,26 +757,35 @@ export class SupplierProfileReviewComponent implements OnInit {
         
 
         approve(level: string) {
-          let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
-          let payload = {
-            "onboarding_status": "Approved"
-          };
-          this.commonservice.putData(endPoint, payload).subscribe({
-            next: (res: any) => {
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: level === 'L1' ? 'Basic Information has been approved' : level === 'L2' ? 'Manufacturing Capabilities has been approved' : 'Financial & Additional has been approved',
-                life: 3000
-              });
-              this.getStatusForm(level, this.supplierId)
-            },
-            error: (error) => {
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: level === 'L1' ? 'Failed to approve Basic Information' : level === 'L2' ? 'Failed to approve Manufacturing Capabilities' : 'Failed to approve Financial & Additional',
-                life: 3000
+          debugger
+          this.sweetAlert.confirm(
+            '',
+            'Are you sure you want to approve this stage?',
+            'question',
+            'Yes',
+            'No'
+          ).then((result:any) => {
+            if (result.isConfirmed) {
+              // User clicked "Yes, Approve"
+              let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
+              let payload = {
+                "onboarding_status": "Approved"
+              };
+              this.commonservice.putData(endPoint, payload).subscribe({
+                next: (res: any) => {
+                  this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: level === 'L1' ? 'Basic Information has been approved' : level === 'L2' ? 'Manufacturing Capabilities has been approved' : 'Financial & Additional has been approved',
+                    life: 3000
+                  });
+                  this.getStatusForm(level, this.supplierId)
+                },
+                error: (error) => {
+                  this.sweetAlert.error(
+                    'Failed to approve stage'
+                  );
+                }
               });
             }
           });
@@ -763,27 +802,38 @@ export class SupplierProfileReviewComponent implements OnInit {
         }
 
         reject(level: string) {
-          let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
-          let payload = {
-            "onboarding_status": "Rejected"
-          };
-          this.commonservice.putData(endPoint, payload).subscribe({
-            next: (res: any) => {
-              this.getL1DataStatus(this.supplierId);
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: level === 'L1' ? 'Basic Information has been rejected' : level === 'L2' ? 'Manufacturing Capabilities has been rejected' : 'Financial & Additional has been rejected',
-                life: 3000
-              });
-              this.getStatusForm(level, this.supplierId)
-            },
-            error: (error) => {
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: level === 'L1' ? 'Failed to reject Basic Information' : level === 'L2' ? 'Failed to reject Manufacturing Capabilities' : 'Failed to reject Financial & Additional',
-                life: 3000
+          this.sweetAlert.confirm(
+            '',
+            'Are you sure you want to reject this stage?',
+            'question',
+            'Yes',
+            'No'
+          ).then((result:any) => {
+            if (result.isConfirmed) {
+              // User clicked "Yes, Approve"
+              let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
+              let payload = {
+                "onboarding_status": "Rejected"
+              };
+              this.commonservice.putData(endPoint, payload).subscribe({
+                next: (res: any) => {
+                  this.getL1DataStatus(this.supplierId);
+                  this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: level === 'L1' ? 'Basic Information has been rejected' : level === 'L2' ? 'Manufacturing Capabilities has been rejected' : 'Financial & Additional has been rejected',
+                    life: 3000
+                  });
+                  this.getStatusForm(level, this.supplierId)
+                },
+                error: (error) => {
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: level === 'L1' ? 'Failed to reject Basic Information' : level === 'L2' ? 'Failed to reject Manufacturing Capabilities' : 'Failed to reject Financial & Additional',
+                    life: 3000
+                  });
+                }
               });
             }
           });
@@ -792,7 +842,8 @@ export class SupplierProfileReviewComponent implements OnInit {
         requestUpdate(level: string) {
           let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
           let payload = {
-            "onboarding_status": "Update Required"
+            "onboarding_status": "Request to Resubmit",
+            "comment": this.updateRequestComment
           };
           this.commonservice.putData(endPoint, payload).subscribe({
             next: (res: any) => {
@@ -1146,8 +1197,8 @@ export class SupplierProfileReviewComponent implements OnInit {
     const level = this.updateRequestLevel;
     let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
     let payload = {
-      "onboarding_status": "Update Required",
-      "update_request_comment": this.updateRequestComment
+      "onboarding_status": "Request to Resubmit",
+      "comment": this.updateRequestComment
     };
     
     this.commonservice.putData(endPoint, payload).subscribe({
@@ -1172,5 +1223,15 @@ export class SupplierProfileReviewComponent implements OnInit {
         });
       }
     });
+  }
+
+  // Add this getter to check if there is any feedback to show
+  get hasFeedback(): boolean {
+    return !!(this.requestToResubmitCommentL1 || this.requestToResubmitCommentL2 || this.requestToResubmitCommentL3);
+  }
+
+  // Add this method to toggle the feedback summary visibility
+  toggleFeedbackSummary(): void {
+    this.showFeedbackSummary = !this.showFeedbackSummary;
   }
 } 

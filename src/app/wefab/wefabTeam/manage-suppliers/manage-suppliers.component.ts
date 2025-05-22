@@ -137,7 +137,7 @@ interface Supplier {
               <thead>
                 <tr>
                   <th>
-                    <div class="header-cell" (click)="sortInvited('company_name')">
+                    <div class="header-cell-invited" (click)="sortInvited('company_name')">
                       <span>Company</span>
                       <i class="pi" [ngClass]="getSortIconInvited('company_name')"></i>
                     </div>
@@ -147,7 +147,7 @@ interface Supplier {
                     </div>
                   </th>
                   <th>
-                    <div class="header-cell" (click)="sortInvited('supplier_email_id')">
+                    <div class="header-cell-invited" (click)="sortInvited('supplier_email_id')">
                       <span>Contact</span>
                       <i class="pi" [ngClass]="getSortIconInvited('supplier_email_id')"></i>
                     </div>
@@ -157,7 +157,7 @@ interface Supplier {
                     </div>
                   </th>
                   <th>
-                    <div class="header-cell" (click)="sortInvited('status')">
+                    <div class="header-cell-invited" (click)="sortInvited('status')">
                       <span>Status</span>
                       <i class="pi" [ngClass]="getSortIconInvited('status')"></i>
                     </div>
@@ -325,6 +325,12 @@ interface Supplier {
 
     .project-name:hover {
       text-decoration: underline;
+    }
+
+    .header-cell-invited {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .header-cell {
