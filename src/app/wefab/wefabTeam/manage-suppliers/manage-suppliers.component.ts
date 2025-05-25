@@ -18,6 +18,7 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { TagModule } from 'primeng/tag';
 import { SweetAlertService } from '../../shared/sweet-alert.service'
 
 interface Supplier {
@@ -30,6 +31,7 @@ interface Supplier {
   project_type?: string;
   location?: string;
   created_at?: string;
+  resubmit_request?: boolean;
 }
 
 @Component({
@@ -51,7 +53,8 @@ interface Supplier {
     TabViewModule,
     MenuModule,
     FormsModule,
-    OverlayPanelModule
+    OverlayPanelModule,
+    TagModule
   ],
   providers: [MessageService],
   template: `
@@ -101,7 +104,7 @@ interface Supplier {
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let supplier of filteredSuppliers">
+                <tr *ngFor="let supplier of paginatedSuppliers">
                   <td>
                   <div class="project-name" (click)="viewSupplierProfile(supplier)">{{ supplier.company_name }}</div>
                     <div class="sub-id">{{ supplier.name }}</div>
@@ -111,8 +114,11 @@ interface Supplier {
                     <div class="sub-id">{{ supplier.primary_phone_number }}</div>
                   </td>
                   <td>
-                    <span class="status-badge" [ngClass]="getStatusClass(supplier.onboarding_status)">
+                    <span class="status-badge" [ngClass]="getStatusClass(supplier.onboarding_status)" *ngIf="supplier.onboarding_status !== 'Request to Resubmit'">
                       {{ supplier.onboarding_status }}
+                    </span>
+                    <span class="status-badge status-review " [ngClass]="getStatusClass(supplier.onboarding_status)" *ngIf="supplier.onboarding_status == 'Request to Resubmit'">
+                      Request to Resubmit
                     </span>
                   </td>
                 </tr>
@@ -121,14 +127,22 @@ interface Supplier {
             
             <div class="pagination-footer">
               <div class="pagination-info">
-                Showing 1 to {{ filteredSuppliers.length }} of {{ filteredSuppliers.length }} entries
+                Showing {{ firstSupplier }} to {{ lastSupplier }} of {{ filteredSuppliers.length }} entries
               </div>
               <div class="pagination-controls">
-                <button pButton type="button" icon="pi pi-angle-double-left" class="p-button-text p-button-sm"></button>
-                <button pButton type="button" icon="pi pi-angle-left" class="p-button-text p-button-sm"></button>
-                <button pButton type="button" label="1" class="p-button-sm p-button-primary"></button>
-                <button pButton type="button" icon="pi pi-angle-right" class="p-button-text p-button-sm"></button>
-                <button pButton type="button" icon="pi pi-angle-double-right" class="p-button-text p-button-sm"></button>
+                <button pButton type="button" icon="pi pi-angle-double-left" class="p-button-text p-button-sm" 
+                  (click)="onPageChange(0)" [disabled]="supplierCurrentPage === 0"></button>
+                <button pButton type="button" icon="pi pi-angle-left" class="p-button-text p-button-sm"
+                  (click)="onPageChange(supplierCurrentPage - 1)" [disabled]="supplierCurrentPage === 0"></button>
+                <ng-container *ngFor="let page of getSupplierPages(); let i = index">
+                  <button pButton type="button" [label]="(i+1).toString()" 
+                    [class]="i === supplierCurrentPage ? 'p-button-sm p-button-primary' : 'p-button-sm p-button-text'"
+                    (click)="onPageChange(i)"></button>
+                </ng-container>
+                <button pButton type="button" icon="pi pi-angle-right" class="p-button-text p-button-sm"
+                  (click)="onPageChange(supplierCurrentPage + 1)" [disabled]="supplierCurrentPage === getTotalSupplierPages() - 1"></button>
+                <button pButton type="button" icon="pi pi-angle-double-right" class="p-button-text p-button-sm"
+                  (click)="onPageChange(getTotalSupplierPages() - 1)" [disabled]="supplierCurrentPage === getTotalSupplierPages() - 1"></button>
               </div>
             </div>
           </p-tabPanel>
@@ -170,7 +184,7 @@ interface Supplier {
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let invite of filteredInvitedSuppliers">
+                <tr *ngFor="let invite of paginatedInvitedSuppliers">
                   <td>
                     <div class="project-name">{{ invite.company_name }}</div>
                     <div class="sub-id">{{ invite.supplier_name }}</div>
@@ -192,14 +206,22 @@ interface Supplier {
             
             <div class="pagination-footer">
               <div class="pagination-info">
-                Showing 1 to {{ filteredInvitedSuppliers.length }} of {{ filteredInvitedSuppliers.length }} entries
+                Showing {{ firstInvited }} to {{ lastInvited }} of {{ filteredInvitedSuppliers.length }} entries
               </div>
               <div class="pagination-controls">
-                <button pButton type="button" icon="pi pi-angle-double-left" class="p-button-text p-button-sm"></button>
-                <button pButton type="button" icon="pi pi-angle-left" class="p-button-text p-button-sm"></button>
-                <button pButton type="button" label="1" class="p-button-sm p-button-primary"></button>
-                <button pButton type="button" icon="pi pi-angle-right" class="p-button-text p-button-sm"></button>
-                <button pButton type="button" icon="pi pi-angle-double-right" class="p-button-text p-button-sm"></button>
+                <button pButton type="button" icon="pi pi-angle-double-left" class="p-button-text p-button-sm"
+                  (click)="onInvitedPageChange(0)" [disabled]="invitedCurrentPage === 0"></button>
+                <button pButton type="button" icon="pi pi-angle-left" class="p-button-text p-button-sm"
+                  (click)="onInvitedPageChange(invitedCurrentPage - 1)" [disabled]="invitedCurrentPage === 0"></button>
+                <ng-container *ngFor="let page of getInvitedPages(); let i = index">
+                  <button pButton type="button" [label]="(i+1).toString()" 
+                    [class]="i === invitedCurrentPage ? 'p-button-sm p-button-primary' : 'p-button-sm p-button-text'"
+                    (click)="onInvitedPageChange(i)"></button>
+                </ng-container>
+                <button pButton type="button" icon="pi pi-angle-right" class="p-button-text p-button-sm"
+                  (click)="onInvitedPageChange(invitedCurrentPage + 1)" [disabled]="invitedCurrentPage === getTotalInvitedPages() - 1"></button>
+                <button pButton type="button" icon="pi pi-angle-double-right" class="p-button-text p-button-sm"
+                  (click)="onInvitedPageChange(getTotalInvitedPages() - 1)" [disabled]="invitedCurrentPage === getTotalInvitedPages() - 1"></button>
               </div>
             </div>
           </p-tabPanel>
@@ -352,6 +374,10 @@ interface Supplier {
       margin-top: 5px;
     }
 
+    .status-container {
+      margin-bottom: 5px;
+    }
+    
     .status-badge {
       display: inline-block;
       padding: 5px 12px;
@@ -360,7 +386,7 @@ interface Supplier {
       text-align: center;
       font-weight: 500;
     }
-
+    
     .status-active {
       background-color: #e8f5e9;
       color: #1b9b62;
@@ -389,6 +415,11 @@ interface Supplier {
     .status-rejected {
       background-color: #f8d7da;
       color: #721c24;
+    }
+    
+    .status-resubmit {
+      background-color: #e0f7fa !important;
+      color: #0288d1;
     }
 
     .actions-column {
@@ -531,6 +562,8 @@ export class ManageSuppliersComponent implements OnInit {
   invitedSuppliers: any[] = [];
   filteredSuppliers: Supplier[] = [];
   filteredInvitedSuppliers: any[] = [];
+  paginatedSuppliers: Supplier[] = [];
+  paginatedInvitedSuppliers: any[] = [];
   inviteDialogVisible = false;
   inviteForm: FormGroup;
   isSubmitting = false;
@@ -543,11 +576,11 @@ export class ManageSuppliersComponent implements OnInit {
   supplierMenuItems: MenuItem[] = [];
   invitedMenuItems: MenuItem[] = [];
   
-  // Sorting state
-  sortField: string = 'company_name';
-  sortOrder: number = 1; // 1 for ascending, -1 for descending
-  invitedSortField: string = 'company_name';
-  invitedSortOrder: number = 1;
+  // Sorting state - Set default to sort by latest first
+  sortField: string = 'created_at';
+  sortOrder: number = -1; // -1 for descending (newest first)
+  invitedSortField: string = 'creation';
+  invitedSortOrder: number = -1; // -1 for descending (newest first)
   
   // Filtering state
   filters = {
@@ -561,6 +594,18 @@ export class ManageSuppliersComponent implements OnInit {
     contact: '',
     status: ''
   };
+
+  // Pagination
+  supplierRowsPerPage = 10;
+  supplierCurrentPage = 0;
+  invitedRowsPerPage = 10;
+  invitedCurrentPage = 0;
+  
+  // Pagination display values
+  firstSupplier = 1;
+  lastSupplier = 10;
+  firstInvited = 1;
+  lastInvited = 10;
 
   // References to menu components
   @ViewChild('actionMenu') actionMenu: any;
@@ -617,12 +662,13 @@ export class ManageSuppliersComponent implements OnInit {
   }
 
   loadSuppliers() {
-    const endPoint = '/api/resource/wfb_supplier_onboarding_L1?fields=["*"]&limit_page_length=0';
+    const endPoint = '/api/resource/wfb_supplier_onboarding_L1?fields=["*"]&limit_page_length=0&order_by=modified desc';
     this.commonService.getData(endPoint).subscribe({
       next: (response: any) => {
         this.suppliers = response.data;
         this.filteredSuppliers = [...this.suppliers];
         this.sortSuppliers();
+        this.paginate();
       },
       error: (error) => {
         console.error('Error loading suppliers:', error);
@@ -632,12 +678,13 @@ export class ManageSuppliersComponent implements OnInit {
   }
 
   loadInvitedSuppliers() {
-    const endPoint = '/api/resource/wfb_supplier_invitation?fields=["*"]';
+    const endPoint = '/api/resource/wfb_supplier_invitation?fields=["*"]&limit_page_length=0&order_by=modified desc';
     this.commonService.getData(endPoint).subscribe({
       next: (response: any) => {
         this.invitedSuppliers = response.data;
         this.filteredInvitedSuppliers = [...this.invitedSuppliers];
         this.sortInvitedSuppliers();
+        this.paginateInvited();
       },
       error: (error) => {
         console.error('Error loading invited suppliers:', error);
@@ -655,6 +702,7 @@ export class ManageSuppliersComponent implements OnInit {
       this.sortOrder = 1;
     }
     this.sortSuppliers();
+    this.paginate();
   }
   
   sortInvited(field: string) {
@@ -665,6 +713,7 @@ export class ManageSuppliersComponent implements OnInit {
       this.invitedSortOrder = 1;
     }
     this.sortInvitedSuppliers();
+    this.paginateInvited();
   }
   
   sortSuppliers() {
@@ -712,6 +761,8 @@ export class ManageSuppliersComponent implements OnInit {
       );
     });
     this.sortSuppliers();
+    this.supplierCurrentPage = 0; // Reset to first page
+    this.paginate();
   }
   
   applyInvitedFilters() {
@@ -726,6 +777,55 @@ export class ManageSuppliersComponent implements OnInit {
       );
     });
     this.sortInvitedSuppliers();
+    this.invitedCurrentPage = 0; // Reset to first page
+    this.paginateInvited();
+  }
+
+  // Pagination functions
+  paginate() {
+    const start = this.supplierCurrentPage * this.supplierRowsPerPage;
+    const end = start + this.supplierRowsPerPage;
+    this.paginatedSuppliers = this.filteredSuppliers.slice(start, end);
+    
+    this.firstSupplier = this.filteredSuppliers.length > 0 ? start + 1 : 0;
+    this.lastSupplier = Math.min(end, this.filteredSuppliers.length);
+  }
+  
+  paginateInvited() {
+    const start = this.invitedCurrentPage * this.invitedRowsPerPage;
+    const end = start + this.invitedRowsPerPage;
+    this.paginatedInvitedSuppliers = this.filteredInvitedSuppliers.slice(start, end);
+    
+    this.firstInvited = this.filteredInvitedSuppliers.length > 0 ? start + 1 : 0;
+    this.lastInvited = Math.min(end, this.filteredInvitedSuppliers.length);
+  }
+  
+  onPageChange(page: number) {
+    this.supplierCurrentPage = page;
+    this.paginate();
+  }
+  
+  onInvitedPageChange(page: number) {
+    this.invitedCurrentPage = page;
+    this.paginateInvited();
+  }
+  
+  getTotalSupplierPages(): number {
+    return Math.ceil(this.filteredSuppliers.length / this.supplierRowsPerPage);
+  }
+  
+  getTotalInvitedPages(): number {
+    return Math.ceil(this.filteredInvitedSuppliers.length / this.invitedRowsPerPage);
+  }
+  
+  getSupplierPages(): number[] {
+    const totalPages = this.getTotalSupplierPages();
+    return Array.from({ length: totalPages }, (_, i) => i);
+  }
+  
+  getInvitedPages(): number[] {
+    const totalPages = this.getTotalInvitedPages();
+    return Array.from({ length: totalPages }, (_, i) => i);
   }
 
   showInviteDialog() {
@@ -746,13 +846,13 @@ export class ManageSuppliersComponent implements OnInit {
     
     if (status.includes('active') || status.includes('approved')) {
       return 'status-active';
-    } else if (status.includes('pending') || status.includes('invited')) {
+    } else if (status.includes('pending') || status.includes('invited') || status.includes('Request to Resubmit')) {
       return 'status-pending';
     } else if (status.includes('complete')) {
       return 'status-completed';
-    } else if (status.includes('progress')) {
+    } else if (status.includes('progress') || status.includes('Request to Resubmit')) {
       return 'status-inprogress';
-    } else if (status.includes('review')) {
+    } else if (status.includes('review') || status.includes('Request to Resubmit')) {
       return 'status-review';
     } else if (status.includes('reject') || status.includes('declined')) {
       return 'status-rejected';
@@ -769,8 +869,8 @@ export class ManageSuppliersComponent implements OnInit {
         next: (response) => {
           this.sweetAlert.success('Supplier invitation sent successfully!');
           this.hideInviteDialog();
+          this.loadInvitedSuppliers(); // Refresh invited list immediately after sending
           this.loadSuppliers();
-          this.loadInvitedSuppliers(); // Refresh invited list
         },
         error: (error) => {
           console.error('Error inviting supplier:', error);
@@ -802,18 +902,12 @@ export class ManageSuppliersComponent implements OnInit {
           company_name: invite.company_name,
           supplier_email_id: invite.supplier_email_id,
         }
-        this.commonService.postData('/api/resource/wfb_supplier_invitation', data).subscribe((res: any) => {
+        this.commonService.postData('/api/method/proq_buyer.wefab.api.supplier.supplier_manager.resend_supplier_invitation', data).subscribe((res: any) => {
           this.sweetAlert.success('Invitation resent successfully');
+          this.loadInvitedSuppliers(); // Refresh the invited list after resending
         });
       }
     });
-    // this.sweetAlert.confirm(
-    //   '',
-    // ).then((result:any) => {
-    //   if (result.isConfirmed) {
-    //     this.sweetAlert.success('Invitation resent successfully');
-    //   }
-    // });
   }
 
   accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
