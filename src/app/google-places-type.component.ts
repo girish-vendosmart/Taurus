@@ -42,10 +42,46 @@ export class FormlyFieldGooglePlacesComponent extends FieldType<FieldTypeConfig>
       // Store the full address data in the form control
       this.formControl.setValue(address);
       
+      // Automatically fill country, state and city fields regardless of updateFields setting
+      const form = this.form;
+      
+      // Try to update country field
+      if (form.get('country') && address.country) {
+        form.get('country')!.setValue(address.country);
+        form.get('country')!.markAsDirty();
+        form.get('country')!.updateValueAndValidity();
+        
+        // Trigger any change events that might be needed to load states
+        const countryControl = form.get('country');
+        if (countryControl) {
+          const event = new Event('change', { bubbles: true });
+          setTimeout(() => {
+            // Give time for Angular to process the value change
+            const formField = document.querySelector(`[formcontrolname="country"]`) as HTMLElement;
+            if (formField) formField.dispatchEvent(event);
+          }, 100);
+        }
+      }
+      
+      // Try to update state field after a short delay to allow country-dependent state list to load
+      setTimeout(() => {
+        if (form.get('state') && address.state) {
+          form.get('state')!.setValue(address.state);
+          form.get('state')!.markAsDirty();
+          form.get('state')!.updateValueAndValidity();
+        }
+      }, 500);
+      
+      // Try to update city field
+      if (form.get('city') && address.city) {
+        form.get('city')!.setValue(address.city);
+        form.get('city')!.markAsDirty();
+        form.get('city')!.updateValueAndValidity();
+      }
+      
       // If there are parent field keys for specific address parts, update them
       if (this.to.updateFields) {
         const fields = this.to.updateFields;
-        const form = this.form;
         
         // Update each field with the corresponding address data
         Object.keys(fields).forEach(key => {

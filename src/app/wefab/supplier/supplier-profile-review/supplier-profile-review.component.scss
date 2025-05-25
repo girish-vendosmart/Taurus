@@ -1700,6 +1700,13 @@
   }
 }
 
+// Add styling for missing data text
+.no-data-text {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
 @import '../../../../assets/scss/variables.scss';
 
 // Profile review container

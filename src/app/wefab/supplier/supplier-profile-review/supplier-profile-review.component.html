@@ -3,15 +3,20 @@
   <div class="review-header">
     <div class="header-left">
       <h1 class="review-title">Supplier Profile Review</h1>
-      <p class="review-subtitle">Status: <span
-          class="status-pending" *ngIf="mainCurrentDataStatusTrack.includes('Under Review')">{{
-          mainCurrentDataStatusTrack }}</span>
-        <span class="status-completed" *ngIf="mainCurrentDataStatusTrack.includes('Approved')">{{
-          mainCurrentDataStatusTrack }}</span> 
-        <span class="status-rejected" *ngIf="mainCurrentDataStatusTrack.includes('Rejected')">{{ 
-          mainCurrentDataStatusTrack }}</span>
-        <span class="status-update" *ngIf="mainCurrentDataStatusTrack.includes('Request to Resubmit')">{{ 
-          mainCurrentDataStatusTrack }}</span>
+      <p class="review-subtitle">Status: 
+        <span class="status-pending" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Under Review')">
+          {{ mainCurrentDataStatusTrack }}
+        </span>
+        <span class="status-completed" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Approved')">
+          {{ mainCurrentDataStatusTrack }}
+        </span> 
+        <span class="status-rejected" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Rejected')">
+          {{ mainCurrentDataStatusTrack }}
+        </span>
+        <span class="status-update" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Request to Resubmit')">
+          {{ mainCurrentDataStatusTrack }}
+        </span>
+        <span class="status-pending" *ngIf="!mainCurrentDataStatusTrack">Pending</span>
       </p>
     </div>
     <!-- View Activity Trail Button -->
@@ -176,8 +181,25 @@
           </button>
         </div>
 
+        <!-- Zero State for Basic Information -->
+        <div *ngIf="!getCompanyProfile" class="zero-state-container">
+          <div class="zero-state-content">
+            <i class="pi pi-info-circle zero-state-icon"></i>
+            <h3>No Basic Information Available</h3>
+            <div *ngIf="userType === 'supplier'">
+              <p>Please complete your basic company information to enhance your supplier profile.</p>
+              <button class="btn btn-primary add-data-btn" (click)="navigateToEdit()">
+                <i class="pi pi-plus"></i> Add Basic Information
+              </button>
+            </div>
+            <div *ngIf="userType === 'wefab_team'">
+              <p>The supplier has not yet provided their basic information.</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Combined Basic Information Content -->
-        <div class="consolidated-info">
+        <div class="consolidated-info" *ngIf="getCompanyProfile">
           <!-- Company Profile Section -->
           <div class="info-section">
             <div class="info-section-header">
@@ -235,13 +257,31 @@
                 <div class="info-card">
                   <div class="info-label">Website URL</div>
                   <div class="info-value">
-                    <a [href]="getCompanyProfile.websiteURL" target="_blank" rel="noopener noreferrer">{{ getCompanyProfile.websiteURL }}</a>
+                    <a *ngIf="getCompanyProfile.websiteURL && getCompanyProfile.websiteURL.trim()" 
+                       [href]="getCompanyProfile.websiteURL" 
+                       target="_blank" 
+                       rel="noopener noreferrer">
+                      {{ getCompanyProfile.websiteURL }}
+                    </a>
+                    <span *ngIf="!getCompanyProfile.websiteURL || !getCompanyProfile.websiteURL.trim()" 
+                          class="no-data-text">
+                      Not provided
+                    </span>
                   </div>
                 </div>
                 <div class="info-card">
                   <div class="info-label">LinkedIn URL</div>
                   <div class="info-value">
-                    <a [href]="getCompanyProfile.linkedinURL" target="_blank" rel="noopener noreferrer">{{ getCompanyProfile.linkedinURL }}</a>
+                    <a *ngIf="getCompanyProfile.linkedinURL && getCompanyProfile.linkedinURL.trim()" 
+                       [href]="getCompanyProfile.linkedinURL" 
+                       target="_blank" 
+                       rel="noopener noreferrer">
+                      {{ getCompanyProfile.linkedinURL }}
+                    </a>
+                    <span *ngIf="!getCompanyProfile.linkedinURL || !getCompanyProfile.linkedinURL.trim()" 
+                          class="no-data-text">
+                      Not provided
+                    </span>
                   </div>
                 </div>
                 <div class="info-card">
@@ -356,6 +396,9 @@
               <button class="btn btn-primary add-data-btn" (click)="navigateToEdit()">
                 <i class="pi pi-plus"></i> Add Manufacturing Details
               </button>
+            </div>
+            <div *ngIf="userType === 'wefab_team'">
+              <p>The supplier has not yet provided their manufacturing capabilities information.</p>
             </div>
           </div>
         </div>
@@ -603,6 +646,9 @@
               <button class="btn btn-primary add-data-btn" (click)="navigateToEdit()">
               <i class="pi pi-plus"></i> Add Financial Details
             </button>
+            </div>
+            <div *ngIf="userType === 'wefab_team'">
+              <p>The supplier has not yet provided their financial information.</p>
             </div>
           </div>
         </div>
@@ -886,36 +932,30 @@
           Verification Status
         </h2>
 
+
         <ul class="verification-list">
           <li class="verification-item">
-            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.phone_number_verification"></i>
+            <i class="pi pi-check-circle verified-icon" *ngIf="phoneVerified"></i>
             <i class="pi pi-exclamation-triangle pending-icon"
-              *ngIf="!verificationStatus.phone_number_verification"></i>
-            <span *ngIf="verificationStatus.phone_number_verification">Phone Number Verified</span>
-            <span class="verification-label" *ngIf="!verificationStatus.phone_number_verification">Phone Number
+              *ngIf="!phoneVerified"></i>
+            <span *ngIf="phoneVerified">Phone Number Verified</span>
+            <span class="verification-label" *ngIf="!phoneVerified">Phone Number
               Verification Pending</span>
           </li>
           <li class="verification-item">
-            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus?.gst_verification_status"></i>
-            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!verificationStatus?.gst_verification_status"></i>
-            <span *ngIf="verificationStatus?.gst_verification_status">GSTIN Verified</span>
-            <span class="verification-label" *ngIf="!verificationStatus?.gst_verification_status">GSTIN Verification
+            <i class="pi pi-check-circle verified-icon" *ngIf="gstVerified"></i>
+            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!gstVerified"></i>
+            <span *ngIf="gstVerified">GSTIN Verified</span>
+            <span class="verification-label" *ngIf="!gstVerified">GSTIN Verification
               Pending</span>
-          </li>
-          <li class="verification-item">
-            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.address_verification"></i>
-            <i class="pi pi-exclamation-triangle pending-icon"
-              *ngIf="!verificationStatus.address_verification"></i>
-            <span *ngIf="verificationStatus.address_verification">Address Verified</span>
-            <span class="verification-label" *ngIf="!verificationStatus.address_verification">Address Verification Pending</span>
           </li>
           <!-- Machine Photos Verification -->
           <li class="verification-item">
-            <i class="pi pi-check-circle verified-icon" *ngIf="verificationStatus.machine_photo_verification"></i>
+            <i class="pi pi-check-circle verified-icon" *ngIf="facilityVerified"></i>
             <i class="pi pi-exclamation-triangle pending-icon"
-              *ngIf="!verificationStatus.machine_photo_verification"></i>
-            <span *ngIf="verificationStatus.machine_photo_verification">Facility Photos Verified</span>
-            <span class="verification-label" *ngIf="!verificationStatus.machine_photo_verification">Facility Photos
+              *ngIf="!facilityVerified"></i>
+            <span *ngIf="facilityVerified">Facility Photos Verified</span>
+            <span class="verification-label" *ngIf="!facilityVerified">Facility Photos
               Pending Review</span>
           </li>
         </ul>

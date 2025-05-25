@@ -29,11 +29,6 @@ import { CommonService } from '../app/wefab/shared/common.service';
         (companyNameChanged)="onCompanyNameChanged($event)"
         [class.is-invalid]="showError">
       </app-gst-verify-field>
-      
-      <div *ngIf="showError" class="invalid-feedback d-block gst-error">
-        <i class="pi pi-exclamation-triangle" style="margin-right: 0.4rem;"></i>
-        <formly-validation-message [field]="field"></formly-validation-message>
-      </div>
     </div>
   `
 })

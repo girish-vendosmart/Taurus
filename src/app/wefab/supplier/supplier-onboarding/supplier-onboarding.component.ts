@@ -148,16 +148,36 @@ export class SupplierOnboardingComponent implements OnInit {
           
           // Use setTimeout to ensure the UI has time to update
           setTimeout(() => {
-            // Update the model directly
-            this.model.state = this.selectedState;
+            // Find if our selected state exists in the loaded state list
+            const stateExists = this.stateList.some(
+              (option: any) => option.value === this.selectedState
+            );
             
-            // Also update the form control
-            const stateControl = this.form.get('state');
-            if (stateControl) {
-              stateControl.setValue(this.selectedState);
-              stateControl.markAsDirty();
-              stateControl.updateValueAndValidity();
-              console.log('State control updated with:', this.selectedState);
+            if (stateExists) {
+              // Update the model directly
+              this.model.state = this.selectedState;
+              
+              // Also update the form control
+              const stateControl = this.form.get('state');
+              if (stateControl) {
+                stateControl.setValue(this.selectedState);
+                stateControl.markAsDirty();
+                stateControl.updateValueAndValidity();
+                console.log('State control updated with:', this.selectedState);
+                
+                // Now that state is set, try to get cities and set city value if we have one
+                if (this.getCompanyProfile && this.getCompanyProfile.city) {
+                  this.getCities(country, this.selectedState);
+                  // Set city after a delay to allow cities to load
+                  setTimeout(() => {
+                    this.setCityValue(this.getCompanyProfile.city);
+                  }, 500);
+                }
+              }
+            } else {
+              console.log('Selected state not found in loaded state list:', this.selectedState);
+              // Reset the selectedState since it doesn't exist in the loaded list
+              this.selectedState = null;
             }
             
             // Update the state dropdown options and mark as dirty
@@ -278,8 +298,14 @@ export class SupplierOnboardingComponent implements OnInit {
       if (res && res.data && res.data.company_profile) {
         try {
           this.getCompanyProfile = JSON.parse(res.data.company_profile);
-          this.phoneVerified = this.getCompanyProfile.phone_verified;
+          this.phoneVerified = this.getCompanyProfile.phone_verified || false;
+          
+          // Load GST verification status from the API response
+          this.gstVerified = this.getCompanyProfile.gstVerified || res.data.gst_verified || false;
+          
           console.log('Company profile loaded:', this.getCompanyProfile);
+          console.log('Phone verified status:', this.phoneVerified);
+          console.log('GST verified status:', this.gstVerified);
           
           // Wait for the form to be initialized before patching values
           setTimeout(() => {
@@ -302,11 +328,14 @@ export class SupplierOnboardingComponent implements OnInit {
     
     console.log('Patching form with values:', this.getCompanyProfile);
     
-    // First, store the state if it exists
+    // First, store the state and city if they exist
     if (this.getCompanyProfile.state) {
       this.selectedState = this.getCompanyProfile.state;
       console.log('Stored selected state:', this.selectedState);
     }
+
+    // Store the city for later use
+    let selectedCity = this.getCompanyProfile.city;
 
     // Properly format registeredAddress according to AddressData interface
     this.formatGooglePlacesAddress();
@@ -336,13 +365,24 @@ export class SupplierOnboardingComponent implements OnInit {
         registeredAddress: this.getCompanyProfile.registeredAddress
       })
     }
+    
     // Patch form values with a slight delay to ensure form is ready
     setTimeout(() => {
       // First patch all other fields
       this.form.patchValue(this.model);
       
+      // Update GST field verification status after form is patched
+      this.updateGstFieldVerificationStatus();
+      
       // Then handle Google Places separately with specialized approach
       this.patchGooglePlacesField(0);
+
+      // Handle city prefill after states are loaded
+      if (selectedCity && this.selectedCountry && this.selectedState) {
+        setTimeout(() => {
+          this.setCityValue(selectedCity);
+        }, 1000); // Give time for states to load
+      }
 
       // Mark form as touched/dirty
       this.form.markAsDirty();
@@ -573,6 +613,11 @@ export class SupplierOnboardingComponent implements OnInit {
                   parentComponent: this,
                   isVerified: this.gstVerified
                 },
+                expressionProperties: {
+                  'templateOptions.required': '!model.noGst',
+                  'templateOptions.isVerified': () => this.gstVerified,
+                  'hide': 'model.noGst'
+                },
                 validators: {
                   validation: [gstValidator]
                 },
@@ -581,10 +626,6 @@ export class SupplierOnboardingComponent implements OnInit {
                     required: 'Please enter your GSTIN number',
                     gstFormat: 'Invalid GSTIN format'
                   }
-                },
-                expressionProperties: {
-                  'templateOptions.required': '!model.noGst',
-                  'hide': 'model.noGst'
                 }
               },
               {
@@ -660,6 +701,9 @@ export class SupplierOnboardingComponent implements OnInit {
               messages: {
                 required: 'Please enter your email id'
               }
+            },
+            expressionProperties: {
+              'className': '(formState.disabled || to.disabled) ? "col-md-6 mb-2 disabled-field" : "col-md-6 mb-2"'
             }
           },
           {
@@ -671,10 +715,16 @@ export class SupplierOnboardingComponent implements OnInit {
               label: 'Registered Address',
               placeholder: 'Search for your registered address',
               required: true,
-              _cachedAddress: this.getCompanyProfile?.registeredAddress || null // Store address for direct access
+              _cachedAddress: this.getCompanyProfile?.registeredAddress || null, // Store address for direct access
+              updateFields: {
+                'country': 'country',
+                'state': 'state', 
+                'city': 'city'
+              }
             },
             expressionProperties: {
-              'templateOptions.disabled': 'formState.disabled'
+              'templateOptions.disabled': 'formState.disabled',
+              'className': '(formState.disabled || to.disabled) ? "col-md-6 mb-3 disabled-field" : "col-md-6 mb-3"'
             },
             validation: {
               messages: {
@@ -696,6 +746,29 @@ export class SupplierOnboardingComponent implements OnInit {
                     }
                   }, 300);
                 }
+
+                // Watch for address changes to update country, state, city
+                field.formControl?.valueChanges.subscribe(value => {
+                  if (value && typeof value === 'object') {
+                    console.log('Address changed:', value);
+                    // Auto-update country
+                    if (value.country && field.form?.get('country')) {
+                      field.form.get('country')!.setValue(value.country);
+                      // Trigger getStates method
+                      this.selectedCountry = value.country;
+                      this.getStates(value.country);
+                    }
+
+                    // Store state and city to set after states are loaded
+                    if (value.state) {
+                      this.selectedState = value.state;
+                    }
+                    
+                    if (value.city && field.form?.get('city')) {
+                      field.form.get('city')!.setValue(value.city);
+                    }
+                  }
+                });
               }
             }
           }
@@ -754,6 +827,9 @@ export class SupplierOnboardingComponent implements OnInit {
               messages: {
                 required: 'Please select a country'
               }
+            },
+            expressionProperties: {
+              'className': '(formState.disabled || to.disabled) ? "col-md-4 mb-2 disabled-field" : "col-md-4 mb-2"'
             }
           },
           {
@@ -796,7 +872,8 @@ export class SupplierOnboardingComponent implements OnInit {
               }
             },
             expressionProperties: {
-              'templateOptions.disabled': '!model.country'
+              'templateOptions.disabled': '!model.country',
+              'className': '(formState.disabled || to.disabled || !model.country) ? "col-md-4 mb-2 disabled-field" : "col-md-4 mb-2"'
             }
           },
           {
@@ -820,7 +897,8 @@ export class SupplierOnboardingComponent implements OnInit {
               }
             },
             expressionProperties: {
-              'templateOptions.disabled': '!model.state'
+              'templateOptions.disabled': '!model.state',
+              'className': '(formState.disabled || to.disabled || !model.state) ? "col-md-4 mb-2 disabled-field" : "col-md-4 mb-2"'
             }
           }
         ]
@@ -1070,18 +1148,7 @@ export class SupplierOnboardingComponent implements OnInit {
                   <h5 class="documentation-title">Documentation Guidelines</h5>
                   <p class="mb-3">To help us evaluate your profile more accurately and expedite decision-making, we encourage you to upload comprehensive and relevant documentation. A well-documented profile significantly increases your visibility and improves your chances of being shortlisted for relevant opportunities.</p>
                   
-                  <p class="mb-2">We highly recommend uploading a single ZIP file containing all supporting documents. However, individual file uploads are also supported for your convenience.</p>
-                  
-                  <p class="mb-2">Please ensure the inclusion of the following key documents, where applicable:</p>
-                  
-                  <ul>
-                    <li><strong>Manufacturing Facility Details</strong> – Photos, videos, or formal documentation showcasing your infrastructure.</li>
-                    <li><strong>Machinery Information</strong> – Make, model, and specifications of key equipment in use.</li>
-                    <li><strong>Product Portfolio</strong> – A detailed list or brochure of products currently manufactured.</li>
-                    <li><strong>Certifications</strong> – Copies of relevant quality, safety, environmental, or industry-specific certifications.</li>
-                  </ul>
-                  
-                  <p>Providing a complete set of documents enhances our ability to assess your capabilities thoroughly and match you with suitable business opportunities.</p>
+
                 </div>
               </div>
             </div>
@@ -1192,6 +1259,7 @@ export class SupplierOnboardingComponent implements OnInit {
       registered_lat: data.registeredAddress.location.lat,
       registered_lng: data.registeredAddress.location.lng, 
       phone_verified: this.phoneVerified,
+      gst_verified: this.gstVerified,
       company_profile: JSON.stringify(data)
     };
     return body;
@@ -1265,6 +1333,7 @@ export class SupplierOnboardingComponent implements OnInit {
     
     // Ensure phone verification status is included
     companyProfile.phone_verified = this.phoneVerified;
+    companyProfile.gstVerified = this.gstVerified;
     
     // Create the body for the API
     let body = {
@@ -1302,6 +1371,7 @@ export class SupplierOnboardingComponent implements OnInit {
   
   submit() {
     if (this.form.valid) {
+      debugger
       console.log('Form submitted successfully', this.model);
       this.postSupplierOnboardingL1();
     } else {
@@ -1373,6 +1443,8 @@ export class SupplierOnboardingComponent implements OnInit {
   
   // Method to get cities based on country and state
   getCities(country: string, state: string) {
+    if (!country || !state) return;
+
     let endPoint = `/api/resource/pq_city?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"], ["state_title", "=", "${state}"]]`;
     console.log('Fetching cities for country:', country, 'and state:', state);
     
@@ -1388,6 +1460,33 @@ export class SupplierOnboardingComponent implements OnInit {
         }));
         
         console.log('City list updated:', cityList);
+        
+        // Extract city value from the form or address
+        const addressValue = this.form.get('registeredAddress')?.value;
+        const addressCity = addressValue && typeof addressValue === 'object' ? addressValue.city : null;
+        
+        // Check if we have city value from address
+        if (addressCity) {
+          setTimeout(() => {
+            // Find if our address city exists in the loaded city list
+            const cityExists = cityList.some(
+              (option: any) => option.value.toLowerCase() === addressCity.toLowerCase()
+            );
+            
+            if (cityExists) {
+              // Set city value in form
+              const cityControl = this.form.get('city');
+              if (cityControl) {
+                cityControl.setValue(addressCity);
+                cityControl.markAsDirty();
+                cityControl.updateValueAndValidity();
+                console.log('City control updated with address city:', addressCity);
+              }
+            } else {
+              console.log('Address city not found in loaded city list:', addressCity);
+            }
+          }, 200);
+        }
         
         // Update the city dropdown options
         this.updateCityDropdownOptions(cityList);
@@ -1513,5 +1612,59 @@ export class SupplierOnboardingComponent implements OnInit {
       detail: 'GST verification in progress...',
       life: 3000
     });
+  }
+
+  // Method to update GST field verification status
+  updateGstFieldVerificationStatus() {
+    if (this.stepFields && this.stepFields.length > 0) {
+      const basicDetailsFields = this.stepFields[0];
+      
+      // Find the row containing GST field
+      const gstRow = basicDetailsFields.find((fieldGroup: any) => 
+        fieldGroup.fieldGroup && 
+        fieldGroup.fieldGroup.some((field: any) => field.key === 'gstinNumber')
+      );
+      
+      if (gstRow && gstRow.fieldGroup) {
+        // Find the GST field
+        const gstField = gstRow.fieldGroup.find((field: any) => field.key === 'gstinNumber');
+        
+        if (gstField && gstField.templateOptions) {
+          // Update the isVerified status
+          gstField.templateOptions['isVerified'] = this.gstVerified;
+          console.log('Updated GST field verification status to:', this.gstVerified);
+          
+          // Force update the UI
+          setTimeout(() => {
+            if (gstField.formControl) {
+              gstField.formControl.updateValueAndValidity();
+            }
+            this.cdr.detectChanges();
+          });
+        }
+      }
+    }
+  }
+
+  // Method to set city value
+  setCityValue(cityValue: string) {
+    if (!cityValue) return;
+    
+    console.log('Setting city value to:', cityValue);
+    
+    // Update the model
+    this.model.city = cityValue;
+    
+    // Update the form control
+    const cityControl = this.form.get('city');
+    if (cityControl) {
+      cityControl.setValue(cityValue);
+      cityControl.markAsDirty();
+      cityControl.updateValueAndValidity();
+      console.log('City control updated with:', cityValue);
+    }
+    
+    // Force change detection
+    this.cdr.detectChanges();
   }
 }

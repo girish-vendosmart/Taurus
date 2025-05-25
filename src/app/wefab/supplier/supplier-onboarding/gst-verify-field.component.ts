@@ -59,7 +59,7 @@ import { CommonService } from '../../shared/common.service';
                 Verifying...
             </span>
             <span *ngIf="!isLoading">
-                {{ _isVerified ? 'Verified' : (verificationError ? 'Re-verify' : 'Verify GST') }}
+                {{ _isVerified ? 'Verified' : (verificationError ? 'Re-verify' : 'VERIFY') }}
             </span>
           </button>
         </div>
@@ -67,7 +67,7 @@ import { CommonService } from '../../shared/common.service';
       
       <div class="invalid-feedback d-block gst-error" *ngIf="gstControl.invalid && gstControl.touched">
         <i class="pi pi-exclamation-triangle" style="margin-right: 0.4rem;"></i>
-        {{ errorMessage }}
+        Invalid GSTIN Number
       </div>
       
       <small *ngIf="description && !gstControl.invalid" class="form-text text-muted mt-1">
@@ -455,6 +455,17 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
     // Initialize dialog visibility to ensure it's properly bound
     this.showVerificationDialog = false;
     console.log('GstVerifyFieldComponent initialized');
+    
+    // Add GST validation on input changes
+    this.gstControl.valueChanges.subscribe(value => {
+      if (value) {
+        // Validate GST number format
+        const gstPattern = /^[0-9]{2}[A-Za-z0-9]{10}[A-Za-z0-9]{1}Z[A-Za-z0-9]{1}$/;
+        if (!gstPattern.test(value)) {
+          this.gstControl.setErrors({ 'gstFormat': true });
+        }
+      }
+    });
   }
   
   verifyGST() {
