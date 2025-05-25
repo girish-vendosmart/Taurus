@@ -1,0 +1,17 @@
+<div class="sidebar-container" [style.width]="width">
+  <!-- Sidebar Header -->
+  <div class="sidebar-header" *ngIf="showHeader">
+    <div class="header-content">
+      <h2 class="header-title">{{ headerTitle }}</h2>
+    </div>
+  </div>
+
+  <!-- Sidebar Content -->
+  <div class="sidebar-content">
+    <p-panelMenu 
+      [model]="convertedMenuItems" 
+      [multiple]="false"
+      styleClass="custom-panel-menu">
+    </p-panelMenu>
+  </div>
+</div>

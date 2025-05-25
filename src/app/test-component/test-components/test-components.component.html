@@ -1,8 +1,19 @@
-<div class="container-fluid mt-4">
+<!-- Sidebar Demo -->
+<app-common-sidebar 
+  [menuItems]="sidebarMenuItems"
+  [visible]="true"
+  [showHeader]="true"
+  headerTitle="WefabTeam Portal"
+  width="280px">
+</app-common-sidebar>
+
+<!-- Main Content with left margin to accommodate sidebar -->
+<div class="main-content" style="margin-left: 280px; padding: 20px;">
+  <div class="container-fluid mt-4">
     <div class="card">
       <div class="card-header bg-primary text-white">
         <h2>Products Table</h2>
-        <p class="mb-0">PrimeNG Table with Bootstrap Styling</p>
+        <p class="mb-0">PrimeNG Table with Bootstrap Styling - Sidebar Demo</p>
       </div>
       <div class="card-body">
         <!-- Search and Clear Controls -->
@@ -113,3 +124,4 @@
       </div>
     </div>
   </div>
+</div>

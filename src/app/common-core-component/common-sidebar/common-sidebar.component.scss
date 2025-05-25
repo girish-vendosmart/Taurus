@@ -1,0 +1,255 @@
+@import '../../../assets/scss/variables.scss';
+
+.sidebar-container {
+  height: 100vh;
+  background: linear-gradient(180deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 1.5rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .header-title {
+    color: $technical-white;
+    font-size: 1.25rem;
+    font-weight: $font-weight-bold;
+    margin: 0;
+    text-align: center;
+    line-height: 1.4;
+  }
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 0;
+  
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+  }
+}
+
+// Custom PrimeNG Panel Menu Styles
+:host ::ng-deep {
+  .custom-panel-menu {
+    background: transparent;
+    border: none;
+    
+    .p-panelmenu-panel {
+      margin-bottom: 0;
+      border: none;
+      background: transparent;
+      
+      .p-panelmenu-header {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        margin: 0;
+        
+        .p-panelmenu-header-content {
+          background: transparent;
+          border: none;
+          border-radius: 8px;
+          margin: 0.25rem 1rem;
+          padding: 0.75rem 1rem;
+          transition: all 0.3s ease;
+          color: rgba(255, 255, 255, 0.9);
+          
+          &:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: $technical-white;
+            transform: translateX(4px);
+          }
+          
+          &:focus {
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+            outline: none;
+          }
+          
+          .p-panelmenu-header-action {
+            background: transparent;
+            border: none;
+            color: inherit;
+            padding: 0;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            
+            .p-menuitem-icon {
+              font-size: 1.1rem;
+              color: rgba(255, 255, 255, 0.8);
+              min-width: 20px;
+            }
+            
+            .p-menuitem-text {
+              font-weight: $font-weight-medium;
+              font-size: 0.95rem;
+              flex: 1;
+            }
+            
+            .p-submenu-icon {
+              color: rgba(255, 255, 255, 0.6);
+              font-size: 0.8rem;
+              margin-left: auto;
+            }
+          }
+        }
+        
+        &.p-highlight .p-panelmenu-header-content {
+          background: rgba(255, 255, 255, 0.15);
+          color: $technical-white;
+          
+          .p-menuitem-icon {
+            color: $technical-white;
+          }
+        }
+      }
+      
+      .p-panelmenu-content {
+        background: transparent;
+        border: none;
+        padding: 0;
+        
+        .p-panelmenu-root-list {
+          background: transparent;
+          border: none;
+          padding: 0;
+          
+          .p-menuitem {
+            background: transparent;
+            
+            .p-menuitem-content {
+              background: transparent;
+              border: none;
+              border-radius: 6px;
+              margin: 0.125rem 1rem 0.125rem 2.5rem;
+              padding: 0.5rem 1rem;
+              transition: all 0.3s ease;
+              
+              &:hover {
+                background: rgba(255, 255, 255, 0.08);
+                transform: translateX(4px);
+              }
+              
+              .p-menuitem-link {
+                background: transparent;
+                border: none;
+                color: rgba(255, 255, 255, 0.8);
+                padding: 0;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                text-decoration: none;
+                width: 100%;
+                
+                &:focus {
+                  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+                  outline: none;
+                }
+                
+                .p-menuitem-icon {
+                  font-size: 1rem;
+                  color: rgba(255, 255, 255, 0.7);
+                  min-width: 18px;
+                }
+                
+                .p-menuitem-text {
+                  font-weight: $font-weight-normal;
+                  font-size: 0.9rem;
+                  color: rgba(255, 255, 255, 0.8);
+                }
+                
+                &:hover {
+                  .p-menuitem-text {
+                    color: $technical-white;
+                  }
+                  
+                  .p-menuitem-icon {
+                    color: $technical-white;
+                  }
+                }
+              }
+              
+              &.p-highlight {
+                background: rgba(255, 255, 255, 0.15);
+                
+                .p-menuitem-link {
+                  .p-menuitem-text {
+                    color: $technical-white;
+                    font-weight: $font-weight-medium;
+                  }
+                  
+                  .p-menuitem-icon {
+                    color: $technical-white;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .sidebar-container {
+    width: 100% !important;
+    max-width: 280px;
+  }
+  
+  .sidebar-header {
+    padding: 1rem;
+    
+    .header-title {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+// Animation for sidebar entrance
+.sidebar-container {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

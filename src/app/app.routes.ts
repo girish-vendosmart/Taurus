@@ -5,8 +5,15 @@ import { FileExplorerComponent } from './file-explorer/file-explorer.component';
 import { CommonTableComponent } from './wefab/wefab-shared-component/common-table/common-table.component';
 import { CommonPrimeTableComponent } from './wefab/wefab-shared-component/common-prime-table/common-prime-table.component';
 import { GooglePlacesComponentComponent } from './wefab/wefab-shared-component/google-places-component/google-places-component.component';
+import { CommonSidebarComponent } from '../app/common-core-component/common-sidebar/common-sidebar.component';
+import { CommonHeaderComponent } from '../app/common-core-component/common-header/common-header.component';
+import { PerformanceTestComponent } from './common-core-component/common-sidebar/performance-test.component';
 export const routes: Routes = [
   { path: '', redirectTo: 'wefab', pathMatch: 'full' },
+  { path: 'common-sidebar', component: CommonSidebarComponent},
+  { path: 'test-component', component: TestComponentsComponent},
+  { path: 'performance-test', component: PerformanceTestComponent},
+  { path: 'common-header', component: CommonHeaderComponent},
   { path : 'common-table', component : CommonPrimeTableComponent},
   { path: 'google-places', component: GooglePlacesComponentComponent},
   {
