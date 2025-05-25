@@ -26,6 +26,8 @@
                 formControlName="email" 
                 placeholder="your.email@company.com"
                 [ngClass]="{ 'ng-invalid ng-dirty': submitted && loginForm.get('email')?.errors }"
+                aria-label="Email Address"
+                style="color: #000 !important;"
               >
             </span>
             <i *ngIf="loginForm.get('email')?.value && !loginForm.get('email')?.disabled" 
@@ -53,6 +55,7 @@
                 formControlName="password" 
                 placeholder="Please fill out this field."
                 [ngClass]="{ 'ng-invalid ng-dirty': submitted && loginForm.get('password')?.errors }"
+                aria-label="Password"
               >
             </span>
             <i 

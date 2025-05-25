@@ -74,10 +74,10 @@
 
   label {
     display: block;
-    font-size: 0.8rem;
-    font-weight: 500;
+    font-size: 0.9rem;
+    font-weight: 600;
     margin-bottom: 0.5rem;
-    color: #666;
+    color: #333;
   }
 
   .p-error {
@@ -116,13 +116,36 @@
     
     > i {
       left: 0.8rem;
-      color: #666;
+      color: #333;
     }
     
     > input {
       width: 100%;
       padding: 0.8rem;
       padding-left: 2.5rem;
+      font-size: 1rem;
+      color: #333;
+      background-color: #ffffff;
+      border: 1px solid #ced4da;
+
+      &::placeholder {
+        color: #aaaaaa;
+        opacity: 1;
+      }
+
+      &:disabled {
+        background-color: #f5f7fa;
+        border-color: #e0e0e0;
+        color: #444;
+        cursor: not-allowed;
+        opacity: 0.8;
+      }
+
+      &:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        outline: none;
+      }
     }
   }
 
@@ -132,16 +155,30 @@
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    color: #999;
+    color: #666;
+    font-size: 1rem;
     z-index: 2;
     
     &:hover {
-      color: #666;
+      color: #333;
     }
   }
 
   input.ng-invalid.ng-dirty {
     border-color: #e53935;
+  }
+
+  .disabled-field-indicator {
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #f0f4f9;
+    color: #1a73e8;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    z-index: 2;
   }
 }
 
@@ -171,15 +208,35 @@
 .button-container {
   margin: 1.5rem 0;
   text-align: center;
+  background-color: #f5f9ff;
+  border: 1px solid #d0e1fd;
+  border-radius: 8px;
+  padding: 1rem;
 }
 
 .login-message {
-  color: #666;
-  font-size: 0.9rem;
-  font-weight: 500;
+  color: #1a3b60;
+  font-size: 1rem;
+  font-weight: 600;
   margin: 0;
   line-height: 1.4;
   letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: #2563eb;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+    mask-size: cover;
+    -webkit-mask-size: cover;
+    margin-right: 10px;
+  }
 }
 
 .terms {
@@ -215,5 +272,15 @@
       background-color: #a4cafe;
       cursor: not-allowed;
     }
+
+    .p-button-label {
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .p-inputtext {
+    font-size: 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   }
 }
