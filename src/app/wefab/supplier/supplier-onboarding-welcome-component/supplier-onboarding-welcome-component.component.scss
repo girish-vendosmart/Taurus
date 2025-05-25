@@ -1,15 +1,18 @@
-// Variables (customize these to match your brand guidelines)
-$primary-color: #3b82f6;
-$primary-light: #dbeafe;
-$primary-dark: #1d4ed8;
-$text-primary: #1e293b;
-$text-secondary: #64748b;
-$background-color: #f1f5f9;
+// Variables based on WE-FAB brand style guide
+$primary-color: #1A3A5F; // Blueprint Blue
+$primary-light: #F6F7F9; // Technical White (lighter version)
+$primary-dark: #12253D; // Darker shade of Blueprint Blue
+$text-primary: #1A1D21; // Precision Black
+$text-secondary: #545A64; // Machine Gray
+$background-color: #F6F7F9; // Technical White
 $card-bg: #ffffff;
-$success-color: #10b981;
-$border-radius: 10px;
+$border-color: #D1D5DB; // Material Finish Silver
+$success-color: #12856E; // Process Green
+$accent-color: #FF5722; // Safety Orange
+$border-radius: 8px;
 $box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.1), 0 6px 8px -6px rgba(0, 0, 0, 0.05);
 $transition: all 0.3s ease;
+$font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
 
 // Main container
 .onboarding-welcome-container {
@@ -19,7 +22,7 @@ $transition: all 0.3s ease;
   min-height: 90vh;
   background-color: $background-color;
   padding: 1.5rem;
-  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  font-family: $font-family;
 }
 
 // Welcome card
@@ -31,6 +34,7 @@ $transition: all 0.3s ease;
   max-width: 950px;
   overflow: hidden;
   transition: $transition;
+  border: 1px solid $border-color;
   
   &:hover {
     box-shadow: 0 15px 20px -5px rgba(0, 0, 0, 0.1), 0 8px 8px -5px rgba(0, 0, 0, 0.04);
@@ -40,14 +44,13 @@ $transition: all 0.3s ease;
 // Header section
 .welcome-header {
   padding: 1.5rem 2rem;
-  background: linear-gradient(135deg, $primary-color, $primary-dark);
+  background: $primary-color;
   
   h1 {
     color: white;
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-size: 30px; // Heading 2 size
+    font-weight: 600; // Semibold
     margin: 0;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     letter-spacing: -0.25px;
   }
 }
@@ -60,13 +63,13 @@ $transition: all 0.3s ease;
   
   .current-step, .total-steps {
     color: $text-secondary;
-    font-size: 0.875rem;
+    font-size: 14px; // Body Small
   }
   
   .progress-bar {
     flex: 1;
     height: 8px;
-    background-color: #e2e8f0;
+    background-color: $border-color;
     border-radius: 4px;
     overflow: hidden;
     
@@ -105,6 +108,7 @@ $transition: all 0.3s ease;
     border-radius: $border-radius;
     box-shadow: $box-shadow;
     transition: $transition;
+    border: 1px solid $border-color;
     
     &:hover {
       transform: scale(1.01);
@@ -122,17 +126,18 @@ $transition: all 0.3s ease;
   
   h2 {
     color: $primary-color;
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 24px; // Heading 3
+    font-weight: 600; // Semibold
     margin-bottom: 0.75rem;
     letter-spacing: -0.25px;
   }
   
   p {
-    color: $text-secondary;
-    font-size: 0.95rem;
+    color: $text-primary;
+    font-size: 16px; // Body Default
     line-height: 1.5;
     margin-bottom: 1.5rem;
+    font-weight: 400; // Regular
   }
   
   @media (max-width: 992px) {
@@ -149,8 +154,8 @@ $transition: all 0.3s ease;
   
   .benefits-title {
     color: $text-primary;
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 20px; // Heading 4
+    font-weight: 500; // Medium
     margin-bottom: 0.35rem;
   }
 }
@@ -161,13 +166,13 @@ $transition: all 0.3s ease;
   gap: 1rem;
   padding: 0.85rem;
   border-radius: $border-radius;
-  background-color: #f8fafc;
+  background-color: $primary-light;
   transition: $transition;
+  border: 1px solid $border-color;
   
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    background-color: $primary-light;
   }
   
   .benefit-icon {
@@ -195,16 +200,17 @@ $transition: all 0.3s ease;
     
     h3 {
       color: $text-primary;
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 16px; // Body Default
+      font-weight: 600; // Semibold
       margin-bottom: 0.25rem;
     }
     
     p {
       color: $text-secondary;
-      font-size: 0.85rem;
+      font-size: 14px; // Body Small
       line-height: 1.4;
       margin: 0;
+      font-weight: 400; // Regular
     }
   }
 }
@@ -212,11 +218,11 @@ $transition: all 0.3s ease;
 // Footer section
 .welcome-footer {
   padding: 1.25rem 2rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid $border-color;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f8fafc;
+  background-color: $primary-light;
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -226,7 +232,7 @@ $transition: all 0.3s ease;
   
   .time-estimate {
     color: $text-secondary;
-    font-size: 0.85rem;
+    font-size: 14px; // Body Small
     margin: 0;
     display: flex;
     align-items: center;
@@ -241,10 +247,10 @@ $transition: all 0.3s ease;
 
 // Primary button
 .primary-button {
-  background-color: $primary-color;
+  background-color: $accent-color; // Safety Orange for CTAs
   color: white;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 600; // Semibold
+  font-size: 16px; // Body Default
   padding: 0.65rem 1.5rem;
   border-radius: 25px;
   border: none;
@@ -255,14 +261,14 @@ $transition: all 0.3s ease;
   justify-content: center;
   
   &:hover {
-    background-color: $primary-dark;
+    background-color: darken($accent-color, 10%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba($primary-color, 0.4);
+    box-shadow: 0 4px 8px rgba($accent-color, 0.4);
   }
   
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba($primary-color, 0.3);
+    box-shadow: 0 0 0 3px rgba($accent-color, 0.3);
   }
   
   &:after {
