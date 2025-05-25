@@ -18,40 +18,55 @@
           <h3>{{ card.value }}</h3>
           <p class="card-title">{{ card.title }}</p>
           <span class="card-description">{{ card.description }}</span>
+          <div *ngIf="card.trend" class="card-trend" [ngClass]="'trend-' + card.trend.direction">
+            <i class="pi" [ngClass]="card.trend.direction === 'up' ? 'pi-arrow-up' : 'pi-arrow-down'"></i>
+            <span>{{ card.trend.value }} {{ card.trend.period }}</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Recent Activities -->
-  <div class="activities-section">
-    <h2>Recent Activities</h2>
-    <div class="activities-list">
-      <div *ngFor="let activity of recentActivities" class="activity-item" [ngClass]="activity.type">
-        <div class="activity-icon">
-          <i class="pi pi-circle-fill"></i>
-        </div>
-        <div class="activity-content">
-          <h4>{{ activity.title }}</h4>
-          <p>{{ activity.description }}</p>
-          <span class="activity-time">{{ activity.timestamp | date:'short' }}</span>
-        </div>
+  <!-- Chart and Recent RFQs Section -->
+  <div class="content-grid">
+    <!-- Quote Performance Chart -->
+    <div class="chart-section">
+      <h2>Quote Performance</h2>
+      <p class="chart-subtitle">Your quotation success rate over time</p>
+      <div class="chart-container">
+        <apx-chart
+          #chart
+          [series]="chartOptions.series!"
+          [chart]="chartOptions.chart!"
+          [xaxis]="chartOptions.xaxis!"
+          [yaxis]="chartOptions.yaxis!"
+          [stroke]="chartOptions.stroke!"
+          [dataLabels]="chartOptions.dataLabels!"
+          [grid]="chartOptions.grid!"
+          [markers]="chartOptions.markers!"
+          [tooltip]="chartOptions.tooltip!"
+          [legend]="chartOptions.legend!"
+          [colors]="chartOptions.colors!">
+        </apx-chart>
       </div>
     </div>
-  </div>
 
-  <!-- Quick Actions -->
-  <div class="quick-actions">
-    <h2>Quick Actions</h2>
-    <div class="actions-grid">
-      <button class="action-btn" routerLink="/wefab/supplier/profile-review">
-        <i class="pi pi-user"></i>
-        <span>View Profile</span>
-      </button>
-      <button class="action-btn" routerLink="/wefab/supplier/supplier-onboarding-status">
-        <i class="pi pi-check-circle"></i>
-        <span>Onboarding Status</span>
-      </button>
+    <!-- Recent RFQs -->
+    <div class="recent-rfqs-section">
+      <h2>Recent RFQs</h2>
+      <p class="section-subtitle">Latest requests for quotation</p>
+      <div class="rfqs-list">
+        <div *ngFor="let rfq of recentRFQs" class="rfq-item">
+          <div class="rfq-content">
+            <h4>{{ rfq.title }}</h4>
+            <p class="rfq-number">{{ rfq.rfqNumber }}</p>
+            <div class="rfq-actions">
+              <span class="status-badge" [ngClass]="rfq.statusClass">{{ rfq.status }}</span>
+              <button class="action-btn view-btn">View</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div> 
