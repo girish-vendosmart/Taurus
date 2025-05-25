@@ -7,10 +7,27 @@ import { FirebaseService } from '../../../core/services/firebase.service';
 import { ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs';
 
+// PrimeNG imports
+import { InputTextModule } from 'primeng/inputtext';
+import { ButtonModule } from 'primeng/button';
+import { PasswordModule } from 'primeng/password';
+import { DividerModule } from 'primeng/divider';
+import { MessageModule } from 'primeng/message';
+import { TooltipModule } from 'primeng/tooltip';
+
 @Component({
   selector: 'app-login-component',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    InputTextModule, 
+    ButtonModule, 
+    PasswordModule, 
+    DividerModule, 
+    MessageModule,
+    TooltipModule
+  ],
   templateUrl: './login-component.component.html',
   styleUrl: './login-component.component.scss'
 })
@@ -20,6 +37,7 @@ export class LoginComponentComponent {
   loginError = '';
   emailId: any;
   companyId: any;
+  submitted = false;
   
   constructor(
     private fb: FormBuilder, 
@@ -29,8 +47,8 @@ export class LoginComponentComponent {
     private route: ActivatedRoute
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
+      email: ['', [Validators.required, Validators.email, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
@@ -66,8 +84,18 @@ export class LoginComponentComponent {
   clearEmail() {
     this.loginForm.get('email')?.setValue('');
   }
+
+  get f() {
+    return this.loginForm.controls;
+  }
   
   onSubmit() {
+    this.submitted = true;
+    
+    if (this.loginForm.invalid) {
+      return;
+    }
+
     if (this.loginForm.valid) {
       const email = this.loginForm.get('email')?.value;
       const password = this.loginForm.get('password')?.value;
@@ -134,8 +162,10 @@ export class LoginComponentComponent {
                 errorMessage = 'Invalid email address. Please check and try again.';
                 break;
               case 'auth/wrong-password':
-              case 'auth/invalid-credential':
                 errorMessage = 'Invalid password. Please check and try again.';
+                break;
+              case 'auth/invalid-credential':
+                errorMessage = 'Invalid credentials. Please check and try again.';
                 break;
               case 'auth/user-disabled':
                 errorMessage = 'This account has been disabled. Please contact support.';

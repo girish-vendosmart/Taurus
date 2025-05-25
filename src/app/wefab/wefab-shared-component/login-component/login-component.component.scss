@@ -79,6 +79,12 @@
     margin-bottom: 0.5rem;
     color: #666;
   }
+
+  .p-error {
+    margin-top: 0.25rem;
+    display: block;
+    color: #e53935;
+  }
 }
 
 .password-header {
@@ -102,81 +108,78 @@
   position: relative;
   display: flex;
   align-items: center;
-  border: 1px solid #ddd;
   border-radius: 4px;
   overflow: hidden;
 
-  input {
-    flex: 1;
-    padding: 0.8rem;
-    padding-left: 2.5rem;
-    border: none;
-    outline: none;
-    font-size: 1rem;
-    color: #333;
+  .p-input-icon-left {
     width: 100%;
-    box-sizing: border-box;
-
-    &::placeholder {
-      color: #aaa;
+    
+    > i {
+      left: 0.8rem;
+      color: #666;
+    }
+    
+    > input {
+      width: 100%;
+      padding: 0.8rem;
+      padding-left: 2.5rem;
     }
   }
 
-  .input-icon {
+  .pi-times, .pi-eye, .pi-eye-slash {
     position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    color: #666;
-  }
-
-  .email-icon, .lock-icon {
-    left: 0.8rem;
-  }
-
-  .clear-icon, .visibility-icon {
     right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
     cursor: pointer;
     color: #999;
+    z-index: 2;
     
     &:hover {
       color: #666;
     }
   }
+
+  input.ng-invalid.ng-dirty {
+    border-color: #e53935;
+  }
 }
 
-.error-message {
-  color: #e53935;
-  font-size: 0.9rem;
+.p-message {
   margin-bottom: 1rem;
-  text-align: center;
-  padding: 0.5rem;
-  background-color: rgba(229, 57, 53, 0.1);
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
   border-radius: 4px;
+
+  &.p-message-error {
+    background-color: rgba(229, 57, 53, 0.1);
+    border-left: 4px solid #e53935;
+  }
+
+  i {
+    color: #e53935;
+    margin-right: 0.5rem;
+  }
+
+  .p-message-text {
+    color: #e53935;
+    font-size: 0.9rem;
+  }
 }
 
-.sign-in-btn {
-  width: 100%;
-  padding: 0.9rem;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 4px;
+.button-container {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.login-message {
+  color: #666;
   font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1rem;
-  transition: background-color 0.2s;
-  
-  &:hover {
-    background-color: #1d4ed8;
-  }
-  
-  &:disabled {
-    background-color: #a4cafe;
-    cursor: not-allowed;
-  }
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.4;
+  letter-spacing: 0.3px;
 }
 
 .terms {
@@ -195,16 +198,22 @@
   }
 }
 
-.button-container {
-  margin: 1.5rem 0;
-  text-align: center;
-}
-
-.login-message {
-  color: #666;
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin: 0;
-  line-height: 1.4;
-  letter-spacing: 0.3px;
+:host ::ng-deep {
+  .p-button {
+    width: 100%;
+    padding: 0.9rem;
+    margin-top: 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background-color: #2563eb;
+    
+    &:hover {
+      background-color: #1d4ed8;
+    }
+    
+    &:disabled {
+      background-color: #a4cafe;
+      cursor: not-allowed;
+    }
+  }
 }

@@ -17,10 +17,25 @@
         <div class="form-group">
           <label for="email">EMAIL ADDRESS</label>
           <div class="input-container">
-            <span class="input-icon email-icon">✉</span>
-            <input type="email" id="email" formControlName="email" placeholder="your.email@company.com">
-            <span class="input-icon clear-icon" (click)="clearEmail()" *ngIf="loginForm.get('email')?.value">✖</span>
+            <span class="p-input-icon-left">
+              <i class="pi pi-envelope"></i>
+              <input 
+                type="email" 
+                id="email" 
+                pInputText 
+                formControlName="email" 
+                placeholder="your.email@company.com"
+                [ngClass]="{ 'ng-invalid ng-dirty': submitted && loginForm.get('email')?.errors }"
+              >
+            </span>
+            <i *ngIf="loginForm.get('email')?.value && !loginForm.get('email')?.disabled" 
+              class="pi pi-times clear-icon" 
+              (click)="clearEmail()"></i>
           </div>
+          <small *ngIf="submitted && loginForm.get('email')?.errors" class="p-error">
+            <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>
+            <span *ngIf="loginForm.get('email')?.errors?.['email'] || loginForm.get('email')?.errors?.['pattern']">Please enter a valid email address</span>
+          </small>
         </div>
 
         <div class="form-group">
@@ -29,24 +44,48 @@
             <a href="#" class="forgot-link">Forgot password?</a>
           </div>
           <div class="input-container">
-            <span class="input-icon lock-icon">🔒</span>
-            <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" placeholder="Please fill out this field.">
-            <span class="input-icon visibility-icon" (click)="togglePasswordVisibility()">
-              <span *ngIf="!showPassword">👁</span>
-              <span *ngIf="showPassword">👁‍🗨</span>
+            <span class="p-input-icon-left">
+              <i class="pi pi-lock"></i>
+              <input 
+                [type]="showPassword ? 'text' : 'password'" 
+                id="password" 
+                pInputText 
+                formControlName="password" 
+                placeholder="Please fill out this field."
+                [ngClass]="{ 'ng-invalid ng-dirty': submitted && loginForm.get('password')?.errors }"
+              >
             </span>
+            <i 
+              class="pi" 
+              [ngClass]="showPassword ? 'pi-eye-slash' : 'pi-eye'" 
+              (click)="togglePasswordVisibility()"
+              pTooltip="Toggle Password Visibility"
+            ></i>
           </div>
+          <small *ngIf="submitted && loginForm.get('password')?.errors" class="p-error">
+            <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</span>
+            <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters</span>
+          </small>
         </div>
 
-        <div *ngIf="loginError" class="error-message">
-          {{ loginError }}
+        <div *ngIf="loginError" class="p-message p-message-error">
+          <i class="pi pi-exclamation-circle"></i>
+          <span class="p-message-text">{{ loginError }}</span>
         </div>
 
         <div class="button-container" *ngIf="companyId">
           <p class="login-message">Login to join the wefab supplier network</p>
         </div>
 
-        <button type="submit" class="sign-in-btn" [disabled]="!loginForm.valid">SIGN IN</button>
+        <button 
+          type="submit" 
+          pButton 
+          label="SIGN IN" 
+          icon="pi pi-sign-in" 
+          iconPos="right"
+          [loading]="loginForm.valid && submitted && !loginError"
+          [disabled]="!loginForm.valid"
+        ></button>
 
         <div class="terms">
           By signing in, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
