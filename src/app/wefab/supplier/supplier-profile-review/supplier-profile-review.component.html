@@ -519,83 +519,47 @@
               </div>
             </ng-container>
 
-            <!-- Certifications Tab -->
-            <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'certifications'">
+            <!--maachine tab for a duplicating -->
+            <ng-container *ngIf="manufacturingTab === 'certifications'">
               <div class="manufacturing-grid">
-                <div class="manufacturing-card" *ngFor="let cert of manufacturingData.certifications">
-                  <div *ngIf="!isCertificateDocumentArray(cert)">
-                    <div class="manufacturing-image-container">
-                      <img [src]="cert.certificateDocument.url" 
-                          [alt]="cert.certificationName" 
-                          class="manufacturing-image">
-                      <!-- Document action buttons -->
-                      <div class="document-actions">
-                        <button class="action-button view-button" (click)="viewDocument(cert.certificateDocument.url, $event)" title="View">
-                          <i class="pi pi-eye"></i>
-                        </button>
-                        <button class="action-button download-button" (click)="downloadDocument(cert.certificateDocument.url, $event)" title="Download">
-                          <i class="pi pi-download"></i>
-                        </button>
-                      </div>
-                    </div>
-                    <div class="manufacturing-details">
-                      <h3 class="manufacturing-title">{{ cert.certificationName }}</h3>
-                      
-                      <div class="verification-badge verified">
-                        <i class="pi pi-check-circle"></i>
-                        <span>Verified Certificate</span>
-                      </div>
-                      
-                      <div class="manufacturing-info">
-                        <p>
-                          <span class="info-label">Certification Body:</span>
-                          <span class="info-value">{{ cert.certifyingBody }}</span>
-                        </p>
-                        <p>
-                          <span class="info-label">Valid Until:</span>
-                          <span class="info-value">{{ cert.expirationDate | date:'mediumDate' }}</span>
-                        </p>
-                      </div>
+                <div class="manufacturing-card" *ngFor="let machine of manufacturingData.certifications">
+                  <div class="manufacturing-image-container">
+                    <img [src]="isArray(machine.certificateDocument) ? machine.certificateDocument[0].url : machine.certificateDocument.url"
+                        [alt]="machine.certificationName" 
+                        class="manufacturing-image"
+                        loading="lazy">
+                    <div class="document-actions">
+                      <button class="action-button view-button" (click)="viewDocument(machine.certificateDocument.url, $event)" title="View">
+                        <i class="pi pi-eye"></i>
+                      </button>
+                      <button class="action-button download-button" (click)="downloadDocument(machine.certificateDocument.url, $event)" title="Download">
+                        <i class="pi pi-download"></i>
+                      </button>
                     </div>
                   </div>
-                  <div *ngIf="isCertificateDocumentArray(cert)">
-                    <div class="manufacturing-image-container">
-                      <img [src]="cert.certificateDocument.url" 
-                          [alt]="cert.certificationName" 
-                          class="manufacturing-image">
-                      <!-- Document action buttons -->
-                      <div class="document-actions">
-                        <button class="action-button view-button" (click)="viewDocument(cert.certificateDocument.url, $event)" title="View">
-                          <i class="pi pi-eye"></i>
-                        </button>
-                        <button class="action-button download-button" (click)="downloadDocument(cert.certificateDocument.url, $event)" title="Download">
-                          <i class="pi pi-download"></i>
-                        </button>
-                      </div>
+                  <div class="manufacturing-details">
+                    <h3 class="manufacturing-title">{{ machine.certificationName }}</h3>
+
+                    <div class="verification-badge verified">
+                      <i class="pi pi-check-circle"></i>
+                      <span>Verified Certificate</span>
                     </div>
-                    <div class="manufacturing-details">
-                      <h3 class="manufacturing-title">{{ cert.certificationName }}</h3>
-                      
-                      <div class="verification-badge verified">
-                        <i class="pi pi-check-circle"></i>
-                        <span>Verified Certificate</span>
-                      </div>
-                      
-                      <div class="manufacturing-info">
-                        <p>
-                          <span class="info-label">Certification Body:</span>
-                          <span class="info-value">{{ cert.certifyingBody }}</span>
-                        </p>
-                        <p>
-                          <span class="info-label">Valid Until:</span>
-                          <span class="info-value">{{ cert.expirationDate | date:'mediumDate' }}</span>
-                        </p>
-                      </div>
+
+                    <div class="manufacturing-info">
+                      <p>
+                        <span class="info-label">Certification Body:</span>
+                        <span class="info-value">{{ machine.certifyingBody }}</span>
+                      </p>
+                      <p>
+                        <span class="info-label">Valid Until:</span>
+                        <span class="info-value">{{ machine.expirationDate | date:'mediumDate' }}</span>
+                      </p>
                     </div>
+
                   </div>
                 </div>
               </div>
-            </div>
+            </ng-container>
 
             <!-- Production Capacity Tab -->
             <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'capacity'">

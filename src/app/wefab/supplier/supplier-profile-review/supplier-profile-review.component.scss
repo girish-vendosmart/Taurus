@@ -3365,3 +3365,24 @@
     }
   }
 }
+
+.no-certifications-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  background-color: $technical-white;
+  border-radius: 8px;
+  border: 1px dashed $material-finish-silver;
+  
+  .no-certs-icon {
+    font-size: 2.5rem;
+    color: $material-finish-silver;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    color: $machine-gray;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+}

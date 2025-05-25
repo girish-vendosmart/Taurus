@@ -866,6 +866,21 @@ export class SupplierProfileReviewComponent implements OnInit {
     return Array.isArray(cert.certificateDocument);
   }
 
+  getCertificateUrl(cert: any): string {
+    if (!cert || !cert.certificateDocument) {
+      return '';
+    }
+    
+    // If it's an array, get the first item
+    if (Array.isArray(cert.certificateDocument)) {
+      const firstDoc = cert.certificateDocument[0];
+      return firstDoc?.url || firstDoc || '';
+    }
+    
+    // If it's an object, get the url property or the value itself
+    return cert.certificateDocument.url || cert.certificateDocument || '';
+  }
+
   isMachineDocumentArray(machine: any): boolean {
     return Array.isArray(machine.machinePhotos);
   }
