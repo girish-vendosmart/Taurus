@@ -5,6 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { CommonSidebarComponent, SidebarMenuItem } from '../../common-core-component/common-sidebar/common-sidebar.component';
+import { CommonHeaderComponent } from '../../common-core-component/common-header/common-header.component';
 
 interface Product {
   id: number;
@@ -19,7 +20,7 @@ interface Product {
 @Component({
   selector: 'app-test-components',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, FormsModule, CommonSidebarComponent],
+  imports: [CommonModule, TableModule, ButtonModule, InputTextModule, FormsModule, CommonSidebarComponent, CommonHeaderComponent],
   templateUrl: './test-components.component.html',
   styleUrl: './test-components.component.scss'
 })
@@ -146,6 +147,11 @@ export class TestComponentsComponent {
       default:
         return 'badge bg-secondary';
     }
+  }
+
+  onHeaderLogout(): void {
+    console.log('Logout event received from header');
+    // Handle logout logic here if needed
   }
 
 }
