@@ -10,7 +10,7 @@
   </app-common-sidebar>
 
   <!-- Main content area -->
-  <div class="main-content">
+  <div class="main-content" [class.with-sidebar]="showDashboardLayout">
     <!-- Common Header Component - only show when dashboard layout is enabled -->
     <app-common-header 
       [title]="''"
