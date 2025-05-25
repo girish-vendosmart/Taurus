@@ -436,7 +436,20 @@
                 <div class="review-row">
                   <div class="review-col">
                     <div class="field-label">Company Website</div>
-                    <div class="field-value">{{ newFinancialData.additionalInformation.websites.website}}</div>
+                    <div class="field-value">
+                      <a 
+                        *ngIf="newFinancialData.additionalInformation.websites.website?.trim()" 
+                        [href]="newFinancialData.additionalInformation.websites.website.trim().startsWith('http') ? newFinancialData.additionalInformation.websites.website.trim() : 'https://' + newFinancialData.additionalInformation.websites.website.trim()" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="website-link">
+                        {{ newFinancialData.additionalInformation.websites.website.trim() }}
+                        <i class="pi pi-external-link"></i>
+                      </a>
+                      <span *ngIf="!newFinancialData.additionalInformation.websites.website?.trim()" class="no-data">
+                        Not provided
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

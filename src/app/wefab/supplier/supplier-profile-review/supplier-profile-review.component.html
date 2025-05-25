@@ -698,7 +698,20 @@
                     <div class="review-row">
                       <div class="review-col">
                         <div class="field-label">Company Website</div>
-                        <div class="field-value">{{ newFinancialData.additionalInformation.websites.website}}</div>
+                        <div class="field-value">
+                          <a 
+                            *ngIf="newFinancialData.additionalInformation.websites.website?.trim()" 
+                            [href]="newFinancialData.additionalInformation.websites.website.trim().startsWith('http') ? newFinancialData.additionalInformation.websites.website.trim() : 'https://' + newFinancialData.additionalInformation.websites.website.trim()" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="website-link">
+                            {{ newFinancialData.additionalInformation.websites.website.trim() }}
+                            <i class="pi pi-external-link"></i>
+                          </a>
+                          <span *ngIf="!newFinancialData.additionalInformation.websites.website?.trim()" class="no-data">
+                            Not provided
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -900,27 +913,26 @@
         <ul class="verification-list">
           <li class="verification-item">
             <i class="pi pi-check-circle verified-icon" *ngIf="phoneVerified"></i>
-            <i class="pi pi-exclamation-triangle pending-icon"
+            <i class="pi pi-times-circle not-verified-icon"
               *ngIf="!phoneVerified"></i>
             <span *ngIf="phoneVerified">Phone Number Verified</span>
-            <span class="verification-label" *ngIf="!phoneVerified">Phone Number
+            <span  *ngIf="!phoneVerified">Phone Number
               Verification Pending</span>
           </li>
           <li class="verification-item">
             <i class="pi pi-check-circle verified-icon" *ngIf="gstVerified"></i>
-            <i class="pi pi-exclamation-triangle pending-icon" *ngIf="!gstVerified"></i>
+            <i class="pi pi-times-circle not-verified-icon" *ngIf="!gstVerified"></i>
             <span *ngIf="gstVerified">GSTIN Verified</span>
-            <span class="verification-label" *ngIf="!gstVerified">GSTIN Verification
+            <span  *ngIf="!gstVerified">GSTIN Verification
               Pending</span>
           </li>
           <!-- Machine Photos Verification -->
           <li class="verification-item">
             <i class="pi pi-check-circle verified-icon" *ngIf="facilityVerified"></i>
-            <i class="pi pi-exclamation-triangle pending-icon"
+            <i class="pi pi-times-circle not-verified-icon"
               *ngIf="!facilityVerified"></i>
             <span *ngIf="facilityVerified">Facility Photos Verified</span>
-            <span class="verification-label" *ngIf="!facilityVerified">Facility Photos
-              Pending Review</span>
+            <span *ngIf="!facilityVerified">Facility Photos Not Verified</span>
           </li>
         </ul>
       </div>

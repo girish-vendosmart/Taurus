@@ -716,6 +716,7 @@ export class SupplierProfileReviewComponent implements OnInit {
             }
             facility.facility_comment = res.data.verification_comment;
           }
+          this.getFacilityVerificationStatus();
         },
         error: (err) => {
           console.error("Error verifying facility:", err);
@@ -723,6 +724,19 @@ export class SupplierProfileReviewComponent implements OnInit {
         }
       });
     });
+
+  }
+
+  getFacilityVerificationStatus() {
+    let verificationStatus = false;
+    this.manufacturingData.facilityPhotos.forEach((facility: any) => {
+      debugger
+      verificationStatus = facility.facility_status;
+    });
+
+    debugger
+    console.log("Verification Status ", verificationStatus);
+    this.facilityVerified = verificationStatus;
   }
 
   getL2Data(supplierId: any) {
