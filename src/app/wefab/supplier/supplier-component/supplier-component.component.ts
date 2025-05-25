@@ -2,19 +2,81 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { CommonSidebarComponent, SidebarMenuItem } from '../../../common-core-component/common-sidebar/common-sidebar.component';
+import { CommonHeaderComponent } from '../../../common-core-component/common-header/common-header.component';
 
 @Component({
   selector: 'app-supplier-component',
   standalone: true,
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, RouterModule, CommonSidebarComponent, CommonHeaderComponent],
   templateUrl: './supplier-component.component.html',
   styleUrl: './supplier-component.component.scss'
 })
 export class SupplierComponentComponent {
   loginError: string = '';
+  showDashboardLayout: boolean = false;
+  normalLayoutHeader: string = '';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  // Sidebar menu items configuration
+  sidebarMenuItems: SidebarMenuItem[] = [
+    {
+      icon: 'pi pi-home',
+      name: 'Dashboard',
+      route: '/wefab/supplier/dashboard'
+    },
+    {
+      icon: 'pi pi-user',
+      name: 'Profile',
+      route: '/wefab/supplier/profile-review'
+    },
+    {
+      icon: 'pi pi-check-circle',
+      name: 'Onboarding Status',
+      route: '/wefab/supplier/supplier-onboarding-status'
+    }
+  ];
+
+  constructor(private http: HttpClient, private router: Router) {
+    // Check if onboarding is complete and dashboard should be shown
+    this.checkDashboardVisibility();
+    
+    // Listen for route changes to update dashboard visibility
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.checkDashboardVisibility();
+    });
+  }
+
+  checkDashboardVisibility(): void {
+    const onboardingComplete = sessionStorage.getItem('supplier_onboarding_complete');
+    const showDashboard = sessionStorage.getItem('show_supplier_dashboard');
+    
+    this.showDashboardLayout = onboardingComplete === 'true' && showDashboard === 'true';
+
+    if(this.showDashboardLayout) {
+      this.normalLayoutHeader = 'WE-FAB Supplier Portal';
+    } else {
+      this.normalLayoutHeader = '';
+    }
+  }
+
+  onHeaderLogout(): void {
+    this.logout();
+  }
+
+  logout(): void {
+    // Clear session storage
+    sessionStorage.removeItem('supplier_onboarding_complete');
+    sessionStorage.removeItem('show_supplier_dashboard');
+    sessionStorage.removeItem('supplier_id');
+    
+    // Navigate to login or home page
+    this.router.navigate(['/wefab/supplier']);
+  }
 
   onLogin(email: string, password: string) {
     const obj = {

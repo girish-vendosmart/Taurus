@@ -331,6 +331,22 @@ $transition: all 0.3s ease;
       background-color: darken($blueprint-blue, 10%);
     }
   }
+
+  .dashboard-button {
+    background-color: $process-green;
+    min-width: 200px;
+    gap: 0.5rem;
+    
+    &:hover {
+      background-color: darken($process-green, 10%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba($process-green, 0.2);
+    }
+    
+    i {
+      font-size: 1rem;
+    }
+  }
 }
 
 // Specifically styled cards for each status

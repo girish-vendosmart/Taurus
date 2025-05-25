@@ -61,9 +61,17 @@
     </div>
     
     <!-- Global Profile Review Button when any section is under review -->
-    <div *ngIf="shouldShowProfileReviewButton()" class="global-actions">
+    <div *ngIf="shouldShowProfileReviewButton() && !areAllStagesApproved()" class="global-actions">
       <button class="primary-button profile-review-button" (click)="goToProfileReview()">
         View Profile
+      </button>
+    </div>
+
+    <!-- Go To Dashboard Button when all stages are approved -->
+    <div *ngIf="areAllStagesApproved()" class="global-actions">
+      <button class="primary-button dashboard-button" (click)="goToDashboard()">
+        <i class="pi pi-home"></i>
+        Go To Dashboard
       </button>
     </div>
   </div>

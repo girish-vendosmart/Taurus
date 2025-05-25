@@ -1,0 +1,73 @@
+// WE-FAB Style Guide Variables
+$blueprint-blue: #1A3A5F;   // Primary brand color
+$technical-white: #F6F7F9;  // Background color
+$precision-black: #1A1D21;  // Text color
+$machine-gray: #545A64;     // Secondary elements
+$material-silver: #D1D5DB;  // Borders, backgrounds
+$safety-orange: #FF5722;    // CTAs, highlights
+$process-green: #12856E;    // Success states, progress
+
+// Layout variables
+$sidebar-width: 260px;
+$header-height: 60px; // Height of common-header component
+$border-radius: 8px;
+$box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+$transition: all 0.3s ease;
+
+.supplier-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: $technical-white;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+
+// Main content area
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  &.with-sidebar {
+    margin-left: $sidebar-width;
+  }
+}
+
+// Content area
+.content-area {
+  flex: 1;
+  padding: 0;
+  background-color: $technical-white;
+
+  &.with-header {
+    // No padding needed as header is positioned within main-content
+  }
+}
+
+// Override common-header positioning when used in this layout
+:host ::ng-deep {
+  app-common-header {
+    .common-header {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      border-bottom: 1px solid rgba($material-silver, 0.3);
+    }
+  }
+  
+  // Ensure sidebar has proper z-index
+  app-common-sidebar {
+    z-index: 1001;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .main-content.with-sidebar {
+    margin-left: 0;
+  }
+  
+  .supplier-layout {
+    position: relative;
+  }
+}

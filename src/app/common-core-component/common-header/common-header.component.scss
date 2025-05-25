@@ -1,15 +1,16 @@
 @import '../../../assets/scss/variables.scss';
 
 .common-header {
-  background-color: $blueprint-blue;
+  background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 5%) 100%);
   color: $technical-white;
   padding: 0;
   margin: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
   z-index: 1000;
   width: 100%;
+  backdrop-filter: blur(10px);
 }
 
 .header-container {
@@ -29,11 +30,12 @@
 
 .header-title {
   color: $technical-white;
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: $font-weight-semibold;
   margin: 0;
   line-height: 1.2;
   font-family: $font-family-sans-serif;
+  letter-spacing: 0.3px;
 }
 
 .header-right {
@@ -42,30 +44,34 @@
 }
 
 .btn-logout {
-  background-color: transparent;
-  border: 1px solid $technical-white;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: $technical-white;
-  padding: 0.5rem 1.5rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
   font-weight: $font-weight-medium;
   font-family: $font-family-sans-serif;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   
   &:hover {
-    background-color: $technical-white;
-    color: $blueprint-blue;
-    border-color: $technical-white;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
   
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(246, 247, 249, 0.3);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
   }
   
   &:active {
-    transform: translateY(1px);
+    transform: translateY(0);
   }
 }
 
@@ -76,12 +82,12 @@
   }
   
   .header-title {
-    font-size: 1.125rem;
+    font-size: 1.2rem;
   }
   
   .btn-logout {
-    padding: 0.375rem 1rem;
-    font-size: 0.8125rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
   }
 }
 
@@ -91,11 +97,11 @@
   }
   
   .header-title {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
   
   .btn-logout {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
   }
 }

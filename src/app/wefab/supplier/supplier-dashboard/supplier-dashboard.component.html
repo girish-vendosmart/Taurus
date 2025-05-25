@@ -1,0 +1,57 @@
+<div class="dashboard-container">
+  <!-- Welcome Section -->
+  <div class="welcome-section">
+    <div class="welcome-content">
+      <h2>Welcome back, {{ supplierName }}!</h2>
+      <p>Here's an overview of your supplier portal activity</p>
+    </div>
+  </div>
+
+  <!-- Dashboard Cards -->
+  <div class="dashboard-grid">
+    <div *ngFor="let card of dashboardCards" class="dashboard-card" [ngClass]="card.color">
+      <div class="card-content">
+        <div class="card-icon">
+          <i [ngClass]="card.icon"></i>
+        </div>
+        <div class="card-details">
+          <h3>{{ card.value }}</h3>
+          <p class="card-title">{{ card.title }}</p>
+          <span class="card-description">{{ card.description }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activities -->
+  <div class="activities-section">
+    <h2>Recent Activities</h2>
+    <div class="activities-list">
+      <div *ngFor="let activity of recentActivities" class="activity-item" [ngClass]="activity.type">
+        <div class="activity-icon">
+          <i class="pi pi-circle-fill"></i>
+        </div>
+        <div class="activity-content">
+          <h4>{{ activity.title }}</h4>
+          <p>{{ activity.description }}</p>
+          <span class="activity-time">{{ activity.timestamp | date:'short' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="actions-grid">
+      <button class="action-btn" routerLink="/wefab/supplier/profile-review">
+        <i class="pi pi-user"></i>
+        <span>View Profile</span>
+      </button>
+      <button class="action-btn" routerLink="/wefab/supplier/supplier-onboarding-status">
+        <i class="pi pi-check-circle"></i>
+        <span>Onboarding Status</span>
+      </button>
+    </div>
+  </div>
+</div> 

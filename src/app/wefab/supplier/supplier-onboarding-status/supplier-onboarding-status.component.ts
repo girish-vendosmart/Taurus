@@ -488,4 +488,23 @@ export class SupplierOnboardingStatusComponent {
     // Show "Go to Profile Review" button if any section is under review
     return this.onboardingSteps.some(step => step.status === 'in-progress' || step.status === 'rejected' || step.status === 'completed' );
   }
+
+  // Check if all stages are approved
+  areAllStagesApproved(): boolean {
+    return this.currentOnboardingL1Status === 'Approved' && 
+           this.currentOnboardingL2Status === 'Approved' && 
+           this.currentOnboardingL3Status === 'Approved';
+  }
+
+  // Navigate to dashboard when all stages are approved
+  goToDashboard(): void {
+    console.log('Going to dashboard - all stages approved');
+    
+    // Set session storage to indicate onboarding is complete
+    sessionStorage.setItem('supplier_onboarding_complete', 'true');
+    sessionStorage.setItem('show_supplier_dashboard', 'true');
+    
+    // Navigate to the supplier dashboard
+    this.router.navigate(['/wefab/supplier/dashboard']);
+  }
 }

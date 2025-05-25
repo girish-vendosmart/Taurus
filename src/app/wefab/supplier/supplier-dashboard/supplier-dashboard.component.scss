@@ -1,0 +1,330 @@
+// WE-FAB Style Guide Variables
+$blueprint-blue: #1A3A5F;   // Primary brand color
+$technical-white: #F6F7F9;  // Background color
+$precision-black: #1A1D21;  // Text color
+$machine-gray: #545A64;     // Secondary elements
+$material-silver: #D1D5DB;  // Borders, backgrounds
+$safety-orange: #FF5722;    // CTAs, highlights
+$process-green: #12856E;    // Success states, progress
+$warning-yellow: #F59E0B;   // Warning color
+$info-blue: #3B82F6;       // Info color
+
+// Layout variables
+$border-radius: 10px;
+$box-shadow: 0 6px 15px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -6px rgba(0, 0, 0, 0.04);
+$transition: all 0.3s ease;
+
+.dashboard-container {
+  padding: 1.5rem;
+  background-color: $technical-white;
+  min-height: 100vh;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+
+// Welcome Section
+.welcome-section {
+  background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
+  border-radius: $border-radius;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: $box-shadow;
+  
+  .welcome-content {
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: white;
+      margin: 0 0 0.5rem 0;
+    }
+    
+    p {
+      color: rgba(white, 0.9);
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+}
+
+// Dashboard Grid
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.dashboard-card {
+  background-color: white;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  overflow: hidden;
+  transition: $transition;
+  border-left: 4px solid transparent;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.12);
+  }
+  
+  &.success {
+    border-left-color: $process-green;
+    
+    .card-icon {
+      background-color: rgba($process-green, 0.1);
+      color: $process-green;
+    }
+  }
+  
+  &.info {
+    border-left-color: $info-blue;
+    
+    .card-icon {
+      background-color: rgba($info-blue, 0.1);
+      color: $info-blue;
+    }
+  }
+  
+  &.warning {
+    border-left-color: $warning-yellow;
+    
+    .card-icon {
+      background-color: rgba($warning-yellow, 0.1);
+      color: $warning-yellow;
+    }
+  }
+  
+  &.primary {
+    border-left-color: $blueprint-blue;
+    
+    .card-icon {
+      background-color: rgba($blueprint-blue, 0.1);
+      color: $blueprint-blue;
+    }
+  }
+}
+
+.card-content {
+  padding: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  i {
+    font-size: 1.5rem;
+  }
+}
+
+.card-details {
+  flex: 1;
+  
+  h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $precision-black;
+    margin: 0 0 0.25rem 0;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $precision-black;
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .card-description {
+    font-size: 0.875rem;
+    color: $machine-gray;
+    line-height: 1.4;
+  }
+}
+
+// Activities Section
+.activities-section {
+  background-color: white;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $precision-black;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+.activities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  transition: $transition;
+  
+  &:hover {
+    background-color: rgba($blueprint-blue, 0.02);
+  }
+  
+  &.success .activity-icon {
+    color: $process-green;
+  }
+  
+  &.info .activity-icon {
+    color: $info-blue;
+  }
+  
+  &.warning .activity-icon {
+    color: $warning-yellow;
+  }
+}
+
+.activity-icon {
+  margin-top: 0.25rem;
+  
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+.activity-content {
+  flex: 1;
+  
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $precision-black;
+    margin: 0 0 0.25rem 0;
+  }
+  
+  p {
+    font-size: 0.875rem;
+    color: $machine-gray;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.4;
+  }
+  
+  .activity-time {
+    font-size: 0.75rem;
+    color: $machine-gray;
+    opacity: 0.8;
+  }
+}
+
+// Quick Actions
+.quick-actions {
+  background-color: white;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  padding: 1.5rem;
+  
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $precision-black;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background-color: $technical-white;
+  border: 1px solid $material-silver;
+  border-radius: 8px;
+  color: $precision-black;
+  text-decoration: none;
+  font-weight: 500;
+  transition: $transition;
+  cursor: pointer;
+  
+  &:hover {
+    background-color: rgba($blueprint-blue, 0.05);
+    border-color: rgba($blueprint-blue, 0.2);
+    color: $blueprint-blue;
+    transform: translateY(-1px);
+  }
+  
+  i {
+    font-size: 1.125rem;
+    color: $blueprint-blue;
+  }
+  
+  span {
+    font-size: 0.9rem;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .welcome-section h1 {
+    font-size: 1.5rem;
+  }
+  
+  .card-content {
+    padding: 1.25rem;
+  }
+  
+  .activities-section,
+  .quick-actions {
+    padding: 1.25rem;
+  }
+  
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 0.75rem;
+  }
+  
+  .card-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .activity-item {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .activity-icon {
+    margin-top: 0;
+  }
+} 

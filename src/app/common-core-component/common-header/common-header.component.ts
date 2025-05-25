@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
   styleUrl: './common-header.component.scss'
 })
 export class CommonHeaderComponent {
+  @Input() title: string = 'Supplier Onboarding Portal';
   @Output() logoutEvent = new EventEmitter<void>();
 
   constructor(private router: Router) {}
