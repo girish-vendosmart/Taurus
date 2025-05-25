@@ -651,18 +651,10 @@ export class SupplierProfileReviewComponent implements OnInit {
     }
 
     this.manufacturingData.machines.forEach((machine: any) => {
-      if (!machine || !machine.machinePhotos || !machine.machinePhotos.fileId) return;
+      debugger
+      console.log("Machine ", machine);
       
-      let fileId = machine.machinePhotos.fileId;
-      console.log('fileId', fileId);
-      console.log('registeredLat', this.registeredLat);
-      console.log('registeredLng', this.registeredLng);
-      
-      if (!this.registeredLat || !this.registeredLng) {
-        machine.machinePhotos.machine_status = false;
-        machine.machinePhotos.machine_status_comment = "Missing location data for verification";
-        return;
-      }
+      let fileId = machine.machinePhotos.fileId ? machine.machinePhotos.fileId : machine.machinePhotos[0].file_id;
       
       let endPoint = `/api/method/proq_buyer.api.supplier_onboarding.machine_image_verification.machine_identification.analyze_machine_image?file_id=${fileId}&facility_lat=${this.registeredLat}&facility_lon=${this.registeredLng}`;
       this.commonservice.getData(endPoint).subscribe({
@@ -730,11 +722,9 @@ export class SupplierProfileReviewComponent implements OnInit {
   getFacilityVerificationStatus() {
     let verificationStatus = false;
     this.manufacturingData.facilityPhotos.forEach((facility: any) => {
-      debugger
       verificationStatus = facility.facility_status;
     });
 
-    debugger
     console.log("Verification Status ", verificationStatus);
     this.facilityVerified = verificationStatus;
   }
@@ -931,7 +921,6 @@ export class SupplierProfileReviewComponent implements OnInit {
   
 
   approve(level: string) {
-    debugger
     this.sweetAlert.confirm(
       '',
       'Are you sure you want to approve this stage?',

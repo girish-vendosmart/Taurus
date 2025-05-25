@@ -548,13 +548,16 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
             progress: 100
           };
         }
-        // If the value is a file object
+        // If the value is a file object - preserve both fileId and file_id
+        const fileId = file.fileId || file.file_id || '';
         return {
           ...file,
           uploading: file.uploading || false,
           uploaded: file.uploaded !== undefined ? file.uploaded : (file.url ? true : false),
           error: file.error || false,
-          progress: file.progress || (file.url ? 100 : 0)
+          progress: file.progress || (file.url ? 100 : 0),
+          fileId: fileId,  // Ensure fileId is preserved
+          file_id: fileId  // Ensure file_id is preserved for backward compatibility
         };
       });
     } else if (typeof value === 'string') {
@@ -570,14 +573,17 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
         progress: 100
       }];
     } else {
-      // Handle object value (file object for single file upload)
+      // Handle object value (file object for single file upload) - preserve both fileId and file_id
       const file = value;
+      const fileId = file.fileId || file.file_id || '';
       this.uploadedFiles = [{
         ...file,
         uploading: file.uploading || false,
         uploaded: file.uploaded !== undefined ? file.uploaded : (file.url ? true : false),
         error: file.error || false,
-        progress: file.progress || (file.url ? 100 : 0)
+        progress: file.progress || (file.url ? 100 : 0),
+        fileId: fileId,  // Ensure fileId is preserved
+        file_id: fileId  // Ensure file_id is preserved for backward compatibility
       }];
     }
   }
@@ -807,7 +813,8 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
         this.uploadedFiles[fileIndex].url = fileUrl;
       }
       if (fileId) {
-        this.uploadedFiles[fileIndex].fileId = fileId;
+        this.uploadedFiles[fileIndex].fileId = fileId;  // Store as fileId for consistency
+        this.uploadedFiles[fileIndex].file_id = fileId; // Also store as file_id for backward compatibility
       }
 
       console.log('this.uploadedFiles', this.uploadedFiles)

@@ -139,6 +139,7 @@ export class SupplierOnboardingL2Component implements OnInit {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId;
     this.commonService.getData(endPoint).subscribe((res: any) => {
       this.getManufacturerData = JSON.parse(res.data.company_profile);
+      debugger
       console.log('Retrieved data:', this.getManufacturerData);
       this.patchValueForm();
     });
@@ -163,6 +164,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       
       processedData.machines.forEach((machine: any, index: number) => {
         if (machine.machinePhotos) {
+          console.log(`Processing machine ${index} photos (before):`, machine.machinePhotos);
           let photoFiles = [];
           
           // If it's already an array, process each item
@@ -179,7 +181,7 @@ export class SupplierOnboardingL2Component implements OnInit {
           }
           
           machine.machinePhotos = photoFiles;
-          console.log(`Machine ${index} photos:`, machine.machinePhotos);
+          console.log(`Machine ${index} photos (after processing):`, machine.machinePhotos);
         }
       });
     } else {
@@ -197,6 +199,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       processedData.certifications.forEach((cert: any, index: number) => {
         // Force single certificate document to be an array if it exists
         if (cert.certificateDocument) {
+          console.log(`Processing certification ${index} document (before):`, cert.certificateDocument);
           let docFiles = [];
           
           // If it's already an array, process each item
@@ -213,7 +216,7 @@ export class SupplierOnboardingL2Component implements OnInit {
           }
           
           cert.certificateDocument = docFiles;
-          console.log(`Certification ${index} document:`, cert.certificateDocument);
+          console.log(`Certification ${index} document (after processing):`, cert.certificateDocument);
         }
       });
     } else {
@@ -223,6 +226,7 @@ export class SupplierOnboardingL2Component implements OnInit {
     
     // Process facility photos
     if (processedData.facilityPhotos) {
+      console.log('Processing facility photos (before):', processedData.facilityPhotos);
       let facilityFiles = [];
       
       // If it's already an array, process each item
@@ -239,7 +243,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       }
       
       processedData.facilityPhotos = facilityFiles;
-      console.log('Facility photos:', processedData.facilityPhotos);
+      console.log('Facility photos (after processing):', processedData.facilityPhotos);
     }
     
     // Update the model with the processed values
@@ -258,8 +262,61 @@ export class SupplierOnboardingL2Component implements OnInit {
       this.setFormControlsDirectly();
       
       this.form.markAsPristine();
-      console.log('Form patched with processed data');
+      console.log('Form patched with processed data - checking file_id preservation...');
+      
+      // Debug: Check if file_id is preserved in form controls
+      this.debugFileIdPreservation();
     }, 1500);  // Increased timeout for component initialization
+  }
+
+  /**
+   * Debug method to check if file_id values are preserved in form controls
+   */
+  private debugFileIdPreservation() {
+    console.log('=== DEBUG: Checking file_id preservation ===');
+    
+    // Check machine photos
+    if (this.model.machines && Array.isArray(this.model.machines)) {
+      this.model.machines.forEach((machine: any, machineIndex: number) => {
+        if (machine.machinePhotos && machine.machinePhotos.length > 0) {
+          console.log(`Machine ${machineIndex} photos in model:`, machine.machinePhotos);
+          const control = this.form.get(`machines.${machineIndex}.machinePhotos`);
+          if (control) {
+            console.log(`Machine ${machineIndex} photos in form control:`, control.value);
+          } else {
+            console.log(`Machine ${machineIndex} photos form control not found`);
+          }
+        }
+      });
+    }
+    
+    // Check certification documents
+    if (this.model.certifications && Array.isArray(this.model.certifications)) {
+      this.model.certifications.forEach((cert: any, certIndex: number) => {
+        if (cert.certificateDocument && cert.certificateDocument.length > 0) {
+          console.log(`Certification ${certIndex} document in model:`, cert.certificateDocument);
+          const control = this.form.get(`certifications.${certIndex}.certificateDocument`);
+          if (control) {
+            console.log(`Certification ${certIndex} document in form control:`, control.value);
+          } else {
+            console.log(`Certification ${certIndex} document form control not found`);
+          }
+        }
+      });
+    }
+    
+    // Check facility photos
+    if (this.model.facilityPhotos && this.model.facilityPhotos.length > 0) {
+      console.log('Facility photos in model:', this.model.facilityPhotos);
+      const control = this.form.get('facilityPhotos');
+      if (control) {
+        console.log('Facility photos in form control:', control.value);
+      } else {
+        console.log('Facility photos form control not found');
+      }
+    }
+    
+    console.log('=== END DEBUG ===');
   }
 
   /**
@@ -341,14 +398,17 @@ export class SupplierOnboardingL2Component implements OnInit {
         url: fileData,
       };
     } else if (typeof fileData === 'object') {
-      // For file objects
+      // For file objects - handle both fileId and file_id property names
+      const fileId = fileData.fileId || fileData.file_id || '';
+      
       fileObject = {
         name: fileData.name || fileData.fileName || 'document',
         size: fileData.size || 0,
         type: fileData.type || fileData.fileType || this.getFileTypeFromUrl(fileData.name || 'document'),
         lastModified: fileData.lastModified || Date.now(),
         url: fileData.url || fileData.file_url || '',
-        file_id: fileData.file_id || ''
+        fileId: fileId,  // Store as fileId to match FormlyFieldFileUploadComponent
+        file_id: fileId  // Also store as file_id for backward compatibility
       };
     }
     
