@@ -35,7 +35,7 @@ export class SupplierComponentComponent {
     {
       icon: 'pi pi-check-circle',
       name: 'Quotations',
-      route: '/wefab/supplier/supplier-onboarding-status'
+      route: '/wefab/supplier/quotation'
     }
   ];
 

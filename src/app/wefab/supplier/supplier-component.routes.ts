@@ -15,6 +15,7 @@ import { SupplierOnboardingStatusComponent } from './supplier-onboarding-status/
 import { SupplierDashboardComponent } from './supplier-dashboard/supplier-dashboard.component';
 import { SupplierRfqComponent } from './supplier-rfq/supplier-rfq.component';
 import { SupplierRfqDetailsComponent } from './supplier-rfq-details/supplier-rfq-details.component';
+import { SupplierQuotationComponent } from './supplier-quotation/supplier-quotation.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
@@ -33,6 +34,11 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
             {
                 path: 'rfq',
                 component: SupplierRfqComponent,
+                canActivate: [AuthGuard]
+            },
+            {
+                path: 'quotation',
+                component: SupplierQuotationComponent,
                 canActivate: [AuthGuard]
             },
             {

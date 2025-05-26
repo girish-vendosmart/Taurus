@@ -1,23 +1,23 @@
-<div class="rfq-page">
+<div class="quotation-page">
   <!-- Page Header -->
   <div class="page-header">
     <div class="header-content">
       <div class="title-section">
-        <h1 class="page-title">Request for Quotations</h1>
-        <p class="page-subtitle">Manage and respond to RFQ requests from customers</p>
+        <h1 class="page-title">Supplier Quotations</h1>
+        <p class="page-subtitle">Manage your quotation submissions and track their status</p>
       </div>
       <div class="stats-section">
         <div class="stat-item">
           <span class="stat-number">{{ getTabCount(0) }}</span>
-          <span class="stat-label">Open to Bid</span>
+          <span class="stat-label">Draft</span>
         </div>
         <div class="stat-item">
           <span class="stat-number">{{ getTabCount(1) }}</span>
-          <span class="stat-label">In Progress</span>
+          <span class="stat-label">Quoted</span>
         </div>
         <div class="stat-item">
           <span class="stat-number">{{ getTabCount(2) }}</span>
-          <span class="stat-label">Completed</span>
+          <span class="stat-label">Awarded</span>
         </div>
       </div>
     </div>
@@ -30,19 +30,19 @@
         class="tab-btn" 
         [class.active]="activeTabIndex === 0"
         (click)="setActiveTab(0)">
-        Open to Bid ({{ getTabCount(0) }})
+        Draft ({{ getTabCount(0) }})
       </button>
       <button 
         class="tab-btn" 
         [class.active]="activeTabIndex === 1"
         (click)="setActiveTab(1)">
-        In Progress ({{ getTabCount(1) }})
+        Quoted ({{ getTabCount(1) }})
       </button>
       <button 
         class="tab-btn" 
         [class.active]="activeTabIndex === 2"
         (click)="setActiveTab(2)">
-        Completed ({{ getTabCount(2) }})
+        Awarded ({{ getTabCount(2) }})
       </button>
     </div>
 
@@ -50,6 +50,14 @@
     <div class="custom-table-container">
       <!-- Search Filters Row -->
       <div class="search-filters-row">
+        <div class="search-col quotation-id-col">
+          <input 
+            type="text" 
+            placeholder="Search Quotation ID" 
+            [(ngModel)]="searchFilters.quotationId"
+            (input)="onSearch()"
+            class="search-input">
+        </div>
         <div class="search-col rfq-id-col">
           <input 
             type="text" 
@@ -86,7 +94,7 @@
           <input 
             type="text" 
             placeholder="Search Date" 
-            [(ngModel)]="searchFilters.dueDate"
+            [(ngModel)]="searchFilters.submittedDate"
             (input)="onSearch()"
             class="search-input">
         </div>
@@ -96,9 +104,9 @@
             (change)="onSearch()"
             class="search-select">
             <option value="">All Status</option>
-            <option value="Open">Open</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Closed">Closed</option>
+            <option value="Draft">Draft</option>
+            <option value="Quoted">Quoted</option>
+            <option value="Awarded">Awarded</option>
           </select>
         </div>
         <div class="search-col actions-col">
@@ -108,43 +116,47 @@
 
       <!-- Table Header -->
       <div class="table-header-row">
+        <div class="header-col quotation-id-col">QUOTATION ID</div>
         <div class="header-col rfq-id-col">RFQ ID</div>
         <div class="header-col title-col">TITLE</div>
         <div class="header-col company-col">COMPANY</div>
         <div class="header-col parts-col">PARTS</div>
-        <div class="header-col date-col">DUE DATE</div>
+        <div class="header-col date-col">SUBMITTED DATE</div>
         <div class="header-col status-col">STATUS</div>
         <div class="header-col actions-col">ACTIONS</div>
       </div>
 
       <!-- Table Content -->
       <div class="table-content">
-        <!-- Open to Bid -->
+        <!-- Draft -->
         <div class="tab-panel" [class.active]="activeTabIndex === 0">
           <div class="data-rows">
-            <div class="data-row" *ngFor="let rfq of getFilteredData(openRFQs)">
+            <div class="data-row" *ngFor="let quotation of getFilteredData(draftQuotations)">
+              <div class="data-col quotation-id-col">
+                <a (click)="onLinkClick(quotation)" class="quotation-link">{{ quotation.quotationId }}</a>
+                <small class="quotation-code">{{ quotation.quotationId.split('-')[2] }}</small>
+              </div>
               <div class="data-col rfq-id-col">
-                <a (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
-                <small class="rfq-code">{{ rfq.rfqId.split('-')[2] }}</small>
+                <span class="rfq-reference">{{ quotation.rfqId }}</span>
               </div>
               <div class="data-col title-col">
                 <div class="title-content">
-                  <strong>{{ rfq.title }}</strong>
-                  <small>{{ rfq.description }}</small>
+                  <strong>{{ quotation.title }}</strong>
+                  <small>{{ quotation.description }}</small>
                 </div>
               </div>
               <div class="data-col company-col">
-                <span>{{ rfq.company }}</span>
+                <span>{{ quotation.company }}</span>
               </div>
               <div class="data-col parts-col">
-                <span class="parts-count">{{ rfq.parts }}</span>
+                <span class="parts-count">{{ quotation.parts }}</span>
               </div>
               <div class="data-col date-col">
-                <span>{{ formatDate(rfq.dueDate) }}</span>
+                <span>{{ formatDate(quotation.submittedDate) }}</span>
               </div>
               <div class="data-col status-col">
-                <span class="status-badge" [ngClass]="'status-' + rfq.status.toLowerCase().replace(' ', '-')">
-                  {{ rfq.status }}
+                <span class="status-badge" [ngClass]="'status-' + quotation.status.toLowerCase()">
+                  {{ quotation.status }}
                 </span>
               </div>
               <div class="data-col actions-col">
@@ -152,14 +164,14 @@
                   <button 
                     type="button" 
                     class="btn btn-outline-primary btn-sm"
-                    (click)="onViewRFQ(rfq)">
-                    View
+                    (click)="onEditQuotation(quotation)">
+                    Edit
                   </button>
                   <button 
                     type="button" 
                     class="btn btn-primary btn-sm"
-                    (click)="onQuoteRFQ(rfq)">
-                    Quote
+                    (click)="onSubmitQuotation(quotation)">
+                    Submit
                   </button>
                 </div>
               </div>
@@ -167,32 +179,35 @@
           </div>
         </div>
 
-        <!-- In Progress -->
+        <!-- Quoted -->
         <div class="tab-panel" [class.active]="activeTabIndex === 1">
           <div class="data-rows">
-            <div class="data-row" *ngFor="let rfq of getFilteredData(inProgressRFQs)">
+            <div class="data-row" *ngFor="let quotation of getFilteredData(quotedQuotations)">
+              <div class="data-col quotation-id-col">
+                <a (click)="onLinkClick(quotation)" class="quotation-link">{{ quotation.quotationId }}</a>
+                <small class="quotation-code">{{ quotation.quotationId.split('-')[2] }}</small>
+              </div>
               <div class="data-col rfq-id-col">
-                <a (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
-                <small class="rfq-code">{{ rfq.rfqId.split('-')[2] }}</small>
+                <span class="rfq-reference">{{ quotation.rfqId }}</span>
               </div>
               <div class="data-col title-col">
                 <div class="title-content">
-                  <strong>{{ rfq.title }}</strong>
-                  <small>{{ rfq.description }}</small>
+                  <strong>{{ quotation.title }}</strong>
+                  <small>{{ quotation.description }}</small>
                 </div>
               </div>
               <div class="data-col company-col">
-                <span>{{ rfq.company }}</span>
+                <span>{{ quotation.company }}</span>
               </div>
               <div class="data-col parts-col">
-                <span class="parts-count">{{ rfq.parts }}</span>
+                <span class="parts-count">{{ quotation.parts }}</span>
               </div>
               <div class="data-col date-col">
-                <span>{{ formatDate(rfq.dueDate) }}</span>
+                <span>{{ formatDate(quotation.submittedDate) }}</span>
               </div>
               <div class="data-col status-col">
-                <span class="status-badge" [ngClass]="'status-' + rfq.status.toLowerCase().replace(' ', '-')">
-                  {{ rfq.status }}
+                <span class="status-badge" [ngClass]="'status-' + quotation.status.toLowerCase()">
+                  {{ quotation.status }}
                 </span>
               </div>
               <div class="data-col actions-col">
@@ -200,13 +215,13 @@
                   <button 
                     type="button" 
                     class="btn btn-outline-primary btn-sm"
-                    (click)="onViewRFQ(rfq)">
+                    (click)="onViewQuotation(quotation)">
                     View
                   </button>
                   <button 
                     type="button" 
                     class="btn btn-warning btn-sm"
-                    (click)="onQuoteRFQ(rfq)">
+                    (click)="onEditQuotation(quotation)">
                     Edit
                   </button>
                 </div>
@@ -215,32 +230,35 @@
           </div>
         </div>
 
-        <!-- Completed -->
+        <!-- Awarded -->
         <div class="tab-panel" [class.active]="activeTabIndex === 2">
           <div class="data-rows">
-            <div class="data-row" *ngFor="let rfq of getFilteredData(closedRFQs)">
+            <div class="data-row" *ngFor="let quotation of getFilteredData(awardedQuotations)">
+              <div class="data-col quotation-id-col">
+                <a (click)="onLinkClick(quotation)" class="quotation-link">{{ quotation.quotationId }}</a>
+                <small class="quotation-code">{{ quotation.quotationId.split('-')[2] }}</small>
+              </div>
               <div class="data-col rfq-id-col">
-                <a (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
-                <small class="rfq-code">{{ rfq.rfqId.split('-')[2] }}</small>
+                <span class="rfq-reference">{{ quotation.rfqId }}</span>
               </div>
               <div class="data-col title-col">
                 <div class="title-content">
-                  <strong>{{ rfq.title }}</strong>
-                  <small>{{ rfq.description }}</small>
+                  <strong>{{ quotation.title }}</strong>
+                  <small>{{ quotation.description }}</small>
                 </div>
               </div>
               <div class="data-col company-col">
-                <span>{{ rfq.company }}</span>
+                <span>{{ quotation.company }}</span>
               </div>
               <div class="data-col parts-col">
-                <span class="parts-count">{{ rfq.parts }}</span>
+                <span class="parts-count">{{ quotation.parts }}</span>
               </div>
               <div class="data-col date-col">
-                <span>{{ formatDate(rfq.dueDate) }}</span>
+                <span>{{ formatDate(quotation.submittedDate) }}</span>
               </div>
               <div class="data-col status-col">
-                <span class="status-badge" [ngClass]="'status-' + rfq.status.toLowerCase().replace(' ', '-')">
-                  {{ rfq.status }}
+                <span class="status-badge" [ngClass]="'status-' + quotation.status.toLowerCase()">
+                  {{ quotation.status }}
                 </span>
               </div>
               <div class="data-col actions-col">
@@ -248,13 +266,13 @@
                   <button 
                     type="button" 
                     class="btn btn-outline-primary btn-sm"
-                    (click)="onViewRFQ(rfq)">
+                    (click)="onViewQuotation(quotation)">
                     View
                   </button>
                   <button 
                     type="button" 
                     class="btn btn-secondary btn-sm"
-                    (click)="onQuoteRFQ(rfq)">
+                    (click)="onDownloadQuotation(quotation)">
                     Download
                   </button>
                 </div>
