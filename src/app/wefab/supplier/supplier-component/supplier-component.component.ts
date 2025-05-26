@@ -29,12 +29,12 @@ export class SupplierComponentComponent {
     },
     {
       icon: 'pi pi-user',
-      name: 'Profile',
-      route: '/wefab/supplier/profile-review'
+      name: 'RFQ',
+      route: '/wefab/supplier/rfq'
     },
     {
       icon: 'pi pi-check-circle',
-      name: 'Onboarding Status',
+      name: 'Quotations',
       route: '/wefab/supplier/supplier-onboarding-status'
     }
   ];

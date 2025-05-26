@@ -13,6 +13,7 @@ import { AuthGuard } from '../../core/guards/auth.guard';
 import { SupplierOnboardingWelcomeComponentComponent } from './supplier-onboarding-welcome-component/supplier-onboarding-welcome-component.component';
 import { SupplierOnboardingStatusComponent } from './supplier-onboarding-status/supplier-onboarding-status.component';
 import { SupplierDashboardComponent } from './supplier-dashboard/supplier-dashboard.component';
+import { SupplierRfqComponent } from './supplier-rfq/supplier-rfq.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
@@ -26,6 +27,11 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
             {
                 path: 'dashboard',
                 component: SupplierDashboardComponent,
+                canActivate: [AuthGuard]
+            },
+            {
+                path: 'rfq',
+                component: SupplierRfqComponent,
                 canActivate: [AuthGuard]
             },
             { 

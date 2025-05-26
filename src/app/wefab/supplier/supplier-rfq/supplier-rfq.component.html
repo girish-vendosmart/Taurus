@@ -1,0 +1,280 @@
+<div class="rfq-page">
+  <!-- Simple Clean Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">Request for Quotation</h1>
+        <p class="page-subtitle">Manage your quotation requests</p>
+      </div>
+      <div class="stats-section">
+        <div class="stat-item">
+          <span class="stat-number">{{ getTabCount(0) }}</span>
+          <span class="stat-label">Open</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getTabCount(1) }}</span>
+          <span class="stat-label">In Progress</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getTabCount(2) }}</span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple Tab Navigation -->
+  <div class="content-section">
+    <div class="tab-nav">
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTabIndex === 0"
+        (click)="setActiveTab(0)">
+        Open to Bid ({{ getTabCount(0) }})
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTabIndex === 1"
+        (click)="setActiveTab(1)">
+        In Progress ({{ getTabCount(1) }})
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTabIndex === 2"
+        (click)="setActiveTab(2)">
+        Completed ({{ getTabCount(2) }})
+      </button>
+    </div>
+
+    <!-- Custom Table Layout -->
+    <div class="custom-table-container">
+      <!-- Search Filters Row -->
+      <div class="search-filters-row">
+        <div class="search-col rfq-id-col">
+          <input 
+            type="text" 
+            placeholder="Search RFQ ID" 
+            [(ngModel)]="searchFilters.rfqId"
+            (input)="onSearch()"
+            class="search-input">
+        </div>
+        <div class="search-col title-col">
+          <input 
+            type="text" 
+            placeholder="Search Title" 
+            [(ngModel)]="searchFilters.title"
+            (input)="onSearch()"
+            class="search-input">
+        </div>
+        <div class="search-col company-col">
+          <input 
+            type="text" 
+            placeholder="Search Company" 
+            [(ngModel)]="searchFilters.company"
+            (input)="onSearch()"
+            class="search-input">
+        </div>
+        <div class="search-col parts-col">
+          <input 
+            type="text" 
+            placeholder="Search Parts" 
+            [(ngModel)]="searchFilters.parts"
+            (input)="onSearch()"
+            class="search-input">
+        </div>
+        <div class="search-col date-col">
+          <input 
+            type="text" 
+            placeholder="Search Date" 
+            [(ngModel)]="searchFilters.dueDate"
+            (input)="onSearch()"
+            class="search-input">
+        </div>
+        <div class="search-col status-col">
+          <select 
+            [(ngModel)]="searchFilters.status"
+            (change)="onSearch()"
+            class="search-select">
+            <option value="">All Status</option>
+            <option value="Open">Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+        <div class="search-col actions-col">
+          <div class="action-placeholder"></div>
+        </div>
+      </div>
+
+      <!-- Table Header -->
+      <div class="table-header-row">
+        <div class="header-col rfq-id-col">RFQ ID</div>
+        <div class="header-col title-col">TITLE</div>
+        <div class="header-col company-col">COMPANY</div>
+        <div class="header-col parts-col">PARTS</div>
+        <div class="header-col date-col">DUE DATE</div>
+        <div class="header-col status-col">STATUS</div>
+        <div class="header-col actions-col">ACTIONS</div>
+      </div>
+
+      <!-- Table Content -->
+      <div class="table-content">
+        <!-- Open to Bid -->
+        <div class="tab-panel" [class.active]="activeTabIndex === 0">
+          <div class="data-rows">
+            <div class="data-row" *ngFor="let rfq of getFilteredData(openRFQs)">
+              <div class="data-col rfq-id-col">
+                <a href="#" (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
+                <small class="rfq-code">{{ rfq.rfqId.split('-')[2] }}</small>
+              </div>
+              <div class="data-col title-col">
+                <div class="title-content">
+                  <strong>{{ rfq.title }}</strong>
+                  <small>{{ rfq.description }}</small>
+                </div>
+              </div>
+              <div class="data-col company-col">
+                <span>{{ rfq.company }}</span>
+              </div>
+              <div class="data-col parts-col">
+                <span class="parts-count">{{ rfq.parts }}</span>
+              </div>
+              <div class="data-col date-col">
+                <span>{{ formatDate(rfq.dueDate) }}</span>
+              </div>
+              <div class="data-col status-col">
+                <span class="status-badge" [ngClass]="'status-' + rfq.status.toLowerCase().replace(' ', '-')">
+                  {{ rfq.status }}
+                </span>
+              </div>
+              <div class="data-col actions-col">
+                <div class="action-buttons">
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-primary btn-sm"
+                    (click)="onViewRFQ(rfq)">
+                    View
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-primary btn-sm"
+                    (click)="onQuoteRFQ(rfq)">
+                    Quote
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- In Progress -->
+        <div class="tab-panel" [class.active]="activeTabIndex === 1">
+          <div class="data-rows">
+            <div class="data-row" *ngFor="let rfq of getFilteredData(inProgressRFQs)">
+              <div class="data-col rfq-id-col">
+                <a href="#" (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
+                <small class="rfq-code">{{ rfq.rfqId.split('-')[2] }}</small>
+              </div>
+              <div class="data-col title-col">
+                <div class="title-content">
+                  <strong>{{ rfq.title }}</strong>
+                  <small>{{ rfq.description }}</small>
+                </div>
+              </div>
+              <div class="data-col company-col">
+                <span>{{ rfq.company }}</span>
+              </div>
+              <div class="data-col parts-col">
+                <span class="parts-count">{{ rfq.parts }}</span>
+              </div>
+              <div class="data-col date-col">
+                <span>{{ formatDate(rfq.dueDate) }}</span>
+              </div>
+              <div class="data-col status-col">
+                <span class="status-badge" [ngClass]="'status-' + rfq.status.toLowerCase().replace(' ', '-')">
+                  {{ rfq.status }}
+                </span>
+              </div>
+              <div class="data-col actions-col">
+                <div class="action-buttons">
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-primary btn-sm"
+                    (click)="onViewRFQ(rfq)">
+                    View
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-warning btn-sm"
+                    (click)="onQuoteRFQ(rfq)">
+                    Edit
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Completed -->
+        <div class="tab-panel" [class.active]="activeTabIndex === 2">
+          <div class="data-rows">
+            <div class="data-row" *ngFor="let rfq of getFilteredData(closedRFQs)">
+              <div class="data-col rfq-id-col">
+                <a href="#" (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
+                <small class="rfq-code">{{ rfq.rfqId.split('-')[2] }}</small>
+              </div>
+              <div class="data-col title-col">
+                <div class="title-content">
+                  <strong>{{ rfq.title }}</strong>
+                  <small>{{ rfq.description }}</small>
+                </div>
+              </div>
+              <div class="data-col company-col">
+                <span>{{ rfq.company }}</span>
+              </div>
+              <div class="data-col parts-col">
+                <span class="parts-count">{{ rfq.parts }}</span>
+              </div>
+              <div class="data-col date-col">
+                <span>{{ formatDate(rfq.dueDate) }}</span>
+              </div>
+              <div class="data-col status-col">
+                <span class="status-badge" [ngClass]="'status-' + rfq.status.toLowerCase().replace(' ', '-')">
+                  {{ rfq.status }}
+                </span>
+              </div>
+              <div class="data-col actions-col">
+                <div class="action-buttons">
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-primary btn-sm"
+                    (click)="onViewRFQ(rfq)">
+                    View
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-secondary btn-sm"
+                    (click)="onQuoteRFQ(rfq)">
+                    Download
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-section">
+        <div class="pagination-info">
+          Showing {{ getFilteredData(getCurrentTabData()).length }} of {{ getCurrentTabData().length }} entries
+        </div>
+        <div class="pagination-controls">
+          <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">Previous</button>
+          <span class="page-info">Page {{ currentPage }} of {{ getTotalPages() }}</span>
+          <button class="page-btn" [disabled]="currentPage === getTotalPages()" (click)="goToPage(currentPage + 1)">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
