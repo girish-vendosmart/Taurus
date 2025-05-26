@@ -1,28 +1,4 @@
 <div class="rfq-page">
-  <!-- Simple Clean Header -->
-  <div class="page-header">
-    <div class="header-content">
-      <div class="title-section">
-        <h1 class="page-title">Request for Quotation</h1>
-        <p class="page-subtitle">Manage your quotation requests</p>
-      </div>
-      <div class="stats-section">
-        <div class="stat-item">
-          <span class="stat-number">{{ getTabCount(0) }}</span>
-          <span class="stat-label">Open</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">{{ getTabCount(1) }}</span>
-          <span class="stat-label">In Progress</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">{{ getTabCount(2) }}</span>
-          <span class="stat-label">Completed</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Simple Tab Navigation -->
   <div class="content-section">
     <div class="tab-nav">
@@ -124,7 +100,7 @@
           <div class="data-rows">
             <div class="data-row" *ngFor="let rfq of getFilteredData(openRFQs)">
               <div class="data-col rfq-id-col">
-                <a href="#" (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
+                <a (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
                 <small class="rfq-code">{{ rfq.rfqId.split('-')[2] }}</small>
               </div>
               <div class="data-col title-col">
@@ -172,7 +148,7 @@
           <div class="data-rows">
             <div class="data-row" *ngFor="let rfq of getFilteredData(inProgressRFQs)">
               <div class="data-col rfq-id-col">
-                <a href="#" (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
+                <a (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
                 <small class="rfq-code">{{ rfq.rfqId.split('-')[2] }}</small>
               </div>
               <div class="data-col title-col">
@@ -220,7 +196,7 @@
           <div class="data-rows">
             <div class="data-row" *ngFor="let rfq of getFilteredData(closedRFQs)">
               <div class="data-col rfq-id-col">
-                <a href="#" (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
+                <a (click)="onLinkClick(rfq)" class="rfq-link">{{ rfq.rfqId }}</a>
                 <small class="rfq-code">{{ rfq.rfqId.split('-')[2] }}</small>
               </div>
               <div class="data-col title-col">

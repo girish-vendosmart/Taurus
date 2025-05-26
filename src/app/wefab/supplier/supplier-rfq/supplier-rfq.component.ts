@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CommonTableComponent, TableColumn } from '../../../wefab/wefab-shared-component/common-table/common-table.component';
 
 export interface RFQItem {
@@ -39,6 +40,8 @@ export interface SearchFilters {
   styleUrl: './supplier-rfq.component.scss'
 })
 export class SupplierRfqComponent implements OnInit {
+
+  constructor(private router: Router) { }
   
   // Tab data
   openRFQs: RFQItem[] = [];
@@ -350,7 +353,7 @@ export class SupplierRfqComponent implements OnInit {
   onLinkClick(rowData: RFQItem) {
     console.log('RFQ clicked:', rowData);
     // Navigate to RFQ details page
-    // this.router.navigate(['/wefab/supplier/rfq', rowData.rfqId]);
+    this.router.navigate(['/wefab/supplier/rfq/details', rowData.rfqId]);
   }
 
   onViewRFQ(rfq: RFQItem) {

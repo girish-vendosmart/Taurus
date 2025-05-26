@@ -1,0 +1,249 @@
+<div class="rfq-details-page">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()">
+        <i class="bi bi-arrow-left"></i>
+        Back to RFQs
+      </button>
+    </div>
+    
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">{{ rfqDetails.title }}</h1>
+        <p class="rfq-id">{{ rfqDetails.rfqId }}</p>
+      </div>
+      
+      <div class="header-right">
+        <span class="status-tag status-open">
+          <i class="bi bi-circle-fill"></i>
+          Open
+        </span>
+        <button class="btn btn-outline-primary" (click)="viewContract()">
+          View Contract
+        </button>
+        <button class="btn btn-primary" (click)="createQuotation()">
+          Create Quotation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RFQ Info Bar -->
+  <div class="rfq-info-bar">
+    <div class="info-item">
+      <span class="info-label">Creation:</span>
+      <span class="info-value">{{ rfqDetails.createdOn }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Project Name:</span>
+      <span class="info-value">{{ rfqDetails.projectName }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Rfq Id:</span>
+      <span class="info-value">{{ rfqDetails.rfqId }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Country:</span>
+      <span class="info-value">{{ rfqDetails.country }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Last Quote Date:</span>
+      <span class="info-value">{{ rfqDetails.lastQuoteDate }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Address:</span>
+      <span class="info-value">{{ rfqDetails.address }}</span>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'overview'"
+      (click)="setActiveTab('overview')">
+      Overview
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'comment'"
+      (click)="setActiveTab('comment')">
+      Comment
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'resolution'"
+      (click)="setActiveTab('resolution')">
+      Resolution Center
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Overview Tab -->
+    <div class="tab-panel" [class.active]="activeTab === 'overview'">
+      <div class="overview-content">
+        <!-- RFQ Details Section -->
+        <div class="details-section">
+          <h2>RFQ Details</h2>
+          <p class="section-subtitle">Review the details of this request for quotation</p>
+          
+          <div class="description-box">
+            <h3>Description</h3>
+            <p>{{ rfqDetails.description }}</p>
+          </div>
+
+          <!-- Timeline -->
+          <div class="timeline-section">
+            <h3>Timeline</h3>
+            <div class="timeline-grid">
+              <div class="timeline-item">
+                <div class="timeline-label">Created On</div>
+                <div class="timeline-value">{{ rfqDetails.createdOn }}</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-label">Last Updated</div>
+                <div class="timeline-value">{{ rfqDetails.lastUpdated }}</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-label">Due Date</div>
+                <div class="timeline-value">{{ rfqDetails.dueDate }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expense Breakdown Table -->
+        <div class="expense-section">
+          <div class="expense-header">
+            <div class="search-controls">
+              <button class="hide-column-btn">
+                Hide Column
+                <i class="bi bi-chevron-down"></i>
+              </button>
+              <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search Keyword" class="search-input">
+                <button class="refresh-btn">
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
+              </div>
+              <div class="action-buttons">
+                <button class="export-btn">
+                  <i class="bi bi-download"></i>
+                </button>
+                <button class="edit-btn">
+                  <i class="bi bi-pencil"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="expense-table">
+            <div class="table-header">
+              <div class="header-cell">Expense Category</div>
+              <div class="header-cell">Section</div>
+              <div class="header-cell">Item Number</div>
+              <div class="header-cell">Description</div>
+              <div class="header-cell">Drawing Number</div>
+              <div class="header-cell">Unit</div>
+              <div class="header-cell">Quantity</div>
+              <div class="header-cell">Currency</div>
+              <div class="header-cell">Notes</div>
+            </div>
+            <div class="table-body">
+              <div class="table-row" *ngFor="let item of expenseItems">
+                <div class="table-cell">{{ item.category }}</div>
+                <div class="table-cell">{{ item.section }}</div>
+                <div class="table-cell">{{ item.itemNumber }}</div>
+                <div class="table-cell">{{ item.description }}</div>
+                <div class="table-cell">{{ item.drawingNumber }}</div>
+                <div class="table-cell">{{ item.unit }}</div>
+                <div class="table-cell">{{ item.quantity }}</div>
+                <div class="table-cell">{{ item.currency }}</div>
+                <div class="table-cell">{{ item.notes }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-section">
+            <div class="pagination-info">
+              Showing 1 to 8 of 8 entries
+            </div>
+            <div class="pagination-controls">
+              <button class="page-btn" disabled>
+                <i class="bi bi-chevron-double-left"></i>
+              </button>
+              <button class="page-btn" disabled>
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn" disabled>
+                <i class="bi bi-chevron-right"></i>
+              </button>
+              <button class="page-btn" disabled>
+                <i class="bi bi-chevron-double-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Section with Contract and Drawings -->
+        <div class="bottom-sections">
+          <!-- Contract Section -->
+          <div class="contract-section">
+            <h3>Contract</h3>
+            <div class="contract-item">
+              <div class="file-icon">
+                <i class="bi bi-file-earmark-pdf"></i>
+              </div>
+              <div class="file-info">
+                <span class="file-name">1.pdf</span>
+              </div>
+              <div class="file-actions">
+                <button class="view-btn" (click)="viewContract()">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button class="download-btn" (click)="downloadFile()">
+                  <i class="bi bi-download"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RFQ Drawings Update -->
+          <div class="drawings-section">
+            <h3>RFQ Drawings Update</h3>
+            <div class="drawings-item">
+              <i class="bi bi-folder"></i>
+              <span>5UTRWI0X_RFQ_File</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment Tab -->
+    <div class="tab-panel" [class.active]="activeTab === 'comment'">
+      <div class="comment-content">
+        <h2>Comments</h2>
+        <p>Comment functionality will be implemented here.</p>
+      </div>
+    </div>
+
+    <!-- Resolution Center Tab -->
+    <div class="tab-panel" [class.active]="activeTab === 'resolution'">
+      <div class="resolution-content">
+        <h2>Resolution Center</h2>
+        <p>Resolution center functionality will be implemented here.</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,429 @@
+<div class="enhanced-table-container">
+  <!-- Table Header -->
+  <header class="table-header" *ngIf="showHeader">
+    <div class="header-left">
+      <h2 class="table-title" *ngIf="tableTitle">{{ tableTitle }}</h2>
+    </div>
+    <div class="header-right">
+      <div class="global-search" *ngIf="showGlobalFilter">
+        <div class="p-input-icon-left">
+          <i class="pi pi-search" aria-hidden="true"></i>
+          <input 
+            pInputText 
+            type="text" 
+            [(ngModel)]="globalFilterValue"
+            (input)="onGlobalFilter($event)" 
+            [placeholder]="globalFilterPlaceholder"
+            [attr.aria-label]="globalFilterPlaceholder"
+            class="global-filter-input" />
+        </div>
+      </div>
+      <div class="export-buttons">
+        <p-button 
+          icon="pi pi-download" 
+          severity="secondary" 
+          [outlined]="true"
+          size="small"
+          pTooltip="Export to CSV"
+          tooltipPosition="bottom"
+          (onClick)="exportToCSV()"
+          ariaLabel="Export table data to CSV">
+        </p-button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Tabs Container -->
+  <section class="tabs-container" *ngIf="useTabs && tabs.length > 0">
+    <p-tabView 
+      [(activeIndex)]="activeTabIndex" 
+      (onChange)="onTabChange($event)"
+      styleClass="enhanced-tabs"
+      [attr.aria-label]="'Data tabs'">
+      
+      <p-tabPanel 
+        *ngFor="let tab of tabs; let i = index" 
+        [header]="tab.label + (tab.count !== undefined ? ' (' + tab.count + ')' : '')"
+        [disabled]="tab.disabled === true"
+        [attr.aria-label]="tab.label">
+        
+        <!-- Table for each tab -->
+        <div class="table-wrapper">
+          <p-table 
+            #dt
+            [value]="tab.data" 
+            [columns]="columns"
+            [paginator]="paginator" 
+            [rows]="rows"
+            [rowsPerPageOptions]="rowsPerPageOptions"
+            [totalRecords]="tab.data.length"
+            [loading]="loading"
+            [globalFilterFields]="globalFilterFields"
+            [lazy]="lazy"
+            [responsive]="responsive"
+            [scrollable]="scrollable"
+            [scrollHeight]="scrollHeight"
+            [resizableColumns]="resizableColumns"
+            [reorderableColumns]="reorderableColumns"
+            [rowHover]="true"
+            [showCurrentPageReport]="true"
+            [selectionMode]="selectionMode"
+            [(selection)]="selectedItems"
+            (onRowSelect)="onRowSelect($event)"
+            (onRowUnselect)="onRowUnselect($event)"
+            (onPage)="onPageChange($event)"
+            (onSort)="onSortChange($event)"
+            [styleClass]="'enhanced-data-table p-datatable-sm' + (gridlines ? ' p-datatable-gridlines' : '') + (striped ? ' p-datatable-striped' : '')"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            [attr.aria-label]="'Data table for ' + tab.label">
+            
+            <!-- Column Headers -->
+            <ng-template pTemplate="header">
+              <tr role="row">
+                <th *ngFor="let col of columns; trackBy: trackByColumn" 
+                    [pSortableColumn]="col.sortable ? col.field : undefined"
+                    [style.width]="col.width"
+                    [attr.aria-sort]="col.sortable ? 'none' : null"
+                    [attr.scope]="'col'"
+                    class="table-header-cell">
+                  <div class="header-content">
+                    <span class="header-title">{{ col.header }}</span>
+                    <p-sortIcon *ngIf="col.sortable" [field]="col.field" [attr.aria-hidden]="true"></p-sortIcon>
+                  </div>
+                </th>
+              </tr>
+              
+              <!-- Column Filters Row -->
+              <tr *ngIf="showColumnFilters" role="row" class="filter-row">
+                <th *ngFor="let col of columns; trackBy: trackByColumn" 
+                    class="filter-cell"
+                    [attr.scope]="'col'">
+                  <ng-container [ngSwitch]="col.filterType">
+                    <!-- Dropdown Filter -->
+                    <p-dropdown 
+                      *ngSwitchCase="'select'"
+                      [options]="filterOptions[col.field] || []"
+                      optionLabel="label"
+                      optionValue="value"
+                      [placeholder]="'All ' + col.header"
+                      [showClear]="true"
+                      [attr.aria-label]="'Filter by ' + col.header"
+                      (onChange)="onDropdownFilter($event.value, col.field)"
+                      styleClass="column-filter-dropdown">
+                    </p-dropdown>
+                    
+                    <!-- Text Filter -->
+                    <ng-container *ngSwitchDefault>
+                      <ng-container *ngIf="col.filterable && col.field !== 'actions'">
+                        <input 
+                          pInputText 
+                          type="text" 
+                          (input)="onColumnFilter($event, col.field)" 
+                          [placeholder]="'Search ' + col.header"
+                          [attr.aria-label]="'Search ' + col.header"
+                          class="column-filter-input">
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </th>
+              </tr>
+            </ng-template>
+            
+            <!-- Table Body -->
+            <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
+              <tr [pSelectableRow]="rowData" 
+                  class="table-row"
+                  role="row"
+                  [attr.aria-rowindex]="rowIndex + 1">
+                <td *ngFor="let col of columns; trackBy: trackByColumn" 
+                    class="table-cell"
+                    role="gridcell"
+                    [attr.data-label]="col.header">
+                  
+                  <!-- Custom Template -->
+                  <ng-container *ngIf="col.customTemplate && customCellTemplate">
+                    <ng-container 
+                      *ngTemplateOutlet="customCellTemplate; context: { $implicit: rowData, field: col.field, column: col }">
+                    </ng-container>
+                  </ng-container>
+                  
+                  <!-- Actions Column -->
+                  <ng-container *ngIf="col.field === 'actions' && !col.customTemplate">
+                    <div class="action-buttons" role="group" [attr.aria-label]="'Actions for row ' + (rowIndex + 1)">
+                      <ng-container *ngIf="customActionTemplate; else defaultActions">
+                        <ng-container 
+                          *ngTemplateOutlet="customActionTemplate; context: { $implicit: rowData }">
+                        </ng-container>
+                      </ng-container>
+                      
+                      <ng-template #defaultActions>
+                        <ng-container *ngFor="let action of actionButtons; trackBy: trackByAction">
+                          <ng-container *ngIf="isActionVisible(action, rowData)">
+                            <p-button 
+                              [label]="action.label"
+                              [icon]="action.icon"
+                              [severity]="action.severity || 'primary'"
+                              [outlined]="action.outlined || false"
+                              [size]="action.size || 'small'"
+                              [pTooltip]="action.tooltip"
+                              [disabled]="isActionDisabled(action, rowData)"
+                              [attr.aria-label]="action.tooltip || action.label"
+                              (onClick)="onActionClick(action.action, rowData)"
+                              styleClass="action-btn">
+                            </p-button>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </div>
+                  </ng-container>
+                  
+                  <!-- Link Column -->
+                  <ng-container *ngIf="col.isLink && col.field !== 'actions'">
+                    <a 
+                      [routerLink]="getRouteLink(rowData)" 
+                      class="table-link"
+                      [attr.aria-label]="'View details for ' + getCellValue(rowData, col)"
+                      (click)="onLinkClick(rowData)">
+                      <span class="link-text">{{ getCellValue(rowData, col) }}</span>
+                    </a>
+                    <div *ngIf="col.field === 'rfqId'" class="rfq-details">
+                      <span class="rfq-code">{{ rowData.rfqId?.split('-')[2] }}</span>
+                    </div>
+                  </ng-container>
+                  
+                  <!-- Status Column -->
+                  <ng-container *ngIf="col.field === statusField && col.field !== 'actions' && !col.isLink">
+                    <p-badge 
+                      [value]="getCellValue(rowData, col)" 
+                      [severity]="getStatusSeverity(getCellValue(rowData, col))"
+                      [attr.aria-label]="'Status: ' + getCellValue(rowData, col)">
+                    </p-badge>
+                  </ng-container>
+                  
+                  <!-- Title Column with Description -->
+                  <ng-container *ngIf="col.field === 'title' && !col.isLink && !col.customTemplate">
+                    <div class="title-content">
+                      <strong class="title-text">{{ getCellValue(rowData, col) }}</strong>
+                      <small *ngIf="rowData.description" class="description-text">{{ rowData.description }}</small>
+                    </div>
+                  </ng-container>
+                  
+                  <!-- Regular Column -->
+                  <ng-container *ngIf="col.field !== 'actions' && col.field !== statusField && col.field !== 'title' && !col.isLink && !col.customTemplate">
+                    <span class="cell-content">{{ getCellValue(rowData, col) }}</span>
+                  </ng-container>
+                </td>
+              </tr>
+            </ng-template>
+            
+            <!-- Empty State -->
+            <ng-template pTemplate="emptymessage">
+              <tr role="row">
+                <td [attr.colspan]="columns.length" class="empty-message" role="gridcell">
+                  <div class="empty-state">
+                    <i class="pi pi-inbox empty-icon" aria-hidden="true"></i>
+                    <p class="empty-text">No records found</p>
+                    <small class="empty-subtext">Try adjusting your search or filter criteria</small>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-tabPanel>
+    </p-tabView>
+  </section>
+
+  <!-- Single Table (No Tabs) -->
+  <section class="single-table-container" *ngIf="!useTabs">
+    <div class="table-wrapper">
+      <p-table 
+        #dt
+        [value]="currentData" 
+        [columns]="columns"
+        [paginator]="paginator" 
+        [rows]="rows"
+        [rowsPerPageOptions]="rowsPerPageOptions"
+        [totalRecords]="totalRecords"
+        [loading]="loading"
+        [globalFilterFields]="globalFilterFields"
+        [lazy]="lazy"
+        [responsive]="responsive"
+        [scrollable]="scrollable"
+        [scrollHeight]="scrollHeight"
+        [resizableColumns]="resizableColumns"
+        [reorderableColumns]="reorderableColumns"
+        [rowHover]="true"
+        [showCurrentPageReport]="true"
+        [selectionMode]="selectionMode"
+        [(selection)]="selectedItems"
+        (onRowSelect)="onRowSelect($event)"
+        (onRowUnselect)="onRowUnselect($event)"
+        (onPage)="onPageChange($event)"
+        (onSort)="onSortChange($event)"
+        [styleClass]="'enhanced-data-table p-datatable-sm' + (gridlines ? ' p-datatable-gridlines' : '') + (striped ? ' p-datatable-striped' : '')"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [attr.aria-label]="tableTitle || 'Data table'">
+        
+        <!-- Same template structure as above for single table -->
+        <ng-template pTemplate="header">
+          <tr role="row">
+            <th *ngFor="let col of columns; trackBy: trackByColumn" 
+                [pSortableColumn]="col.sortable ? col.field : undefined"
+                [style.width]="col.width"
+                [attr.aria-sort]="col.sortable ? 'none' : null"
+                [attr.scope]="'col'"
+                class="table-header-cell">
+              <div class="header-content">
+                <span class="header-title">{{ col.header }}</span>
+                <p-sortIcon *ngIf="col.sortable" [field]="col.field" [attr.aria-hidden]="true"></p-sortIcon>
+              </div>
+            </th>
+          </tr>
+          
+          <!-- Column Filters Row -->
+          <tr *ngIf="showColumnFilters" role="row" class="filter-row">
+            <th *ngFor="let col of columns; trackBy: trackByColumn" 
+                class="filter-cell"
+                [attr.scope]="'col'">
+              <ng-container [ngSwitch]="col.filterType">
+                <!-- Dropdown Filter -->
+                <p-dropdown 
+                  *ngSwitchCase="'select'"
+                  [options]="filterOptions[col.field] || []"
+                  optionLabel="label"
+                  optionValue="value"
+                  [placeholder]="'All ' + col.header"
+                  [showClear]="true"
+                  [attr.aria-label]="'Filter by ' + col.header"
+                  (onChange)="onDropdownFilter($event.value, col.field)"
+                  styleClass="column-filter-dropdown">
+                </p-dropdown>
+                
+                <!-- Text Filter -->
+                <ng-container *ngSwitchDefault>
+                  <ng-container *ngIf="col.filterable && col.field !== 'actions'">
+                    <input 
+                      pInputText 
+                      type="text" 
+                      (input)="onColumnFilter($event, col.field)" 
+                      [placeholder]="'Search ' + col.header"
+                      [attr.aria-label]="'Search ' + col.header"
+                      class="column-filter-input">
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+            </th>
+          </tr>
+        </ng-template>
+        
+        <!-- Table Body -->
+        <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
+          <tr [pSelectableRow]="rowData" 
+              class="table-row"
+              role="row"
+              [attr.aria-rowindex]="rowIndex + 1">
+            <td *ngFor="let col of columns; trackBy: trackByColumn" 
+                class="table-cell"
+                role="gridcell"
+                [attr.data-label]="col.header">
+              
+              <!-- Custom Template -->
+              <ng-container *ngIf="col.customTemplate && customCellTemplate">
+                <ng-container 
+                  *ngTemplateOutlet="customCellTemplate; context: { $implicit: rowData, field: col.field, column: col }">
+                </ng-container>
+              </ng-container>
+              
+              <!-- Actions Column -->
+              <ng-container *ngIf="col.field === 'actions' && !col.customTemplate">
+                <div class="action-buttons" role="group" [attr.aria-label]="'Actions for row ' + (rowIndex + 1)">
+                  <ng-container *ngIf="customActionTemplate; else defaultActions">
+                    <ng-container 
+                      *ngTemplateOutlet="customActionTemplate; context: { $implicit: rowData }">
+                    </ng-container>
+                  </ng-container>
+                  
+                  <ng-template #defaultActions>
+                    <ng-container *ngFor="let action of actionButtons; trackBy: trackByAction">
+                      <ng-container *ngIf="isActionVisible(action, rowData)">
+                        <p-button 
+                          [label]="action.label"
+                          [icon]="action.icon"
+                          [severity]="action.severity || 'primary'"
+                          [outlined]="action.outlined || false"
+                          [size]="action.size || 'small'"
+                          [pTooltip]="action.tooltip"
+                          [disabled]="isActionDisabled(action, rowData)"
+                          [attr.aria-label]="action.tooltip || action.label"
+                          (onClick)="onActionClick(action.action, rowData)"
+                          styleClass="action-btn">
+                        </p-button>
+                      </ng-container>
+                    </ng-container>
+                  </ng-template>
+                </div>
+              </ng-container>
+              
+              <!-- Link Column -->
+              <ng-container *ngIf="col.isLink && col.field !== 'actions'">
+                <a 
+                  [routerLink]="getRouteLink(rowData)" 
+                  class="table-link"
+                  [attr.aria-label]="'View details for ' + getCellValue(rowData, col)"
+                  (click)="onLinkClick(rowData)">
+                  <span class="link-text">{{ getCellValue(rowData, col) }}</span>
+                </a>
+                <div *ngIf="col.field === 'rfqId'" class="rfq-details">
+                  <span class="rfq-code">{{ rowData.rfqId?.split('-')[2] }}</span>
+                </div>
+              </ng-container>
+              
+              <!-- Status Column -->
+              <ng-container *ngIf="col.field === statusField && col.field !== 'actions' && !col.isLink">
+                <p-badge 
+                  [value]="getCellValue(rowData, col)" 
+                  [severity]="getStatusSeverity(getCellValue(rowData, col))"
+                  [attr.aria-label]="'Status: ' + getCellValue(rowData, col)">
+                </p-badge>
+              </ng-container>
+              
+              <!-- Title Column with Description -->
+              <ng-container *ngIf="col.field === 'title' && !col.isLink && !col.customTemplate">
+                <div class="title-content">
+                  <strong class="title-text">{{ getCellValue(rowData, col) }}</strong>
+                  <small *ngIf="rowData.description" class="description-text">{{ rowData.description }}</small>
+                </div>
+              </ng-container>
+              
+              <!-- Regular Column -->
+              <ng-container *ngIf="col.field !== 'actions' && col.field !== statusField && col.field !== 'title' && !col.isLink && !col.customTemplate">
+                <span class="cell-content">{{ getCellValue(rowData, col) }}</span>
+              </ng-container>
+            </td>
+          </tr>
+        </ng-template>
+        
+        <!-- Empty State -->
+        <ng-template pTemplate="emptymessage">
+          <tr role="row">
+            <td [attr.colspan]="columns.length" class="empty-message" role="gridcell">
+              <div class="empty-state">
+                <i class="pi pi-inbox empty-icon" aria-hidden="true"></i>
+                <p class="empty-text">No records found</p>
+                <small class="empty-subtext">Try adjusting your search or filter criteria</small>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </section>
+</div>
+
+<!-- Confirmation Dialog -->
+<p-confirmDialog 
+  [style]="{ width: '450px' }"
+  [baseZIndex]="10000"
+  rejectButtonStyleClass="p-button-text">
+</p-confirmDialog> 
