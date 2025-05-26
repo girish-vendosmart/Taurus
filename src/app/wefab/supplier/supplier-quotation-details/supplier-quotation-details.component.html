@@ -1,0 +1,272 @@
+<div class="quotation-details-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-top">
+      <button class="back-btn" (click)="onBackToRFQs()">
+        <i class="fas fa-arrow-left"></i>
+        Back to RFQs
+      </button>
+    </div>
+    
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">{{ quotationDetails.quotationId }}</h1>
+        <div class="header-badges">
+          <span class="status-badge sent">Sent</span>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <button class="btn btn-outline-primary">View Contract</button>
+        <button class="btn btn-primary">Edit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quotation Info Bar -->
+  <div class="quotation-info-bar">
+    <div class="info-item">
+      <span class="info-label">Creation:</span>
+      <span class="info-value">{{ quotationDetails.createdOn }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Rfq Id:</span>
+      <span class="info-value">{{ quotationDetails.rfqId }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Payment Terms:</span>
+      <span class="info-value">{{ quotationDetails.paymentTerms }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Total Amount:</span>
+      <span class="info-value">{{ formatCurrency(quotationDetails.totalAmount) }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Accept Contract Terms:</span>
+      <span class="info-value">{{ quotationDetails.acceptContractTerms }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Is All Queries Resolved:</span>
+      <span class="info-value">{{ quotationDetails.isAllQueriesResolved }}</span>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'overview'"
+      (click)="setActiveTab('overview')">
+      Overview
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'comment'"
+      (click)="setActiveTab('comment')">
+      Comment
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'activity'"
+      (click)="setActiveTab('activity')">
+      Activity
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Overview Tab -->
+    <div class="tab-panel" [class.active]="activeTab === 'overview'">
+      <div class="overview-content">
+        <!-- Quote From/To Section -->
+        <div class="quote-parties-section">
+          <div class="quote-from">
+            <h3>Quote From :-</h3>
+            <div class="party-details">
+              <div class="company-name">{{ quotationDetails.quoteFrom.company }}</div>
+              <div class="contact-info">{{ quotationDetails.quoteFrom.email }}</div>
+              <div class="contact-info">{{ quotationDetails.quoteFrom.phone }}</div>
+            </div>
+          </div>
+          
+          <div class="quote-to">
+            <h3>Quote To :-</h3>
+            <div class="party-details">
+              <div class="company-name">{{ quotationDetails.quoteTo.company }}</div>
+              <div class="contact-info">{{ quotationDetails.quoteTo.email }}</div>
+              <div class="contact-info">{{ quotationDetails.quoteTo.location }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Section -->
+        <div class="items-section">
+          <div class="items-header">
+            <h3>Items</h3>
+            <div class="items-controls">
+              <div class="hide-column-dropdown">
+                <button class="dropdown-btn">
+                  Hide Column <i class="fas fa-chevron-down"></i>
+                </button>
+              </div>
+              <div class="search-box">
+                <input 
+                  type="text" 
+                  placeholder="Search Keyword" 
+                  [(ngModel)]="searchKeyword"
+                  (input)="onSearch()"
+                  class="search-input">
+                <i class="fas fa-search search-icon"></i>
+              </div>
+              <button class="export-btn">
+                <i class="fas fa-share-alt"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Items Table -->
+          <div class="items-table-container">
+            <div class="items-table">
+              <!-- Table Header -->
+              <div class="table-header">
+                <div class="header-cell section-col">
+                  Section <i class="fas fa-sort"></i>
+                </div>
+                <div class="header-cell expense-col">
+                  Expense Category <i class="fas fa-sort"></i>
+                </div>
+                <div class="header-cell item-num-col">
+                  Item Number <i class="fas fa-sort"></i>
+                </div>
+                <div class="header-cell description-col">
+                  Description <i class="fas fa-sort"></i>
+                </div>
+                <div class="header-cell drawing-col">
+                  Drawing Number <i class="fas fa-sort"></i>
+                </div>
+                <div class="header-cell unit-col">
+                  Unit <i class="fas fa-sort"></i>
+                </div>
+                <div class="header-cell quantity-col">
+                  Quantity <i class="fas fa-sort"></i>
+                </div>
+                <div class="header-cell currency-col">
+                  Currency <i class="fas fa-sort"></i>
+                </div>
+                <div class="header-cell rate-col">
+                  Rate <i class="fas fa-sort"></i>
+                </div>
+                <div class="header-cell total-col">
+                  Total Amount <i class="fas fa-sort"></i>
+                </div>
+                <div class="header-cell notes-col">
+                  Notes <i class="fas fa-sort"></i>
+                </div>
+                <div class="header-cell comment-col">
+                  Comment <i class="fas fa-sort"></i>
+                </div>
+              </div>
+
+              <!-- Table Body -->
+              <div class="table-body">
+                <div class="table-row" *ngFor="let item of getFilteredItems()">
+                  <div class="table-cell section-col">{{ item.section }}</div>
+                  <div class="table-cell expense-col">{{ item.expenseCategory }}</div>
+                  <div class="table-cell item-num-col">{{ item.itemNumber }}</div>
+                  <div class="table-cell description-col">
+                    <i class="fas fa-info-circle info-icon"></i>
+                    {{ item.description }}
+                  </div>
+                  <div class="table-cell drawing-col">{{ item.drawingNumber }}</div>
+                  <div class="table-cell unit-col">{{ item.unit }}</div>
+                  <div class="table-cell quantity-col">{{ item.quantity }}</div>
+                  <div class="table-cell currency-col">{{ item.currency }}</div>
+                  <div class="table-cell rate-col">{{ formatCurrency(item.rate) }}</div>
+                  <div class="table-cell total-col">{{ formatCurrency(item.totalAmount) }}</div>
+                  <div class="table-cell notes-col">{{ item.notes }}</div>
+                  <div class="table-cell comment-col">{{ item.comment }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-section">
+              <div class="pagination-info">
+                Showing 1 to {{ totalItems }} of {{ totalItems }} entries
+              </div>
+              <div class="pagination-controls">
+                <button class="page-btn" [disabled]="currentPage === 1">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="page-btn" [disabled]="currentPage === 1">
+                  <i class="fas fa-chevron-double-left"></i>
+                </button>
+                <span class="page-number active">1</span>
+                <button class="page-btn" [disabled]="currentPage === 1">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="page-btn" [disabled]="currentPage === 1">
+                  <i class="fas fa-chevron-double-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary Section -->
+          <div class="summary-section">
+            <div class="summary-row">
+              <span class="summary-label">Sub Total:</span>
+              <span class="summary-value">{{ formatCurrency(getSubTotal()) }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Discount:</span>
+              <span class="summary-value">{{ getDiscount() }}%</span>
+            </div>
+            <div class="summary-row total-row">
+              <span class="summary-label">Total Amount:</span>
+              <span class="summary-value">{{ formatCurrency(getTotalAmount()) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contract and RFQ Drawings Section -->
+        <div class="documents-section">
+          <div class="contract-section">
+            <h4>Contract</h4>
+            <div class="document-item">
+              <i class="fas fa-exclamation-triangle warning-icon"></i>
+              <span>Lost</span>
+            </div>
+          </div>
+          
+          <div class="rfq-drawings-section">
+            <h4>RFQ Drawings Update</h4>
+            <div class="document-item">
+              <i class="fas fa-file-pdf file-icon"></i>
+              <span>DRAWINGS_RFQ_File</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment Tab -->
+    <div class="tab-panel" [class.active]="activeTab === 'comment'">
+      <div class="comment-content">
+        <p>Comment section content goes here...</p>
+      </div>
+    </div>
+
+    <!-- Activity Tab -->
+    <div class="tab-panel" [class.active]="activeTab === 'activity'">
+      <div class="activity-content">
+        <p>Activity section content goes here...</p>
+      </div>
+    </div>
+  </div>
+</div>

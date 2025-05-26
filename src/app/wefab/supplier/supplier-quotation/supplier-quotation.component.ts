@@ -264,17 +264,17 @@ export class SupplierQuotationComponent implements OnInit {
   onLinkClick(quotation: QuotationItem) {
     console.log('Quotation link clicked:', quotation);
     // Navigate to quotation details
-    this.router.navigate(['/wefab/supplier/quotation-details', quotation.quotationId]);
+    this.router.navigate(['/wefab/supplier/quotation/details', quotation.quotationId]);
   }
 
   onViewQuotation(quotation: QuotationItem) {
     console.log('View quotation:', quotation);
-    this.router.navigate(['/wefab/supplier/quotation-details', quotation.quotationId]);
+    this.router.navigate(['/wefab/supplier/quotation/details', quotation.quotationId]);
   }
 
   onEditQuotation(quotation: QuotationItem) {
     console.log('Edit quotation:', quotation);
-    this.router.navigate(['/wefab/supplier/quotation-edit', quotation.quotationId]);
+    this.router.navigate(['/wefab/supplier/quotation/details', quotation.quotationId]);
   }
 
   onSubmitQuotation(quotation: QuotationItem) {
