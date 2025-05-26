@@ -188,6 +188,13 @@ export class SupplierRfqDetailsComponent implements OnInit {
     }
   ];
 
+  // Contract modal properties
+  showContractModal: boolean = false;
+  contractFullyRead: boolean = false;
+  contractAccepted: boolean = false;
+  pdfLoaded: boolean = false;
+  contractPdfUrl: string = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'; // Sample PDF for demonstration
+
   constructor(
     private route: ActivatedRoute,
     private router: Router
@@ -220,8 +227,59 @@ export class SupplierRfqDetailsComponent implements OnInit {
   }
 
   viewContract() {
-    // Implement view contract functionality
-    console.log('Viewing contract for RFQ:', this.rfqId);
+    // Open the contract modal
+    this.showContractModal = true;
+    this.contractFullyRead = false;
+    this.contractAccepted = false;
+    this.pdfLoaded = true;
+    
+    // For demo purposes, we'll simulate PDF loading and enable checkbox after 3 seconds
+    // In a real application, you would detect when the user has scrolled through the PDF
+    setTimeout(() => {
+      this.contractFullyRead = true;
+    }, 3000);
+  }
+
+  closeContractModal() {
+    this.showContractModal = false;
+    this.contractFullyRead = false;
+    this.contractAccepted = false;
+    this.pdfLoaded = false;
+  }
+
+  onPdfLoad() {
+    this.pdfLoaded = true;
+  }
+
+  onContractScroll(event: Event) {
+    const element = event.target as HTMLElement;
+    const scrollTop = element.scrollTop;
+    const scrollHeight = element.scrollHeight;
+    const clientHeight = element.clientHeight;
+    
+    // Check if user has scrolled to the bottom (with a small tolerance)
+    const scrolledToBottom = scrollTop + clientHeight >= scrollHeight - 10;
+    
+    if (scrolledToBottom && !this.contractFullyRead) {
+      this.contractFullyRead = true;
+    }
+  }
+
+  acceptContract() {
+    if (this.contractAccepted && this.contractFullyRead) {
+      // Implement contract acceptance logic
+      console.log('Contract accepted for RFQ:', this.rfqId);
+      
+      // You can add additional logic here such as:
+      // - API call to save contract acceptance
+      // - Update RFQ status
+      // - Show success message
+      
+      this.closeContractModal();
+      
+      // Optional: Show success notification
+      alert('Contract has been accepted successfully!');
+    }
   }
 
   downloadFile() {

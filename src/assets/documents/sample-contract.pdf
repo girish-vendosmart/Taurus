@@ -1,0 +1,15 @@
+This is a placeholder for the contract PDF file.
+
+To use a real PDF contract:
+1. Replace this file with an actual PDF document
+2. Update the contractPdfUrl in the component to point to your PDF
+3. The PDF will be displayed in the iframe within the modal
+
+For testing purposes, you can:
+- Use a publicly available PDF URL
+- Host your PDF file in the assets folder
+- Use a PDF service or API to generate contracts dynamically
+
+Example PDF URLs you can use for testing:
+- https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf
+- Any other publicly accessible PDF URL 

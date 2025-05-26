@@ -247,3 +247,65 @@
     </div>
   </div>
 </div>
+
+<!-- Contract Modal -->
+<div class="contract-modal-overlay" [class.show]="showContractModal" (click)="closeContractModal()">
+  <div class="contract-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Contract Terms and Conditions</h3>
+      <button class="close-btn" (click)="closeContractModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="contract-content" 
+           #contractContent
+           (scroll)="onContractScroll($event)">
+        <div class="pdf-viewer-container">
+          <iframe 
+            [src]="contractPdfUrl" 
+            class="pdf-viewer"
+            frameborder="0"
+            (load)="onPdfLoad()">
+          </iframe>
+          <div class="pdf-loading" *ngIf="!pdfLoaded">
+            <div class="loading-spinner"></div>
+            <p>Loading contract document...</p>
+          </div>
+          <div class="scroll-indicator" *ngIf="!contractFullyRead">
+            <p>Please scroll to the bottom to read the complete contract</p>
+            <i class="bi bi-arrow-down"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <div class="contract-acceptance">
+        <label class="checkbox-container" [class.disabled]="!contractFullyRead">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="contractAccepted"
+            [disabled]="!contractFullyRead">
+          <span class="checkmark"></span>
+          <span class="checkbox-text">I have read and accept the contract terms</span>
+        </label>
+      </div>
+      
+      <div class="modal-actions">
+        <button 
+          class="btn btn-secondary" 
+          (click)="closeContractModal()">
+          Cancel
+        </button>
+        <button 
+          class="btn btn-primary" 
+          [disabled]="!contractAccepted"
+          (click)="acceptContract()">
+          Accept Contract
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

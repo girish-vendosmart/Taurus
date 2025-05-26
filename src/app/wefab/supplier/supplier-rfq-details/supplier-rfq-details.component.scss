@@ -946,3 +946,403 @@
   outline: 2px solid rgba($blueprint-blue, 0.5);
   outline-offset: 2px;
 }
+
+// Contract Modal Styles
+.contract-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+
+  &.show {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.contract-modal {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+
+  .contract-modal-overlay.show & {
+    transform: scale(1);
+  }
+
+  .modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba($material-finish-silver, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, rgba($blueprint-blue, 0.05) 0%, rgba($blueprint-blue, 0.02) 100%);
+    border-radius: 16px 16px 0 0;
+
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: $font-weight-bold;
+      color: $precision-black;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: $machine-gray;
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba($machine-gray, 0.1);
+        color: $precision-black;
+      }
+    }
+  }
+
+  .modal-body {
+    flex: 1;
+    overflow: hidden;
+    padding: 0;
+    position: relative;
+
+    .contract-content {
+      height: 500px;
+      overflow-y: auto;
+      padding: 0;
+      scroll-behavior: smooth;
+      position: relative;
+
+      &::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: rgba($material-finish-silver, 0.1);
+        border-radius: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: rgba($blueprint-blue, 0.3);
+        border-radius: 4px;
+        transition: background 0.2s ease;
+
+        &:hover {
+          background: rgba($blueprint-blue, 0.5);
+        }
+      }
+
+      .pdf-viewer-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+
+        .pdf-viewer {
+          width: 100%;
+          height: 100%;
+          border: none;
+          background: white;
+        }
+
+        .pdf-loading {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(white, 0.95);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          z-index: 10;
+
+          .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba($blueprint-blue, 0.2);
+            border-left: 4px solid $blueprint-blue;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+
+          p {
+            font-size: 0.875rem;
+            color: $machine-gray;
+            margin: 0;
+            font-weight: $font-weight-medium;
+          }
+        }
+
+        .scroll-indicator {
+          position: absolute;
+          bottom: 1rem;
+          right: 1rem;
+          background: rgba($blueprint-blue, 0.9);
+          color: white;
+          padding: 0.75rem 1rem;
+          border-radius: 8px;
+          font-size: 0.75rem;
+          font-weight: $font-weight-medium;
+          box-shadow: 0 4px 12px rgba($blueprint-blue, 0.3);
+          animation: pulse 2s infinite;
+          z-index: 5;
+
+          p {
+            margin: 0 0 0.25rem 0;
+            line-height: 1.2;
+          }
+
+          i {
+            display: block;
+            text-align: center;
+            font-size: 0.875rem;
+            animation: bounce 1s infinite;
+          }
+        }
+      }
+    }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-3px); }
+    60% { transform: translateY(-2px); }
+  }
+
+  .modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid rgba($material-finish-silver, 0.2);
+    background: rgba($technical-white, 0.5);
+    border-radius: 0 0 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    .contract-acceptance {
+      .checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.2s ease;
+        padding: 0.5rem;
+        border-radius: 8px;
+
+        &:hover:not(.disabled) {
+          background: rgba($blueprint-blue, 0.05);
+          transform: translateX(2px);
+        }
+
+        &.disabled {
+          cursor: not-allowed;
+        }
+
+        input[type="checkbox"] {
+          display: none;
+        }
+
+        .checkmark {
+          width: 20px;
+          height: 20px;
+          border: 2px solid $material-finish-silver;
+          border-radius: 4px;
+          position: relative;
+          transition: all 0.3s ease;
+          background: white;
+          flex-shrink: 0;
+
+          &::after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 2px;
+            width: 6px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+          }
+        }
+
+        input[type="checkbox"]:checked + .checkmark {
+          background: $blueprint-blue;
+          border-color: $blueprint-blue;
+
+          &::after {
+            opacity: 1;
+          }
+        }
+
+        input[type="checkbox"]:disabled + .checkmark {
+          background: rgba($material-finish-silver, 0.3);
+          border-color: rgba($material-finish-silver, 0.5);
+        }
+
+        input[type="checkbox"]:disabled ~ .checkbox-text {
+          color: $machine-gray;
+        }
+
+        .checkbox-text {
+          font-size: 0.875rem;
+          color: $precision-black;
+          font-weight: $font-weight-medium;
+          transition: color 0.2s ease;
+          line-height: 1.4;
+        }
+      }
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      align-items: center;
+
+      .btn {
+        padding: 0.75rem 2rem;
+        font-size: 0.875rem;
+        font-weight: $font-weight-semibold;
+        border-radius: 8px;
+        border: 2px solid;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        min-width: 120px;
+        text-align: center;
+
+        &.btn-secondary {
+          background: white;
+          border-color: $material-finish-silver;
+          color: $machine-gray;
+
+          &:hover {
+            background: rgba($material-finish-silver, 0.1);
+            border-color: $machine-gray;
+            color: $precision-black;
+            transform: translateY(-1px);
+          }
+        }
+
+        &.btn-primary {
+          background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
+          border-color: $blueprint-blue;
+          color: white;
+
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, darken($blueprint-blue, 5%) 0%, darken($blueprint-blue, 15%) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba($blueprint-blue, 0.4);
+          }
+
+          &:disabled {
+            background: rgba($material-finish-silver, 0.5);
+            border-color: rgba($material-finish-silver, 0.5);
+            color: rgba(white, 0.7);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Mobile responsive for contract modal
+@media (max-width: 768px) {
+  .contract-modal {
+    width: 95%;
+    max-height: 95vh;
+
+    .modal-header {
+      padding: 1rem 1.5rem;
+
+      h3 {
+        font-size: 1.125rem;
+      }
+    }
+
+    .modal-body {
+      .contract-content {
+        height: 350px;
+
+        .pdf-viewer-container {
+          .scroll-indicator {
+            bottom: 0.5rem;
+            right: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.7rem;
+
+            p {
+              font-size: 0.7rem;
+            }
+
+            i {
+              font-size: 0.75rem;
+            }
+          }
+        }
+      }
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      gap: 1rem;
+
+      .contract-acceptance {
+        .checkbox-container {
+          padding: 0.75rem;
+
+          .checkbox-text {
+            font-size: 0.8rem;
+          }
+        }
+      }
+
+      .modal-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+
+        .btn {
+          width: 100%;
+          justify-content: center;
+          min-width: auto;
+        }
+      }
+    }
+  }
+}
