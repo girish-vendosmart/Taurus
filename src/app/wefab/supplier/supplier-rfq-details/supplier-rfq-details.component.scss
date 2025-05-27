@@ -1,5 +1,18 @@
 @import '../../../../assets/scss/variables.scss';
 
+// WE-FAB Style Guide Variables
+$blueprint-blue: #1A3A5F;   // Primary brand color
+$technical-white: #F6F7F9;  // Background color
+$precision-black: #1A1D21;  // Text color
+$machine-gray: #545A64;     // Secondary elements
+$material-silver: #D1D5DB;  // Borders, backgrounds
+$safety-orange: #FF5722;    // CTAs, highlights
+$process-green: #12856E;    // Success states, progress
+$warning-yellow: #F59E0B;   // Warning color
+$info-blue: #3B82F6;       // Info color
+$danger-red: #EF4444; 
+
+
 .rfq-details-page {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   min-height: 100vh;
@@ -67,23 +80,44 @@
       gap: 1rem;
       align-items: center;
 
-      .status-tag {
+      .status-badge {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
         font-weight: $font-weight-semibold;
-        border: 2px solid;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0;
         
         &.status-open {
-          background: rgba(34, 197, 94, 0.1);
-          border-color: #22c55e;
-          color: #16a34a;
+          background-color: rgba($info-blue, 0.1);
+          color: $info-blue;
           
           i {
-            color: #22c55e;
+            color: $info-blue;
+            font-size: 0.5rem;
+          }
+        }
+
+        &.status-progress {
+          background-color: rgba($warning-yellow, 0.1);
+          color: $warning-yellow;
+          
+          i {
+            color: $warning-yellow;
+            font-size: 0.5rem;
+          }
+        }
+
+        &.status-closed {
+          background-color: rgba($machine-gray, 0.1);
+          color: $machine-gray;
+          
+          i {
+            color: $machine-gray;
             font-size: 0.5rem;
           }
         }
@@ -146,9 +180,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.375rem 0.75rem;
-    background: rgba($technical-white, 0.8);
     border-radius: 6px;
-    border: 1px solid rgba($material-finish-silver, 0.2);
 
     .info-label {
       color: $machine-gray;
@@ -332,7 +364,7 @@
   }
 }
 
-// Expense Section (updated to work without right-column wrapper)
+// Expense Section (updated to work with common-table-component)
 .expense-section {
   background: white;
   border-radius: 12px;
@@ -342,229 +374,53 @@
   overflow: hidden;
 
   .expense-header {
-    padding: 0.75rem;
+    padding: 1rem;
     border-bottom: 1px solid rgba($material-finish-silver, 0.2);
     background: linear-gradient(135deg, rgba($blueprint-blue, 0.02) 0%, rgba($blueprint-blue, 0.01) 100%);
 
-    .search-controls {
+    h3 {
+      font-size: 1.125rem;
+      font-weight: $font-weight-bold;
+      color: $precision-black;
+      margin: 0 0 0.5rem 0;
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      flex-wrap: wrap;
 
-      .hide-column-btn {
-        background: white;
-        border: 1px solid rgba($material-finish-silver, 0.3);
-        padding: 0.75rem 1.25rem;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        color: $machine-gray;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-        &:hover {
-          border-color: $blueprint-blue;
-          color: $blueprint-blue;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-      }
-
-      .search-box {
-        display: flex;
-        align-items: center;
-        background: white;
-        border: 1px solid rgba($material-finish-silver, 0.3);
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        flex: 1;
-        max-width: 350px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-
-        &:focus-within {
-          border-color: $blueprint-blue;
-          box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.1);
-        }
-
-        i {
-          color: $machine-gray;
-          margin-right: 0.75rem;
-          font-size: 1rem;
-        }
-
-        .search-input {
-          border: none;
-          outline: none;
-          flex: 1;
-          font-size: 0.875rem;
-          color: $precision-black;
-
-          &::placeholder {
-            color: $machine-gray;
-          }
-        }
-
-        .refresh-btn {
-          background: none;
-          border: none;
-          color: $machine-gray;
-          cursor: pointer;
-          padding: 0.5rem;
-          margin-left: 0.5rem;
-          border-radius: 4px;
-          transition: all 0.2s ease;
-
-          &:hover {
-            color: $blueprint-blue;
-            background: rgba($blueprint-blue, 0.1);
-          }
-        }
-      }
-
-      .action-buttons {
-        display: flex;
-        gap: 0.75rem;
-
-        button {
-          background: white;
-          border: 1px solid rgba($material-finish-silver, 0.3);
-          padding: 0.75rem;
-          border-radius: 8px;
-          color: $machine-gray;
-          cursor: pointer;
-          width: 3rem;
-          height: 3rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.3s ease;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-          &:hover {
-            border-color: $blueprint-blue;
-            color: $blueprint-blue;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          }
-        }
-      }
-    }
-  }
-}
-
-// Expense Table
-.expense-table {
-  .table-header {
-    display: grid;
-    grid-template-columns: 1fr 1fr 0.8fr 1fr 1fr 0.8fr 0.8fr 0.8fr 0.8fr;
-    background: linear-gradient(135deg, rgba($blueprint-blue, 0.08) 0%, rgba($blueprint-blue, 0.04) 100%);
-    border-bottom: 1px solid rgba($material-finish-silver, 0.3);
-
-    .header-cell {
-      padding: 0.75rem 0.5rem;
-      font-size: 0.75rem;
-      font-weight: $font-weight-bold;
-      color: $precision-black;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-right: 1px solid rgba($material-finish-silver, 0.2);
-
-      &:last-child {
-        border-right: none;
-      }
-    }
-  }
-
-  .table-body {
-    .table-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 0.8fr 1fr 1fr 0.8fr 0.8fr 0.8fr 0.8fr;
-      border-bottom: 1px solid rgba($material-finish-silver, 0.1);
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: rgba($blueprint-blue, 0.03);
-        transform: scale(1.001);
-      }
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      .table-cell {
-        padding: 1rem 0.5rem;
-        font-size: 0.875rem;
-        color: $precision-black;
-        border-right: 1px solid rgba($material-finish-silver, 0.1);
-        display: flex;
-        align-items: center;
-
-        &:last-child {
-          border-right: none;
-        }
-      }
-    }
-  }
-}
-
-// Pagination
-.pagination-section {
-  padding: 0.75rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid rgba($material-finish-silver, 0.2);
-  background: rgba($technical-white, 0.3);
-
-  .pagination-info {
-    font-size: 0.875rem;
-    color: $machine-gray;
-    font-weight: $font-weight-medium;
-  }
-
-  .pagination-controls {
-    display: flex;
-    gap: 0.5rem;
-
-    .page-btn {
-      background: white;
-      border: 1px solid rgba($material-finish-silver, 0.3);
-      padding: 0.75rem;
-      font-size: 0.875rem;
-      color: $machine-gray;
-      cursor: pointer;
-      border-radius: 6px;
-      min-width: 3rem;
-      height: 3rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-
-      &:hover:not(:disabled) {
-        border-color: $blueprint-blue;
-        color: $blueprint-blue;
-        transform: translateY(-1px);
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      &.active {
+      &::before {
+        content: '';
+        width: 4px;
+        height: 20px;
         background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
-        border-color: $blueprint-blue;
-        color: white;
-        box-shadow: 0 3px 8px rgba($blueprint-blue, 0.3);
+        border-radius: 2px;
       }
+    }
 
-      &:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-      }
+    .section-subtitle {
+      font-size: 0.8rem;
+      color: $machine-gray;
+      margin: 0;
+      padding-left: 1rem;
+    }
+  }
+
+  // Override common table styles within expense section
+  app-common-table {
+    .table-wrapper {
+      border-radius: 0;
+      box-shadow: none;
+      border: none;
+    }
+
+    .common-table-container {
+      border-radius: 0;
+    }
+  }
+
+  // Override common table mobile styles
+  app-common-table {
+    .table-wrapper {
+      margin: 0;
     }
   }
 }
@@ -573,7 +429,7 @@
 .bottom-sections {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -841,51 +697,9 @@
       }
     }
 
-    .expense-table {
-      .table-header,
-      .table-row {
-        grid-template-columns: 1fr;
-        
-        .header-cell,
-        .table-cell {
-          border-right: none;
-          border-bottom: 1px solid rgba($material-finish-silver, 0.1);
-          padding: 0.75rem;
-          
-          &:last-child {
-            border-bottom: none;
-          }
-        }
-      }
-    }
-
     .expense-section {
       .expense-header {
-        padding: 0.75rem;
-
-        .search-controls {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 0.75rem;
-
-          .search-box {
-            max-width: none;
-          }
-
-          .action-buttons {
-            justify-content: center;
-          }
-        }
-      }
-    }
-
-    .pagination-section {
-      padding: 1rem;
-      flex-direction: column;
-      gap: 1rem;
-
-      .pagination-controls {
-        justify-content: center;
+        padding: 1rem;
       }
     }
 

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CommonTableComponent, TableConfig, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
 
 export interface RFQDetails {
   rfqId: string;
@@ -43,7 +44,8 @@ export interface ExpenseItem {
   imports: [
     CommonModule,
     RouterModule,
-    FormsModule
+    FormsModule,
+    CommonTableComponent
   ],
   templateUrl: './supplier-rfq-details.component.html',
   styleUrl: './supplier-rfq-details.component.scss'
@@ -51,6 +53,7 @@ export interface ExpenseItem {
 export class SupplierRfqDetailsComponent implements OnInit {
   rfqId: string = '';
   activeTab: 'overview' | 'comment' | 'resolution' = 'overview';
+  loading: boolean = false;
   
   rfqDetails: RFQDetails = {
     rfqId: 'RFQ-2023-001',
@@ -195,6 +198,72 @@ export class SupplierRfqDetailsComponent implements OnInit {
   pdfLoaded: boolean = false;
   contractPdfUrl: string = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'; // Sample PDF for demonstration
 
+  // Expense Table Configuration
+  expenseTableConfig: TableConfig = {
+    columns: [
+      {
+        field: 'category',
+        header: 'Expense Category',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'section',
+        header: 'Section',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'itemNumber',
+        header: 'Item Number',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'description',
+        header: 'Description',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'drawingNumber',
+        header: 'Drawing Number',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'unit',
+        header: 'Unit',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'quantity',
+        header: 'Quantity',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'currency',
+        header: 'Currency',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'notes',
+        header: 'Notes',
+        sortable: true,
+        filterable: true,
+      }
+    ],
+    enableSearch: true,
+    enableSort: true,
+    enableFilter: true,
+    enablePagination: true,
+    pageSize: 10,
+    showActions: false
+  };
+
   constructor(
     private route: ActivatedRoute,
     private router: Router
@@ -223,7 +292,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
 
   createQuotation() {
     // Implement create quotation functionality
-    console.log('Creating quotation for RFQ:', this.rfqId);
+    this.router.navigate(['/wefab/supplier/create-quotation']);
   }
 
   viewContract() {
@@ -298,5 +367,18 @@ export class SupplierRfqDetailsComponent implements OnInit {
       default:
         return 'status-default';
     }
+  }
+
+  // Common Table Event Handlers
+  onExpenseRowClick(event: { event: Event, rowData: any }) {
+    console.log('Expense row clicked:', event.rowData);
+  }
+
+  onExpenseLinkClick(event: { rowData: any, column: any }) {
+    console.log('Expense link clicked:', event.rowData, event.column);
+  }
+
+  onExpenseActionClick(event: { action: string, rowData: any }) {
+    console.log('Expense action clicked:', event.action, event.rowData);
   }
 }
