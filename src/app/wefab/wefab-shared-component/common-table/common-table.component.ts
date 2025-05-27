@@ -259,11 +259,15 @@ export class CommonTableComponent implements OnInit {
     status = status.toLowerCase();
     switch (status) {
       case 'approved':
+      case 'closed':
         return 'success';
       case 'under review':
+      case 'in progress':
         return 'warning';
       case 'request to resubmit':
         return 'danger';
+      case 'open':
+        return 'info';
       default:
         return 'info';
     }
@@ -278,6 +282,12 @@ export class CommonTableComponent implements OnInit {
         return 'status-under-review';
       case 'request to resubmit':
         return 'status-resubmit';
+      case 'open':
+        return 'status-open';
+      case 'in progress':
+        return 'status-in-progress';
+      case 'closed':
+        return 'status-closed';
       default:
         return 'status-default';
     }

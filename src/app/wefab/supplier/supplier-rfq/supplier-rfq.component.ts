@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CommonTableComponent, TableConfig, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
 
 export interface RFQItem {
   rfqId: string;
@@ -15,15 +16,7 @@ export interface RFQItem {
   company?: string;
   priority?: 'High' | 'Medium' | 'Low';
   estimatedValue?: number;
-}
-
-export interface SearchFilters {
-  rfqId: string;
-  title: string;
-  company: string;
-  parts: string;
-  dueDate: string;
-  status: string;
+  routerLink?: string;
 }
 
 @Component({
@@ -33,6 +26,7 @@ export interface SearchFilters {
     CommonModule,
     RouterModule,
     FormsModule,
+    CommonTableComponent,
   ],
   templateUrl: './supplier-rfq.component.html',
   styleUrl: './supplier-rfq.component.scss'
@@ -41,89 +35,65 @@ export class SupplierRfqComponent implements OnInit {
 
   constructor(private router: Router) { }
   
-  // Tab data
-  openRFQs: RFQItem[] = [];
-  inProgressRFQs: RFQItem[] = [];
-  closedRFQs: RFQItem[] = [];
-  
-  // Search filters
-  searchFilters: SearchFilters = {
-    rfqId: '',
-    title: '',
-    company: '',
-    parts: '',
-    dueDate: '',
-    status: ''
-  };
-  
-  // Pagination
-  currentPage = 1;
-  itemsPerPage = 10;
+  // Consolidated RFQ data
+  allRFQs: RFQItem[] = [];
   
   // Table configuration
-  tableColumns: any = [];
-  
-  // Loading states
-  loading = false;
-  
-  // Active tab index
-  activeTabIndex = 0;
-
-  ngOnInit() {
-    this.initializeTableColumns();
-    this.loadSampleData();
-  }
-
-  initializeTableColumns() {
-    this.tableColumns = [
+  tableConfig: TableConfig = {
+    columns: [
       {
         field: 'rfqId',
         header: 'RFQ ID',
         sortable: true,
         filterable: true,
-        width: '15%',
-        isLink: true
+        isLink: true,
       },
       {
         field: 'title',
         header: 'Title',
         sortable: true,
         filterable: true,
-        width: '35%'
+      },
+      {
+        field: 'company',
+        header: 'Company',
+        sortable: true,
+        filterable: true,
       },
       {
         field: 'parts',
         header: 'Parts',
         sortable: true,
-        width: '10%',
-        formatter: (value: number) => value.toString()
       },
       {
         field: 'dueDate',
         header: 'Due Date',
         sortable: true,
-        width: '15%',
-        formatter: (value: string) => this.formatDate(value)
       },
       {
         field: 'status',
         header: 'Status',
         sortable: true,
-        width: '15%',
-        customTemplate: true
+        isStatus: true,
       },
-      {
-        field: 'actions',
-        header: 'Actions',
-        width: '10%',
-        customTemplate: true
-      }
-    ];
+    ],
+    enableSearch: true,
+    enableSort: true,
+    enableFilter: true,
+    enablePagination: true,
+    pageSize: 10,
+  };
+  
+  // Loading states
+  loading = false;
+
+  ngOnInit() {
+    this.loadSampleData();
   }
 
   loadSampleData() {
-    // Sample data with realistic information
-    this.openRFQs = [
+    // Consolidate all RFQ data into a single array
+    const openRFQs: RFQItem[] = [
       {
         rfqId: 'RFQ-2023-001',
         title: 'CNC Machined Aluminum Brackets',
@@ -134,7 +104,8 @@ export class SupplierRfqComponent implements OnInit {
         description: 'High precision aluminum brackets for automotive application',
         company: 'AutoTech Industries',
         priority: 'High',
-        estimatedValue: 25000
+        estimatedValue: 25000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-001'
       },
       {
         rfqId: 'RFQ-2023-002',
@@ -146,7 +117,8 @@ export class SupplierRfqComponent implements OnInit {
         description: 'Custom sheet metal enclosure for electronic equipment',
         company: 'ElectroSystems Ltd',
         priority: 'Medium',
-        estimatedValue: 15000
+        estimatedValue: 15000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-002'
       },
       {
         rfqId: 'RFQ-2023-003',
@@ -158,7 +130,8 @@ export class SupplierRfqComponent implements OnInit {
         description: 'Plastic injection molded parts for consumer electronics',
         company: 'TechGadgets Inc',
         priority: 'Medium',
-        estimatedValue: 18000
+        estimatedValue: 18000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-003'
       },
       {
         rfqId: 'RFQ-2023-008',
@@ -170,7 +143,8 @@ export class SupplierRfqComponent implements OnInit {
         description: 'High precision turned components for aerospace',
         company: 'AeroSpace Solutions',
         priority: 'High',
-        estimatedValue: 32000
+        estimatedValue: 32000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-008'
       },
       {
         rfqId: 'RFQ-2023-009',
@@ -182,11 +156,12 @@ export class SupplierRfqComponent implements OnInit {
         description: 'Custom fabricated steel brackets for construction',
         company: 'BuildPro Inc',
         priority: 'Low',
-        estimatedValue: 12000
+        estimatedValue: 12000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-009'
       }
     ];
 
-    this.inProgressRFQs = [
+    const inProgressRFQs: RFQItem[] = [
       {
         rfqId: 'RFQ-2023-004',
         title: '3D Printed Prototype Parts',
@@ -197,7 +172,8 @@ export class SupplierRfqComponent implements OnInit {
         description: 'Rapid prototyping for new product development',
         company: 'Innovation Labs',
         priority: 'High',
-        estimatedValue: 8000
+        estimatedValue: 8000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-004'
       },
       {
         rfqId: 'RFQ-2023-005',
@@ -209,7 +185,8 @@ export class SupplierRfqComponent implements OnInit {
         description: 'High precision gears for industrial machinery',
         company: 'MechPrecision Co',
         priority: 'High',
-        estimatedValue: 35000
+        estimatedValue: 35000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-005'
       },
       {
         rfqId: 'RFQ-2023-010',
@@ -221,11 +198,12 @@ export class SupplierRfqComponent implements OnInit {
         description: 'Complex welded assemblies for marine equipment',
         company: 'Marine Tech Ltd',
         priority: 'Medium',
-        estimatedValue: 22000
+        estimatedValue: 22000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-010'
       }
     ];
 
-    this.closedRFQs = [
+    const closedRFQs: RFQItem[] = [
       {
         rfqId: 'RFQ-2023-006',
         title: 'Welded Steel Framework',
@@ -236,7 +214,8 @@ export class SupplierRfqComponent implements OnInit {
         description: 'Structural steel framework for construction project',
         company: 'BuildTech Solutions',
         priority: 'Low',
-        estimatedValue: 45000
+        estimatedValue: 45000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-006'
       },
       {
         rfqId: 'RFQ-2023-007',
@@ -248,7 +227,8 @@ export class SupplierRfqComponent implements OnInit {
         description: 'Heavy duty cast iron parts for mining equipment',
         company: 'Mining Solutions Ltd',
         priority: 'Medium',
-        estimatedValue: 28000
+        estimatedValue: 28000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-007'
       },
       {
         rfqId: 'RFQ-2023-011',
@@ -260,7 +240,8 @@ export class SupplierRfqComponent implements OnInit {
         description: 'Precision machined valve bodies for hydraulic systems',
         company: 'Hydraulic Systems Inc',
         priority: 'High',
-        estimatedValue: 38000
+        estimatedValue: 38000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-011'
       },
       {
         rfqId: 'RFQ-2023-012',
@@ -272,96 +253,82 @@ export class SupplierRfqComponent implements OnInit {
         description: 'Custom sheet metal panels for industrial equipment',
         company: 'Industrial Panels Co',
         priority: 'Medium',
-        estimatedValue: 16000
+        estimatedValue: 16000,
+        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-012'
       }
     ];
+
+    // Combine all RFQs into a single array
+    this.allRFQs = [...openRFQs, ...inProgressRFQs, ...closedRFQs];
   }
 
-  // Tab management
-  setActiveTab(index: number) {
-    this.activeTabIndex = index;
-    this.currentPage = 1; // Reset pagination when switching tabs
+  // Event handlers for common table component
+  onRowClick(event: { event: Event, rowData: RFQItem }) {
+    console.log('Row clicked:', event.rowData);
   }
 
-  // Get current tab data
-  getCurrentTabData(): RFQItem[] {
-    switch (this.activeTabIndex) {
-      case 0: return this.openRFQs;
-      case 1: return this.inProgressRFQs;
-      case 2: return this.closedRFQs;
-      default: return this.openRFQs;
-    }
-  }
-
-  // Search functionality
-  onSearch() {
-    this.currentPage = 1; // Reset to first page when searching
-  }
-
-  getFilteredData(data: RFQItem[]): RFQItem[] {
-    let filtered = data.filter(item => {
-      return (
-        (!this.searchFilters.rfqId || item.rfqId.toLowerCase().includes(this.searchFilters.rfqId.toLowerCase())) &&
-        (!this.searchFilters.title || item.title.toLowerCase().includes(this.searchFilters.title.toLowerCase())) &&
-        (!this.searchFilters.company || item.company?.toLowerCase().includes(this.searchFilters.company.toLowerCase())) &&
-        (!this.searchFilters.parts || item.parts.toString().includes(this.searchFilters.parts)) &&
-        (!this.searchFilters.dueDate || this.formatDate(item.dueDate).toLowerCase().includes(this.searchFilters.dueDate.toLowerCase())) &&
-        (!this.searchFilters.status || item.status === this.searchFilters.status)
-      );
-    });
-
-    // Apply pagination
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    return filtered.slice(startIndex, endIndex);
-  }
-
-  // Pagination methods
-  getTotalPages(): number {
-    const currentData = this.getCurrentTabData();
-    const filteredCount = currentData.filter(item => {
-      return (
-        (!this.searchFilters.rfqId || item.rfqId.toLowerCase().includes(this.searchFilters.rfqId.toLowerCase())) &&
-        (!this.searchFilters.title || item.title.toLowerCase().includes(this.searchFilters.title.toLowerCase())) &&
-        (!this.searchFilters.company || item.company?.toLowerCase().includes(this.searchFilters.company.toLowerCase())) &&
-        (!this.searchFilters.parts || item.parts.toString().includes(this.searchFilters.parts)) &&
-        (!this.searchFilters.dueDate || this.formatDate(item.dueDate).toLowerCase().includes(this.searchFilters.dueDate.toLowerCase())) &&
-        (!this.searchFilters.status || item.status === this.searchFilters.status)
-      );
-    }).length;
-    
-    return Math.ceil(filteredCount / this.itemsPerPage);
-  }
-
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.getTotalPages()) {
-      this.currentPage = page;
-    }
-  }
-
-  // Event handlers
-  onTabChange(event: any) {
-    this.activeTabIndex = event.index;
-  }
-
-  onRowSelect(event: any) {
-    console.log('Row selected:', event);
-  }
-
-  onLinkClick(rowData: RFQItem) {
-    console.log('RFQ clicked:', rowData);
+  onLinkClick(event: { rowData: RFQItem, column: any }) {
+    console.log('RFQ link clicked:', event.rowData);
     // Navigate to RFQ details page
-    this.router.navigate(['/wefab/supplier/rfq/details', rowData.rfqId]);
+    this.router.navigate(['/wefab/supplier/rfq/details', event.rowData.rfqId]);
+  }
+
+  onActionClick(event: { action: string, rowData: RFQItem }) {
+    console.log('Action clicked:', event.action, event.rowData);
+    
+    const rfq = event.rowData;
+    
+    switch (event.action) {
+      case 'view':
+        this.onViewRFQ(rfq);
+        break;
+      case 'quote':
+        if (rfq.status === 'Open') {
+          this.onQuoteRFQ(rfq);
+        } else {
+          alert('Quote action is only available for Open RFQs');
+        }
+        break;
+      case 'edit':
+        if (rfq.status === 'In Progress') {
+          this.onEditRFQ(rfq);
+        } else {
+          alert('Edit action is only available for In Progress RFQs');
+        }
+        break;
+      case 'download':
+        if (rfq.status === 'Closed') {
+          this.downloadRFQDocuments(rfq);
+        } else {
+          alert('Download action is only available for Closed RFQs');
+        }
+        break;
+      default:
+        console.log('Unknown action:', event.action);
+    }
   }
 
   onViewRFQ(rfq: RFQItem) {
     console.log('View RFQ:', rfq);
-    // Implement view functionality
+    // Navigate to RFQ details page
+    this.router.navigate(['/wefab/supplier/rfq/details', rfq.rfqId]);
   }
 
   onQuoteRFQ(rfq: RFQItem) {
     console.log('Quote RFQ:', rfq);
-    // Implement quote functionality
+    // Navigate to quote creation page for Open RFQs
+    this.router.navigate(['/wefab/supplier/rfq/quote', rfq.rfqId]);
+  }
+
+  onEditRFQ(rfq: RFQItem) {
+    console.log('Edit RFQ:', rfq);
+    // Navigate to quote edit page for In Progress RFQs
+    this.router.navigate(['/wefab/supplier/rfq/quote/edit', rfq.rfqId]);
+  }
+
+  downloadRFQDocuments(rfq: RFQItem) {
+    console.log('Download documents for RFQ:', rfq.rfqId);
+    // Implement download functionality
   }
 
   // Utility methods
@@ -373,13 +340,5 @@ export class SupplierRfqComponent implements OnInit {
       day: 'numeric'
     });
   }
-
-  getTabCount(tabIndex: number): number {
-    switch (tabIndex) {
-      case 0: return this.openRFQs.length;
-      case 1: return this.inProgressRFQs.length;
-      case 2: return this.closedRFQs.length;
-      default: return 0;
-    }
-  }
 }
+

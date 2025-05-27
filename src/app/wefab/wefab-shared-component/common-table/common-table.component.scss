@@ -201,6 +201,24 @@
                 background-color: #fff3cd;
                 color: #664d03;
               }
+
+              &.status-open {
+                background-color: rgba($blueprint-blue, 0.1);
+                color: $blueprint-blue;
+                border: 1px solid rgba($blueprint-blue, 0.2);
+              }
+
+              &.status-in-progress {
+                background-color: #fff3cd;
+                color: #664d03;
+                border: 1px solid #ffeaa7;
+              }
+
+              &.status-closed {
+                background-color: #e7f5e7;
+                color: #198754;
+                border: 1px solid #c3e6cb;
+              }
             }
           }
 
