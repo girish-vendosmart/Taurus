@@ -688,110 +688,46 @@
 
           <!-- Additional Information Tab Content -->
           <div class="financial-tab-content" *ngIf="financialTab === 'additional'">
-            <div class="additional-info">
-              <!-- Additional Information Tab Content -->
-              <div class="financial-tab-content" *ngIf="financialTab === 'additional'">
-                <div class="additional-info">
-                  <!-- Digital Presence -->
-                  <div class="review-info-container">
-                    <h3>Digital Presence</h3>
-                    <div class="review-row">
-                      <div class="review-col">
-                        <div class="field-label">Company Website</div>
-                        <div class="field-value">
-                          <a 
-                            *ngIf="newFinancialData.additionalInformation.websites.website?.trim()" 
-                            [href]="newFinancialData.additionalInformation.websites.website.trim().startsWith('http') ? newFinancialData.additionalInformation.websites.website.trim() : 'https://' + newFinancialData.additionalInformation.websites.website.trim()" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            class="website-link">
-                            {{ newFinancialData.additionalInformation.websites.website.trim() }}
-                            <i class="pi pi-external-link"></i>
-                          </a>
-                          <span *ngIf="!newFinancialData.additionalInformation.websites.website?.trim()" class="no-data">
-                            Not provided
-                          </span>
-                        </div>
-                      </div>
+            <div class="financial-overview-section">
+              <!-- Business References -->
+              <div class="review-info-container">
+                <h3>Business References</h3>
+                <div *ngIf="newFinancialData.additionalInformation.references && newFinancialData.additionalInformation.references.length > 0">
+                  <div class="review-row" *ngFor="let reference of newFinancialData.additionalInformation.references">
+                    <div class="review-col">
+                      <div class="field-label">Company Name</div>
+                      <div class="field-value">{{ reference.companyName }}</div>
+                    </div>
+                    <div class="review-col">
+                      <div class="field-label">Contact Name</div>
+                      <div class="field-value">{{ reference.contactName }}</div>
+                    </div>
+                    <div class="review-col">
+                      <div class="field-label">Email</div>
+                      <div class="field-value">{{ reference.email }}</div>
                     </div>
                   </div>
-
-                  <!-- Production Facilities -->
-                  <div class="review-info-container">
-                    <h3>Production Facilities</h3>
-                    <div class="facilities-list"
-                      *ngIf="newFinancialData.additionalInformation.productionFacilities && newFinancialData.additionalInformation.productionFacilities.length > 0">
-                      <div class="facility-item"
-                        *ngFor="let facility of newFinancialData.additionalInformation.productionFacilities">
-                        <div class="facility-card">
-                          <div class="facility-header">
-                            <h4 class="facility-name">{{ facility.facilityName }}</h4>
-                            <span class="facility-location">
-                              <i class="pi pi-map-marker"></i> {{ facility.facilityLocation }}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="empty-message"
-                      *ngIf="!newFinancialData.additionalInformation.productionFacilities || newFinancialData.additionalInformation.productionFacilities.length === 0">
-                      No production facilities added yet.
+                </div>
+                <div *ngIf="!newFinancialData.additionalInformation.references || newFinancialData.additionalInformation.references.length === 0">
+                  <div class="review-row">
+                    <div class="review-col">
+                      <div class="field-value" style="color: #6b7280; font-style: italic;">No business references added yet.</div>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  <!-- Business Refrences -->
-                  <div class="review-info-container">
-                    <h3>Business References</h3>
-                    <div class="facilities-list"
-                      *ngIf="newFinancialData.additionalInformation.references && newFinancialData.additionalInformation.references.length > 0">
-                      <div class="facility-item"
-                        *ngFor="let reference of newFinancialData.additionalInformation.references">
-                        <div class="facility-card">
-                          <div class="facility-header">
-                            <h4 class="facility-name">{{ reference.companyName }}</h4>
-                            <span class="facility-location">
-                              <i class="pi pi-user"></i> {{ reference.contactName }}
-                            </span>
-                            <span class="facility-location">
-                              <i class="pi pi-envelope"></i> {{ reference.email }}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="empty-message"
-                      *ngIf="!newFinancialData.additionalInformation.productionFacilities || newFinancialData.additionalInformation.productionFacilities.length === 0">
-                      No production facilities added yet.
-                    </div>
+              <!-- Business Terms -->
+              <div class="review-info-container">
+                <h3>Business Terms</h3>
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Lead Time (Days)</div>
+                    <div class="field-value">{{ newFinancialData.additionalInformation.leadTime || 'Not specified' }}</div>
                   </div>
-
-                  <!-- Operational Metrics -->
-                  <div class="review-info-container">
-                    <h3>Operational Metrics</h3>
-                    <div class="review-row">
-                      <div class="review-col">
-                        <div class="field-label">Total Number of Employees</div>
-                        <div class="field-value">{{ newFinancialData.additionalInformation.totalEmployees}}</div>
-                      </div>
-                      <div class="review-col">
-                        <div class="field-label">Year of Establishment</div>
-                        <div class="field-value">{{ newFinancialData.additionalInformation.foundedYear}}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="review-info-container">
-                    <h3>Business Terms</h3>
-                    <div class="review-row">
-                      <div class="review-col">
-                        <div class="field-label">Lead Time (Days)</div>
-                        <div class="field-value">{{ newFinancialData.additionalInformation.leadTime}}</div>
-                      </div>
-                      <div class="review-col">
-                        <div class="field-label">Minimum Order Quantity</div>
-                        <div class="field-value">{{newFinancialData.additionalInformation.minimumOrderQuantity}}</div>
-                      </div>
-                    </div>
+                  <div class="review-col">
+                    <div class="field-label">Minimum Order Quantity</div>
+                    <div class="field-value">{{ newFinancialData.additionalInformation.minimumOrderQuantity || 'Not specified' }}</div>
                   </div>
                 </div>
               </div>
