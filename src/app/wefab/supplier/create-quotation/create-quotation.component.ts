@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
@@ -190,6 +190,8 @@ export class CreateQuotationComponent implements OnInit {
     { label: 'Days', value: 'Days' }
   ];
 
+  @ViewChild('csvFileInput', { static: false }) csvFileInput!: ElementRef;
+
   constructor(private messageService: MessageService) {}
 
   ngOnInit() {
@@ -279,20 +281,284 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   exportCSV() {
+    // Create CSV content for quotation items only
+    const headers = [
+      'S.No',
+      'Expense Head',
+      'Section Head', 
+      'Item Number',
+      'Drawing Ref',
+      'Description',
+      'Unit',
+      'Quantity',
+      'Rate',
+      'Total Amount',
+      'Comment By Swiss Electric Solutions AG',
+      'Notes By Alshaya Group'
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...this.model.quotationItems.map((item: any, index: number) => [
+        index + 1,
+        `"${item.expenseHead || ''}"`,
+        `"${item.sectionHead || ''}"`,
+        `"${item.itemNumber || ''}"`,
+        `"${item.drawingRef || ''}"`,
+        `"${item.description || ''}"`,
+        `"${item.unit || ''}"`,
+        item.quantity || 0,
+        item.rate || 0,
+        this.getRowTotal(item),
+        `"${item.commentBySwissElectric || ''}"`,
+        `"${item.notesByAlshayaGroup || ''}"`
+      ].join(','))
+    ].join('\n');
+
+    // Create and download the CSV file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `quotation-items-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
     this.messageService.add({
-      severity: 'info',
-      summary: 'Export',
-      detail: 'CSV export functionality will be implemented'
+      severity: 'success',
+      summary: 'Export Successful',
+      detail: 'Quotation items exported to CSV successfully!'
     });
   }
 
+  importCSV() {
+    // Use the ViewChild reference to trigger file selection
+    if (this.csvFileInput) {
+      this.csvFileInput.nativeElement.click();
+    }
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        try {
+          const csvContent = e.target.result;
+          this.parseCSVAndUpdateTable(csvContent);
+        } catch (error) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Import Error',
+            detail: 'Error reading CSV file. Please check the file format.'
+          });
+        }
+      };
+      reader.readAsText(file);
+    }
+  }
+
+  private parseCSVAndUpdateTable(csvContent: string) {
+    const lines = csvContent.split('\n');
+    
+    // Skip header row and filter out empty lines
+    const dataLines = lines.slice(1).filter(line => line.trim() !== '');
+    
+    if (dataLines.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Import Warning',
+        detail: 'No data found in CSV file.'
+      });
+      return;
+    }
+
+    const importedItems: any[] = [];
+
+    dataLines.forEach((line, index) => {
+      try {
+        // Parse CSV line (handling quoted values)
+        const values = this.parseCSVLine(line);
+        
+        if (values.length >= 12) {
+          const item = {
+            expenseHead: values[1] || '',
+            sectionHead: values[2] || '',
+            itemNumber: values[3] || '',
+            drawingRef: values[4] || '',
+            description: values[5] || '',
+            unit: values[6] || '',
+            quantity: parseFloat(values[7]) || 0,
+            rate: parseFloat(values[8]) || 0,
+            totalAmount: parseFloat(values[9]) || 0,
+            commentBySwissElectric: values[10] || '',
+            notesByAlshayaGroup: values[11] || ''
+          };
+          importedItems.push(item);
+        }
+      } catch (error) {
+        console.warn(`Error parsing line ${index + 2}:`, error);
+      }
+    });
+
+    if (importedItems.length > 0) {
+      this.model.quotationItems = importedItems;
+      this.calculateTotals();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Import Successful',
+        detail: `Successfully imported ${importedItems.length} quotation items from CSV.`
+      });
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Import Error',
+        detail: 'No valid data could be imported from the CSV file.'
+      });
+    }
+  }
+
+  private parseCSVLine(line: string): string[] {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    result.push(current.trim());
+    return result.map(value => value.replace(/^"|"$/g, '')); // Remove surrounding quotes
+  }
+
   resetTable() {
-    this.model.quotationItems = [];
+    // Reset to original sample data
+    this.model.quotationItems = [
+      {
+        expenseHead: 'Professional Costs',
+        sectionHead: 'Power Distribution Setup',
+        itemNumber: '7.1.2',
+        drawingRef: '-',
+        description: 'Description',
+        unit: 'Pieces',
+        quantity: 200,
+        rate: 1000,
+        totalAmount: 200000,
+        commentBySwissElectric: '-',
+        notesByAlshayaGroup: '-'
+      },
+      {
+        expenseHead: 'Preliminiries',
+        sectionHead: 'others',
+        itemNumber: '3.2.4',
+        drawingRef: '-',
+        description: 'Description',
+        unit: 'Pieces',
+        quantity: 56,
+        rate: 10000,
+        totalAmount: 560000,
+        commentBySwissElectric: '-',
+        notesByAlshayaGroup: '-'
+      },
+      {
+        expenseHead: 'Contingency',
+        sectionHead: 'Risk & Contingency Planning',
+        itemNumber: '8.2.1',
+        drawingRef: '-',
+        description: 'Description',
+        unit: 'Sqm',
+        quantity: 20,
+        rate: 20000,
+        totalAmount: 400000,
+        commentBySwissElectric: '-',
+        notesByAlshayaGroup: '-'
+      },
+      {
+        expenseHead: 'Preliminiries',
+        sectionHead: 'Other',
+        itemNumber: '3.2.3',
+        drawingRef: '-',
+        description: 'Description',
+        unit: 'Sqm',
+        quantity: 9,
+        rate: 20000,
+        totalAmount: 180000,
+        commentBySwissElectric: '-',
+        notesByAlshayaGroup: '-'
+      },
+      {
+        expenseHead: 'Fire Services',
+        sectionHead: 'Fire maintaince',
+        itemNumber: '5.2.2',
+        drawingRef: '-',
+        description: 'Desc',
+        unit: 'Pieces',
+        quantity: 56,
+        rate: 20000,
+        totalAmount: 1120000,
+        commentBySwissElectric: '-',
+        notesByAlshayaGroup: '-'
+      },
+      {
+        expenseHead: 'Preliminiries',
+        sectionHead: 'Others',
+        itemNumber: '3.2.6',
+        drawingRef: '-',
+        description: 'Descrip',
+        unit: 'Pieces',
+        quantity: 20,
+        rate: 3000,
+        totalAmount: 60000,
+        commentBySwissElectric: '-',
+        notesByAlshayaGroup: '-'
+      },
+      {
+        expenseHead: 'HVAC',
+        sectionHead: 'Water Supply & Drainage',
+        itemNumber: '9.2.1',
+        drawingRef: '-',
+        description: 'Desc',
+        unit: 'Sqm',
+        quantity: 12,
+        rate: 2000,
+        totalAmount: 24000,
+        commentBySwissElectric: '-',
+        notesByAlshayaGroup: '-'
+      },
+      {
+        expenseHead: 'IT Equipment',
+        sectionHead: 'Temporary Site Services',
+        itemNumber: '6.2.1',
+        drawingRef: '-',
+        description: 'Desc',
+        unit: 'Pieces',
+        quantity: 2,
+        rate: 20000,
+        totalAmount: 40000,
+        commentBySwissElectric: '-',
+        notesByAlshayaGroup: '-'
+      }
+    ];
+    
+    // Reset discount percentage
+    this.discountPercentage = 0;
+    
     this.calculateTotals();
     this.messageService.add({
-      severity: 'info',
-      summary: 'Reset',
-      detail: 'Table has been reset'
+      severity: 'success',
+      summary: 'Reset Successful',
+      detail: 'Table has been reset to original sample data'
     });
   }
 }

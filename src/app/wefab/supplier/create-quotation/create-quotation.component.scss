@@ -14,6 +14,57 @@
   }
 }
 
+// Table Actions Styling
+.table-actions {
+  .btn {
+    border-radius: 6px;
+    font-weight: $font-weight-medium;
+    font-size: 14px;
+    padding: 8px 16px;
+    transition: all 0.2s ease;
+    
+    &.btn-outline-secondary {
+      border-color: $material-finish-silver;
+      color: $machine-gray;
+      
+      &:hover {
+        background-color: $material-finish-silver;
+        border-color: $machine-gray;
+        color: $precision-black;
+        transform: translateY(-1px);
+      }
+    }
+    
+    &.btn-outline-success {
+      border-color: $process-green;
+      color: $process-green;
+      
+      &:hover {
+        background-color: $process-green;
+        border-color: $process-green;
+        color: white;
+        transform: translateY(-1px);
+      }
+    }
+    
+    &.btn-outline-primary {
+      border-color: $blueprint-blue;
+      color: $blueprint-blue;
+      
+      &:hover {
+        background-color: $blueprint-blue;
+        border-color: $blueprint-blue;
+        color: white;
+        transform: translateY(-1px);
+      }
+    }
+    
+    i {
+      font-size: 14px;
+    }
+  }
+}
+
 .header-actions {
   .btn {
     border-radius: 6px;

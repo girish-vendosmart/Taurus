@@ -3,22 +3,6 @@
   <div class="quotation-header mb-4">
     <div class="d-flex justify-content-between align-items-center">
       <h2 class="text-blueprint-blue mb-0">Quotation</h2>
-      <div class="header-actions">
-        <button 
-          type="button" 
-          class="btn btn-outline-secondary me-2"
-          (click)="resetTable()">
-          <i class="pi pi-refresh me-1"></i>
-          Reset Table
-        </button>
-        <button 
-          type="button" 
-          class="btn btn-outline-primary me-2"
-          (click)="exportCSV()">
-          <i class="pi pi-download me-1"></i>
-          Export CSVs
-        </button>
-      </div>
     </div>
   </div>
 
@@ -35,6 +19,41 @@
         </formly-form>
       </div>
     </div>
+
+    <!-- Table Actions -->
+    <div class="d-flex justify-content-end mb-3 table-actions">
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary me-2"
+        (click)="resetTable()">
+        <i class="pi pi-refresh me-1"></i>
+        Reset Table
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-outline-success me-2"
+        (click)="importCSV()"
+        title="Import quotation items from CSV file. Expected format: S.No, Expense Head, Section Head, Item Number, Drawing Ref, Description, Unit, Quantity, Rate, Total Amount, Comment By Swiss Electric Solutions AG, Notes By Alshaya Group">
+        <i class="pi pi-upload me-1"></i>
+        Import CSV
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-outline-primary"
+        (click)="exportCSV()"
+        title="Export current quotation items to CSV file">
+        <i class="pi pi-arrow-up me-1"></i>
+        Export CSV
+      </button>
+    </div>
+
+    <!-- Hidden file input for CSV import -->
+    <input 
+      #csvFileInput 
+      type="file" 
+      accept=".csv" 
+      style="display: none;" 
+      (change)="onFileSelected($event)">
 
     <!-- Quotation Items Table Card -->
     <div class="card mb-4">
