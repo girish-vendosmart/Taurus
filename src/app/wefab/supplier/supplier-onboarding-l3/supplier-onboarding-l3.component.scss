@@ -244,12 +244,12 @@
     padding: 0.8rem 1.2rem; 
     font-size: 1rem;
     transition: all 0.3s ease;
-    background-color: rgba($technical-white, 0.8);
+    background-color: #ffffff;
     width: 100%;
     
     &:hover {
       border-color: lighten($blueprint-blue, 20%);
-      background-color: rgba($technical-white, 1);
+      background-color: #ffffff;
     }
     
     &:focus {
@@ -577,13 +577,13 @@
   .p-multiselect {
     width: 100%;
     border-radius: 8px;
-    background-color: rgba($technical-white, 0.8);
+    background-color: #ffffff;
     border: 1px solid $material-finish-silver;
     transition: all 0.3s ease;
     
     &:hover {
       border-color: lighten($blueprint-blue, 20%);
-      background-color: rgba($technical-white, 1);
+      background-color: #ffffff;
     }
     
     &.p-focus {

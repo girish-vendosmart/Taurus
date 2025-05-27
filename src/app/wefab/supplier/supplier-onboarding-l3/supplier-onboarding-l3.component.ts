@@ -87,15 +87,6 @@ export class SupplierOnboardingL3Component implements OnInit {
       productLiabilityInsurance: '0987'
     },
     additionalInformation: {
-      websites: {
-        website: ''
-      },
-      totalEmployees: '',
-      foundedYear: '',
-      productionFacilities: [{
-        facilityName: '',
-        facilityLocation: ''
-      }],
       leadTime: '',
       minimumOrderQuantity: 0,
       references: [{
@@ -173,19 +164,6 @@ export class SupplierOnboardingL3Component implements OnInit {
       this.model.additionalInformation = {};
     }
     
-    // Initialize nested objects to prevent errors
-    if (!this.model.additionalInformation.websites) {
-      this.model.additionalInformation.websites = { website: '' };
-    }
-    
-    if (!this.model.additionalInformation.productionFacilities || 
-        !this.model.additionalInformation.productionFacilities.length) {
-      this.model.additionalInformation.productionFacilities = [{
-        facilityName: '',
-        facilityLocation: ''
-      }];
-    }
-    
     if (!this.model.additionalInformation.references || 
         !this.model.additionalInformation.references.length) {
       this.model.additionalInformation.references = [{
@@ -254,15 +232,6 @@ export class SupplierOnboardingL3Component implements OnInit {
     };
     
     // Ensure arrays are properly initialized
-    if (!this.model.additionalInformation.productionFacilities || 
-        !Array.isArray(this.model.additionalInformation.productionFacilities) || 
-        this.model.additionalInformation.productionFacilities.length === 0) {
-      this.model.additionalInformation.productionFacilities = [{
-        facilityName: '',
-        facilityLocation: ''
-      }];
-    }
-    
     if (!this.model.additionalInformation.references || 
         !Array.isArray(this.model.additionalInformation.references) || 
         this.model.additionalInformation.references.length === 0) {
@@ -342,7 +311,7 @@ export class SupplierOnboardingL3Component implements OnInit {
               label: 'Annual Revenue (This Year) (INR)',
               required: true,
               type: 'text',
-              placeholder: '12359'
+              placeholder: 'Enter current year revenue amount'
             },
             validation: {
               messages: {
@@ -358,7 +327,7 @@ export class SupplierOnboardingL3Component implements OnInit {
               label: 'Annual Revenue (Last Year) (INR)',
               required: true,
               type: 'text',
-              placeholder: '9876'
+              placeholder: 'Enter last year revenue amount'
             },
             validation: {
               messages: {
@@ -383,7 +352,7 @@ export class SupplierOnboardingL3Component implements OnInit {
               label: 'Annual Revenue (Two Years Ago) (INR)',
               required: true,
               type: 'text',
-              placeholder: '09876r'
+              placeholder: 'Enter two years ago revenue amount'
             },
             validation: {
               messages: {
@@ -477,140 +446,6 @@ export class SupplierOnboardingL3Component implements OnInit {
       {
         key: 'additionalInformation',
         fieldGroup: [
-          // Digital Presence Section
-          {
-            template: `
-              <div class="mt-3 mb-2">
-                <h4 class="section-title">Digital Presence</h4>
-              </div>
-            `
-          },
-          {
-            key: 'websites',
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-12',
-                key: 'website',
-                type: 'input',
-                templateOptions: {
-                  label: 'Company Website',
-                  placeholder: 'Enter company website URL',
-                  required: true
-                },
-                validation: {
-                  messages: {
-                    required: 'Company website is required'
-                  }
-                }
-              }
-            ]
-          },
-          
-          // Operational Metrics Section
-          {
-            template: `
-              <div class="mt-3 mb-2">
-                <h4 class="section-title">Operational Metrics</h4>
-              </div>
-            `
-          },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-6',
-                key: 'totalEmployees',
-                type: 'input',
-                templateOptions: {
-                  type: 'number',
-                  label: 'Total Number of Employees',
-                  placeholder: 'Enter number of employees',
-                  min: 1,
-                  required: true
-                },
-                validation: {
-                  messages: {
-                    required: 'Number of employees is required'
-                  }
-                }
-              },
-              {
-                className: 'col-md-6',
-                key: 'foundedYear',
-                type: 'input',
-                templateOptions: {
-                  type: 'number',
-                  label: 'Year Founded',
-                  placeholder: 'Enter year company was founded',
-                  min: 1900,
-                  max: new Date().getFullYear(),
-                  required: true
-                },
-                validation: {
-                  messages: {
-                    required: 'Year founded is required'
-                  }
-                }
-              }
-            ]
-          },
-          
-          // Production Facility
-          {
-            key: 'productionFacilities',
-            type: 'repeat',
-            templateOptions: {
-              label: 'Production Facilities',
-              addText: '+ Add Facility',
-              min: 1
-            },
-            fieldArray: {
-              fieldGroup: [
-                {
-                  expressionProperties: {
-                    'template': 'return "<div class=\'mt-3 mb-1\'><h6>Facility " + (field.parent.index + 1) + "</h6></div>";'
-                  }
-                },
-                {
-                  fieldGroupClassName: 'row',
-                  fieldGroup: [
-                    {
-                      className: 'col-md-6',
-                      key: 'facilityName',
-                      type: 'input',
-                      templateOptions: {
-                        label: 'Facility Name',
-                        placeholder: 'Enter facility name',
-                        required: true
-                      },
-                      validation: {
-                        messages: {
-                          required: 'Facility name is required'
-                        }
-                      }
-                    },
-                    {
-                      className: 'col-md-6',
-                      key: 'facilityLocation',
-                      type: 'input',
-                      templateOptions: {
-                        label: 'Location',
-                        placeholder: 'Enter facility location',
-                        required: true
-                      },
-                      validation: {
-                        messages: {
-                          required: 'Facility location is required'
-                        }
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
-          },
-          
           // Business Terms Section
           {
             template: `
@@ -678,9 +513,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             fieldArray: {
               fieldGroup: [
                 {
-                  expressionProperties: {
-                    'template': 'return "<div class=\'mt-3 mb-1\'><h6>Item " + (field.parent.index + 1) + "</h6></div>";'
-                  }
+                  template: ''
                 },
                 {
                   fieldGroupClassName: 'row',
@@ -785,7 +618,7 @@ export class SupplierOnboardingL3Component implements OnInit {
 
   // Helper method to get a control by a possibly nested key
   getControlByKey(key: string): AbstractControl | null {
-    // Handle nested keys like 'additionalInformation.websites.website'
+    // Handle nested keys for form controls
     const path = key.toString().split('.');
     let control = this.form.get(path[0]);
     
@@ -851,7 +684,7 @@ export class SupplierOnboardingL3Component implements OnInit {
     }
     
     // Ensure these are arrays
-    const repeatingFields = ['productionFacilities', 'references'];
+    const repeatingFields = ['references'];
     repeatingFields.forEach(field => {
       if (!Array.isArray(formData.additionalInformation[field])) {
         formData.additionalInformation[field] = 
