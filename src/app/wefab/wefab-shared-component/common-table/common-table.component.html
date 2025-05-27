@@ -1,109 +1,157 @@
-<div class="card m-3">
-  <div class="table-header" *ngIf="showGlobalFilter">
-    <span class="p-input-icon-left">
-      <i class="pi pi-search"></i>
-      <input type="text" pInputText [(ngModel)]="globalFilterValue" 
-        (input)="onGlobalFilterChange($event)" placeholder="Search..." />
-    </span>
-  </div>
+<div class="table-wrapper">
+  <div class="common-table-container">
+    <!-- Header with Column Names -->
+    <div class="table-header">
+      <div class="header-row">
+        <div class="header-cell" 
+             *ngFor="let col of config.columns"
+             [style.width]="col.width"
+             [style.flex]="col.width ? 'none' : '1'">
+          <span class="header-title">{{ col.header }}</span>
+          <i [class]="getSortIcon(col.field)" 
+             *ngIf="col.sortable" 
+             (click)="sortTable(col.field)"
+             [class.active]="currentSortField === col.field && currentSortOrder !== 0"></i>
+        </div>
+      </div>
+      
+      <!-- Search Fields Row -->
+      <div class="search-row">
+        <div class="search-field" 
+             *ngFor="let col of config.columns"
+             [style.width]="col.width"
+             [style.flex]="col.width ? 'none' : '1'">
+          <input 
+            type="text" 
+            pInputText 
+            [placeholder]="col.filterable ? 'Search ' + col.header : ''"
+            (input)="dt.filter($any($event.target).value, col.field, 'contains')"
+            class="search-input"
+            [disabled]="!col.filterable"
+            *ngIf="col.filterable"
+          />
+          <div class="no-search" *ngIf="!col.filterable"></div>
+        </div>
+      </div>
+    </div>
 
-  <div class="common-table-wrapper">
+    <!-- Table -->
     <p-table 
       #dt 
-      [value]="data" 
-      [rows]="rows" 
-      [paginator]="paginator" 
+      [value]="data.length ? data : sampleData"
+      [columns]="config.columns"
+      [paginator]="config.enablePagination"
+      [rows]="config.pageSize || 10"
+      [showCurrentPageReport]="config.enablePagination"
+      [tableStyle]="{ 'min-width': '100%' }"
       [loading]="loading"
-      [rowsPerPageOptions]="rowsPerPageOptions"
-      [totalRecords]="totalRecords"
       [globalFilterFields]="globalFilterFields"
-      [filterDelay]="0"
-      [rowHover]="true"
-      [showCurrentPageReport]="true"
       styleClass="p-datatable-sm"
-      [responsive]="true"
-      [resizableColumns]="false"
+      [rowHover]="true"
+      responsiveLayout="scroll"
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-      [selectionMode]="selectionMode"
-      [(selection)]="selectedItems"
-      (onRowSelect)="onRowSelect($event)"
-      (onRowUnselect)="onRowUnselect($event)"
-      (onPage)="onPageChange($event)"
-      (onSort)="onSortChange($event)"
-      [sortField]="sortField"
-      [sortOrder]="sortOrder">
-      
-      <ng-template pTemplate="header">
-        <tr>
-          <th *ngFor="let col of columns" 
-              [pSortableColumn]="col.sortable ? col.field : undefined" 
-              [style.width]="col.width" 
-              class="header-cell">
-            <div class="header-content">
-              <span class="header-title">{{col.header}}</span>
-              <div class="header-icons">
-                <p-sortIcon *ngIf="col.sortable" [field]="col.field"></p-sortIcon>
-                <button *ngIf="col.filterable" pButton 
-                        class="p-button-text p-button-rounded p-button-sm icon-only"
-                        icon="pi pi-filter">
+      [alwaysShowPaginator]="false"
+      [showFirstLastIcon]="false"
+      [showPageLinks]="false"
+      [rowsPerPageOptions]="[5, 10, 20, 50]"
+    >
+      <!-- Custom Pagination Template -->
+      <ng-template pTemplate="paginatorright">
+        <div class="custom-pagination">
+          <button 
+            class="pagination-btn" 
+            [disabled]="isFirstPage()"
+            (click)="goToPreviousPage()">
+            Previous
+          </button>
+          <span class="page-info">
+            Page {{ getCurrentPage() }} of {{ getTotalPages() }}
+          </span>
+          <button 
+            class="pagination-btn" 
+            [disabled]="isLastPage()"
+            (click)="goToNextPage()">
+            Next
+          </button>
+        </div>
+      </ng-template>
+
+      <!-- Table Content -->
+      <ng-template pTemplate="body" let-rowData>
+        <tr (click)="onRowClick($event, rowData)">
+          <td *ngFor="let col of config.columns" 
+              [ngClass]="col.field + '-column'"
+              [style.width]="col.width"
+              [style.flex]="col.width ? 'none' : '1'">
+            <ng-container [ngSwitch]="true">
+              <!-- Company Cell -->
+              <div class="company-cell" *ngSwitchCase="col.isLink">
+                <a class="company-name" 
+                   *ngIf="!col.routerLink && !rowData.routerLink"
+                   (click)="onLinkClick($event, rowData, col)">
+                  {{ rowData[col.field] }}
+                </a>
+                <a class="company-name" 
+                   *ngIf="col.routerLink && !rowData.routerLink"
+                   [routerLink]="getRouterLink(col, rowData)"
+                   (click)="onLinkClick($event, rowData, col)">
+                  {{ rowData[col.field] }}
+                </a>
+                <a class="company-name" 
+                   *ngIf="rowData.routerLink"
+                   [routerLink]="rowData.routerLink"
+                   (click)="onLinkClick($event, rowData, col)">
+                  {{ rowData[col.field] }}
+                </a>
+                <span class="company-id" *ngIf="rowData.companyId">{{ rowData.companyId }}</span>
+              </div>
+
+              <!-- Status Cell -->
+              <div class="status-cell" *ngSwitchCase="col.isStatus">
+                <span [class]="'status-badge ' + getStatusClass(rowData[col.field])">
+                  {{ rowData[col.field] }}
+                </span>
+              </div>
+
+              <!-- Action Cell -->
+              <div class="action-cell" *ngSwitchCase="col.isAction">
+                <button 
+                  type="button" 
+                  [class]="'action-btn ' + (btn.class || '') + ' ' + getSeverityClass(btn.severity)"
+                  (click)="onActionClick(btn.action, rowData, $event)"
+                  [title]="btn.tooltip || btn.label"
+                  *ngFor="let btn of getActionButtons()">
+                  <i [class]="btn.icon" *ngIf="btn.icon"></i>
+                  <span *ngIf="!btn.iconOnly && btn.label">{{ btn.label }}</span>
                 </button>
               </div>
-            </div>
-          </th>
-        </tr>
-      </ng-template>
-      
-      <ng-template pTemplate="body" let-rowData>
-        <tr [pSelectableRow]="rowData" class="table-row">
-          <td *ngFor="let col of columns; let i = index" class="data-cell">
-            <ng-container *ngIf="col.isLink">
-              <a [routerLink]="getRouteLink(rowData)" 
-                 class="link-style"
-                 (click)="onLinkClick(rowData)">
-                {{ col.formatter ? col.formatter(rowData[col.field], rowData) : rowData[col.field] }}
-              </a>
-            </ng-container>
-            
-            <ng-container *ngIf="!col.isLink">
-              <ng-container [ngSwitch]="col.field">
-                <ng-container *ngSwitchCase="'status'">
-                  <!-- <p-tag [value]="rowData[col.field]" [severity]="getTagSeverity(rowData[col.field])"></p-tag> -->
-                </ng-container>
-                <ng-container *ngSwitchCase="'created_at'">
-                  {{ formatDate(rowData[col.field]) }}
-                </ng-container>
-                <ng-container *ngSwitchCase="'creation'">
-                  {{ formatDate(rowData[col.field]) }}
-                </ng-container>
-                <ng-container *ngSwitchCase="'modified'">
-                  {{ formatDate(rowData[col.field]) }}
-                </ng-container>
-                <ng-container *ngSwitchDefault>
-                  {{ rowData[col.field] }}
-                </ng-container>
-              </ng-container>
+
+              <!-- Default Cell -->
+              <div [class]="col.field + '-cell'" *ngSwitchDefault>
+                {{ rowData[col.field] }}
+              </div>
             </ng-container>
           </td>
         </tr>
       </ng-template>
-      
+
+      <!-- Empty State -->
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="100%" class="text-center empty-message">No records found</td>
+          <td [attr.colspan]="config.columns.length" class="text-center p-4">
+            No records found.
+          </td>
         </tr>
       </ng-template>
-      
-      <ng-template pTemplate="paginatorleft">
-        <ng-container *ngIf="getPaginationInfo() as info">
-          <div class="pagination-info">
-            Showing {{info.first}} to {{info.last}} of {{info.total}} entries
-          </div>
-        </ng-container>
+
+      <!-- Loading State -->
+      <ng-template pTemplate="loadingbody">
+        <tr>
+          <td [attr.colspan]="config.columns.length" class="text-center p-4">
+            Loading data...
+          </td>
+        </tr>
       </ng-template>
     </p-table>
   </div>
 </div>
-
-<ng-template #customTemplate let-rowData let-field="field" let-column="column">
-  <!-- Custom template for specific fields, to be overridden by parent component -->
-</ng-template>
