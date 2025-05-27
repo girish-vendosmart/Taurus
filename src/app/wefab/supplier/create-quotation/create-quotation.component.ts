@@ -53,7 +53,7 @@ export class CreateQuotationComponent implements OnInit {
         description: 'Description',
         unit: 'Pieces',
         quantity: 200,
-        rate: 1000,
+        rate: 0,
         totalAmount: 200000,
         commentBySwissElectric: '-',
         notesByAlshayaGroup: '-'
@@ -66,7 +66,7 @@ export class CreateQuotationComponent implements OnInit {
         description: 'Description',
         unit: 'Pieces',
         quantity: 56,
-        rate: 10000,
+        rate: 0,
         totalAmount: 560000,
         commentBySwissElectric: '-',
         notesByAlshayaGroup: '-'
@@ -79,7 +79,7 @@ export class CreateQuotationComponent implements OnInit {
         description: 'Description',
         unit: 'Sqm',
         quantity: 20,
-        rate: 20000,
+        rate: 0,
         totalAmount: 400000,
         commentBySwissElectric: '-',
         notesByAlshayaGroup: '-'
@@ -92,7 +92,7 @@ export class CreateQuotationComponent implements OnInit {
         description: 'Description',
         unit: 'Sqm',
         quantity: 9,
-        rate: 20000,
+        rate: 0,
         totalAmount: 180000,
         commentBySwissElectric: '-',
         notesByAlshayaGroup: '-'
@@ -105,7 +105,7 @@ export class CreateQuotationComponent implements OnInit {
         description: 'Desc',
         unit: 'Pieces',
         quantity: 56,
-        rate: 20000,
+        rate: 0,
         totalAmount: 1120000,
         commentBySwissElectric: '-',
         notesByAlshayaGroup: '-'
@@ -118,7 +118,7 @@ export class CreateQuotationComponent implements OnInit {
         description: 'Descrip',
         unit: 'Pieces',
         quantity: 20,
-        rate: 3000,
+        rate: 0,
         totalAmount: 60000,
         commentBySwissElectric: '-',
         notesByAlshayaGroup: '-'
@@ -131,7 +131,7 @@ export class CreateQuotationComponent implements OnInit {
         description: 'Desc',
         unit: 'Sqm',
         quantity: 12,
-        rate: 2000,
+        rate: 0,
         totalAmount: 24000,
         commentBySwissElectric: '-',
         notesByAlshayaGroup: '-'
@@ -144,7 +144,7 @@ export class CreateQuotationComponent implements OnInit {
         description: 'Desc',
         unit: 'Pieces',
         quantity: 2,
-        rate: 20000,
+        rate: 0,
         totalAmount: 40000,
         commentBySwissElectric: '-',
         notesByAlshayaGroup: '-'
