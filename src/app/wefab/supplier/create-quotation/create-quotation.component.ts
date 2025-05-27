@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
+import { Router } from '@angular/router';
 
 // PrimeNG imports
 import { CardModule } from 'primeng/card';
@@ -192,7 +193,7 @@ export class CreateQuotationComponent implements OnInit {
 
   @ViewChild('csvFileInput', { static: false }) csvFileInput!: ElementRef;
 
-  constructor(private messageService: MessageService) {}
+  constructor(private messageService: MessageService, private router: Router) {}
 
   ngOnInit() {
     this.initializeForm();
@@ -265,12 +266,20 @@ export class CreateQuotationComponent implements OnInit {
 
   onSubmit() {
     if (this.form.valid && this.model.siteVisitConfirmed && this.model.complianceConfirmed) {
+      // Generate a quotation ID (in a real app, this would come from the backend)
+      const quotationId = 'QUO' + Date.now().toString().slice(-6);
+      
       this.messageService.add({
         severity: 'success',
         summary: 'Success',
         detail: 'Quotation saved successfully!'
       });
       console.log('Quotation Data:', this.model);
+      
+      // Redirect to quotation details page after a short delay to show the success message
+      setTimeout(() => {
+        this.router.navigate(['/wefab/supplier/quotation/details', quotationId]);
+      }, 1500);
     } else {
       this.messageService.add({
         severity: 'error',

@@ -193,7 +193,16 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Initialize component
+    // Get quotation ID from route parameters
+    this.route.params.subscribe(params => {
+      const quotationId = params['id'];
+      if (quotationId) {
+        // Update the quotation details with the new ID
+        this.quotationDetails.quotationId = quotationId;
+        // In a real application, you would fetch the quotation details from a service
+        // this.quotationService.getQuotationDetails(quotationId).subscribe(...)
+      }
+    });
   }
 
   setActiveTab(tab: string): void {
