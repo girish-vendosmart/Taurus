@@ -1,2 +1,27 @@
 <!-- <app-navigation-bar></app-navigation-bar> -->
-<router-outlet></router-outlet>
+<!-- <router-outlet></router-outlet> -->
+
+<div class="supplier-layout">
+    <!-- Common Sidebar Component - only show when dashboard layout is enabled -->
+    <app-common-sidebar 
+      [menuItems]="sidebarMenuItems"
+      [visible]="true"
+      [showHeader]="true"
+      headerTitle="WE-FAB Team Portal"
+      width="260px">
+    </app-common-sidebar>
+  
+    <!-- Main content area -->
+    <div class="main-content">
+      <!-- Common Header Component - only show when dashboard layout is enabled -->
+      <app-common-header 
+        [title]="''">
+      </app-common-header>
+  
+      <!-- Router outlet for all content -->
+      <div class="content-area">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
+  

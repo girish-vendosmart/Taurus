@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CommonTableComponent, TableColumn } from '../../../wefab/wefab-shared-component/common-table/common-table.component';
 
 export interface RFQItem {
   rfqId: string;
@@ -34,7 +33,6 @@ export interface SearchFilters {
     CommonModule,
     RouterModule,
     FormsModule,
-    CommonTableComponent
   ],
   templateUrl: './supplier-rfq.component.html',
   styleUrl: './supplier-rfq.component.scss'
@@ -63,7 +61,7 @@ export class SupplierRfqComponent implements OnInit {
   itemsPerPage = 10;
   
   // Table configuration
-  tableColumns: TableColumn[] = [];
+  tableColumns: any = [];
   
   // Loading states
   loading = false;
