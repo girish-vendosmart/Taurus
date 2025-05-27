@@ -37,6 +37,57 @@ export class SupplierRfqComponent implements OnInit {
   
   // Consolidated RFQ data
   allRFQs: RFQItem[] = [];
+
+  dashboardCards = [
+    {
+      title: 'Open RFQs',
+      value: '12',
+      icon: 'pi pi-file-o',
+      color: 'info',
+      description: '',
+      trend: {
+        value: '+2',
+        direction: 'up',
+        period: 'from last week'
+      }
+    },
+    {
+      title: 'Under Review',
+      value: '8',
+      icon: 'pi pi-check-circle',
+      color: 'warning',
+      description: '',
+      trend: {
+        value: '+1',
+        direction: 'up',
+        period: 'from last week'
+      }
+    },
+    {
+      title: 'Closed RFQs',
+      value: '3',
+      icon: 'pi pi-lock',
+      color: 'danger',
+      description: '',
+      trend: {
+        value: '-2',
+        direction: 'down',
+        period: 'from last week'
+      }
+    }
+  ];
+  
+  // Status counts for cards (matching screenshot)
+  openRFQsCount = 12;
+  submittedQuotesCount = 24;
+  awardedQuotesCount = 8;
+  rejectedQuotesCount = 3;
+  
+  // Trend data for cards
+  openRFQsTrend = { value: 2, isPositive: true, period: 'from last week' };
+  submittedQuotesTrend = { value: 5, isPositive: true, period: 'from last week' };
+  awardedQuotesTrend = { value: 1, isPositive: true, period: 'from last week' };
+  rejectedQuotesTrend = { value: 2, isPositive: false, period: 'from last week' };
   
   // Table configuration
   tableConfig: TableConfig = {
@@ -260,6 +311,16 @@ export class SupplierRfqComponent implements OnInit {
 
     // Combine all RFQs into a single array
     this.allRFQs = [...openRFQs, ...inProgressRFQs, ...closedRFQs];
+    
+    // Calculate status counts for cards
+    this.calculateStatusCounts();
+  }
+
+  // Calculate counts for status cards
+  calculateStatusCounts() {
+    this.openRFQsCount = this.allRFQs.filter(rfq => rfq.status === 'Open').length;
+    this.submittedQuotesCount = this.allRFQs.filter(rfq => rfq.status === 'In Progress').length;
+    this.awardedQuotesCount = this.allRFQs.filter(rfq => rfq.status === 'Closed').length;
   }
 
   // Event handlers for common table component

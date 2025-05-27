@@ -1,8 +1,25 @@
 <div class="rfq-page">
   <div class="content-section">
-
-
     <!-- Common Table Component -->
+    <!-- Dashboard Cards -->
+    <div class="dashboard-grid">
+      <div *ngFor="let card of dashboardCards" class="dashboard-card" [ngClass]="card.color">
+        <div class="card-content">
+          <div class="card-icon">
+            <i [ngClass]="card.icon"></i>
+          </div>
+          <div class="card-details">
+            <h3>{{ card.value }}</h3>
+            <p class="card-title">{{ card.title }}</p>
+            <span class="card-description">{{ card.description }}</span>
+            <div *ngIf="card.trend" class="card-trend" [ngClass]="'trend-' + card.trend.direction">
+              <i class="pi" [ngClass]="card.trend.direction === 'up' ? 'pi-arrow-up' : 'pi-arrow-down'"></i>
+              <span>{{ card.trend.value }} {{ card.trend.period }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <app-common-table 
       [config]="tableConfig" 
       [data]="allRFQs"
