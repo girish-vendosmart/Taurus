@@ -291,8 +291,10 @@ export class SupplierRfqDetailsComponent implements OnInit {
   }
 
   createQuotation() {
-    // Implement create quotation functionality
-    this.router.navigate(['/wefab/supplier/create-quotation']);
+    // Navigate to create quotation page with rfqId as query parameter
+    this.router.navigate(['/wefab/supplier/create-quotation'], {
+      queryParams: { rfqId: this.rfqDetails.rfqId }
+    });
   }
 
   viewContract() {

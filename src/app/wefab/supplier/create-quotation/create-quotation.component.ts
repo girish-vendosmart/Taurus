@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 // PrimeNG imports
 import { CardModule } from 'primeng/card';
@@ -42,8 +42,11 @@ import { FormlyFieldDropdownComponent } from '../../../dropdown-type.component';
 })
 export class CreateQuotationComponent implements OnInit {
   form: FormGroup = new FormGroup({});
+  isEditMode: boolean = false;
+  quotationId: string = '';
+  
   model: any = {
-    rfqId: 'RFQ000001137',
+    rfqId: '',
     projectDuration: 120,
     quotationItems: [
       {
@@ -193,11 +196,31 @@ export class CreateQuotationComponent implements OnInit {
 
   @ViewChild('csvFileInput', { static: false }) csvFileInput!: ElementRef;
 
-  constructor(private messageService: MessageService, private router: Router) {}
+  constructor(private messageService: MessageService, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.initializeForm();
     this.calculateTotals();
+    
+    // Get query parameters
+    this.route.queryParams.subscribe(params => {
+      // Check if this is edit mode
+      if (params['mode'] === 'edit' && params['quotationId']) {
+        this.isEditMode = true;
+        this.quotationId = params['quotationId'];
+        console.log('Edit mode activated for quotation:', this.quotationId);
+        this.loadQuotationForEdit(this.quotationId);
+      } else if (params['rfqId']) {
+        // Create mode with RFQ ID
+        this.model.rfqId = params['rfqId'];
+        console.log('RFQ ID received from query params:', params['rfqId']);
+        
+        // Update the form with the new RFQ ID
+        this.form.patchValue({
+          rfqId: params['rfqId']
+        });
+      }
+    });
   }
 
   initializeForm() {
@@ -211,7 +234,7 @@ export class CreateQuotationComponent implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'RFQ ID',
-              placeholder: 'RFQ000001137',
+              placeholder: 'RFQ ID will be populated from the selected RFQ',
               readonly: true
             }
           },
@@ -265,26 +288,46 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.form.valid && this.model.siteVisitConfirmed && this.model.complianceConfirmed) {
-      // Generate a quotation ID (in a real app, this would come from the backend)
-      const quotationId = 'QUO' + Date.now().toString().slice(-6);
-      
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Quotation saved successfully!'
-      });
-      console.log('Quotation Data:', this.model);
-      
-      // Redirect to quotation details page after a short delay to show the success message
-      setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/quotation/details', quotationId]);
-      }, 1500);
+    if (this.form.valid && this.model.siteVisitConfirmed && this.model.complianceConfirmed && this.model.rfqId) {
+      if (this.isEditMode) {
+        // Update existing quotation
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Quotation updated successfully!'
+        });
+        console.log('Updated Quotation Data:', this.model);
+        
+        // Redirect back to quotation details page after a short delay
+        setTimeout(() => {
+          this.router.navigate(['/wefab/supplier/quotation/details', this.quotationId]);
+        }, 1500);
+      } else {
+        // Create new quotation
+        const quotationId = 'QUO' + Date.now().toString().slice(-6);
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Quotation saved successfully!'
+        });
+        console.log('New Quotation Data:', this.model);
+        
+        // Redirect to quotation details page after a short delay
+        setTimeout(() => {
+          this.router.navigate(['/wefab/supplier/quotation/details', quotationId]);
+        }, 1500);
+      }
     } else {
+      let errorMessage = 'Please fill all required fields and confirm the checkboxes';
+      if (!this.model.rfqId) {
+        errorMessage = 'RFQ ID is required. Please navigate from an RFQ to create a quotation.';
+      }
+      
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: 'Please fill all required fields and confirm the checkboxes'
+        detail: errorMessage
       });
     }
   }
@@ -569,5 +612,128 @@ export class CreateQuotationComponent implements OnInit {
       summary: 'Reset Successful',
       detail: 'Table has been reset to original sample data'
     });
+  }
+
+  loadQuotationForEdit(quotationId: string) {
+    // In a real application, this would fetch data from a service
+    // Example: this.quotationService.getQuotationById(quotationId).subscribe(data => { ... })
+    console.log('Loading quotation data for editing:', quotationId);
+    
+    // Simulate quotation data (this would come from an API)
+    const quotationData = {
+      rfqId: 'RFQ000001137',
+      projectDuration: 120,
+      quotationItems: [
+        {
+          expenseHead: 'Professional Costs',
+          sectionHead: 'Power Distribution Setup',
+          itemNumber: '7.1.2',
+          drawingRef: '-',
+          description: 'Description',
+          unit: 'Pieces',
+          quantity: 200,
+          rate: 2000,
+          totalAmount: 400000,
+          commentBySwissElectric: '-',
+          notesByAlshayaGroup: '-'
+        },
+        {
+          expenseHead: 'Preliminiries',
+          sectionHead: 'others',
+          itemNumber: '3.2.4',
+          drawingRef: '-',
+          description: 'Description',
+          unit: 'Pieces',
+          quantity: 56,
+          rate: 6000,
+          totalAmount: 336000,
+          commentBySwissElectric: '-',
+          notesByAlshayaGroup: '-'
+        },
+        {
+          expenseHead: 'Contingency',
+          sectionHead: 'Risk & Contingency Planning',
+          itemNumber: '8.2.1',
+          drawingRef: '-',
+          description: 'Description',
+          unit: 'Sqm',
+          quantity: 20,
+          rate: 10000,
+          totalAmount: 200000,
+          commentBySwissElectric: '-',
+          notesByAlshayaGroup: '-'
+        },
+        {
+          expenseHead: 'Preliminiries',
+          sectionHead: 'Other',
+          itemNumber: '3.2.3',
+          drawingRef: '-',
+          description: 'Description',
+          unit: 'Sqm',
+          quantity: 9,
+          rate: 14000,
+          totalAmount: 126000,
+          commentBySwissElectric: '-',
+          notesByAlshayaGroup: '-'
+        },
+        {
+          expenseHead: 'Fire Services',
+          sectionHead: 'Fire maintaince',
+          itemNumber: '5.2.2',
+          drawingRef: '-',
+          description: 'Desc',
+          unit: 'Pieces',
+          quantity: 56,
+          rate: 28000,
+          totalAmount: 1568000,
+          commentBySwissElectric: '-',
+          notesByAlshayaGroup: '-'
+        },
+        {
+          expenseHead: 'HVAC',
+          sectionHead: 'Water Supply & Drainage',
+          itemNumber: '9.2.1',
+          drawingRef: '-',
+          description: 'Desc',
+          unit: 'Sqm',
+          quantity: 12,
+          rate: 32000,
+          totalAmount: 384000,
+          commentBySwissElectric: '-',
+          notesByAlshayaGroup: '-'
+        },
+        {
+          expenseHead: 'IT Equipment',
+          sectionHead: 'Temporary Site Services',
+          itemNumber: '6.2.1',
+          drawingRef: '-',
+          description: 'Desc',
+          unit: 'Pieces',
+          quantity: 2,
+          rate: 36000,
+          totalAmount: 72000,
+          commentBySwissElectric: '-',
+          notesByAlshayaGroup: '-'
+        }
+      ],
+      siteVisitConfirmed: true,
+      complianceConfirmed: true,
+      discountPercentage: 5
+    };
+
+    // Update the model with loaded data
+    this.model = { ...quotationData };
+    this.discountPercentage = quotationData.discountPercentage || 0;
+
+    // Update the form with loaded data
+    this.form.patchValue({
+      rfqId: quotationData.rfqId,
+      projectDuration: quotationData.projectDuration
+    });
+
+    // Recalculate totals
+    this.calculateTotals();
+
+    console.log('Quotation data loaded for editing:', this.model);
   }
 }

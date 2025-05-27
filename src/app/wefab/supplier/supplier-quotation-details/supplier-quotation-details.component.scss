@@ -17,24 +17,27 @@
     margin-bottom: 1rem;
 
     .back-btn {
-      background: none;
-      border: none;
-      color: $blueprint-blue;
+      color: $blueprint-blue !important;
       font-size: 0.875rem;
       font-weight: $font-weight-medium;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.2s ease;
-      padding: 0.25rem 0;
+      padding: 0.25rem 0 !important;
+      border: none !important;
+      background: none !important;
 
       &:hover {
-        color: darken($blueprint-blue, 10%);
-        transform: translateX(-2px);
+        color: darken($blueprint-blue, 10%) !important;
+        background: none !important;
       }
 
-      i {
+      &:focus {
+        box-shadow: none !important;
+      }
+
+      ::ng-deep .p-button-label {
+        font-weight: $font-weight-medium;
+      }
+
+      ::ng-deep .p-button-icon {
         font-size: 0.875rem;
       }
     }
@@ -88,35 +91,34 @@
         justify-content: flex-start;
       }
 
-      .btn {
-        padding: 0.625rem 1.5rem;
-        font-size: 0.875rem;
-        font-weight: $font-weight-semibold;
-        border-radius: 6px;
-        border: 1px solid;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-decoration: none;
+      ::ng-deep p-button {
+        .p-button {
+          padding: 0.625rem 1.5rem;
+          font-size: 0.875rem;
+          font-weight: $font-weight-semibold;
+          border-radius: 6px;
+          transition: all 0.2s ease;
 
-        &.btn-outline-primary {
-          background: white;
-          border-color: $blueprint-blue;
-          color: $blueprint-blue;
+          &.p-button-outlined {
+            background: white;
+            border-color: $blueprint-blue;
+            color: $blueprint-blue;
 
-          &:hover {
-            background: $blueprint-blue;
-            color: white;
+            &:hover {
+              background: $blueprint-blue;
+              color: white;
+            }
           }
-        }
 
-        &.btn-primary {
-          background: $blueprint-blue;
-          border-color: $blueprint-blue;
-          color: white;
+          &:not(.p-button-outlined) {
+            background: $blueprint-blue;
+            border-color: $blueprint-blue;
+            color: white;
 
-          &:hover {
-            background: darken($blueprint-blue, 10%);
-            border-color: darken($blueprint-blue, 10%);
+            &:hover {
+              background: darken($blueprint-blue, 10%);
+              border-color: darken($blueprint-blue, 10%);
+            }
           }
         }
       }
@@ -179,28 +181,40 @@
     padding: 0 1rem;
   }
 
-  .tab-btn {
-    background: none;
-    border: none;
-    padding: 1rem 1.5rem;
-    font-size: 0.875rem;
-    font-weight: $font-weight-medium;
-    color: $machine-gray;
-    cursor: pointer;
+  p-button {
+    position: relative;
     border-bottom: 3px solid transparent;
     transition: all 0.2s ease;
-    position: relative;
-
-    &:hover {
-      color: $blueprint-blue;
-      background: rgba($blueprint-blue, 0.05);
-    }
 
     &.active {
-      color: $blueprint-blue;
-      border-bottom-color: $blueprint-blue;
+      border-bottom: 3px solid $blueprint-blue;
+    }
+
+    ::ng-deep .p-button.tab-btn {
+      background: none !important;
+      border: none !important;
+      padding: 1rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: $font-weight-medium;
+      color: $machine-gray;
+      transition: all 0.2s ease;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+
+      &:hover {
+        color: $blueprint-blue !important;
+        background: rgba($blueprint-blue, 0.05) !important;
+      }
+
+      &:focus {
+        box-shadow: none !important;
+      }
+    }
+
+    &.active ::ng-deep .p-button.tab-btn {
+      color: $blueprint-blue !important;
       font-weight: $font-weight-semibold;
-      background: rgba($blueprint-blue, 0.08);
+      background: rgba($blueprint-blue, 0.08) !important;
     }
   }
 }

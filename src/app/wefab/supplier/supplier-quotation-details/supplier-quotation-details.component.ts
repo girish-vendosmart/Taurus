@@ -3,6 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
+
+// PrimeNG imports
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 
 export interface QuotationDetails {
   quotationId: string;
@@ -49,7 +54,10 @@ export interface QuotationItem {
   imports: [
     CommonModule,
     RouterModule,
-    FormsModule
+    FormsModule,
+    CommonTableComponent,
+    ButtonModule,
+    InputTextModule
   ],
   templateUrl: './supplier-quotation-details.component.html',
   styleUrl: './supplier-quotation-details.component.scss'
@@ -182,10 +190,94 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   ];
 
   activeTab: string = 'overview';
-  searchKeyword: string = '';
   currentPage: number = 1;
   itemsPerPage: number = 7;
   totalItems: number = 7;
+  discountPercentage: number = 5;
+
+  // Table configuration
+  tableConfig: TableConfig = {
+    columns: [
+      {
+        field: 'section',
+        header: 'Section',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'expenseCategory',
+        header: 'Expense Category',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'itemNumber',
+        header: 'Item Number',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'description',
+        header: 'Description',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'drawingNumber',
+        header: 'Drawing Number',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'unit',
+        header: 'Unit',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'quantity',
+        header: 'Quantity',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'currency',
+        header: 'Currency',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'rate',
+        header: 'Rate',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'totalAmount',
+        header: 'Total Amount',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'notes',
+        header: 'Notes',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'comment',
+        header: 'Comment',
+        sortable: true,
+        filterable: true,
+      }
+    ],
+    enableSearch: true,
+    enableSort: true,
+    enableFilter: true,
+    enablePagination: true,
+    pageSize: 7,
+    showActions: false
+  };
 
   constructor(
     private router: Router,
@@ -213,21 +305,6 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     this.router.navigate(['/wefab/supplier/quotation']);
   }
 
-  onSearch(): void {
-    // Implement search functionality
-  }
-
-  getFilteredItems(): QuotationItem[] {
-    if (!this.searchKeyword) {
-      return this.quotationItems;
-    }
-    return this.quotationItems.filter(item => 
-      item.description.toLowerCase().includes(this.searchKeyword.toLowerCase()) ||
-      item.section.toLowerCase().includes(this.searchKeyword.toLowerCase()) ||
-      item.expenseCategory.toLowerCase().includes(this.searchKeyword.toLowerCase())
-    );
-  }
-
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -242,10 +319,42 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   }
 
   getDiscount(): number {
-    return 0; // 0% discount
+    return (this.getSubTotal() * this.discountPercentage) / 100;
   }
 
   getTotalAmount(): number {
     return this.getSubTotal() - this.getDiscount();
+  }
+
+  // Table event handlers
+  onRowClick(event: any) {
+    console.log('Row clicked:', event);
+  }
+
+  onLinkClick(event: any) {
+    console.log('Link clicked:', event);
+  }
+
+  onActionClick(event: any) {
+    console.log('Action clicked:', event);
+  }
+
+  editQuotation() {
+    // Navigate to create quotation page with quotationId and edit mode as query parameters
+    this.router.navigate(['/wefab/supplier/create-quotation'], {
+      queryParams: { 
+        quotationId: this.quotationDetails.quotationId,
+        mode: 'edit'
+      }
+    });
+  }
+
+  // Get formatted table data for display
+  get formattedQuotationItems() {
+    return this.quotationItems.map(item => ({
+      ...item,
+      rate: this.formatCurrency(item.rate),
+      totalAmount: this.formatCurrency(item.totalAmount)
+    }));
   }
 }

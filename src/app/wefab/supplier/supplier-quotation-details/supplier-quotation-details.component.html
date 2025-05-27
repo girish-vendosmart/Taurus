@@ -2,10 +2,12 @@
   <!-- Page Header -->
   <div class="page-header">
     <div class="header-top">
-      <button class="back-btn" (click)="onBackToRFQs()">
-        <i class="fas fa-arrow-left"></i>
-        Back to RFQs
-      </button>
+      <p-button 
+        label="Back to RFQs" 
+        icon="pi pi-arrow-left" 
+        styleClass="p-button-text back-btn"
+        (onClick)="onBackToRFQs()">
+      </p-button>
     </div>
     
     <div class="header-content">
@@ -17,8 +19,11 @@
       </div>
       
       <div class="header-right">
-        <button class="btn btn-outline-primary">View Contract</button>
-        <button class="btn btn-primary">Edit</button>
+        <p-button 
+          label="Edit" 
+          severity="primary"
+          (onClick)="editQuotation()">
+        </p-button>
       </div>
     </div>
   </div>
@@ -58,24 +63,24 @@
 
   <!-- Tab Navigation -->
   <div class="tab-navigation">
-    <button 
-      class="tab-btn" 
-      [class.active]="activeTab === 'overview'"
-      (click)="setActiveTab('overview')">
-      Overview
-    </button>
-    <button 
-      class="tab-btn" 
-      [class.active]="activeTab === 'comment'"
-      (click)="setActiveTab('comment')">
-      Comment
-    </button>
-    <button 
-      class="tab-btn" 
-      [class.active]="activeTab === 'activity'"
-      (click)="setActiveTab('activity')">
-      Activity
-    </button>
+    <p-button 
+      label="Overview"
+      styleClass="p-button-text tab-btn"
+      [ngClass]="{'active': activeTab === 'overview'}"
+      (onClick)="setActiveTab('overview')">
+    </p-button>
+    <p-button 
+      label="Comment"
+      styleClass="p-button-text tab-btn"
+      [ngClass]="{'active': activeTab === 'comment'}"
+      (onClick)="setActiveTab('comment')">
+    </p-button>
+    <p-button 
+      label="Activity"
+      styleClass="p-button-text tab-btn"
+      [ngClass]="{'active': activeTab === 'activity'}"
+      (onClick)="setActiveTab('activity')">
+    </p-button>
   </div>
 
   <!-- Tab Content -->
@@ -108,113 +113,18 @@
         <div class="items-section">
           <div class="items-header">
             <h3>Items</h3>
-            <div class="items-controls">
-              <div class="hide-column-dropdown">
-                <button class="dropdown-btn">
-                  Hide Column <i class="fas fa-chevron-down"></i>
-                </button>
-              </div>
-              <div class="search-box">
-                <input 
-                  type="text" 
-                  placeholder="Search Keyword" 
-                  [(ngModel)]="searchKeyword"
-                  (input)="onSearch()"
-                  class="search-input">
-                <i class="fas fa-search search-icon"></i>
-              </div>
-              <button class="export-btn">
-                <i class="fas fa-share-alt"></i>
-              </button>
-            </div>
           </div>
 
-          <!-- Items Table -->
+          <!-- Common Table Component -->
           <div class="items-table-container">
-            <div class="items-table">
-              <!-- Table Header -->
-              <div class="table-header">
-                <div class="header-cell section-col">
-                  Section <i class="fas fa-sort"></i>
-                </div>
-                <div class="header-cell expense-col">
-                  Expense Category <i class="fas fa-sort"></i>
-                </div>
-                <div class="header-cell item-num-col">
-                  Item Number <i class="fas fa-sort"></i>
-                </div>
-                <div class="header-cell description-col">
-                  Description <i class="fas fa-sort"></i>
-                </div>
-                <div class="header-cell drawing-col">
-                  Drawing Number <i class="fas fa-sort"></i>
-                </div>
-                <div class="header-cell unit-col">
-                  Unit <i class="fas fa-sort"></i>
-                </div>
-                <div class="header-cell quantity-col">
-                  Quantity <i class="fas fa-sort"></i>
-                </div>
-                <div class="header-cell currency-col">
-                  Currency <i class="fas fa-sort"></i>
-                </div>
-                <div class="header-cell rate-col">
-                  Rate <i class="fas fa-sort"></i>
-                </div>
-                <div class="header-cell total-col">
-                  Total Amount <i class="fas fa-sort"></i>
-                </div>
-                <div class="header-cell notes-col">
-                  Notes <i class="fas fa-sort"></i>
-                </div>
-                <div class="header-cell comment-col">
-                  Comment <i class="fas fa-sort"></i>
-                </div>
-              </div>
-
-              <!-- Table Body -->
-              <div class="table-body">
-                <div class="table-row" *ngFor="let item of getFilteredItems()">
-                  <div class="table-cell section-col">{{ item.section }}</div>
-                  <div class="table-cell expense-col">{{ item.expenseCategory }}</div>
-                  <div class="table-cell item-num-col">{{ item.itemNumber }}</div>
-                  <div class="table-cell description-col">
-                    <i class="fas fa-info-circle info-icon"></i>
-                    {{ item.description }}
-                  </div>
-                  <div class="table-cell drawing-col">{{ item.drawingNumber }}</div>
-                  <div class="table-cell unit-col">{{ item.unit }}</div>
-                  <div class="table-cell quantity-col">{{ item.quantity }}</div>
-                  <div class="table-cell currency-col">{{ item.currency }}</div>
-                  <div class="table-cell rate-col">{{ formatCurrency(item.rate) }}</div>
-                  <div class="table-cell total-col">{{ formatCurrency(item.totalAmount) }}</div>
-                  <div class="table-cell notes-col">{{ item.notes }}</div>
-                  <div class="table-cell comment-col">{{ item.comment }}</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Pagination -->
-            <div class="pagination-section">
-              <div class="pagination-info">
-                Showing 1 to {{ totalItems }} of {{ totalItems }} entries
-              </div>
-              <div class="pagination-controls">
-                <button class="page-btn" [disabled]="currentPage === 1">
-                  <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="page-btn" [disabled]="currentPage === 1">
-                  <i class="fas fa-chevron-double-left"></i>
-                </button>
-                <span class="page-number active">1</span>
-                <button class="page-btn" [disabled]="currentPage === 1">
-                  <i class="fas fa-chevron-right"></i>
-                </button>
-                <button class="page-btn" [disabled]="currentPage === 1">
-                  <i class="fas fa-chevron-double-right"></i>
-                </button>
-              </div>
-            </div>
+            <app-common-table 
+              [config]="tableConfig" 
+              [data]="formattedQuotationItems"
+              [loading]="false"
+              (rowClick)="onRowClick($event)"
+              (linkClick)="onLinkClick($event)"
+              (actionClick)="onActionClick($event)">
+            </app-common-table>
           </div>
 
           <!-- Summary Section -->
@@ -224,31 +134,16 @@
               <span class="summary-value">{{ formatCurrency(getSubTotal()) }}</span>
             </div>
             <div class="summary-row">
-              <span class="summary-label">Discount:</span>
-              <span class="summary-value">{{ getDiscount() }}%</span>
+              <span class="summary-label">Discount (%):</span>
+              <span class="summary-value">{{ discountPercentage }}%</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Discount Amount:</span>
+              <span class="summary-value">{{ formatCurrency(getDiscount()) }}</span>
             </div>
             <div class="summary-row total-row">
               <span class="summary-label">Total Amount:</span>
               <span class="summary-value">{{ formatCurrency(getTotalAmount()) }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Contract and RFQ Drawings Section -->
-        <div class="documents-section">
-          <div class="contract-section">
-            <h4>Contract</h4>
-            <div class="document-item">
-              <i class="fas fa-exclamation-triangle warning-icon"></i>
-              <span>Lost</span>
-            </div>
-          </div>
-          
-          <div class="rfq-drawings-section">
-            <h4>RFQ Drawings Update</h4>
-            <div class="document-item">
-              <i class="fas fa-file-pdf file-icon"></i>
-              <span>DRAWINGS_RFQ_File</span>
             </div>
           </div>
         </div>
