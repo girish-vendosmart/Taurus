@@ -1,0 +1,356 @@
+@import '../../../../assets/scss/variables.scss';
+
+.quotation-container {
+  padding: 24px;
+  background-color: $technical-white;
+  min-height: 100vh;
+}
+
+.quotation-header {
+  h2 {
+    font-weight: $font-weight-bold;
+    color: $blueprint-blue;
+    font-size: $h2-font-size;
+  }
+}
+
+.header-actions {
+  .btn {
+    border-radius: 6px;
+    font-weight: $font-weight-medium;
+    
+    &.btn-outline-secondary {
+      border-color: $material-finish-silver;
+      color: $machine-gray;
+      
+      &:hover {
+        background-color: $material-finish-silver;
+        border-color: $machine-gray;
+        color: $precision-black;
+      }
+    }
+    
+    &.btn-outline-primary {
+      border-color: $blueprint-blue;
+      color: $blueprint-blue;
+      
+      &:hover {
+        background-color: $blueprint-blue;
+        border-color: $blueprint-blue;
+        color: white;
+      }
+    }
+  }
+}
+
+.card {
+  border: 1px solid $material-finish-silver;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(26, 58, 95, 0.08);
+  
+  .card-header {
+    background-color: $technical-white;
+    border-bottom: 1px solid $material-finish-silver;
+    padding: 16px 24px;
+    
+    h5 {
+      color: $blueprint-blue;
+      font-weight: $font-weight-semibold;
+      font-size: $h4-font-size;
+    }
+  }
+  
+  .card-body {
+    padding: 24px;
+  }
+}
+
+.quotation-table {
+  font-size: 14px;
+  
+  th {
+    background-color: $technical-white;
+    color: $precision-black;
+    font-weight: $font-weight-semibold;
+    border-color: $material-finish-silver;
+    padding: 12px 8px;
+    vertical-align: middle;
+    white-space: nowrap;
+    
+    .text-danger {
+      color: $safety-orange;
+    }
+  }
+  
+  td {
+    padding: 8px;
+    vertical-align: middle;
+    border-color: $material-finish-silver;
+  }
+  
+  .quotation-row {
+    &:hover {
+      background-color: rgba(26, 58, 95, 0.02);
+    }
+    
+    // Highlight editable rate column
+    td:nth-child(9) {
+      background-color: rgba(18, 133, 110, 0.02);
+      border-left: 2px solid $process-green;
+      
+      .p-inputnumber .p-inputtext {
+        background-color: white;
+        border-color: $process-green;
+        
+        &:focus {
+          border-color: $process-green;
+          box-shadow: 0 0 0 2px rgba(18, 133, 110, 0.1);
+        }
+      }
+    }
+  }
+}
+
+// Form Controls Styling
+:host ::ng-deep {
+  .form-control {
+    border: 1px solid $material-finish-silver;
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 8px 12px;
+    
+    &:focus {
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+    }
+    
+    &.bg-light {
+      background-color: $technical-white;
+      color: $machine-gray;
+    }
+    
+    // Styling for frozen/readonly fields
+    &[readonly] {
+      background-color: rgba(26, 58, 95, 0.03);
+      color: $machine-gray;
+      border-color: $material-finish-silver;
+      cursor: not-allowed;
+      
+      &:focus {
+        background-color: rgba(26, 58, 95, 0.03);
+        border-color: $material-finish-silver;
+        box-shadow: none;
+      }
+    }
+  }
+  
+  // PrimeNG Dropdown Styling
+  .p-dropdown {
+    border: 1px solid $material-finish-silver;
+    border-radius: 4px;
+    
+    &:hover {
+      border-color: $blueprint-blue;
+    }
+    
+    &.p-focus {
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+    }
+    
+    .p-dropdown-label {
+      font-size: 14px;
+      padding: 8px 12px;
+    }
+  }
+  
+  .p-dropdown-panel {
+    border: 1px solid $material-finish-silver;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(26, 58, 95, 0.15);
+    
+    .p-dropdown-items {
+      .p-dropdown-item {
+        font-size: 14px;
+        padding: 8px 12px;
+        
+        &:hover {
+          background-color: rgba(26, 58, 95, 0.05);
+        }
+        
+        &.p-highlight {
+          background-color: $blueprint-blue;
+          color: white;
+        }
+      }
+    }
+  }
+  
+  // PrimeNG InputNumber Styling
+  .p-inputnumber {
+    .p-inputtext {
+      border: 1px solid $material-finish-silver;
+      border-radius: 4px;
+      font-size: 14px;
+      padding: 8px 12px;
+      
+      &:focus {
+        border-color: $blueprint-blue;
+        box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+      }
+    }
+  }
+  
+  // Button Styling
+  .btn {
+    border-radius: 6px;
+    font-weight: $font-weight-medium;
+    padding: 8px 16px;
+    
+    &.btn-primary {
+      background-color: $blueprint-blue;
+      border-color: $blueprint-blue;
+      
+      &:hover {
+        background-color: darken($blueprint-blue, 10%);
+        border-color: darken($blueprint-blue, 10%);
+      }
+      
+      &:disabled {
+        background-color: $material-finish-silver;
+        border-color: $material-finish-silver;
+        color: $machine-gray;
+      }
+    }
+    
+    &.btn-outline-primary {
+      border-color: $blueprint-blue;
+      color: $blueprint-blue;
+      
+      &:hover {
+        background-color: $blueprint-blue;
+        border-color: $blueprint-blue;
+        color: white;
+      }
+    }
+    
+    &.btn-outline-danger {
+      border-color: $safety-orange;
+      color: $safety-orange;
+      
+      &:hover {
+        background-color: $safety-orange;
+        border-color: $safety-orange;
+        color: white;
+      }
+    }
+    
+    &.btn-sm {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    
+    &.btn-lg {
+      padding: 12px 24px;
+      font-size: 16px;
+    }
+  }
+  
+  // Form Check Styling
+  .form-check {
+    .form-check-input {
+      border: 1px solid $material-finish-silver;
+      
+      &:checked {
+        background-color: $blueprint-blue;
+        border-color: $blueprint-blue;
+      }
+      
+      &:focus {
+        box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+      }
+    }
+    
+    .form-check-label {
+      color: $precision-black;
+      font-size: 14px;
+      line-height: $line-height-sm;
+    }
+  }
+}
+
+.totals-section {
+  background-color: rgba(26, 58, 95, 0.02);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid $material-finish-silver;
+  
+  .fw-medium {
+    font-weight: $font-weight-medium;
+    color: $precision-black;
+  }
+  
+  .fw-bold {
+    font-weight: $font-weight-bold;
+  }
+  
+  .text-blueprint-blue {
+    color: $blueprint-blue;
+  }
+  
+  hr {
+    border-color: $material-finish-silver;
+    margin: 12px 0;
+  }
+  
+  .text-muted {
+    color: $machine-gray;
+    font-size: 12px;
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .quotation-table {
+    font-size: 12px;
+    
+    th, td {
+      padding: 6px 4px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .quotation-container {
+    padding: 16px;
+  }
+  
+  .header-actions {
+    .btn {
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+  }
+  
+  .card-body {
+    padding: 16px;
+  }
+  
+  .table-responsive {
+    font-size: 11px;
+  }
+}
+
+// Animation for smooth interactions
+.quotation-row {
+  transition: background-color 0.2s ease;
+}
+
+.btn {
+  transition: all 0.2s ease;
+}
+
+:host ::ng-deep .p-dropdown,
+:host ::ng-deep .p-inputnumber .p-inputtext {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}

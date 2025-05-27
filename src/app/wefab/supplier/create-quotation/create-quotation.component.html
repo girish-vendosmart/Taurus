@@ -1,1 +1,257 @@
-<p>create-quotation works!</p>
+<div class="quotation-container">
+  <!-- Header -->
+  <div class="quotation-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="text-blueprint-blue mb-0">Quotation</h2>
+      <div class="header-actions">
+        <button 
+          type="button" 
+          class="btn btn-outline-secondary me-2"
+          (click)="resetTable()">
+          <i class="pi pi-refresh me-1"></i>
+          Reset Table
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-primary me-2"
+          (click)="exportCSV()">
+          <i class="pi pi-download me-1"></i>
+          Export CSVs
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Form -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <!-- Basic Information Card -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <formly-form 
+          [form]="form" 
+          [fields]="fields" 
+          [model]="model" 
+          [options]="options">
+        </formly-form>
+      </div>
+    </div>
+
+    <!-- Quotation Items Table Card -->
+    <div class="card mb-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0 text-blueprint-blue">Quotation Items</h5>
+      </div>
+      <div class="card-body p-0">
+        <!-- Table Header -->
+        <div class="table-responsive">
+          <table class="table table-bordered mb-0 quotation-table">
+            <thead class="table-light">
+              <tr>
+                <th class="text-center" style="width: 40px;">S.No</th>
+                <th style="width: 150px;">Expense Head</th>
+                <th style="width: 150px;">Section Head</th>
+                <th style="width: 100px;">Item Number</th>
+                <th style="width: 100px;">Drawing Ref</th>
+                <th style="width: 200px;">Description</th>
+                <th style="width: 100px;">Unit</th>
+                <th style="width: 100px;">Quantity</th>
+                <th style="width: 100px;">Rate <span class="text-danger">*</span></th>
+                <th style="width: 120px;">Total Amount</th>
+                <th style="width: 200px;">Comment By Swiss Electric Solutions AG</th>
+                <th style="width: 200px;">Notes By Alshaya Group</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of model.quotationItems; let i = index" class="quotation-row">
+                <td class="text-center align-middle">{{ i + 1 }}</td>
+                
+                <!-- Expense Head -->
+                <td>
+                  <input 
+                    type="text" 
+                    class="form-control bg-light" 
+                    [value]="item.expenseHead"
+                    readonly>
+                </td>
+                
+                <!-- Section Head -->
+                <td>
+                  <input 
+                    type="text" 
+                    class="form-control bg-light" 
+                    [value]="item.sectionHead"
+                    readonly>
+                </td>
+                
+                <!-- Item Number -->
+                <td>
+                  <input 
+                    type="text" 
+                    class="form-control bg-light" 
+                    [value]="item.itemNumber"
+                    readonly>
+                </td>
+                
+                <!-- Drawing Ref -->
+                <td>
+                  <input 
+                    type="text" 
+                    class="form-control bg-light" 
+                    [value]="item.drawingRef"
+                    readonly>
+                </td>
+                
+                <!-- Description -->
+                <td>
+                  <input 
+                    type="text" 
+                    class="form-control bg-light" 
+                    [value]="item.description"
+                    readonly>
+                </td>
+                
+                <!-- Unit -->
+                <td>
+                  <input 
+                    type="text" 
+                    class="form-control bg-light" 
+                    [value]="item.unit"
+                    readonly>
+                </td>
+                
+                <!-- Quantity -->
+                <td>
+                  <input 
+                    type="number" 
+                    class="form-control bg-light" 
+                    [value]="item.quantity"
+                    readonly>
+                </td>
+                
+                <!-- Rate -->
+                <td>
+                  <p-inputNumber
+                    [(ngModel)]="item.rate"
+                    [min]="0"
+                    [style]="{ width: '100%' }"
+                    styleClass="w-100"
+                    (onInput)="onQuantityOrRateChange(item)"
+                    [ngModelOptions]="{standalone: true}">
+                  </p-inputNumber>
+                </td>
+                
+                <!-- Total Amount (Calculated) -->
+                <td>
+                  <input 
+                    type="number" 
+                    class="form-control bg-light" 
+                    [value]="getRowTotal(item)"
+                    readonly>
+                </td>
+                
+                <!-- Comment By Swiss Electric -->
+                <td>
+                  <input 
+                    type="text" 
+                    class="form-control bg-light" 
+                    [value]="item.commentBySwissElectric"
+                    readonly>
+                </td>
+                
+                <!-- Notes By Alshaya Group -->
+                <td>
+                  <input 
+                    type="text" 
+                    class="form-control bg-light" 
+                    [value]="item.notesByAlshayaGroup"
+                    readonly>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totals Card -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row justify-content-end">
+          <div class="col-md-4">
+            <div class="totals-section">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="fw-medium">Sub Total:</span>
+                <span class="fw-bold">{{ calculatedSubTotal | number:'1.2-2' }} USD</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span class="fw-medium">Discount (%):</span>
+                <div class="d-flex align-items-center">
+                  <input 
+                    type="number" 
+                    class="form-control form-control-sm me-2" 
+                    style="width: 80px;"
+                    [(ngModel)]="discountPercentage"
+                    (ngModelChange)="calculateTotals()"
+                    [ngModelOptions]="{standalone: true}"
+                    min="0" 
+                    max="100">
+                  <span>%</span>
+                </div>
+              </div>
+              <hr>
+              <div class="d-flex justify-content-between">
+                <span class="fw-bold text-blueprint-blue">Total Amount:</span>
+                <span class="fw-bold text-blueprint-blue fs-5">
+                  {{ calculatedTotalAmount | number:'1.2-2' }} USD
+                </span>
+              </div>
+              <small class="text-muted d-block mt-2">* Note: All the prices are exclusive of taxes</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Checkboxes -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="form-check mb-3">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            id="siteVisitConfirm"
+            [(ngModel)]="model.siteVisitConfirmed"
+            [ngModelOptions]="{standalone: true}">
+          <label class="form-check-label" for="siteVisitConfirm">
+            Kindly confirm that a site visit has been conducted as part of the tender submission exercise and all necessary considerations are incorporated as part of the priced tender.
+          </label>
+        </div>
+        <div class="form-check">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            id="complianceConfirm"
+            [(ngModel)]="model.complianceConfirmed"
+            [ngModelOptions]="{standalone: true}">
+          <label class="form-check-label" for="complianceConfirm">
+            Kindly confirm that the priced tender submitted is in compliance of the tender documents and site visit, other than the points indicated as deviation which will be discussed prior to sign off.
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="text-end">
+      <button 
+        type="submit" 
+        class="btn btn-primary btn-lg px-5"
+        [disabled]="!model.siteVisitConfirmed || !model.complianceConfirmed">
+        <i class="pi pi-check me-2"></i>
+        Submit Quotation
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Toast Messages -->
+<p-toast></p-toast>
