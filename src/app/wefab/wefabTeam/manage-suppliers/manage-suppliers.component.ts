@@ -20,6 +20,7 @@ import { FormsModule } from '@angular/forms';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { TagModule } from 'primeng/tag';
 import { SweetAlertService } from '../../shared/sweet-alert.service'
+import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 
 interface Supplier {
   name: string;
@@ -54,7 +55,8 @@ interface Supplier {
     MenuModule,
     FormsModule,
     OverlayPanelModule,
-    TagModule
+    TagModule,
+    DateFormatPipe
   ],
   providers: [MessageService],
   template: `
@@ -191,7 +193,7 @@ interface Supplier {
                   </td>
                   <td>
                     <div>{{ invite.supplier_email_id }}</div>
-                    <div class="sub-id">{{ invite.creation }}</div>
+                    <div class="sub-id">{{ invite.creation | dateFormat:'medium' }}</div>
                   </td>
                   <td>
                     <span class="status-badge status-pending">Invited</span>
