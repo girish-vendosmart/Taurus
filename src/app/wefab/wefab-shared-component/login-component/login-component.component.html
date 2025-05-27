@@ -30,9 +30,6 @@
                 style="color: #000 !important;"
               >
             </span>
-            <i *ngIf="loginForm.get('email')?.value && !loginForm.get('email')?.disabled" 
-              class="pi pi-times clear-icon" 
-              (click)="clearEmail()"></i>
           </div>
           <small *ngIf="submitted && loginForm.get('email')?.errors" class="p-error">
             <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>

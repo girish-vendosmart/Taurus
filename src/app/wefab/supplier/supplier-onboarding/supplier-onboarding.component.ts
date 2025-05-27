@@ -43,6 +43,20 @@ export function gstValidator(control: AbstractControl): ValidationErrors | null 
   
   return gstPattern.test(value) ? null : { 'gstFormat': true };
 }
+
+// PAN Validator function
+export function panValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  
+  if (!value) {
+    return null; // Let required validation handle empty values
+  }
+  
+  const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+  
+  return panPattern.test(value) ? null : { 'panFormat': true };
+}
+
 @Component({
   selector: 'app-supplier-onboarding',
   standalone: true,
@@ -609,14 +623,20 @@ export class SupplierOnboardingComponent implements OnInit {
                   label: 'GSTIN',
                   placeholder: '22AAAAA0000A1Z5',
                   required: true,
-                  description: 'Format: 2 digits + 10-character PAN + 1 entity code + Z + 1 checksum',
+                  description: '',
                   parentComponent: this,
                   isVerified: this.gstVerified
                 },
                 expressionProperties: {
-                  'templateOptions.required': '!model.noGst',
+                  'templateOptions.required': (model: any) => {
+                    console.log('GSTIN field required expression evaluated, model.noGst:', model.noGst);
+                    return !model.noGst;
+                  },
                   'templateOptions.isVerified': () => this.gstVerified,
-                  'hide': 'model.noGst'
+                  'hide': (model: any) => {
+                    console.log('GSTIN field hide expression evaluated, model.noGst:', model.noGst);
+                    return model.noGst;
+                  }
                 },
                 validators: {
                   validation: [gstValidator]
@@ -640,7 +660,38 @@ export class SupplierOnboardingComponent implements OnInit {
                   description: 'Enter 10-character PAN (e.g., ABCDE1234F)'
                 },
                 expressionProperties: {
-                  'hide': '!model.noGst'
+                  'hide': (model: any) => {
+                    console.log('PAN field hide expression evaluated, model.noGst:', model.noGst);
+                    return !model.noGst;
+                  },
+                  'templateOptions.required': (model: any) => {
+                    console.log('PAN field required expression evaluated, model.noGst:', model.noGst);
+                    return model.noGst;
+                  },
+                  'templateOptions.disabled': (model: any) => {
+                    console.log('PAN field disabled expression evaluated, model.noGst:', model.noGst);
+                    return !model.noGst;
+                  }
+                },
+                validators: {
+                  validation: [panValidator]
+                },
+                validation: {
+                  messages: {
+                    required: 'Please enter your PAN number',
+                    panFormat: 'Invalid PAN format. Please enter a valid 10-character PAN (e.g., ABCDE1234F)'
+                  }
+                },
+                hooks: {
+                  onInit: (field) => {
+                    console.log('PAN field initialized');
+                    // Clear PAN field when it becomes hidden
+                    field.formControl?.valueChanges.subscribe(() => {
+                      if (!this.model.noGst && field.formControl?.value) {
+                        field.formControl.setValue('');
+                      }
+                    });
+                  }
                 }
               },
               {
@@ -653,14 +704,42 @@ export class SupplierOnboardingComponent implements OnInit {
                 hooks: {
                   onInit: (field) => {
                     field.formControl?.valueChanges.subscribe(value => {
-                      const panField = field.form?.get('panNumber');
                       const gstinField = field.form?.get('gstinNumber');
+                      const panField = field.form?.get('panNumber');
+                      console.log('noGst checkbox changed to:', value);
                       
                       if (value && gstinField) {
-                        // When "We don't have GST" is checked, clear GSTIN validation errors
+                        // When "We don't have GST" is checked, clear GSTIN
                         gstinField.setErrors(null);
                         gstinField.setValue('');
                       }
+                      
+                      // Clear PAN field when GST is available (noGst = false)
+                      if (!value && panField) {
+                        panField.setValue('');
+                        panField.setErrors(null);
+                      }
+                      
+                      // Update model to trigger expressionProperties
+                      this.model.noGst = value;
+                      
+                      // Force Formly to re-evaluate all expression properties
+                      setTimeout(() => {
+                        // Trigger a model change event to force re-evaluation
+                        this.model = { ...this.model };
+                        this.cdr.detectChanges();
+                        
+                        // Use the custom method to update field visibility
+                        this.updateFieldVisibility(value);
+                        
+                        // Also manually trigger field updates
+                        if (panField) {
+                          panField.updateValueAndValidity();
+                        }
+                        if (gstinField) {
+                          gstinField.updateValueAndValidity();
+                        }
+                      }, 0);
                     });
                   }
                 }
@@ -1663,6 +1742,56 @@ export class SupplierOnboardingComponent implements OnInit {
       cityControl.updateValueAndValidity();
       console.log('City control updated with:', cityValue);
     }
+    
+    // Force change detection
+    this.cdr.detectChanges();
+  }
+
+  // Method to manually update field visibility when expression properties don't trigger properly
+  private updateFieldVisibility(noGstValue: boolean) {
+    // Find the GSTIN and PAN fields in the current step fields
+    const currentFields = this.stepFields[0]; // Basic details step
+    
+    const findAndUpdateFields = (fields: FormlyFieldConfig[]): void => {
+      for (const field of fields) {
+        if (field.fieldGroup) {
+          findAndUpdateFields(field.fieldGroup);
+        } else if (field.key === 'gstinNumber') {
+          // Update GSTIN field - should be hidden when noGst is true
+          if (field.templateOptions) {
+            field.templateOptions.required = !noGstValue;
+          }
+          
+          // Update the hide property
+          field.hide = noGstValue;
+          
+          // Force field to update
+          if (field.formControl) {
+            field.formControl.updateValueAndValidity();
+          }
+          
+          console.log('GSTIN field updated:', { hide: field.hide, required: field.templateOptions?.required });
+        } else if (field.key === 'panNumber') {
+          // Update PAN field - should be visible when noGst is true
+          if (field.templateOptions) {
+            field.templateOptions.required = noGstValue;
+            field.templateOptions.disabled = !noGstValue;
+          }
+          
+          // Update the hide property
+          field.hide = !noGstValue;
+          
+          // Force field to update
+          if (field.formControl) {
+            field.formControl.updateValueAndValidity();
+          }
+          
+          console.log('PAN field updated:', { hide: field.hide, required: field.templateOptions?.required });
+        }
+      }
+    };
+    
+    findAndUpdateFields(currentFields);
     
     // Force change detection
     this.cdr.detectChanges();
