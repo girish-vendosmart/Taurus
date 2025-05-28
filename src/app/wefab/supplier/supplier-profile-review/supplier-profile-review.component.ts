@@ -990,6 +990,20 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     return process.replace(/([A-Z])/g, ' $1').trim();
   }
 
+  // Method to mask account number for security
+  maskAccountNumber(accountNumber: string): string {
+    if (!accountNumber) return 'Not provided';
+    
+    // Show only last 4 digits, mask the rest
+    if (accountNumber.length <= 4) {
+      return '*'.repeat(accountNumber.length);
+    }
+    
+    const lastFour = accountNumber.slice(-4);
+    const maskedPart = '*'.repeat(accountNumber.length - 4);
+    return maskedPart + lastFour;
+  }
+
   isImageFile(url: string): boolean {
     return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
   }

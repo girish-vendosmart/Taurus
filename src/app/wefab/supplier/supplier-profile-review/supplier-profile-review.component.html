@@ -658,6 +658,60 @@
                 verified clients when necessary for business purposes.
               </div>
 
+              <!-- Bank Details Section -->
+              <div class="review-info-container bank-details-section" *ngIf="newFinancialData.bankDetails">
+                <h3>Bank Details</h3>
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Bank Name</div>
+                    <div class="field-value">{{ newFinancialData.bankDetails.bankName || 'Not provided' }}</div>
+                  </div>
+                  <div class="review-col">
+                    <div class="field-label">Account Holder Name</div>
+                    <div class="field-value">{{ newFinancialData.bankDetails.accountHolderName || 'Not provided' }}</div>
+                  </div>
+                </div>
+
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Account Number</div>
+                    <div class="field-value">
+                      <span *ngIf="newFinancialData.bankDetails.accountNumber" class="masked-account">
+                        {{ maskAccountNumber(newFinancialData.bankDetails.accountNumber) }}
+                      </span>
+                      <span *ngIf="!newFinancialData.bankDetails.accountNumber" class="no-data-text">
+                        Not provided
+                      </span>
+                    </div>
+                  </div>
+                  <div class="review-col">
+                    <div class="field-label">IFSC Code</div>
+                    <div class="field-value">{{ newFinancialData.bankDetails.ifscCode || 'Not provided' }}</div>
+                  </div>
+                </div>
+
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-label">Account Type</div>
+                    <div class="field-value">{{ newFinancialData.bankDetails.accountType || 'Not provided' }}</div>
+                  </div>
+                  <div class="review-col">
+                    <div class="field-label">Branch Name</div>
+                    <div class="field-value">{{ newFinancialData.bankDetails.branchName || 'Not provided' }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Show message if no bank details -->
+              <div class="review-info-container bank-details-section" *ngIf="!newFinancialData.bankDetails">
+                <h3>Bank Details</h3>
+                <div class="review-row">
+                  <div class="review-col">
+                    <div class="field-value no-data-text">No bank details provided yet.</div>
+                  </div>
+                </div>
+              </div>
+
               <div class="review-info-container">
                 <h3>Annual Revenue (Last 3 Years)</h3>
                 <div class="review-row">
