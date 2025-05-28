@@ -4,6 +4,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormContr
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { InputTextModule } from 'primeng/inputtext';
+import { CheckboxModule } from 'primeng/checkbox';
 
 export interface DropdownGroupOption {
   label: string;
@@ -21,7 +22,7 @@ export interface DropdownGroup {
 @Component({
   selector: 'app-p-dropdown-group-search',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DropdownModule, MultiSelectModule, InputTextModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DropdownModule, MultiSelectModule, InputTextModule, FormsModule, CheckboxModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -131,18 +132,32 @@ export interface DropdownGroup {
         (onHide)="onDropdownHide()"
       >
         <ng-template pTemplate="header">
-          <div class="custom-filter-container">
-            <input 
-              #filterInputMulti
-              type="text" 
-              class="custom-filter-input"
-              [placeholder]="filterPlaceholder"
-              [(ngModel)]="currentFilter"
-              (input)="onCustomFilterChange($event)"
-              (keydown.escape)="clearFilter()"
-              (click)="$event.stopPropagation()"
-            />
-            <i class="pi pi-search filter-icon"></i>
+          <div class="multiselect-header-container">
+            <!-- Select All Checkbox -->
+            <div class="select-all-container">
+              <p-checkbox 
+                [binary]="true"
+                [(ngModel)]="selectAllChecked"
+                (onChange)="onSelectAllChange($event)"
+                inputId="selectAll"
+                [disabled]="disabled">
+              </p-checkbox>
+            </div>
+            
+            <!-- Search Input -->
+            <div class="custom-filter-container">
+              <input 
+                #filterInputMulti
+                type="text" 
+                class="custom-filter-input"
+                [placeholder]="filterPlaceholder"
+                [(ngModel)]="currentFilter"
+                (input)="onCustomFilterChange($event)"
+                (keydown.escape)="clearFilter()"
+                (click)="$event.stopPropagation()"
+              />
+              <i class="pi pi-search filter-icon"></i>
+            </div>
           </div>
         </ng-template>
         
@@ -195,20 +210,25 @@ export interface DropdownGroup {
     
     .custom-filter-container {
       position: relative;
-      padding: 0.5rem;
+      padding: 0.75rem;
       border-bottom: 1px solid #dee2e6;
-      background: #fff;
       margin-bottom: 0;
+      width: 100%;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      flex: 1;
     }
     
     .custom-filter-input {
       width: 100%;
-      padding: 0.375rem 2rem 0.375rem 0.75rem;
+      padding: 0.5rem 2.5rem 0.5rem 0.75rem;
       border: 1px solid #ced4da;
       border-radius: 0.375rem;
       font-size: 0.875rem;
       outline: none;
       transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      background-color: #fff;
     }
     
     .custom-filter-input:focus {
@@ -218,11 +238,12 @@ export interface DropdownGroup {
     
     .filter-icon {
       position: absolute;
-      right: 1rem;
+      right: 1.25rem;
       top: 50%;
       transform: translateY(-50%);
       color: #6c757d;
       pointer-events: none;
+      font-size: 0.875rem;
     }
     
     .selected-item {
@@ -264,6 +285,8 @@ export interface DropdownGroup {
       text-align: center;
       padding: 2rem 1rem;
       color: #6c757d;
+      background: #fff;
+      margin: 0;
     }
     
     .empty-filter-message i {
@@ -277,11 +300,14 @@ export interface DropdownGroup {
       margin-bottom: 0.5rem;
       font-weight: 500;
       font-size: 1rem;
+      margin-top: 0;
     }
     
     .empty-filter-message small {
       color: #adb5bd;
       font-size: 0.875rem;
+      display: block;
+      margin-top: 0.5rem;
     }
     
     .debug-info {
@@ -315,10 +341,17 @@ export interface DropdownGroup {
       max-height: 400px;
       border-radius: 0.375rem;
       box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      min-width: 300px;
+      z-index: 1000;
     }
     
     :host ::ng-deep .p-dropdown-items-wrapper {
       max-height: 350px;
+      overflow-y: auto;
+    }
+    
+    :host ::ng-deep .p-dropdown-items {
+      padding: 0;
     }
     
     /* PrimeNG MultiSelect Panel Customization */
@@ -326,10 +359,84 @@ export interface DropdownGroup {
       max-height: 400px;
       border-radius: 0.375rem;
       box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      min-width: 350px;
+      z-index: 1000;
+      border: 1px solid #dee2e6;
     }
     
     :host ::ng-deep .p-multiselect-items-wrapper {
       max-height: 350px;
+      overflow-y: auto;
+    }
+    
+    :host ::ng-deep .p-multiselect-items {
+      padding: 0;
+    }
+    
+    /* Ensure multiselect trigger has proper width */
+    :host ::ng-deep .p-multiselect {
+      width: 100% !important;
+      min-height: 2.5rem;
+    }
+    
+    :host ::ng-deep .p-multiselect .p-multiselect-label {
+      padding: 0.5rem 0.75rem;
+      min-height: 1.5rem;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+    
+    /* OLD CONFLICTING SELECT-ALL CHECKBOX RULES REMOVED */
+    
+    /* Hide ALL checkboxes in multiselect items and interface */
+    :host ::ng-deep .p-multiselect .p-checkbox,
+    :host ::ng-deep .p-multiselect-item .p-checkbox,
+    :host ::ng-deep .p-multiselect-label .p-checkbox,
+    :host ::ng-deep .p-multiselect-token .p-checkbox,
+    :host ::ng-deep .p-multiselect-trigger .p-checkbox,
+    :host ::ng-deep .p-multiselect-label-container .p-checkbox {
+      display: none !important;
+      visibility: hidden !important;
+    }
+    
+    /* Hide checkbox boxes and icons */
+    :host ::ng-deep .p-multiselect .p-checkbox-box,
+    :host ::ng-deep .p-multiselect-item .p-checkbox-box,
+    :host ::ng-deep .p-multiselect .p-checkbox-icon,
+    :host ::ng-deep .p-multiselect-item .p-checkbox-icon {
+      display: none !important;
+      visibility: hidden !important;
+    }
+    
+    /* Only show the select-all checkbox in header */
+    :host ::ng-deep .select-all-container .p-checkbox {
+      display: flex !important;
+      visibility: visible !important;
+      margin-right: 0.5rem;
+    }
+    
+    :host ::ng-deep .select-all-container .p-checkbox .p-checkbox-box {
+      display: inline-block !important;
+      visibility: visible !important;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 0.25rem;
+      border: 1px solid #ced4da;
+      background: #fff;
+    }
+    
+    :host ::ng-deep .select-all-container .p-checkbox .p-checkbox-box.p-highlight {
+      background: #0d6efd;
+      border-color: #0d6efd;
+    }
+    
+    :host ::ng-deep .select-all-container .p-checkbox .p-checkbox-box .p-checkbox-icon {
+      display: block !important;
+      visibility: visible !important;
+      color: #fff;
+      font-size: 0.75rem;
     }
     
     /* Improve group header styling */
@@ -338,20 +445,39 @@ export interface DropdownGroup {
       background-color: #f8f9fa !important;
       font-weight: 600 !important;
       color: #495057 !important;
-      padding: 0.5rem 0.75rem !important;
+      padding: 0.75rem 1rem !important;
       border-bottom: 1px solid #dee2e6 !important;
+      margin: 0 !important;
+      font-size: 0.875rem !important;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
     
     /* Improve item styling */
     :host ::ng-deep .p-dropdown-item,
     :host ::ng-deep .p-multiselect-item {
-      padding: 0.5rem 0.75rem !important;
+      padding: 0.75rem 1rem !important;
       transition: background-color 0.15s ease-in-out !important;
+      border: none !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      min-height: 2.5rem !important;
     }
     
     :host ::ng-deep .p-dropdown-item:hover,
     :host ::ng-deep .p-multiselect-item:hover {
       background-color: #f8f9fa !important;
+    }
+    
+    :host ::ng-deep .p-multiselect-item.p-highlight {
+      background-color: #e7f3ff !important;
+      color: #0d6efd !important;
+    }
+    
+    :host ::ng-deep .p-multiselect-item.p-highlight:hover {
+      background-color: #cce7ff !important;
     }
     
     /* Improve selected item styling for multiselect */
@@ -362,11 +488,69 @@ export interface DropdownGroup {
       padding: 0.25rem 0.5rem;
       margin: 0.125rem;
       font-size: 0.875rem;
+      display: inline-flex;
+      align-items: center;
+      max-width: 200px;
+    }
+    
+    :host ::ng-deep .p-multiselect-token-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     
     :host ::ng-deep .p-multiselect-token-icon {
       margin-left: 0.25rem;
       color: #6c757d;
+      cursor: pointer;
+    }
+    
+    /* Fix header filter styling */
+    :host ::ng-deep .p-multiselect-header {
+      padding: 0 !important;
+      border-bottom: none !important;
+    }
+    
+    /* Ensure proper panel positioning */
+    :host ::ng-deep .p-multiselect-panel .p-multiselect-header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: white;
+    }
+    
+    .multiselect-header-container {
+      display: flex;
+      flex-direction: row;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border-bottom: 1px solid #dee2e6;
+      position: sticky;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+    }
+    
+    .select-all-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .select-all-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #495057;
+      cursor: pointer;
+      margin: 0;
+    }
+    
+    .custom-filter-container {
+      position: relative;
+      margin: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
     }
   `]
 })
@@ -404,6 +588,7 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   displayOptions: DropdownGroup[] = [];
   selectedValue: any = null;
   currentFilter: string = '';
+  selectAllChecked: boolean = false;
   
   // ControlValueAccessor implementation
   private onChange = (value: any) => {};
@@ -427,11 +612,21 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       this.selectedValue = value;
       this.onChange(value);
       this.selectionChange.emit(value);
+      
+      // Update select all state for multiselect
+      if (this.multiselect) {
+        this.updateSelectAllState();
+      }
     });
     
     // If using external formControl, sync the internal control
     if (this.formControl) {
       this.dropdownControl = this.formControl;
+    }
+    
+    // Initialize select all state
+    if (this.multiselect) {
+      this.updateSelectAllState();
     }
   }
 
@@ -467,6 +662,11 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     // Reset filter when dropdown opens
     this.currentFilter = '';
     this.displayOptions = [...this.originalOptions];
+    
+    // Update select all state for multiselect
+    if (this.multiselect) {
+      this.updateSelectAllState();
+    }
   }
 
   onDropdownHide(): void {
@@ -558,11 +758,21 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     
     // Apply our custom filtering logic
     this.filterOptions(filterValue);
+    
+    // Update select all state after filtering
+    if (this.multiselect) {
+      this.updateSelectAllState();
+    }
   }
 
   clearFilter(): void {
     this.currentFilter = '';
     this.displayOptions = [...this.originalOptions];
+    
+    // Update select all state after clearing filter
+    if (this.multiselect) {
+      this.updateSelectAllState();
+    }
   }
 
   getSelectedItemsLabel(): string {
@@ -571,5 +781,41 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       return 'Select items';
     }
     return selectedItems.map((item: any) => this.getDisplayLabel(item)).join(', ');
+  }
+
+  onSelectAllChange(event: any): void {
+    if (!this.multiselect) return;
+    
+    const allItems: any[] = [];
+    this.displayOptions.forEach(group => {
+      group.items.forEach(item => {
+        allItems.push(item.value);
+      });
+    });
+    
+    if (event.checked) {
+      // Select all items
+      this.dropdownControl.setValue(allItems);
+    } else {
+      // Deselect all items
+      this.dropdownControl.setValue([]);
+    }
+    
+    this.updateSelectAllState();
+  }
+  
+  private updateSelectAllState(): void {
+    if (!this.multiselect) return;
+    
+    const selectedValues = this.dropdownControl.value || [];
+    const allItems: any[] = [];
+    
+    this.displayOptions.forEach(group => {
+      group.items.forEach(item => {
+        allItems.push(item.value);
+      });
+    });
+    
+    this.selectAllChecked = allItems.length > 0 && selectedValues.length === allItems.length;
   }
 } 
