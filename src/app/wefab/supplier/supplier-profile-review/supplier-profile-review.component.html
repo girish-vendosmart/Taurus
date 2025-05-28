@@ -717,18 +717,18 @@
                 <div class="review-row">
                   <div class="review-col">
                     <div class="field-label">Annual Revenue (This Year)</div>
-                    <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2024 }}</div>
+                    <div class="field-value">{{ formatCurrency(newFinancialData.companyFinancials.annualRevenue2024) }}</div>
                   </div>
                   <div class="review-col">
                     <div class="field-label">Annual Revenue (Last Year)</div>
-                    <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2023 }}</div>
+                    <div class="field-value">{{ formatCurrency(newFinancialData.companyFinancials.annualRevenue2023) }}</div>
                   </div>
                 </div>
 
                 <div class="review-row">
                   <div class="review-col">
                     <div class="field-label">Annual Revenue (Two Years Ago)</div>
-                    <div class="field-value">{{ newFinancialData.companyFinancials.annualRevenue2022 }}</div>
+                    <div class="field-value">{{ formatCurrency(newFinancialData.companyFinancials.annualRevenue2022) }}</div>
                   </div>
                 </div>
               </div>
@@ -753,11 +753,11 @@
                 <div class="review-row">
                   <div class="review-col">
                     <div class="field-label">General Liability</div>
-                    <div class="field-value">{{ newFinancialData.insuranceCoverage.generalLiabilityInsurance }}</div>
+                    <div class="field-value">{{ formatCurrency(newFinancialData.insuranceCoverage.generalLiabilityInsurance) }}</div>
                   </div>
                   <div class="review-col">
                     <div class="field-label">Product Liability</div>
-                    <div class="field-value">{{ newFinancialData.insuranceCoverage.productLiabilityInsurance }}</div>
+                    <div class="field-value">{{ formatCurrency(newFinancialData.insuranceCoverage.productLiabilityInsurance) }}</div>
                   </div>
                 </div>
               </div>
@@ -959,15 +959,15 @@
     <div class="review-main-content activity-trail-container">
       <div class="activity-trail-header">
         <h2><i class="pi pi-history"></i> Activity Trail</h2>
-        <button class="btn-navigation" (click)="toggleActivityTrail()">
+        <button class="btn-navigation btn-back" (click)="toggleActivityTrail()">
           <i class="pi pi-arrow-left"></i> Back to Profile
         </button>
       </div>
       
       <div class="activity-trail-content">
         <div class="timeline">
-          <!-- Approval activities -->
-          <div class="timeline-item" *ngFor="let activity of activityTrail">
+          <!-- Real activity data -->
+          <div class="timeline-item" *ngFor="let activity of activityTrail; trackBy: trackByActivityId">
             <div class="timeline-marker" [ngClass]="getStatusColorClass(activity.action)">
               <i class="pi" [ngClass]="getStatusIcon(activity.action)"></i>
             </div>
@@ -980,7 +980,7 @@
                   <span class="activity-title">{{activity.title}}</span>
                 </div>
                 <div class="header-time">
-                  <span class="activity-time">{{activity.time_since || (activity.date | date:'MMM d, y')}}</span>
+                  <span class="activity-time">{{activity.time_since}}</span>
                 </div>
               </div>
               <div class="activity-details">
@@ -990,10 +990,16 @@
             </div>
           </div>
           
-          <!-- Empty state when no activities -->
-          <div class="empty-activity" *ngIf="activityTrail.length === 0">
+          <!-- Loading state -->
+          <div class="empty-activity" *ngIf="activityTrail.length === 0 && !dataLoading">
             <i class="pi pi-info-circle"></i>
             <p>No activity records found for this supplier profile.</p>
+          </div>
+          
+          <!-- Loading indicator -->
+          <div class="empty-activity" *ngIf="dataLoading">
+            <i class="pi pi-spin pi-spinner"></i>
+            <p>Loading activity trail...</p>
           </div>
         </div>
       </div>
