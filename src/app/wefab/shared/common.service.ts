@@ -204,6 +204,14 @@ export class CommonService {
         const docRef = doc(this.firestore, `${doctType_name}/${doctypeId}`);
         return docSnapshots(docRef);
     }
+
+    getWefabData(endPoint: string, params?: HttpParams) {
+        const headers = new HttpHeaders({
+            'Authorization': `Token c9e1cbc24e5be05:e1a9e577dba5db8`,
+            'Content-Type': 'application/json'
+        });
+        return this.http.get(`${environment.wefabApiUrl}${endPoint}`, { headers, params });
+    }
     
 
     

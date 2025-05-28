@@ -1,6 +1,7 @@
 export const environment = {
     production: false,
     apiUrl: 'https://apiestrial.proqsmart.com',
+    wefabApiUrl: 'https://wefabqa.vendosmart.com',
     firebaseConfig: {
         apiKey: "AIzaSyB6l9WmhjQhmNYXQKryWvuGr3Rp3V45fOM",
         authDomain: "wefab-ai.firebaseapp.com",

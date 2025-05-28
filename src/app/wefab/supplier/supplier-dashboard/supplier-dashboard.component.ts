@@ -43,11 +43,28 @@ interface DashboardCard {
   };
 }
 
+interface RecentQuotation {
+  title: string;
+  quoteNumber: string;
+  amount: number;
+  submittedDate: Date;
+  status: 'Pending' | 'Awarded' | 'Rejected' | 'Under Review';
+  statusClass: string;
+}
+
 interface RecentRFQ {
   title: string;
   rfqNumber: string;
   status: 'Open' | 'In Progress' | 'Closed';
   statusClass: string;
+  category: string;
+  dueDate: Date;
+  timeLeft: string;
+  urgencyClass: string;
+  quantity: number;
+  unit: string;
+  material: string;
+  materialSpec: string;
 }
 
 @Component({
@@ -233,30 +250,97 @@ export class SupplierDashboardComponent {
     }
   ];
 
+  recentQuotations: RecentQuotation[] = [
+    {
+      title: 'CNC Machined Aluminum Brackets',
+      quoteNumber: 'QUO-2023-001',
+      amount: 15750.00,
+      submittedDate: new Date('2023-05-10'),
+      status: 'Under Review',
+      statusClass: 'status-review'
+    },
+    {
+      title: 'Sheet Metal Enclosure',
+      quoteNumber: 'QUO-2023-002',
+      amount: 8920.50,
+      submittedDate: new Date('2023-05-08'),
+      status: 'Awarded',
+      statusClass: 'status-awarded'
+    },
+    {
+      title: '3D Printed Prototype Parts',
+      quoteNumber: 'QUO-2023-003',
+      amount: 2340.75,
+      submittedDate: new Date('2023-05-05'),
+      status: 'Pending',
+      statusClass: 'status-pending'
+    },
+    {
+      title: 'Injection Molded Housing',
+      quoteNumber: 'QUO-2023-004',
+      amount: 12500.00,
+      submittedDate: new Date('2023-05-01'),
+      status: 'Rejected',
+      statusClass: 'status-rejected'
+    }
+  ];
+
   recentRFQs: RecentRFQ[] = [
     {
       title: 'CNC Machined Aluminum Brackets',
       rfqNumber: 'RFQ-2023-001',
       status: 'Open',
-      statusClass: 'status-open'
+      statusClass: 'status-open',
+      category: 'Machining',
+      dueDate: new Date('2023-05-15'),
+      timeLeft: '2 weeks',
+      urgencyClass: 'urgent',
+      quantity: 100,
+      unit: 'pieces',
+      material: 'Aluminum',
+      materialSpec: 'Bracket Specification'
     },
     {
       title: 'Sheet Metal Enclosure',
       rfqNumber: 'RFQ-2023-002',
       status: 'Open',
-      statusClass: 'status-open'
+      statusClass: 'status-open',
+      category: 'Sheet Metal',
+      dueDate: new Date('2023-06-01'),
+      timeLeft: '1 week',
+      urgencyClass: 'normal',
+      quantity: 50,
+      unit: 'sheets',
+      material: 'Stainless Steel',
+      materialSpec: 'Enclosure Specification'
     },
     {
       title: '3D Printed Prototype Parts',
       rfqNumber: 'RFQ-2023-003',
       status: 'In Progress',
-      statusClass: 'status-progress'
+      statusClass: 'status-progress',
+      category: '3D Printing',
+      dueDate: new Date('2023-05-20'),
+      timeLeft: 'Ongoing',
+      urgencyClass: 'urgent',
+      quantity: 200,
+      unit: 'parts',
+      material: 'ABS Plastic',
+      materialSpec: 'Prototype Parts Specification'
     },
     {
       title: 'Injection Molded Housing',
       rfqNumber: 'RFQ-2023-004',
       status: 'Closed',
-      statusClass: 'status-closed'
+      statusClass: 'status-closed',
+      category: 'Injection Molding',
+      dueDate: new Date('2023-04-30'),
+      timeLeft: 'Completed',
+      urgencyClass: 'completed',
+      quantity: 150,
+      unit: 'units',
+      material: 'Aluminum',
+      materialSpec: 'Housing Specification'
     }
   ];
 

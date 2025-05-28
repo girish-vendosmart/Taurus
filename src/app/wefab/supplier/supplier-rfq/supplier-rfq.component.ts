@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
+import { CommonService } from '../../shared/common.service';
 
 export interface RFQItem {
   rfqId: string;
@@ -33,7 +34,7 @@ export interface RFQItem {
 })
 export class SupplierRfqComponent implements OnInit {
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private commonService: CommonService) { }
   
   // Consolidated RFQ data
   allRFQs: RFQItem[] = [];
@@ -90,7 +91,7 @@ export class SupplierRfqComponent implements OnInit {
   rejectedQuotesTrend = { value: 2, isPositive: false, period: 'from last week' };
   
   // Table configuration
-  tableConfig: TableConfig = {
+  tableConfig: any = {
     columns: [
       {
         field: 'rfqId',
@@ -100,25 +101,20 @@ export class SupplierRfqComponent implements OnInit {
         isLink: true,
       },
       {
-        field: 'title',
-        header: 'Title',
+        field: 'rfq_name',
+        header: 'RFQ Name',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'company',
-        header: 'Company',
+        field: 'total_amount',
+        header: 'Total Amount',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'parts',
-        header: 'Parts',
-        sortable: true,
-      },
-      {
-        field: 'dueDate',
-        header: 'Due Date',
+        field: 'expiry_data',
+        header: 'Expiry Date',
         sortable: true,
       },
       {
@@ -139,181 +135,75 @@ export class SupplierRfqComponent implements OnInit {
   loading = false;
 
   ngOnInit() {
-    this.loadSampleData();
+    // Remove sample data loading since we're using real API data
+    // this.loadSampleData();
+    this.getRfqList();
   }
 
-  loadSampleData() {
-    // Consolidate all RFQ data into a single array
-    const openRFQs: RFQItem[] = [
-      {
-        rfqId: 'RFQ-2023-001',
-        title: 'CNC Machined Aluminum Brackets',
-        parts: 1,
-        dueDate: '2023-12-15',
-        status: 'Open',
-        statusClass: 'status-open',
-        description: 'High precision aluminum brackets for automotive application',
-        company: 'AutoTech Industries',
-        priority: 'High',
-        estimatedValue: 25000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-001'
-      },
-      {
-        rfqId: 'RFQ-2023-002',
-        title: 'Sheet Metal Enclosure',
-        parts: 1,
-        dueDate: '2023-12-18',
-        status: 'Open',
-        statusClass: 'status-open',
-        description: 'Custom sheet metal enclosure for electronic equipment',
-        company: 'ElectroSystems Ltd',
-        priority: 'Medium',
-        estimatedValue: 15000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-002'
-      },
-      {
-        rfqId: 'RFQ-2023-003',
-        title: 'Injection Molded Components',
-        parts: 3,
-        dueDate: '2023-12-20',
-        status: 'Open',
-        statusClass: 'status-open',
-        description: 'Plastic injection molded parts for consumer electronics',
-        company: 'TechGadgets Inc',
-        priority: 'Medium',
-        estimatedValue: 18000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-003'
-      },
-      {
-        rfqId: 'RFQ-2023-008',
-        title: 'Precision Turned Parts',
-        parts: 2,
-        dueDate: '2023-12-22',
-        status: 'Open',
-        statusClass: 'status-open',
-        description: 'High precision turned components for aerospace',
-        company: 'AeroSpace Solutions',
-        priority: 'High',
-        estimatedValue: 32000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-008'
-      },
-      {
-        rfqId: 'RFQ-2023-009',
-        title: 'Custom Fabricated Brackets',
-        parts: 4,
-        dueDate: '2023-12-25',
-        status: 'Open',
-        statusClass: 'status-open',
-        description: 'Custom fabricated steel brackets for construction',
-        company: 'BuildPro Inc',
-        priority: 'Low',
-        estimatedValue: 12000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-009'
-      }
-    ];
-
-    const inProgressRFQs: RFQItem[] = [
-      {
-        rfqId: 'RFQ-2023-004',
-        title: '3D Printed Prototype Parts',
-        parts: 2,
-        dueDate: '2023-12-25',
-        status: 'In Progress',
-        statusClass: 'status-progress',
-        description: 'Rapid prototyping for new product development',
-        company: 'Innovation Labs',
-        priority: 'High',
-        estimatedValue: 8000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-004'
-      },
-      {
-        rfqId: 'RFQ-2023-005',
-        title: 'Precision Machined Gears',
-        parts: 5,
-        dueDate: '2023-12-30',
-        status: 'In Progress',
-        statusClass: 'status-progress',
-        description: 'High precision gears for industrial machinery',
-        company: 'MechPrecision Co',
-        priority: 'High',
-        estimatedValue: 35000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-005'
-      },
-      {
-        rfqId: 'RFQ-2023-010',
-        title: 'Welded Assemblies',
-        parts: 3,
-        dueDate: '2024-01-05',
-        status: 'In Progress',
-        statusClass: 'status-progress',
-        description: 'Complex welded assemblies for marine equipment',
-        company: 'Marine Tech Ltd',
-        priority: 'Medium',
-        estimatedValue: 22000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-010'
-      }
-    ];
-
-    const closedRFQs: RFQItem[] = [
-      {
-        rfqId: 'RFQ-2023-006',
-        title: 'Welded Steel Framework',
-        parts: 1,
-        dueDate: '2023-11-15',
-        status: 'Closed',
-        statusClass: 'status-closed',
-        description: 'Structural steel framework for construction project',
-        company: 'BuildTech Solutions',
-        priority: 'Low',
-        estimatedValue: 45000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-006'
-      },
-      {
-        rfqId: 'RFQ-2023-007',
-        title: 'Cast Iron Components',
-        parts: 4,
-        dueDate: '2023-11-20',
-        status: 'Closed',
-        statusClass: 'status-closed',
-        description: 'Heavy duty cast iron parts for mining equipment',
-        company: 'Mining Solutions Ltd',
-        priority: 'Medium',
-        estimatedValue: 28000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-007'
-      },
-      {
-        rfqId: 'RFQ-2023-011',
-        title: 'Machined Valve Bodies',
-        parts: 6,
-        dueDate: '2023-11-25',
-        status: 'Closed',
-        statusClass: 'status-closed',
-        description: 'Precision machined valve bodies for hydraulic systems',
-        company: 'Hydraulic Systems Inc',
-        priority: 'High',
-        estimatedValue: 38000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-011'
-      },
-      {
-        rfqId: 'RFQ-2023-012',
-        title: 'Sheet Metal Panels',
-        parts: 8,
-        dueDate: '2023-11-30',
-        status: 'Closed',
-        statusClass: 'status-closed',
-        description: 'Custom sheet metal panels for industrial equipment',
-        company: 'Industrial Panels Co',
-        priority: 'Medium',
-        estimatedValue: 16000,
-        routerLink: '/wefab/supplier/rfq/details/RFQ-2023-012'
-      }
-    ];
-
-    // Combine all RFQs into a single array
-    this.allRFQs = [...openRFQs, ...inProgressRFQs, ...closedRFQs];
+  getRfqList() {
+    this.loading = true;
+    let endpoint = `/api/resource/Request for Quotation?fields=["*"]`
     
-    // Calculate status counts for cards
-    this.calculateStatusCounts();
+    this.commonService.getWefabData(endpoint).subscribe({
+      next: (res: any) => {
+        // Transform API data to match RFQItem interface
+        this.allRFQs = this.transformApiDataToRFQItems(res.data);
+        this.calculateStatusCounts();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching RFQ data:', error);
+        this.loading = false;
+        // Fallback to sample data if API fails
+        // this.loadSampleData();
+      }
+    });
+  }
+
+  // Add this new method to transform API data
+  private transformApiDataToRFQItems(apiData: any[]): any[] {
+    if (!apiData || !Array.isArray(apiData)) {
+      return [];
+    }
+
+    return apiData.map(item => ({
+      // Map API fields to RFQItem interface
+      rfqId: item.name || '',
+      rfq_name: item.rfq_name || '',
+      total_amount: item.total_amount || '',
+      expiry_data: this.formatApiDate(item.due_date),
+      status: this.mapApiStatusToRFQStatus(item.status || item.workflow_state),
+      routerLink: `/wefab/supplier/rfq/details/${item.name || item.rfq_id || item.id}`
+    }));
+  }
+
+  // Helper method to format API date
+  private formatApiDate(apiDate: string): string {
+    if (!apiDate) return new Date().toISOString().split('T')[0];
+    
+    try {
+      const date = new Date(apiDate);
+      return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+    } catch {
+      return new Date().toISOString().split('T')[0];
+    }
+  }
+
+  // Helper method to map API status to RFQ status
+  private mapApiStatusToRFQStatus(apiStatus: string): 'Open' | 'In Progress' | 'Closed' {
+    if (!apiStatus) return 'Open';
+    
+    const status = apiStatus.toLowerCase();
+    
+    if (status.includes('draft') || status.includes('open') || status.includes('pending')) {
+      return 'Open';
+    } else if (status.includes('submitted') || status.includes('review') || status.includes('progress')) {
+      return 'In Progress';
+    } else if (status.includes('closed') || status.includes('completed') || status.includes('cancelled')) {
+      return 'Closed';
+    }
+    
+    return 'Open'; // Default fallback
   }
 
   // Calculate counts for status cards
