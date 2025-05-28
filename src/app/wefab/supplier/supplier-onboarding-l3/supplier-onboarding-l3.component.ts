@@ -74,6 +74,14 @@ import { FormlyFieldDropdownComponent } from '../../../../app/dropdown-type.comp
 export class SupplierOnboardingL3Component implements OnInit {
   form: FormGroup;
   model: any = {
+    bankDetails: {
+      bankName: '',
+      accountNumber: '',
+      ifscCode: '',
+      accountHolderName: '',
+      accountType: 'Current',
+      branchName: ''
+    },
     companyFinancials: {
       annualRevenue2024: '',
       annualRevenue2023: '',
@@ -130,6 +138,23 @@ export class SupplierOnboardingL3Component implements OnInit {
 
   checkScreenSize() {
     this.isMobile = window.innerWidth < 768;
+  }
+
+  // Number formatting function for currency inputs
+  formatNumber(value: string): string {
+    if (!value) return '';
+    // Remove all non-numeric characters except decimal point
+    const numericValue = value.replace(/[^\d.]/g, '');
+    // Convert to number and format with commas
+    const number = parseFloat(numericValue);
+    if (isNaN(number)) return '';
+    return number.toLocaleString('en-IN');
+  }
+
+  // Parse formatted number back to numeric string
+  parseFormattedNumber(value: string): string {
+    if (!value) return '';
+    return value.replace(/,/g, '');
   }
 
   ngOnInit(): void {
@@ -231,6 +256,28 @@ export class SupplierOnboardingL3Component implements OnInit {
       ...this.getFinancialData
     };
     
+    // Format numbers for display when loading existing data
+    if (this.model.companyFinancials) {
+      if (this.model.companyFinancials.annualRevenue2024) {
+        this.model.companyFinancials.annualRevenue2024 = this.formatNumber(this.model.companyFinancials.annualRevenue2024);
+      }
+      if (this.model.companyFinancials.annualRevenue2023) {
+        this.model.companyFinancials.annualRevenue2023 = this.formatNumber(this.model.companyFinancials.annualRevenue2023);
+      }
+      if (this.model.companyFinancials.annualRevenue2022) {
+        this.model.companyFinancials.annualRevenue2022 = this.formatNumber(this.model.companyFinancials.annualRevenue2022);
+      }
+    }
+    
+    if (this.model.insuranceCoverage) {
+      if (this.model.insuranceCoverage.generalLiabilityInsurance) {
+        this.model.insuranceCoverage.generalLiabilityInsurance = this.formatNumber(this.model.insuranceCoverage.generalLiabilityInsurance);
+      }
+      if (this.model.insuranceCoverage.productLiabilityInsurance) {
+        this.model.insuranceCoverage.productLiabilityInsurance = this.formatNumber(this.model.insuranceCoverage.productLiabilityInsurance);
+      }
+    }
+    
     // Ensure arrays are properly initialized
     if (!this.model.additionalInformation.references || 
         !Array.isArray(this.model.additionalInformation.references) || 
@@ -293,13 +340,136 @@ export class SupplierOnboardingL3Component implements OnInit {
           </div>
         `
       },
+      
+      // Bank Details Section
+      {
+        template: '<h4 class="bank-details-title mb-2 mt-4">Bank Details</h4>'
+      },
+      {
+        template: '<p class="text-muted small mb-3">Provide your primary business bank account details for payment processing</p>'
+      },
+      // Bank Name and Account Holder Name in one row
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6',
+            key: 'bankDetails.bankName',
+            type: 'input',
+            templateOptions: {
+              label: 'Bank Name',
+              required: true,
+              placeholder: 'Enter your bank name'
+            },
+            validation: {
+              messages: {
+                required: 'Bank name is required'
+              }
+            }
+          },
+          {
+            className: 'col-md-6',
+            key: 'bankDetails.accountHolderName',
+            type: 'input',
+            templateOptions: {
+              label: 'Account Holder Name',
+              required: true,
+              placeholder: 'Enter account holder name'
+            },
+            validation: {
+              messages: {
+                required: 'Account holder name is required'
+              }
+            }
+          }
+        ]
+      },
+      // Account Number and IFSC Code in one row
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6',
+            key: 'bankDetails.accountNumber',
+            type: 'input',
+            templateOptions: {
+              label: 'Account Number',
+              required: true,
+              placeholder: 'Enter account number'
+            },
+            validation: {
+              messages: {
+                required: 'Account number is required'
+              }
+            }
+          },
+          {
+            className: 'col-md-6',
+            key: 'bankDetails.ifscCode',
+            type: 'input',
+            templateOptions: {
+              label: 'IFSC Code',
+              required: true,
+              placeholder: 'Enter IFSC code'
+            },
+            validation: {
+              messages: {
+                required: 'IFSC code is required'
+              }
+            }
+          }
+        ]
+      },
+      // Account Type and Branch Name in one row
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6',
+            key: 'bankDetails.accountType',
+            type: 'select',
+            templateOptions: {
+              label: 'Account Type',
+              required: true,
+              options: [
+                { label: 'Current Account', value: 'Current' },
+                { label: 'Savings Account', value: 'Savings' },
+                { label: 'Business Account', value: 'Business' }
+              ],
+              placeholder: 'Select account type'
+            },
+            validation: {
+              messages: {
+                required: 'Account type is required'
+              }
+            }
+          },
+          {
+            className: 'col-md-6',
+            key: 'bankDetails.branchName',
+            type: 'input',
+            templateOptions: {
+              label: 'Branch Name',
+              required: true,
+              placeholder: 'Enter branch name'
+            },
+            validation: {
+              messages: {
+                required: 'Branch name is required'
+              }
+            }
+          }
+        ]
+      },
+      
+      // Financial Overview Section
       {
         template: '<h4 class="financial-overview-title mb-2 mt-4">Financial Overview</h4>'
       },
       {
         template: '<h6 class="annual-revenue-title mb-1">Annual Revenue (Last 3 Years)</h6>'
       },
-      // Annual Revenue 2024 and 2023 in one row
+      // Annual Revenue 2024 and 2023 in one row with number formatting
       {
         fieldGroupClassName: 'row',
         fieldGroup: [
@@ -312,6 +482,20 @@ export class SupplierOnboardingL3Component implements OnInit {
               required: true,
               type: 'text',
               placeholder: 'Enter current year revenue amount'
+            },
+            hooks: {
+              onInit: (field: any) => {
+                if (field.formControl) {
+                  field.formControl.valueChanges.subscribe((value: string) => {
+                    if (value && !value.includes(',')) {
+                      const formatted = this.formatNumber(value);
+                      if (formatted !== value) {
+                        field.formControl.setValue(formatted, { emitEvent: false });
+                      }
+                    }
+                  });
+                }
+              }
             },
             validation: {
               messages: {
@@ -328,6 +512,20 @@ export class SupplierOnboardingL3Component implements OnInit {
               required: true,
               type: 'text',
               placeholder: 'Enter last year revenue amount'
+            },
+            hooks: {
+              onInit: (field: any) => {
+                if (field.formControl) {
+                  field.formControl.valueChanges.subscribe((value: string) => {
+                    if (value && !value.includes(',')) {
+                      const formatted = this.formatNumber(value);
+                      if (formatted !== value) {
+                        field.formControl.setValue(formatted, { emitEvent: false });
+                      }
+                    }
+                  });
+                }
+              }
             },
             validation: {
               messages: {
@@ -353,6 +551,20 @@ export class SupplierOnboardingL3Component implements OnInit {
               required: true,
               type: 'text',
               placeholder: 'Enter two years ago revenue amount'
+            },
+            hooks: {
+              onInit: (field: any) => {
+                if (field.formControl) {
+                  field.formControl.valueChanges.subscribe((value: string) => {
+                    if (value && !value.includes(',')) {
+                      const formatted = this.formatNumber(value);
+                      if (formatted !== value) {
+                        field.formControl.setValue(formatted, { emitEvent: false });
+                      }
+                    }
+                  });
+                }
+              }
             },
             validation: {
               messages: {
@@ -399,7 +611,7 @@ export class SupplierOnboardingL3Component implements OnInit {
       {
         template: '<h4 class="insurance-title mt-3 mb-2 mt-6">Insurance Coverage</h4>'
       },
-      // Row with General Liability and Product Liability Insurance
+      // Row with General Liability and Product Liability Insurance with number formatting
       {
         fieldGroupClassName: 'row',
         fieldGroup: [
@@ -408,9 +620,24 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'insuranceCoverage.generalLiabilityInsurance',
             type: 'input',
             templateOptions: {
-              label: 'General Liability Insurance',
+              label: 'General Liability Insurance (INR)',
               placeholder: 'Enter General Liability Insurance Amount',
-              required: true
+              required: true,
+              type: 'text'
+            },
+            hooks: {
+              onInit: (field: any) => {
+                if (field.formControl) {
+                  field.formControl.valueChanges.subscribe((value: string) => {
+                    if (value && !value.includes(',')) {
+                      const formatted = this.formatNumber(value);
+                      if (formatted !== value) {
+                        field.formControl.setValue(formatted, { emitEvent: false });
+                      }
+                    }
+                  });
+                }
+              }
             },
             validation: {
               messages: {
@@ -423,9 +650,24 @@ export class SupplierOnboardingL3Component implements OnInit {
             key: 'insuranceCoverage.productLiabilityInsurance',
             type: 'input',
             templateOptions: {
-              label: 'Product Liability Insurance',
+              label: 'Product Liability Insurance (INR)',
               placeholder: 'Enter Product Liability Insurance Amount',
-              required: true
+              required: true,
+              type: 'text'
+            },
+            hooks: {
+              onInit: (field: any) => {
+                if (field.formControl) {
+                  field.formControl.valueChanges.subscribe((value: string) => {
+                    if (value && !value.includes(',')) {
+                      const formatted = this.formatNumber(value);
+                      if (formatted !== value) {
+                        field.formControl.setValue(formatted, { emitEvent: false });
+                      }
+                    }
+                  });
+                }
+              }
             },
             validation: {
               messages: {
@@ -691,6 +933,28 @@ export class SupplierOnboardingL3Component implements OnInit {
           this.model.additionalInformation[field] || [];
       }
     });
+    
+    // Parse formatted numbers back to numeric values for storage
+    if (formData.companyFinancials) {
+      if (formData.companyFinancials.annualRevenue2024) {
+        formData.companyFinancials.annualRevenue2024 = this.parseFormattedNumber(formData.companyFinancials.annualRevenue2024);
+      }
+      if (formData.companyFinancials.annualRevenue2023) {
+        formData.companyFinancials.annualRevenue2023 = this.parseFormattedNumber(formData.companyFinancials.annualRevenue2023);
+      }
+      if (formData.companyFinancials.annualRevenue2022) {
+        formData.companyFinancials.annualRevenue2022 = this.parseFormattedNumber(formData.companyFinancials.annualRevenue2022);
+      }
+    }
+    
+    if (formData.insuranceCoverage) {
+      if (formData.insuranceCoverage.generalLiabilityInsurance) {
+        formData.insuranceCoverage.generalLiabilityInsurance = this.parseFormattedNumber(formData.insuranceCoverage.generalLiabilityInsurance);
+      }
+      if (formData.insuranceCoverage.productLiabilityInsurance) {
+        formData.insuranceCoverage.productLiabilityInsurance = this.parseFormattedNumber(formData.insuranceCoverage.productLiabilityInsurance);
+      }
+    }
     
     // Create final body to send
     let body = {
