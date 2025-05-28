@@ -83,8 +83,8 @@ export class SupplierOnboardingL3Component implements OnInit {
       currency: 'USD'
     },
     insuranceCoverage: {
-      generalLiabilityInsurance: 'i-0987',
-      productLiabilityInsurance: '0987'
+      generalLiabilityInsurance: '',
+      productLiabilityInsurance: ''
     },
     additionalInformation: {
       leadTime: '',
@@ -409,7 +409,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'General Liability Insurance',
-              placeholder: 'i-0987',
+              placeholder: 'Enter General Liability Insurance Amount',
               required: true
             },
             validation: {
@@ -424,7 +424,7 @@ export class SupplierOnboardingL3Component implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'Product Liability Insurance',
-              placeholder: '0987',
+              placeholder: 'Enter Product Liability Insurance Amount',
               required: true
             },
             validation: {
@@ -450,7 +450,7 @@ export class SupplierOnboardingL3Component implements OnInit {
           {
             template: `
               <div class="mt-3 mb-2">
-                <h4 class="section-title">Business Terms</h4>
+                <h4 class="section-title">Operational Metrics</h4>
               </div>
             `
           },
