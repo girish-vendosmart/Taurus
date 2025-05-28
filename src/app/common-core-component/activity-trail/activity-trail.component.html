@@ -1,0 +1,91 @@
+<div class="activity-trail-container">
+  <!-- Header -->
+  <div class="activity-trail-header" *ngIf="showHeader">
+    <h3 class="activity-trail-title">{{ title }}</h3>
+    <button 
+      pButton 
+      pRipple 
+      type="button" 
+      icon="pi pi-refresh" 
+      class="p-button-text p-button-sm refresh-btn"
+      (click)="refresh()"
+      [disabled]="loading"
+      pTooltip="Refresh activity trail"
+      tooltipPosition="top">
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="activity-trail-content" [style.max-height]="maxHeight">
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="loading">
+      <p-progressSpinner 
+        [style]="{ width: '24px', height: '24px' }" 
+        strokeWidth="4"
+        animationDuration="1s">
+      </p-progressSpinner>
+      <span class="loading-text">Loading activity trail...</span>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && processedActivities.length === 0">
+      <i class="pi pi-history empty-icon"></i>
+      <p class="empty-message">{{ emptyMessage }}</p>
+    </div>
+
+    <!-- Activity Timeline -->
+    <div class="activity-timeline" *ngIf="!loading && processedActivities.length > 0">
+      <div 
+        class="activity-item" 
+        *ngFor="let activity of processedActivities; trackBy: trackByActivityId"
+        [class]="getStatusColorClass(activity.action)">
+        
+        <!-- Timeline Connector -->
+        <div class="timeline-connector">
+          <i [class]="'pi ' + getStatusIcon(activity.action)"></i>
+        </div>
+
+        <!-- Activity Content -->
+        <div class="activity-content">
+          <!-- Activity Header -->
+          <div class="activity-header">
+            <div class="activity-title-section">
+              <h4 class="activity-title">{{ activity.title }}</h4>
+              <span class="activity-status-badge">
+                {{ activity.action }}
+              </span>
+            </div>
+            <div class="activity-meta">
+              <span class="activity-time">{{ activity.time_since }}</span>
+              <span class="activity-user">{{ activity.user }}</span>
+            </div>
+          </div>
+
+          <!-- Activity Description -->
+          <div class="activity-description">
+            <p>{{ activity.description }}</p>
+          </div>
+
+          <!-- Activity Changes (if any) - Only show if changes are meaningful -->
+          <div class="activity-changes" *ngIf="activity.changes && activity.changes.length > 0 && !isLongProfileChange(activity.changes)">
+            <div class="changes-header">
+              <i class="pi pi-list"></i>
+              <span>Details:</span>
+            </div>
+            <ul class="changes-list">
+              <li *ngFor="let change of activity.changes" class="change-item">
+                {{ change }}
+              </li>
+            </ul>
+          </div>
+
+          <!-- Activity Date -->
+          <div class="activity-date">
+            <i class="pi pi-calendar"></i>
+            <span>{{ activity.date | date:'MMM d, y, h:mm a' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

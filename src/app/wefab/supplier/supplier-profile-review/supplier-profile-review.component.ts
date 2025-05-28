@@ -14,7 +14,7 @@ import e from 'express';
 import { forkJoin, of, BehaviorSubject, Observable } from 'rxjs';
 import { map, tap, catchError, finalize, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
-
+import { ActivityTrailComponent, ActivityLogData } from '../../../common-core-component/activity-trail';
 
 interface DocumentSummary {
   companyDocuments: number;
@@ -27,30 +27,6 @@ interface CompletionStatus {
   basicInformation: number;
   manufacturingCapabilities: number;
   financialAdditional: number;
-}
-
-// New interface for activity trail
-interface ActivityItem {
-  id: string;
-  date: Date;
-  action: 'Approved' | 'Rejected' | 'Updated' | 'Submitted' | 'Created';
-  title: string;
-  description: string;
-  user: string;
-  level?: string;
-  section?: string;
-  time_since?: string;
-}
-
-// New interface for activity trail based on the provided data format
-interface ActivityLogItem {
-  name: number;
-  user: string;
-  creation: string;
-  time_since: string;
-  data: {
-    changed: string[];
-  };
 }
 
 interface LoadingState {
@@ -87,7 +63,8 @@ interface CacheEntry<T> {
     ButtonModule,
     ToastModule,
     RippleModule,
-    TooltipModule
+    TooltipModule,
+    ActivityTrailComponent
   ],
   providers: [MessageService],
   templateUrl: './supplier-profile-review.component.html',
@@ -222,7 +199,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   showActivityTrail: boolean = false;
   
   // Activity trail data - loaded from API
-  activityTrail: ActivityItem[] = [];
+  activityTrail: ActivityLogData[] = [];
   
   // Activity trail loading state
   activityTrailLoading: boolean = false;
@@ -1033,12 +1010,13 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     this.activityTrailLoading = true;
 
     // Load real activity trail data from API
-    const endpoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_supplier_activity_logs?supplier_company_id=${this.supplierId}`;
+    const endpoint = `/api/method/proq_buyer.api.core.versioning.get_new_versions_trail?doctype=wfb_supplier_onboarding_L1&docname=SUP-000424`;
     
     this.commonservice.getData(endpoint).subscribe({
       next: (response: any) => {
         if (response?.data && Array.isArray(response.data)) {
-          this.activityTrail = this.processActivityLogs(response.data);
+          // Store raw data - let ActivityTrailComponent handle processing
+          this.activityTrail = response.data;
         } else {
           console.log('No activity logs found');
           this.activityTrail = [];
@@ -1055,116 +1033,15 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  private processActivityLogs(logs: any[]): ActivityItem[] {
-    return logs.map((log: any, index: number) => {
-      // Map the log data to our ActivityItem interface
-      const action = this.mapLogAction(log);
-      const title = this.generateLogTitle(log, action);
-      const description = this.generateLogDescription(log, action);
-      
-      return {
-        id: (index + 1).toString(),
-        date: new Date(log.creation),
-        action: action,
-        title: title,
-        description: description,
-        user: log.user || 'System',
-        time_since: log.time_since || this.calculateTimeSince(new Date(log.creation))
-      };
-    }).sort((a, b) => b.date.getTime() - a.date.getTime()); // Sort by date, newest first
-  }
-
-  private mapLogAction(log: any): 'Approved' | 'Rejected' | 'Updated' | 'Submitted' | 'Created' {
-    // Map based on the log data structure
-    if (log.data?.changed?.includes('approval_status')) {
-      // Check what the approval status was changed to
-      if (log.data.approval_status === 'Approved') return 'Approved';
-      if (log.data.approval_status === 'Rejected') return 'Rejected';
-      if (log.data.approval_status === 'Request to Resubmit') return 'Updated';
-      return 'Submitted';
-    }
-    
-    if (log.data?.changed?.includes('company_profile')) {
-      return 'Updated';
-    }
-    
-    if (log.data?.changed?.includes('onboarding_status')) {
-      return 'Submitted';
-    }
-    
-    // Default to Created for initial entries
-    return 'Created';
-  }
-
-  private generateLogTitle(log: any, action: string): string {
-    const stage = this.getStageFromLog(log);
-    
-    switch (action) {
-      case 'Approved':
-        return `${stage} Approved`;
-      case 'Rejected':
-        return `${stage} Rejected`;
-      case 'Updated':
-        return `${stage} Updated`;
-      case 'Submitted':
-        return `${stage} Submitted`;
-      default:
-        return `${stage} Created`;
-    }
-  }
-
-  private generateLogDescription(log: any, action: string): string {
-    const stage = this.getStageFromLog(log);
-    
-    switch (action) {
-      case 'Approved':
-        return `${stage} information was reviewed and approved by admin`;
-      case 'Rejected':
-        return `${stage} information was rejected. ${log.comment || 'Please review and resubmit.'}`;
-      case 'Updated':
-        return `${stage} information was updated by supplier`;
-      case 'Submitted':
-        return `${stage} information was submitted for review`;
-      default:
-        return `${stage} record was created in the system`;
-    }
-  }
-
-  private getStageFromLog(log: any): string {
-    // Try to determine stage from the log context
-    if (log.doctype?.includes('L1') || log.name?.toString().includes('L1')) {
-      return 'Basic Information';
-    }
-    if (log.doctype?.includes('L2') || log.name?.toString().includes('L2')) {
-      return 'Manufacturing Capabilities';
-    }
-    if (log.doctype?.includes('L3') || log.name?.toString().includes('L3')) {
-      return 'Financial Information';
-    }
-    return 'Profile';
-  }
-
-  private calculateTimeSince(date: Date): string {
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-
-    if (diffInDays > 0) {
-      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-    } else if (diffInHours > 0) {
-      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-    } else if (diffInMinutes > 0) {
-      return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
-    } else {
-      return 'Just now';
-    }
-  }
-
-  private getDemoActivityLogs(): ActivityItem[] {
+  // Remove the old processing methods since ActivityTrailComponent handles this
+  private getDemoActivityLogs(): ActivityLogData[] {
     // Remove demo data - this method is no longer used
     return [];
+  }
+
+  // TrackBy function for activity trail
+  trackByActivityId(index: number, activity: ActivityLogData): string {
+    return activity.name.toString();
   }
 
   // Approval methods
@@ -1305,29 +1182,6 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Status helper methods
-  getStatusColorClass(action: string): string {
-    const statusMap: { [key: string]: string } = {
-      'Approved': 'status-approved',
-      'Rejected': 'status-rejected',
-      'Updated': 'status-updated',
-      'Submitted': 'status-submitted',
-      'Created': 'status-created'
-    };
-    return statusMap[action] || 'status-created';
-  }
-
-  getStatusIcon(action: string): string {
-    const iconMap: { [key: string]: string } = {
-      'Approved': 'pi-check-circle',
-      'Rejected': 'pi-times-circle',
-      'Updated': 'pi-sync',
-      'Submitted': 'pi-upload',
-      'Created': 'pi-plus-circle'
-    };
-    return iconMap[action] || 'pi-circle';
-  }
-
   // Utility methods for error handling
   private showSuccess(message: string): void {
     this.messageService.add({
@@ -1422,10 +1276,5 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   get hasFinancialData(): boolean {
     return !!this.newFinancialData;
-  }
-
-  // TrackBy function for activity trail
-  trackByActivityId(index: number, activity: ActivityItem): string {
-    return activity.id;
   }
 } 

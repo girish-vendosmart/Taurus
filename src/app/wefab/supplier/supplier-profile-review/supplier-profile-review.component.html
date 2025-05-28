@@ -964,45 +964,14 @@
         </button>
       </div>
       
-      <div class="activity-trail-content">
-        <div class="timeline">
-          <!-- Real activity data -->
-          <div class="timeline-item" *ngFor="let activity of activityTrail; trackBy: trackByActivityId">
-            <div class="timeline-marker" [ngClass]="getStatusColorClass(activity.action)">
-              <i class="pi" [ngClass]="getStatusIcon(activity.action)"></i>
-            </div>
-            <div class="timeline-content" [ngClass]="getStatusColorClass(activity.action)">
-              <div class="timeline-header">
-                <div class="header-title">
-                  <span class="activity-badge" [ngClass]="getStatusColorClass(activity.action)">
-                    {{activity.action}}
-                  </span>
-                  <span class="activity-title">{{activity.title}}</span>
-                </div>
-                <div class="header-time">
-                  <span class="activity-time">{{activity.time_since}}</span>
-                </div>
-              </div>
-              <div class="activity-details">
-                <p class="activity-description">{{activity.description}}</p>
-                <p class="activity-user"><i class="pi pi-user"></i> {{activity.user}}</p>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Loading state -->
-          <div class="empty-activity" *ngIf="activityTrail.length === 0 && !dataLoading">
-            <i class="pi pi-info-circle"></i>
-            <p>No activity records found for this supplier profile.</p>
-          </div>
-          
-          <!-- Loading indicator -->
-          <div class="empty-activity" *ngIf="dataLoading">
-            <i class="pi pi-spin pi-spinner"></i>
-            <p>Loading activity trail...</p>
-          </div>
-        </div>
-      </div>
+      <!-- Use the new Activity Trail Component -->
+      <app-activity-trail 
+        [activityData]="activityTrail"
+        [loading]="activityTrailLoading"
+        [showHeader]="false"
+        [maxHeight]="'500px'"
+        [emptyMessage]="'No activity records found for this supplier profile.'">
+      </app-activity-trail>
     </div>
 
     <!-- Right Sidebar -->
