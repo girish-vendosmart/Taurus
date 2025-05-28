@@ -857,76 +857,6 @@ export class SupplierOnboardingComponent implements OnInit {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-6 mb-2',
-            key: 'totalEmployees',
-            type: 'input',
-            templateOptions: {
-              type: 'number',
-              label: 'Total Number of Employees',
-              placeholder: 'Enter number of employees',
-              min: 1,
-              required: true
-            },
-            validation: {
-              messages: {
-                required: 'Number of employees is required'
-              }
-            }
-          },
-          {
-            className: 'col-md-6 mb-2',
-            key: 'foundedYear',
-            type: 'input',
-            templateOptions: {
-              type: 'number',
-              label: 'Year Founded',
-              placeholder: 'Enter year company was founded',
-              min: 1900,
-              max: new Date().getFullYear(),
-              required: true
-            },
-            validation: {
-              messages: {
-                required: 'Year founded is required'
-              }
-            }
-          }
-        ]
-      },
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
-          {
-            className: 'col-md-6 mb-2',
-            key: 'websiteURL',
-            type: 'input',
-            templateOptions: {
-              label: 'Company Website URL',
-              placeholder: 'https://yourcompany.com',
-              required: true
-            },
-            validation: {
-              messages: {
-                required: 'Please enter your company website URL'
-              }
-            }
-          },
-          {
-            className: 'col-md-6 mb-2',
-            key: 'linkedinURL',
-            type: 'input',
-            templateOptions: {
-              label: 'LinkedIn URL',
-              placeholder: 'https://linkedin.com/company/yourcompany',
-              required: false
-            }
-          }
-        ]
-      },
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
-          {
             className: 'col-md-4 mb-2',
             key: 'country',
             type: 'searchable-select',
@@ -1051,41 +981,6 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           }
         ]
-      },
-      // Added Documentation Guidelines Component
-      {
-        template: `
-          <div class="card mt-4 mb-4 border-0 bg-light">
-            <div class="card-body">
-              <div class="d-flex align-items-start">
-                <i class="pi pi-info-circle text-primary me-2 mt-1" style="font-size: 1.2rem;"></i>
-                <div>
-                  <h5 class="documentation-title">Documentation Guidelines</h5>
-                  <p class="mb-3">To help us evaluate your profile more accurately and expedite decision-making, we encourage you to upload comprehensive and relevant documentation. A well-documented profile significantly increases your visibility and improves your chances of being shortlisted for relevant opportunities.</p>
-                  
-
-                </div>
-              </div>
-            </div>
-          </div>
-        `
-      },
-      {
-        key: 'companyDocuments',
-        type: 'file-upload',
-        className: 'col-12 mb-2',
-        templateOptions: {
-          label: 'Company Documents',
-          description: 'Upload documents that will help us evaluate your profile more accurately and expedite decision-making',
-          required: true,
-          acceptedTypes: '.pdf',
-          multiple: true
-        },
-        validation: {
-          messages: {
-            required: 'Please upload documents'
-          }
-        }
       }
     ];
   }
@@ -1342,24 +1237,6 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           }
         ]
-      },
-      // Added Documentation Guidelines Component
-      {
-        template: `
-          <div class="card mt-4 mb-4 border-0 bg-light">
-            <div class="card-body">
-              <div class="d-flex align-items-start">
-                <i class="pi pi-info-circle text-primary me-2 mt-1" style="font-size: 1.2rem;"></i>
-                <div>
-                  <h5 class="documentation-title">Documentation Guidelines</h5>
-                  <p class="mb-3">To help us evaluate your profile more accurately and expedite decision-making, we encourage you to upload comprehensive and relevant documentation. A well-documented profile significantly increases your visibility and improves your chances of being shortlisted for relevant opportunities.</p>
-                  
-
-                </div>
-              </div>
-            </div>
-          </div>
-        `
       },
       {
         key: 'companyDocuments',

@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,8 +11,8 @@ import { CommonService } from '../../shared/common.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SweetAlertService } from '../../shared/sweet-alert.service'
 import e from 'express';
-import { forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { forkJoin, of, BehaviorSubject, Observable } from 'rxjs';
+import { map, tap, catchError, finalize, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 
@@ -53,6 +53,31 @@ interface ActivityLogItem {
   };
 }
 
+interface LoadingState {
+  l1Data: boolean;
+  l2Data: boolean;
+  l3Data: boolean;
+  verification: boolean;
+  machineAnalysis: boolean;
+  facilityAnalysis: boolean;
+}
+
+interface MachineAnalysisResult {
+  machine_status: boolean;
+  machine_status_comment: string;
+}
+
+interface FacilityAnalysisResult {
+  facility_status: boolean;
+  facility_comment: string;
+}
+
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+  expiry: number;
+}
+
 @Component({
   selector: 'app-supplier-profile-review',
   standalone: true,
@@ -66,11 +91,25 @@ interface ActivityLogItem {
   ],
   providers: [MessageService],
   templateUrl: './supplier-profile-review.component.html',
-  styleUrls: ['./supplier-profile-review.component.scss']
+  styleUrls: ['./supplier-profile-review.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SupplierProfileReviewComponent implements OnInit {
+export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
+  private cache = new Map<string, CacheEntry<any>>();
+  private readonly CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
+  
+  // Loading states
+  loadingState: LoadingState = {
+    l1Data: false,
+    l2Data: false,
+    l3Data: false,
+    verification: false,
+    machineAnalysis: false,
+    facilityAnalysis: false
+  };
 
+  // Core properties
   status: string = 'Pending';
   lastUpdated: Date = new Date(2025, 4, 8); // May 8, 2025
   supplierId: any = sessionStorage.getItem('supplier_id');
@@ -105,9 +144,9 @@ export class SupplierProfileReviewComponent implements OnInit {
 
   // Completion Status
   completionStatus: CompletionStatus = {
-    basicInformation: 100,
-    manufacturingCapabilities: 90,
-    financialAdditional: 75
+    basicInformation: 0,
+    manufacturingCapabilities: 0,
+    financialAdditional: 0
   };
   
   // Document Summary
@@ -286,8 +325,188 @@ export class SupplierProfileReviewComponent implements OnInit {
   gstVerified: any = false;
   phoneVerified: any = false;
   facilityVerified: any = false;
-  // First, let's add a method to update the completion status based on approval status
-  updateCompletionStatus(): void {
+
+  // Add isArray method for use in the template
+  isArray = Array.isArray;
+
+  // Observables for reactive data loading
+  private dataLoadingSubject = new BehaviorSubject<boolean>(false);
+  public dataLoading$ = this.dataLoadingSubject.asObservable();
+
+  // Overall completion percentage
+  get completionPercentage(): number {
+    const total = this.completionStatus.basicInformation + 
+                  this.completionStatus.manufacturingCapabilities + 
+                  this.completionStatus.financialAdditional;
+    return Math.round(total / 3);
+  }
+  
+  // Add this property to track which dropdown is visible
+  dropdownVisible: { [key: string]: boolean } = {
+    'L1': false,
+    'L2': false,
+    'L3': false
+  };
+
+  // Add these properties to the component
+  showUpdateDialog: boolean = false;
+  updateRequestLevel: string = '';
+  updateRequestComment: string = '';
+
+  constructor(
+    private router: Router,
+    private messageService: MessageService,
+    private commonservice: CommonService,
+    private sanitizer: DomSanitizer,
+    private sweetAlert: SweetAlertService,
+    private location: Location,
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+    this.mainCurrentDataStatusTrack = 'Pending'; // Initialize with a default value
+    
+    // Add click listener to close dropdowns when clicking outside
+    if (this.isBrowser) {
+      document.addEventListener('click', () => {
+        Object.keys(this.dropdownVisible).forEach(key => {
+          this.dropdownVisible[key] = false;
+        });
+      });
+    }
+  }
+
+  ngOnInit(): void {
+    if (!this.isBrowser) return;
+
+    this.initializeComponent();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+    this.cache.clear();
+  }
+
+  private initializeComponent(): void {
+    // Show loading state
+    this.dataLoadingSubject.next(true);
+
+    // Handle URL parameters
+    this.handleUrlParameters();
+
+    // Load initial data in parallel
+    this.loadInitialData();
+  }
+
+  private handleUrlParameters(): void {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get('tab');
+      
+      if (tab && ['basic', 'manufacturing', 'financial'].includes(tab)) {
+        this.activeLevelTab = tab;
+      }
+
+      if (this.activeLevelTab === 'manufacturing') {
+        const mtab = urlParams.get('mtab');
+        if (mtab && ['machines', 'facility', 'certifications', 'capacity'].includes(mtab)) {
+          this.manufacturingTab = mtab;
+        }
+      }
+    } catch (error) {
+      console.error('Error handling URL parameters:', error);
+    }
+  }
+
+  private loadInitialData(): void {
+    if (!this.supplierId) {
+      this.showError('Supplier ID is missing');
+      this.dataLoadingSubject.next(false);
+      return;
+    }
+
+    // Load all data in parallel for profile completeness calculation
+    const allRequests = [
+      this.getVerificationStatusObservable(this.supplierId),
+      this.getL1DataObservable(this.supplierId),
+      this.getL2DataObservable(this.supplierId),
+      this.getL3DataObservable(this.supplierId)
+    ];
+
+    this.subscription.add(
+      forkJoin(allRequests).pipe(
+        finalize(() => {
+          this.dataLoadingSubject.next(false);
+          this.cdr.detectChanges();
+        })
+      ).subscribe({
+        next: ([verificationData, l1Data, l2Data, l3Data]) => {
+          // Process all data
+          this.verificationStatus = verificationData;
+          this.processL1Data(l1Data);
+          this.processL2Data(l2Data);
+          this.processL3Data(l3Data);
+          
+          // Calculate profile completeness once with all data
+          this.calculateProfileCompleteness();
+        },
+        error: (error) => {
+          console.error('Error loading initial data:', error);
+          this.showError('Failed to load profile data');
+        }
+      })
+    );
+  }
+
+  private getL2DataObservable(supplierId: string): Observable<any> {
+    const cacheKey = `l2_data_${supplierId}`;
+    const cached = this.getFromCache(cacheKey);
+    
+    if (cached) {
+      return of(cached);
+    }
+
+    return forkJoin([
+      this.commonservice.getData(`/api/resource/wfb_supplier_onboarding_L2/${supplierId}`),
+      this.commonservice.getData(`/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=${supplierId}`)
+    ]).pipe(
+      map(([dataRes, statusRes]: [any, any]) => ({
+        data: dataRes?.data || null,
+        status: statusRes?.data || null
+      })),
+      tap(result => this.setCache(cacheKey, result)),
+      catchError(error => {
+        console.error('Error fetching L2 data:', error);
+        return of({ data: null, status: null });
+      })
+    );
+  }
+
+  private getL3DataObservable(supplierId: string): Observable<any> {
+    const cacheKey = `l3_data_${supplierId}`;
+    const cached = this.getFromCache(cacheKey);
+    
+    if (cached) {
+      return of(cached);
+    }
+
+    return forkJoin([
+      this.commonservice.getData(`/api/resource/wfb_supplier_onboarding_L3/${supplierId}`),
+      this.commonservice.getData(`/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${supplierId}`)
+    ]).pipe(
+      map(([dataRes, statusRes]: [any, any]) => ({
+        data: dataRes?.data || null,
+        status: statusRes?.data || null
+      })),
+      tap(result => this.setCache(cacheKey, result)),
+      catchError(error => {
+        console.error('Error fetching L3 data:', error);
+        return of({ data: null, status: null });
+      })
+    );
+  }
+
+  private calculateProfileCompleteness(): void {
     // Reset completion status initially to 0
     this.completionStatus = {
       basicInformation: 0,
@@ -295,7 +514,7 @@ export class SupplierProfileReviewComponent implements OnInit {
       financialAdditional: 0
     };
     
-    // Update based on current approval status
+    // Calculate based on current approval status for all levels
     // For Stage 1: Basic Information
     if (this.getCurrentL1DataStatus) {
       if (this.getCurrentL1DataStatus === 'Approved' || 
@@ -328,1093 +547,839 @@ export class SupplierProfileReviewComponent implements OnInit {
         this.completionStatus.financialAdditional = 50; // Set to 50% if rejected
       }
     }
-  }
-  
-  // Overall completion percentage
-  get completionPercentage(): number {
-    const total = this.completionStatus.basicInformation + 
-                  this.completionStatus.manufacturingCapabilities + 
-                  this.completionStatus.financialAdditional;
-    return Math.round(total / 3);
-  }
-  
-  // Add this property to track which dropdown is visible
-  dropdownVisible: { [key: string]: boolean } = {
-    'L1': false,
-    'L2': false,
-    'L3': false
-  };
 
-  // Add these properties to the component
-  showUpdateDialog: boolean = false;
-  updateRequestLevel: string = '';
-  updateRequestComment: string = '';
-
-  // Add isArray method for use in the template
-  isArray = Array.isArray;
-
-  constructor(
-    private router: Router,
-    private messageService: MessageService,
-    private commonservice: CommonService,
-    private sanitizer: DomSanitizer,
-    private sweetAlert: SweetAlertService,
-    private location: Location,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-    this.isBrowser = isPlatformBrowser(this.platformId);
-    this.mainCurrentDataStatusTrack = 'Pending'; // Initialize with a default value
-    this.getL1Data(this.supplierId);
-    this.getDocumentSummary(this.supplierId);
-    this.getL1DocumentSummary(this.supplierId);
+    // Update main status after calculating completeness
+    this.updateMainStatus();
     
-    // Add click listener to close dropdowns when clicking outside
-    if (this.isBrowser) {
-      document.addEventListener('click', () => {
-        Object.keys(this.dropdownVisible).forEach(key => {
-          this.dropdownVisible[key] = false;
-        });
-      });
+    console.log('Profile completeness calculated:', this.completionStatus);
+  }
+
+  private getFromCache<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    if (entry && Date.now() < entry.timestamp + entry.expiry) {
+      return entry.data;
+    }
+    this.cache.delete(key);
+    return null;
+  }
+
+  private setCache<T>(key: string, data: T): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      expiry: this.CACHE_EXPIRY
+    });
+  }
+
+  private getVerificationStatusObservable(supplierId: string): Observable<any> {
+    const cacheKey = `verification_${supplierId}`;
+    const cached = this.getFromCache(cacheKey);
+    
+    if (cached) {
+      return of(cached);
+    }
+
+    this.loadingState.verification = true;
+    
+    return this.commonservice.getData(
+      `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_and_verification_status?supplier_company_id=${supplierId}`
+    ).pipe(
+      map((res: any) => res?.data || {}),
+      tap(data => this.setCache(cacheKey, data)),
+      catchError(error => {
+        console.error('Error fetching verification status:', error);
+        return of({});
+      }),
+      finalize(() => {
+        this.loadingState.verification = false;
+        this.cdr.detectChanges();
+      })
+    );
+  }
+
+  private getL1DataObservable(supplierId: string): Observable<any> {
+    const cacheKey = `l1_data_${supplierId}`;
+    const cached = this.getFromCache(cacheKey);
+    
+    if (cached) {
+      return of(cached);
+    }
+
+    this.loadingState.l1Data = true;
+
+    return forkJoin([
+      this.commonservice.getData(`/api/resource/wfb_supplier_onboarding_L1/${supplierId}`),
+      this.commonservice.getData(`/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=${supplierId}`)
+    ]).pipe(
+      map(([dataRes, statusRes]: [any, any]) => ({
+        data: dataRes?.data || null,
+        status: statusRes?.data || null
+      })),
+      tap(result => this.setCache(cacheKey, result)),
+      catchError(error => {
+        console.error('Error fetching L1 data:', error);
+        return of({ data: null, status: null });
+      }),
+      finalize(() => {
+        this.loadingState.l1Data = false;
+        this.cdr.detectChanges();
+      })
+    );
+  }
+
+  private processL1Data(result: any): void {
+    if (result.data) {
+      try {
+        this.getCompanyProfile = JSON.parse(result.data.company_profile);
+        this.gstVerified = this.getCompanyProfile?.gstVerified || false;
+        this.phoneVerified = this.getCompanyProfile?.phone_verified || false;
+        this.requestToResubmitCommentL1 = result.data.comment || '';
+        
+        // Count documents
+        this.numberOfCompanyDocuments = this.getCompanyProfile?.companyDocuments?.length || 0;
+      } catch (error) {
+        console.error('Error parsing L1 data:', error);
+        this.getCompanyProfile = null;
+      }
+    }
+
+    if (result.status) {
+      this.getCurrentL1DataStatus = result.status.approval_status;
     }
   }
 
-  ngOnInit(): void {
-    // Check for route params to determine which tab to display
-    // Example: route like /profile-review?tab=manufacturing
-    if (this.isBrowser) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tab = urlParams.get('tab');
-      if (tab) {
-        this.changeLevelTab(tab);
+  private processL2Data(result: any): void {
+    if (result.data) {
+      try {
+        this.manufacturingData = JSON.parse(result.data.company_profile);
+        this.requestToResubmitCommentL2 = result.data.comment || '';
+        
+        // Count documents
+        this.numberOfMachinePhoto = this.manufacturingData?.machines?.length || 0;
+        this.numberOfFacilityPhoto = this.manufacturingData?.facilityPhotos?.length || 0;
+        this.numberOfCertificationPhoto = this.manufacturingData?.certifications?.length || 0;
+
+        // Process machine verification in background
+        this.processMachineVerificationAsync();
+      } catch (error) {
+        console.error('Error parsing L2 data:', error);
+        this.manufacturingData = null;
+      }
+    }
+
+    if (result.status) {
+      this.getCurrentL2DataStatus = result.status.approval_status;
+    }
+  }
+
+  private processL3Data(result: any): void {
+    if (result.data) {
+      try {
+        this.newFinancialData = JSON.parse(result.data.company_profile);
+        this.requestToResubmitCommentL3 = result.data.comment || '';
+      } catch (error) {
+        console.error('Error parsing L3 data:', error);
+        this.newFinancialData = null;
+      }
+    }
+
+    if (result.status) {
+      this.getCurrentL3DataStatus = result.status.approval_status;
+    }
+  }
+
+  private processMachineVerificationAsync(): void {
+    if (!this.manufacturingData?.machines?.length || !this.getCompanyProfile) return;
+
+    // Check if machine analysis is already in progress or completed
+    if (this.loadingState.machineAnalysis) return;
+
+    // Check if all machines already have analysis results
+    const needsAnalysis = this.manufacturingData.machines.some((machine: any) => {
+      const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
+      if (!fileId) return false;
+      
+      // Check if this machine already has analysis results
+      const cacheKey = `machine_analysis_${fileId}`;
+      const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
+      
+      if (cached) {
+        // Apply cached results
+        machine.machinePhotos.machine_status = cached.machine_status;
+        machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
+        return false; // No analysis needed
       }
       
-      // Check for manufacturing tab
-      if (this.activeLevelTab === 'manufacturing') {
-        const mtab = urlParams.get('mtab');
-        if (mtab && ['machines', 'facility', 'certifications', 'capacity'].includes(mtab)) {
-          this.changeManufacturingTab(mtab);
-        }
-      }
+      // Check if machine already has status (from previous analysis)
+      return machine.machinePhotos.machine_status === undefined;
+    });
 
-      this.getVerificationStatus(this.supplierId)
-      this.accessFirebaseTrigger('wfb_supplier_onboarding_L1', this.supplierId)
-      this.accessFirebaseTrigger('wfb_supplier_onboarding_L2', this.supplierId)
-      this.accessFirebaseTrigger('wfb_supplier_onboarding_L3', this.supplierId)
-
+    if (!needsAnalysis) {
+      console.log('All machines already analyzed, skipping API calls');
+      this.processFacilityVerificationAsync();
+      return;
     }
-  }
 
-  getVerificationStatus(supplierId: string): void {
-    this.commonservice.getData('/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_and_verification_status?supplier_company_id=' + supplierId).subscribe((res: any) => {
-      this.verificationStatus = res.data
-    })
-  }
-  
-  navigateToEdit(): void {
+    this.loadingState.machineAnalysis = true;
+
+    // Process machines in batches to avoid overwhelming the server
+    const batchSize = 3;
+    const machines = this.manufacturingData.machines.filter((machine: any) => {
+      const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
+      if (!fileId) return false;
+      
+      // Only process machines that need analysis
+      const cacheKey = `machine_analysis_${fileId}`;
+      const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
+      return !cached && machine.machinePhotos.machine_status === undefined;
+    });
+
+    if (machines.length === 0) {
+      this.loadingState.machineAnalysis = false;
+      this.processFacilityVerificationAsync();
+      return;
+    }
+
+    const batches = [];
+    for (let i = 0; i < machines.length; i += batchSize) {
+      batches.push(machines.slice(i, i + batchSize));
+    }
+
+    console.log(`Starting machine analysis for ${machines.length} machines in ${batches.length} batches`);
     
-    // Navigate to appropriate edit page based on active tab
-    switch (this.activeLevelTab) {
-      case 'basic':
-        this.router.navigate(['/wefab/supplier/supplier-onboarding'], {
-          queryParams: { mode: 'edit' }
-        });
-        break;
-      case 'manufacturing':
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-l2'], {
-      queryParams: { mode: 'edit' }
+    // Process batches sequentially with delay
+    this.processMachineBatches(batches, 0);
+  }
+
+  private processMachineBatches(batches: any[][], batchIndex: number): void {
+    if (batchIndex >= batches.length) {
+      this.loadingState.machineAnalysis = false;
+      this.processFacilityVerificationAsync();
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const batch = batches[batchIndex];
+    const requests = batch.map(machine => this.analyzeMachine(machine));
+
+    console.log(`Processing machine batch ${batchIndex + 1}/${batches.length} with ${batch.length} machines`);
+
+    forkJoin(requests).pipe(
+      catchError(error => {
+        console.error(`Error processing machine batch ${batchIndex}:`, error);
+        return of([]);
+      })
+    ).subscribe(() => {
+      // Process next batch after a short delay
+      setTimeout(() => {
+        this.processMachineBatches(batches, batchIndex + 1);
+      }, 500);
     });
-        break;
-      case 'financial':
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-l3'], {
-      queryParams: { mode: 'edit' }
+  }
+
+  private analyzeMachine(machine: any): Observable<any> {
+    if (!machine?.machinePhotos) return of(null);
+
+    const fileId = machine.machinePhotos.fileId || machine.machinePhotos[0]?.file_id;
+    if (!fileId) return of(null);
+
+    // Check cache first
+    const cacheKey = `machine_analysis_${fileId}`;
+    const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
+    
+    if (cached) {
+      console.log(`Using cached analysis for machine ${fileId}`);
+      machine.machinePhotos.machine_status = cached.machine_status;
+      machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
+      return of(cached);
+    }
+
+    // Check if machine already has analysis results
+    if (machine.machinePhotos.machine_status !== undefined) {
+      console.log(`Machine ${fileId} already analyzed, skipping API call`);
+      return of(null);
+    }
+
+    const lat = this.getCompanyProfile?.registered_lat;
+    const lng = this.getCompanyProfile?.registered_lng;
+
+    console.log(`Analyzing machine image: ${fileId}`);
+
+    return this.commonservice.getData(
+      `/api/method/proq_buyer.api.supplier_onboarding.machine_image_verification.machine_identification.analyze_machine_image?file_id=${fileId}&facility_lat=${lat}&facility_lon=${lng}`
+    ).pipe(
+      tap((res: any) => {
+        if (res?.data) {
+          const { machine_image, within_facility, verification_comment } = res.data;
+          const analysisResult = {
+            machine_status: machine_image && within_facility,
+            machine_status_comment: verification_comment
+          };
+          
+          // Apply results to machine
+          machine.machinePhotos.machine_status = analysisResult.machine_status;
+          machine.machinePhotos.machine_status_comment = analysisResult.machine_status_comment;
+          
+          // Cache the results for future use
+          this.setCache(cacheKey, analysisResult);
+          
+          console.log(`Machine analysis completed for ${fileId}:`, analysisResult);
+        }
+      }),
+      catchError(error => {
+        console.error('Error analyzing machine:', error);
+        const errorResult = {
+          machine_status: false,
+          machine_status_comment: 'Error during verification'
+        };
+        
+        machine.machinePhotos.machine_status = errorResult.machine_status;
+        machine.machinePhotos.machine_status_comment = errorResult.machine_status_comment;
+        
+        // Cache the error result to avoid retrying immediately
+        this.setCache(cacheKey, errorResult);
+        
+        return of(null);
+      })
+    );
+  }
+
+  private processFacilityVerificationAsync(): void {
+    if (!this.manufacturingData?.facilityPhotos?.length) return;
+
+    // Check if all facilities already have analysis results
+    const needsAnalysis = this.manufacturingData.facilityPhotos.some((facility: any) => {
+      if (!facility?.fileId) return false;
+      
+      // Check if this facility already has analysis results
+      const cacheKey = `facility_analysis_${facility.fileId}`;
+      const cached = this.getFromCache<FacilityAnalysisResult>(cacheKey);
+      
+      if (cached) {
+        // Apply cached results
+        facility.facility_status = cached.facility_status;
+        facility.facility_comment = cached.facility_comment;
+        return false; // No analysis needed
+      }
+      
+      // Check if facility already has status (from previous analysis)
+      return facility.facility_status === undefined;
     });
-        break;
-      default:
-        this.router.navigate(['/wefab/supplier/supplier-onboarding']);
+
+    if (!needsAnalysis) {
+      console.log('All facilities already analyzed, skipping API calls');
+      this.updateFacilityVerificationStatus();
+      return;
+    }
+
+    this.loadingState.facilityAnalysis = true;
+
+    // Filter facilities that need analysis
+    const facilitiesToAnalyze = this.manufacturingData.facilityPhotos.filter((facility: any) => {
+      if (!facility?.fileId) return false;
+      
+      const cacheKey = `facility_analysis_${facility.fileId}`;
+      const cached = this.getFromCache<FacilityAnalysisResult>(cacheKey);
+      return !cached && facility.facility_status === undefined;
+    });
+
+    if (facilitiesToAnalyze.length === 0) {
+      this.loadingState.facilityAnalysis = false;
+      this.updateFacilityVerificationStatus();
+      this.cdr.detectChanges();
+      return;
+    }
+
+    console.log(`Starting facility analysis for ${facilitiesToAnalyze.length} facilities`);
+
+    const requests = facilitiesToAnalyze.map((facility: any) => 
+      this.analyzeFacility(facility)
+    );
+
+    forkJoin(requests).pipe(
+      finalize(() => {
+        this.loadingState.facilityAnalysis = false;
+        this.updateFacilityVerificationStatus();
+        this.cdr.detectChanges();
+      })
+    ).subscribe();
+  }
+
+  private analyzeFacility(facility: any): Observable<any> {
+    if (!facility?.fileId) return of(null);
+
+    // Check cache first
+    const cacheKey = `facility_analysis_${facility.fileId}`;
+    const cached = this.getFromCache<FacilityAnalysisResult>(cacheKey);
+    
+    if (cached) {
+      console.log(`Using cached analysis for facility ${facility.fileId}`);
+      facility.facility_status = cached.facility_status;
+      facility.facility_comment = cached.facility_comment;
+      return of(cached);
+    }
+
+    // Check if facility already has analysis results
+    if (facility.facility_status !== undefined) {
+      console.log(`Facility ${facility.fileId} already analyzed, skipping API call`);
+      return of(null);
+    }
+
+    const lat = this.getCompanyProfile?.registered_lat;
+    const lng = this.getCompanyProfile?.registered_lng;
+
+    console.log(`Analyzing facility: ${facility.fileId}`);
+
+    return this.commonservice.getData(
+      `/api/method/proq_buyer.api.supplier_onboarding.machine_image_verification.machine_identification.factory_geolocation_verification?file_id=${facility.fileId}&registered_address_lat=${lat}&registered_address_lon=${lng}`
+    ).pipe(
+      tap((res: any) => {
+        if (res?.data) {
+          const analysisResult: FacilityAnalysisResult = {
+            facility_status: res.data.verification_status,
+            facility_comment: res.data.verification_comment
+          };
+          
+          // Apply results to facility
+          facility.facility_status = analysisResult.facility_status;
+          facility.facility_comment = analysisResult.facility_comment;
+          
+          // Cache the results for future use
+          this.setCache(cacheKey, analysisResult);
+          
+          console.log(`Facility analysis completed for ${facility.fileId}:`, analysisResult);
+        }
+      }),
+      catchError(error => {
+        console.error('Error verifying facility:', error);
+        const errorResult: FacilityAnalysisResult = {
+          facility_status: false,
+          facility_comment: 'Error during verification'
+        };
+        
+        facility.facility_status = errorResult.facility_status;
+        facility.facility_comment = errorResult.facility_comment;
+        
+        // Cache the error result to avoid retrying immediately
+        this.setCache(cacheKey, errorResult);
+        
+        return of(null);
+      })
+    );
+  }
+
+  private updateFacilityVerificationStatus(): void {
+    if (!this.manufacturingData?.facilityPhotos?.length) {
+      this.facilityVerified = false;
+      return;
+    }
+
+    this.facilityVerified = this.manufacturingData.facilityPhotos.some(
+      (facility: any) => facility.facility_status
+    );
+  }
+
+  private updateMainStatus(): void {
+    if (this.getCurrentL3DataStatus && this.getCurrentL3DataStatus !== 'Pending') {
+      this.mainCurrentDataStatusTrack = this.getCurrentL3DataStatus;
+    } else if (this.getCurrentL2DataStatus && this.getCurrentL2DataStatus !== 'Pending') {
+      this.mainCurrentDataStatusTrack = this.getCurrentL2DataStatus;
+    } else if (this.getCurrentL1DataStatus && this.getCurrentL1DataStatus !== 'Pending') {
+      this.mainCurrentDataStatusTrack = this.getCurrentL1DataStatus;
+    } else {
+      this.mainCurrentDataStatusTrack = 'Pending';
     }
   }
-  
-  returnToForm(): void {
-    this.router.navigate(['/wefab/supplier/supplier-onboarding']);
-  }
-  
-  printProfile(): void {
-    if (this.isBrowser) {
-      window.print();
-    }
-  }
-  
-  exportProfile(): void {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Export',
-      detail: 'Profile exported successfully',
-      life: 3000
-    });
-  }
-  
+
+  // Optimized tab change methods
   changeLevelTab(tab: string): void {
+    if (this.activeLevelTab === tab) return;
+
     this.activeLevelTab = tab;
     
-    // Reset the secondary tab when changing level tabs
-    if (tab === 'financial') {
-      this.activeTab = 'revenue';
-      this.getL3Data(this.supplierId)
-      this.getL3DataStatus(this.supplierId)
-    }
-    
-    // Update URL with the active tab without navigation - only if in browser
-    if (this.isBrowser) {
-      try {
-        const url = new URL(window.location.href);
-        url.searchParams.set('tab', tab);
-        window.history.replaceState({}, '', url.toString());
-      } catch (error) {
-        console.error('Error updating URL:', error);
-      }
-    }
+    // Update URL without navigation
+    this.updateUrl({ tab });
 
-    if(tab === 'basic') {
-      this.getL1Data(this.supplierId)
-      this.getL1DataStatus(this.supplierId)
-    }
+    // All data is already loaded during initialization, no need to load again
+    this.cdr.detectChanges();
+  }
 
-    if(tab === 'manufacturing') {
-      this.getL2Data(this.supplierId)
-      this.getL2DataStatus(this.supplierId)
-    }
-    
-    // Update completion status whenever tab changes
-    this.updateCompletionStatus();
-  }
-  
-  changeTab(tab: string): void {
-    this.activeTab = tab;
-  }
-  
-  getTabDisplayName(tab: string): string {
-    switch (tab) {
-      case 'basic': return 'Basic Information';
-      case 'manufacturing': return 'Manufacturing Capabilities';
-      case 'financial': return 'Financial & Additional';
-      default: return tab.charAt(0).toUpperCase() + tab.slice(1);
-    }
-  }
-  
-  approveProfile(): void {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Approved',
-      detail: 'Profile has been approved successfully',
-      life: 3000
-    });
-    
-    // Update status
-    this.status = 'Approved';
-  }
-  
-  rejectProfile(): void {
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Rejected',
-      detail: 'Profile has been rejected',
-      life: 3000
-    });
-    
-    // Update status
-    this.status = 'Rejected';
-  }
-  
-  changeBasicInfoTab(tab: string): void {
-    this.basicInfoTab = tab;
-    
-    // Update URL with the active tabs without navigation - only if in browser
-    if (this.isBrowser) {
-      try {
-        const url = new URL(window.location.href);
-        url.searchParams.set('tab', this.activeLevelTab);
-        url.searchParams.set('secondaryTab', tab);
-        window.history.replaceState({}, '', url.toString());
-      } catch (error) {
-        console.error('Error updating URL:', error);
-      }
-    }
-    
-    
-  }
-  
   changeManufacturingTab(tab: string): void {
     this.manufacturingTab = tab;
-    
-    // Update URL with the active tabs without navigation - only if in browser
-    if (this.isBrowser) {
-      try {
-        const url = new URL(window.location.href);
-        url.searchParams.set('tab', this.activeLevelTab);
-        url.searchParams.set('mtab', tab);
-        window.history.replaceState({}, '', url.toString());
-      } catch (error) {
-        console.error('Error updating URL:', error);
-      }
-    }
-    
-  }
-  
-  getManufacturingTabName(tab: string): string {
-    switch (tab) {
-      case 'machines': return 'Machine Details';
-      case 'facility': return 'Facility Verification';
-      case 'certifications': return 'Certifications';
-      case 'capacity': return 'Production Capacity';
-      default: return tab.charAt(0).toUpperCase() + tab.slice(1);
-    }
+    this.updateUrl({ tab: this.activeLevelTab, mtab: tab });
   }
 
   changeFinancialTab(tab: string): void {
     this.financialTab = tab;
   }
 
-  getDocumentSummary(supplierId:any) {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId
-      this.commonservice.getData(endPoint).subscribe((res: any) => {
-        this.getDocumentSummaryData = JSON.parse(res.data.company_profile)
-        this.numberOfMachinePhoto = this.getDocumentSummaryData.machines.length
-        this.numberOfFacilityPhoto = this.getDocumentSummaryData.facilityPhotos.length
-        this.numberOfCertificationPhoto = this.getDocumentSummaryData.certifications.length
-        console.log(this.getDocumentSummaryData)
-      })
-    }
+  private updateUrl(params: { [key: string]: string }): void {
+    if (!this.isBrowser) return;
 
-    getL1DocumentSummary(supplierId:any) {
-      let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
-        this.commonservice.getData(endPoint).subscribe((res: any) => {
-          this.getDocumentSummaryL1Data = JSON.parse(res.data.company_profile)
-          this.phoneVerifiedStatus = this.getDocumentSummaryL1Data.phone_verified
-          this.numberOfCompanyDocuments = this.getDocumentSummaryL1Data.companyDocuments.length
-          console.log(this.numberOfCompanyDocuments)
-          console.log(this.getDocumentSummaryData)
-        })
-      }
-
-  getL1Data(supplierId: any) {
-    if (!supplierId) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Warning',
-        detail: 'Supplier ID is missing or invalid',
-        life: 3000
+    try {
+      const url = new URL(window.location.href);
+      Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.set(key, value);
       });
-      return;
+      window.history.replaceState({}, '', url.toString());
+    } catch (error) {
+      console.error('Error updating URL:', error);
     }
-
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId;
-    this.commonservice.getData(endPoint).subscribe({
-      next: (res: any) => {
-        if (res && res.data) {
-          if (res.data.comment) {
-            this.requestToResubmitCommentL1 = res.data.comment;
-          }
-          console.log("L1 Data ", res);
-          try {
-            this.getCompanyProfile = JSON.parse(res.data.company_profile);
-            console.log("L1 Data ", this.getCompanyProfile);
-            
-            // Check if gstVerified and phone_verified properties exist before assignment
-            this.gstVerified = this.getCompanyProfile.gstVerified || false;
-            this.phoneVerified = this.getCompanyProfile.phone_verified || false;
-            
-            this.registeredLat = this.getCompanyProfile.registered_lat;
-            this.registeredLng = this.getCompanyProfile.registered_lng;
-          } catch (error) {
-            console.error("Error parsing company profile data:", error);
-            this.getCompanyProfile = null;
-          }
-          this.getL1DataStatus(this.supplierId);
-        } else {
-          this.getCompanyProfile = null;
-          this.getL1DataStatus(this.supplierId);
-        }
-      },
-      error: (err) => {
-        console.error("Error fetching L1 data:", err);
-        this.getCompanyProfile = null;
-        this.getL1DataStatus(this.supplierId);
-      }
-    });
   }
 
-  updateMachineData() {
-    if (!this.manufacturingData || !this.manufacturingData.machines || 
-        !Array.isArray(this.manufacturingData.machines) || 
-        this.manufacturingData.machines.length === 0) {
-      return;
-    }
-
-    this.manufacturingData.machines.forEach((machine: any) => {
-      debugger
-      console.log("Machine ", machine);
-      
-      let fileId = machine.machinePhotos.fileId ? machine.machinePhotos.fileId : machine.machinePhotos[0].file_id;
-      
-      let endPoint = `/api/method/proq_buyer.api.supplier_onboarding.machine_image_verification.machine_identification.analyze_machine_image?file_id=${fileId}&facility_lat=${this.registeredLat}&facility_lon=${this.registeredLng}`;
-      this.commonservice.getData(endPoint).subscribe({
-        next: (res: any) => {
-          console.log("Machine Analysis ", res);
-          if (res && res.data) {
-            if (!res.data.machine_image && !res.data.within_facility) {
-              machine.machinePhotos.machine_status = false;
-              machine.machinePhotos.machine_status_comment = res.data.verification_comment;
-            } else if (res.data.machine_image && !res.data.within_facility) {
-              machine.machinePhotos.machine_status = false;
-              machine.machinePhotos.machine_status_comment = res.data.verification_comment;
-            } else if (res.data.machine_image && res.data.within_facility) {
-              machine.machinePhotos.machine_status = true;
-              machine.machinePhotos.machine_status_comment = res.data.verification_comment;
-            }
-          }
-        },
-        error: (err) => {
-          console.error("Error analyzing machine:", err);
-          machine.machinePhotos.machine_status = false;
-          machine.machinePhotos.machine_status_comment = "Error during verification";
-        }
-      });
-    });
-    this.updateFacilityData();
-  }
-
-  updateFacilityData() {
-    if (!this.manufacturingData || !this.manufacturingData.facilityPhotos || 
-        !Array.isArray(this.manufacturingData.facilityPhotos) || 
-        this.manufacturingData.facilityPhotos.length === 0) {
-      this.facilityVerified = false;
-      return;
-    }
-
-    this.manufacturingData.facilityPhotos.forEach((facility: any) => {
-      if (!facility || !facility.fileId) return;
-      
-      let fileId = facility.fileId;
-      console.log('fileId', fileId);
-      let endpoint = `/api/method/proq_buyer.api.supplier_onboarding.machine_image_verification.machine_identification.factory_geolocation_verification?file_id=${fileId}&registered_address_lat=${this.registeredLat}&registered_address_lon=${this.registeredLng}`;
-      this.commonservice.getData(endpoint).subscribe({
-        next: (res: any) => {
-          if (res && res.data) {
-            if (res.data.verification_status) {
-              facility.facility_status = true;
-              this.facilityVerified = true;
-            } else {
-              facility.facility_status = false;
-            }
-            facility.facility_comment = res.data.verification_comment;
-          }
-          this.getFacilityVerificationStatus();
-        },
-        error: (err) => {
-          console.error("Error verifying facility:", err);
-          facility.facility_status = false;
-        }
-      });
-    });
-
-  }
-
-  getFacilityVerificationStatus() {
-    let verificationStatus = false;
-    this.manufacturingData.facilityPhotos.forEach((facility: any) => {
-      verificationStatus = facility.facility_status;
-    });
-
-    console.log("Verification Status ", verificationStatus);
-    this.facilityVerified = verificationStatus;
-  }
-
-  getL2Data(supplierId: any) {
-    if (!supplierId) return;
-    
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId;
-    this.commonservice.getData(endPoint).subscribe({
-      next: (res: any) => {
-        if (res && res.data) {
-          if (res.data.comment) {
-            this.requestToResubmitCommentL2 = res.data.comment;
-          }
-          console.log("Manufacturing data ", res);
-          try {
-            this.manufacturingData = JSON.parse(res.data.company_profile);
-            console.log("Manufacturing data ", this.manufacturingData);
-            this.updateMachineData();
-          } catch (error) {
-            console.error("Error parsing manufacturing data:", error);
-            this.manufacturingData = null;
-          }
-        } else {
-          this.manufacturingData = null;
-        }
-        this.getL2DataStatus(supplierId);
-      },
-      error: (err) => {
-        console.error("Error fetching L2 data:", err);
-        this.manufacturingData = null;
-        this.getL2DataStatus(supplierId);
-      }
-    });
-  }
-
-  getL3Data(supplierId: any) {
-    if (!supplierId) return;
-    
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + supplierId;
-    this.commonservice.getData(endPoint).subscribe({
-      next: (res: any) => {
-        if (res && res.data) {
-          if (res.data.comment) {
-            this.requestToResubmitCommentL3 = res.data.comment;
-          }
-          try {
-            this.newFinancialData = JSON.parse(res.data.company_profile);
-          } catch (error) {
-            console.error("Error parsing financial data:", error);
-            this.newFinancialData = null;
-          }
-        } else {
-          this.newFinancialData = null;
-        }
-        this.getL3DataStatus(supplierId);
-      },
-      error: (err) => {
-        console.error("Error fetching L3 data:", err);
-        this.newFinancialData = null;
-        this.getL3DataStatus(supplierId);
-      }
-    });
-  }
-
-  getL1DataStatus(supplierId:any) {
-    let endPoint = '/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=' + supplierId
-      this.commonservice.getData(endPoint).subscribe((res: any) => {
-        this.getCurrentDataStatus = res.data.approval_status
-        this.getCurrentL1DataStatus = res.data.approval_status
-        this.getL2Data(supplierId)
-        this.updateCompletionStatus();
-      })
-  }
-
-  getL2DataStatus(supplierId:any) {
-    let endPoint = '/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=' + supplierId
-      this.commonservice.getData(endPoint).subscribe((res: any) => {
-        this.getCurrentDataStatus = res.data.approval_status
-        this.getCurrentL2DataStatus = res.data.approval_status
-        this.getL3Data(supplierId)
-        this.updateCompletionStatus();
-      })
-  }
-
-  getL3DataStatus(supplierId:any) {
-    let endPoint = '/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=' + supplierId
-      this.commonservice.getData(endPoint).subscribe((res: any) => {
-        this.getCurrentDataStatus = res.data.approval_status
-        this.getCurrentL3DataStatus = res.data.approval_status
-        this.mainCurrentDataStatus()
-        this.updateCompletionStatus();
-      })
-  }
-
-  mainCurrentDataStatus() {
-    if(this.getCurrentL1DataStatus === 'Under Review') {
-       this.mainCurrentDataStatusTrack = 'Stage 1: Under Review'
-    }
-    else if(this.getCurrentL1DataStatus === 'Request to Resubmit') {
-       this.mainCurrentDataStatusTrack = 'Stage 1: Request to Resubmit'
-    }
-    else if(this.getCurrentL2DataStatus === 'Under Review') {
-      this.mainCurrentDataStatusTrack = 'Stage 2: Under Review'
-    }
-    else if(this.getCurrentL2DataStatus === 'Request to Resubmit') {
-      this.mainCurrentDataStatusTrack = 'Stage 2: Request to Resubmit'
-    }
-    else if(this.getCurrentL3DataStatus === 'Under Review') {
-      this.mainCurrentDataStatusTrack = 'Stage 3: Under Review'
-    }
-    else if(this.getCurrentL3DataStatus === 'Request to Resubmit') {
-      this.mainCurrentDataStatusTrack = 'Stage 3: Request to Resubmit'
-    } else if(this.getCurrentL2DataStatus === 'Rejected') {
-      this.mainCurrentDataStatusTrack = 'Stage 2: Rejected'
-    } else if(this.getCurrentL3DataStatus === 'Rejected') {
-      this.mainCurrentDataStatusTrack = 'Stage 3: Rejected'
-    } else if(this.getCurrentL1DataStatus === 'Rejected') {
-      this.mainCurrentDataStatusTrack = 'Stage 1: Rejected'
-    } 
-    else if(this.getCurrentL3DataStatus === 'Approved') {
-      this.mainCurrentDataStatusTrack = 'Stage 3: Approved'
-    } else if(this.getCurrentL2DataStatus === 'Approved') {
-      this.mainCurrentDataStatusTrack = 'Stage 2: Approved'
-    } else if(this.getCurrentL1DataStatus === 'Approved') {
-      this.mainCurrentDataStatusTrack = 'Stage 1: Approved'
-    }
-    
-    // Update the completion status whenever the status changes
-    this.updateCompletionStatus();
-  }
-
+  // Utility methods
   formatProcessName(process: string): string {
-    // Convert snake_case or kebab-case to Title Case
-    return process
-      .replace(/[_-]/g, ' ')
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
-
-  isCertificateDocumentArray(cert: any): boolean {
-    return Array.isArray(cert.certificateDocument);
-  }
-
-  getCertificateUrl(cert: any): string {
-    if (!cert || !cert.certificateDocument) {
-      return '';
-    }
-    
-    // If it's an array, get the first item
-    if (Array.isArray(cert.certificateDocument)) {
-      const firstDoc = cert.certificateDocument[0];
-      return firstDoc?.url || firstDoc || '';
-    }
-    
-    // If it's an object, get the url property or the value itself
-    return cert.certificateDocument.url || cert.certificateDocument || '';
-  }
-
-  isMachineDocumentArray(machine: any): boolean {
-    return Array.isArray(machine.machinePhotos);
+    return process.replace(/([A-Z])/g, ' $1').trim();
   }
 
   isImageFile(url: string): boolean {
-    return /\.(jpeg|jpg|gif|png|webp|bmp)$/i.test(url);
+    return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
   }
-  
+
   isPdfFile(url: string): boolean {
     return /\.pdf$/i.test(url);
   }
-  
+
   isDocFile(url: string): boolean {
     return /\.(doc|docx)$/i.test(url);
   }
-  
+
   isOtherFile(url: string): boolean {
     return !this.isImageFile(url) && !this.isPdfFile(url) && !this.isDocFile(url);
   }
-  
+
   getDocumentName(url: string): string {
-    // Extract filename from URL
-    const parts = url.split('/');
-    const filename = parts[parts.length - 1];
-    // Remove extension and decode URL
-    return decodeURIComponent(filename.split('.')[0]);
+    return url.split('/').pop()?.split('?')[0] || 'Document';
   }
-  
+
   getDocumentType(url: string): string {
-    // Extract extension from URL
-    const parts = url.split('.');
-    return parts[parts.length - 1].toUpperCase();
-  }
-  
-
-  approve(level: string) {
-    this.sweetAlert.confirm(
-      '',
-      'Are you sure you want to approve this stage?',
-      'question',
-      'Yes',
-      'No'
-    ).then((result:any) => {
-      if (result.isConfirmed) {
-        // User clicked "Yes, Approve"
-        let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
-        let payload = {
-          "onboarding_status": "Approved"
-        };
-        this.commonservice.putData(endPoint, payload).subscribe({
-          next: (res: any) => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Success',
-              detail: level === 'L1' ? 'Basic Information has been approved' : level === 'L2' ? 'Manufacturing Capabilities has been approved' : 'Financial & Additional has been approved',
-              life: 3000
-            });
-            this.getStatusForm(level, this.supplierId)
-          },
-          error: (error) => {
-            this.sweetAlert.error(
-              'Failed to approve stage'
-            );
-          }
-        });
-      }
-    });
+    const extension = url.split('.').pop()?.toLowerCase();
+    return extension || 'file';
   }
 
-  getStatusForm(level:string, supplierId:any) {
-    if(level === 'L1') {
-      this.getL1DataStatus(supplierId)
-    } else if(level === 'L2') {
-      this.getL2DataStatus(supplierId)
-    } else if(level === 'L3') {
-      this.getL3DataStatus(supplierId)
-    }
-    this.updateCompletionStatus();
-  }
-
-  reject(level: string) {
-    this.sweetAlert.confirm(
-      '',
-      'Are you sure you want to reject this stage?',
-      'question',
-      'Yes',
-      'No'
-    ).then((result:any) => {
-      if (result.isConfirmed) {
-        // User clicked "Yes, Approve"
-        let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
-        let payload = {
-          "onboarding_status": "Rejected"
-        };
-        this.commonservice.putData(endPoint, payload).subscribe({
-          next: (res: any) => {
-            this.getL1DataStatus(this.supplierId);
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Success',
-              detail: level === 'L1' ? 'Basic Information has been rejected' : level === 'L2' ? 'Manufacturing Capabilities has been rejected' : 'Financial & Additional has been rejected',
-              life: 3000
-            });
-            this.getStatusForm(level, this.supplierId)
-          },
-          error: (error) => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: level === 'L1' ? 'Failed to reject Basic Information' : level === 'L2' ? 'Failed to reject Manufacturing Capabilities' : 'Failed to reject Financial & Additional',
-              life: 3000
-            });
-          }
-        });
-      }
-    });
-  }
-
-  requestUpdate(level: string) {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
-    let payload = {
-      "onboarding_status": "Request to Resubmit",
-      "comment": this.updateRequestComment
+  // Navigation methods
+  navigateToEdit(): void {
+    const routes = {
+      basic: '/wefab/supplier/supplier-onboarding',
+      manufacturing: '/wefab/supplier/supplier-onboarding-l2',
+      financial: '/wefab/supplier/supplier-onboarding-l3'
     };
-    this.commonservice.putData(endPoint, payload).subscribe({
-      next: (res: any) => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: level === 'L1' ? 'Basic Information update has been requested' : level === 'L2' ? 'Manufacturing Capabilities update has been requested' : 'Financial & Additional update has been requested',
-          life: 3000
-        });
-        this.getStatusForm(level, this.supplierId)
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: level === 'L1' ? 'Failed to request update for Basic Information' : level === 'L2' ? 'Failed to request update for Manufacturing Capabilities' : 'Failed to request update for Financial & Additional',
-          life: 3000
-        });
-      }
-    });
+
+    const route = routes[this.activeLevelTab as keyof typeof routes] || routes.basic;
+    this.router.navigate([route], { queryParams: { mode: 'edit' } });
   }
 
-/**
- * View a document in the preview overlay
- */
-viewDocument(url: string, event: Event): void {
-  if (event) {
-    event.stopPropagation();
-    event.preventDefault();
-  }
-  
-  if (!url) {
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Document URL is not available'
-    });
-    return;
-  }
-  
-  this.previewDocument = url;
-}
-
-/**
- * Close the document preview overlay
- */
-closeDocumentPreview(): void {
-  this.previewDocument = null;
-}
-
-/**
- * Download a document
- */
-downloadDocument(url: string, event: Event): void {
-  if (event) {
-    event.stopPropagation();
-    event.preventDefault();
-  }
-  
-  if (!url) {
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Document URL is not available'
-    });
-    return;
-  }
-  
-  // Create a temporary anchor element to trigger the download
-  const link = document.createElement('a');
-  link.href = url;
-  
-  // Extract filename from URL
-  const filename = this.getDocumentName(url);
-  link.download = filename;
-  
-  // Append to body, click, and remove
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  this.messageService.add({
-    severity: 'success',
-    summary: 'Success',
-    detail: 'Document download started'
-  });
-}
-
-/**
- * Sanitize a URL for safe use in iframes
- */
-getSafeUrl(url: string): SafeResourceUrl {
-  return this.sanitizer.bypassSecurityTrustResourceUrl(url);
-}
-
-/**
- * Toggle between profile review and activity trail views
- */
-toggleActivityTrail(): void {
-  this.showActivityTrail = !this.showActivityTrail;
-  
-  if (this.showActivityTrail) {
-    this.loadActivityTrail();
-  }
-}
-
-/**
- * Load activity trail data from API
- */
-loadActivityTrail(): void {
-  // In a real implementation, you'd fetch from API
-  // For now, using mock data from the provided format
-  this.commonservice.getData(`/api/method/proq_buyer.api.core.versioning.get_new_versions_trail?doctype=wfb_supplier_onboarding_L1&docname=${this.supplierId}`)
-    .subscribe({
-      next: (res: any) => {
-        if (res && res.data && Array.isArray(res.data)) {
-          this.activityLogs = res.data;
-          // Convert raw activity logs to displayed activity items
-          this.activityTrail = this.parseActivityLogs(this.activityLogs);
-        } else {
-          // Fallback to demo data
-          this.activityLogs = this.getDemoActivityLogs();
-          this.activityTrail = this.parseActivityLogs(this.activityLogs);
-        }
-      },
-      error: (error) => {
-        console.error('Error loading activity trail:', error);
-        // Fallback to demo data
-        this.activityLogs = this.getDemoActivityLogs();
-        this.activityTrail = this.parseActivityLogs(this.activityLogs);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load activity trail data',
-          life: 3000
-        });
-      }
-    });
-}
-
-/**
- * Get demo activity logs in the provided format
- */
-getDemoActivityLogs(): ActivityLogItem[] {
-  return [
-    {
-      name: 986,
-      user: "David",
-      creation: "2025-05-21 16:51:27.753543",
-      time_since: "20 hours ago",
-      data: {
-        changed: [
-          "Company Profile changed from {...} to {...}"  // Shortened for readability
-        ]
-      }
-    },
-    {
-      name: 985,
-      user: "David",
-      creation: "2025-05-21 16:12:53.774990",
-      time_since: "20 hours ago",
-      data: {
-        changed: [
-          "Company Profile changed from {...} to {...}"  // Shortened for readability
-        ]
-      }
-    },
-    {
-      name: 984,
-      user: "Admin",
-      creation: "2025-05-21 15:30:27.123456",
-      time_since: "21 hours ago",
-      data: {
-        changed: [
-          "Profile Status changed from 'Under Review' to 'Approved'"
-        ]
-      }
-    },
-    {
-      name: 983,
-      user: "System",
-      creation: "2025-05-20 14:22:11.334455",
-      time_since: "2 days ago",
-      data: {
-        changed: [
-          "Verified Machine Photos"
-        ]
-      }
-    },
-    {
-      name: 982,
-      user: "Rajesh Kumar",
-      creation: "2025-05-20 10:15:32.112233",
-      time_since: "2 days ago",
-      data: {
-        changed: [
-          "Added new manufacturing capability (5-axis CNC)"
-        ]
-      }
-    }
-  ];
-}
-
-/**
- * Parse the raw activity logs into displayable activity items
- */
-parseActivityLogs(logs: ActivityLogItem[]): ActivityItem[] {
-  return logs.map(log => {
-    // Default values
-    let action: 'Approved' | 'Rejected' | 'Updated' | 'Submitted' | 'Created' = 'Updated';
-    let title = 'Profile Updated';
-    let description = log.data.changed[0] || 'Changes made to profile';
-    
-    // Determine action and title based on the description
-    if (description.includes('changed from') && description.includes('to')) {
-      action = 'Updated';
-      
-      // Extract what was changed from the description
-      const changedField = description.split('changed from')[0].trim();
-      title = `${changedField} Updated`;
-      
-      // Create a cleaner description
-      if (changedField === 'Company Profile') {
-        if (description.includes('machinePhotos')) {
-          description = 'Updated machine details or photos';
-        } else if (description.includes('facilityPhotos')) {
-          description = 'Updated facility photos';
-        } else if (description.includes('certifications')) {
-          description = 'Updated certification information';
-        } else if (description.includes('companyDocuments')) {
-          description = 'Updated company documents';
-        } else {
-          description = 'Updated company profile information';
-        }
-      }
-    } else if (description.includes('changed from') && description.includes('Approved')) {
-      action = 'Approved';
-      title = 'Profile Approved';
-      description = 'Profile status was approved';
-    } else if (description.includes('changed from') && description.includes('Rejected')) {
-      action = 'Rejected';
-      title = 'Profile Rejected';
-      description = 'Profile status was rejected';
-    } else if (description.includes('Verified')) {
-      action = 'Approved';
-      title = 'Verification Complete';
-      description = 'Verification process was completed';
-    } else if (description.includes('Added new')) {
-      action = 'Created';
-      title = 'New Item Added';
-    }
-    
-    // Create the activity item
-    return {
-      id: log.name.toString(),
-      date: new Date(log.creation),
-      action,
-      title,
-      description,
-      user: log.user,
-      time_since: log.time_since
-    };
-  });
-}
-
-// Add activityLogs property to store raw log data
-activityLogs: ActivityLogItem[] = [];
-
-/**
- * Get CSS class for status badge based on action type
- */
-getStatusColorClass(action: string): string {
-  switch(action) {
-    case 'Approved':
-      return 'status-approved';
-    case 'Rejected':
-      return 'status-rejected';
-    case 'Updated':
-      return 'status-updated';
-    case 'Submitted':
-      return 'status-submitted';
-    case 'Created':
-      return 'status-created';
-    default:
-      return '';
-  }
-}
-
-/**
- * Get appropriate icon for action type
- */
-getStatusIcon(action: string): string {
-  switch(action) {
-    case 'Approved':
-      return 'pi-check-circle';
-    case 'Rejected':
-      return 'pi-times-circle';
-    case 'Updated':
-      return 'pi-sync';
-    case 'Submitted':
-      return 'pi-upload';
-    case 'Created':
-      return 'pi-plus-circle';
-    default:
-      return 'pi-info-circle';
-  }
-}
-
-// Add this method to toggle dropdown visibility
-toggleDropdown(level: string, event: Event): void {
-  event.stopPropagation();
-  // Close all other dropdowns
-  Object.keys(this.dropdownVisible).forEach(key => {
-    if (key !== level) {
-      this.dropdownVisible[key] = false;
-    }
-  });
-  // Toggle the current dropdown
-  this.dropdownVisible[level] = !this.dropdownVisible[level];
-}
-
-// Add these methods to the component
-showUpdateRequestDialog(level: string): void {
-  // Close any open dropdowns
-  Object.keys(this.dropdownVisible).forEach(key => {
-    this.dropdownVisible[key] = false;
-  });
-  
-  this.updateRequestLevel = level;
-  this.updateRequestComment = '';
-  this.showUpdateDialog = true;
-}
-
-cancelUpdateRequest(): void {
-  this.showUpdateDialog = false;
-  this.updateRequestLevel = '';
-  this.updateRequestComment = '';
-}
-
-sendUpdateRequest(): void {
-  if (!this.updateRequestComment.trim()) {
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: 'Please provide a comment for the update request',
-      life: 3000
-    });
-    return;
-  }
-  
-  const level = this.updateRequestLevel;
-  let endPoint = '/api/resource/wfb_supplier_onboarding_' + level + '/' + this.supplierId;
-  let payload = {
-    "onboarding_status": "Request to Resubmit",
-    "comment": this.updateRequestComment
-  };
-  
-  this.commonservice.putData(endPoint, payload).subscribe({
-    next: (res: any) => {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: level === 'L1' ? 'Basic Information update has been requested' : level === 'L2' ? 'Manufacturing Capabilities update has been requested' : 'Financial & Additional update has been requested',
-        life: 3000
-      });
-      this.getStatusForm(level, this.supplierId);
-      this.showUpdateDialog = false;
-      this.updateRequestLevel = '';
-      this.updateRequestComment = '';
-    },
-    error: (error) => {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: level === 'L1' ? 'Failed to request update for Basic Information' : level === 'L2' ? 'Failed to request update for Manufacturing Capabilities' : 'Failed to request update for Financial & Additional',
-        life: 3000
-      });
-    }
-  });
-}
-
-// Add this getter to check if there is any feedback to show
-get hasFeedback(): boolean {
-  return !!(this.requestToResubmitCommentL1 || this.requestToResubmitCommentL2 || this.requestToResubmitCommentL3);
-}
-
-// Add this method to toggle the feedback summary visibility
-toggleFeedbackSummary(): void {
-  this.showFeedbackSummary = !this.showFeedbackSummary;
-}
-
-/**
- * Navigate back to the previous page
- */
-goBack(): void {
-  if (this.isBrowser) {
+  goBack(): void {
     this.location.back();
   }
-}
 
-accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
-  this.commonservice.commonFirebaseTrigger(doctType_name, doctypeId).subscribe((res: any) => {
-    this.getL1Data(this.supplierId)
-    this.getL1DataStatus(this.supplierId)
+  // Document preview methods
+  viewDocument(url: string, event: Event): void {
+    event.stopPropagation();
+    this.previewDocument = url;
+  }
 
-  });
-}
+  closeDocumentPreview(): void {
+    this.previewDocument = null;
+  }
 
-  
+  downloadDocument(url: string, event: Event): void {
+    event.stopPropagation();
+    
+    if (this.isBrowser) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = this.getDocumentName(url);
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+
+  getSafeUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  // Activity trail methods
+  toggleActivityTrail(): void {
+    this.showActivityTrail = !this.showActivityTrail;
+    
+    if (this.showActivityTrail && this.activityTrail.length === 0) {
+      this.loadActivityTrail();
+    }
+  }
+
+  private loadActivityTrail(): void {
+    // Load activity trail data
+    // Implementation depends on your API
+    this.activityTrail = this.getDemoActivityLogs();
+  }
+
+  private getDemoActivityLogs(): ActivityItem[] {
+    return [
+      {
+        id: '1',
+        date: new Date(2025, 0, 15),
+        action: 'Submitted',
+        title: 'Profile Submitted for Review',
+        description: 'Supplier profile has been submitted for initial review',
+        user: 'System',
+        time_since: '2 days ago'
+      }
+    ];
+  }
+
+  // Approval methods
+  approve(level: string): void {
+    this.sweetAlert.confirm(
+      '',
+      `Are you sure you want to approve ${level} data?`,
+      'question',
+      'Yes, Approve',
+      'Cancel'
+    ).then((result: any) => {
+      if (result.isConfirmed) {
+        this.processApproval(level);
+      }
+    });
+  }
+
+  private processApproval(level: string): void {
+    const endpoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.approve_onboarding_stage`;
+    const data = {
+      onboarding_stage: level,
+      supplier_company_id: this.supplierId,
+      approval_status: 'Approved'
+    };
+
+    this.commonservice.postData(endpoint, data).subscribe({
+      next: (res) => {
+        this.showSuccess(`${level} data approved successfully`);
+        this.refreshStatusData(level);
+      },
+      error: (error) => {
+        console.error('Error approving:', error);
+        this.showError('Failed to approve data');
+      }
+    });
+  }
+
+  reject(level: string): void {
+    this.sweetAlert.confirm(
+      '',
+      `Are you sure you want to reject ${level} data?`,
+      'question',
+      'Yes, Reject',
+      'Cancel'
+    ).then((result: any) => {
+      if (result.isConfirmed) {
+        this.processRejection(level);
+      }
+    });
+  }
+
+  private processRejection(level: string): void {
+    const endpoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.approve_onboarding_stage`;
+    const data = {
+      onboarding_stage: level,
+      supplier_company_id: this.supplierId,
+      approval_status: 'Rejected'
+    };
+
+    this.commonservice.postData(endpoint, data).subscribe({
+      next: (res) => {
+        this.showSuccess(`${level} data rejected`);
+        this.refreshStatusData(level);
+      },
+      error: (error) => {
+        console.error('Error rejecting:', error);
+        this.showError('Failed to reject data');
+      }
+    });
+  }
+
+  private refreshStatusData(level: string): void {
+    // Clear cache and reload status
+    this.cache.delete(`${level.toLowerCase()}_data_${this.supplierId}`);
+    
+    // Reload all data and recalculate completeness when Firebase triggers update
+    this.loadInitialData();
+  }
+
+  // Update request methods
+  showUpdateRequestDialog(level: string): void {
+    this.updateRequestLevel = level;
+    this.updateRequestComment = '';
+    this.showUpdateDialog = true;
+    this.closeAllDropdowns();
+  }
+
+  cancelUpdateRequest(): void {
+    this.showUpdateDialog = false;
+    this.updateRequestLevel = '';
+    this.updateRequestComment = '';
+  }
+
+  sendUpdateRequest(): void {
+    if (!this.updateRequestComment.trim()) return;
+
+    const endpoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.approve_onboarding_stage`;
+    const data = {
+      onboarding_stage: this.updateRequestLevel,
+      supplier_company_id: this.supplierId,
+      approval_status: 'Request to Resubmit',
+      comment: this.updateRequestComment
+    };
+
+    this.commonservice.postData(endpoint, data).subscribe({
+      next: (res) => {
+        this.showSuccess('Update request sent successfully');
+        this.cancelUpdateRequest();
+        this.refreshStatusData(this.updateRequestLevel);
+      },
+      error: (error) => {
+        console.error('Error sending update request:', error);
+        this.showError('Failed to send update request');
+      }
+    });
+  }
+
+  // Dropdown methods
+  toggleDropdown(level: string, event: Event): void {
+    event.stopPropagation();
+    
+    // Close all other dropdowns
+    Object.keys(this.dropdownVisible).forEach(key => {
+      this.dropdownVisible[key] = key === level ? !this.dropdownVisible[key] : false;
+    });
+
+    // Add click listener to close dropdown when clicking outside
+    if (this.dropdownVisible[level]) {
+      setTimeout(() => {
+        document.addEventListener('click', this.closeAllDropdowns.bind(this), { once: true });
+      });
+    }
+  }
+
+  private closeAllDropdowns(): void {
+    Object.keys(this.dropdownVisible).forEach(key => {
+      this.dropdownVisible[key] = false;
+    });
+  }
+
+  // Status helper methods
+  getStatusColorClass(action: string): string {
+    const statusMap: { [key: string]: string } = {
+      'Approved': 'status-approved',
+      'Rejected': 'status-rejected',
+      'Updated': 'status-updated',
+      'Submitted': 'status-submitted',
+      'Created': 'status-created'
+    };
+    return statusMap[action] || 'status-created';
+  }
+
+  getStatusIcon(action: string): string {
+    const iconMap: { [key: string]: string } = {
+      'Approved': 'pi-check-circle',
+      'Rejected': 'pi-times-circle',
+      'Updated': 'pi-sync',
+      'Submitted': 'pi-upload',
+      'Created': 'pi-plus-circle'
+    };
+    return iconMap[action] || 'pi-circle';
+  }
+
+  // Utility methods for error handling
+  private showSuccess(message: string): void {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: message,
+      life: 3000
+    });
+  }
+
+  private showError(message: string): void {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: message,
+      life: 5000
+    });
+  }
+
+  // Firebase trigger method - This is where profile completeness should be recalculated
+  accessFirebaseTrigger(doctType_name: string, doctypeId: string): void {
+    console.log('Firebase trigger received:', doctType_name, doctypeId);
+    
+    // Clear analysis cache if machines or facilities are updated
+    if (doctType_name === 'machine' || doctType_name === 'facility' || doctType_name === 'manufacturing') {
+      this.clearAnalysisCache();
+    }
+    
+    // When Firebase triggers, clear cache and reload all data to recalculate completeness
+    this.cache.clear();
+    this.loadInitialData();
+  }
+
+  // Method to clear analysis cache when machines/facilities are updated
+  private clearAnalysisCache(): void {
+    const keysToDelete: string[] = [];
+    
+    this.cache.forEach((value, key) => {
+      if (key.startsWith('machine_analysis_') || key.startsWith('facility_analysis_')) {
+        keysToDelete.push(key);
+      }
+    });
+    
+    keysToDelete.forEach(key => {
+      this.cache.delete(key);
+      console.log(`Cleared analysis cache for: ${key}`);
+    });
+  }
+
+  // Method to force refresh analysis (useful for testing or manual refresh)
+  forceRefreshAnalysis(): void {
+    console.log('Forcing refresh of machine and facility analysis');
+    this.clearAnalysisCache();
+    
+    // Reset analysis status for all machines and facilities
+    if (this.manufacturingData?.machines) {
+      this.manufacturingData.machines.forEach((machine: any) => {
+        if (machine.machinePhotos) {
+          machine.machinePhotos.machine_status = undefined;
+          machine.machinePhotos.machine_status_comment = undefined;
+        }
+      });
+    }
+    
+    if (this.manufacturingData?.facilityPhotos) {
+      this.manufacturingData.facilityPhotos.forEach((facility: any) => {
+        facility.facility_status = undefined;
+        facility.facility_comment = undefined;
+      });
+    }
+    
+    // Restart analysis
+    this.processMachineVerificationAsync();
+  }
+
+  // Getter methods for template
+  get isLoading(): boolean {
+    return Object.values(this.loadingState).some(loading => loading);
+  }
+
+  get hasBasicData(): boolean {
+    return !!this.getCompanyProfile;
+  }
+
+  get hasManufacturingData(): boolean {
+    return !!this.manufacturingData;
+  }
+
+  get hasFinancialData(): boolean {
+    return !!this.newFinancialData;
+  }
 } 
