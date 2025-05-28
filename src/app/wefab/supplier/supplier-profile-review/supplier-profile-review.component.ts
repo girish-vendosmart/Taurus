@@ -221,107 +221,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   // Activity Trail UI state
   showActivityTrail: boolean = false;
   
-  // Sample activity trail data - in real implementation, this would be loaded from an API
-  activityTrail: ActivityItem[] = [
-    {
-      id: '1',
-      date: new Date(2023, 11, 20, 15, 30),
-      action: 'Created',
-      title: 'Profile Created',
-      description: 'Supplier profile was created in the system',
-      user: 'Rajesh Kumar'
-    },
-    {
-      id: '2',
-      date: new Date(2023, 11, 21, 10, 15),
-      action: 'Submitted',
-      title: 'Basic Information Submitted',
-      description: 'L1: Basic company information was submitted for review',
-      user: 'Rajesh Kumar',
-      level: 'L1',
-      section: 'Basic Information'
-    },
-    {
-      id: '3',
-      date: new Date(2023, 11, 22, 11, 45),
-      action: 'Approved',
-      title: 'Basic Information Approved',
-      description: 'L1: Basic company information was approved',
-      user: 'WeFab Admin',
-      level: 'L1',
-      section: 'Basic Information'
-    },
-    {
-      id: '4',
-      date: new Date(2023, 11, 25, 9, 30),
-      action: 'Submitted',
-      title: 'Manufacturing Capabilities Submitted',
-      description: 'L2: Manufacturing capabilities information was submitted for review',
-      user: 'Rajesh Kumar',
-      level: 'L2',
-      section: 'Manufacturing Capabilities'
-    },
-    {
-      id: '5',
-      date: new Date(2023, 12, 1, 14, 0),
-      action: 'Updated',
-      title: 'Manufacturing Capabilities Updated',
-      description: 'Added new machine details and certifications',
-      user: 'Rajesh Kumar',
-      level: 'L2',
-      section: 'Manufacturing Capabilities'
-    },
-    {
-      id: '6',
-      date: new Date(2023, 12, 2, 16, 20),
-      action: 'Approved',
-      title: 'Manufacturing Capabilities Approved',
-      description: 'L2: Manufacturing capabilities were verified and approved',
-      user: 'WeFab Admin',
-      level: 'L2',
-      section: 'Manufacturing Capabilities'
-    },
-    {
-      id: '7',
-      date: new Date(2023, 12, 10, 11, 0),
-      action: 'Submitted',
-      title: 'Financial Information Submitted',
-      description: 'L3: Financial information was submitted for review',
-      user: 'Rajesh Kumar',
-      level: 'L3',
-      section: 'Financial Information'
-    },
-    {
-      id: '8',
-      date: new Date(2023, 12, 12, 15, 45),
-      action: 'Rejected',
-      title: 'Financial Information Rejected',
-      description: 'L3: Financial information was rejected. Missing insurance details.',
-      user: 'WeFab Admin',
-      level: 'L3',
-      section: 'Financial Information'
-    },
-    {
-      id: '9',
-      date: new Date(2023, 12, 15, 10, 30),
-      action: 'Updated',
-      title: 'Financial Information Updated',
-      description: 'Added missing insurance documentation and updated credit information',
-      user: 'Rajesh Kumar',
-      level: 'L3',
-      section: 'Financial Information'
-    },
-    {
-      id: '10',
-      date: new Date(2023, 12, 18, 14, 15),
-      action: 'Approved',
-      title: 'Financial Information Approved',
-      description: 'L3: Financial information was verified and approved',
-      user: 'WeFab Admin',
-      level: 'L3',
-      section: 'Financial Information'
-    }
-  ];
+  // Activity trail data - loaded from API
+  activityTrail: ActivityItem[] = [];
+  
+  // Activity trail loading state
+  activityTrailLoading: boolean = false;
   gstVerified: any = false;
   phoneVerified: any = false;
   facilityVerified: any = false;
@@ -1004,6 +908,43 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     return maskedPart + lastFour;
   }
 
+  // Method to format currency in Indian format with comma separation
+  formatCurrency(value: string | number): string {
+    if (!value || value === 'Not provided' || value === '') return 'Not provided';
+    
+    // Convert to string and remove any existing formatting
+    let numericValue = value.toString().replace(/[^\d.]/g, '');
+    
+    // Convert to number
+    const number = parseFloat(numericValue);
+    if (isNaN(number)) return 'Not provided';
+    
+    // Format with Indian locale (en-IN) for comma separation
+    const formatted = number.toLocaleString('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+    
+    return formatted;
+  }
+
+  // Alternative method for simple number formatting without currency symbol
+  formatNumber(value: string | number): string {
+    if (!value || value === 'Not provided' || value === '') return 'Not provided';
+    
+    // Convert to string and remove any existing formatting
+    let numericValue = value.toString().replace(/[^\d.]/g, '');
+    
+    // Convert to number
+    const number = parseFloat(numericValue);
+    if (isNaN(number)) return 'Not provided';
+    
+    // Format with Indian locale (en-IN) for comma separation
+    return number.toLocaleString('en-IN');
+  }
+
   isImageFile(url: string): boolean {
     return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
   }
@@ -1077,29 +1018,153 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   toggleActivityTrail(): void {
     this.showActivityTrail = !this.showActivityTrail;
     
-    if (this.showActivityTrail && this.activityTrail.length === 0) {
+    if (this.showActivityTrail) {
       this.loadActivityTrail();
     }
   }
 
   private loadActivityTrail(): void {
-    // Load activity trail data
-    // Implementation depends on your API
-    this.activityTrail = this.getDemoActivityLogs();
+    if (!this.supplierId) {
+      console.error('Supplier ID is missing for activity trail');
+      return;
+    }
+
+    // Set loading state
+    this.activityTrailLoading = true;
+
+    // Load real activity trail data from API
+    const endpoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_supplier_activity_logs?supplier_company_id=${this.supplierId}`;
+    
+    this.commonservice.getData(endpoint).subscribe({
+      next: (response: any) => {
+        if (response?.data && Array.isArray(response.data)) {
+          this.activityTrail = this.processActivityLogs(response.data);
+        } else {
+          console.log('No activity logs found');
+          this.activityTrail = [];
+        }
+        this.activityTrailLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading activity trail:', error);
+        this.activityTrail = [];
+        this.activityTrailLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private processActivityLogs(logs: any[]): ActivityItem[] {
+    return logs.map((log: any, index: number) => {
+      // Map the log data to our ActivityItem interface
+      const action = this.mapLogAction(log);
+      const title = this.generateLogTitle(log, action);
+      const description = this.generateLogDescription(log, action);
+      
+      return {
+        id: (index + 1).toString(),
+        date: new Date(log.creation),
+        action: action,
+        title: title,
+        description: description,
+        user: log.user || 'System',
+        time_since: log.time_since || this.calculateTimeSince(new Date(log.creation))
+      };
+    }).sort((a, b) => b.date.getTime() - a.date.getTime()); // Sort by date, newest first
+  }
+
+  private mapLogAction(log: any): 'Approved' | 'Rejected' | 'Updated' | 'Submitted' | 'Created' {
+    // Map based on the log data structure
+    if (log.data?.changed?.includes('approval_status')) {
+      // Check what the approval status was changed to
+      if (log.data.approval_status === 'Approved') return 'Approved';
+      if (log.data.approval_status === 'Rejected') return 'Rejected';
+      if (log.data.approval_status === 'Request to Resubmit') return 'Updated';
+      return 'Submitted';
+    }
+    
+    if (log.data?.changed?.includes('company_profile')) {
+      return 'Updated';
+    }
+    
+    if (log.data?.changed?.includes('onboarding_status')) {
+      return 'Submitted';
+    }
+    
+    // Default to Created for initial entries
+    return 'Created';
+  }
+
+  private generateLogTitle(log: any, action: string): string {
+    const stage = this.getStageFromLog(log);
+    
+    switch (action) {
+      case 'Approved':
+        return `${stage} Approved`;
+      case 'Rejected':
+        return `${stage} Rejected`;
+      case 'Updated':
+        return `${stage} Updated`;
+      case 'Submitted':
+        return `${stage} Submitted`;
+      default:
+        return `${stage} Created`;
+    }
+  }
+
+  private generateLogDescription(log: any, action: string): string {
+    const stage = this.getStageFromLog(log);
+    
+    switch (action) {
+      case 'Approved':
+        return `${stage} information was reviewed and approved by admin`;
+      case 'Rejected':
+        return `${stage} information was rejected. ${log.comment || 'Please review and resubmit.'}`;
+      case 'Updated':
+        return `${stage} information was updated by supplier`;
+      case 'Submitted':
+        return `${stage} information was submitted for review`;
+      default:
+        return `${stage} record was created in the system`;
+    }
+  }
+
+  private getStageFromLog(log: any): string {
+    // Try to determine stage from the log context
+    if (log.doctype?.includes('L1') || log.name?.toString().includes('L1')) {
+      return 'Basic Information';
+    }
+    if (log.doctype?.includes('L2') || log.name?.toString().includes('L2')) {
+      return 'Manufacturing Capabilities';
+    }
+    if (log.doctype?.includes('L3') || log.name?.toString().includes('L3')) {
+      return 'Financial Information';
+    }
+    return 'Profile';
+  }
+
+  private calculateTimeSince(date: Date): string {
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+
+    if (diffInDays > 0) {
+      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    } else if (diffInHours > 0) {
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    } else if (diffInMinutes > 0) {
+      return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+    } else {
+      return 'Just now';
+    }
   }
 
   private getDemoActivityLogs(): ActivityItem[] {
-    return [
-      {
-        id: '1',
-        date: new Date(2025, 0, 15),
-        action: 'Submitted',
-        title: 'Profile Submitted for Review',
-        description: 'Supplier profile has been submitted for initial review',
-        user: 'System',
-        time_since: '2 days ago'
-      }
-    ];
+    // Remove demo data - this method is no longer used
+    return [];
   }
 
   // Approval methods
@@ -1343,6 +1408,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     return Object.values(this.loadingState).some(loading => loading);
   }
 
+  get dataLoading(): boolean {
+    return this.activityTrailLoading || this.dataLoadingSubject.value;
+  }
+
   get hasBasicData(): boolean {
     return !!this.getCompanyProfile;
   }
@@ -1353,5 +1422,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   get hasFinancialData(): boolean {
     return !!this.newFinancialData;
+  }
+
+  // TrackBy function for activity trail
+  trackByActivityId(index: number, activity: ActivityItem): string {
+    return activity.id;
   }
 } 
