@@ -20,7 +20,7 @@
       </p>
     </div>
     <!-- View Activity Trail Button -->
-    <div class="navigation-buttons" style="display: flex; gap: 10px;">
+    <div class="navigation-buttons">
       <button class="btn-view-activity" (click)="toggleActivityTrail()" *ngIf="!showActivityTrail">
         <i class="pi pi-history"></i> View Activity Trail
       </button>
@@ -73,17 +73,17 @@
       <div class="levels-tabs">
         <button class="level-tab" [class.active]="activeLevelTab === 'basic'" (click)="changeLevelTab('basic')">
           <div class="level-badge">
-            <i class="pi pi-times-circle" style="color: red;" *ngIf="getCurrentL1DataStatus === 'Rejected'"></i>
-            <i class="pi pi-check-circle" *ngIf="getCurrentL1DataStatus === 'Approved'"></i>
-            <i class="pi pi-exclamation-triangle" style="color: orange;"
+            <i class="pi pi-times-circle status-icon rejected" *ngIf="getCurrentL1DataStatus === 'Rejected'"></i>
+            <i class="pi pi-check-circle status-icon approved" *ngIf="getCurrentL1DataStatus === 'Approved'"></i>
+            <i class="pi pi-exclamation-triangle status-icon under-review"
               *ngIf="getCurrentL1DataStatus === 'Under Review'"></i>
-            <i class="pi pi-sync" style="color: #3498db;"
+            <i class="pi pi-sync status-icon request-resubmit"
               *ngIf="getCurrentL1DataStatus === 'Request to Resubmit'"></i>
             <span>Stage 1: Basic Information</span>
           </div>
           <!-- Three dot menu for Stage 1 -->
           <div class="tab-actions" *ngIf="userType === 'wefab_team' && (getCurrentL1DataStatus === 'Under Review' || getCurrentL1DataStatus === 'Request to Resubmit')">
-            <i class="pi pi-ellipsis-v" (click)="toggleDropdown('L1', $event)" style="cursor: pointer;"></i>
+            <i class="pi pi-ellipsis-v dropdown-trigger" (click)="toggleDropdown('L1', $event)"></i>
             <div class="tab-dropdown" [class.visible]="dropdownVisible['L1']">
               <div class="dropdown-item" (click)="$event.stopPropagation(); approve('L1')">
                 <i class="pi pi-check-circle"></i> Approve
@@ -100,17 +100,17 @@
         <button class="level-tab" [class.active]="activeLevelTab === 'manufacturing'"
           (click)="changeLevelTab('manufacturing')" [disabled]="getCurrentL1DataStatus === 'Rejected'">
           <div class="level-badge">
-            <i class="pi pi-times-circle" style="color: red;" *ngIf="getCurrentL2DataStatus === 'Rejected'"></i>
-            <i class="pi pi-check-circle" *ngIf="getCurrentL2DataStatus === 'Approved'"></i>
-            <i class="pi pi-exclamation-triangle" style="color: orange;"
+            <i class="pi pi-times-circle status-icon rejected" *ngIf="getCurrentL2DataStatus === 'Rejected'"></i>
+            <i class="pi pi-check-circle status-icon approved" *ngIf="getCurrentL2DataStatus === 'Approved'"></i>
+            <i class="pi pi-exclamation-triangle status-icon under-review"
               *ngIf="getCurrentL2DataStatus === 'Under Review'"></i>
-            <i class="pi pi-sync" style="color: #3498db;"
+            <i class="pi pi-sync status-icon request-resubmit"
               *ngIf="getCurrentL2DataStatus === 'Request to Resubmit'"></i>
             <span>Stage 2: Manufacturing</span>
           </div>
           <!-- Three dot menu for Stage 2 -->
           <div class="tab-actions" *ngIf="userType === 'wefab_team' && getCurrentL1DataStatus === 'Approved' && (getCurrentL2DataStatus === 'Under Review' || getCurrentL2DataStatus === 'Request to Resubmit')">
-            <i class="pi pi-ellipsis-v" (click)="toggleDropdown('L2', $event)" style="cursor: pointer;"></i>
+            <i class="pi pi-ellipsis-v dropdown-trigger" (click)="toggleDropdown('L2', $event)"></i>
             <div class="tab-dropdown" [class.visible]="dropdownVisible['L2']">
               <div class="dropdown-item" (click)="$event.stopPropagation(); approve('L2')">
                 <i class="pi pi-check-circle"></i> Approve
@@ -128,17 +128,17 @@
         <button class="level-tab" [class.active]="activeLevelTab === 'financial'" (click)="changeLevelTab('financial')"
           [disabled]="getCurrentL1DataStatus === 'Rejected' || getCurrentL2DataStatus === 'Rejected'">
           <div class="level-badge">
-            <i class="pi pi-times-circle" style="color: red;" *ngIf="getCurrentL3DataStatus === 'Rejected'"></i>
-            <i class="pi pi-check-circle" *ngIf="getCurrentL3DataStatus === 'Approved'"></i>
-            <i class="pi pi-exclamation-triangle" style="color: orange;"
+            <i class="pi pi-times-circle status-icon rejected" *ngIf="getCurrentL3DataStatus === 'Rejected'"></i>
+            <i class="pi pi-check-circle status-icon approved" *ngIf="getCurrentL3DataStatus === 'Approved'"></i>
+            <i class="pi pi-exclamation-triangle status-icon under-review"
               *ngIf="getCurrentL3DataStatus === 'Under Review'"></i>
-            <i class="pi pi-sync" style="color: #3498db;"
+            <i class="pi pi-sync status-icon request-resubmit"
               *ngIf="getCurrentL3DataStatus === 'Request to Resubmit'"></i>
             <span>Stage 3: Financial & Additional</span>
           </div>
           <!-- Three dot menu for Stage 3 -->
           <div class="tab-actions" *ngIf="userType === 'wefab_team' && getCurrentL1DataStatus === 'Approved' && getCurrentL2DataStatus === 'Approved' && (getCurrentL3DataStatus === 'Under Review' || getCurrentL3DataStatus === 'Request to Resubmit')">
-            <i class="pi pi-ellipsis-v" (click)="toggleDropdown('L3', $event)" style="cursor: pointer;"></i>
+            <i class="pi pi-ellipsis-v dropdown-trigger" (click)="toggleDropdown('L3', $event)"></i>
             <div class="tab-dropdown" [class.visible]="dropdownVisible['L3']">
               <div class="dropdown-item" (click)="$event.stopPropagation(); approve('L3')">
                 <i class="pi pi-check-circle"></i> Approve
@@ -353,7 +353,7 @@
                     <!-- PDF files -->
                     <div *ngIf="isPdfFile(document.url)" class="document-icon pdf-icon">
                       <div class="pdf-thumbnail">
-                        <i class="pi pi-file-pdf" style="font-size: 3rem; color: #e74c3c;"></i>
+                        <i class="pi pi-file-pdf file-icon pdf-icon"></i>
                         <span class="file-extension">PDF</span>
                       </div>
                     </div>
@@ -361,7 +361,7 @@
                     <!-- DOC/DOCX files -->
                     <div *ngIf="isDocFile(document.url)" class="document-icon doc-icon">
                       <div class="doc-thumbnail">
-                        <i class="pi pi-file-word" style="font-size: 3rem; color: #2980b9;"></i>
+                        <i class="pi pi-file-word file-icon doc-icon"></i>
                         <span class="file-extension">DOC</span>
                       </div>
                     </div>
@@ -369,7 +369,7 @@
                     <!-- Other file types -->
                     <div *ngIf="isOtherFile(document.url)" class="document-icon other-icon">
                       <div class="other-thumbnail">
-                        <i class="pi pi-file" style="font-size: 3rem; color: #7f8c8d;"></i>
+                        <i class="pi pi-file file-icon generic-icon"></i>
                         <span class="file-extension">FILE</span>
                       </div>
                     </div>
@@ -789,7 +789,7 @@
                 <div *ngIf="!newFinancialData.additionalInformation.references || newFinancialData.additionalInformation.references.length === 0">
                   <div class="review-row">
                     <div class="review-col">
-                      <div class="field-value" style="color: #6b7280; font-style: italic;">No business references added yet.</div>
+                      <div class="field-value empty-state-text">No business references added yet.</div>
                     </div>
                   </div>
                 </div>

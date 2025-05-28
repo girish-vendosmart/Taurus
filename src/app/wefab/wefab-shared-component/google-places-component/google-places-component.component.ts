@@ -67,8 +67,11 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
   constructor(private zone: NgZone, private messageService: MessageService) {}
 
   ngOnChanges(changes: any): void {
-    this.prefillAddressDetails = changes.prefillAdress.currentValue
-    this.prefillAddressData(this.prefillAddressDetails)
+    if (changes.prefillAdress && changes.prefillAdress.currentValue) {
+      console.log('Google Places component received prefill address:', changes.prefillAdress.currentValue);
+      this.prefillAddressDetails = changes.prefillAdress.currentValue;
+      this.prefillAddressData(this.prefillAddressDetails);
+    }
   }
   
   ngOnInit(): void {
@@ -87,6 +90,9 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
     
     // When search control changes, call the onChange callback
     this.searchControl.valueChanges.subscribe(value => {
+      // Update addressText to keep it in sync
+      this.addressText = value || '';
+      
       if (!value && this.selectedAddress) {
         this.selectedAddress = null;
         this.onChange(null);
@@ -94,16 +100,37 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
       }
     });
 
-    // this.prefillAddressData();
-    
+    // If we have prefillAdress on init, use it
+    if (this.prefillAdress) {
+      console.log('Google Places component initialized with prefill address:', this.prefillAdress);
+      this.prefillAddressData(this.prefillAdress);
+    }
   }
 
   prefillAddressData(addressDetails: any) {
+    if (!addressDetails) {
+      console.log('No address details to prefill');
+      return;
+    }
+
+    console.log('Prefilling address data:', addressDetails);
+    
     // Set the address text directly
-    this.addressText = addressDetails.fullAddress;
+    this.addressText = addressDetails.fullAddress || '';
     
     // Set the selected address object
     this.selectedAddress = addressDetails;
+    
+    // Update the search control with the address text
+    this.searchControl.setValue(this.addressText, { emitEvent: false });
+    
+    // Call the ControlValueAccessor onChange to notify parent form
+    this.onChange(addressDetails);
+    
+    console.log('Address prefilled successfully:', {
+      addressText: this.addressText,
+      selectedAddress: this.selectedAddress
+    });
   }
   
   private loadGoogleMapsScript(): void {
@@ -258,12 +285,20 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
   
   // ControlValueAccessor methods
   writeValue(value: AddressData | null): void {
+    console.log('Google Places writeValue called with:', value);
     if (value) {
       this.selectedAddress = value;
+      this.addressText = value.fullAddress || '';
       this.searchControl.setValue(value.fullAddress, { emitEvent: false });
+      console.log('Address value written successfully:', {
+        addressText: this.addressText,
+        selectedAddress: this.selectedAddress
+      });
     } else {
       this.selectedAddress = null;
+      this.addressText = '';
       this.searchControl.setValue('', { emitEvent: false });
+      console.log('Address value cleared');
     }
   }
   

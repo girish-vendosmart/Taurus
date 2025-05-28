@@ -1,6 +1,7 @@
-import { Component, SimpleChanges } from '@angular/core';
+import { Component, SimpleChanges, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FieldType, FieldTypeConfig } from '@ngx-formly/core';
 import { GooglePlacesComponentComponent, AddressData } from './wefab/wefab-shared-component/google-places-component/google-places-component.component';
+import { Subscription } from 'rxjs';
 
 interface GooglePlacesTemplateOptions {
   label?: string;
@@ -24,17 +25,45 @@ interface GooglePlacesTemplateOptions {
     </app-google-places-component>
   `,
 })
-export class FormlyFieldGooglePlacesComponent extends FieldType<FieldTypeConfig> {
+export class FormlyFieldGooglePlacesComponent extends FieldType<FieldTypeConfig> implements OnInit, OnDestroy {
   prefillAdress: any;
+  private valueChangesSubscription?: Subscription;
+  
   // Type the template options
   override get to(): GooglePlacesTemplateOptions {
     return this.props as GooglePlacesTemplateOptions;
   }
 
+  constructor(private cdr: ChangeDetectorRef) {
+    super();
+  }
+
   ngOnInit() {
-    this.formControl.valueChanges.subscribe((value) => {
-        this.prefillAdress = value
+    // Check if form control already has a value (for step navigation)
+    const currentValue = this.formControl.value;
+    if (currentValue && typeof currentValue === 'object') {
+      console.log('Google Places field initialized with existing value:', currentValue);
+      this.prefillAdress = currentValue;
+      this.cdr.detectChanges();
+    }
+
+    // Subscribe to value changes for future updates
+    this.valueChangesSubscription = this.formControl.valueChanges.subscribe((value) => {
+      console.log('Google Places form control value changed:', value);
+      if (value && typeof value === 'object') {
+        this.prefillAdress = value;
+        this.cdr.detectChanges();
+      } else if (!value) {
+        this.prefillAdress = null;
+        this.cdr.detectChanges();
+      }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.valueChangesSubscription) {
+      this.valueChangesSubscription.unsubscribe();
+    }
   }
 
   onAddressSelect(address: AddressData | null) {

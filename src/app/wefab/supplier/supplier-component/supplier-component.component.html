@@ -5,9 +5,10 @@
     [menuItems]="sidebarMenuItems"
     [visible]="true"
     [showHeader]="true"
-    headerTitle="WE-FAB Supplier Portal"
+    [headerTitle]="userType === 'wefab_team' ? 'WE-FAB Team Portal' : 'WE-FAB Supplier Portal'"
     width="260px">
   </app-common-sidebar>
+
 
   <!-- Main content area -->
   <div class="main-content" [class.with-sidebar]="showDashboardLayout">

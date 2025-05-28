@@ -610,7 +610,15 @@ export class SupplierOnboardingComponent implements OnInit {
 
   // Getter to make accessing the current step's fields easy in template
   get currentFields(): FormlyFieldConfig[] {
-    return this.stepFields[this.activeStepIndex] || [];
+    const fields = this.stepFields[this.activeStepIndex] || [];
+    console.log(`Getting current fields for step ${this.activeStepIndex}:`, fields.length, 'fields');
+    
+    // If we're on step 0 and have address data, ensure it's properly set
+    if (this.activeStepIndex === 0 && this.model.registeredAddress) {
+      console.log('Step 0 with registered address in model:', this.model.registeredAddress);
+    }
+    
+    return fields;
   }
 
   getBasicDetailsFields(): FormlyFieldConfig[] {
@@ -818,10 +826,26 @@ export class SupplierOnboardingComponent implements OnInit {
             hooks: {
               onInit: (field) => {
                 console.log('Google Places field initialized');
-                // Try to set the value again after field is initialized
-                if (this.getCompanyProfile?.registeredAddress && field.formControl) {
+                
+                // Check if form control already has a value (for step navigation)
+                const currentValue = field.formControl?.value;
+                if (currentValue && typeof currentValue === 'object') {
+                  console.log('Google Places field has existing value on init:', currentValue);
+                  // Force the field to recognize the existing value
                   setTimeout(() => {
-                    console.log('Setting address from onInit hook:', this.getCompanyProfile.registeredAddress);
+                    if (field.formControl) {
+                      field.formControl.setValue(currentValue, { emitEvent: true });
+                      field.formControl.markAsDirty();
+                      field.formControl.updateValueAndValidity();
+                      this.cdr.detectChanges();
+                    }
+                  }, 100);
+                }
+                
+                // Try to set the value from getCompanyProfile if available
+                if (this.getCompanyProfile?.registeredAddress && field.formControl && !currentValue) {
+                  setTimeout(() => {
+                    console.log('Setting address from getCompanyProfile:', this.getCompanyProfile.registeredAddress);
                     if (field.formControl) {
                       field.formControl.setValue(this.getCompanyProfile.registeredAddress);
                       field.formControl.markAsDirty();
@@ -1262,10 +1286,67 @@ export class SupplierOnboardingComponent implements OnInit {
   }
 
   prevStep() {
+    // Synchronize model with current form values before navigating
+    this.synchronizeModelWithForm();
+    
     this.activeStepIndex--;
+    
+    // If navigating back to Basic Details step (step 0), force refresh the Google Places field
+    if (this.activeStepIndex === 0) {
+      setTimeout(() => {
+        // Patch the form with current model values to ensure all fields are populated
+        this.form.patchValue(this.model);
+        
+        // Force refresh the Google Places field specifically
+        this.refreshGooglePlacesField();
+        
+        // Force change detection
+        this.cdr.detectChanges();
+        
+        console.log('Returned to step 0, form patched with model:', this.model);
+      }, 100);
+    }
+  }
+
+  // Method to synchronize the model with current form values
+  private synchronizeModelWithForm() {
+    if (this.form && this.form.value) {
+      console.log('Synchronizing model with form values:', this.form.value);
+      this.model = { ...this.model, ...this.form.value };
+      console.log('Model synchronized:', this.model);
+    }
+  }
+
+  // Method to force refresh the Google Places field
+  private refreshGooglePlacesField() {
+    const addressControl = this.form.get('registeredAddress');
+    if (addressControl && addressControl.value) {
+      console.log('Refreshing Google Places field with value:', addressControl.value);
+      
+      // Temporarily store the value
+      const currentValue = addressControl.value;
+      
+      // Clear and reset the value to trigger change detection
+      addressControl.setValue(null, { emitEvent: false });
+      
+      // Use setTimeout to ensure the change is processed
+      setTimeout(() => {
+        addressControl.setValue(currentValue, { emitEvent: true });
+        addressControl.markAsDirty();
+        addressControl.updateValueAndValidity();
+        
+        // Force change detection
+        this.cdr.detectChanges();
+        
+        console.log('Google Places field refreshed successfully');
+      }, 50);
+    }
   }
 
   nextStep() {
+    // Synchronize model with current form values before validation
+    this.synchronizeModelWithForm();
+    
     const formlyFields = this.currentFields;
     
     // Mark all fields in the current step as touched

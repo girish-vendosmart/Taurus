@@ -38,6 +38,7 @@ export class SupplierComponentComponent {
       route: '/wefab/supplier/quotation'
     }
   ];
+  userType: any;
 
   constructor(private http: HttpClient, private router: Router) {
     // Check if onboarding is complete and dashboard should be shown
@@ -52,10 +53,14 @@ export class SupplierComponentComponent {
   }
 
   checkDashboardVisibility(): void {
+    debugger
     const onboardingComplete = sessionStorage.getItem('supplier_onboarding_complete');
     const showDashboard = sessionStorage.getItem('show_supplier_dashboard');
+    const userType = sessionStorage.getItem('user_type');
+    this.userType = userType;
     
-    this.showDashboardLayout = onboardingComplete === 'true' && showDashboard === 'true';
+    this.showDashboardLayout = onboardingComplete === 'true' || showDashboard === 'true' || userType === 'wefab_team';
+    this.updateSidebarMenuItems();
 
     if(this.showDashboardLayout) {
       this.normalLayoutHeader = 'WE-FAB Supplier Portal';
@@ -66,6 +71,41 @@ export class SupplierComponentComponent {
 
   onHeaderLogout(): void {
     this.logout();
+  }
+
+  updateSidebarMenuItems() {
+    if(this.userType === 'wefab_team') {
+      this.sidebarMenuItems = [
+        {
+          icon: 'bi bi-people',
+          name: 'Manage Suppliers',
+          route: '/wefab/wefabTeam/manage-suppliers'
+        },
+        {
+          icon: 'pi pi-search',
+          name: 'Supplier Finder',
+          route: '/wefab/wefabTeam/supplier-finder'
+        },
+      ];
+    } else {
+      this.sidebarMenuItems = [
+        {
+          icon: 'pi pi-home',
+          name: 'Dashboard',
+          route: '/wefab/supplier/dashboard'
+        },
+        {
+          icon: 'pi pi-user',
+          name: 'RFQ',
+          route: '/wefab/supplier/rfq'
+        },
+        {
+          icon: 'pi pi-check-circle',
+          name: 'Quotations',
+          route: '/wefab/supplier/quotation'
+        }
+      ]
+    }
   }
 
   logout(): void {
