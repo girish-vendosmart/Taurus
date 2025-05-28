@@ -17,6 +17,7 @@ import { FormlyFieldSearchableSelectComponent } from './searchable-select-type.c
 import { PMultiSelectGroupComponent } from './p-multiSelect-group.component';
 import { FormlyFieldGooglePlacesComponent } from './google-places-type.component';
 import { FormlyFieldGstVerifyComponent } from './gst-verify-type.component';
+import { FormlyFieldPDropdownGroupSearchComponent } from './p-dropdown-group-search-type.component';
 import { loaderInterceptor } from './core/interceptors/loader.interceptor';
 
 
@@ -59,7 +60,8 @@ export const appConfig: ApplicationConfig = {
           { name: 'p-dropdown', component: FormlyFieldDropdownComponent },
           { name: 'searchable-select', component: FormlyFieldSearchableSelectComponent },
           { name: 'google-places', component: FormlyFieldGooglePlacesComponent },
-          { name: 'gst-verify', component: FormlyFieldGstVerifyComponent }
+          { name: 'gst-verify', component: FormlyFieldGstVerifyComponent },
+          { name: 'p-dropdown-group-search', component: FormlyFieldPDropdownGroupSearchComponent }
         ],
         wrappers: [
           { name: 'panel', component: PanelWrapperComponent },
