@@ -1169,9 +1169,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   // Approval methods
   approve(level: string): void {
+    debugger;
+    console.log(level);
     this.sweetAlert.confirm(
       '',
-      `Are you sure you want to approve ${level} data?`,
+      `Are you sure you want to approve this stage?`,
       'question',
       'Yes, Approve',
       'Cancel'
@@ -1183,16 +1185,15 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processApproval(level: string): void {
-    const endpoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.approve_onboarding_stage`;
+    let currentLevel = level === 'L1' ? 'wfb_supplier_onboarding_L1': level === 'L2' ? 'wfb_supplier_onboarding_L2' : 'wfb_supplier_onboarding_L3';
+    const endpoint = `/api/resource/${currentLevel}/${this.supplierId}`
     const data = {
-      onboarding_stage: level,
-      supplier_company_id: this.supplierId,
-      approval_status: 'Approved'
+      onboarding_status: 'Approved'
     };
 
-    this.commonservice.postData(endpoint, data).subscribe({
+    this.commonservice.putData(endpoint, data).subscribe({
       next: (res) => {
-        this.showSuccess(`${level} data approved successfully`);
+        this.showSuccess(`Approved successfully`);
         this.refreshStatusData(level);
       },
       error: (error) => {
@@ -1205,7 +1206,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   reject(level: string): void {
     this.sweetAlert.confirm(
       '',
-      `Are you sure you want to reject ${level} data?`,
+      `Are you sure you want to reject this stage?`,
       'question',
       'Yes, Reject',
       'Cancel'
@@ -1217,16 +1218,15 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processRejection(level: string): void {
-    const endpoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.approve_onboarding_stage`;
+    let currentLevel = level === 'L1' ? 'wfb_supplier_onboarding_L1': level === 'L2' ? 'wfb_supplier_onboarding_L2' : 'wfb_supplier_onboarding_L3';
+    const endpoint = `/api/resource/${currentLevel}/${this.supplierId}`
     const data = {
-      onboarding_stage: level,
-      supplier_company_id: this.supplierId,
-      approval_status: 'Rejected'
+      onboarding_status: 'Rejected'
     };
 
-    this.commonservice.postData(endpoint, data).subscribe({
+    this.commonservice.putData(endpoint, data).subscribe({
       next: (res) => {
-        this.showSuccess(`${level} data rejected`);
+        this.showSuccess(`Rejected successfully`);
         this.refreshStatusData(level);
       },
       error: (error) => {
@@ -1261,11 +1261,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   sendUpdateRequest(): void {
     if (!this.updateRequestComment.trim()) return;
 
-    const endpoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.approve_onboarding_stage`;
+    let currentLevel = this.updateRequestLevel === 'L1' ? 'wfb_supplier_onboarding_L1': this.updateRequestLevel === 'L2' ? 'wfb_supplier_onboarding_L2' : 'wfb_supplier_onboarding_L3';
+
+    const endpoint = `api/resource/${currentLevel}/${this.supplierId}`
     const data = {
-      onboarding_stage: this.updateRequestLevel,
-      supplier_company_id: this.supplierId,
-      approval_status: 'Request to Resubmit',
+      onboarding_status: 'Request to Resubmit',
       comment: this.updateRequestComment
     };
 
