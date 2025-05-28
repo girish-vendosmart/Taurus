@@ -7,6 +7,8 @@ import { CommonSidebarComponent } from '../app/common-core-component/common-side
 import { CommonHeaderComponent } from '../app/common-core-component/common-header/common-header.component';
 import { PerformanceTestComponent } from './common-core-component/common-sidebar/performance-test.component';
 import { CommonTableComponent } from './wefab/wefab-shared-component/common-table/common-table.component';
+import { DropdownGroupSearchDemoComponent } from './dropdown-group-search-demo.component';
+
 export const routes: Routes = [
   { path: '', redirectTo: 'wefab', pathMatch: 'full' },
   { path: 'common-sidebar', component: CommonSidebarComponent},
@@ -15,6 +17,7 @@ export const routes: Routes = [
   { path: 'common-header', component: CommonHeaderComponent},
   { path: 'google-places', component: GooglePlacesComponentComponent},
   { path: 'common-table', component: CommonTableComponent},
+  { path: 'dropdown-demo', component: DropdownGroupSearchDemoComponent},
   {
     path: 'wefab',
     loadChildren: () => import('./wefab/wefab-component.routes').then(m => m.WEFAB_ROUTES)
