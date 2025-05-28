@@ -689,91 +689,110 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processMachineVerificationAsync(): void {
-    if (!this.manufacturingData?.machines?.length || !this.getCompanyProfile) return;
+    if (!this.manufacturingData?.machines?.length && !this.manufacturingData?.facilityPhotos?.length) return;
 
-    // Check if machine analysis is already in progress or completed
-    if (this.loadingState.machineAnalysis) return;
+    // Check if machine analysis is already in progress
+    if (this.loadingState.machineAnalysis || this.loadingState.facilityAnalysis) return;
 
-    // Check if all machines already have analysis results
-    const needsAnalysis = this.manufacturingData.machines.some((machine: any) => {
-      const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
-      if (!fileId) return false;
-      
-      // Check if this machine already has analysis results
-      const cacheKey = `machine_analysis_${fileId}`;
-      const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
-      
-      if (cached) {
-        // Apply cached results
-        machine.machinePhotos.machine_status = cached.machine_status;
-        machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
-        return false; // No analysis needed
+    // Prepare machine analysis requests
+    const machineRequests: Observable<any>[] = [];
+    if (this.manufacturingData?.machines?.length) {
+      const needsMachineAnalysis = this.manufacturingData.machines.some((machine: any) => {
+        const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
+        if (!fileId) return false;
+        
+        const cacheKey = `machine_analysis_${fileId}`;
+        const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
+        
+        if (cached) {
+          machine.machinePhotos.machine_status = cached.machine_status;
+          machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
+          return false;
+        }
+        
+        return machine.machinePhotos.machine_status === undefined;
+      });
+
+      if (needsMachineAnalysis) {
+        const machinesToAnalyze = this.manufacturingData.machines.filter((machine: any) => {
+          const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
+          if (!fileId) return false;
+          
+          const cacheKey = `machine_analysis_${fileId}`;
+          const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
+          return !cached && machine.machinePhotos.machine_status === undefined;
+        });
+
+        machineRequests.push(...machinesToAnalyze.map((machine: any) => this.analyzeMachine(machine)));
       }
-      
-      // Check if machine already has status (from previous analysis)
-      return machine.machinePhotos.machine_status === undefined;
-    });
+    }
 
-    if (!needsAnalysis) {
-      console.log('All machines already analyzed, skipping API calls');
-      this.processFacilityVerificationAsync();
+    // Prepare facility analysis requests
+    const facilityRequests: Observable<any>[] = [];
+    if (this.manufacturingData?.facilityPhotos?.length) {
+      const needsFacilityAnalysis = this.manufacturingData.facilityPhotos.some((facility: any) => {
+        if (!facility?.fileId) return false;
+        
+        const cacheKey = `facility_analysis_${facility.fileId}`;
+        const cached = this.getFromCache<FacilityAnalysisResult>(cacheKey);
+        
+        if (cached) {
+          facility.facility_status = cached.facility_status;
+          facility.facility_comment = cached.facility_comment;
+          return false;
+        }
+        
+        return facility.facility_status === undefined;
+      });
+
+      if (needsFacilityAnalysis) {
+        const facilitiesToAnalyze = this.manufacturingData.facilityPhotos.filter((facility: any) => {
+          if (!facility?.fileId) return false;
+          
+          const cacheKey = `facility_analysis_${facility.fileId}`;
+          const cached = this.getFromCache<FacilityAnalysisResult>(cacheKey);
+          return !cached && facility.facility_status === undefined;
+        });
+
+        facilityRequests.push(...facilitiesToAnalyze.map((facility: any) => this.analyzeFacility(facility)));
+      }
+    }
+
+    // If no analysis is needed, return early
+    if (machineRequests.length === 0 && facilityRequests.length === 0) {
+      console.log('All machines and facilities already analyzed, skipping API calls');
+      this.updateFacilityVerificationStatus();
       return;
     }
 
-    this.loadingState.machineAnalysis = true;
+    // Set loading states
+    if (machineRequests.length > 0) this.loadingState.machineAnalysis = true;
+    if (facilityRequests.length > 0) this.loadingState.facilityAnalysis = true;
 
-    // Process machines in batches to avoid overwhelming the server
-    const batchSize = 3;
-    const machines = this.manufacturingData.machines.filter((machine: any) => {
-      const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
-      if (!fileId) return false;
-      
-      // Only process machines that need analysis
-      const cacheKey = `machine_analysis_${fileId}`;
-      const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
-      return !cached && machine.machinePhotos.machine_status === undefined;
-    });
-
-    if (machines.length === 0) {
-      this.loadingState.machineAnalysis = false;
-      this.processFacilityVerificationAsync();
-      return;
-    }
-
-    const batches = [];
-    for (let i = 0; i < machines.length; i += batchSize) {
-      batches.push(machines.slice(i, i + batchSize));
-    }
-
-    console.log(`Starting machine analysis for ${machines.length} machines in ${batches.length} batches`);
+    // Combine all requests and execute in parallel
+    const allRequests = [...machineRequests, ...facilityRequests];
     
-    // Process batches sequentially with delay
-    this.processMachineBatches(batches, 0);
-  }
+    console.log(`Starting parallel analysis: ${machineRequests.length} machines and ${facilityRequests.length} facilities`);
 
-  private processMachineBatches(batches: any[][], batchIndex: number): void {
-    if (batchIndex >= batches.length) {
-      this.loadingState.machineAnalysis = false;
-      this.processFacilityVerificationAsync();
-      this.cdr.detectChanges();
-      return;
-    }
-
-    const batch = batches[batchIndex];
-    const requests = batch.map(machine => this.analyzeMachine(machine));
-
-    console.log(`Processing machine batch ${batchIndex + 1}/${batches.length} with ${batch.length} machines`);
-
-    forkJoin(requests).pipe(
+    // Execute all requests in parallel
+    forkJoin(allRequests.length > 0 ? allRequests : [of(null)]).pipe(
       catchError(error => {
-        console.error(`Error processing machine batch ${batchIndex}:`, error);
+        console.error('Error during parallel analysis:', error);
         return of([]);
+      }),
+      finalize(() => {
+        this.loadingState.machineAnalysis = false;
+        this.loadingState.facilityAnalysis = false;
+        this.updateFacilityVerificationStatus();
+        this.cdr.detectChanges();
       })
-    ).subscribe(() => {
-      // Process next batch after a short delay
-      setTimeout(() => {
-        this.processMachineBatches(batches, batchIndex + 1);
-      }, 500);
+    ).subscribe({
+      next: (results) => {
+        console.log(`Parallel analysis completed. Processed ${results.length} items.`);
+      },
+      error: (error) => {
+        console.error('Error in parallel analysis:', error);
+      }
     });
   }
 
@@ -842,67 +861,6 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         return of(null);
       })
     );
-  }
-
-  private processFacilityVerificationAsync(): void {
-    if (!this.manufacturingData?.facilityPhotos?.length) return;
-
-    // Check if all facilities already have analysis results
-    const needsAnalysis = this.manufacturingData.facilityPhotos.some((facility: any) => {
-      if (!facility?.fileId) return false;
-      
-      // Check if this facility already has analysis results
-      const cacheKey = `facility_analysis_${facility.fileId}`;
-      const cached = this.getFromCache<FacilityAnalysisResult>(cacheKey);
-      
-      if (cached) {
-        // Apply cached results
-        facility.facility_status = cached.facility_status;
-        facility.facility_comment = cached.facility_comment;
-        return false; // No analysis needed
-      }
-      
-      // Check if facility already has status (from previous analysis)
-      return facility.facility_status === undefined;
-    });
-
-    if (!needsAnalysis) {
-      console.log('All facilities already analyzed, skipping API calls');
-      this.updateFacilityVerificationStatus();
-      return;
-    }
-
-    this.loadingState.facilityAnalysis = true;
-
-    // Filter facilities that need analysis
-    const facilitiesToAnalyze = this.manufacturingData.facilityPhotos.filter((facility: any) => {
-      if (!facility?.fileId) return false;
-      
-      const cacheKey = `facility_analysis_${facility.fileId}`;
-      const cached = this.getFromCache<FacilityAnalysisResult>(cacheKey);
-      return !cached && facility.facility_status === undefined;
-    });
-
-    if (facilitiesToAnalyze.length === 0) {
-      this.loadingState.facilityAnalysis = false;
-      this.updateFacilityVerificationStatus();
-      this.cdr.detectChanges();
-      return;
-    }
-
-    console.log(`Starting facility analysis for ${facilitiesToAnalyze.length} facilities`);
-
-    const requests = facilitiesToAnalyze.map((facility: any) => 
-      this.analyzeFacility(facility)
-    );
-
-    forkJoin(requests).pipe(
-      finalize(() => {
-        this.loadingState.facilityAnalysis = false;
-        this.updateFacilityVerificationStatus();
-        this.cdr.detectChanges();
-      })
-    ).subscribe();
   }
 
   private analyzeFacility(facility: any): Observable<any> {
@@ -1362,7 +1320,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       });
     }
     
-    // Restart analysis
+    // Restart parallel analysis
     this.processMachineVerificationAsync();
   }
 
