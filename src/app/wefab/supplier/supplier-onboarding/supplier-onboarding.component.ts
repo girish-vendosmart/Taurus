@@ -1039,7 +1039,7 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           },
           {
-            className: 'col-md-12 mb-2',
+            className: 'col-md-6 mb-2',
             key: 'primaryManufacturingProcess',
             type: 'p-dropdown-group-search', // Use the new dropdown-group-search type
             defaultValue: [], // For multiselect, initialize as an empty array
