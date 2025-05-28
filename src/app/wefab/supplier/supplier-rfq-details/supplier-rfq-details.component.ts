@@ -3,39 +3,49 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
+import { CommonService } from '../../shared/common.service';
 
 export interface RFQDetails {
-  rfqId: string;
-  title: string;
+  name: string;
+  rfq_name: string;
   description: string;
-  status: 'Published' | 'Draft' | 'Closed';
-  createdOn: string;
-  lastUpdated: string;
-  dueDate: string;
-  projectName: string;
-  country: string;
-  lastQuoteDate: string;
-  address: string;
+  docstatus: number;
+  creation: string;
+  modified: string;
+  target_completion: string;
+  expiry_date: string;
+  delivery_address: string;
+  special_instructions: string;
+  total_amount: number;
+  payment_terms: string;
+  delivery_terms: string;
+  supplier: string;
+  enquiry: string;
 }
 
-export interface RFQPart {
-  partName: string;
-  quantity: number;
+export interface RFQItem {
+  name: string;
+  item_code: string;
+  item_description: string;
   material: string;
-  process: string;
-  specifications: string;
+  specification: string;
+  quantity: number;
+  unit: string;
+  estimated_rate: number;
+  process_required: string;
+  tolerance: string;
+  notes: string;
+  cad_file_reference: string;
 }
 
-export interface ExpenseItem {
-  category: string;
-  section: string;
-  itemNumber: string;
+export interface RFQAttachment {
+  name: string;
+  file: string;
+  file_name: string;
+  file_type: string;
   description: string;
-  drawingNumber: string;
-  unit: string;
-  quantity: number;
-  currency: string;
-  notes: string;
+  category: string;
+  uploaded_on: string;
 }
 
 @Component({
@@ -56,140 +66,26 @@ export class SupplierRfqDetailsComponent implements OnInit {
   loading: boolean = false;
   
   rfqDetails: RFQDetails = {
-    rfqId: 'RFQ-2023-001',
-    title: 'CNC Machined Aluminum Brackets',
-    description: 'Set of 4 aluminum brackets for robotics application. These brackets will be used to mount motors and sensors on a robotic arm. The parts require high precision and must meet the specified tolerances.',
-    status: 'Published',
-    createdOn: '8/1/2023',
-    lastUpdated: '8/1/2023',
-    dueDate: '8/15/2023',
-    projectName: 'Logitech Office Expansion Project',
-    country: 'Kuwait',
-    lastQuoteDate: '07 Jun 2025, 02:23 PM',
-    address: 'Kuwait City, Kuwait'
+    name: '',
+    rfq_name: '',
+    description: '',
+    docstatus: 0,
+    creation: '',
+    modified: '',
+    target_completion: '',
+    expiry_date: '',
+    delivery_address: '',
+    special_instructions: '',
+    total_amount: 0,
+    payment_terms: '',
+    delivery_terms: '',
+    supplier: '',
+    enquiry: ''
   };
 
-  rfqParts: RFQPart[] = [
-    {
-      partName: 'Bracket A',
-      quantity: 10,
-      material: 'Aluminum 6061',
-      process: 'CNC Machining',
-      specifications: 'Tolerance: ±0.1mm, Surface finish: Ra 1.6'
-    },
-    {
-      partName: 'Bracket B',
-      quantity: 5,
-      material: 'Aluminum 6061',
-      process: 'CNC Machining',
-      specifications: 'Tolerance: ±0.05mm, Surface finish: Ra 0.8'
-    },
-    {
-      partName: 'Bracket C',
-      quantity: 8,
-      material: 'Aluminum 7075',
-      process: 'CNC Machining',
-      specifications: 'Tolerance: ±0.1mm, Surface finish: Ra 1.6, Anodized finish'
-    },
-    {
-      partName: 'Bracket D',
-      quantity: 4,
-      material: 'Aluminum 7075',
-      process: 'CNC Machining',
-      specifications: 'Tolerance: ±0.05mm, Surface finish: Ra 0.8, Anodized finish'
-    }
-  ];
+  rfqParts: RFQItem[] = [];
 
-  expenseItems: ExpenseItem[] = [
-    {
-      category: 'Professional Costs',
-      section: 'Power Distribution',
-      itemNumber: '7.1.2',
-      description: 'Description',
-      drawingNumber: '-',
-      unit: 'Pieces',
-      quantity: 200,
-      currency: 'USD',
-      notes: '-'
-    },
-    {
-      category: 'Preliminiries',
-      section: 'others',
-      itemNumber: '3.2.4',
-      description: 'Description',
-      drawingNumber: '-',
-      unit: 'Pieces',
-      quantity: 56,
-      currency: 'USD',
-      notes: '-'
-    },
-    {
-      category: 'Contingency',
-      section: 'Risk & Contingency',
-      itemNumber: '8.2.1',
-      description: 'Description',
-      drawingNumber: '-',
-      unit: 'Sqm',
-      quantity: 20,
-      currency: 'USD',
-      notes: '-'
-    },
-    {
-      category: 'Preliminiries',
-      section: 'Other',
-      itemNumber: '3.2.3',
-      description: 'Description',
-      drawingNumber: '-',
-      unit: 'Sqm',
-      quantity: 9,
-      currency: 'USD',
-      notes: '-'
-    },
-    {
-      category: 'Fire Services',
-      section: 'Fire maintaince',
-      itemNumber: '5.2.2',
-      description: 'Desc',
-      drawingNumber: '-',
-      unit: 'Pieces',
-      quantity: 56,
-      currency: 'USD',
-      notes: '-'
-    },
-    {
-      category: 'Preliminiries',
-      section: 'Others',
-      itemNumber: '3.2.6',
-      description: 'Descrip',
-      drawingNumber: '-',
-      unit: 'Pieces',
-      quantity: 20,
-      currency: 'USD',
-      notes: '-'
-    },
-    {
-      category: 'HVAC',
-      section: 'Water Supply & Drainage',
-      itemNumber: '9.2.1',
-      description: 'Desc',
-      drawingNumber: '-',
-      unit: 'Sqm',
-      quantity: 12,
-      currency: 'USD',
-      notes: '-'
-    },
-    {
-      category: 'IT Equipment',
-      section: 'Temporary Site Facilities',
-      itemNumber: '6.2.1',
-      description: 'Desc',
-      drawingNumber: '-',
-      unit: 'Pieces',
-      quantity: 2,
-      currency: 'USD',
-      notes: '-'
-    }
-  ];
+  rfqAttachments: RFQAttachment[] = [];
 
   // Contract modal properties
   showContractModal: boolean = false;
@@ -198,42 +94,32 @@ export class SupplierRfqDetailsComponent implements OnInit {
   pdfLoaded: boolean = false;
   contractPdfUrl: string = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'; // Sample PDF for demonstration
 
-  // Expense Table Configuration
-  expenseTableConfig: TableConfig = {
+  rfqNewDetails: any;
+
+  // RFQ Items Table Configuration
+  rfqItemsTableConfig: TableConfig = {
     columns: [
       {
-        field: 'category',
-        header: 'Expense Category',
+        field: 'item_code',
+        header: 'Item Code',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'section',
-        header: 'Section',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'itemNumber',
-        header: 'Item Number',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'description',
+        field: 'item_description',
         header: 'Description',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'drawingNumber',
-        header: 'Drawing Number',
+        field: 'material',
+        header: 'Material',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'unit',
-        header: 'Unit',
+        field: 'specification',
+        header: 'Specification',
         sortable: true,
         filterable: true,
       },
@@ -244,8 +130,26 @@ export class SupplierRfqDetailsComponent implements OnInit {
         filterable: true,
       },
       {
-        field: 'currency',
-        header: 'Currency',
+        field: 'unit',
+        header: 'Unit',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'estimated_rate',
+        header: 'Estimated Rate',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'process_required',
+        header: 'Process Required',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'tolerance',
+        header: 'Tolerance',
         sortable: true,
         filterable: true,
       },
@@ -266,20 +170,84 @@ export class SupplierRfqDetailsComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private commonService: CommonService
   ) {}
 
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.rfqId = params['id'];
+      debugger
+      console.log(this.rfqId)
       this.loadRFQDetails();
     });
   }
 
   loadRFQDetails() {
-    // In a real application, this would fetch data from a service
-    // For now, we'll use the mock data above
-    console.log('Loading RFQ details for:', this.rfqId);
+    this.loading = true;
+    this.commonService.getWefabData(`/api/resource/Request for Quotation/${this.rfqId}`).subscribe((res: any) => {
+      this.rfqNewDetails = res.data;
+      
+      // Map API response to rfqDetails
+      if (this.rfqNewDetails) {
+        this.rfqDetails = {
+          name: this.rfqNewDetails.name || '',
+          rfq_name: this.rfqNewDetails.rfq_name || '',
+          description: this.rfqNewDetails.description || '',
+          docstatus: this.rfqNewDetails.docstatus || 0,
+          creation: this.rfqNewDetails.creation || '',
+          modified: this.rfqNewDetails.modified || '',
+          target_completion: this.rfqNewDetails.target_completion || '',
+          expiry_date: this.rfqNewDetails.expiry_date || '',
+          delivery_address: this.rfqNewDetails.delivery_address || '',
+          special_instructions: this.rfqNewDetails.special_instructions || '',
+          total_amount: this.rfqNewDetails.total_amount || 0,
+          payment_terms: this.rfqNewDetails.payment_terms || '',
+          delivery_terms: this.rfqNewDetails.delivery_terms || '',
+          supplier: this.rfqNewDetails.supplier || '',
+          enquiry: this.rfqNewDetails.enquiry || ''
+        };
+
+        // Map API response items to rfqParts
+        if (this.rfqNewDetails.items && this.rfqNewDetails.items.length > 0) {
+          this.rfqParts = this.rfqNewDetails.items.map((item: any) => ({
+            name: item.name || '',
+            item_code: item.item_code || '',
+            item_description: item.item_description || '',
+            material: item.material || '',
+            specification: item.specification || '',
+            quantity: item.quantity || 0,
+            unit: item.unit || '',
+            estimated_rate: item.estimated_rate || 0,
+            process_required: item.process_required || '',
+            tolerance: item.tolerance || '',
+            notes: item.notes || '',
+            cad_file_reference: item.cad_file_reference || ''
+          }));
+        }
+
+        // Map API response attachments to rfqAttachments
+        if (this.rfqNewDetails.attachments && this.rfqNewDetails.attachments.length > 0) {
+          this.rfqAttachments = this.rfqNewDetails.attachments.map((attachment: any) => ({
+            name: attachment.name || '',
+            file: attachment.file || '',
+            file_name: attachment.file_name || '',
+            file_type: attachment.file_type || '',
+            description: attachment.description || '',
+            category: attachment.category || '',
+            uploaded_on: attachment.uploaded_on || ''
+          }));
+        }
+      }
+      
+      this.loading = false;
+      console.log('RFQ Details loaded:', this.rfqDetails);
+      console.log('RFQ Parts loaded:', this.rfqParts);
+      console.log('RFQ Attachments loaded:', this.rfqAttachments);
+    }, (error) => {
+      this.loading = false;
+      console.error('Error loading RFQ details:', error);
+    });
   }
 
   setActiveTab(tab: 'overview' | 'comment' | 'resolution') {
@@ -293,7 +261,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
   createQuotation() {
     // Navigate to create quotation page with rfqId as query parameter
     this.router.navigate(['/wefab/supplier/create-quotation'], {
-      queryParams: { rfqId: this.rfqDetails.rfqId }
+      queryParams: { rfqId: this.rfqDetails.name }
     });
   }
 
@@ -354,33 +322,85 @@ export class SupplierRfqDetailsComponent implements OnInit {
   }
 
   downloadFile() {
-    // Implement file download functionality
+    // Implement file download functionality for contract
     console.log('Downloading file for RFQ:', this.rfqId);
   }
 
   getStatusClass(): string {
-    switch (this.rfqDetails.status) {
-      case 'Published':
+    switch (this.rfqDetails.docstatus) {
+      case 1:
         return 'status-published';
-      case 'Draft':
+      case 0:
         return 'status-draft';
-      case 'Closed':
+      case 2:
         return 'status-closed';
       default:
         return 'status-default';
     }
   }
 
+  getStatusText(): string {
+    switch (this.rfqDetails.docstatus) {
+      case 1:
+        return 'Published';
+      case 0:
+        return 'Draft';
+      case 2:
+        return 'Closed';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  // Helper method to format date
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+
+  // Helper method to strip HTML tags from description
+  stripHtmlTags(html: string): string {
+    if (!html) return '';
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  }
+
   // Common Table Event Handlers
-  onExpenseRowClick(event: { event: Event, rowData: any }) {
-    console.log('Expense row clicked:', event.rowData);
+  onRfqItemRowClick(event: { event: Event, rowData: any }) {
+    console.log('RFQ Item row clicked:', event.rowData);
   }
 
-  onExpenseLinkClick(event: { rowData: any, column: any }) {
-    console.log('Expense link clicked:', event.rowData, event.column);
+  onRfqItemLinkClick(event: { rowData: any, column: any }) {
+    console.log('RFQ Item link clicked:', event.rowData, event.column);
   }
 
-  onExpenseActionClick(event: { action: string, rowData: any }) {
-    console.log('Expense action clicked:', event.action, event.rowData);
+  onRfqItemActionClick(event: { action: string, rowData: any }) {
+    console.log('RFQ Item action clicked:', event.action, event.rowData);
+  }
+
+  // Attachment methods
+  viewAttachment(attachment: RFQAttachment) {
+    // Open attachment in new window/tab
+    if (attachment.file) {
+      window.open(attachment.file, '_blank');
+    }
+  }
+
+  downloadAttachment(attachment: RFQAttachment) {
+    // Implement attachment download functionality
+    if (attachment.file) {
+      const link = document.createElement('a');
+      link.href = attachment.file;
+      link.download = attachment.file_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   }
 }

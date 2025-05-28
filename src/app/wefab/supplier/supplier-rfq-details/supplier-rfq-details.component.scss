@@ -1160,3 +1160,342 @@ $danger-red: #EF4444;
     }
   }
 }
+
+// Status Badge Styles
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.5rem;
+
+  &.status-published {
+    background-color: rgba($process-green, 0.1);
+    color: $process-green;
+  }
+
+  &.status-draft {
+    background-color: rgba($warning-yellow, 0.1);
+    color: $warning-yellow;
+  }
+
+  &.status-closed {
+    background-color: rgba($machine-gray, 0.1);
+    color: $machine-gray;
+  }
+
+  &.status-default {
+    background-color: rgba($info-blue, 0.1);
+    color: $info-blue;
+  }
+}
+
+// Special Instructions Section
+.special-instructions {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba($warning-yellow, 0.05);
+  border-radius: 8px;
+  border-left: 4px solid $warning-yellow;
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: $font-weight-semibold;
+    color: $precision-black;
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &::before {
+      content: '⚠️';
+      font-size: 1rem;
+    }
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: $precision-black;
+    line-height: 1.7;
+    margin: 0;
+  }
+}
+
+// RFQ Items Section
+.items-section {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid rgba($material-finish-silver, 0.2);
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+
+  .items-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba($material-finish-silver, 0.2);
+    background: linear-gradient(135deg, rgba($blueprint-blue, 0.02) 0%, rgba($blueprint-blue, 0.01) 100%);
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: $font-weight-bold;
+      color: $precision-black;
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      &::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
+        border-radius: 2px;
+      }
+    }
+
+    .section-subtitle {
+      font-size: 0.875rem;
+      color: $machine-gray;
+      margin: 0;
+    }
+  }
+
+  // Override common table styles within items section
+  app-common-table {
+    .table-wrapper {
+      border-radius: 0;
+      box-shadow: none;
+      border: none;
+    }
+
+    .common-table-container {
+      border-radius: 0;
+    }
+  }
+
+  // Override common table mobile styles
+  app-common-table {
+    .table-wrapper {
+      margin: 0;
+    }
+  }
+}
+
+// Attachments Section
+.attachments-section {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid rgba($material-finish-silver, 0.2);
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+
+  .attachments-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba($material-finish-silver, 0.2);
+    background: linear-gradient(135deg, rgba($process-green, 0.02) 0%, rgba($process-green, 0.01) 100%);
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: $font-weight-bold;
+      color: $precision-black;
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      &::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, $process-green 0%, darken($process-green, 10%) 100%);
+        border-radius: 2px;
+      }
+    }
+
+    .section-subtitle {
+      font-size: 0.875rem;
+      color: $machine-gray;
+      margin: 0;
+    }
+  }
+
+  .attachments-grid {
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+    }
+  }
+
+  .attachment-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border: 1px solid rgba($material-finish-silver, 0.3);
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: rgba($process-green, 0.3);
+    }
+
+    .file-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba($process-green, 0.1);
+      border-radius: 8px;
+
+      i {
+        font-size: 1.25rem;
+        color: $process-green;
+      }
+    }
+
+    .file-info {
+      flex: 1;
+      min-width: 0;
+
+      .file-name {
+        font-size: 0.875rem;
+        font-weight: $font-weight-semibold;
+        color: $precision-black;
+        margin: 0 0 0.25rem 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .file-description {
+        font-size: 0.75rem;
+        color: $machine-gray;
+        margin: 0 0 0.5rem 0;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .file-meta {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+
+        span {
+          font-size: 0.625rem;
+          padding: 0.125rem 0.375rem;
+          border-radius: 4px;
+          font-weight: $font-weight-medium;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+
+          &.file-type {
+            background: rgba($info-blue, 0.1);
+            color: $info-blue;
+          }
+
+          &.file-category {
+            background: rgba($warning-yellow, 0.1);
+            color: $warning-yellow;
+          }
+
+          &.upload-date {
+            background: rgba($machine-gray, 0.1);
+            color: $machine-gray;
+          }
+        }
+      }
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+
+      button {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+
+        i {
+          font-size: 0.875rem;
+        }
+
+        &.view-btn {
+          background: rgba($info-blue, 0.1);
+          color: $info-blue;
+
+          &:hover {
+            background: rgba($info-blue, 0.2);
+            transform: scale(1.05);
+          }
+        }
+
+        &.download-btn {
+          background: rgba($process-green, 0.1);
+          color: $process-green;
+
+          &:hover {
+            background: rgba($process-green, 0.2);
+            transform: scale(1.05);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Loading State
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba($blueprint-blue, 0.2);
+    border-top: 3px solid $blueprint-blue;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: $machine-gray;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

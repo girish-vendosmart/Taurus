@@ -10,15 +10,13 @@
     
     <div class="header-content">
       <div class="header-left">
-        <h1 class="page-title">{{ rfqDetails.title }}</h1>
-        <p class="rfq-id">{{ rfqDetails.rfqId }}</p>
+        <h1 class="page-title">{{ rfqDetails.rfq_name || 'Loading...' }}</h1>
+        <p class="rfq-id">{{ rfqDetails.name || 'Loading...' }}</p>
+        <span class="status-badge" [ngClass]="getStatusClass()">{{ getStatusText() }}</span>
       </div>
       
       <div class="header-right">
-        <button class="btn btn-outline-primary" (click)="viewContract()">
-          View Contract
-        </button>
-        <button class="btn btn-primary" (click)="createQuotation()">
+        <button class="btn btn-primary" (click)="createQuotation()" [disabled]="loading">
           Create Quotation
         </button>
       </div>
@@ -26,35 +24,35 @@
   </div>
 
   <!-- RFQ Info Bar -->
-  <div class="rfq-info-bar">
+  <div class="rfq-info-bar" *ngIf="!loading">
     <div class="info-item">
       <span class="info-label">Creation:</span>
-      <span class="info-value">{{ rfqDetails.createdOn }}</span>
+      <span class="info-value">{{ formatDate(rfqDetails.creation) }}</span>
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Project Name:</span>
-      <span class="info-value">{{ rfqDetails.projectName }}</span>
+      <span class="info-label">Target Completion:</span>
+      <span class="info-value">{{ formatDate(rfqDetails.target_completion) }}</span>
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Rfq Id:</span>
-      <span class="info-value">{{ rfqDetails.rfqId }}</span>
+      <span class="info-label">Expiry Date:</span>
+      <span class="info-value">{{ formatDate(rfqDetails.expiry_date) }}</span>
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Country:</span>
-      <span class="info-value">{{ rfqDetails.country }}</span>
+      <span class="info-label">Delivery Address:</span>
+      <span class="info-value">{{ rfqDetails.delivery_address }}</span>
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Last Quote Date:</span>
-      <span class="info-value">{{ rfqDetails.lastQuoteDate }}</span>
+      <span class="info-label">Payment Terms:</span>
+      <span class="info-value">{{ rfqDetails.payment_terms }}</span>
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Address:</span>
-      <span class="info-value">{{ rfqDetails.address }}</span>
+      <span class="info-label">Delivery Terms:</span>
+      <span class="info-value">{{ rfqDetails.delivery_terms }}</span>
     </div>
   </div>
 
@@ -86,7 +84,13 @@
           
           <div class="description-box">
             <h3>Description</h3>
-            <p>{{ rfqDetails.description }}</p>
+            <div [innerHTML]="rfqDetails.description"></div>
+          </div>
+
+          <!-- Special Instructions -->
+          <div class="special-instructions" *ngIf="rfqDetails.special_instructions">
+            <h3>Special Instructions</h3>
+            <p>{{ rfqDetails.special_instructions }}</p>
           </div>
 
           <!-- Timeline -->
@@ -95,69 +99,80 @@
             <div class="timeline-grid">
               <div class="timeline-item">
                 <div class="timeline-label">Created On</div>
-                <div class="timeline-value">{{ rfqDetails.createdOn }}</div>
+                <div class="timeline-value">{{ formatDate(rfqDetails.creation) }}</div>
               </div>
               <div class="timeline-item">
                 <div class="timeline-label">Last Updated</div>
-                <div class="timeline-value">{{ rfqDetails.lastUpdated }}</div>
+                <div class="timeline-value">{{ formatDate(rfqDetails.modified) }}</div>
               </div>
               <div class="timeline-item">
-                <div class="timeline-label">Due Date</div>
-                <div class="timeline-value">{{ rfqDetails.dueDate }}</div>
+                <div class="timeline-label">Target Completion</div>
+                <div class="timeline-value">{{ formatDate(rfqDetails.target_completion) }}</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-label">Expiry Date</div>
+                <div class="timeline-value">{{ formatDate(rfqDetails.expiry_date) }}</div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Expense Breakdown Table -->
-        <div class="expense-section">
-          <div class="expense-header">
-            <h3>Items</h3>
-            <p class="section-subtitle">Review the detailed breakdown of expenses for this RFQ</p>
+        <!-- RFQ Items Section -->
+        <div class="items-section">
+          <div class="items-header">
+            <h3>RFQ Items</h3>
+            <p class="section-subtitle">Review the items requested in this RFQ</p>
           </div>
 
-          <!-- Common Table Component -->
+          <!-- Common Table Component for RFQ Items -->
           <app-common-table 
-            [config]="expenseTableConfig" 
-            [data]="expenseItems"
+            [config]="rfqItemsTableConfig" 
+            [data]="rfqParts"
             [loading]="loading"
-            (rowClick)="onExpenseRowClick($event)"
-            (linkClick)="onExpenseLinkClick($event)"
-            (actionClick)="onExpenseActionClick($event)">
+            (rowClick)="onRfqItemRowClick($event)"
+            (linkClick)="onRfqItemLinkClick($event)"
+            (actionClick)="onRfqItemActionClick($event)">
           </app-common-table>
         </div>
 
-        <!-- Bottom Section with Contract and Drawings -->
-        <div class="bottom-sections">
-          <!-- Contract Section -->
-          <div class="contract-section">
-            <h3>Contract</h3>
-            <div class="contract-item">
+        <!-- Attachments Section -->
+        <div class="attachments-section" *ngIf="rfqAttachments && rfqAttachments.length > 0">
+          <div class="attachments-header">
+            <h3>Attachments</h3>
+            <p class="section-subtitle">Documents and files related to this RFQ</p>
+          </div>
+
+          <div class="attachments-grid">
+            <div class="attachment-card" *ngFor="let attachment of rfqAttachments">
               <div class="file-icon">
-                <i class="bi bi-file-earmark-pdf"></i>
+                <i class="bi bi-file-earmark-pdf" *ngIf="attachment.file_type === 'Specification' || attachment.file_type === 'Process Document'"></i>
+                <i class="bi bi-file-earmark" *ngIf="attachment.file_type !== 'Specification' && attachment.file_type !== 'Process Document'"></i>
               </div>
               <div class="file-info">
-                <span class="file-name">1.pdf</span>
+                <h4 class="file-name">{{ attachment.file_name }}</h4>
+                <p class="file-description">{{ attachment.description }}</p>
+                <div class="file-meta">
+                  <span class="file-type">{{ attachment.file_type }}</span>
+                  <span class="file-category">{{ attachment.category }}</span>
+                  <span class="upload-date">{{ formatDate(attachment.uploaded_on) }}</span>
+                </div>
               </div>
               <div class="file-actions">
-                <button class="view-btn" (click)="viewContract()">
+                <button class="view-btn" (click)="viewAttachment(attachment)">
                   <i class="bi bi-eye"></i>
                 </button>
-                <button class="download-btn" (click)="downloadFile()">
+                <button class="download-btn" (click)="downloadAttachment(attachment)">
                   <i class="bi bi-download"></i>
                 </button>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- RFQ Drawings Update -->
-          <div class="drawings-section">
-            <h3>RFQ Drawings Update</h3>
-            <div class="drawings-item">
-              <i class="bi bi-folder"></i>
-              <span>5UTRWI0X_RFQ_File</span>
-            </div>
-          </div>
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="loading">
+          <div class="loading-spinner"></div>
+          <p>Loading RFQ details...</p>
         </div>
       </div>
     </div>
