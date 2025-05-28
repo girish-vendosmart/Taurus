@@ -21,6 +21,7 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { TagModule } from 'primeng/tag';
 import { SweetAlertService } from '../../shared/sweet-alert.service'
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
+import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
 
 interface Supplier {
   name: string;
@@ -56,7 +57,8 @@ interface Supplier {
     FormsModule,
     OverlayPanelModule,
     TagModule,
-    DateFormatPipe
+    DateFormatPipe,
+    CommonTableComponent
   ],
   providers: [MessageService],
   template: `
@@ -68,171 +70,30 @@ interface Supplier {
         <button pButton label="Invite Vendor" icon="pi pi-plus" class="p-button-primary" (click)="showInviteDialog()"></button>
       </div>
 
-        <p-tabView>
-          <p-tabPanel header="Active Suppliers">
-            <table class="suppliers-table">
-              <thead>
-                <tr>
-                  <th>
-                    <div class="header-cell" (click)="sort('company_name')">
-                      <span>Company</span>
-                      <i class="pi" [ngClass]="getSortIcon('company_name')"></i>
-                    </div>
-                    <div class="filter-row">
-                      <input pInputText type="text" placeholder="Search Company" class="search-input" 
-                             [(ngModel)]="filters.company" (input)="applyFilters()">
-                    </div>
-                  </th>
-                  <th>
-                    <div class="header-cell" (click)="sort('primary_email_id')">
-                      <span>Contact</span>
-                      <i class="pi" [ngClass]="getSortIcon('primary_email_id')"></i>
-                    </div>
-                    <div class="filter-row">
-                      <input pInputText type="text" placeholder="Search Contact" class="search-input"
-                             [(ngModel)]="filters.contact" (input)="applyFilters()">
-                    </div>
-                  </th>
-                  <th>
-                    <div class="header-cell" (click)="sort('onboarding_status')">
-                      <span>Status</span>
-                      <i class="pi" [ngClass]="getSortIcon('onboarding_status')"></i>
-                    </div>
-                    <div class="filter-row">
-                      <input pInputText type="text" placeholder="Search Status" class="search-input"
-                             [(ngModel)]="filters.status" (input)="applyFilters()">
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let supplier of paginatedSuppliers">
-                  <td>
-                  <div class="project-name" (click)="viewSupplierProfile(supplier)">{{ supplier.company_name }}</div>
-                    <div class="sub-id">{{ supplier.name }}</div>
-                  </td>
-                  <td>
-                    <div>{{ supplier.primary_email_id }}</div>
-                    <div class="sub-id">{{ supplier.primary_phone_number }}</div>
-                  </td>
-                  <td>
-                    <span class="status-badge" [ngClass]="getStatusClass(supplier.onboarding_status)" *ngIf="supplier.onboarding_status !== 'Request to Resubmit'">
-                      {{ supplier.onboarding_status }}
-                    </span>
-                    <span class="status-badge status-review " [ngClass]="getStatusClass(supplier.onboarding_status)" *ngIf="supplier.onboarding_status == 'Request to Resubmit'">
-                      Request to Resubmit
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            
-            <div class="pagination-footer">
-              <div class="pagination-info">
-                Showing {{ firstSupplier }} to {{ lastSupplier }} of {{ filteredSuppliers.length }} entries
-              </div>
-              <div class="pagination-controls">
-                <button pButton type="button" icon="pi pi-angle-double-left" class="p-button-text p-button-sm" 
-                  (click)="onPageChange(0)" [disabled]="supplierCurrentPage === 0"></button>
-                <button pButton type="button" icon="pi pi-angle-left" class="p-button-text p-button-sm"
-                  (click)="onPageChange(supplierCurrentPage - 1)" [disabled]="supplierCurrentPage === 0"></button>
-                <ng-container *ngFor="let page of getSupplierPages(); let i = index">
-                  <button pButton type="button" [label]="(i+1).toString()" 
-                    [class]="i === supplierCurrentPage ? 'p-button-sm p-button-primary' : 'p-button-sm p-button-text'"
-                    (click)="onPageChange(i)"></button>
-                </ng-container>
-                <button pButton type="button" icon="pi pi-angle-right" class="p-button-text p-button-sm"
-                  (click)="onPageChange(supplierCurrentPage + 1)" [disabled]="supplierCurrentPage === getTotalSupplierPages() - 1"></button>
-                <button pButton type="button" icon="pi pi-angle-double-right" class="p-button-text p-button-sm"
-                  (click)="onPageChange(getTotalSupplierPages() - 1)" [disabled]="supplierCurrentPage === getTotalSupplierPages() - 1"></button>
-              </div>
-            </div>
-          </p-tabPanel>
-          <p-tabPanel header="Invited Suppliers">
-            <table class="suppliers-table">
-              <thead>
-                <tr>
-                  <th>
-                    <div class="header-cell-invited" (click)="sortInvited('company_name')">
-                      <span>Company</span>
-                      <i class="pi" [ngClass]="getSortIconInvited('company_name')"></i>
-                    </div>
-                    <div class="filter-row">
-                      <input pInputText type="text" placeholder="Search Company" class="search-input"
-                             [(ngModel)]="invitedFilters.company" (input)="applyInvitedFilters()">
-                    </div>
-                  </th>
-                  <th>
-                    <div class="header-cell-invited" (click)="sortInvited('supplier_email_id')">
-                      <span>Contact</span>
-                      <i class="pi" [ngClass]="getSortIconInvited('supplier_email_id')"></i>
-                    </div>
-                    <div class="filter-row">
-                      <input pInputText type="text" placeholder="Search Contact" class="search-input"
-                             [(ngModel)]="invitedFilters.contact" (input)="applyInvitedFilters()">
-                    </div>
-                  </th>
-                  <th>
-                    <div class="header-cell-invited" (click)="sortInvited('status')">
-                      <span>Status</span>
-                      <i class="pi" [ngClass]="getSortIconInvited('status')"></i>
-                    </div>
-                    <div class="filter-row">
-                      <input pInputText type="text" placeholder="Search Status" class="search-input"
-                             [(ngModel)]="invitedFilters.status" (input)="applyInvitedFilters()">
-                    </div>
-                  </th>
-                  <th class="actions-column">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let invite of paginatedInvitedSuppliers">
-                  <td>
-                    <div class="project-name">{{ invite.company_name }}</div>
-                    <div class="sub-id">{{ invite.supplier_name }}</div>
-                  </td>
-                  <td>
-                    <div>{{ invite.supplier_email_id }}</div>
-                    <div class="sub-id">{{ invite.creation | dateFormat:'medium' }}</div>
-                  </td>
-                  <td>
-                    <span class="status-badge status-pending">Invited</span>
-                  </td>
-                  <td class="actions-column">
-                    <button pButton type="button" icon="pi pi-send" class="menu-button" title="Resend Invitation"
-                      (click)="resendInvitation(invite)"></button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            
-            <div class="pagination-footer">
-              <div class="pagination-info">
-                Showing {{ firstInvited }} to {{ lastInvited }} of {{ filteredInvitedSuppliers.length }} entries
-              </div>
-              <div class="pagination-controls">
-                <button pButton type="button" icon="pi pi-angle-double-left" class="p-button-text p-button-sm"
-                  (click)="onInvitedPageChange(0)" [disabled]="invitedCurrentPage === 0"></button>
-                <button pButton type="button" icon="pi pi-angle-left" class="p-button-text p-button-sm"
-                  (click)="onInvitedPageChange(invitedCurrentPage - 1)" [disabled]="invitedCurrentPage === 0"></button>
-                <ng-container *ngFor="let page of getInvitedPages(); let i = index">
-                  <button pButton type="button" [label]="(i+1).toString()" 
-                    [class]="i === invitedCurrentPage ? 'p-button-sm p-button-primary' : 'p-button-sm p-button-text'"
-                    (click)="onInvitedPageChange(i)"></button>
-                </ng-container>
-                <button pButton type="button" icon="pi pi-angle-right" class="p-button-text p-button-sm"
-                  (click)="onInvitedPageChange(invitedCurrentPage + 1)" [disabled]="invitedCurrentPage === getTotalInvitedPages() - 1"></button>
-                <button pButton type="button" icon="pi pi-angle-double-right" class="p-button-text p-button-sm"
-                  (click)="onInvitedPageChange(getTotalInvitedPages() - 1)" [disabled]="invitedCurrentPage === getTotalInvitedPages() - 1"></button>
-              </div>
-            </div>
-          </p-tabPanel>
-        </p-tabView>
+      <p-tabView>
+        <p-tabPanel header="Active Suppliers">
+          <app-common-table 
+            [config]="activeSupplierTableConfig" 
+            [data]="suppliers"
+            [loading]="loadingSuppliers"
+            (rowClick)="onActiveSupplierRowClick($event)"
+            (linkClick)="onActiveSupplierLinkClick($event)"
+            (actionClick)="onActiveSupplierActionClick($event)">
+          </app-common-table>
+        </p-tabPanel>
+        
+        <p-tabPanel header="Invited Suppliers">
+          <app-common-table 
+            [config]="invitedSupplierTableConfig" 
+            [data]="invitedSuppliers"
+            [loading]="loadingInvitedSuppliers"
+            (rowClick)="onInvitedSupplierRowClick($event)"
+            (linkClick)="onInvitedSupplierLinkClick($event)"
+            (actionClick)="onInvitedSupplierActionClick($event)">
+          </app-common-table>
+        </p-tabPanel>
+      </p-tabView>
     </div>
-
-    <!-- Action menus -->
-    <p-menu #actionMenu [popup]="true" [model]="supplierMenuItems" [styleClass]="'custom-menu'"></p-menu>
-    <p-menu #inviteActionMenu [popup]="true" [model]="invitedMenuItems" [styleClass]="'custom-menu'"></p-menu>
 
     <p-dialog 
       [(visible)]="inviteDialogVisible" 
@@ -311,182 +172,6 @@ interface Supplier {
       margin: 0;
     }
 
-    .card {
-      background-color: transparent;
-      border-radius: 0;
-      box-shadow: none;
-      overflow: hidden;
-    }
-
-    .suppliers-table {
-      width: 100%;
-      border-collapse: collapse;
-      border: 1px solid #e0e0e0;
-    }
-
-    .suppliers-table th {
-      background: #f8f9fa;
-      font-weight: 600;
-      padding: 10px 12px;
-      text-align: left;
-      color: #495057;
-      border: 1px solid #e0e0e0;
-    }
-
-    .suppliers-table td {
-      padding: 10px 12px;
-      border: 1px solid #e0e0e0;
-      vertical-align: middle;
-      text-align: left;
-    }
-
-    .project-name {
-      color: #2563eb;
-      font-weight: 500;
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .project-name:hover {
-      text-decoration: underline;
-    }
-
-    .header-cell-invited {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .header-cell {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-    }
-
-    .header-cell:hover {
-      color: #0d6efd;
-    }
-
-    .search-input {
-      width: 100%;
-      font-size: 0.85rem;
-      padding: 6px;
-      border-radius: 4px;
-      margin-top: 5px;
-    }
-
-    .status-container {
-      margin-bottom: 5px;
-    }
-    
-    .status-badge {
-      display: inline-block;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      text-align: center;
-      font-weight: 500;
-    }
-    
-    .status-active {
-      background-color: #e8f5e9;
-      color: #1b9b62;
-    }
-
-    .status-pending {
-      background-color: #fff1ec;
-      color: #f76b42;
-    }
-
-    .status-completed {
-      background-color: #e7f9ee;
-      color: #1a9b61;
-    }
-
-    .status-inprogress {
-      background-color: #fff3cd;
-      color: #856404;
-    }
-
-    .status-review {
-      background-color: #fff3cd;
-      color: #856404;
-    }
-
-    .status-rejected {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-    
-    .status-resubmit {
-      background-color: #e0f7fa !important;
-      color: #0288d1;
-    }
-
-    .actions-column {
-      white-space: nowrap;
-      text-align: center;
-    }
-
-    .menu-button {
-      background: none;
-      border: 1px solid #E0E0E0;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: #6c757d;
-      border-radius: 4px;
-      margin: 0;
-    }
-
-    .menu-button:hover {
-      background-color: #f8f9fa;
-    }
-
-    .menu-button i {
-      font-size: 1rem;
-    }
-
-    .sub-id {
-      color: #888;
-      font-size: 0.85em;
-      text-align: left;
-      margin-top: 3px;
-    }
-
-    .pagination-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      border-top: 1px solid #e0e0e0;
-      background-color: #f8f9fa;
-    }
-
-    .pagination-info {
-      font-size: 0.9rem;
-      color: #6c757d;
-    }
-
-    .pagination-controls {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .pagination-controls button {
-      margin: 0 2px;
-    }
-
-    .pagination-controls .p-button-primary {
-      background-color: #3b82f6;
-      border-color: #3b82f6;
-    }
-
     .invite-form .field {
       margin-bottom: 1.2rem;
     }
@@ -514,33 +199,6 @@ interface Supplier {
       margin-top: 1.5rem;
     }
 
-    /* Custom menu styling to match screenshot */
-    :host ::ng-deep .custom-menu {
-      border: 1px solid #e0e0e0 !important;
-      border-radius: 4px !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-      min-width: 180px !important;
-      padding: 0 !important;
-    }
-    
-    :host ::ng-deep .custom-menu .p-menuitem-link {
-      padding: 0.7rem 1rem !important;
-    }
-    
-    :host ::ng-deep .custom-menu .p-menuitem-icon {
-      color: #495057 !important;
-      margin-right: 0.75rem !important;
-    }
-    
-    :host ::ng-deep .custom-menu .p-menuitem-text {
-      color: #495057 !important;
-      font-weight: 400 !important;
-    }
-    
-    :host ::ng-deep .custom-menu .p-menuitem-link:hover {
-      background-color: #f8f9fa !important;
-    }
-
     /* PrimeNG component overrides for better alignment */
     :host ::ng-deep .p-tabview .p-tabview-nav {
       justify-content: flex-start;
@@ -551,67 +209,101 @@ interface Supplier {
       align-items: center;
       justify-content: center;
     }
-
-    /* Add some breathing room between rows */
-    .suppliers-table tr:hover {
-      background-color: #f5f9ff;
-    }
   `]
 })
 export class ManageSuppliersComponent implements OnInit {
   private sweetAlert = inject(SweetAlertService);
   suppliers: Supplier[] = [];
   invitedSuppliers: any[] = [];
-  filteredSuppliers: Supplier[] = [];
-  filteredInvitedSuppliers: any[] = [];
-  paginatedSuppliers: Supplier[] = [];
-  paginatedInvitedSuppliers: any[] = [];
   inviteDialogVisible = false;
   inviteForm: FormGroup;
   isSubmitting = false;
+  loadingSuppliers = false;
+  loadingInvitedSuppliers = false;
   
-  // Selected items for actions
-  selectedSupplier: Supplier | null = null;
-  selectedInvite: any = null;
-  
-  // Menu items
-  supplierMenuItems: MenuItem[] = [];
-  invitedMenuItems: MenuItem[] = [];
-  
-  // Sorting state - Set default to sort by latest first
-  sortField: string = 'created_at';
-  sortOrder: number = -1; // -1 for descending (newest first)
-  invitedSortField: string = 'creation';
-  invitedSortOrder: number = -1; // -1 for descending (newest first)
-  
-  // Filtering state
-  filters = {
-    company: '',
-    contact: '',
-    status: ''
-  };
-  
-  invitedFilters = {
-    company: '',
-    contact: '',
-    status: ''
+  // Table configurations
+  activeSupplierTableConfig: TableConfig = {
+    columns: [
+      {
+        field: 'company_name',
+        header: 'Company',
+        sortable: true,
+        filterable: true,
+        isLink: true,
+        width: '40%'
+      },
+      {
+        field: 'primary_email_id',
+        header: 'Contact',
+        sortable: true,
+        filterable: true,
+        width: '35%'
+      },
+      {
+        field: 'onboarding_status',
+        header: 'Status',
+        sortable: true,
+        filterable: true,
+        isStatus: true,
+        width: '25%'
+      }
+    ],
+    enableSearch: true,
+    enableSort: true,
+    enableFilter: true,
+    enablePagination: true,
+    pageSize: 10
   };
 
-  // Pagination
-  supplierRowsPerPage = 10;
-  supplierCurrentPage = 0;
-  invitedRowsPerPage = 10;
-  invitedCurrentPage = 0;
-  
-  // Pagination display values
-  firstSupplier = 1;
-  lastSupplier = 10;
-  firstInvited = 1;
-  lastInvited = 10;
-
-  // References to menu components
-  @ViewChild('actionMenu') actionMenu: any;
-  @ViewChild('inviteActionMenu') inviteActionMenu: any;
+  invitedSupplierTableConfig: TableConfig = {
+    columns: [
+      {
+        field: 'company_name',
+        header: 'Company',
+        sortable: true,
+        filterable: true,
+        width: '35%'
+      },
+      {
+        field: 'supplier_email_id',
+        header: 'Contact',
+        sortable: true,
+        filterable: true,
+        width: '35%'
+      },
+      {
+        field: 'status',
+        header: 'Status',
+        sortable: true,
+        filterable: true,
+        isStatus: true,
+        width: '20%'
+      },
+      {
+        field: 'actions',
+        header: 'Action',
+        sortable: false,
+        filterable: false,
+        isAction: true,
+        width: '10%'
+      }
+    ],
+    enableSearch: true,
+    enableSort: true,
+    enableFilter: true,
+    enablePagination: true,
+    pageSize: 10,
+    showActions: true,
+    actionButtons: [
+      {
+        action: 'resend',
+        icon: 'pi pi-send',
+        iconOnly: true,
+        tooltip: 'Resend Invitation',
+        severity: 'secondary'
+      }
+    ]
+  };
 
   constructor(
     private commonService: CommonService,
@@ -625,9 +317,6 @@ export class ManageSuppliersComponent implements OnInit {
       supplier_name: ['', Validators.required],
       company_name: ['', Validators.required]
     });
-    
-    // Initialize menu items
-    this.initializeMenuItems();
   }
 
   ngOnInit() {
@@ -637,197 +326,76 @@ export class ManageSuppliersComponent implements OnInit {
     this.accessFirebaseTriggerLoad('wfb_supplier_onboarding_L1_list_view', 'L1_list_view');
   }
 
-  initializeMenuItems() {
-    // Only keep View Profile in supplier menu
-    this.supplierMenuItems = [
-      {
-        label: 'View Profile',
-        icon: 'pi pi-eye',
-        command: () => {
-          if (this.selectedSupplier) {
-            this.viewSupplierProfile(this.selectedSupplier);
-          }
-        }
-      }
-    ];
-    
-    // Only keep Resend Invitation in invited menu
-    this.invitedMenuItems = [
-      {
-        label: 'Resend Invitation',
-        icon: 'pi pi-send',
-        command: () => {
-          this.sweetAlert.success('Invitation resent successfully!');
-        }
-      }
-    ];
-  }
-
   loadSuppliers() {
+    this.loadingSuppliers = true;
     const endPoint = '/api/resource/wfb_supplier_onboarding_L1?fields=["*"]&limit_page_length=0&order_by=modified desc';
     this.commonService.getData(endPoint).subscribe({
       next: (response: any) => {
-        this.suppliers = response.data;
-        this.filteredSuppliers = [...this.suppliers];
-        this.sortSuppliers();
-        this.paginate();
+        // Transform data to include sub-information for display
+        this.suppliers = response.data.map((supplier: any) => ({
+          ...supplier,
+          // Add sub-information that will be displayed in the company cell
+          companySubInfo: supplier.name,
+          contactSubInfo: supplier.primary_phone_number
+        }));
+        this.loadingSuppliers = false;
       },
       error: (error) => {
         console.error('Error loading suppliers:', error);
         this.sweetAlert.error('Failed to load suppliers');
+        this.loadingSuppliers = false;
       }
     });
   }
 
   loadInvitedSuppliers() {
+    this.loadingInvitedSuppliers = true;
     const endPoint = '/api/resource/wfb_supplier_invitation?fields=["*"]&limit_page_length=0&order_by=modified desc';
     this.commonService.getData(endPoint).subscribe({
       next: (response: any) => {
-        this.invitedSuppliers = response.data;
-        this.filteredInvitedSuppliers = [...this.invitedSuppliers];
-        this.sortInvitedSuppliers();
-        this.paginateInvited();
+        // Transform data to add status and sub-information
+        this.invitedSuppliers = response.data.map((invite: any) => ({
+          ...invite,
+          status: 'Invited',
+          companySubInfo: invite.supplier_name,
+          contactSubInfo: this.formatDate(invite.creation)
+        }));
+        this.loadingInvitedSuppliers = false;
       },
       error: (error) => {
         console.error('Error loading invited suppliers:', error);
         this.sweetAlert.error('Failed to load invited suppliers');
+        this.loadingInvitedSuppliers = false;
       }
     });
   }
 
-  // Sorting functions
-  sort(field: string) {
-    if (this.sortField === field) {
-      this.sortOrder = this.sortOrder * -1;
-    } else {
-      this.sortField = field;
-      this.sortOrder = 1;
-    }
-    this.sortSuppliers();
-    this.paginate();
-  }
-  
-  sortInvited(field: string) {
-    if (this.invitedSortField === field) {
-      this.invitedSortOrder = this.invitedSortOrder * -1;
-    } else {
-      this.invitedSortField = field;
-      this.invitedSortOrder = 1;
-    }
-    this.sortInvitedSuppliers();
-    this.paginateInvited();
-  }
-  
-  sortSuppliers() {
-    this.filteredSuppliers.sort((a: any, b: any) => {
-      const valueA = a[this.sortField]?.toLowerCase() || '';
-      const valueB = b[this.sortField]?.toLowerCase() || '';
-      return this.sortOrder * (valueA > valueB ? 1 : valueA < valueB ? -1 : 0);
-    });
-  }
-  
-  sortInvitedSuppliers() {
-    this.filteredInvitedSuppliers.sort((a: any, b: any) => {
-      const valueA = a[this.invitedSortField]?.toLowerCase() || '';
-      const valueB = b[this.invitedSortField]?.toLowerCase() || '';
-      return this.invitedSortOrder * (valueA > valueB ? 1 : valueA < valueB ? -1 : 0);
-    });
-  }
-  
-  getSortIcon(field: string): string {
-    if (this.sortField !== field) {
-      return 'pi-sort-alt';
-    }
-    return this.sortOrder === 1 ? 'pi-sort-amount-up' : 'pi-sort-amount-down';
-  }
-  
-  getSortIconInvited(field: string): string {
-    if (this.invitedSortField !== field) {
-      return 'pi-sort-alt';
-    }
-    return this.invitedSortOrder === 1 ? 'pi-sort-amount-up' : 'pi-sort-amount-down';
-  }
-  
-  // Filtering functions
-  applyFilters() {
-    this.filteredSuppliers = this.suppliers.filter(supplier => {
-      return (
-        (this.filters.company === '' || 
-          supplier.company_name.toLowerCase().includes(this.filters.company.toLowerCase()) || 
-          supplier.name.toLowerCase().includes(this.filters.company.toLowerCase())) &&
-        (this.filters.contact === '' || 
-          supplier.primary_email_id.toLowerCase().includes(this.filters.contact.toLowerCase()) || 
-          (supplier.primary_phone_number && supplier.primary_phone_number.toLowerCase().includes(this.filters.contact.toLowerCase()))) &&
-        (this.filters.status === '' || 
-          supplier.onboarding_status.toLowerCase().includes(this.filters.status.toLowerCase()))
-      );
-    });
-    this.sortSuppliers();
-    this.supplierCurrentPage = 0; // Reset to first page
-    this.paginate();
-  }
-  
-  applyInvitedFilters() {
-    this.filteredInvitedSuppliers = this.invitedSuppliers.filter(invite => {
-      return (
-        (this.invitedFilters.company === '' || 
-          invite.company_name.toLowerCase().includes(this.invitedFilters.company.toLowerCase()) || 
-          (invite.supplier_name && invite.supplier_name.toLowerCase().includes(this.invitedFilters.company.toLowerCase()))) &&
-        (this.invitedFilters.contact === '' || 
-          invite.supplier_email_id.toLowerCase().includes(this.invitedFilters.contact.toLowerCase())) &&
-        (this.invitedFilters.status === '' || 'invited'.includes(this.invitedFilters.status.toLowerCase()))
-      );
-    });
-    this.sortInvitedSuppliers();
-    this.invitedCurrentPage = 0; // Reset to first page
-    this.paginateInvited();
+  // Event handlers for Active Suppliers table
+  onActiveSupplierRowClick(event: { event: Event, rowData: any }) {
+    // Handle row click if needed
   }
 
-  // Pagination functions
-  paginate() {
-    const start = this.supplierCurrentPage * this.supplierRowsPerPage;
-    const end = start + this.supplierRowsPerPage;
-    this.paginatedSuppliers = this.filteredSuppliers.slice(start, end);
-    
-    this.firstSupplier = this.filteredSuppliers.length > 0 ? start + 1 : 0;
-    this.lastSupplier = Math.min(end, this.filteredSuppliers.length);
+  onActiveSupplierLinkClick(event: { rowData: any, column: TableColumn }) {
+    this.viewSupplierProfile(event.rowData);
   }
-  
-  paginateInvited() {
-    const start = this.invitedCurrentPage * this.invitedRowsPerPage;
-    const end = start + this.invitedRowsPerPage;
-    this.paginatedInvitedSuppliers = this.filteredInvitedSuppliers.slice(start, end);
-    
-    this.firstInvited = this.filteredInvitedSuppliers.length > 0 ? start + 1 : 0;
-    this.lastInvited = Math.min(end, this.filteredInvitedSuppliers.length);
+
+  onActiveSupplierActionClick(event: { action: string, rowData: any }) {
+    // Handle actions if any are added later
   }
-  
-  onPageChange(page: number) {
-    this.supplierCurrentPage = page;
-    this.paginate();
+
+  // Event handlers for Invited Suppliers table
+  onInvitedSupplierRowClick(event: { event: Event, rowData: any }) {
+    // Handle row click if needed
   }
-  
-  onInvitedPageChange(page: number) {
-    this.invitedCurrentPage = page;
-    this.paginateInvited();
+
+  onInvitedSupplierLinkClick(event: { rowData: any, column: TableColumn }) {
+    // Handle link click if needed
   }
-  
-  getTotalSupplierPages(): number {
-    return Math.ceil(this.filteredSuppliers.length / this.supplierRowsPerPage);
-  }
-  
-  getTotalInvitedPages(): number {
-    return Math.ceil(this.filteredInvitedSuppliers.length / this.invitedRowsPerPage);
-  }
-  
-  getSupplierPages(): number[] {
-    const totalPages = this.getTotalSupplierPages();
-    return Array.from({ length: totalPages }, (_, i) => i);
-  }
-  
-  getInvitedPages(): number[] {
-    const totalPages = this.getTotalInvitedPages();
-    return Array.from({ length: totalPages }, (_, i) => i);
+
+  onInvitedSupplierActionClick(event: { action: string, rowData: any }) {
+    if (event.action === 'resend') {
+      this.resendInvitation(event.rowData);
+    }
   }
 
   showInviteDialog() {
@@ -840,26 +408,6 @@ export class ManageSuppliersComponent implements OnInit {
 
   onDialogHide() {
     this.inviteForm.reset();
-  }
-
-  getStatusClass(status: string): string {
-    if (!status) return '';
-    status = status.toLowerCase();
-    
-    if (status.includes('active') || status.includes('approved')) {
-      return 'status-active';
-    } else if (status.includes('pending') || status.includes('invited') || status.includes('Request to Resubmit')) {
-      return 'status-pending';
-    } else if (status.includes('complete')) {
-      return 'status-completed';
-    } else if (status.includes('progress') || status.includes('Request to Resubmit')) {
-      return 'status-inprogress';
-    } else if (status.includes('review') || status.includes('Request to Resubmit')) {
-      return 'status-review';
-    } else if (status.includes('reject') || status.includes('declined')) {
-      return 'status-rejected';
-    }
-    return '';
   }
 
   onSubmit() {
@@ -921,6 +469,16 @@ export class ManageSuppliersComponent implements OnInit {
   accessFirebaseTriggerLoad(doctType_name: string, doctypeId: string) {
     this.commonService.commonFirebaseTrigger('wfb_supplier_invitation_list_view', 'invitation_list_view').subscribe((res: any) => {
       this.loadInvitedSuppliers();
+    });
+  }
+
+  private formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
     });
   }
 } 

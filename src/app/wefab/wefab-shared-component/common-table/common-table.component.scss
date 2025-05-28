@@ -1,22 +1,16 @@
 @import '../../../../assets/scss/variables.scss';
 
 .table-wrapper {
-  margin: 1.5rem;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   overflow: hidden;
-  background: white;
 }
 
 .common-table-container {
-  background: $technical-white;
   border-radius: 0;
   overflow: hidden;
 
   // Header styling
   .table-header {
-    background: $technical-white;
-
     .header-row {
       display: flex;
       width: 100%;
@@ -167,9 +161,10 @@
               }
             }
 
-            .company-id {
+            .company-id, .sub-info {
               color: $machine-gray;
               font-size: 0.75rem;
+              margin-top: 3px;
             }
           }
 
@@ -356,6 +351,19 @@
           div[class$="-cell"] {
             width: 100%;
             word-break: break-word;
+            display: flex;
+            flex-direction: column;
+            
+            .main-content {
+              line-height: 1.4;
+            }
+            
+            .sub-info {
+              color: #888;
+              font-size: 0.75rem;
+              margin-top: 3px;
+              line-height: 1.2;
+            }
           }
         }
 
@@ -474,5 +482,101 @@
       }
     }
   }
+}
+
+// Add styles for sub-information display
+.sub-info {
+  color: #888;
+  font-size: 0.85em;
+  margin-top: 3px;
+  line-height: 1.2;
+}
+
+.company-name {
+  color: #2563eb;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.main-content {
+  line-height: 1.4;
+}
+
+// Status badge styling to match original design
+.status-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  text-align: center;
+  font-weight: 500;
+  
+  &.status-approved {
+    background-color: #e8f5e9;
+    color: #1b9b62;
+  }
+  
+  &.status-under-review {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  &.status-resubmit {
+    background-color: #e0f7fa;
+    color: #0288d1;
+  }
+  
+  &.status-open {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+  
+  &.status-in-progress {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  &.status-closed {
+    background-color: #e8f5e9;
+    color: #1b9b62;
+  }
+  
+  &.status-default {
+    background-color: #f5f5f5;
+    color: #666;
+  }
+}
+
+// Action button styling
+.action-btn {
+  background: none;
+  border: 1px solid #E0E0E0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6c757d;
+  border-radius: 4px;
+  margin: 0 2px;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+  
+  i {
+    font-size: 1rem;
+  }
+}
+
+// Table row hover effect
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
+  background-color: #f5f9ff !important;
 }
 

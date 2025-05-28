@@ -103,7 +103,9 @@
                    (click)="onLinkClick($event, rowData, col)">
                   {{ rowData[col.field] }}
                 </a>
-                <span class="company-id" *ngIf="rowData.companyId">{{ rowData.companyId }}</span>
+                <div class="sub-info" *ngIf="rowData.companySubInfo || rowData.companyId || rowData.name">
+                  {{ rowData.companySubInfo || rowData.companyId || rowData.name }}
+                </div>
               </div>
 
               <!-- Status Cell -->
@@ -128,7 +130,10 @@
 
               <!-- Default Cell -->
               <div [class]="col.field + '-cell'" *ngSwitchDefault>
-                {{ rowData[col.field] }}
+                <div class="main-content">{{ rowData[col.field] }}</div>
+                <div class="sub-info" *ngIf="getSubInfo(col.field, rowData)">
+                  {{ getSubInfo(col.field, rowData) }}
+                </div>
               </div>
             </ng-container>
           </td>

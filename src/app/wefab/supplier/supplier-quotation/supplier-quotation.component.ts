@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CommonService } from '../../shared/common.service';
+
 
 export interface QuotationItem {
   quotationId: string;
@@ -42,7 +44,7 @@ export interface SearchFilters {
 })
 export class SupplierQuotationComponent implements OnInit {
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private commonService: CommonService) { }
   
   // Tab data
   draftQuotations: QuotationItem[] = [];
@@ -71,7 +73,16 @@ export class SupplierQuotationComponent implements OnInit {
   activeTabIndex = 0;
 
   ngOnInit() {
+    this.getQuotationList()
     this.loadSampleData();
+  }
+
+  getQuotationList() {
+    let endPoint = '/api/resource/Supplier Quotation?fields=["*"]'
+    this.commonService.getWefabData(endPoint).subscribe((res:any) => {
+      debugger
+      console.log(res)
+    })
   }
 
   loadSampleData() {

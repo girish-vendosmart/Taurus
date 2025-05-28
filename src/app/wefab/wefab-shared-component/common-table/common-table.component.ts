@@ -274,6 +274,8 @@ export class CommonTableComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
+    if (!status) return 'status-default';
+    
     status = status.toLowerCase();
     switch (status) {
       case 'approved':
@@ -288,6 +290,8 @@ export class CommonTableComponent implements OnInit {
         return 'status-in-progress';
       case 'closed':
         return 'status-closed';
+      case 'invited':
+        return 'status-under-review'; // Use same styling as under review
       default:
         return 'status-default';
     }
@@ -335,6 +339,29 @@ export class CommonTableComponent implements OnInit {
     }
     
     return column.routerLink;
+  }
+
+  getSubInfo(field: string, rowData: any): string {
+    // Handle contact fields
+    if (field === 'primary_email_id' && rowData.contactSubInfo) {
+      return rowData.contactSubInfo;
+    }
+    if (field === 'primary_email_id' && rowData.primary_phone_number) {
+      return rowData.primary_phone_number;
+    }
+    if (field === 'supplier_email_id' && rowData.contactSubInfo) {
+      return rowData.contactSubInfo;
+    }
+    
+    // Handle company fields
+    if (field === 'company_name' && rowData.companySubInfo) {
+      return rowData.companySubInfo;
+    }
+    if (field === 'company_name' && rowData.name) {
+      return rowData.name;
+    }
+    
+    return '';
   }
 
   getSeverityClass(severity?: string): string {
