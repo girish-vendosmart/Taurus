@@ -2,6 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter, forwardRef } from '@ang
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { InputTextModule } from 'primeng/inputtext';
 
 export interface DropdownGroupOption {
@@ -20,7 +21,7 @@ export interface DropdownGroup {
 @Component({
   selector: 'app-p-dropdown-group-search',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DropdownModule, InputTextModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DropdownModule, MultiSelectModule, InputTextModule, FormsModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -35,7 +36,9 @@ export interface DropdownGroup {
         <span *ngIf="required" class="text-danger">*</span>
       </label>
       
+      <!-- Single Select Dropdown -->
       <p-dropdown
+        *ngIf="!multiselect"
         [id]="dropdownId"
         [formControl]="dropdownControl"
         [options]="displayOptions"
@@ -94,7 +97,7 @@ export interface DropdownGroup {
           <div class="empty-filter-message" *ngIf="currentFilter">
             <i class="pi pi-search"></i>
             <p>No results found for "{{ currentFilter }}"</p>
-            <small>Try searching for group names like "Frontend" or "Backend"</small>
+            <small>Try searching for group names or specific processes</small>
           </div>
           <div class="empty-message" *ngIf="!currentFilter && displayOptions.length === 0">
             <p>No options available</p>
@@ -102,12 +105,79 @@ export interface DropdownGroup {
         </ng-template>
       </p-dropdown>
       
+      <!-- Multi Select Dropdown -->
+      <p-multiSelect
+        *ngIf="multiselect"
+        [id]="dropdownId + '_multi'"
+        [formControl]="dropdownControl"
+        [options]="displayOptions"
+        [optionLabel]="optionLabel"
+        [optionValue]="optionValue"
+        [optionGroupLabel]="optionGroupLabel"
+        [optionGroupChildren]="optionGroupChildren"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [required]="required"
+        [style]="{ width: '100%' }"
+        [group]="true"
+        [filter]="false"
+        [showClear]="showClear"
+        [appendTo]="appendTo"
+        [showToggleAll]="true"
+        [maxSelectedLabels]="3"
+        [selectedItemsLabel]="getSelectedItemsLabel()"
+        (onChange)="onSelectionChange($event)"
+        (onShow)="onDropdownShow()"
+        (onHide)="onDropdownHide()"
+      >
+        <ng-template pTemplate="header">
+          <div class="custom-filter-container">
+            <input 
+              #filterInputMulti
+              type="text" 
+              class="custom-filter-input"
+              [placeholder]="filterPlaceholder"
+              [(ngModel)]="currentFilter"
+              (input)="onCustomFilterChange($event)"
+              (keydown.escape)="clearFilter()"
+              (click)="$event.stopPropagation()"
+            />
+            <i class="pi pi-search filter-icon"></i>
+          </div>
+        </ng-template>
+        
+        <ng-template pTemplate="item" let-option let-index="index">
+          <div class="dropdown-item">
+            <span [innerHTML]="highlightSearchTerm(getDisplayLabel(option), currentFilter)"></span>
+          </div>
+        </ng-template>
+        
+        <ng-template pTemplate="group" let-group>
+          <div class="dropdown-group-header">
+            <span [innerHTML]="highlightSearchTerm(group.label, currentFilter)"></span>
+            <small class="text-muted">({{ getVisibleItemsCount(group) }} items)</small>
+          </div>
+        </ng-template>
+        
+        <ng-template pTemplate="empty">
+          <div class="empty-filter-message" *ngIf="currentFilter">
+            <i class="pi pi-search"></i>
+            <p>No results found for "{{ currentFilter }}"</p>
+            <small>Try searching for group names or specific processes</small>
+          </div>
+          <div class="empty-message" *ngIf="!currentFilter && displayOptions.length === 0">
+            <p>No options available</p>
+          </div>
+        </ng-template>
+      </p-multiSelect>
+      
       <small *ngIf="description" class="form-text text-muted">{{ description }}</small>
       
       <!-- Debug info (remove in production) -->
       <div *ngIf="showDebugInfo" class="debug-info mt-2 p-2 border rounded bg-light">
         <small>
           <strong>Debug Info:</strong><br>
+          Mode: {{ multiselect ? 'Multi-select' : 'Single-select' }}<br>
           Selected Value: {{ selectedValue | json }}<br>
           Current Filter: "{{ currentFilter }}"<br>
           Total Groups: {{ originalOptions.length }}<br>
@@ -128,6 +198,7 @@ export interface DropdownGroup {
       padding: 0.5rem;
       border-bottom: 1px solid #dee2e6;
       background: #fff;
+      margin-bottom: 0;
     }
     
     .custom-filter-input {
@@ -137,6 +208,7 @@ export interface DropdownGroup {
       border-radius: 0.375rem;
       font-size: 0.875rem;
       outline: none;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     }
     
     .custom-filter-input:focus {
@@ -156,10 +228,17 @@ export interface DropdownGroup {
     .selected-item {
       display: flex;
       align-items: center;
+      padding: 0.25rem 0;
     }
     
     .dropdown-item {
-      padding: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      transition: background-color 0.15s ease-in-out;
+    }
+    
+    .dropdown-item:hover {
+      background-color: #f8f9fa;
     }
     
     .dropdown-group-header {
@@ -171,11 +250,14 @@ export interface DropdownGroup {
       background-color: #f8f9fa;
       padding: 0.5rem 0.75rem;
       border-bottom: 1px solid #dee2e6;
+      font-size: 0.875rem;
     }
     
     .highlight {
       background-color: #fff3cd;
       font-weight: bold;
+      padding: 0.1rem 0.2rem;
+      border-radius: 0.2rem;
     }
     
     .empty-filter-message, .empty-message {
@@ -188,27 +270,103 @@ export interface DropdownGroup {
       font-size: 2rem;
       margin-bottom: 1rem;
       display: block;
+      color: #adb5bd;
     }
     
     .empty-filter-message p, .empty-message p {
       margin-bottom: 0.5rem;
       font-weight: 500;
+      font-size: 1rem;
     }
     
     .empty-filter-message small {
       color: #adb5bd;
+      font-size: 0.875rem;
     }
     
     .debug-info {
       font-size: 0.75rem;
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
     }
     
+    .form-text {
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      color: #6c757d;
+    }
+    
+    .form-label {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #212529;
+    }
+    
+    .text-danger {
+      color: #dc3545 !important;
+      margin-left: 0.25rem;
+    }
+    
+    /* PrimeNG Dropdown Panel Customization */
     :host ::ng-deep .p-dropdown-panel {
-      max-height: 300px;
+      max-height: 400px;
+      border-radius: 0.375rem;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     }
     
     :host ::ng-deep .p-dropdown-items-wrapper {
-      max-height: 250px;
+      max-height: 350px;
+    }
+    
+    /* PrimeNG MultiSelect Panel Customization */
+    :host ::ng-deep .p-multiselect-panel {
+      max-height: 400px;
+      border-radius: 0.375rem;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    :host ::ng-deep .p-multiselect-items-wrapper {
+      max-height: 350px;
+    }
+    
+    /* Improve group header styling */
+    :host ::ng-deep .p-dropdown-item-group,
+    :host ::ng-deep .p-multiselect-item-group {
+      background-color: #f8f9fa !important;
+      font-weight: 600 !important;
+      color: #495057 !important;
+      padding: 0.5rem 0.75rem !important;
+      border-bottom: 1px solid #dee2e6 !important;
+    }
+    
+    /* Improve item styling */
+    :host ::ng-deep .p-dropdown-item,
+    :host ::ng-deep .p-multiselect-item {
+      padding: 0.5rem 0.75rem !important;
+      transition: background-color 0.15s ease-in-out !important;
+    }
+    
+    :host ::ng-deep .p-dropdown-item:hover,
+    :host ::ng-deep .p-multiselect-item:hover {
+      background-color: #f8f9fa !important;
+    }
+    
+    /* Improve selected item styling for multiselect */
+    :host ::ng-deep .p-multiselect-token {
+      background-color: #e9ecef;
+      color: #495057;
+      border-radius: 0.25rem;
+      padding: 0.25rem 0.5rem;
+      margin: 0.125rem;
+      font-size: 0.875rem;
+    }
+    
+    :host ::ng-deep .p-multiselect-token-icon {
+      margin-left: 0.25rem;
+      color: #6c757d;
     }
   `]
 })
@@ -222,6 +380,7 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   @Input() appendTo: string = 'body';
   @Input() filterPlaceholder: string = 'Search groups and options...';
   @Input() showDebugInfo: boolean = false;
+  @Input() multiselect: boolean = false;
   
   // PrimeNG dropdown configuration
   @Input() optionLabel: string = 'label';
@@ -231,6 +390,9 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   
   // Data input
   @Input() options: DropdownGroup[] = [];
+  
+  // Form control input for direct binding (optional)
+  @Input() formControl?: FormControl;
   
   // Events
   @Output() selectionChange = new EventEmitter<any>();
@@ -251,12 +413,26 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     this.originalOptions = [...this.options];
     this.displayOptions = [...this.options];
     
-    // Subscribe to dropdown control changes
-    this.dropdownControl.valueChanges.subscribe(value => {
+    // Use external formControl if provided, otherwise use internal one
+    const controlToUse = this.formControl || this.dropdownControl;
+    
+    // Initialize with proper default value based on mode
+    if (!controlToUse.value) {
+      const defaultValue = this.multiselect ? [] : null;
+      controlToUse.setValue(defaultValue, { emitEvent: false });
+    }
+    
+    // Subscribe to control changes
+    controlToUse.valueChanges.subscribe(value => {
       this.selectedValue = value;
       this.onChange(value);
       this.selectionChange.emit(value);
     });
+    
+    // If using external formControl, sync the internal control
+    if (this.formControl) {
+      this.dropdownControl = this.formControl;
+    }
   }
 
   // ControlValueAccessor methods
@@ -387,5 +563,13 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   clearFilter(): void {
     this.currentFilter = '';
     this.displayOptions = [...this.originalOptions];
+  }
+
+  getSelectedItemsLabel(): string {
+    const selectedItems = this.dropdownControl.value;
+    if (!selectedItems || selectedItems.length === 0) {
+      return 'Select items';
+    }
+    return selectedItems.map((item: any) => this.getDisplayLabel(item)).join(', ');
   }
 } 

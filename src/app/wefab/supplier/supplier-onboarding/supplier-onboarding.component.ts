@@ -30,6 +30,9 @@ import { PMultiSelectGroupComponent } from '../../../p-multiSelect-group.compone
 import { GstVerifyFieldComponent } from './gst-verify-field.component';
 // Import the FormlyFieldGstVerifyComponent
 import { FormlyFieldGstVerifyComponent } from '../../../gst-verify-type.component';
+// Import PDropdownGroupSearchComponent and its Formly wrapper
+import { PDropdownGroupSearchComponent } from '../../../p-dropdown-group-search.component';
+import { FormlyFieldPDropdownGroupSearchComponent } from '../../../p-dropdown-group-search-type.component';
 // GST Validator function
 import { ChangeDetectorRef } from '@angular/core';
 export function gstValidator(control: AbstractControl): ValidationErrors | null {
@@ -81,7 +84,9 @@ export function panValidator(control: AbstractControl): ValidationErrors | null 
     MultiFileUploadComponent,
     PMultiSelectGroupComponent,
     GstVerifyFieldComponent,
-    FormlyFieldGstVerifyComponent
+    FormlyFieldGstVerifyComponent,
+    PDropdownGroupSearchComponent,
+    FormlyFieldPDropdownGroupSearchComponent
   ],
   providers: [MessageService],
   templateUrl: './supplier-onboarding.component.html',
@@ -1034,15 +1039,18 @@ export class SupplierOnboardingComponent implements OnInit {
             }
           },
           {
-            className: 'col-md-4 mb-2',
+            className: 'col-md-12 mb-2',
             key: 'primaryManufacturingProcess',
-            type: 'p-multiselect-group', // Use the multiselect-group type
+            type: 'p-dropdown-group-search', // Use the new dropdown-group-search type
             defaultValue: [], // For multiselect, initialize as an empty array
             templateOptions: {
               label: 'Primary Manufacturing Process',
-              placeholder: 'Select your primary manufacturing process',
+              placeholder: 'Select your manufacturing processes',
               required: true,
-              groups: [
+              filterPlaceholder: 'Search manufacturing processes...',
+              multiselect: true, // Enable multiselect mode
+              options: 
+              [
                 {
                   label: 'Precision Machining',
                   items: [
@@ -1145,19 +1153,14 @@ export class SupplierOnboardingComponent implements OnInit {
                   label: 'Tool & Die Making',
                   items: [
                     { value: "stampingdies", label: "Stamping Dies" },
-{ value: "progressivedies", label: "Progressive Dies" },
-{ value: "forging", label: "Forging Dies" },
-{ value: "drawingdies", label: "Drawing Dies" },
-{ value: "moldmaking", label: "Mold Making" },
-{ value: "fixtures", label: "Fixtures & Jigs" }
-
+                    { value: "progressivedies", label: "Progressive Dies" },
+                    { value: "forging", label: "Forging Dies" },
+                    { value: "drawingdies", label: "Drawing Dies" },
+                    { value: "moldmaking", label: "Mold Making" },
+                    { value: "fixtures", label: "Fixtures & Jigs" }
                   ]
                 },
               ],
-              optionGroupLabel: 'label',
-              optionGroupChildren: 'items',
-              filter: true,
-              showToggleAll: true,
               description: 'Select all manufacturing capabilities that apply to your business'
             },
             validation: {
