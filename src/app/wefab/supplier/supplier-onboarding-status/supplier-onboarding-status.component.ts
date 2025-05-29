@@ -66,6 +66,12 @@ export class SupplierOnboardingStatusComponent {
     
     // Start the API chain to get all statuses
     this.getOnboardingL1Status();
+
+    // firebase trigger
+    this.accessFirebaseTrigger('wfb_supplier_onboarding_L1', this.supplierCompanyId)
+    this.accessFirebaseTrigger('wfb_supplier_onboarding_L2', this.supplierCompanyId)
+    this.accessFirebaseTrigger('wfb_supplier_onboarding_L3', this.supplierCompanyId)
+
   }
 
   supplierCompanyId: string = '';
@@ -84,6 +90,12 @@ export class SupplierOnboardingStatusComponent {
         this.currentOnboardingL1Status = 'Not Started';
         this.getOnboardingL2Status();
       }
+    });
+  }
+
+  accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
+    this.commonService.commonFirebaseTrigger(doctType_name, doctypeId).subscribe((res: any) => {
+      this.getOnboardingL1Status();
     });
   }
 
