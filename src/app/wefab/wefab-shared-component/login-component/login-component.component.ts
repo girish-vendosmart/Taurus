@@ -125,7 +125,8 @@ export class LoginComponentComponent {
                     if(!response.data.supplier_info.supplier_company_id) {
                       this.router.navigate(['/wefab/supplier/supplier-onboarding-welcome']);
                     } else {
-                      this.router.navigate(['/wefab/supplier/supplier-onboarding-status']);
+                      this.getOnboardingL3Status(response.data.supplier_info.supplier_company_id);
+                      // this.router.navigate(['/wefab/supplier/supplier-onboarding-status']);
                     }
                     // this.router.navigate([response.data.route_link]);
                   } else if (response.data.user_type === 'wefab_team') {
@@ -200,6 +201,20 @@ export class LoginComponentComponent {
     });
     
     return params;
+  }
+
+  getOnboardingL3Status(supplierCompanyId: string) {
+    console.log('Getting L3 status');
+    let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${supplierCompanyId}`;
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      if(res?.data?.approval_status === 'Approved') {
+        sessionStorage.setItem('supplier_onboarding_complete', 'true');
+        sessionStorage.setItem('show_supplier_dashboard', 'true');
+        this.router.navigate(['/wefab/supplier/dashboard']);
+      } else {
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-status']);
+      }
+    })
   }
   
 }
