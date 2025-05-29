@@ -8,15 +8,14 @@ import { CommonService } from '../../shared/common.service';
 
 export interface RFQItem {
   rfqId: string;
-  title: string;
-  parts: number;
-  dueDate: string;
-  status: 'Open' | 'In Progress' | 'Closed';
-  statusClass: string;
-  description?: string;
-  company?: string;
-  priority?: 'High' | 'Medium' | 'Low';
-  estimatedValue?: number;
+  rfqName: string;
+  creationDate: string;
+  status: 'Open' | 'In Progress' | 'Closed' | 'Draft';
+  // Additional fields from API
+  name?: string;
+  owner?: string;
+  modified?: string;
+  docstatus?: number;
   routerLink?: string;
 }
 
@@ -41,37 +40,49 @@ export class SupplierRfqComponent implements OnInit {
 
   dashboardCards = [
     {
+      title: 'Draft RFQs',
+      value: '0',
+      icon: 'pi pi-file-edit',
+      color: 'secondary',
+      description: '',
+      trend: {
+        value: '+0',
+        direction: 'up',
+        period: 'from last week'
+      }
+    },
+    {
       title: 'Open RFQs',
-      value: '12',
+      value: '0',
       icon: 'pi pi-file-o',
       color: 'info',
       description: '',
       trend: {
-        value: '+2',
+        value: '+0',
         direction: 'up',
         period: 'from last week'
       }
     },
     {
       title: 'Under Review',
-      value: '8',
+      value: '0',
       icon: 'pi pi-check-circle',
       color: 'warning',
       description: '',
       trend: {
-        value: '+1',
+        value: '+0',
         direction: 'up',
         period: 'from last week'
       }
     },
     {
       title: 'Closed RFQs',
-      value: '3',
+      value: '0',
       icon: 'pi pi-lock',
       color: 'danger',
       description: '',
       trend: {
-        value: '-2',
+        value: '+0',
         direction: 'down',
         period: 'from last week'
       }
@@ -83,6 +94,7 @@ export class SupplierRfqComponent implements OnInit {
   submittedQuotesCount = 24;
   awardedQuotesCount = 8;
   rejectedQuotesCount = 3;
+  draftRFQsCount = 0;
   
   // Trend data for cards
   openRFQsTrend = { value: 2, isPositive: true, period: 'from last week' };
@@ -101,20 +113,14 @@ export class SupplierRfqComponent implements OnInit {
         isLink: true,
       },
       {
-        field: 'rfq_name',
+        field: 'rfqName',
         header: 'RFQ Name',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'total_amount',
-        header: 'Total Amount',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'expiry_data',
-        header: 'Expiry Date',
+        field: 'creationDate',
+        header: 'Creation Date',
         sortable: true,
       },
       {
@@ -142,10 +148,12 @@ export class SupplierRfqComponent implements OnInit {
 
   getRfqList() {
     this.loading = true;
-    let endpoint = `/api/resource/Request for Quotation?fields=["*"]`
+    let endpoint = `/api/resource/Supplier Request for Quotation?fields=["*"]`
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
+        debugger;
+        console.log(res.data);
         // Transform API data to match RFQItem interface
         this.allRFQs = this.transformApiDataToRFQItems(res.data);
         this.calculateStatusCounts();
@@ -167,13 +175,17 @@ export class SupplierRfqComponent implements OnInit {
     }
 
     return apiData.map(item => ({
-      // Map API fields to RFQItem interface
-      rfqId: item.name || '',
-      rfq_name: item.rfq_name || '',
-      total_amount: item.total_amount || '',
-      expiry_data: this.formatApiDate(item.due_date),
-      status: this.mapApiStatusToRFQStatus(item.status || item.workflow_state),
-      routerLink: `/wefab/supplier/rfq/details/${item.name || item.rfq_id || item.id}`
+      // Map API fields to match the table configuration
+      rfqId: item.rfq_id || '',
+      rfqName: item.name || '',
+      creationDate: this.formatApiDate(item.creation),
+      status: this.mapApiStatusToRFQStatus(item.status),
+      // Additional fields for potential use
+      // name: item.name || '',
+      owner: item.owner || '',
+      modified: item.modified || '',
+      docstatus: item.docstatus || 0,
+      routerLink: `/wefab/supplier/rfq/details/${item.rfq_id}`
     }));
   }
 
@@ -182,28 +194,39 @@ export class SupplierRfqComponent implements OnInit {
     if (!apiDate) return new Date().toISOString().split('T')[0];
     
     try {
+      // Handle the datetime format from API: "2025-05-28 17:56:55.424710"
       const date = new Date(apiDate);
-      return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
     } catch {
-      return new Date().toISOString().split('T')[0];
+      return new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
     }
   }
 
   // Helper method to map API status to RFQ status
-  private mapApiStatusToRFQStatus(apiStatus: string): 'Open' | 'In Progress' | 'Closed' {
-    if (!apiStatus) return 'Open';
+  private mapApiStatusToRFQStatus(apiStatus: string): 'Open' | 'In Progress' | 'Closed' | 'Draft' {
+    if (!apiStatus) return 'Draft';
     
     const status = apiStatus.toLowerCase();
     
-    if (status.includes('draft') || status.includes('open') || status.includes('pending')) {
+    if (status.includes('draft')) {
+      return 'Draft';
+    } else if (status.includes('open') || status.includes('pending')) {
       return 'Open';
-    } else if (status.includes('submitted') || status.includes('review') || status.includes('progress')) {
+    } else if (status.includes('submitted') || status.includes('review') || status.includes('progress') || status.includes('in progress')) {
       return 'In Progress';
-    } else if (status.includes('closed') || status.includes('completed') || status.includes('cancelled')) {
+    } else if (status.includes('closed') || status.includes('completed') || status.includes('cancelled') || status.includes('approved')) {
       return 'Closed';
     }
     
-    return 'Open'; // Default fallback
+    return 'Draft'; // Default fallback
   }
 
   // Calculate counts for status cards
@@ -211,6 +234,18 @@ export class SupplierRfqComponent implements OnInit {
     this.openRFQsCount = this.allRFQs.filter(rfq => rfq.status === 'Open').length;
     this.submittedQuotesCount = this.allRFQs.filter(rfq => rfq.status === 'In Progress').length;
     this.awardedQuotesCount = this.allRFQs.filter(rfq => rfq.status === 'Closed').length;
+    this.draftRFQsCount = this.allRFQs.filter(rfq => rfq.status === 'Draft').length;
+    
+    // Update dashboard cards with dynamic data
+    this.updateDashboardCards();
+  }
+
+  // Update dashboard cards with dynamic counts
+  updateDashboardCards() {
+    this.dashboardCards[0].value = this.draftRFQsCount.toString();
+    this.dashboardCards[1].value = this.openRFQsCount.toString();
+    this.dashboardCards[2].value = this.submittedQuotesCount.toString();
+    this.dashboardCards[3].value = this.awardedQuotesCount.toString();
   }
 
   // Event handlers for common table component
@@ -220,8 +255,8 @@ export class SupplierRfqComponent implements OnInit {
 
   onLinkClick(event: { rowData: RFQItem, column: any }) {
     console.log('RFQ link clicked:', event.rowData);
-    // Navigate to RFQ details page
-    this.router.navigate(['/wefab/supplier/rfq/details', event.rowData.rfqId]);
+    // Navigate to RFQ details page using the name field for routing
+    this.router.navigate(['/wefab/supplier/rfq/details', event.rowData.name || event.rowData.rfqId]);
   }
 
   onActionClick(event: { action: string, rowData: RFQItem }) {
@@ -241,10 +276,10 @@ export class SupplierRfqComponent implements OnInit {
         }
         break;
       case 'edit':
-        if (rfq.status === 'In Progress') {
+        if (rfq.status === 'In Progress' || rfq.status === 'Draft') {
           this.onEditRFQ(rfq);
         } else {
-          alert('Edit action is only available for In Progress RFQs');
+          alert('Edit action is only available for In Progress or Draft RFQs');
         }
         break;
       case 'download':
@@ -261,24 +296,24 @@ export class SupplierRfqComponent implements OnInit {
 
   onViewRFQ(rfq: RFQItem) {
     console.log('View RFQ:', rfq);
-    // Navigate to RFQ details page
-    this.router.navigate(['/wefab/supplier/rfq/details', rfq.rfqId]);
+    // Navigate to RFQ details page using the name field for routing
+    this.router.navigate(['/wefab/supplier/rfq/details', rfq.name || rfq.rfqId]);
   }
 
   onQuoteRFQ(rfq: RFQItem) {
     console.log('Quote RFQ:', rfq);
     // Navigate to quote creation page for Open RFQs
-    this.router.navigate(['/wefab/supplier/rfq/quote', rfq.rfqId]);
+    this.router.navigate(['/wefab/supplier/rfq/quote', rfq.name || rfq.rfqId]);
   }
 
   onEditRFQ(rfq: RFQItem) {
     console.log('Edit RFQ:', rfq);
     // Navigate to quote edit page for In Progress RFQs
-    this.router.navigate(['/wefab/supplier/rfq/quote/edit', rfq.rfqId]);
+    this.router.navigate(['/wefab/supplier/rfq/quote/edit', rfq.name || rfq.rfqId]);
   }
 
   downloadRFQDocuments(rfq: RFQItem) {
-    console.log('Download documents for RFQ:', rfq.rfqId);
+    console.log('Download documents for RFQ:', rfq.name || rfq.rfqId);
     // Implement download functionality
   }
 
