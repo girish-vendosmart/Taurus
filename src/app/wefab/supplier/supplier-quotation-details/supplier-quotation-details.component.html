@@ -188,9 +188,15 @@
 
     <!-- Activity Tab -->
     <div class="tab-panel" [class.active]="activeTab === 'activity'">
-      <div class="activity-content">
-        <p>Activity section content goes here...</p>
-      </div>
+
+        <app-activity-trail 
+          [activityData]="activityTrail"
+          [loading]="activityTrailLoading"
+          [showHeader]="false"
+          [maxHeight]="'500px'"
+          [emptyMessage]="'No activity records found.'">
+        </app-activity-trail>
+
     </div>
   </div>
 </div>
