@@ -20,13 +20,15 @@
         </div>
       </div>
     </div>
-    <app-common-table 
-      [config]="tableConfig" 
-      [data]="allRFQs"
-      [loading]="loading"
-      (rowClick)="onRowClick($event)"
-      (linkClick)="onLinkClick($event)"
-      (actionClick)="onActionClick($event)">
-    </app-common-table>
+    <div class="table-section">
+      <app-common-table 
+        [config]="tableConfig" 
+        [data]="allRFQs"
+        [loading]="loading"
+        (rowClick)="onRowClick($event)"
+        (linkClick)="onLinkClick($event)"
+        (actionClick)="onActionClick($event)">
+      </app-common-table>
+    </div>
   </div>
 </div>

@@ -4,31 +4,52 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonService } from '../../shared/common.service';
+import { CommonTableComponent, TableConfig, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
 
+export interface SupplierQuotationData {
+  name: string;
+  owner: string;
+  creation: string;
+  modified: string;
+  modified_by: string;
+  docstatus: number;
+  idx: number;
+  workflow_state: string;
+  quotation_id: string | null;
+  rfq_id: string;
+  supplier_id: string;
+  estimated_completion_duration: string;
+  validity: string;
+  delivery_address: string;
+  total_amount: number;
+  discount_percentage: number;
+  discount_amount: number;
+  grand_total: number;
+  payment_terms: string;
+  shipping_terms: string;
+  notes: string;
+  amended_from: string | null;
+}
 
-export interface QuotationItem {
+export interface QuotationTableItem {
   quotationId: string;
   rfqId: string;
   title: string;
   parts: number;
   submittedDate: string;
-  status: 'Draft' | 'Quoted' | 'Awarded';
+  status: string;
   statusClass: string;
   description?: string;
   company?: string;
   priority?: 'High' | 'Medium' | 'Low';
   estimatedValue?: number;
-  totalAmount?: number;
-}
-
-export interface SearchFilters {
-  quotationId: string;
-  rfqId: string;
-  title: string;
-  company: string;
-  parts: string;
-  submittedDate: string;
-  status: string;
+  totalAmount?: string | number;
+  grandTotal?: string | number;
+  paymentTerms?: string;
+  shippingTerms?: string;
+  validity?: string;
+  duration?: string;
+  notes?: string;
 }
 
 @Component({
@@ -37,7 +58,8 @@ export interface SearchFilters {
   imports: [
     CommonModule,
     RouterModule,
-    FormsModule
+    FormsModule,
+    CommonTableComponent
   ],
   templateUrl: './supplier-quotation.component.html',
   styleUrl: './supplier-quotation.component.scss'
@@ -46,260 +68,134 @@ export class SupplierQuotationComponent implements OnInit {
 
   constructor(private router: Router, private commonService: CommonService) { }
   
-  // Tab data
-  draftQuotations: QuotationItem[] = [];
-  quotedQuotations: QuotationItem[] = [];
-  awardedQuotations: QuotationItem[] = [];
+  // Raw API data
+  rawQuotationData: SupplierQuotationData[] = [];
   
-  // Search filters
-  searchFilters: SearchFilters = {
-    quotationId: '',
-    rfqId: '',
-    title: '',
-    company: '',
-    parts: '',
-    submittedDate: '',
-    status: ''
-  };
-  
-  // Pagination
-  currentPage = 1;
-  itemsPerPage = 10;
+  // All processed quotations
+  allQuotations: QuotationTableItem[] = [];
   
   // Loading states
   loading = false;
-  
-  // Active tab index
-  activeTabIndex = 0;
+
+  // Table configuration for common-table component
+  tableConfig: TableConfig = {
+    columns: [
+      {
+        field: 'quotationId',
+        header: 'QUOTATION ID',
+        sortable: true,
+        filterable: true,
+        isLink: true,
+      },
+      {
+        field: 'rfqId',
+        header: 'RFQ ID',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'totalAmount',
+        header: 'TOTAL AMOUNT',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'grandTotal',
+        header: 'GRAND TOTAL',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'submittedDate',
+        header: 'SUBMITTED DATE',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'validity',
+        header: 'VALIDITY',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'status',
+        header: 'STATUS',
+        sortable: true,
+        filterable: true,
+        isStatus: true,
+      },
+    ],
+    enableSearch: true,
+    enableSort: true,
+    enableFilter: true,
+    enablePagination: true,
+    pageSize: 10,
+    showActions: true,
+  };
 
   ngOnInit() {
-    this.getQuotationList()
-    this.loadSampleData();
+    this.getQuotationList();
   }
 
   getQuotationList() {
-    let endPoint = '/api/resource/Supplier Quotation?fields=["*"]'
-    this.commonService.getWefabData(endPoint).subscribe((res:any) => {
-      debugger
-      console.log(res)
-    })
-  }
-
-  loadSampleData() {
-    // Sample draft quotations
-    this.draftQuotations = [
-      {
-        quotationId: 'QUO-2023-001',
-        rfqId: 'RFQ-2023-001',
-        title: 'CNC Machined Aluminum Brackets',
-        parts: 1,
-        submittedDate: '2023-12-10',
-        status: 'Draft',
-        statusClass: 'status-draft',
-        description: 'High precision aluminum brackets for automotive application',
-        company: 'AutoTech Industries',
-        priority: 'High',
-        estimatedValue: 25000,
-        totalAmount: 24500
+    this.loading = true;
+    let endPoint = '/api/resource/Supplier Quotation?fields=["*"]';
+    this.commonService.getWefabData(endPoint).subscribe({
+      next: (res: any) => {
+        console.log('API Response:', res);
+        if (res && res.data) {
+          this.rawQuotationData = res.data;
+          this.processQuotationData();
+        }
+        this.loading = false;
       },
-      {
-        quotationId: 'QUO-2023-005',
-        rfqId: 'RFQ-2023-005',
-        title: 'Custom Fabricated Brackets',
-        parts: 4,
-        submittedDate: '2023-12-12',
-        status: 'Draft',
-        statusClass: 'status-draft',
-        description: 'Custom fabricated steel brackets for construction',
-        company: 'BuildPro Inc',
-        priority: 'Medium',
-        estimatedValue: 12000,
-        totalAmount: 11800
-      },
-      {
-        quotationId: 'QUO-2023-008',
-        rfqId: 'RFQ-2023-008',
-        title: 'Precision Turned Parts',
-        parts: 2,
-        submittedDate: '2023-12-14',
-        status: 'Draft',
-        statusClass: 'status-draft',
-        description: 'High precision turned components for aerospace',
-        company: 'AeroSpace Solutions',
-        priority: 'High',
-        estimatedValue: 32000,
-        totalAmount: 31200
+      error: (error) => {
+        console.error('Error fetching quotation data:', error);
+        this.loading = false;
+        // Optionally load sample data as fallback
+        // this.loadSampleData();
       }
-    ];
-
-    // Sample quoted quotations
-    this.quotedQuotations = [
-      {
-        quotationId: 'QUO-2023-002',
-        rfqId: 'RFQ-2023-002',
-        title: 'Sheet Metal Enclosure',
-        parts: 1,
-        submittedDate: '2023-12-08',
-        status: 'Quoted',
-        statusClass: 'status-quoted',
-        description: 'Custom sheet metal enclosure for electronic equipment',
-        company: 'ElectroSystems Ltd',
-        priority: 'Medium',
-        estimatedValue: 15000,
-        totalAmount: 14750
-      },
-      {
-        quotationId: 'QUO-2023-003',
-        rfqId: 'RFQ-2023-003',
-        title: 'Injection Molded Components',
-        parts: 3,
-        submittedDate: '2023-12-09',
-        status: 'Quoted',
-        statusClass: 'status-quoted',
-        description: 'Plastic injection molded parts for consumer electronics',
-        company: 'TechGadgets Inc',
-        priority: 'Medium',
-        estimatedValue: 18000,
-        totalAmount: 17500
-      },
-      {
-        quotationId: 'QUO-2023-006',
-        rfqId: 'RFQ-2023-006',
-        title: '3D Printed Prototype Parts',
-        parts: 2,
-        submittedDate: '2023-12-11',
-        status: 'Quoted',
-        statusClass: 'status-quoted',
-        description: 'Rapid prototyping for new product development',
-        company: 'Innovation Labs',
-        priority: 'High',
-        estimatedValue: 8000,
-        totalAmount: 7800
-      },
-      {
-        quotationId: 'QUO-2023-009',
-        rfqId: 'RFQ-2023-009',
-        title: 'Welded Steel Assemblies',
-        parts: 5,
-        submittedDate: '2023-12-13',
-        status: 'Quoted',
-        statusClass: 'status-quoted',
-        description: 'Complex welded assemblies for industrial equipment',
-        company: 'Heavy Industries Corp',
-        priority: 'Medium',
-        estimatedValue: 45000,
-        totalAmount: 43500
-      }
-    ];
-
-    // Sample awarded quotations
-    this.awardedQuotations = [
-      {
-        quotationId: 'QUO-2023-004',
-        rfqId: 'RFQ-2023-004',
-        title: 'Machined Steel Components',
-        parts: 3,
-        submittedDate: '2023-11-28',
-        status: 'Awarded',
-        statusClass: 'status-awarded',
-        description: 'Precision machined steel components for machinery',
-        company: 'Precision Manufacturing',
-        priority: 'High',
-        estimatedValue: 22000,
-        totalAmount: 21500
-      },
-      {
-        quotationId: 'QUO-2023-007',
-        rfqId: 'RFQ-2023-007',
-        title: 'Cast Iron Parts',
-        parts: 2,
-        submittedDate: '2023-11-30',
-        status: 'Awarded',
-        statusClass: 'status-awarded',
-        description: 'Custom cast iron parts for heavy machinery',
-        company: 'Industrial Casting Ltd',
-        priority: 'Medium',
-        estimatedValue: 35000,
-        totalAmount: 34200
-      }
-    ];
-  }
-
-  // Tab management
-  setActiveTab(index: number) {
-    this.activeTabIndex = index;
-    this.currentPage = 1;
-  }
-
-  getCurrentTabData(): QuotationItem[] {
-    switch (this.activeTabIndex) {
-      case 0: return this.draftQuotations;
-      case 1: return this.quotedQuotations;
-      case 2: return this.awardedQuotations;
-      default: return [];
-    }
-  }
-
-  // Search functionality
-  onSearch() {
-    // Implement search logic here
-  }
-
-  getFilteredData(data: QuotationItem[]): QuotationItem[] {
-    return data.filter(item => {
-      return (
-        (!this.searchFilters.quotationId || item.quotationId.toLowerCase().includes(this.searchFilters.quotationId.toLowerCase())) &&
-        (!this.searchFilters.rfqId || item.rfqId.toLowerCase().includes(this.searchFilters.rfqId.toLowerCase())) &&
-        (!this.searchFilters.title || item.title.toLowerCase().includes(this.searchFilters.title.toLowerCase())) &&
-        (!this.searchFilters.company || item.company?.toLowerCase().includes(this.searchFilters.company.toLowerCase())) &&
-        (!this.searchFilters.parts || item.parts.toString().includes(this.searchFilters.parts)) &&
-        (!this.searchFilters.submittedDate || item.submittedDate.includes(this.searchFilters.submittedDate)) &&
-        (!this.searchFilters.status || item.status.toLowerCase().includes(this.searchFilters.status.toLowerCase()))
-      );
     });
   }
 
-  // Pagination
-  getTotalPages(): number {
-    const filteredData = this.getFilteredData(this.getCurrentTabData());
-    return Math.ceil(filteredData.length / this.itemsPerPage);
+  processQuotationData() {
+    // Convert raw API data to table format
+    this.allQuotations = this.rawQuotationData.map(item => this.mapApiDataToTableItem(item));
   }
 
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.getTotalPages()) {
-      this.currentPage = page;
+  mapApiDataToTableItem(apiItem: SupplierQuotationData): QuotationTableItem {
+    return {
+      quotationId: apiItem.name,
+      rfqId: apiItem.rfq_id,
+      title: `Quotation ${apiItem.name}`,
+      parts: 1, // Default value as not provided in API
+      submittedDate: this.formatDate(apiItem.creation),
+      status: apiItem.workflow_state,
+      statusClass: this.getStatusClass(apiItem.workflow_state),
+      description: apiItem.notes ? apiItem.notes.substring(0, 100) + '...' : '',
+      totalAmount: this.formatCurrency(apiItem.total_amount),
+      grandTotal: this.formatCurrency(apiItem.grand_total),
+      paymentTerms: apiItem.payment_terms,
+      shippingTerms: apiItem.shipping_terms,
+      validity: this.formatDate(apiItem.validity),
+      duration: apiItem.estimated_completion_duration,
+      notes: apiItem.notes
+    };
+  }
+
+  getStatusClass(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'draft': return 'status-draft';
+      case 'submitted': return 'status-quoted';
+      case 'quoted': return 'status-quoted';
+      case 'awarded': return 'status-awarded';
+      default: return 'status-draft';
     }
-  }
-
-  // Event handlers
-  onLinkClick(quotation: QuotationItem) {
-    console.log('Quotation link clicked:', quotation);
-    // Navigate to quotation details
-    this.router.navigate(['/wefab/supplier/quotation/details', quotation.quotationId]);
-  }
-
-  onViewQuotation(quotation: QuotationItem) {
-    console.log('View quotation:', quotation);
-    this.router.navigate(['/wefab/supplier/quotation/details', quotation.quotationId]);
-  }
-
-  onEditQuotation(quotation: QuotationItem) {
-    console.log('Edit quotation:', quotation);
-    this.router.navigate(['/wefab/supplier/quotation/details', quotation.quotationId]);
-  }
-
-  onSubmitQuotation(quotation: QuotationItem) {
-    console.log('Submit quotation:', quotation);
-    // Implement submit logic
-  }
-
-  onDownloadQuotation(quotation: QuotationItem) {
-    console.log('Download quotation:', quotation);
-    // Implement download logic
   }
 
   // Utility methods
   formatDate(dateString: string): string {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -309,18 +205,56 @@ export class SupplierQuotationComponent implements OnInit {
   }
 
   formatCurrency(amount: number): string {
+    if (amount == null || isNaN(amount)) {
+      return '$0.00';
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
     }).format(amount);
   }
 
-  getTabCount(tabIndex: number): number {
-    switch (tabIndex) {
-      case 0: return this.draftQuotations.length;
-      case 1: return this.quotedQuotations.length;
-      case 2: return this.awardedQuotations.length;
-      default: return 0;
+  // Common Table Event Handlers
+  onRowClick(event: { event: Event, rowData: any }) {
+    console.log('Quotation row clicked:', event.rowData);
+    this.router.navigate(['/wefab/supplier/quotation/details', event.rowData.quotationId]);
+  }
+
+  onLinkClick(event: { rowData: any, column: any }) {
+    console.log('Quotation link clicked:', event.rowData);
+    this.router.navigate(['/wefab/supplier/quotation/details', event.rowData.quotationId]);
+  }
+
+  onActionClick(event: { action: string, rowData: any }) {
+    console.log('Action clicked:', event.action, event.rowData);
+    
+    switch (event.action) {
+      case 'view':
+        this.onViewQuotation(event.rowData);
+        break;
+      case 'edit':
+        this.onEditQuotation(event.rowData);
+        break;
+      case 'download':
+        this.onDownloadQuotation(event.rowData);
+        break;
     }
   }
+
+  // Action handlers
+  onViewQuotation(quotation: QuotationTableItem) {
+    console.log('View quotation:', quotation);
+    this.router.navigate(['/wefab/supplier/quotation/details', quotation.quotationId]);
+  }
+
+  onEditQuotation(quotation: QuotationTableItem) {
+    console.log('Edit quotation:', quotation);
+    this.router.navigate(['/wefab/supplier/quotation/details', quotation.quotationId]);
+  }
+
+  onDownloadQuotation(quotation: QuotationTableItem) {
+    console.log('Download quotation:', quotation);
+    // Implement download logic
+  }
 }
+
