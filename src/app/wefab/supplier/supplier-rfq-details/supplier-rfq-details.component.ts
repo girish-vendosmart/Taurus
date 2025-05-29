@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
 import { CommonService } from '../../shared/common.service';
+import { ConversationTrailComponent } from '../../shared/components/conversation-trail/conversation-trail.component';
 
 export interface RFQDetails {
   name: string;
@@ -55,7 +56,8 @@ export interface RFQAttachment {
     CommonModule,
     RouterModule,
     FormsModule,
-    CommonTableComponent
+    CommonTableComponent,
+    ConversationTrailComponent
   ],
   templateUrl: './supplier-rfq-details.component.html',
   styleUrl: './supplier-rfq-details.component.scss'
