@@ -45,11 +45,6 @@ export class SupplierRfqComponent implements OnInit {
       icon: 'pi pi-file-edit',
       color: 'secondary',
       description: '',
-      trend: {
-        value: '+0',
-        direction: 'up',
-        period: 'from last week'
-      }
     },
     {
       title: 'Open RFQs',
@@ -57,11 +52,6 @@ export class SupplierRfqComponent implements OnInit {
       icon: 'pi pi-file-o',
       color: 'info',
       description: '',
-      trend: {
-        value: '+0',
-        direction: 'up',
-        period: 'from last week'
-      }
     },
     {
       title: 'Under Review',
@@ -69,11 +59,6 @@ export class SupplierRfqComponent implements OnInit {
       icon: 'pi pi-check-circle',
       color: 'warning',
       description: '',
-      trend: {
-        value: '+0',
-        direction: 'up',
-        period: 'from last week'
-      }
     },
     {
       title: 'Closed RFQs',
@@ -81,11 +66,6 @@ export class SupplierRfqComponent implements OnInit {
       icon: 'pi pi-lock',
       color: 'danger',
       description: '',
-      trend: {
-        value: '+0',
-        direction: 'down',
-        period: 'from last week'
-      }
     }
   ];
   

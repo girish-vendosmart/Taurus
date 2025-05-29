@@ -6,8 +6,18 @@
 
   <!-- Main Form -->
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <!-- Basic Information -->
+    <!-- First Row: RFQ ID and Quotation Name -->
     <div class="row mb-4">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">RFQ ID</label>
+        <input 
+          type="text" 
+          class="form-control"
+          [(ngModel)]="model.rfqId"
+          [ngModelOptions]="{standalone: true}"
+          readonly
+          placeholder="RFQ ID">
+      </div>
       <div class="col-md-6 mb-3">
         <label class="form-label">Quotation Name</label>
         <input 
@@ -17,6 +27,10 @@
           [ngModelOptions]="{standalone: true}"
           placeholder="Enter quotation name">
       </div>
+    </div>
+
+    <!-- Second Row: Total Lead Time and Payment Terms -->
+    <div class="row mb-4">
       <div class="col-md-6 mb-3">
         <label class="form-label">Total lead time (days) <span class="text-danger">*</span></label>
         <input 
@@ -39,6 +53,10 @@
           styleClass="w-100">
         </p-dropdown>
       </div>
+    </div>
+
+    <!-- Third Row: Quote Valid Till -->
+    <div class="row mb-4">
       <div class="col-md-6 mb-3">
         <label class="form-label">Quote Valid till <span class="text-danger">*</span></label>
         <p-calendar 
@@ -252,163 +270,56 @@
       </table>
     </div>
 
-    <!-- Bottom Section -->
-    <div class="row">
-      <!-- Left Side - Contact and Details -->
-      <div class="col-md-12">
-        <div class="row mb-3">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Email <span class="text-danger">*</span></label>
-            <input 
-              type="email" 
-              class="form-control"
-              [(ngModel)]="model.email"
-              [ngModelOptions]="{standalone: true}"
-              placeholder="email@example.com"
-              required>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Reference <span class="text-danger">*</span></label>
-            <input 
-              type="text" 
-              class="form-control"
-              [(ngModel)]="model.reference"
-              [ngModelOptions]="{standalone: true}"
-              placeholder="Enter text"
-              required>
-          </div>
-        </div>
-
-        <!-- Terms & Conditions -->
-        <div class="mb-3">
-          <label class="form-label">Terms & Conditions <span class="text-danger">*</span></label>
-          <textarea 
-            class="form-control" 
-            rows="4"
-            [(ngModel)]="model.termsAndConditions"
-            [ngModelOptions]="{standalone: true}"
-            placeholder="Terms & Conditions"
-            required>
-          </textarea>
-        </div>
-
-        <!-- Attachments Section -->
-        <div class="mb-3">
-          <label class="form-label">Attachments</label>
-          <div class="attachment-area">
-            <input 
-              #attachmentFileInput 
-              type="file" 
-              multiple
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xlsx,.xls"
-              style="display: none;" 
-              (change)="onAttachmentSelected($event)">
-            
-            <div class="upload-area" (click)="selectAttachments()" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
-              <i class="pi pi-cloud-upload"></i>
-              <p class="mb-0">Click to upload or drag and drop files here</p>
-              <small class="text-muted">Supports PDF, DOC, DOCX, JPG, PNG, TXT, XLSX files</small>
-            </div>
-            
-            <!-- Display attached files -->
-            <div *ngIf="attachedFiles.length > 0" class="attached-files mt-3">
-              <h6>Attached Files:</h6>
-              <div class="file-list">
-                <div *ngFor="let file of attachedFiles; let i = index" class="file-item">
-                  <i class="pi pi-file me-2"></i>
-                  <span class="file-name">{{ file.name }}</span>
-                  <span class="file-size text-muted">({{ formatFileSize(file.size) }})</span>
-                  <button 
-                    type="button" 
-                    class="btn btn-link btn-sm text-danger ms-2 p-0"
-                    (click)="removeAttachment(i)"
-                    title="Remove file">
-                    <i class="pi pi-times"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Totals Section -->
+    <!-- Totals Section (Moved under table) -->
     <div class="row mb-4">
-      <div class="col-md-6 offset-md-6">
-        <div class="totals-section">
+      <div class="col-lg-4 col-md-5 offset-lg-8 offset-md-7">
+        <div class="totals-section border rounded p-3 bg-light">
           <!-- Tax Options -->
-          <div class="row mb-3">
-            <div class="col-12">
-              <div class="tax-options">
-                <div class="row">
-                  <div class="col-6">
-                    <div class="form-check">
-                      <input 
-                        class="form-check-input" 
-                        type="checkbox" 
-                        id="cgstSgst"
-                        [(ngModel)]="model.cgstSgst"
-                        [ngModelOptions]="{standalone: true}"
-                        (change)="onTaxTypeChange('cgstSgst')">
-                      <label class="form-check-label" for="cgstSgst">
-                        CGST & SGST
-                      </label>
-                    </div>
-                    <div *ngIf="model.cgstSgst" class="tax-inputs mt-2">
-                      <div class="row">
-                        <div class="col-6">
-                          <label class="form-label-sm">CGST %</label>
-                          <input 
-                            type="number" 
-                            class="form-control form-control-sm"
-                            [(ngModel)]="cgstPercentage"
-                            [ngModelOptions]="{standalone: true}"
-                            (ngModelChange)="calculateTotals()"
-                            min="0" 
-                            max="50"
-                            placeholder="9">
-                        </div>
-                        <div class="col-6">
-                          <label class="form-label-sm">SGST %</label>
-                          <input 
-                            type="number" 
-                            class="form-control form-control-sm"
-                            [(ngModel)]="sgstPercentage"
-                            [ngModelOptions]="{standalone: true}"
-                            (ngModelChange)="calculateTotals()"
-                            min="0" 
-                            max="50"
-                            placeholder="9">
-                        </div>
-                      </div>
-                    </div>
+          <div class="mb-3">
+            <div class="row">
+              <div class="col-12">
+                <div class="d-flex gap-4">
+                  <div class="form-check form-check-sm">
+                    <input 
+                      class="form-check-input" 
+                      type="radio" 
+                      name="taxType"
+                      id="cgstSgst"
+                      value="cgstSgst"
+                      [(ngModel)]="selectedTaxType"
+                      [ngModelOptions]="{standalone: true}"
+                      (change)="onTaxTypeChange('cgstSgst')">
+                    <label class="form-check-label small" for="cgstSgst">
+                      CGST & SGST
+                    </label>
                   </div>
-                  <div class="col-6">
-                    <div class="form-check">
-                      <input 
-                        class="form-check-input" 
-                        type="checkbox" 
-                        id="igst"
-                        [(ngModel)]="model.igst"
-                        [ngModelOptions]="{standalone: true}"
-                        (change)="onTaxTypeChange('igst')">
-                      <label class="form-check-label" for="igst">
-                        IGST
-                      </label>
-                    </div>
-                    <div *ngIf="model.igst" class="tax-inputs mt-2">
-                      <label class="form-label-sm">IGST %</label>
-                      <input 
-                        type="number" 
-                        class="form-control form-control-sm"
-                        [(ngModel)]="igstPercentage"
-                        [ngModelOptions]="{standalone: true}"
-                        (ngModelChange)="calculateTotals()"
-                        min="0" 
-                        max="50"
-                        placeholder="18">
-                    </div>
+                  <div class="form-check form-check-sm">
+                    <input 
+                      class="form-check-input" 
+                      type="radio" 
+                      name="taxType"
+                      id="igst"
+                      value="igst"
+                      [(ngModel)]="selectedTaxType"
+                      [ngModelOptions]="{standalone: true}"
+                      (change)="onTaxTypeChange('igst')">
+                    <label class="form-check-label small" for="igst">
+                      IGST
+                    </label>
+                  </div>
+                  <div class="form-check form-check-sm">
+                    <input 
+                      class="form-check-input" 
+                      type="radio" 
+                      name="taxType"
+                      id="noTax"
+                      value="none"
+                      [(ngModel)]="selectedTaxType"
+                      [ngModelOptions]="{standalone: true}"
+                      (change)="onTaxTypeChange('none')">
+                    <label class="form-check-label small" for="noTax">
+                      No Tax
+                    </label>
                   </div>
                 </div>
               </div>
@@ -416,67 +327,167 @@
           </div>
 
           <!-- Sub Total -->
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="total-label">Sub Total:</span>
-            <span class="total-value">{{ calculatedSubTotal | number:'1.2-2' }} {{ model.currency }}</span>
+          <div class="d-flex justify-content-between align-items-center mb-2 py-1 border-bottom">
+            <span class="total-label small fw-medium">Sub Total:</span>
+            <span class="total-value small fw-bold">{{ calculatedSubTotal | number:'1.2-2' }} {{ model.currency }}</span>
           </div>
           
           <!-- Discount -->
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="total-label">Discount:</span>
+          <div class="d-flex justify-content-between align-items-center mb-2 py-1">
+            <span class="total-label small fw-medium">Discount:</span>
             <div class="d-flex align-items-center">
               <input 
                 type="number" 
-                class="form-control total-input me-2" 
+                class="form-control form-control-sm me-1" 
                 [(ngModel)]="discountPercentage"
                 (ngModelChange)="calculateTotals()"
                 [ngModelOptions]="{standalone: true}"
                 min="0" 
                 max="100"
-                placeholder="0">
-              <span class="total-unit">%</span>
+                placeholder="0"
+                style="width: 60px; font-size: 12px;">
+              <span class="small">%</span>
             </div>
           </div>
           
           <!-- Shipping Charges -->
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="total-label">Shipping Charges:</span>
+          <div class="d-flex justify-content-between align-items-center mb-2 py-1">
+            <span class="total-label small fw-medium">Shipping Charges:</span>
             <div class="d-flex align-items-center">
               <input 
                 type="number" 
-                class="form-control total-input me-2"
+                class="form-control form-control-sm me-1"
                 [(ngModel)]="shippingCharges"
                 (ngModelChange)="calculateTotals()"
                 [ngModelOptions]="{standalone: true}"
                 min="0"
-                placeholder="0">
-              <span class="total-unit">{{ model.currency }}</span>
+                placeholder="0"
+                style="width: 80px; font-size: 12px;">
+              <span class="small">{{ model.currency }}</span>
             </div>
           </div>
           
           <!-- Tax Details -->
-          <div *ngIf="model.cgstSgst && (cgstPercentage > 0 || sgstPercentage > 0)" class="mb-3">
-            <div *ngIf="cgstPercentage > 0" class="d-flex justify-content-between align-items-center mb-2">
-              <span class="total-label">CGST ({{ cgstPercentage }}%):</span>
-              <span class="total-value">{{ calculatedCGST | number:'1.2-2' }} {{ model.currency }}</span>
+          <div *ngIf="selectedTaxType === 'cgstSgst' && (cgstPercentage > 0 || sgstPercentage > 0)">
+            <div *ngIf="cgstPercentage > 0" class="d-flex justify-content-between align-items-center mb-1 py-1">
+              <span class="total-label small fw-medium">CGST ({{ cgstPercentage }}%):</span>
+              <span class="total-value small">{{ calculatedCGST | number:'1.2-2' }} {{ model.currency }}</span>
             </div>
-            <div *ngIf="sgstPercentage > 0" class="d-flex justify-content-between align-items-center mb-2">
-              <span class="total-label">SGST ({{ sgstPercentage }}%):</span>
-              <span class="total-value">{{ calculatedSGST | number:'1.2-2' }} {{ model.currency }}</span>
+            <div *ngIf="sgstPercentage > 0" class="d-flex justify-content-between align-items-center mb-1 py-1">
+              <span class="total-label small fw-medium">SGST ({{ sgstPercentage }}%):</span>
+              <span class="total-value small">{{ calculatedSGST | number:'1.2-2' }} {{ model.currency }}</span>
             </div>
           </div>
           
-          <div *ngIf="model.igst && igstPercentage > 0" class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="total-label">IGST ({{ igstPercentage }}%):</span>
-              <span class="total-value">{{ calculatedIGST | number:'1.2-2' }} {{ model.currency }}</span>
+          <div *ngIf="selectedTaxType === 'igst' && igstPercentage > 0">
+            <div class="d-flex justify-content-between align-items-center mb-2 py-1">
+              <span class="total-label small fw-medium">IGST ({{ igstPercentage }}%):</span>
+              <span class="total-value small">{{ calculatedIGST | number:'1.2-2' }} {{ model.currency }}</span>
             </div>
           </div>
           
           <!-- Total Amount -->
-          <div class="d-flex justify-content-between align-items-center total-amount-row">
-            <span class="total-amount-label">Total Amount:</span>
-            <span class="total-amount-value">{{ calculatedTotalAmount | number:'1.2-2' }} {{ model.currency }}</span>
+          <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-2">
+            <span class="total-amount-label fw-bold">Total Amount:</span>
+            <span class="total-amount-value fw-bold text-primary">{{ calculatedTotalAmount | number:'1.2-2' }} {{ model.currency }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email and Reference Row -->
+    <div class="row mb-4">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Email <span class="text-danger">*</span></label>
+        <input 
+          type="email" 
+          class="form-control"
+          [(ngModel)]="model.email"
+          [ngModelOptions]="{standalone: true}"
+          placeholder="email@example.com"
+          required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Reference <span class="text-danger">*</span></label>
+        <input 
+          type="text" 
+          class="form-control"
+          [(ngModel)]="model.reference"
+          [ngModelOptions]="{standalone: true}"
+          placeholder="Enter text"
+          required>
+      </div>
+    </div>
+
+    <!-- Delivery Address and Shipping Terms Row -->
+    <div class="row mb-4">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Delivery Address</label>
+        <input 
+          type="text" 
+          class="form-control"
+          [(ngModel)]="model.deliveryAddress"
+          [ngModelOptions]="{standalone: true}"
+          placeholder="Enter delivery address">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Shipping Terms</label>
+        <input 
+          type="text" 
+          class="form-control"
+          [(ngModel)]="model.shippingTerms"
+          [ngModelOptions]="{standalone: true}"
+          placeholder="e.g., FOB Origin, CIF, etc.">
+      </div>
+    </div>
+
+    <!-- Terms & Conditions and Attachments Row -->
+    <div class="row mb-4">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Terms & Conditions <span class="text-danger">*</span></label>
+        <textarea 
+          class="form-control" 
+          rows="4"
+          [(ngModel)]="model.termsAndConditions"
+          [ngModelOptions]="{standalone: true}"
+          placeholder="Terms & Conditions"
+          required>
+        </textarea>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Attachments</label>
+        <div class="attachment-area">
+          <input 
+            #attachmentFileInput 
+            type="file" 
+            multiple
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xlsx,.xls"
+            style="display: none;" 
+            (change)="onAttachmentSelected($event)">
+          
+          <div class="upload-area" (click)="selectAttachments()" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+            <i class="pi pi-cloud-upload"></i>
+            <p class="mb-0">Click to upload or drag and drop files here</p>
+            <small class="text-muted">Supports PDF, DOC, DOCX, JPG, PNG, TXT, XLSX files</small>
+          </div>
+          
+          <!-- Display attached files -->
+          <div *ngIf="attachedFiles.length > 0" class="attached-files mt-3">
+            <h6>Attached Files:</h6>
+            <div class="file-list">
+              <div *ngFor="let file of attachedFiles; let i = index" class="file-item">
+                <i class="pi pi-file me-2"></i>
+                <span class="file-name">{{ file.name }}</span>
+                <span class="file-size text-muted">({{ formatFileSize(file.size) }})</span>
+                <button 
+                  type="button" 
+                  class="btn btn-link btn-sm text-danger ms-2 p-0"
+                  (click)="removeAttachment(i)"
+                  title="Remove file">
+                  <i class="pi pi-times"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

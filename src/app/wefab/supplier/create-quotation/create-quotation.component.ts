@@ -18,6 +18,8 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MessageService } from 'primeng/api';
 
+import { CommonService } from '../../shared/common.service';
+
 // Custom Formly components
 import { FormlyFieldDropdownComponent } from '../../../dropdown-type.component';
 
@@ -44,7 +46,49 @@ import { FormlyFieldDropdownComponent } from '../../../dropdown-type.component';
   ],
   providers: [MessageService],
   templateUrl: './create-quotation.component.html',
-  styleUrl: './create-quotation.component.scss'
+  styleUrl: './create-quotation.component.scss',
+  styles: [`
+    .totals-section {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+    }
+    
+    .totals-section .form-control-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 12px;
+    }
+    
+    .totals-section .form-check-sm {
+      font-size: 13px;
+    }
+    
+    .totals-section .small {
+      font-size: 12px;
+    }
+    
+    .total-amount-label, .total-amount-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .total-amount-value {
+      color: #0d6efd !important;
+    }
+    
+    .border-bottom {
+      border-bottom: 1px solid #dee2e6 !important;
+    }
+    
+    .border-top {
+      border-top: 2px solid #0d6efd !important;
+    }
+    
+    @media (max-width: 768px) {
+      .totals-section {
+        margin-top: 1rem;
+      }
+    }
+  `]
 })
 export class CreateQuotationComponent implements OnInit {
   form: FormGroup = new FormGroup({});
@@ -52,6 +96,7 @@ export class CreateQuotationComponent implements OnInit {
   quotationId: string = '';
   
   model: any = {
+    rfqId: '',
     quotationName: '',
     totalLeadTime: '',
     paymentTerms: 'Net 10',
@@ -60,6 +105,8 @@ export class CreateQuotationComponent implements OnInit {
     email: 'email@example.com',
     reference: '',
     termsAndConditions: '',
+    deliveryAddress: '',
+    shippingTerms: 'FOB Origin',
     cgstSgst: false,
     igst: false,
     quotationItems: [
@@ -88,10 +135,13 @@ export class CreateQuotationComponent implements OnInit {
   shippingCharges: number = 0;
   totalAmount: number = 0;
 
-  // Tax calculation properties
+  // Tax calculation properties - Fixed values
   cgstPercentage: number = 9;
   sgstPercentage: number = 9;
   igstPercentage: number = 18;
+
+  // Tax selection
+  selectedTaxType: string = 'none'; // 'cgstSgst', 'igst', or 'none'
 
   // Attachment properties
   attachedFiles: File[] = [];
@@ -124,14 +174,32 @@ export class CreateQuotationComponent implements OnInit {
   @ViewChild('csvFileInput', { static: false }) csvFileInput!: ElementRef;
   @ViewChild('attachmentFileInput', { static: false }) attachmentFileInput!: ElementRef;
 
-  constructor(private messageService: MessageService, private router: Router, private route: ActivatedRoute) {}
+  constructor(private messageService: MessageService, private router: Router, private route: ActivatedRoute, private commonService: CommonService) {}
 
   ngOnInit() {
+    // Extract and set RFQ ID from URL
+    this.extractRfqIdFromUrl();
+    
     this.initializeForm();
     this.calculateTotals();
     
+    // Listen for route parameter changes to update RFQ ID dynamically
+    this.route.params.subscribe(params => {
+      if (params['rfqId'] && params['rfqId'] !== this.model.rfqId) {
+        this.model.rfqId = params['rfqId'];
+        console.log('RFQ ID updated from route params:', params['rfqId']);
+      }
+    });
+    
     // Get query parameters
     this.route.queryParams.subscribe(params => {
+      // Update RFQ ID if it comes through query params
+      if ((params['rfqId'] || params['rfq_id']) && 
+          (params['rfqId'] || params['rfq_id']) !== this.model.rfqId) {
+        this.model.rfqId = params['rfqId'] || params['rfq_id'];
+        console.log('RFQ ID updated from query params:', this.model.rfqId);
+      }
+      
       // Check if this is edit mode
       if (params['mode'] === 'edit' && params['quotationId']) {
         this.isEditMode = true;
@@ -139,6 +207,48 @@ export class CreateQuotationComponent implements OnInit {
         console.log('Edit mode activated for quotation:', this.quotationId);
         this.loadQuotationForEdit(this.quotationId);
       }
+    });
+  }
+
+  // Extract RFQ ID from URL and prefill the field
+  extractRfqIdFromUrl() {
+    // Try multiple ways to get RFQ ID from the URL
+    // Supports patterns like:
+    // /create-quotation/RFQ001
+    // /create-quotation?rfqId=RFQ001
+    // /create-quotation?rfq_id=RFQ001
+    const rfqId = this.route.snapshot.params['rfqId'] || 
+                  this.route.snapshot.params['id'] ||
+                  this.route.snapshot.queryParams['rfqId'] || 
+                  this.route.snapshot.queryParams['rfq_id'] ||
+                  this.route.snapshot.queryParams['rfq'];
+    
+    if (rfqId) {
+      this.model.rfqId = rfqId;
+      console.log('RFQ ID extracted from URL:', rfqId);
+    } else {
+      // If no RFQ ID in URL, try to get from route data or generate a default
+      this.model.rfqId = this.route.snapshot.data['rfqId'] || this.generateDefaultRfqId();
+      console.log('Using default RFQ ID:', this.model.rfqId);
+    }
+  }
+
+  // Generate a default RFQ ID if none is provided
+  private generateDefaultRfqId(): string {
+    const timestamp = Date.now().toString().slice(-6);
+    return `RFQ${timestamp}`;
+  }
+
+  // Method to test different URL patterns (for development/testing)
+  testRfqIdExtraction() {
+    console.log('Current route params:', this.route.snapshot.params);
+    console.log('Current query params:', this.route.snapshot.queryParams);
+    console.log('Extracted RFQ ID:', this.model.rfqId);
+    
+    this.messageService.add({
+      severity: 'info',
+      summary: 'RFQ ID Info',
+      detail: `Current RFQ ID: ${this.model.rfqId}`
     });
   }
 
@@ -283,11 +393,20 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   onTaxTypeChange(taxType: string) {
-    if (taxType === 'cgstSgst' && this.model.cgstSgst) {
-      this.model.igst = false;
-    } else if (taxType === 'igst' && this.model.igst) {
-      this.model.cgstSgst = false;
+    this.selectedTaxType = taxType;
+    
+    // Reset all tax flags
+    this.model.cgstSgst = false;
+    this.model.igst = false;
+    
+    // Set the selected tax type
+    if (taxType === 'cgstSgst') {
+      this.model.cgstSgst = true;
+    } else if (taxType === 'igst') {
+      this.model.igst = true;
     }
+    // 'none' case: both remain false
+    
     this.calculateTotals();
   }
 
@@ -313,6 +432,21 @@ export class CreateQuotationComponent implements OnInit {
 
   onSubmit() {
     if (this.form.valid && this.model.termsAndConditions) {
+      // Transform data to API format
+      const apiData = this.transformToApiFormat();
+      
+      // Validate API data
+      const validation = this.validateApiData(apiData);
+      
+      if (!validation.isValid) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Validation Warning',
+          detail: `Some fields may be missing: ${validation.missingFields.join(', ')}`
+        });
+        console.warn('Missing API fields:', validation.missingFields);
+      }
+      
       if (this.isEditMode) {
         // Update existing quotation
         this.messageService.add({
@@ -320,7 +454,7 @@ export class CreateQuotationComponent implements OnInit {
           summary: 'Success',
           detail: 'Quotation updated successfully!'
         });
-        console.log('Updated Quotation Data:', this.model);
+        console.log('Updated Quotation Data (API Format):', apiData);
         
         // Redirect back to quotation details page after a short delay
         setTimeout(() => {
@@ -328,19 +462,7 @@ export class CreateQuotationComponent implements OnInit {
         }, 1500);
       } else {
         // Create new quotation
-        const quotationId = 'QUO' + Date.now().toString().slice(-6);
-        
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Quotation sent successfully!'
-        });
-        console.log('New Quotation Data:', this.model);
-        
-        // Redirect to quotation details page after a short delay
-        setTimeout(() => {
-          this.router.navigate(['/wefab/supplier/quotation/details', quotationId]);
-        }, 1500);
+        this.createNewQuotation(apiData);
       }
     } else {
       let errorMessage = 'Please fill all required fields';
@@ -350,6 +472,187 @@ export class CreateQuotationComponent implements OnInit {
         summary: 'Error',
         detail: errorMessage
       });
+    }
+  }
+
+  createNewQuotation(apiData: any) {
+    let endpoint = `/api/resource/Supplier Quotation`
+
+    this.commonService.postWefabData(endpoint, apiData).subscribe((res: any) => {
+      console.log('Quotation created successfully:', res);
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Quotation sent successfully!'
+      });
+      this.router.navigate(['/wefab/supplier/quotation/details', res.data.name]);
+    })
+
+    // const quotationId = 'QUO' + Date.now().toString().slice(-6);
+        
+    //     this.messageService.add({
+    //       severity: 'success',
+    //       summary: 'Success',
+    //       detail: 'Quotation sent successfully!'
+    //     });
+    //     console.log('New Quotation Data (API Format):', apiData);
+        
+    //     // Here you would typically make an API call:
+    //     // this.quotationService.createQuotation(apiData).subscribe(...)
+        
+    //     // Redirect to quotation details page after a short delay
+    //     setTimeout(() => {
+    //       this.router.navigate(['/wefab/supplier/quotation/details', quotationId]);
+    //     }, 1500);
+  }
+
+  // Transform current form data to API expected format
+  transformToApiFormat(): any {
+    const apiData = {
+      rfq_id: this.getRfqId(),
+      supplier_id: this.getSupplierId(),
+      estimated_completion_duration: `${this.model.totalLeadTime} days`,
+      validity: this.formatDateForApi(this.model.quoteValidTill),
+      delivery_address: this.getDeliveryAddress(),
+      discount_percentage: this.discountPercentage || 0,
+      payment_terms: this.model.paymentTerms,
+      shipping_terms: this.getShippingTerms(),
+      notes: `<p>${this.model.termsAndConditions}</p>`,
+      items: this.transformQuotationItems(),
+      attachments: this.transformAttachments()
+    };
+
+    return apiData;
+  }
+
+  // Transform quotation items to API format
+  transformQuotationItems(): any[] {
+    return this.model.quotationItems.map((item: any, index: number) => {
+      const unitPrice = item.itemPrice || 0;
+      const quantity = item.qty || 0;
+      const totalItemAmount = unitPrice * quantity;
+      
+      return {
+        item_code: this.generateItemCode(item, index),
+        item_description: item.description || item.actionItemName || '',
+        quantity: quantity,
+        unit: item.unit || 'Nos',
+        currency_code: this.model.currency,
+        unit_price: unitPrice,
+        setup_cost: this.calculateSetupCost(item),
+        material_cost: this.calculateMaterialCost(item, totalItemAmount),
+        labor_cost: this.calculateLaborCost(item, totalItemAmount),
+        overhead_cost: this.calculateOverheadCost(item, totalItemAmount),
+        discount_type: "Percentage",
+        discount: 0, // You can add item-level discount if needed
+        comments: this.buildItemComments(item)
+      };
+    });
+  }
+
+  // Transform attachments to API format
+  transformAttachments(): any[] {
+    return this.attachedFiles.map((file: File) => ({
+      file_name: file.name,
+      file_url: `/files/${file.name}`, // This would be updated after file upload
+      description: this.getFileDescription(file)
+    }));
+  }
+
+  // Helper methods for data transformation
+  private getRfqId(): string {
+    // Use the RFQ ID that was extracted from URL and stored in model
+    return this.model.rfqId || 'RFQ0001';
+  }
+
+  private getSupplierId(): string {
+    // You might get this from user session or service
+    // For now, using a placeholder - in real app, get from authentication service
+    return localStorage.getItem('supplierId') || 
+           sessionStorage.getItem('supplierId') ||
+           'f9m9s21tsu';
+  }
+
+  private getDeliveryAddress(): string {
+    // Use form value if provided, otherwise use default
+    return this.model.deliveryAddress || 'Industrial Park Chicago-Shipping';
+  }
+
+  private getShippingTerms(): string {
+    // Use form value if provided, otherwise use default
+    return this.model.shippingTerms || 'FOB Origin';
+  }
+
+  private formatDateForApi(date: Date | string): string {
+    if (!date) return '';
+    
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+  }
+
+  private generateItemCode(item: any, index: number): string {
+    // Generate item code based on item name or use index
+    const baseName = item.actionItemName || `ITEM-${index + 1}`;
+    return baseName.toUpperCase().replace(/\s+/g, '-').substring(0, 20);
+  }
+
+  private calculateSetupCost(item: any): number {
+    // Calculate setup cost based on tooling or other factors
+    const baseSetupCost = item.tooling && item.tooling.toLowerCase() === 'required' ? 500 : 200;
+    return baseSetupCost;
+  }
+
+  private calculateMaterialCost(item: any, totalItemAmount: number): number {
+    // Calculate material cost as percentage of total item amount
+    return totalItemAmount * 0.6; // 60% of total as material cost
+  }
+
+  private calculateLaborCost(item: any, totalItemAmount: number): number {
+    // Calculate labor cost as percentage of total item amount
+    return totalItemAmount * 0.3; // 30% of total as labor cost
+  }
+
+  private calculateOverheadCost(item: any, totalItemAmount: number): number {
+    // Calculate overhead cost as percentage of total item amount
+    return totalItemAmount * 0.1; // 10% of total as overhead cost
+  }
+
+  private buildItemComments(item: any): string {
+    const comments = [];
+    
+    if (item.material) {
+      comments.push(`Material: ${item.material}`);
+    }
+    
+    if (item.miscellaneous) {
+      comments.push(`Misc: ${item.miscellaneous}`);
+    }
+    
+    if (item.tooling) {
+      comments.push(`Tooling: ${item.tooling}`);
+    }
+    
+    return comments.join('; ') || 'Standard manufacturing specifications';
+  }
+
+  private getFileDescription(file: File): string {
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    
+    switch (extension) {
+      case 'pdf':
+        return 'Technical specifications and documentation';
+      case 'doc':
+      case 'docx':
+        return 'Supporting documentation';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return 'Technical drawings and images';
+      case 'xlsx':
+      case 'xls':
+        return 'Technical data and specifications';
+      default:
+        return 'Supporting file';
     }
   }
 
@@ -537,8 +840,12 @@ export class CreateQuotationComponent implements OnInit {
     // In a real application, this would fetch data from a service
     console.log('Loading quotation data for editing:', quotationId);
     
+    // Store the current RFQ ID before loading edit data
+    const currentRfqId = this.model.rfqId;
+    
     // Simulate quotation data (this would come from an API)
     const quotationData = {
+      rfqId: currentRfqId, // Preserve the RFQ ID from URL
       quotationName: 'Sample Quotation',
       totalLeadTime: 30,
       paymentTerms: 'Net 30',
@@ -547,6 +854,8 @@ export class CreateQuotationComponent implements OnInit {
       email: 'supplier@example.com',
       reference: 'REF123',
       termsAndConditions: 'Standard terms and conditions apply',
+      deliveryAddress: 'Industrial Park Chicago-Shipping',
+      shippingTerms: 'FOB Origin',
       cgstSgst: false,
       igst: true,
       quotationItems: [
@@ -565,6 +874,15 @@ export class CreateQuotationComponent implements OnInit {
 
     // Update the model with loaded data
     this.model = { ...quotationData };
+
+    // Set the selectedTaxType based on loaded data
+    if (this.model.cgstSgst) {
+      this.selectedTaxType = 'cgstSgst';
+    } else if (this.model.igst) {
+      this.selectedTaxType = 'igst';
+    } else {
+      this.selectedTaxType = 'none';
+    }
 
     // Update the form with loaded data
     this.form.patchValue({
@@ -660,5 +978,54 @@ export class CreateQuotationComponent implements OnInit {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     ];
     return allowedTypes.includes(file.type);
+  }
+
+  // Method to preview API data format (useful for debugging)
+  previewApiData(): void {
+    const apiData = this.transformToApiFormat();
+    console.log('API Data Preview:', JSON.stringify(apiData, null, 2));
+    
+    this.messageService.add({
+      severity: 'info',
+      summary: 'API Data Preview',
+      detail: 'Check console for formatted API data structure'
+    });
+  }
+
+  // Method to validate required API fields
+  validateApiData(apiData: any): { isValid: boolean; missingFields: string[] } {
+    const requiredFields = [
+      'rfq_id',
+      'supplier_id', 
+      'estimated_completion_duration',
+      'validity',
+      'payment_terms',
+      'items'
+    ];
+    
+    const missingFields: string[] = [];
+    
+    requiredFields.forEach(field => {
+      if (!apiData[field] || (Array.isArray(apiData[field]) && apiData[field].length === 0)) {
+        missingFields.push(field);
+      }
+    });
+    
+    // Validate items array
+    if (apiData.items && apiData.items.length > 0) {
+      apiData.items.forEach((item: any, index: number) => {
+        const requiredItemFields = ['item_description', 'quantity', 'unit_price'];
+        requiredItemFields.forEach(field => {
+          if (!item[field]) {
+            missingFields.push(`items[${index}].${field}`);
+          }
+        });
+      });
+    }
+    
+    return {
+      isValid: missingFields.length === 0,
+      missingFields
+    };
   }
 }
