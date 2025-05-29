@@ -227,6 +227,21 @@ export class CommonService {
             { headers, params }
         );
     }
+
+    putWefabData(endPoint: string, body: any, params?: HttpParams) {
+        // Create headers with Authorization token
+        const headers = new HttpHeaders({
+            'Authorization': `Token c9e1cbc24e5be05:e1a9e577dba5db8`,
+            'Content-Type': 'application/json'
+        });
+    
+        // Return the HTTP request with headers, body and params
+        return this.http.put(
+            `${environment.wefabApiUrl}${endPoint}`,
+            body,
+            { headers, params }
+        );
+    }
     
 
     

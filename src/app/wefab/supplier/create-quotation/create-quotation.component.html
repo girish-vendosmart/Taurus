@@ -507,7 +507,7 @@
         (click)="onSubmit()"
         [disabled]="!model.termsAndConditions || !model.email || !model.reference || !model.totalLeadTime">
         <i class="pi pi-send me-2"></i>
-        Send
+        {{ isEditMode ? 'Update' : 'Send' }}
       </button>
     </div>
   </form>

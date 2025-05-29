@@ -448,18 +448,19 @@ export class CreateQuotationComponent implements OnInit {
       }
       
       if (this.isEditMode) {
+        this.updateExistingQuotation(apiData);
         // Update existing quotation
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Quotation updated successfully!'
-        });
-        console.log('Updated Quotation Data (API Format):', apiData);
+        // this.messageService.add({
+        //   severity: 'success',
+        //   summary: 'Success',
+        //   detail: 'Quotation updated successfully!'
+        // });
+        // console.log('Updated Quotation Data (API Format):', apiData);
         
-        // Redirect back to quotation details page after a short delay
-        setTimeout(() => {
-          this.router.navigate(['/wefab/supplier/quotation/details', this.quotationId]);
-        }, 1500);
+        // // Redirect back to quotation details page after a short delay
+        // setTimeout(() => {
+        //   this.router.navigate(['/wefab/supplier/quotation/details', this.quotationId]);
+        // }, 1500);
       } else {
         // Create new quotation
         this.createNewQuotation(apiData);
@@ -473,6 +474,20 @@ export class CreateQuotationComponent implements OnInit {
         detail: errorMessage
       });
     }
+  }
+
+  updateExistingQuotation(apiData: any) {
+    let endPoint = `/api/resource/Supplier Quotation/${this.quotationId}`
+
+    this.commonService.putWefabData(endPoint, apiData).subscribe((res: any) => {
+      console.log('Quotation updated successfully:', res);
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Quotation Update successfully!'
+      });
+      this.router.navigate(['/wefab/supplier/quotation/details', res.data.name]);
+    })
   }
 
   createNewQuotation(apiData: any) {
@@ -836,66 +851,155 @@ export class CreateQuotationComponent implements OnInit {
     });
   }
 
+  getQuotationDetails(quotationId: string) {
+    return this.commonService.getWefabData(`/api/resource/Supplier Quotation/${quotationId}`);
+  }
+
   loadQuotationForEdit(quotationId: string) {
-    // In a real application, this would fetch data from a service
     console.log('Loading quotation data for editing:', quotationId);
     
     // Store the current RFQ ID before loading edit data
     const currentRfqId = this.model.rfqId;
     
-    // Simulate quotation data (this would come from an API)
-    const quotationData = {
-      rfqId: currentRfqId, // Preserve the RFQ ID from URL
-      quotationName: 'Sample Quotation',
-      totalLeadTime: 30,
-      paymentTerms: 'Net 30',
-      quoteValidTill: new Date(),
-      currency: 'USD',
-      email: 'supplier@example.com',
-      reference: 'REF123',
-      termsAndConditions: 'Standard terms and conditions apply',
-      deliveryAddress: 'Industrial Park Chicago-Shipping',
-      shippingTerms: 'FOB Origin',
-      cgstSgst: false,
-      igst: true,
-      quotationItems: [
-        {
-          actionItemName: 'Sample Item',
-          description: 'Sample Description',
-          material: 'Steel',
-          qty: 10,
-          unit: 'Pieces',
-          itemPrice: 100,
-          miscellaneous: 'N/A',
-          tooling: 'Required'
+    this.getQuotationDetails(quotationId).subscribe((res: any) => {
+      if (res && res.data) {
+        const quotationData = res.data;
+        console.log('Received quotation data:', quotationData);
+        
+        // Map API data to component model
+        this.model = {
+          rfqId: quotationData.rfq_id || currentRfqId,
+          quotationName: quotationData.name || '',
+          totalLeadTime: this.extractDaysFromDuration(quotationData.estimated_completion_duration),
+          paymentTerms: quotationData.payment_terms || 'Net 30',
+          quoteValidTill: this.parseApiDate(quotationData.validity),
+          currency: quotationData.items?.[0]?.currency_code || 'USD',
+          email: 'email@example.com', // This might come from user/supplier data
+          reference: quotationData.name || '',
+          termsAndConditions: this.stripHtmlTags(quotationData.notes || ''),
+          deliveryAddress: 'Industrial Park Chicago-Shipping', // This might come from API later
+          shippingTerms: quotationData.shipping_terms || 'FOB Origin',
+          cgstSgst: quotationData.sgst_cgst_applicable === 1,
+          igst: quotationData.igst_applicable === 1,
+          quotationItems: this.transformApiItemsToModel(quotationData.items || []),
+          subTotal: quotationData.total_amount || 0,
+          discount: quotationData.discount_percentage || 0,
+          shippingCharges: 0, // This might need to be calculated or come from API
+          totalAmount: quotationData.grand_total || 0
+        };
+
+        // Set discount percentage and shipping charges for calculations
+        this.discountPercentage = quotationData.discount_percentage || 0;
+        this.shippingCharges = 0; // Set based on your business logic
+
+        // Set the selectedTaxType based on loaded data
+        if (this.model.cgstSgst) {
+          this.selectedTaxType = 'cgstSgst';
+        } else if (this.model.igst) {
+          this.selectedTaxType = 'igst';
+        } else {
+          this.selectedTaxType = 'none';
         }
-      ]
-    };
 
-    // Update the model with loaded data
-    this.model = { ...quotationData };
+        // Update the form with loaded data
+        this.form.patchValue({
+          quotationName: this.model.quotationName,
+          totalLeadTime: this.model.totalLeadTime,
+          paymentTerms: this.model.paymentTerms,
+          quoteValidTill: this.model.quoteValidTill
+        });
 
-    // Set the selectedTaxType based on loaded data
-    if (this.model.cgstSgst) {
-      this.selectedTaxType = 'cgstSgst';
-    } else if (this.model.igst) {
-      this.selectedTaxType = 'igst';
-    } else {
-      this.selectedTaxType = 'none';
-    }
+        // Handle attachments if any
+        if (quotationData.attachments && quotationData.attachments.length > 0) {
+          // Note: You might need to handle file reconstruction from API data
+          console.log('Attachments found:', quotationData.attachments);
+        }
 
-    // Update the form with loaded data
-    this.form.patchValue({
-      quotationName: quotationData.quotationName,
-      totalLeadTime: quotationData.totalLeadTime,
-      paymentTerms: quotationData.paymentTerms,
-      quoteValidTill: quotationData.quoteValidTill
+        // Recalculate totals
+        this.calculateTotals();
+
+        // console.log('Quotation data loaded and mapped to model:', this.model);
+        
+        // this.messageService.add({
+        //   severity: 'success',
+        //   summary: 'Data Loaded',
+        //   detail: 'Quotation data loaded successfully for editing'
+        // });
+      }
+    }, (error) => {
+      console.error('Error loading quotation data:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load quotation data'
+      });
     });
+  }
 
-    // Recalculate totals
-    this.calculateTotals();
+  // Helper method to extract days from duration string like "20 days"
+  private extractDaysFromDuration(duration: string): number {
+    if (!duration) return 0;
+    const match = duration.match(/(\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
+  }
 
-    console.log('Quotation data loaded for editing:', this.model);
+  // Helper method to parse API date format
+  private parseApiDate(dateString: string): Date | null {
+    if (!dateString) return null;
+    try {
+      return new Date(dateString);
+    } catch (error) {
+      console.warn('Error parsing date:', dateString);
+      return null;
+    }
+  }
+
+  // Helper method to strip HTML tags from notes
+  private stripHtmlTags(html: string): string {
+    if (!html) return '';
+    return html.replace(/<[^>]*>/g, '').trim();
+  }
+
+  // Helper method to transform API items to component model format
+  private transformApiItemsToModel(apiItems: any[]): any[] {
+    return apiItems.map(item => {
+      // Parse comments to extract material, miscellaneous, and tooling info
+      const parsedComments = this.parseItemComments(item.comments || '');
+      
+      return {
+        actionItemName: item.item_code || '',
+        description: item.item_description || '',
+        material: parsedComments.material || '',
+        qty: item.quantity || 0,
+        unit: item.unit || 'Pieces',
+        itemPrice: item.unit_price || 0,
+        miscellaneous: parsedComments.miscellaneous || '',
+        tooling: parsedComments.tooling || ''
+      };
+    });
+  }
+
+  // Helper method to parse item comments back to individual fields
+  private parseItemComments(comments: string): { material: string; miscellaneous: string; tooling: string } {
+    const result = { material: '', miscellaneous: '', tooling: '' };
+    
+    if (!comments) return result;
+    
+    // Split by semicolon and parse each part
+    const parts = comments.split(';');
+    
+    parts.forEach(part => {
+      const trimmedPart = part.trim();
+      if (trimmedPart.startsWith('Material:')) {
+        result.material = trimmedPart.replace('Material:', '').trim();
+      } else if (trimmedPart.startsWith('Misc:')) {
+        result.miscellaneous = trimmedPart.replace('Misc:', '').trim();
+      } else if (trimmedPart.startsWith('Tooling:')) {
+        result.tooling = trimmedPart.replace('Tooling:', '').trim();
+      }
+    });
+    
+    return result;
   }
 
   cancel() {
