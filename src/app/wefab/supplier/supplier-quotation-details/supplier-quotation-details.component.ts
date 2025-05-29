@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
 import { CommonService } from '../../shared/common.service';
+import { HttpParams } from '@angular/common/http';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -249,6 +250,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     pageSize: 7,
     showActions: false
   };
+  quotationId: any;
 
   constructor(
     private router: Router,
@@ -260,6 +262,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     // Get quotation ID from route parameters
     this.route.params.subscribe(params => {
       const quotationId = params['id'];
+      this.quotationId = quotationId;
       if (quotationId) {
         this.getQuotationDetails(quotationId);
       }
@@ -604,5 +607,22 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       unitPrice: this.formatCurrency(item.unitPrice),
       totalPrice: this.formatCurrency(item.totalPrice)
     }));
+  }
+
+  sendQuotation() {
+    let params = new HttpParams()
+    let action = {
+      action: 'Submit',
+      doc: {
+        doctype: 'Supplier Quotation',
+        name: this.quotationId
+      } 
+    }
+
+
+
+    this.commonService.postWefabData(`/api/method/frappe.model.workflow.apply_workflow`, action).subscribe((res: any) => {
+      console.log('Quotation sent successfully:', res);
+    })
   }
 }

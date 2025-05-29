@@ -35,8 +35,8 @@
         </p-button>
         <p-button 
           *ngIf="quotationDetails.workflowState === 'Draft'"
-          label="Send" 
-          severity="primary">
+          label="Send"
+          (onClick)="sendQuotation()">
         </p-button>
       </div>
     </div>
