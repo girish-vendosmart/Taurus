@@ -131,4 +131,15 @@ export class ConversationTrailComponent implements OnInit {
   removeAttachment(index: number) {
     this.attachments.splice(index, 1);
   }
+
+  getFileIcon(att: { file_url: string }): string {
+    const ext = (att.file_url.split('.').pop() || '').toLowerCase();
+    if (["jpg","jpeg","png","gif","bmp","webp"].includes(ext)) return "pi pi-image";
+    if (["pdf"].includes(ext)) return "pi pi-file-pdf";
+    if (["doc","docx"].includes(ext)) return "pi pi-file-word";
+    if (["xls","xlsx"].includes(ext)) return "pi pi-file-excel";
+    if (["ppt","pptx"].includes(ext)) return "pi pi-file-ppt";
+    if (["zip","rar","7z"].includes(ext)) return "pi pi-file-zip";
+    return "pi pi-file";
+  }
 } 
