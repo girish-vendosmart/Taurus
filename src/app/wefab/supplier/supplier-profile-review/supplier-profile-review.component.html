@@ -24,6 +24,9 @@
       <button class="btn-view-activity" (click)="toggleActivityTrail()" *ngIf="!showActivityTrail">
         <i class="pi pi-history"></i> View Activity Trail
       </button>
+      <button class="btn-success" (click)="goToDashboard()" *ngIf="areAllStagesApproved && userType === 'supplier'">
+        <i class="pi pi-home"></i> Go to Dashboard
+      </button>
       <button class="btn-navigation" (click)="goBack()">
         <i class="pi pi-arrow-left"></i> Back
       </button>
@@ -880,14 +883,12 @@
           </div>
         </div>
 
-        <!-- <div class="action-buttons">
-          <button class="btn btn-danger reject-btn" (click)="rejectProfile()">
-            <i class="pi pi-times-circle"></i> Reject
+        <!-- Dashboard Button when all stages approved -->
+        <div class="action-buttons" *ngIf="areAllStagesApproved && userType === 'supplier'">
+          <button class="btn btn-success dashboard-btn" (click)="goToDashboard()">
+            <i class="pi pi-home"></i> Go to Dashboard
           </button>
-          <button class="btn btn-success approve-btn" (click)="approveProfile()">
-            <i class="pi pi-check-circle"></i> Approve
-          </button>
-        </div> -->
+        </div>
       </div>
 
       <!-- Document Summary -->

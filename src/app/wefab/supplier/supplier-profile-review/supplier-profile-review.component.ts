@@ -277,6 +277,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
     // Load initial data in parallel
     this.loadInitialData();
+
+    // firebase trigger
+    this.accessFirebaseTrigger('wfb_supplier_onboarding_L1', this.supplierId)
+    this.accessFirebaseTrigger('wfb_supplier_onboarding_L2', this.supplierId)
+    this.accessFirebaseTrigger('wfb_supplier_onboarding_L3', this.supplierId)
   }
 
   private handleUrlParameters(): void {
@@ -1140,7 +1145,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
     let currentLevel = this.updateRequestLevel === 'L1' ? 'wfb_supplier_onboarding_L1': this.updateRequestLevel === 'L2' ? 'wfb_supplier_onboarding_L2' : 'wfb_supplier_onboarding_L3';
 
-    const endpoint = `api/resource/${currentLevel}/${this.supplierId}`
+    const endpoint = `/api/resource/${currentLevel}/${this.supplierId}`
     const data = {
       onboarding_status: 'Request to Resubmit',
       comment: this.updateRequestComment
@@ -1201,18 +1206,12 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Firebase trigger method - This is where profile completeness should be recalculated
-  accessFirebaseTrigger(doctType_name: string, doctypeId: string): void {
-    console.log('Firebase trigger received:', doctType_name, doctypeId);
-    
-    // Clear analysis cache if machines or facilities are updated
-    if (doctType_name === 'machine' || doctType_name === 'facility' || doctType_name === 'manufacturing') {
-      this.clearAnalysisCache();
-    }
-    
-    // When Firebase triggers, clear cache and reload all data to recalculate completeness
-    this.cache.clear();
-    this.loadInitialData();
+  accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
+    this.commonservice.commonFirebaseTrigger(doctType_name, doctypeId).subscribe((res: any) => {
+       // When Firebase triggers, clear cache and reload all data to recalculate completeness
+      this.cache.clear();
+      this.loadInitialData();
+    });
   }
 
   // Method to clear analysis cache when machines/facilities are updated
@@ -1276,5 +1275,19 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   get hasFinancialData(): boolean {
     return !!this.newFinancialData;
+  }
+
+  // Check if all three stages are approved
+  get areAllStagesApproved(): boolean {
+    return this.getCurrentL1DataStatus === 'Approved' && 
+           this.getCurrentL2DataStatus === 'Approved' && 
+           this.getCurrentL3DataStatus === 'Approved';
+  }
+
+  // Navigate to dashboard when all stages are approved
+  goToDashboard(): void {
+    sessionStorage.setItem('show_supplier_dashboard', 'true');
+    sessionStorage.setItem('supplier_onboarding_complete', 'true');
+    this.router.navigate(['/wefab/supplier/dashboard']);
   }
 } 

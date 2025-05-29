@@ -24,6 +24,11 @@ interface OnboardingStep {
 export class SupplierOnboardingStatusComponent {
   overallProgress: number = 0;
   
+  // Add tracking for Firebase triggers
+  private firebaseTriggerCount = 0;
+  private totalFirebaseTriggers = 3;
+  private firebaseTriggersCompleted = false;
+  
   onboardingSteps: OnboardingStep[] = [
     {
       id: 1,
@@ -74,6 +79,13 @@ export class SupplierOnboardingStatusComponent {
 
   }
 
+  accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
+    this.commonService.commonFirebaseTrigger(doctType_name, doctypeId).subscribe((res: any) => {
+       // When Firebase triggers, clear cache and reload all data to recalculate completeness
+      this.getOnboardingL1Status();
+    });
+  }
+
   supplierCompanyId: string = '';
 
   getOnboardingL1Status() {
@@ -90,12 +102,6 @@ export class SupplierOnboardingStatusComponent {
         this.currentOnboardingL1Status = 'Not Started';
         this.getOnboardingL2Status();
       }
-    });
-  }
-
-  accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
-    this.commonService.commonFirebaseTrigger(doctType_name, doctypeId).subscribe((res: any) => {
-      this.getOnboardingL1Status();
     });
   }
 
