@@ -40,7 +40,8 @@
     .message {
       display: flex;
       align-items: flex-start;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
+      width: 100%;
       .profile-icon {
         width: 48px;
         height: 48px;
@@ -63,9 +64,11 @@
         background: #fff;
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        padding: 1.25rem 1.5rem;
-        min-width: 300px;
-        max-width: 650px;
+        padding: 0.75rem 1rem;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        font-size: 1rem;
         .message-header {
           display: flex;
           flex-direction: row;
@@ -80,7 +83,7 @@
           .company {
             font-weight: 600;
             color: #2563eb;
-            font-size: 1.05em;
+            font-size: 1rem;
             margin-bottom: 0.1rem;
           }
           .user-row {
@@ -89,7 +92,7 @@
             gap: 0.5rem;
             .user-name {
               font-weight: 700;
-              font-size: 1.05rem;
+              font-size: 1rem;
               color: #222;
             }
           }
@@ -106,8 +109,8 @@
           }
         }
         .message-text {
-          font-size: 1.05rem;
-          margin-bottom: 0.75rem;
+          font-size: 1rem;
+          margin-bottom: 0.5rem;
           color: #222;
           text-align: start;
         }
