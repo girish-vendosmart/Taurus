@@ -15,118 +15,98 @@
 }
 
 // Table Actions Styling
-.table-actions {
-  .btn {
-    border-radius: 6px;
-    font-weight: $font-weight-medium;
-    font-size: 14px;
-    padding: 8px 16px;
-    transition: all 0.2s ease;
+.btn {
+  border-radius: 6px;
+  font-weight: $font-weight-medium;
+  font-size: 14px;
+  padding: 8px 16px;
+  transition: all 0.2s ease;
+  
+  &.btn-outline-secondary {
+    border-color: $material-finish-silver;
+    color: $machine-gray;
     
-    &.btn-outline-secondary {
-      border-color: $material-finish-silver;
-      color: $machine-gray;
-      
-      &:hover {
-        background-color: $material-finish-silver;
-        border-color: $machine-gray;
-        color: $precision-black;
-        transform: translateY(-1px);
-      }
+    &:hover {
+      background-color: $material-finish-silver;
+      border-color: $machine-gray;
+      color: $precision-black;
+      transform: translateY(-1px);
     }
+  }
+  
+  &.btn-outline-success {
+    border-color: $process-green;
+    color: $process-green;
     
-    &.btn-outline-success {
+    &:hover {
+      background-color: $process-green;
       border-color: $process-green;
-      color: $process-green;
-      
-      &:hover {
-        background-color: $process-green;
-        border-color: $process-green;
-        color: white;
-        transform: translateY(-1px);
-      }
-    }
-    
-    &.btn-outline-primary {
-      border-color: $blueprint-blue;
-      color: $blueprint-blue;
-      
-      &:hover {
-        background-color: $blueprint-blue;
-        border-color: $blueprint-blue;
-        color: white;
-        transform: translateY(-1px);
-      }
-    }
-    
-    i {
-      font-size: 14px;
+      color: white;
+      transform: translateY(-1px);
     }
   }
-}
-
-.header-actions {
-  .btn {
-    border-radius: 6px;
-    font-weight: $font-weight-medium;
+  
+  &.btn-outline-primary {
+    border-color: $blueprint-blue;
+    color: $blueprint-blue;
     
-    &.btn-outline-secondary {
+    &:hover {
+      background-color: $blueprint-blue;
+      border-color: $blueprint-blue;
+      color: white;
+      transform: translateY(-1px);
+    }
+  }
+  
+  &.btn-primary {
+    background-color: $blueprint-blue;
+    border-color: $blueprint-blue;
+    
+    &:hover {
+      background-color: darken($blueprint-blue, 10%);
+      border-color: darken($blueprint-blue, 10%);
+    }
+    
+    &:disabled {
+      background-color: $material-finish-silver;
       border-color: $material-finish-silver;
       color: $machine-gray;
-      
-      &:hover {
-        background-color: $material-finish-silver;
-        border-color: $machine-gray;
-        color: $precision-black;
-      }
-    }
-    
-    &.btn-outline-primary {
-      border-color: $blueprint-blue;
-      color: $blueprint-blue;
-      
-      &:hover {
-        background-color: $blueprint-blue;
-        border-color: $blueprint-blue;
-        color: white;
-      }
-    }
-  }
-}
-
-.card {
-  border: 1px solid $material-finish-silver;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(26, 58, 95, 0.08);
-  
-  .card-header {
-    background-color: $technical-white;
-    border-bottom: 1px solid $material-finish-silver;
-    padding: 16px 24px;
-    
-    h5 {
-      color: $blueprint-blue;
-      font-weight: $font-weight-semibold;
-      font-size: $h4-font-size;
     }
   }
   
-  .card-body {
-    padding: 24px;
+  &.btn-outline-danger {
+    border-color: $safety-orange;
+    color: $safety-orange;
+    
+    &:hover {
+      background-color: $safety-orange;
+      border-color: $safety-orange;
+      color: white;
+    }
+  }
+  
+  &.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  i {
+    font-size: 14px;
   }
 }
 
 .quotation-table {
-  font-size: 14px;
+  font-size: 13px;
   
   th {
     background-color: $technical-white;
     color: $precision-black;
     font-weight: $font-weight-semibold;
     border-color: $material-finish-silver;
-    padding: 12px 8px;
+    padding: 8px 6px;
     vertical-align: middle;
     white-space: nowrap;
+    font-size: 12px;
     
     .text-danger {
       color: $safety-orange;
@@ -134,7 +114,7 @@
   }
   
   td {
-    padding: 8px;
+    padding: 4px;
     vertical-align: middle;
     border-color: $material-finish-silver;
   }
@@ -144,19 +124,15 @@
       background-color: rgba(26, 58, 95, 0.02);
     }
     
-    // Highlight editable rate column
-    td:nth-child(9) {
-      background-color: rgba(18, 133, 110, 0.02);
-      border-left: 2px solid $process-green;
+    // Style for editable cells
+    .form-control-sm {
+      padding: 4px 6px;
+      font-size: 12px;
+      border: 1px solid $material-finish-silver;
       
-      .p-inputnumber .p-inputtext {
-        background-color: white;
-        border-color: $process-green;
-        
-        &:focus {
-          border-color: $process-green;
-          box-shadow: 0 0 0 2px rgba(18, 133, 110, 0.1);
-        }
+      &:focus {
+        border-color: $blueprint-blue;
+        box-shadow: 0 0 0 1px rgba(26, 58, 95, 0.1);
       }
     }
   }
@@ -175,24 +151,17 @@
       box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
     }
     
-    &.bg-light {
-      background-color: $technical-white;
-      color: $machine-gray;
+    &.form-control-sm {
+      padding: 4px 6px;
+      font-size: 12px;
     }
-    
-    // Styling for frozen/readonly fields
-    &[readonly] {
-      background-color: rgba(26, 58, 95, 0.03);
-      color: $machine-gray;
-      border-color: $material-finish-silver;
-      cursor: not-allowed;
-      
-      &:focus {
-        background-color: rgba(26, 58, 95, 0.03);
-        border-color: $material-finish-silver;
-        box-shadow: none;
-      }
-    }
+  }
+  
+  .form-label {
+    font-weight: $font-weight-medium;
+    color: $precision-black;
+    margin-bottom: 4px;
+    font-size: 14px;
   }
   
   // PrimeNG Dropdown Styling
@@ -212,6 +181,13 @@
     .p-dropdown-label {
       font-size: 14px;
       padding: 8px 12px;
+    }
+    
+    &.p-inputtext-sm {
+      .p-dropdown-label {
+        padding: 4px 6px;
+        font-size: 12px;
+      }
     }
   }
   
@@ -250,60 +226,41 @@
         box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
       }
     }
-  }
-  
-  // Button Styling
-  .btn {
-    border-radius: 6px;
-    font-weight: $font-weight-medium;
-    padding: 8px 16px;
     
-    &.btn-primary {
-      background-color: $blueprint-blue;
-      border-color: $blueprint-blue;
-      
-      &:hover {
-        background-color: darken($blueprint-blue, 10%);
-        border-color: darken($blueprint-blue, 10%);
-      }
-      
-      &:disabled {
-        background-color: $material-finish-silver;
-        border-color: $material-finish-silver;
-        color: $machine-gray;
-      }
-    }
-    
-    &.btn-outline-primary {
-      border-color: $blueprint-blue;
-      color: $blueprint-blue;
-      
-      &:hover {
-        background-color: $blueprint-blue;
-        border-color: $blueprint-blue;
-        color: white;
-      }
-    }
-    
-    &.btn-outline-danger {
-      border-color: $safety-orange;
-      color: $safety-orange;
-      
-      &:hover {
-        background-color: $safety-orange;
-        border-color: $safety-orange;
-        color: white;
-      }
-    }
-    
-    &.btn-sm {
-      padding: 4px 8px;
+    &.p-inputnumber-sm .p-inputtext {
+      padding: 4px 6px;
       font-size: 12px;
     }
-    
-    &.btn-lg {
-      padding: 12px 24px;
-      font-size: 16px;
+  }
+  
+  // PrimeNG Calendar Styling
+  .p-calendar {
+    .p-inputtext {
+      border: 1px solid $material-finish-silver;
+      border-radius: 4px;
+      font-size: 14px;
+      padding: 8px 12px;
+      
+      &:focus {
+        border-color: $blueprint-blue;
+        box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+      }
+    }
+  }
+  
+  // PrimeNG RadioButton Styling
+  .p-radiobutton {
+    .p-radiobutton-box {
+      border: 1px solid $material-finish-silver;
+      
+      &.p-highlight {
+        background-color: $blueprint-blue;
+        border-color: $blueprint-blue;
+      }
+      
+      &:hover {
+        border-color: $blueprint-blue;
+      }
     }
   }
   
@@ -326,6 +283,10 @@
       color: $precision-black;
       font-size: 14px;
       line-height: $line-height-sm;
+      
+      &.small {
+        font-size: 12px;
+      }
     }
   }
 }
@@ -336,37 +297,139 @@
   border-radius: 8px;
   border: 1px solid $material-finish-silver;
   
-  .fw-medium {
+  .tax-options {
+    .form-check {
+      .form-check-input {
+        margin-top: 0.125em;
+      }
+      
+      .form-check-label {
+        color: $precision-black;
+        font-size: 14px;
+        font-weight: $font-weight-medium;
+      }
+    }
+    
+    .tax-inputs {
+      .form-label-sm {
+        font-size: 12px;
+        font-weight: $font-weight-medium;
+        color: $precision-black;
+        margin-bottom: 4px;
+        display: block;
+      }
+      
+      .form-control-sm {
+        padding: 4px 6px;
+        font-size: 12px;
+        height: auto;
+      }
+    }
+  }
+  
+  .form-check {
+    .form-check-input {
+      margin-top: 0.125em;
+    }
+    
+    .form-check-label {
+      color: $precision-black;
+      font-size: 14px;
+      font-weight: $font-weight-medium;
+    }
+  }
+  
+  .total-label {
     font-weight: $font-weight-medium;
     color: $precision-black;
+    font-size: 14px;
   }
   
-  .fw-bold {
+  .total-value {
+    font-weight: $font-weight-semibold;
+    color: $precision-black;
+    font-size: 14px;
+  }
+  
+  .total-input {
+    width: 80px;
+    padding: 6px 8px;
+    font-size: 14px;
+    text-align: center;
+    border: 1px solid $material-finish-silver;
+    border-radius: 4px;
+    
+    &:focus {
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+    }
+    
+    &::placeholder {
+      color: #999;
+    }
+  }
+  
+  .total-unit {
+    font-weight: $font-weight-medium;
+    color: $precision-black;
+    font-size: 14px;
+    min-width: 40px;
+  }
+  
+  .total-amount-row {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid $material-finish-silver;
+  }
+  
+  .total-amount-label {
     font-weight: $font-weight-bold;
-  }
-  
-  .text-blueprint-blue {
     color: $blueprint-blue;
+    font-size: 16px;
   }
   
-  hr {
-    border-color: $material-finish-silver;
-    margin: 12px 0;
-  }
-  
-  .text-muted {
-    color: $machine-gray;
-    font-size: 12px;
+  .total-amount-value {
+    font-weight: $font-weight-bold;
+    color: $blueprint-blue;
+    font-size: 16px;
   }
 }
 
 // Responsive Design
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
   .quotation-table {
-    font-size: 12px;
+    font-size: 11px;
     
     th, td {
-      padding: 6px 4px;
+      padding: 4px 3px;
+    }
+    
+    th {
+      font-size: 11px;
+    }
+    
+    .form-control-sm {
+      padding: 2px 4px;
+      font-size: 11px;
+    }
+  }
+}
+
+@media (max-width: 1200px) {
+  .quotation-table {
+    font-size: 10px;
+    
+    th, td {
+      padding: 3px 2px;
+    }
+    
+    th {
+      font-size: 10px;
+    }
+    
+    .form-control-sm {
+      padding: 2px 3px;
+      font-size: 10px;
     }
   }
 }
@@ -376,19 +439,22 @@
     padding: 16px;
   }
   
-  .header-actions {
+  .d-flex.justify-content-between {
+    flex-direction: column;
+    gap: 10px;
+    
     .btn {
       font-size: 12px;
       padding: 6px 12px;
     }
   }
   
-  .card-body {
-    padding: 16px;
+  .table-responsive {
+    font-size: 10px;
   }
   
-  .table-responsive {
-    font-size: 11px;
+  .totals-section {
+    padding: 12px;
   }
 }
 
@@ -402,6 +468,116 @@
 }
 
 :host ::ng-deep .p-dropdown,
-:host ::ng-deep .p-inputnumber .p-inputtext {
+:host ::ng-deep .p-inputnumber .p-inputtext,
+:host ::ng-deep .p-calendar .p-inputtext {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+// Currency selection styling
+.form-check {
+  display: flex;
+  align-items: center;
+}
+
+// Required field asterisk styling
+.text-danger {
+  color: $safety-orange !important;
+}
+
+// Attachment styling
+.attachment-area {
+  .upload-area {
+    border: 2px dashed $material-finish-silver;
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: rgba(26, 58, 95, 0.01);
+    
+    &:hover {
+      border-color: $blueprint-blue;
+      background-color: rgba(26, 58, 95, 0.03);
+    }
+    
+    &:active {
+      background-color: rgba(26, 58, 95, 0.05);
+    }
+    
+    i {
+      font-size: 2rem;
+      color: $blueprint-blue;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    p {
+      color: $precision-black;
+      font-weight: $font-weight-medium;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    
+    small {
+      color: $machine-gray;
+      font-size: 12px;
+    }
+  }
+  
+  .attached-files {
+    h6 {
+      color: $precision-black;
+      font-weight: $font-weight-semibold;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    
+    .file-list {
+      .file-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        background-color: rgba(26, 58, 95, 0.02);
+        border: 1px solid $material-finish-silver;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        i.pi-file {
+          color: $blueprint-blue;
+          font-size: 16px;
+        }
+        
+        .file-name {
+          flex: 1;
+          color: $precision-black;
+          font-weight: $font-weight-medium;
+          font-size: 14px;
+          margin-left: 8px;
+        }
+        
+        .file-size {
+          color: $machine-gray;
+          font-size: 12px;
+          margin-left: 8px;
+        }
+        
+        .btn-link {
+          color: $safety-orange;
+          text-decoration: none;
+          
+          &:hover {
+            color: darken($safety-orange, 10%);
+          }
+          
+          i {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
 }

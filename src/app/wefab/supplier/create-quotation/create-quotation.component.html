@@ -1,50 +1,119 @@
 <div class="quotation-container">
   <!-- Header -->
   <div class="quotation-header mb-4">
-    <div class="d-flex justify-content-between align-items-center">
-      <h2 class="text-blueprint-blue mb-0">{{ isEditMode ? 'Edit Quotation' : 'Create Quotation' }}</h2>
-    </div>
+    <h2 class="text-blueprint-blue mb-0">Quotation</h2>
   </div>
 
   <!-- Main Form -->
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <!-- Basic Information Card -->
-    <div class="card mb-4">
-      <div class="card-body">
-        <formly-form 
-          [form]="form" 
-          [fields]="fields" 
-          [model]="model" 
-          [options]="options">
-        </formly-form>
+    <!-- Basic Information -->
+    <div class="row mb-4">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Quotation Name</label>
+        <input 
+          type="text" 
+          class="form-control"
+          [(ngModel)]="model.quotationName"
+          [ngModelOptions]="{standalone: true}"
+          placeholder="Enter quotation name">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Total lead time (days) <span class="text-danger">*</span></label>
+        <input 
+          type="number" 
+          class="form-control"
+          [(ngModel)]="model.totalLeadTime"
+          [ngModelOptions]="{standalone: true}"
+          placeholder="Enter total lead time"
+          required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Payment Terms <span class="text-danger">*</span></label>
+        <p-dropdown 
+          [(ngModel)]="model.paymentTerms"
+          [options]="paymentTermsOptions"
+          [ngModelOptions]="{standalone: true}"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select payment terms"
+          styleClass="w-100">
+        </p-dropdown>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Quote Valid till <span class="text-danger">*</span></label>
+        <p-calendar 
+          [(ngModel)]="model.quoteValidTill"
+          [ngModelOptions]="{standalone: true}"
+          dateFormat="dd/mm/yy"
+          placeholder="dd/mm/yyyy"
+          styleClass="w-100">
+        </p-calendar>
+      </div>
+    </div>
+
+    <!-- Currency Selection -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <label class="form-label me-3">Currency:</label>
+        <div class="d-flex gap-4">
+          <div class="form-check">
+            <p-radioButton 
+              inputId="inr" 
+              name="currency" 
+              value="INR"
+              [(ngModel)]="model.currency"
+              [ngModelOptions]="{standalone: true}">
+            </p-radioButton>
+            <label for="inr" class="form-check-label ms-2">INR</label>
+          </div>
+          <div class="form-check">
+            <p-radioButton 
+              inputId="usd" 
+              name="currency" 
+              value="USD"
+              [(ngModel)]="model.currency"
+              [ngModelOptions]="{standalone: true}">
+            </p-radioButton>
+            <label for="usd" class="form-check-label ms-2">USD</label>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Table Actions -->
-    <div class="d-flex justify-content-end mb-3 table-actions">
-      <button 
-        type="button" 
-        class="btn btn-outline-secondary me-2"
-        (click)="resetTable()">
-        <i class="pi pi-refresh me-1"></i>
-        Reset Table
-      </button>
-      <button 
-        type="button" 
-        class="btn btn-outline-success me-2"
-        (click)="importCSV()"
-        title="Import quotation items from CSV file. Expected format: S.No, Expense Head, Section Head, Item Number, Drawing Ref, Description, Unit, Quantity, Rate, Total Amount, Comment By Swiss Electric Solutions AG, Notes By Alshaya Group">
-        <i class="pi pi-upload me-1"></i>
-        Import CSV
-      </button>
-      <button 
-        type="button" 
-        class="btn btn-outline-primary"
-        (click)="exportCSV()"
-        title="Export current quotation items to CSV file">
-        <i class="pi pi-arrow-up me-1"></i>
-        Export CSV
-      </button>
+    <div class="d-flex justify-content-between mb-3">
+      <div>
+        <button 
+          type="button" 
+          class="btn btn-outline-success me-2"
+          (click)="addNewRow()">
+          <i class="pi pi-plus me-1"></i>
+          Add Item
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-secondary me-2"
+          (click)="resetTable()">
+          <i class="pi pi-refresh me-1"></i>
+          Reset
+        </button>
+      </div>
+      <div>
+        <button 
+          type="button" 
+          class="btn btn-outline-success me-2"
+          (click)="importCSV()">
+          <i class="pi pi-upload me-1"></i>
+          From CSV
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-primary"
+          (click)="exportCSV()">
+          <i class="pi pi-download me-1"></i>
+          Export CSV
+        </button>
+      </div>
     </div>
 
     <!-- Hidden file input for CSV import -->
@@ -55,218 +124,379 @@
       style="display: none;" 
       (change)="onFileSelected($event)">
 
-    <!-- Quotation Items Table Card -->
-    <div class="card mb-4">
-      <div class="card-header bg-light">
-        <h5 class="mb-0 text-blueprint-blue">Quotation Items</h5>
-      </div>
-      <div class="card-body p-0">
-        <!-- Table Header -->
-        <div class="table-responsive">
-          <table class="table table-bordered mb-0 quotation-table">
-            <thead class="table-light">
-              <tr>
-                <th class="text-center" style="width: 40px;">S.No</th>
-                <th style="width: 150px;">Expense Head</th>
-                <th style="width: 150px;">Section Head</th>
-                <th style="width: 100px;">Item Number</th>
-                <th style="width: 100px;">Drawing Ref</th>
-                <th style="width: 200px;">Description</th>
-                <th style="width: 100px;">Unit</th>
-                <th style="width: 100px;">Quantity</th>
-                <th style="width: 100px;">Rate <span class="text-danger">*</span></th>
-                <th style="width: 120px;">Total Amount</th>
-                <th style="width: 200px;">Comment By Swiss Electric Solutions AG</th>
-                <th style="width: 200px;">Notes By Alshaya Group</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of model.quotationItems; let i = index" class="quotation-row">
-                <td class="text-center align-middle">{{ i + 1 }}</td>
-                
-                <!-- Expense Head -->
-                <td>
-                  <input 
-                    type="text" 
-                    class="form-control bg-light" 
-                    [value]="item.expenseHead"
-                    readonly>
-                </td>
-                
-                <!-- Section Head -->
-                <td>
-                  <input 
-                    type="text" 
-                    class="form-control bg-light" 
-                    [value]="item.sectionHead"
-                    readonly>
-                </td>
-                
-                <!-- Item Number -->
-                <td>
-                  <input 
-                    type="text" 
-                    class="form-control bg-light" 
-                    [value]="item.itemNumber"
-                    readonly>
-                </td>
-                
-                <!-- Drawing Ref -->
-                <td>
-                  <input 
-                    type="text" 
-                    class="form-control bg-light" 
-                    [value]="item.drawingRef"
-                    readonly>
-                </td>
-                
-                <!-- Description -->
-                <td>
-                  <input 
-                    type="text" 
-                    class="form-control bg-light" 
-                    [value]="item.description"
-                    readonly>
-                </td>
-                
-                <!-- Unit -->
-                <td>
-                  <input 
-                    type="text" 
-                    class="form-control bg-light" 
-                    [value]="item.unit"
-                    readonly>
-                </td>
-                
-                <!-- Quantity -->
-                <td>
-                  <input 
-                    type="number" 
-                    class="form-control bg-light" 
-                    [value]="item.quantity"
-                    readonly>
-                </td>
-                
-                <!-- Rate -->
-                <td>
-                  <p-inputNumber
-                    [(ngModel)]="item.rate"
-                    [min]="0"
-                    [style]="{ width: '100%' }"
-                    styleClass="w-100"
-                    (onInput)="onQuantityOrRateChange(item)"
-                    [ngModelOptions]="{standalone: true}">
-                  </p-inputNumber>
-                </td>
-                
-                <!-- Total Amount (Calculated) -->
-                <td>
-                  <input 
-                    type="number" 
-                    class="form-control bg-light" 
-                    [value]="getRowTotal(item)"
-                    readonly>
-                </td>
-                
-                <!-- Comment By Swiss Electric -->
-                <td>
-                  <input 
-                    type="text" 
-                    class="form-control bg-light" 
-                    [value]="item.commentBySwissElectric"
-                    readonly>
-                </td>
-                
-                <!-- Notes By Alshaya Group -->
-                <td>
-                  <input 
-                    type="text" 
-                    class="form-control bg-light" 
-                    [value]="item.notesByAlshayaGroup"
-                    readonly>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <!-- Quotation Items Table -->
+    <div class="table-responsive mb-4">
+      <table class="table table-bordered quotation-table">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 40px;">S.No</th>
+            <th style="width: 150px;">Item Name <span class="text-danger">*</span></th>
+            <th style="width: 200px;">Description</th>
+            <th style="width: 120px;">Material</th>
+            <th style="width: 80px;">Qty <span class="text-danger">*</span></th>
+            <th style="width: 100px;">Unit <span class="text-danger">*</span></th>
+            <th style="width: 120px;">Item Price <span class="text-danger">*</span></th>
+            <th style="width: 120px;">Miscellaneous</th>
+            <th style="width: 100px;">Tooling <span class="text-danger">*</span></th>
+            <th style="width: 60px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of model.quotationItems; let i = index" class="quotation-row">
+            <td class="text-center align-middle">{{ i + 1 }}</td>
+            
+            <!-- Item Name -->
+            <td>
+              <input 
+                type="text" 
+                class="form-control form-control-sm" 
+                [(ngModel)]="item.actionItemName"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Enter item name">
+            </td>
+            
+            <!-- Description -->
+            <td>
+              <input 
+                type="text" 
+                class="form-control form-control-sm" 
+                [(ngModel)]="item.description"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Enter description">
+            </td>
+            
+            <!-- Material -->
+            <td>
+              <input 
+                type="text" 
+                class="form-control form-control-sm" 
+                [(ngModel)]="item.material"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Enter material">
+            </td>
+            
+            <!-- Quantity -->
+            <td>
+              <p-inputNumber
+                [(ngModel)]="item.qty"
+                [min]="0"
+                [style]="{ width: '100%' }"
+                styleClass="w-100"
+                size="small"
+                (onInput)="onQuantityOrPriceChange(item)"
+                [ngModelOptions]="{standalone: true}">
+              </p-inputNumber>
+            </td>
+            
+            <!-- Unit -->
+            <td>
+              <p-dropdown 
+                [(ngModel)]="item.unit"
+                [options]="unitOptions"
+                [ngModelOptions]="{standalone: true}"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Unit"
+                styleClass="w-100 p-inputtext-sm">
+              </p-dropdown>
+            </td>
+            
+            <!-- Item Price -->
+            <td>
+              <p-inputNumber
+                [(ngModel)]="item.itemPrice"
+                [min]="0"
+                mode="decimal"
+                [minFractionDigits]="2"
+                [style]="{ width: '100%' }"
+                styleClass="w-100"
+                size="small"
+                (onInput)="onQuantityOrPriceChange(item)"
+                [ngModelOptions]="{standalone: true}">
+              </p-inputNumber>
+            </td>
+            
+            <!-- Miscellaneous -->
+            <td>
+              <input 
+                type="text" 
+                class="form-control form-control-sm" 
+                [(ngModel)]="item.miscellaneous"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Misc">
+            </td>
+            
+            <!-- Tooling -->
+            <td>
+              <input 
+                type="text" 
+                class="form-control form-control-sm" 
+                [(ngModel)]="item.tooling"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Tooling">
+            </td>
+            
+            <!-- Action -->
+            <td class="text-center">
+              <button 
+                type="button" 
+                class="btn btn-outline-danger btn-sm"
+                (click)="removeRow(i)"
+                [disabled]="model.quotationItems.length === 1"
+                title="Remove row">
+                <i class="pi pi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Totals Card -->
-    <div class="card mb-4">
-      <div class="card-body">
-        <div class="row justify-content-end">
-          <div class="col-md-4">
-            <div class="totals-section">
-              <div class="d-flex justify-content-between mb-2">
-                <span class="fw-medium">Sub Total:</span>
-                <span class="fw-bold">{{ calculatedSubTotal | number:'1.2-2' }} USD</span>
-              </div>
-              <div class="d-flex justify-content-between mb-2">
-                <span class="fw-medium">Discount (%):</span>
-                <div class="d-flex align-items-center">
-                  <input 
-                    type="number" 
-                    class="form-control form-control-sm me-2" 
-                    style="width: 80px;"
-                    [(ngModel)]="discountPercentage"
-                    (ngModelChange)="calculateTotals()"
-                    [ngModelOptions]="{standalone: true}"
-                    min="0" 
-                    max="100">
-                  <span>%</span>
+    <!-- Bottom Section -->
+    <div class="row">
+      <!-- Left Side - Contact and Details -->
+      <div class="col-md-12">
+        <div class="row mb-3">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Email <span class="text-danger">*</span></label>
+            <input 
+              type="email" 
+              class="form-control"
+              [(ngModel)]="model.email"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="email@example.com"
+              required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Reference <span class="text-danger">*</span></label>
+            <input 
+              type="text" 
+              class="form-control"
+              [(ngModel)]="model.reference"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Enter text"
+              required>
+          </div>
+        </div>
+
+        <!-- Terms & Conditions -->
+        <div class="mb-3">
+          <label class="form-label">Terms & Conditions <span class="text-danger">*</span></label>
+          <textarea 
+            class="form-control" 
+            rows="4"
+            [(ngModel)]="model.termsAndConditions"
+            [ngModelOptions]="{standalone: true}"
+            placeholder="Terms & Conditions"
+            required>
+          </textarea>
+        </div>
+
+        <!-- Attachments Section -->
+        <div class="mb-3">
+          <label class="form-label">Attachments</label>
+          <div class="attachment-area">
+            <input 
+              #attachmentFileInput 
+              type="file" 
+              multiple
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xlsx,.xls"
+              style="display: none;" 
+              (change)="onAttachmentSelected($event)">
+            
+            <div class="upload-area" (click)="selectAttachments()" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+              <i class="pi pi-cloud-upload"></i>
+              <p class="mb-0">Click to upload or drag and drop files here</p>
+              <small class="text-muted">Supports PDF, DOC, DOCX, JPG, PNG, TXT, XLSX files</small>
+            </div>
+            
+            <!-- Display attached files -->
+            <div *ngIf="attachedFiles.length > 0" class="attached-files mt-3">
+              <h6>Attached Files:</h6>
+              <div class="file-list">
+                <div *ngFor="let file of attachedFiles; let i = index" class="file-item">
+                  <i class="pi pi-file me-2"></i>
+                  <span class="file-name">{{ file.name }}</span>
+                  <span class="file-size text-muted">({{ formatFileSize(file.size) }})</span>
+                  <button 
+                    type="button" 
+                    class="btn btn-link btn-sm text-danger ms-2 p-0"
+                    (click)="removeAttachment(i)"
+                    title="Remove file">
+                    <i class="pi pi-times"></i>
+                  </button>
                 </div>
               </div>
-              <hr>
-              <div class="d-flex justify-content-between">
-                <span class="fw-bold text-blueprint-blue">Total Amount:</span>
-                <span class="fw-bold text-blueprint-blue fs-5">
-                  {{ calculatedTotalAmount | number:'1.2-2' }} USD
-                </span>
-              </div>
-              <small class="text-muted d-block mt-2">* Note: All the prices are exclusive of taxes</small>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Confirmation Checkboxes -->
-    <div class="card mb-4">
-      <div class="card-body">
-        <div class="form-check mb-3">
-          <input 
-            class="form-check-input" 
-            type="checkbox" 
-            id="siteVisitConfirm"
-            [(ngModel)]="model.siteVisitConfirmed"
-            [ngModelOptions]="{standalone: true}">
-          <label class="form-check-label" for="siteVisitConfirm">
-            Kindly confirm that a site visit has been conducted as part of the tender submission exercise and all necessary considerations are incorporated as part of the priced tender.
-          </label>
-        </div>
-        <div class="form-check">
-          <input 
-            class="form-check-input" 
-            type="checkbox" 
-            id="complianceConfirm"
-            [(ngModel)]="model.complianceConfirmed"
-            [ngModelOptions]="{standalone: true}">
-          <label class="form-check-label" for="complianceConfirm">
-            Kindly confirm that the priced tender submitted is in compliance of the tender documents and site visit, other than the points indicated as deviation which will be discussed prior to sign off.
-          </label>
+    <!-- Totals Section -->
+    <div class="row mb-4">
+      <div class="col-md-6 offset-md-6">
+        <div class="totals-section">
+          <!-- Tax Options -->
+          <div class="row mb-3">
+            <div class="col-12">
+              <div class="tax-options">
+                <div class="row">
+                  <div class="col-6">
+                    <div class="form-check">
+                      <input 
+                        class="form-check-input" 
+                        type="checkbox" 
+                        id="cgstSgst"
+                        [(ngModel)]="model.cgstSgst"
+                        [ngModelOptions]="{standalone: true}"
+                        (change)="onTaxTypeChange('cgstSgst')">
+                      <label class="form-check-label" for="cgstSgst">
+                        CGST & SGST
+                      </label>
+                    </div>
+                    <div *ngIf="model.cgstSgst" class="tax-inputs mt-2">
+                      <div class="row">
+                        <div class="col-6">
+                          <label class="form-label-sm">CGST %</label>
+                          <input 
+                            type="number" 
+                            class="form-control form-control-sm"
+                            [(ngModel)]="cgstPercentage"
+                            [ngModelOptions]="{standalone: true}"
+                            (ngModelChange)="calculateTotals()"
+                            min="0" 
+                            max="50"
+                            placeholder="9">
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label-sm">SGST %</label>
+                          <input 
+                            type="number" 
+                            class="form-control form-control-sm"
+                            [(ngModel)]="sgstPercentage"
+                            [ngModelOptions]="{standalone: true}"
+                            (ngModelChange)="calculateTotals()"
+                            min="0" 
+                            max="50"
+                            placeholder="9">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-check">
+                      <input 
+                        class="form-check-input" 
+                        type="checkbox" 
+                        id="igst"
+                        [(ngModel)]="model.igst"
+                        [ngModelOptions]="{standalone: true}"
+                        (change)="onTaxTypeChange('igst')">
+                      <label class="form-check-label" for="igst">
+                        IGST
+                      </label>
+                    </div>
+                    <div *ngIf="model.igst" class="tax-inputs mt-2">
+                      <label class="form-label-sm">IGST %</label>
+                      <input 
+                        type="number" 
+                        class="form-control form-control-sm"
+                        [(ngModel)]="igstPercentage"
+                        [ngModelOptions]="{standalone: true}"
+                        (ngModelChange)="calculateTotals()"
+                        min="0" 
+                        max="50"
+                        placeholder="18">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub Total -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="total-label">Sub Total:</span>
+            <span class="total-value">{{ calculatedSubTotal | number:'1.2-2' }} {{ model.currency }}</span>
+          </div>
+          
+          <!-- Discount -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="total-label">Discount:</span>
+            <div class="d-flex align-items-center">
+              <input 
+                type="number" 
+                class="form-control total-input me-2" 
+                [(ngModel)]="discountPercentage"
+                (ngModelChange)="calculateTotals()"
+                [ngModelOptions]="{standalone: true}"
+                min="0" 
+                max="100"
+                placeholder="0">
+              <span class="total-unit">%</span>
+            </div>
+          </div>
+          
+          <!-- Shipping Charges -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="total-label">Shipping Charges:</span>
+            <div class="d-flex align-items-center">
+              <input 
+                type="number" 
+                class="form-control total-input me-2"
+                [(ngModel)]="shippingCharges"
+                (ngModelChange)="calculateTotals()"
+                [ngModelOptions]="{standalone: true}"
+                min="0"
+                placeholder="0">
+              <span class="total-unit">{{ model.currency }}</span>
+            </div>
+          </div>
+          
+          <!-- Tax Details -->
+          <div *ngIf="model.cgstSgst && (cgstPercentage > 0 || sgstPercentage > 0)" class="mb-3">
+            <div *ngIf="cgstPercentage > 0" class="d-flex justify-content-between align-items-center mb-2">
+              <span class="total-label">CGST ({{ cgstPercentage }}%):</span>
+              <span class="total-value">{{ calculatedCGST | number:'1.2-2' }} {{ model.currency }}</span>
+            </div>
+            <div *ngIf="sgstPercentage > 0" class="d-flex justify-content-between align-items-center mb-2">
+              <span class="total-label">SGST ({{ sgstPercentage }}%):</span>
+              <span class="total-value">{{ calculatedSGST | number:'1.2-2' }} {{ model.currency }}</span>
+            </div>
+          </div>
+          
+          <div *ngIf="model.igst && igstPercentage > 0" class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="total-label">IGST ({{ igstPercentage }}%):</span>
+              <span class="total-value">{{ calculatedIGST | number:'1.2-2' }} {{ model.currency }}</span>
+            </div>
+          </div>
+          
+          <!-- Total Amount -->
+          <div class="d-flex justify-content-between align-items-center total-amount-row">
+            <span class="total-amount-label">Total Amount:</span>
+            <span class="total-amount-value">{{ calculatedTotalAmount | number:'1.2-2' }} {{ model.currency }}</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Submit Button -->
-    <div class="text-end">
+    <!-- Submit Buttons -->
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary px-4"
+        (click)="cancel()">
+        Cancel
+      </button>
       <button 
         type="submit" 
-        class="btn btn-primary btn-lg px-5"
-        [disabled]="!model.siteVisitConfirmed || !model.complianceConfirmed">
-        <i class="pi pi-check me-2"></i>
-        {{ isEditMode ? 'Update Quotation' : 'Submit Quotation' }}
+        class="btn btn-primary px-4"
+        (click)="onSubmit()"
+        [disabled]="!model.termsAndConditions || !model.email || !model.reference || !model.totalLeadTime">
+        <i class="pi pi-send me-2"></i>
+        Send
       </button>
     </div>
   </form>

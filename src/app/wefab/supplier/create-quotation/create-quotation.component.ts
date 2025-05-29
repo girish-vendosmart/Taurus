@@ -13,6 +13,9 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { DropdownModule } from 'primeng/dropdown';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
+import { CalendarModule } from 'primeng/calendar';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { CheckboxModule } from 'primeng/checkbox';
 import { MessageService } from 'primeng/api';
 
 // Custom Formly components
@@ -34,6 +37,9 @@ import { FormlyFieldDropdownComponent } from '../../../dropdown-type.component';
     DropdownModule,
     TableModule,
     ToastModule,
+    CalendarModule,
+    RadioButtonModule,
+    CheckboxModule,
     FormlyFieldDropdownComponent
   ],
   providers: [MessageService],
@@ -46,116 +52,32 @@ export class CreateQuotationComponent implements OnInit {
   quotationId: string = '';
   
   model: any = {
-    rfqId: '',
-    projectDuration: 120,
+    quotationName: '',
+    totalLeadTime: '',
+    paymentTerms: 'Net 10',
+    quoteValidTill: null,
+    currency: 'USD',
+    email: 'email@example.com',
+    reference: '',
+    termsAndConditions: '',
+    cgstSgst: false,
+    igst: false,
     quotationItems: [
       {
-        expenseHead: 'Professional Costs',
-        sectionHead: 'Power Distribution Setup',
-        itemNumber: '7.1.2',
-        drawingRef: '-',
-        description: 'Description',
-        unit: 'Pieces',
-        quantity: 200,
-        rate: 0,
-        totalAmount: 200000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'Preliminiries',
-        sectionHead: 'others',
-        itemNumber: '3.2.4',
-        drawingRef: '-',
-        description: 'Description',
-        unit: 'Pieces',
-        quantity: 56,
-        rate: 0,
-        totalAmount: 560000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'Contingency',
-        sectionHead: 'Risk & Contingency Planning',
-        itemNumber: '8.2.1',
-        drawingRef: '-',
-        description: 'Description',
-        unit: 'Sqm',
-        quantity: 20,
-        rate: 0,
-        totalAmount: 400000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'Preliminiries',
-        sectionHead: 'Other',
-        itemNumber: '3.2.3',
-        drawingRef: '-',
-        description: 'Description',
-        unit: 'Sqm',
-        quantity: 9,
-        rate: 0,
-        totalAmount: 180000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'Fire Services',
-        sectionHead: 'Fire maintaince',
-        itemNumber: '5.2.2',
-        drawingRef: '-',
-        description: 'Desc',
-        unit: 'Pieces',
-        quantity: 56,
-        rate: 0,
-        totalAmount: 1120000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'Preliminiries',
-        sectionHead: 'Others',
-        itemNumber: '3.2.6',
-        drawingRef: '-',
-        description: 'Descrip',
-        unit: 'Pieces',
-        quantity: 20,
-        rate: 0,
-        totalAmount: 60000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'HVAC',
-        sectionHead: 'Water Supply & Drainage',
-        itemNumber: '9.2.1',
-        drawingRef: '-',
-        description: 'Desc',
-        unit: 'Sqm',
-        quantity: 12,
-        rate: 0,
-        totalAmount: 24000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'IT Equipment',
-        sectionHead: 'Temporary Site Services',
-        itemNumber: '6.2.1',
-        drawingRef: '-',
-        description: 'Desc',
-        unit: 'Pieces',
-        quantity: 2,
-        rate: 0,
-        totalAmount: 40000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
+        actionItemName: '',
+        description: '',
+        material: '',
+        qty: 0,
+        unit: '',
+        itemPrice: 0,
+        miscellaneous: '',
+        tooling: ''
       }
     ],
-    siteVisitConfirmed: false,
-    complianceConfirmed: false
+    subTotal: 0,
+    discount: 0,
+    shippingCharges: 0,
+    totalAmount: 0
   };
   options: FormlyFormOptions = {};
   fields: FormlyFieldConfig[] = [];
@@ -163,27 +85,30 @@ export class CreateQuotationComponent implements OnInit {
   // Calculation properties
   subTotal: number = 0;
   discountPercentage: number = 0;
+  shippingCharges: number = 0;
   totalAmount: number = 0;
 
+  // Tax calculation properties
+  cgstPercentage: number = 9;
+  sgstPercentage: number = 9;
+  igstPercentage: number = 18;
+
+  // Attachment properties
+  attachedFiles: File[] = [];
+
   // Dropdown options
-  expenseHeadOptions = [
-    { label: 'Professional Costs', value: 'Professional Costs' },
-    { label: 'Preliminiries', value: 'Preliminiries' },
-    { label: 'Contingency', value: 'Contingency' },
-    { label: 'Fire Services', value: 'Fire Services' },
-    { label: 'HVAC', value: 'HVAC' },
-    { label: 'IT Equipment', value: 'IT Equipment' }
+  paymentTermsOptions = [
+    { label: 'Net 10', value: 'Net 10' },
+    { label: 'Net 15', value: 'Net 15' },
+    { label: 'Net 30', value: 'Net 30' },
+    { label: 'Net 45', value: 'Net 45' },
+    { label: 'Net 60', value: 'Net 60' },
+    { label: 'Due on receipt', value: 'Due on receipt' }
   ];
 
-  sectionHeadOptions = [
-    { label: 'Power Distribution Setup', value: 'Power Distribution Setup' },
-    { label: 'others', value: 'others' },
-    { label: 'Risk & Contingency Planning', value: 'Risk & Contingency Planning' },
-    { label: 'Other', value: 'Other' },
-    { label: 'Fire maintaince', value: 'Fire maintaince' },
-    { label: 'Others', value: 'Others' },
-    { label: 'Water Supply & Drainage', value: 'Water Supply & Drainage' },
-    { label: 'Temporary Site Services', value: 'Temporary Site Services' }
+  currencyOptions = [
+    { label: 'INR', value: 'INR' },
+    { label: 'USD', value: 'USD' }
   ];
 
   unitOptions = [
@@ -191,10 +116,13 @@ export class CreateQuotationComponent implements OnInit {
     { label: 'Sqm', value: 'Sqm' },
     { label: 'Meters', value: 'Meters' },
     { label: 'Hours', value: 'Hours' },
-    { label: 'Days', value: 'Days' }
+    { label: 'Days', value: 'Days' },
+    { label: 'Kg', value: 'Kg' },
+    { label: 'Liters', value: 'Liters' }
   ];
 
   @ViewChild('csvFileInput', { static: false }) csvFileInput!: ElementRef;
+  @ViewChild('attachmentFileInput', { static: false }) attachmentFileInput!: ElementRef;
 
   constructor(private messageService: MessageService, private router: Router, private route: ActivatedRoute) {}
 
@@ -210,15 +138,6 @@ export class CreateQuotationComponent implements OnInit {
         this.quotationId = params['quotationId'];
         console.log('Edit mode activated for quotation:', this.quotationId);
         this.loadQuotationForEdit(this.quotationId);
-      } else if (params['rfqId']) {
-        // Create mode with RFQ ID
-        this.model.rfqId = params['rfqId'];
-        console.log('RFQ ID received from query params:', params['rfqId']);
-        
-        // Update the form with the new RFQ ID
-        this.form.patchValue({
-          rfqId: params['rfqId']
-        });
       }
     });
   }
@@ -230,22 +149,49 @@ export class CreateQuotationComponent implements OnInit {
         fieldGroup: [
           {
             className: 'col-md-6',
-            key: 'rfqId',
+            key: 'quotationName',
             type: 'input',
             templateOptions: {
-              label: 'RFQ ID',
-              placeholder: 'RFQ ID will be populated from the selected RFQ',
-              readonly: true
+              label: 'Quotation Name',
+              placeholder: 'Enter quotation name',
+              required: false
             }
           },
           {
             className: 'col-md-6',
-            key: 'projectDuration',
+            key: 'totalLeadTime',
             type: 'input',
             templateOptions: {
-              label: 'Project Duration (in days)',
+              label: 'Total lead time (days)',
               type: 'number',
-              placeholder: '120',
+              placeholder: 'Enter total lead time',
+              required: true
+            }
+          }
+        ]
+      },
+      {
+        fieldGroupClassName: 'row mb-4',
+        fieldGroup: [
+          {
+            className: 'col-md-6',
+            key: 'paymentTerms',
+            type: 'dropdown',
+            templateOptions: {
+              label: 'Payment Terms',
+              placeholder: 'Select payment terms',
+              required: true,
+              options: this.paymentTermsOptions
+            }
+          },
+          {
+            className: 'col-md-6',
+            key: 'quoteValidTill',
+            type: 'input',
+            templateOptions: {
+              label: 'Quote Valid till',
+              type: 'date',
+              placeholder: 'dd/mm/yyyy',
               required: true
             }
           }
@@ -256,39 +202,117 @@ export class CreateQuotationComponent implements OnInit {
 
   calculateTotals() {
     this.subTotal = this.model.quotationItems?.reduce((sum: number, item: any) => {
-      const itemTotal = (item.quantity || 0) * (item.rate || 0);
-      item.totalAmount = itemTotal;
+      const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
       return sum + itemTotal;
     }, 0) || 0;
     
-    this.totalAmount = this.subTotal - (this.subTotal * this.discountPercentage / 100);
+    const discountAmount = this.subTotal * this.discountPercentage / 100;
+    const subtotalAfterDiscount = this.subTotal - discountAmount;
+    
+    // Calculate taxes
+    let totalTax = 0;
+    if (this.model.cgstSgst) {
+      totalTax += (subtotalAfterDiscount * this.cgstPercentage / 100);
+      totalTax += (subtotalAfterDiscount * this.sgstPercentage / 100);
+    }
+    if (this.model.igst) {
+      totalTax += (subtotalAfterDiscount * this.igstPercentage / 100);
+    }
+    
+    this.totalAmount = subtotalAfterDiscount + totalTax + this.shippingCharges;
+    
+    // Update model
+    this.model.subTotal = this.subTotal;
+    this.model.discount = this.discountPercentage;
+    this.model.shippingCharges = this.shippingCharges;
+    this.model.totalAmount = this.totalAmount;
   }
 
   // Add getter methods for template calculations
   get calculatedSubTotal(): number {
     return this.model.quotationItems?.reduce((sum: number, item: any) => {
-      return sum + ((item.quantity || 0) * (item.rate || 0));
+      return sum + ((item.qty || 0) * (item.itemPrice || 0));
     }, 0) || 0;
   }
 
   get calculatedTotalAmount(): number {
     const subTotal = this.calculatedSubTotal;
-    return subTotal - (subTotal * this.discountPercentage / 100);
+    const discountAmount = subTotal * this.discountPercentage / 100;
+    const subtotalAfterDiscount = subTotal - discountAmount;
+    
+    let totalTax = 0;
+    if (this.model.cgstSgst) {
+      totalTax += (subtotalAfterDiscount * this.cgstPercentage / 100);
+      totalTax += (subtotalAfterDiscount * this.sgstPercentage / 100);
+    }
+    if (this.model.igst) {
+      totalTax += (subtotalAfterDiscount * this.igstPercentage / 100);
+    }
+    
+    return subtotalAfterDiscount + totalTax + this.shippingCharges;
+  }
+
+  get calculatedCGST(): number {
+    const subTotal = this.calculatedSubTotal;
+    const discountAmount = subTotal * this.discountPercentage / 100;
+    const subtotalAfterDiscount = subTotal - discountAmount;
+    return this.model.cgstSgst ? (subtotalAfterDiscount * this.cgstPercentage / 100) : 0;
+  }
+
+  get calculatedSGST(): number {
+    const subTotal = this.calculatedSubTotal;
+    const discountAmount = subTotal * this.discountPercentage / 100;
+    const subtotalAfterDiscount = subTotal - discountAmount;
+    return this.model.cgstSgst ? (subtotalAfterDiscount * this.sgstPercentage / 100) : 0;
+  }
+
+  get calculatedIGST(): number {
+    const subTotal = this.calculatedSubTotal;
+    const discountAmount = subTotal * this.discountPercentage / 100;
+    const subtotalAfterDiscount = subTotal - discountAmount;
+    return this.model.igst ? (subtotalAfterDiscount * this.igstPercentage / 100) : 0;
   }
 
   // Method to calculate individual row total
   getRowTotal(item: any): number {
-    return (item.quantity || 0) * (item.rate || 0);
+    return (item.qty || 0) * (item.itemPrice || 0);
   }
 
-  onQuantityOrRateChange(item: any) {
-    // Only rate can be changed now, quantity is frozen
-    item.totalAmount = (item.quantity || 0) * (item.rate || 0);
+  onQuantityOrPriceChange(item: any) {
     this.calculateTotals();
   }
 
+  onTaxTypeChange(taxType: string) {
+    if (taxType === 'cgstSgst' && this.model.cgstSgst) {
+      this.model.igst = false;
+    } else if (taxType === 'igst' && this.model.igst) {
+      this.model.cgstSgst = false;
+    }
+    this.calculateTotals();
+  }
+
+  addNewRow() {
+    this.model.quotationItems.push({
+      actionItemName: '',
+      description: '',
+      material: '',
+      qty: 0,
+      unit: '',
+      itemPrice: 0,
+      miscellaneous: '',
+      tooling: ''
+    });
+  }
+
+  removeRow(index: number) {
+    if (this.model.quotationItems.length > 1) {
+      this.model.quotationItems.splice(index, 1);
+      this.calculateTotals();
+    }
+  }
+
   onSubmit() {
-    if (this.form.valid && this.model.siteVisitConfirmed && this.model.complianceConfirmed && this.model.rfqId) {
+    if (this.form.valid && this.model.termsAndConditions) {
       if (this.isEditMode) {
         // Update existing quotation
         this.messageService.add({
@@ -309,7 +333,7 @@ export class CreateQuotationComponent implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
-          detail: 'Quotation saved successfully!'
+          detail: 'Quotation sent successfully!'
         });
         console.log('New Quotation Data:', this.model);
         
@@ -319,10 +343,7 @@ export class CreateQuotationComponent implements OnInit {
         }, 1500);
       }
     } else {
-      let errorMessage = 'Please fill all required fields and confirm the checkboxes';
-      if (!this.model.rfqId) {
-        errorMessage = 'RFQ ID is required. Please navigate from an RFQ to create a quotation.';
-      }
+      let errorMessage = 'Please fill all required fields';
       
       this.messageService.add({
         severity: 'error',
@@ -336,34 +357,28 @@ export class CreateQuotationComponent implements OnInit {
     // Create CSV content for quotation items only
     const headers = [
       'S.No',
-      'Expense Head',
-      'Section Head', 
-      'Item Number',
-      'Drawing Ref',
+      'ActionItem Name',
       'Description',
+      'Material',
+      'Qty',
       'Unit',
-      'Quantity',
-      'Rate',
-      'Total Amount',
-      'Comment By Swiss Electric Solutions AG',
-      'Notes By Alshaya Group'
+      'Item Price',
+      'Miscellaneous',
+      'Tooling'
     ];
 
     const csvContent = [
       headers.join(','),
       ...this.model.quotationItems.map((item: any, index: number) => [
         index + 1,
-        `"${item.expenseHead || ''}"`,
-        `"${item.sectionHead || ''}"`,
-        `"${item.itemNumber || ''}"`,
-        `"${item.drawingRef || ''}"`,
+        `"${item.actionItemName || ''}"`,
         `"${item.description || ''}"`,
+        `"${item.material || ''}"`,
+        item.qty || 0,
         `"${item.unit || ''}"`,
-        item.quantity || 0,
-        item.rate || 0,
-        this.getRowTotal(item),
-        `"${item.commentBySwissElectric || ''}"`,
-        `"${item.notesByAlshayaGroup || ''}"`
+        item.itemPrice || 0,
+        `"${item.miscellaneous || ''}"`,
+        `"${item.tooling || ''}"`
       ].join(','))
     ].join('\n');
 
@@ -434,19 +449,16 @@ export class CreateQuotationComponent implements OnInit {
         // Parse CSV line (handling quoted values)
         const values = this.parseCSVLine(line);
         
-        if (values.length >= 12) {
+        if (values.length >= 8) {
           const item = {
-            expenseHead: values[1] || '',
-            sectionHead: values[2] || '',
-            itemNumber: values[3] || '',
-            drawingRef: values[4] || '',
-            description: values[5] || '',
-            unit: values[6] || '',
-            quantity: parseFloat(values[7]) || 0,
-            rate: parseFloat(values[8]) || 0,
-            totalAmount: parseFloat(values[9]) || 0,
-            commentBySwissElectric: values[10] || '',
-            notesByAlshayaGroup: values[11] || ''
+            actionItemName: values[1] || '',
+            description: values[2] || '',
+            material: values[3] || '',
+            qty: parseFloat(values[4]) || 0,
+            unit: values[5] || '',
+            itemPrice: parseFloat(values[6]) || 0,
+            miscellaneous: values[7] || '',
+            tooling: values[8] || ''
           };
           importedItems.push(item);
         }
@@ -495,245 +507,158 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   resetTable() {
-    // Reset to original sample data
+    // Reset to single empty row
     this.model.quotationItems = [
       {
-        expenseHead: 'Professional Costs',
-        sectionHead: 'Power Distribution Setup',
-        itemNumber: '7.1.2',
-        drawingRef: '-',
-        description: 'Description',
-        unit: 'Pieces',
-        quantity: 200,
-        rate: 1000,
-        totalAmount: 200000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'Preliminiries',
-        sectionHead: 'others',
-        itemNumber: '3.2.4',
-        drawingRef: '-',
-        description: 'Description',
-        unit: 'Pieces',
-        quantity: 56,
-        rate: 10000,
-        totalAmount: 560000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'Contingency',
-        sectionHead: 'Risk & Contingency Planning',
-        itemNumber: '8.2.1',
-        drawingRef: '-',
-        description: 'Description',
-        unit: 'Sqm',
-        quantity: 20,
-        rate: 20000,
-        totalAmount: 400000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'Preliminiries',
-        sectionHead: 'Other',
-        itemNumber: '3.2.3',
-        drawingRef: '-',
-        description: 'Description',
-        unit: 'Sqm',
-        quantity: 9,
-        rate: 20000,
-        totalAmount: 180000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'Fire Services',
-        sectionHead: 'Fire maintaince',
-        itemNumber: '5.2.2',
-        drawingRef: '-',
-        description: 'Desc',
-        unit: 'Pieces',
-        quantity: 56,
-        rate: 20000,
-        totalAmount: 1120000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'Preliminiries',
-        sectionHead: 'Others',
-        itemNumber: '3.2.6',
-        drawingRef: '-',
-        description: 'Descrip',
-        unit: 'Pieces',
-        quantity: 20,
-        rate: 3000,
-        totalAmount: 60000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'HVAC',
-        sectionHead: 'Water Supply & Drainage',
-        itemNumber: '9.2.1',
-        drawingRef: '-',
-        description: 'Desc',
-        unit: 'Sqm',
-        quantity: 12,
-        rate: 2000,
-        totalAmount: 24000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
-      },
-      {
-        expenseHead: 'IT Equipment',
-        sectionHead: 'Temporary Site Services',
-        itemNumber: '6.2.1',
-        drawingRef: '-',
-        description: 'Desc',
-        unit: 'Pieces',
-        quantity: 2,
-        rate: 20000,
-        totalAmount: 40000,
-        commentBySwissElectric: '-',
-        notesByAlshayaGroup: '-'
+        actionItemName: '',
+        description: '',
+        material: '',
+        qty: 0,
+        unit: '',
+        itemPrice: 0,
+        miscellaneous: '',
+        tooling: ''
       }
     ];
     
-    // Reset discount percentage
+    // Reset totals
     this.discountPercentage = 0;
+    this.shippingCharges = 0;
     
     this.calculateTotals();
     this.messageService.add({
       severity: 'success',
       summary: 'Reset Successful',
-      detail: 'Table has been reset to original sample data'
+      detail: 'Table has been reset'
     });
   }
 
   loadQuotationForEdit(quotationId: string) {
     // In a real application, this would fetch data from a service
-    // Example: this.quotationService.getQuotationById(quotationId).subscribe(data => { ... })
     console.log('Loading quotation data for editing:', quotationId);
     
     // Simulate quotation data (this would come from an API)
     const quotationData = {
-      rfqId: 'RFQ000001137',
-      projectDuration: 120,
+      quotationName: 'Sample Quotation',
+      totalLeadTime: 30,
+      paymentTerms: 'Net 30',
+      quoteValidTill: new Date(),
+      currency: 'USD',
+      email: 'supplier@example.com',
+      reference: 'REF123',
+      termsAndConditions: 'Standard terms and conditions apply',
+      cgstSgst: false,
+      igst: true,
       quotationItems: [
         {
-          expenseHead: 'Professional Costs',
-          sectionHead: 'Power Distribution Setup',
-          itemNumber: '7.1.2',
-          drawingRef: '-',
-          description: 'Description',
+          actionItemName: 'Sample Item',
+          description: 'Sample Description',
+          material: 'Steel',
+          qty: 10,
           unit: 'Pieces',
-          quantity: 200,
-          rate: 2000,
-          totalAmount: 400000,
-          commentBySwissElectric: '-',
-          notesByAlshayaGroup: '-'
-        },
-        {
-          expenseHead: 'Preliminiries',
-          sectionHead: 'others',
-          itemNumber: '3.2.4',
-          drawingRef: '-',
-          description: 'Description',
-          unit: 'Pieces',
-          quantity: 56,
-          rate: 6000,
-          totalAmount: 336000,
-          commentBySwissElectric: '-',
-          notesByAlshayaGroup: '-'
-        },
-        {
-          expenseHead: 'Contingency',
-          sectionHead: 'Risk & Contingency Planning',
-          itemNumber: '8.2.1',
-          drawingRef: '-',
-          description: 'Description',
-          unit: 'Sqm',
-          quantity: 20,
-          rate: 10000,
-          totalAmount: 200000,
-          commentBySwissElectric: '-',
-          notesByAlshayaGroup: '-'
-        },
-        {
-          expenseHead: 'Preliminiries',
-          sectionHead: 'Other',
-          itemNumber: '3.2.3',
-          drawingRef: '-',
-          description: 'Description',
-          unit: 'Sqm',
-          quantity: 9,
-          rate: 14000,
-          totalAmount: 126000,
-          commentBySwissElectric: '-',
-          notesByAlshayaGroup: '-'
-        },
-        {
-          expenseHead: 'Fire Services',
-          sectionHead: 'Fire maintaince',
-          itemNumber: '5.2.2',
-          drawingRef: '-',
-          description: 'Desc',
-          unit: 'Pieces',
-          quantity: 56,
-          rate: 28000,
-          totalAmount: 1568000,
-          commentBySwissElectric: '-',
-          notesByAlshayaGroup: '-'
-        },
-        {
-          expenseHead: 'HVAC',
-          sectionHead: 'Water Supply & Drainage',
-          itemNumber: '9.2.1',
-          drawingRef: '-',
-          description: 'Desc',
-          unit: 'Sqm',
-          quantity: 12,
-          rate: 32000,
-          totalAmount: 384000,
-          commentBySwissElectric: '-',
-          notesByAlshayaGroup: '-'
-        },
-        {
-          expenseHead: 'IT Equipment',
-          sectionHead: 'Temporary Site Services',
-          itemNumber: '6.2.1',
-          drawingRef: '-',
-          description: 'Desc',
-          unit: 'Pieces',
-          quantity: 2,
-          rate: 36000,
-          totalAmount: 72000,
-          commentBySwissElectric: '-',
-          notesByAlshayaGroup: '-'
+          itemPrice: 100,
+          miscellaneous: 'N/A',
+          tooling: 'Required'
         }
-      ],
-      siteVisitConfirmed: true,
-      complianceConfirmed: true,
-      discountPercentage: 5
+      ]
     };
 
     // Update the model with loaded data
     this.model = { ...quotationData };
-    this.discountPercentage = quotationData.discountPercentage || 0;
 
     // Update the form with loaded data
     this.form.patchValue({
-      rfqId: quotationData.rfqId,
-      projectDuration: quotationData.projectDuration
+      quotationName: quotationData.quotationName,
+      totalLeadTime: quotationData.totalLeadTime,
+      paymentTerms: quotationData.paymentTerms,
+      quoteValidTill: quotationData.quoteValidTill
     });
 
     // Recalculate totals
     this.calculateTotals();
 
     console.log('Quotation data loaded for editing:', this.model);
+  }
+
+  cancel() {
+    this.router.navigate(['/wefab/supplier/quotations']);
+  }
+
+  // Attachment methods
+  selectAttachments() {
+    if (this.attachmentFileInput) {
+      this.attachmentFileInput.nativeElement.click();
+    }
+  }
+
+  onAttachmentSelected(event: any) {
+    const files = event.target.files;
+    if (files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (this.isValidFileType(file)) {
+          this.attachedFiles.push(file);
+        } else {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Invalid File Type',
+            detail: `File "${file.name}" is not supported. Please use PDF, DOC, DOCX, JPG, PNG, TXT, or XLSX files.`
+          });
+        }
+      }
+    }
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const files = event.dataTransfer?.files;
+    if (files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (this.isValidFileType(file)) {
+          this.attachedFiles.push(file);
+        } else {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Invalid File Type',
+            detail: `File "${file.name}" is not supported. Please use PDF, DOC, DOCX, JPG, PNG, TXT, or XLSX files.`
+          });
+        }
+      }
+    }
+  }
+
+  removeAttachment(index: number) {
+    this.attachedFiles.splice(index, 1);
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  private isValidFileType(file: File): boolean {
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'text/plain',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+    return allowedTypes.includes(file.type);
   }
 }
