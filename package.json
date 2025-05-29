@@ -40,6 +40,7 @@
     "ng-apexcharts": "^1.15.0",
     "papaparse": "^5.5.2",
     "primeng": "^17.3.0",
+    "quill": "^2.0.3",
     "rxjs": "~7.8.0",
     "sweetalert2": "^11.21.2",
     "tslib": "^2.3.0",
