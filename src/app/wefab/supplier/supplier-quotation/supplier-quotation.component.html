@@ -1,5 +1,21 @@
 <div class="quotation-page">
   <div class="content-section">
+    <!-- Dashboard Cards -->
+    <div class="dashboard-grid">
+      <div *ngFor="let card of dashboardCards" class="dashboard-card" [ngClass]="card.color">
+        <div class="card-content">
+          <div class="card-icon">
+            <i [ngClass]="card.icon"></i>
+          </div>
+          <div class="card-details">
+            <h3>{{ card.value }}</h3>
+            <p class="card-title">{{ card.title }}</p>
+            <span class="card-description">{{ card.description }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Common Table Component -->
     <div class="table-section">
       <app-common-table 

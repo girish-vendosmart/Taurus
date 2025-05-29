@@ -77,6 +77,36 @@ export class SupplierQuotationComponent implements OnInit {
   // Loading states
   loading = false;
 
+  // Dashboard cards data
+  dashboardCards = [
+    {
+      title: 'Total Quotations',
+      value: '0',
+      icon: 'pi pi-file-o',
+      color: 'info',
+      description: 'All submitted quotations',
+    },
+    {
+      title: 'Awarded Quotations',
+      value: '0',
+      icon: 'pi pi-check-circle',
+      color: 'success',
+      description: 'Successfully awarded quotations',
+    },
+    {
+      title: 'Non Awarded Quotations',
+      value: '0',
+      icon: 'pi pi-times-circle',
+      color: 'warning',
+      description: 'Pending or rejected quotations',
+    }
+  ];
+
+  // Status counts for cards
+  totalQuotationsCount = 0;
+  awardedQuotationsCount = 0;
+  nonAwardedQuotationsCount = 0;
+
   // Table configuration for common-table component
   tableConfig: TableConfig = {
     columns: [
@@ -146,12 +176,19 @@ export class SupplierQuotationComponent implements OnInit {
         if (res && res.data) {
           this.rawQuotationData = res.data;
           this.processQuotationData();
+        } else {
+          // No data received, still calculate stats for empty state
+          this.allQuotations = [];
+          this.calculateQuotationStats();
         }
         this.loading = false;
       },
       error: (error) => {
         console.error('Error fetching quotation data:', error);
         this.loading = false;
+        // Ensure cards show 0 values when API fails
+        this.allQuotations = [];
+        this.calculateQuotationStats();
         // Optionally load sample data as fallback
         // this.loadSampleData();
       }
@@ -161,6 +198,8 @@ export class SupplierQuotationComponent implements OnInit {
   processQuotationData() {
     // Convert raw API data to table format
     this.allQuotations = this.rawQuotationData.map(item => this.mapApiDataToTableItem(item));
+    // Update dashboard cards with calculated statistics
+    this.calculateQuotationStats();
   }
 
   mapApiDataToTableItem(apiItem: SupplierQuotationData): QuotationTableItem {
@@ -256,5 +295,22 @@ export class SupplierQuotationComponent implements OnInit {
     console.log('Download quotation:', quotation);
     // Implement download logic
   }
+
+  // Calculate statistics for dashboard cards
+  calculateQuotationStats() {
+    this.totalQuotationsCount = this.allQuotations.length;
+    this.awardedQuotationsCount = this.allQuotations.filter(q => 
+      q.status?.toLowerCase() === 'awarded'
+    ).length;
+    this.nonAwardedQuotationsCount = this.totalQuotationsCount - this.awardedQuotationsCount;
+
+    // Update dashboard cards with actual values
+    this.dashboardCards[0].value = this.totalQuotationsCount.toString();
+    this.dashboardCards[1].value = this.awardedQuotationsCount.toString();
+    this.dashboardCards[2].value = this.nonAwardedQuotationsCount.toString();
+
+    // Optional: Calculate trends (you can enhance this based on historical data)
+  }
+
 }
 
