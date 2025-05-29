@@ -7,6 +7,9 @@ import { BadgeModule } from 'primeng/badge';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
+import { DropdownModule } from 'primeng/dropdown';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
 
 export interface ActionButton {
   label?: string;
@@ -42,6 +45,8 @@ export interface TableConfig {
   pageSize?: number;
   showActions?: boolean;
   actionButtons?: ActionButton[];
+  enableColumnHide?: boolean 
+  enableColumnResize?: boolean;
 }
 
 @Component({
@@ -55,7 +60,10 @@ export interface TableConfig {
     BadgeModule,
     InputTextModule,
     ButtonModule,
-    TagModule
+    TagModule,
+    DropdownModule,
+    MultiSelectModule,
+    OverlayPanelModule
   ],
   templateUrl: './common-table.component.html',
   styleUrl: './common-table.component.scss'
@@ -104,6 +112,8 @@ export class CommonTableComponent implements OnInit {
     enablePagination: true,
     pageSize: 5,
     showActions: true,
+    enableColumnHide: true,
+    enableColumnResize: true,
     actionButtons: [
       { 
         label: 'View', 
@@ -144,6 +154,17 @@ export class CommonTableComponent implements OnInit {
   // Sorting state
   currentSortField: string = '';
   currentSortOrder: number = 0; // 0: none, 1: asc, -1: desc
+
+  // Column visibility and resize state
+  visibleColumns: TableColumn[] = [];
+  selectedColumns: any[] = [];
+  columnOptions: any[] = [];
+  
+  // Column resizing
+  isResizing = false;
+  resizingColumn: string = '';
+  startX = 0;
+  startWidth = 0;
 
   // Sample data for demonstration
   sampleData = [
@@ -237,6 +258,74 @@ export class CommonTableComponent implements OnInit {
     this.globalFilterFields = this.config.columns
       .filter(col => col.filterable)
       .map(col => col.field);
+    
+    // Initialize column visibility
+    this.initializeColumnVisibility();
+  }
+
+  initializeColumnVisibility() {
+    this.visibleColumns = [...this.config.columns];
+    this.columnOptions = this.config.columns.map(col => ({
+      label: col.header,
+      value: col.field,
+      column: col
+    }));
+    this.selectedColumns = this.columnOptions.map(opt => opt.value);
+  }
+
+  onColumnSelectionChange() {
+    this.visibleColumns = this.config.columns.filter(col => 
+      this.selectedColumns.includes(col.field)
+    );
+  }
+
+  getVisibleColumns(): TableColumn[] {
+    return this.visibleColumns;
+  }
+
+  // Column resizing methods
+  onResizeStart(event: MouseEvent, column: string) {
+    if (!this.config.enableColumnResize) return;
+    
+    this.isResizing = true;
+    this.resizingColumn = column;
+    this.startX = event.clientX;
+    
+    const headerCell = (event.target as HTMLElement).closest('.header-cell') as HTMLElement;
+    if (headerCell) {
+      this.startWidth = headerCell.offsetWidth;
+    }
+    
+    // Add class to prevent text selection
+    document.body.classList.add('resizing');
+    
+    document.addEventListener('mousemove', this.onResize.bind(this));
+    document.addEventListener('mouseup', this.onResizeEnd.bind(this));
+    
+    event.preventDefault();
+  }
+
+  onResize(event: MouseEvent) {
+    if (!this.isResizing) return;
+    
+    const diff = event.clientX - this.startX;
+    const newWidth = Math.max(100, this.startWidth + diff); // Minimum width of 100px
+    
+    const column = this.config.columns.find(col => col.field === this.resizingColumn);
+    if (column) {
+      column.width = `${newWidth}px`;
+    }
+  }
+
+  onResizeEnd() {
+    this.isResizing = false;
+    this.resizingColumn = '';
+    
+    // Remove class to re-enable text selection
+    document.body.classList.remove('resizing');
+    
+    document.removeEventListener('mousemove', this.onResize.bind(this));
+    document.removeEventListener('mouseup', this.onResizeEnd.bind(this));
   }
 
   onRowClick(event: any, rowData: any) {

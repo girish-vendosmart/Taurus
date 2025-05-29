@@ -1,24 +1,98 @@
 <div class="table-wrapper">
   <div class="common-table-container">
+    <!-- Table Controls -->
+    <div class="table-controls" *ngIf="config.enableColumnHide">
+      <div class="column-controls">
+        <label class="control-label">
+          <i class="pi pi-eye control-icon"></i>
+          Column Visibility:
+        </label>
+        <p-multiSelect 
+          [options]="columnOptions" 
+          [(ngModel)]="selectedColumns"
+          (onChange)="onColumnSelectionChange()"
+          optionLabel="label" 
+          optionValue="value"
+          placeholder="Choose columns to display"
+          [showToggleAll]="true"
+          appendTo="body"
+          styleClass="column-selector"
+          [showHeader]="true"
+          [filter]="false"
+          [virtualScroll]="false"
+          [showClear]="false"
+          selectedItemsLabel="{0} columns visible"
+          [maxSelectedLabels]="3">
+          
+          <ng-template pTemplate="header">
+            <div class="multiselect-header">
+              <div class="header-content">
+                <div class="header-title">
+                  <i class="pi pi-eye-slash"></i>
+                  <span>Show/Hide Table Columns</span>
+                </div>
+                <div class="header-subtitle">
+                  Select columns to display in the table
+                </div>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="item" let-option>
+            <div class="column-option">
+              <div class="option-content">
+                <span class="column-name">{{ option.label }}</span>
+                <span class="visibility-status" [class.visible]="selectedColumns.includes(option.value)">
+                  <i class="pi" [class.pi-eye]="selectedColumns.includes(option.value)" 
+                     [class.pi-eye-slash]="!selectedColumns.includes(option.value)"></i>
+                  {{ selectedColumns.includes(option.value) ? 'Visible' : 'Hidden' }}
+                </span>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="selectedItems" let-$any="$any">
+            <div class="selected-columns-display">
+              <span class="selection-count">
+                {{ selectedColumns.length }} of {{ columnOptions.length }} columns visible
+              </span>
+            </div>
+          </ng-template>
+        </p-multiSelect>
+      </div>
+    </div>
+
     <!-- Header with Column Names -->
     <div class="table-header">
       <div class="header-row">
         <div class="header-cell" 
-             *ngFor="let col of config.columns"
+             *ngFor="let col of getVisibleColumns()"
              [style.width]="col.width"
              [style.flex]="col.width ? 'none' : '1'">
-          <span class="header-title">{{ col.header }}</span>
-          <i [class]="getSortIcon(col.field)" 
-             *ngIf="col.sortable" 
-             (click)="sortTable(col.field)"
-             [class.active]="currentSortField === col.field && currentSortOrder !== 0"></i>
+          <div class="header-content">
+            <span class="header-title">
+              {{ col.header }}
+              <i class="pi pi-external-link link-indicator" 
+                 *ngIf="col.isLink" 
+                 title="This column contains clickable links"></i>
+            </span>
+            <i [class]="getSortIcon(col.field)" 
+               *ngIf="col.sortable" 
+               (click)="sortTable(col.field)"
+               [class.active]="currentSortField === col.field && currentSortOrder !== 0"></i>
+          </div>
+          <div class="resize-handle" 
+               *ngIf="config.enableColumnResize"
+               (mousedown)="onResizeStart($event, col.field)"
+               title="Drag to resize column">
+          </div>
         </div>
       </div>
       
       <!-- Search Fields Row -->
       <div class="search-row">
         <div class="search-field" 
-             *ngFor="let col of config.columns"
+             *ngFor="let col of getVisibleColumns()"
              [style.width]="col.width"
              [style.flex]="col.width ? 'none' : '1'">
           <input 
@@ -39,7 +113,7 @@
     <p-table 
       #dt 
       [value]="data.length ? data : sampleData"
-      [columns]="config.columns"
+      [columns]="getVisibleColumns()"
       [paginator]="config.enablePagination"
       [rows]="config.pageSize || 10"
       [showCurrentPageReport]="config.enablePagination"
@@ -61,8 +135,9 @@
           <button 
             class="pagination-btn" 
             [disabled]="isFirstPage()"
-            (click)="goToPreviousPage()">
-            Previous
+            (click)="goToPreviousPage()"
+            title="Previous Page">
+            <i class="pi pi-chevron-left"></i>
           </button>
           <span class="page-info">
             Page {{ getCurrentPage() }} of {{ getTotalPages() }}
@@ -70,8 +145,9 @@
           <button 
             class="pagination-btn" 
             [disabled]="isLastPage()"
-            (click)="goToNextPage()">
-            Next
+            (click)="goToNextPage()"
+            title="Next Page">
+            <i class="pi pi-chevron-right"></i>
           </button>
         </div>
       </ng-template>
@@ -79,7 +155,7 @@
       <!-- Table Content -->
       <ng-template pTemplate="body" let-rowData>
         <tr (click)="onRowClick($event, rowData)">
-          <td *ngFor="let col of config.columns" 
+          <td *ngFor="let col of getVisibleColumns()" 
               [ngClass]="col.field + '-column'"
               [style.width]="col.width"
               [style.flex]="col.width ? 'none' : '1'">
@@ -89,18 +165,21 @@
                 <a class="company-name" 
                    *ngIf="!col.routerLink && !rowData.routerLink"
                    (click)="onLinkClick($event, rowData, col)">
+                  <i class="pi pi-external-link link-icon"></i>
                   {{ rowData[col.field] }}
                 </a>
                 <a class="company-name" 
                    *ngIf="col.routerLink && !rowData.routerLink"
                    [routerLink]="getRouterLink(col, rowData)"
                    (click)="onLinkClick($event, rowData, col)">
+                  <i class="pi pi-external-link link-icon"></i>
                   {{ rowData[col.field] }}
                 </a>
                 <a class="company-name" 
                    *ngIf="rowData.routerLink"
                    [routerLink]="rowData.routerLink"
                    (click)="onLinkClick($event, rowData, col)">
+                  <i class="pi pi-external-link link-icon"></i>
                   {{ rowData[col.field] }}
                 </a>
                 <div class="sub-info" *ngIf="rowData.companySubInfo || rowData.companyId || rowData.name">
@@ -143,7 +222,7 @@
       <!-- Empty State -->
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td [attr.colspan]="config.columns.length" class="text-center p-4">
+          <td [attr.colspan]="getVisibleColumns().length" class="text-center p-4">
             No records found.
           </td>
         </tr>
@@ -152,7 +231,7 @@
       <!-- Loading State -->
       <ng-template pTemplate="loadingbody">
         <tr>
-          <td [attr.colspan]="config.columns.length" class="text-center p-4">
+          <td [attr.colspan]="getVisibleColumns().length" class="text-center p-4">
             Loading data...
           </td>
         </tr>

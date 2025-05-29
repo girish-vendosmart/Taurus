@@ -161,6 +161,8 @@ export class SupplierQuotationComponent implements OnInit {
     enablePagination: true,
     pageSize: 10,
     showActions: true,
+    enableColumnHide: false,
+    enableColumnResize: true,
   };
 
   ngOnInit() {
