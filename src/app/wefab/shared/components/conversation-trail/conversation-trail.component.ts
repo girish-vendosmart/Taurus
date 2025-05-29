@@ -17,7 +17,7 @@ export class ConversationTrailComponent implements OnInit {
   messages: any[] = [];
   supplierId: string = '';
   loading = false;
-  currentUser: string = 'You';
+  currentUser: any = sessionStorage.getItem('primary_email_id');
   newMessage: string = '';
   attachedFile: File | null = null;
   previewImageUrl: string | null = null;
@@ -33,7 +33,7 @@ export class ConversationTrailComponent implements OnInit {
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
-      this.supplierId = params.get('supplierId') || '';
+      this.supplierId = params.get('supplierId') || 'SUP-000403';
       if (this.supplierId) {
         this.fetchMessages();
       }
