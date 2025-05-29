@@ -5,11 +5,11 @@ import { ActivatedRoute } from '@angular/router';
 import { CommonService } from './../../common.service';
 import { DialogModule } from 'primeng/dialog';
 import { FileUploadService, FileUploadResult } from '../../file-upload.service';
-
+import { EditorModule } from 'primeng/editor';
 @Component({
   selector: 'app-conversation-trail',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule],
+  imports: [CommonModule, FormsModule, DialogModule,EditorModule],
   templateUrl: './conversation-trail.component.html',
   styleUrls: ['./conversation-trail.component.scss']
 })

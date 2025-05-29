@@ -1,10 +1,11 @@
 <div class="conversation-container">
-    <div class="send-section">
+    <div class="send-section px-5">
       <label class="attach-btn">
         <input type="file" (change)="onFileSelected($event)" multiple hidden>
         <i class="pi pi-paperclip"></i>
       </label>
-      <input type="text" [(ngModel)]="newMessage" placeholder="Type a message..." />
+      <p-editor [(ngModel)]="newMessage" placeholder="Type a message..."  />
+      <!-- <input type="text" [(ngModel)]="newMessage" placeholder="Type a message..." /> -->
       <button class="send-btn" (click)="sendMessage()" [disabled]="uploading">
         <i class="pi pi-send"></i>
       </button>
@@ -29,7 +30,7 @@
             </div>
             <span class="timestamp">{{ msg.timestamp | date:'short' }}</span>
           </div>
-          <div class="message-text">{{ msg.text }}</div>
+          <div class="message-text" [innerHTML]="msg.text"></div>
           <div *ngIf="msg.attachments?.length" class="attachments-list">
             <div class="attachment-item" *ngFor="let file of msg.attachments">
               <ng-container *ngIf="isImageFile(file.file_type); else nonImage">
