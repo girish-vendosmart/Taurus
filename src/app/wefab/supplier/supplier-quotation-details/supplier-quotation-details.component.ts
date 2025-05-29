@@ -4,23 +4,85 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
+import { CommonService } from '../../shared/common.service';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 
+// API Response Interfaces
+export interface SupplierQuotationApiResponse {
+  name: string;
+  owner: string;
+  creation: string;
+  modified: string;
+  modified_by: string;
+  docstatus: number;
+  idx: number;
+  workflow_state: string;
+  rfq_id: string;
+  supplier_id: string;
+  estimated_completion_duration: string;
+  validity: string;
+  delivery_address: string;
+  total_amount: number;
+  discount_percentage: number;
+  discount_amount: number;
+  grand_total: number;
+  payment_terms: string;
+  shipping_terms: string;
+  notes: string;
+  doctype: string;
+  items: QuotationLineItem[];
+  attachments: any[];
+}
+
+export interface QuotationLineItem {
+  name: string;
+  owner: string;
+  creation: string;
+  modified: string;
+  modified_by: string;
+  docstatus: number;
+  idx: number;
+  item_code: string;
+  item_description: string;
+  quantity: number;
+  unit: string;
+  currency_code: string;
+  unit_price: number;
+  total_price: number;
+  comments: string;
+  setup_cost: number;
+  material_cost: number;
+  labor_cost: number;
+  overhead_cost: number;
+  discount_type: string;
+  discount: number;
+  parent: string;
+  parentfield: string;
+  parenttype: string;
+  doctype: string;
+}
+
+// Component Data Interfaces
 export interface QuotationDetails {
   quotationId: string;
   rfqId: string;
   createdOn: string;
-  projectName: string;
-  country: string;
-  lastQuoteDate: string;
-  address: string;
-  paymentTerms: string;
+  lastModified: string;
+  workflowState: string;
+  estimatedDuration: string;
+  validity: string;
+  deliveryAddress: string;
   totalAmount: number;
-  acceptContractTerms: string;
-  isAllQueriesResolved: string;
+  discountPercentage: number;
+  discountAmount: number;
+  grandTotal: number;
+  paymentTerms: string;
+  shippingTerms: string;
+  notes: string;
+  supplierId: string;
   quoteFrom: {
     company: string;
     email: string;
@@ -34,18 +96,20 @@ export interface QuotationDetails {
 }
 
 export interface QuotationItem {
-  section: string;
-  expenseCategory: string;
-  itemNumber: string;
+  itemCode: string;
   description: string;
-  drawingNumber: string;
-  unit: string;
   quantity: number;
+  unit: string;
   currency: string;
-  rate: number;
-  totalAmount: number;
-  notes: string;
-  comment: string;
+  unitPrice: number;
+  totalPrice: number;
+  comments: string;
+  setupCost: number;
+  materialCost: number;
+  laborCost: number;
+  overheadCost: number;
+  discount: number;
+  discountType: string;
 }
 
 @Component({
@@ -63,156 +127,51 @@ export interface QuotationItem {
   styleUrl: './supplier-quotation-details.component.scss'
 })
 export class SupplierQuotationDetailsComponent implements OnInit {
-  
+
+  // Component data - initialized as empty, will be populated from API
   quotationDetails: QuotationDetails = {
-    quotationId: 'QTN0000001123',
-    rfqId: 'RFQ0000001104',
-    createdOn: '20 May 2025, 01:10 PM',
-    projectName: 'Logitech Office Expansion Project',
-    country: 'Kuwait',
-    lastQuoteDate: '07 Jan 2025, 03:23 PM',
-    address: 'Kuwait City, Kuwait',
-    paymentTerms: 'Net 20',
-    totalAmount: 3086000,
-    acceptContractTerms: 'Accepted',
-    isAllQueriesResolved: 'Not Resolved',
+    quotationId: '',
+    rfqId: '',
+    createdOn: '',
+    lastModified: '',
+    workflowState: '',
+    estimatedDuration: '',
+    validity: '',
+    deliveryAddress: '',
+    totalAmount: 0,
+    discountPercentage: 0,
+    discountAmount: 0,
+    grandTotal: 0,
+    paymentTerms: '',
+    shippingTerms: '',
+    notes: '',
+    supplierId: '',
     quoteFrom: {
-      company: 'Swiss Electric Solutions AG',
-      email: 'daniel.roth@mailinator.com',
-      phone: '4121765432'
+      company: '',
+      email: '',
+      phone: ''
     },
     quoteTo: {
-      company: 'Logitech International S.A.',
-      email: 'super_admin_alshaya@mailinator.com',
-      location: 'Lausanne'
+      company: '',
+      email: '',
+      location: ''
     }
   };
 
-  quotationItems: QuotationItem[] = [
-    {
-      section: 'Power Distribution',
-      expenseCategory: 'Professional Costs',
-      itemNumber: '71.2',
-      description: 'Expenses related to...',
-      drawingNumber: '-',
-      unit: 'Pieces',
-      quantity: 200,
-      currency: 'USD',
-      rate: 2000,
-      totalAmount: 400000,
-      notes: '-',
-      comment: '-'
-    },
-    {
-      section: 'others',
-      expenseCategory: 'Preliminaries',
-      itemNumber: '3.2.4',
-      description: 'Covers fencing...',
-      drawingNumber: '-',
-      unit: 'Pieces',
-      quantity: 56,
-      currency: 'USD',
-      rate: 6000,
-      totalAmount: 336000,
-      notes: '-',
-      comment: '-'
-    },
-    {
-      section: 'Risk & Contingency',
-      expenseCategory: 'Contingency',
-      itemNumber: '8.2.1',
-      description: 'Reserved budget...',
-      drawingNumber: '-',
-      unit: 'Sqm',
-      quantity: 20,
-      currency: 'USD',
-      rate: 10000,
-      totalAmount: 200000,
-      notes: '-',
-      comment: '-'
-    },
-    {
-      section: 'Other',
-      expenseCategory: 'Preliminaries',
-      itemNumber: '3.2.3',
-      description: 'Project setup...',
-      drawingNumber: '-',
-      unit: 'Sqm',
-      quantity: 9,
-      currency: 'USD',
-      rate: 14000,
-      totalAmount: 126000,
-      notes: '-',
-      comment: '-'
-    },
-    {
-      section: 'Fire maintaince',
-      expenseCategory: 'Fire Services',
-      itemNumber: '5.2.2',
-      description: 'Provision and...',
-      drawingNumber: '-',
-      unit: 'Pieces',
-      quantity: 56,
-      currency: 'USD',
-      rate: 28000,
-      totalAmount: 1568000,
-      notes: '-',
-      comment: '-'
-    },
-    {
-      section: 'Water Supply & Drainage',
-      expenseCategory: 'HVAC',
-      itemNumber: '9.2.1',
-      description: 'Heating, ventilation...',
-      drawingNumber: '-',
-      unit: 'Sqm',
-      quantity: 12,
-      currency: 'USD',
-      rate: 32000,
-      totalAmount: 384000,
-      notes: '-',
-      comment: '-'
-    },
-    {
-      section: 'Temporary Site Facilities',
-      expenseCategory: 'IT Equipment',
-      itemNumber: '6.2.1',
-      description: 'Purchase and...',
-      drawingNumber: '-',
-      unit: 'Pieces',
-      quantity: 2,
-      currency: 'USD',
-      rate: 36000,
-      totalAmount: 72000,
-      notes: '-',
-      comment: '-'
-    }
-  ];
+  quotationItems: QuotationItem[] = [];
 
   activeTab: string = 'overview';
   currentPage: number = 1;
   itemsPerPage: number = 7;
-  totalItems: number = 7;
-  discountPercentage: number = 5;
+  totalItems: number = 0;
+  loading: boolean = false;
 
   // Table configuration
   tableConfig: TableConfig = {
     columns: [
       {
-        field: 'section',
-        header: 'Section',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'expenseCategory',
-        header: 'Expense Category',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'itemNumber',
-        header: 'Item Number',
+        field: 'itemCode',
+        header: 'Item Code',
         sortable: true,
         filterable: true,
       },
@@ -223,8 +182,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         filterable: true,
       },
       {
-        field: 'drawingNumber',
-        header: 'Drawing Number',
+        field: 'quantity',
+        header: 'Quantity',
         sortable: true,
         filterable: true,
       },
@@ -235,38 +194,50 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         filterable: true,
       },
       {
-        field: 'quantity',
-        header: 'Quantity',
-        sortable: true,
-        filterable: true,
-      },
-      {
         field: 'currency',
         header: 'Currency',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'rate',
-        header: 'Rate',
+        field: 'unitPrice',
+        header: 'Unit Price',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'totalAmount',
-        header: 'Total Amount',
+        field: 'totalPrice',
+        header: 'Total Price',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'notes',
-        header: 'Notes',
+        field: 'comments',
+        header: 'Comments',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'comment',
-        header: 'Comment',
+        field: 'setupCost',
+        header: 'Setup Cost',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'materialCost',
+        header: 'Material Cost',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'laborCost',
+        header: 'Labor Cost',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'overheadCost',
+        header: 'Overhead Cost',
         sortable: true,
         filterable: true,
       }
@@ -281,7 +252,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private commonService: CommonService
   ) {}
 
   ngOnInit(): void {
@@ -289,12 +261,100 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     this.route.params.subscribe(params => {
       const quotationId = params['id'];
       if (quotationId) {
-        // Update the quotation details with the new ID
-        this.quotationDetails.quotationId = quotationId;
-        // In a real application, you would fetch the quotation details from a service
-        // this.quotationService.getQuotationDetails(quotationId).subscribe(...)
+        this.getQuotationDetails(quotationId);
       }
     });
+  }
+
+  getQuotationDetails(quotationId: string) {
+    this.loading = true;
+    let endPoint = `/api/resource/Supplier Quotation/${quotationId}`;
+    
+    this.commonService.getWefabData(endPoint).subscribe({
+      next: (res: any) => {
+        console.log('Quotation Details API Response:', res);
+        if (res && res.data) {
+          this.mapApiResponseToComponent(res.data);
+        }
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching quotation details:', error);
+        this.loading = false;
+        // You might want to show an error message to the user
+      }
+    });
+  }
+
+  // Map API response to component data structure
+  mapApiResponseToComponent(apiData: SupplierQuotationApiResponse) {
+    // Map main quotation details
+    this.quotationDetails = {
+      quotationId: apiData.name,
+      rfqId: apiData.rfq_id,
+      createdOn: this.formatApiDate(apiData.creation),
+      lastModified: this.formatApiDate(apiData.modified),
+      workflowState: apiData.workflow_state,
+      estimatedDuration: apiData.estimated_completion_duration,
+      validity: this.formatApiDate(apiData.validity),
+      deliveryAddress: apiData.delivery_address,
+      totalAmount: apiData.total_amount,
+      discountPercentage: apiData.discount_percentage,
+      discountAmount: apiData.discount_amount,
+      grandTotal: apiData.grand_total,
+      paymentTerms: apiData.payment_terms,
+      shippingTerms: apiData.shipping_terms,
+      notes: apiData.notes,
+      supplierId: apiData.supplier_id,
+      quoteFrom: {
+        company: 'Swiss Electric Solutions AG', // This might need to come from supplier API
+        email: 'daniel.roth@mailinator.com', // This might need to come from supplier API
+        phone: '4121765432' // This might need to come from supplier API
+      },
+      quoteTo: {
+        company: 'Logitech International S.A.', // This might need to come from customer/RFQ API
+        email: 'super_admin_alshaya@mailinator.com', // This might need to come from customer/RFQ API
+        location: 'Lausanne' // This might need to come from customer/RFQ API
+      }
+    };
+
+    // Map quotation items
+    this.quotationItems = apiData.items.map(item => ({
+      itemCode: item.item_code,
+      description: item.item_description,
+      quantity: item.quantity,
+      unit: item.unit,
+      currency: item.currency_code,
+      unitPrice: item.unit_price,
+      totalPrice: item.total_price,
+      comments: item.comments,
+      setupCost: item.setup_cost,
+      materialCost: item.material_cost,
+      laborCost: item.labor_cost,
+      overheadCost: item.overhead_cost,
+      discount: item.discount,
+      discountType: item.discount_type
+    }));
+
+    this.totalItems = this.quotationItems.length;
+  }
+
+  // Helper method to format API date
+  formatApiDate(dateString: string): string {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateString; // Return original string if parsing fails
+    }
   }
 
   setActiveTab(tab: string): void {
@@ -315,11 +375,11 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   }
 
   getSubTotal(): number {
-    return this.quotationItems.reduce((sum, item) => sum + item.totalAmount, 0);
+    return this.quotationItems.reduce((sum, item) => sum + item.totalPrice, 0);
   }
 
   getDiscount(): number {
-    return (this.getSubTotal() * this.discountPercentage) / 100;
+    return (this.getSubTotal() * this.quotationDetails.discountPercentage) / 100;
   }
 
   getTotalAmount(): number {
@@ -349,12 +409,200 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     });
   }
 
+  printQuotation() {
+    const printContent = this.generatePrintContent();
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      
+      // Wait for content to load, then print
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    }
+  }
+
+  private generatePrintContent(): string {
+    const itemsTableRows = this.quotationItems.map(item => `
+      <tr>
+        <td>${item.itemCode}</td>
+        <td>${item.description}</td>
+        <td>${item.quantity}</td>
+        <td>${item.unit}</td>
+        <td>${item.currency}</td>
+        <td>${this.formatCurrency(item.unitPrice)}</td>
+        <td>${this.formatCurrency(item.totalPrice)}</td>
+        <td>${item.comments}</td>
+        <td>${this.formatCurrency(item.setupCost)}</td>
+        <td>${this.formatCurrency(item.materialCost)}</td>
+        <td>${this.formatCurrency(item.laborCost)}</td>
+        <td>${this.formatCurrency(item.overheadCost)}</td>
+      </tr>
+    `).join('');
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Quotation - ${this.quotationDetails.quotationId}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 12px;
+            color: #333;
+          }
+          .print-header {
+            border-bottom: 2px solid #1a3a5f;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+          }
+          .quote-parties {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+          }
+          .quote-section h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1a3a5f;
+          }
+          .quote-section .company-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+          }
+          .quote-section .contact-info {
+            color: #666;
+            margin-bottom: 3px;
+          }
+          .items-section h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1a3a5f;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 11px;
+          }
+          th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+          }
+          th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #1a3a5f;
+          }
+          .summary-section {
+            margin-left: auto;
+            width: 300px;
+            border-top: 2px solid #ddd;
+            padding-top: 10px;
+          }
+          .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+          }
+          .summary-row.total-row {
+            border-top: 2px solid #ddd;
+            padding-top: 10px;
+            margin-top: 5px;
+            font-weight: bold;
+            font-size: 14px;
+          }
+          .summary-label {
+            color: #666;
+          }
+          .summary-value {
+            font-weight: bold;
+          }
+          .total-row .summary-value {
+            color: #1a3a5f;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-header">
+          <h1>Quotation ${this.quotationDetails.quotationId}</h1>
+        </div>
+
+        <div class="quote-parties">
+          <div class="quote-section">
+            <h3>Quote From :-</h3>
+            <div class="company-name">${this.quotationDetails.quoteFrom.company}</div>
+            <div class="contact-info">${this.quotationDetails.quoteFrom.email}</div>
+            <div class="contact-info">${this.quotationDetails.quoteFrom.phone}</div>
+          </div>
+          
+          <div class="quote-section">
+            <h3>Quote To :-</h3>
+            <div class="company-name">${this.quotationDetails.quoteTo.company}</div>
+            <div class="contact-info">${this.quotationDetails.quoteTo.email}</div>
+            <div class="contact-info">${this.quotationDetails.quoteTo.location}</div>
+          </div>
+        </div>
+
+        <div class="items-section">
+          <h3>Items (${this.totalItems})</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Item Code</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Currency</th>
+                <th>Unit Price</th>
+                <th>Total Price</th>
+                <th>Comments</th>
+                <th>Setup Cost</th>
+                <th>Material Cost</th>
+                <th>Labor Cost</th>
+                <th>Overhead Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsTableRows}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="summary-section">
+          <div class="summary-row">
+            <span class="summary-label">Sub Total:</span>
+            <span class="summary-value">${this.formatCurrency(this.quotationDetails.totalAmount)}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Discount:</span>
+            <span class="summary-value">${this.formatCurrency(this.quotationDetails.discountAmount)}</span>
+          </div>
+          <div class="summary-row total-row">
+            <span class="summary-label">Grand Total:</span>
+            <span class="summary-value">${this.formatCurrency(this.quotationDetails.grandTotal)}</span>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
   // Get formatted table data for display
   get formattedQuotationItems() {
     return this.quotationItems.map(item => ({
       ...item,
-      rate: this.formatCurrency(item.rate),
-      totalAmount: this.formatCurrency(item.totalAmount)
+      unitPrice: this.formatCurrency(item.unitPrice),
+      totalPrice: this.formatCurrency(item.totalPrice)
     }));
   }
 }

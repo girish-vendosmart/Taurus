@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="header-top">
       <p-button 
-        label="Back to RFQs" 
+        label="Back to Quotations" 
         icon="pi pi-arrow-left" 
         styleClass="p-button-text back-btn"
         (onClick)="onBackToRFQs()">
@@ -14,11 +14,19 @@
       <div class="header-left">
         <h1 class="page-title">{{ quotationDetails.quotationId }}</h1>
         <div class="header-badges">
-          <span class="status-badge sent">Sent</span>
+          <span class="status-badge" [ngClass]="quotationDetails.workflowState?.toLowerCase()">
+            {{ quotationDetails.workflowState }}
+          </span>
         </div>
       </div>
       
       <div class="header-right">
+        <p-button 
+          label="Print" 
+          icon="pi pi-print"
+          severity="secondary"
+          (onClick)="printQuotation()">
+        </p-button>
         <p-button 
           label="Edit" 
           severity="primary"
@@ -31,12 +39,12 @@
   <!-- Quotation Info Bar -->
   <div class="quotation-info-bar">
     <div class="info-item">
-      <span class="info-label">Creation:</span>
+      <span class="info-label">Created On:</span>
       <span class="info-value">{{ quotationDetails.createdOn }}</span>
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Rfq Id:</span>
+      <span class="info-label">RFQ ID:</span>
       <span class="info-value">{{ quotationDetails.rfqId }}</span>
     </div>
     <div class="info-separator">|</div>
@@ -46,18 +54,43 @@
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Total Amount:</span>
-      <span class="info-value">{{ formatCurrency(quotationDetails.totalAmount) }}</span>
+      <span class="info-label">Grand Total:</span>
+      <span class="info-value">{{ formatCurrency(quotationDetails.grandTotal) }}</span>
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Accept Contract Terms:</span>
-      <span class="info-value">{{ quotationDetails.acceptContractTerms }}</span>
+      <span class="info-label">Validity:</span>
+      <span class="info-value">{{ quotationDetails.validity }}</span>
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Is All Queries Resolved:</span>
-      <span class="info-value">{{ quotationDetails.isAllQueriesResolved }}</span>
+      <span class="info-label">Delivery Address:</span>
+      <span class="info-value">{{ quotationDetails.deliveryAddress }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Estimated Duration:</span>
+      <span class="info-value">{{ quotationDetails.estimatedDuration }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Shipping Terms:</span>
+      <span class="info-value">{{ quotationDetails.shippingTerms }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Supplier ID:</span>
+      <span class="info-value">{{ quotationDetails.supplierId }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Last Modified:</span>
+      <span class="info-value">{{ quotationDetails.lastModified }}</span>
+    </div>
+    <div class="info-separator" *ngIf="quotationDetails.notes">|</div>
+    <div class="info-item" *ngIf="quotationDetails.notes">
+      <span class="info-label">Notes:</span>
+      <span class="info-value">{{ quotationDetails.notes }}</span>
     </div>
   </div>
 
@@ -112,7 +145,7 @@
         <!-- Items Section -->
         <div class="items-section">
           <div class="items-header">
-            <h3>Items</h3>
+            <h3>Items ({{ totalItems }})</h3>
           </div>
 
           <!-- Common Table Component -->
@@ -120,7 +153,7 @@
             <app-common-table 
               [config]="tableConfig" 
               [data]="formattedQuotationItems"
-              [loading]="false"
+              [loading]="loading"
               (rowClick)="onRowClick($event)"
               (linkClick)="onLinkClick($event)"
               (actionClick)="onActionClick($event)">
@@ -131,19 +164,15 @@
           <div class="summary-section">
             <div class="summary-row">
               <span class="summary-label">Sub Total:</span>
-              <span class="summary-value">{{ formatCurrency(getSubTotal()) }}</span>
+              <span class="summary-value">{{ formatCurrency(quotationDetails.totalAmount) }}</span>
             </div>
             <div class="summary-row">
-              <span class="summary-label">Discount (%):</span>
-              <span class="summary-value">{{ discountPercentage }}%</span>
-            </div>
-            <div class="summary-row">
-              <span class="summary-label">Discount Amount:</span>
-              <span class="summary-value">{{ formatCurrency(getDiscount()) }}</span>
+              <span class="summary-label">Discount:</span>
+              <span class="summary-value">{{ formatCurrency(quotationDetails.discountAmount) }}</span>
             </div>
             <div class="summary-row total-row">
-              <span class="summary-label">Total Amount:</span>
-              <span class="summary-value">{{ formatCurrency(getTotalAmount()) }}</span>
+              <span class="summary-label">Grand Total:</span>
+              <span class="summary-value">{{ formatCurrency(quotationDetails.grandTotal) }}</span>
             </div>
           </div>
         </div>
