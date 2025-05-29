@@ -7,6 +7,7 @@ import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '..
 import { CommonService } from '../../shared/common.service';
 import { HttpParams } from '@angular/common/http';
 import { ActivityTrailComponent, ActivityLogData } from '../../../common-core-component/activity-trail';
+import { ConversationTrailComponent } from '../../shared/components/conversation-trail/conversation-trail.component';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -146,7 +147,8 @@ export interface QuotationItem {
     CommonTableComponent,
     ButtonModule,
     InputTextModule,
-    ActivityTrailComponent
+    ActivityTrailComponent,
+    ConversationTrailComponent
   ],
   templateUrl: './supplier-quotation-details.component.html',
   styleUrl: './supplier-quotation-details.component.scss'
