@@ -18,13 +18,16 @@ export class CommonHeaderComponent {
   userInitials: string = '';
   // Dummy user data
   dummyUserEmail: string = 'michael.doe@mailinator.com';
+  supplierEmailId: any = '';
 
   constructor(
     private router: Router,
     public authService: AuthService,
   ) {
+    // Supplier email id
+    this.supplierEmailId = sessionStorage.getItem('primary_email_id');
     // Set initials using dummy data
-    this.userInitials = this.getInitials(this.dummyUserEmail);
+    this.userInitials = this.getInitials(this.supplierEmailId);
   }
 
   @HostListener('document:click', ['$event'])

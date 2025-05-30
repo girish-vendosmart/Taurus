@@ -118,7 +118,7 @@
   transition: all 0.2s ease;
   text-align: left;
 
-  i {
+  .pi {
     font-size: 1rem;
     color: $machine-gray;
   }
@@ -127,7 +127,7 @@
     background: rgba($blueprint-blue, 0.05);
     color: $blueprint-blue;
 
-    i {
+    .pi {
       color: $blueprint-blue;
     }
   }
