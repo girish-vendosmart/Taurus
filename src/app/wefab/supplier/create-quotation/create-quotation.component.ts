@@ -162,21 +162,25 @@ export class CreateQuotationComponent implements OnInit {
   ];
 
   unitOptions = [
-    { label: 'Pieces', value: 'Pieces' },
-    { label: 'Sqm', value: 'Sqm' },
-    { label: 'Meters', value: 'Meters' },
-    { label: 'Hours', value: 'Hours' },
-    { label: 'Days', value: 'Days' },
+    { label: 'Nos', value: 'Nos' },
     { label: 'Kg', value: 'Kg' },
-    { label: 'Liters', value: 'Liters' }
+    { label: 'Meter', value: 'Meter' },
+    { label: 'Square Meter', value: 'Square Meter' },
+    { label: 'Cubic Meter', value: 'Cubic Meter' },
+    { label: 'Liter', value: 'Liter' },
+    { label: 'Set', value: 'Set' },
+    { label: 'Pair', value: 'Pair' }
   ];
 
   @ViewChild('csvFileInput', { static: false }) csvFileInput!: ElementRef;
   @ViewChild('attachmentFileInput', { static: false }) attachmentFileInput!: ElementRef;
+  quoteFrom: any;
+  quoteTo: any;
 
   constructor(private messageService: MessageService, private router: Router, private route: ActivatedRoute, private commonService: CommonService) {}
 
   ngOnInit() {
+    debugger
     // Extract and set RFQ ID from URL
     this.extractRfqIdFromUrl();
     
@@ -186,28 +190,224 @@ export class CreateQuotationComponent implements OnInit {
     // Listen for route parameter changes to update RFQ ID dynamically
     this.route.params.subscribe(params => {
       if (params['rfqId'] && params['rfqId'] !== this.model.rfqId) {
+        debugger
         this.model.rfqId = params['rfqId'];
         console.log('RFQ ID updated from route params:', params['rfqId']);
+        
+        // Load quotation data if not in edit mode
+        if (!this.isEditMode) {
+          this.loadCreateQuotation(this.model.rfqId);
+        }
       }
     });
     
     // Get query parameters
     this.route.queryParams.subscribe(params => {
-      // Update RFQ ID if it comes through query params
-      if ((params['rfqId'] || params['rfq_id']) && 
-          (params['rfqId'] || params['rfq_id']) !== this.model.rfqId) {
-        this.model.rfqId = params['rfqId'] || params['rfq_id'];
-        console.log('RFQ ID updated from query params:', this.model.rfqId);
-      }
-      
-      // Check if this is edit mode
+      // Check if this is edit mode first
       if (params['mode'] === 'edit' && params['quotationId']) {
         this.isEditMode = true;
         this.quotationId = params['quotationId'];
         console.log('Edit mode activated for quotation:', this.quotationId);
         this.loadQuotationForEdit(this.quotationId);
+      } else {
+        // Not in edit mode, handle RFQ ID updates and load create quotation data
+        let rfqIdFromQuery = params['rfqId'] || params['rfq_id'];
+        
+        if (rfqIdFromQuery && rfqIdFromQuery !== this.model.rfqId) {
+          this.model.rfqId = rfqIdFromQuery;
+          console.log('RFQ ID updated from query params:', this.model.rfqId);
+          this.loadCreateQuotation(this.model.rfqId);
+        } else if (this.model.rfqId && !this.isEditMode) {
+          // If we have an RFQ ID (from URL params or extracted initially) and not in edit mode,
+          // load the create quotation data
+          console.log('Loading create quotation data for existing RFQ ID:', this.model.rfqId);
+          this.loadCreateQuotation(this.model.rfqId);
+        }
       }
     });
+  }
+
+  loadCreateQuotation(rfqId: string) {
+    let endPoint = `/api/method/wefab.wefab.api.supplier.quotation.quotation_builder.build_quote_for_rfq?rfq_id=${rfqId}&supplier_id=${this.getSupplierId()}`
+
+    this.commonService.getWefabData(endPoint).subscribe((res: any) => {
+      if (res && res.message && res.message.data) {
+        const createQuotationData = res.message.data;
+        console.log('Create Quotation data loaded:', createQuotationData);
+
+        this.quoteFrom = createQuotationData.quotation_from;
+        this.quoteTo = createQuotationData.quotation_to;
+        
+        // Map API data to component model
+        this.model = {
+          rfqId: createQuotationData.rfq_id || this.model.rfqId,
+          quotationName: createQuotationData.quotation_id || '',
+          quotationFrom: createQuotationData.quotation_from || '',
+          quotationTo: createQuotationData.quotation_to || '',
+          totalLeadTime: this.extractDaysFromDuration(createQuotationData.estimated_completion_duration),
+          paymentTerms: createQuotationData.payment_terms || 'Net 30',
+          quoteValidTill: this.parseApiDate(createQuotationData.validity),
+          currency: createQuotationData.items?.[0]?.currency_code || 'USD',
+          email: 'email@example.com', // This might come from user/supplier data
+          reference: createQuotationData.quotation_id || '',
+          termsAndConditions: this.stripHtmlTags(createQuotationData.notes || ''),
+          deliveryAddress: this.parseAddressFromQuotationTo(createQuotationData.quotation_to),
+          shippingTerms: createQuotationData.shipping_terms || 'FOB Origin',
+          cgstSgst: createQuotationData.sgst_cgst_applicable === 1,
+          igst: createQuotationData.igst_applicable === 1,
+          quotationItems: this.transformCreateQuotationItemsToModel(createQuotationData.items || []),
+          subTotal: createQuotationData.total_amount || 0,
+          discount: createQuotationData.discount_percentage || 0,
+          shippingCharges: 0, // This might need to be calculated or come from API
+          totalAmount: createQuotationData.grand_total || 0
+        };
+
+        // Set discount percentage and shipping charges for calculations
+        this.discountPercentage = createQuotationData.discount_percentage || 0;
+        this.shippingCharges = 0; // Set based on your business logic
+
+        // Set the selectedTaxType based on loaded data
+        if (this.model.cgstSgst) {
+          this.selectedTaxType = 'cgstSgst';
+        } else if (this.model.igst) {
+          this.selectedTaxType = 'igst';
+        } else {
+          this.selectedTaxType = 'none';
+        }
+
+        // Update the form with loaded data
+        this.form.patchValue({
+          quotationName: this.model.quotationName,
+          totalLeadTime: this.model.totalLeadTime,
+          paymentTerms: this.model.paymentTerms,
+          quoteValidTill: this.model.quoteValidTill
+        });
+
+        // Handle attachments if any
+        if (createQuotationData.attachments && createQuotationData.attachments.length > 0) {
+          console.log('Attachments found:', createQuotationData.attachments);
+        }
+
+        // Recalculate totals based on the loaded items
+        this.calculateTotals();
+
+        console.log('Create quotation data mapped to model:', this.model);
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Data Loaded',
+          detail: 'RFQ data loaded successfully for quotation creation'
+        });
+      }
+    }, (error) => {
+      console.error('Error loading create quotation data:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load RFQ data for quotation creation'
+      });
+    });
+  }
+
+  // Helper method to transform create quotation API items to component model format
+  private transformCreateQuotationItemsToModel(apiItems: any[]): any[] {
+    return apiItems.map(item => {
+      // Parse comments to extract material, specification, process, etc.
+      const parsedComments = this.parseCreateQuotationItemComments(item.comments || '');
+      
+      // Extract estimated rate if available
+      const estimatedRate = this.extractEstimatedRate(item.comments || '');
+      
+      return {
+        actionItemName: item.item_code || '',
+        description: this.stripHtmlTags(item.item_description || ''),
+        material: parsedComments.material || '',
+        qty: item.quantity || 0,
+        unit: item.unit || 'Pieces',
+        itemPrice: item.unit_price || 0,
+        miscellaneous: this.buildMiscellaneousFromComments(parsedComments),
+        tooling: parsedComments.processRequired || ''
+      };
+    });
+  }
+
+  // Helper method to parse create quotation item comments
+  private parseCreateQuotationItemComments(comments: string): any {
+    const result: any = {
+      material: '',
+      specification: '',
+      processRequired: '',
+      tolerance: '',
+      notes: '',
+      cadFile: '',
+      estimatedRate: ''
+    };
+    
+    if (!comments) return result;
+    
+    // Split by | and parse each part
+    const parts = comments.split('|');
+    
+    parts.forEach(part => {
+      const trimmedPart = part.trim();
+      if (trimmedPart.startsWith('Material:')) {
+        result.material = trimmedPart.replace('Material:', '').trim();
+      } else if (trimmedPart.startsWith('Specification:')) {
+        result.specification = trimmedPart.replace('Specification:', '').trim();
+      } else if (trimmedPart.startsWith('Process Required:')) {
+        result.processRequired = trimmedPart.replace('Process Required:', '').trim();
+      } else if (trimmedPart.startsWith('Tolerance:')) {
+        result.tolerance = trimmedPart.replace('Tolerance:', '').trim();
+      } else if (trimmedPart.startsWith('Notes:')) {
+        result.notes = trimmedPart.replace('Notes:', '').trim();
+      } else if (trimmedPart.startsWith('CAD File:')) {
+        result.cadFile = trimmedPart.replace('CAD File:', '').trim();
+      } else if (trimmedPart.startsWith('Estimated Rate:')) {
+        result.estimatedRate = trimmedPart.replace('Estimated Rate:', '').trim();
+      }
+    });
+    
+    return result;
+  }
+
+  // Helper method to extract estimated rate from comments
+  private extractEstimatedRate(comments: string): number {
+    if (!comments) return 0;
+    
+    const match = comments.match(/Estimated Rate:\s*(\d+(?:\.\d+)?)/);
+    return match ? parseFloat(match[1]) : 0;
+  }
+
+  // Helper method to build miscellaneous field from parsed comments
+  private buildMiscellaneousFromComments(parsedComments: any): string {
+    const miscParts = [];
+    
+    if (parsedComments.specification) {
+      miscParts.push(`Spec: ${parsedComments.specification}`);
+    }
+    
+    if (parsedComments.tolerance) {
+      miscParts.push(`Tolerance: ${parsedComments.tolerance}`);
+    }
+    
+    if (parsedComments.notes) {
+      miscParts.push(`Notes: ${parsedComments.notes}`);
+    }
+    
+    if (parsedComments.cadFile) {
+      miscParts.push(`CAD: ${parsedComments.cadFile}`);
+    }
+    
+    return miscParts.join(' | ');
+  }
+
+  // Helper method to parse delivery address from quotation_to field
+  private parseAddressFromQuotationTo(quotationTo: string): string {
+    if (!quotationTo) return 'Industrial Park Chicago-Shipping';
+    
+    // Remove company name (first line) and return the address part
+    const lines = quotationTo.split('\n');
+    return lines.length > 1 ? lines.slice(1).join(', ') : quotationTo;
   }
 
   // Extract RFQ ID from URL and prefill the field
@@ -529,6 +729,8 @@ export class CreateQuotationComponent implements OnInit {
       estimated_completion_duration: `${this.model.totalLeadTime} days`,
       validity: this.formatDateForApi(this.model.quoteValidTill),
       delivery_address: this.getDeliveryAddress(),
+      quotation_from: this.quoteFrom,
+      quotation_to: this.quoteTo,
       discount_percentage: this.discountPercentage || 0,
       payment_terms: this.model.paymentTerms,
       shipping_terms: this.getShippingTerms(),
@@ -536,6 +738,9 @@ export class CreateQuotationComponent implements OnInit {
       items: this.transformQuotationItems(),
       attachments: this.transformAttachments()
     };
+
+    debugger
+    console.log('API Data:', apiData);
 
     return apiData;
   }

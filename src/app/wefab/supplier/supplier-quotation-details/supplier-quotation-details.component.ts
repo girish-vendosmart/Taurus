@@ -54,10 +54,6 @@ export interface QuotationLineItem {
   unit_price: number;
   total_price: number;
   comments: string;
-  setup_cost: number;
-  material_cost: number;
-  labor_cost: number;
-  overhead_cost: number;
   discount_type: string;
   discount: number;
   parent: string;
@@ -105,10 +101,6 @@ export interface QuotationItem {
   unitPrice: number;
   totalPrice: number;
   comments: string;
-  setupCost: number;
-  materialCost: number;
-  laborCost: number;
-  overheadCost: number;
   discount: number;
   discountType: string;
 }
@@ -218,30 +210,6 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         sortable: true,
         filterable: true,
       },
-      {
-        field: 'setupCost',
-        header: 'Setup Cost',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'materialCost',
-        header: 'Material Cost',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'laborCost',
-        header: 'Labor Cost',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'overheadCost',
-        header: 'Overhead Cost',
-        sortable: true,
-        filterable: true,
-      }
     ],
     enableSearch: true,
     enableSort: true,
@@ -331,10 +299,6 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       unitPrice: item.unit_price,
       totalPrice: item.total_price,
       comments: item.comments,
-      setupCost: item.setup_cost,
-      materialCost: item.material_cost,
-      laborCost: item.labor_cost,
-      overheadCost: item.overhead_cost,
       discount: item.discount,
       discountType: item.discount_type
     }));
@@ -368,25 +332,18 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     this.router.navigate(['/wefab/supplier/quotation']);
   }
 
-  formatCurrency(amount: number): string {
+  formatCurrency(amount: number, currency: string = 'USD'): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
   }
 
-  getSubTotal(): number {
-    return this.quotationItems.reduce((sum, item) => sum + item.totalPrice, 0);
-  }
-
-  getDiscount(): number {
-    return (this.getSubTotal() * this.quotationDetails.discountPercentage) / 100;
-  }
-
-  getTotalAmount(): number {
-    return this.getSubTotal() - this.getDiscount();
+  // Helper method to get the main currency from quotation items
+  getMainCurrency(): string {
+    return this.quotationItems.length > 0 ? this.quotationItems[0].currency : 'USD';
   }
 
   // Table event handlers
@@ -437,13 +394,9 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         <td>${item.quantity}</td>
         <td>${item.unit}</td>
         <td>${item.currency}</td>
-        <td>${this.formatCurrency(item.unitPrice)}</td>
-        <td>${this.formatCurrency(item.totalPrice)}</td>
+        <td>${this.formatCurrency(item.unitPrice, item.currency)}</td>
+        <td>${this.formatCurrency(item.totalPrice, item.currency)}</td>
         <td>${item.comments}</td>
-        <td>${this.formatCurrency(item.setupCost)}</td>
-        <td>${this.formatCurrency(item.materialCost)}</td>
-        <td>${this.formatCurrency(item.laborCost)}</td>
-        <td>${this.formatCurrency(item.overheadCost)}</td>
       </tr>
     `).join('');
 
@@ -569,10 +522,6 @@ export class SupplierQuotationDetailsComponent implements OnInit {
                 <th>Unit Price</th>
                 <th>Total Price</th>
                 <th>Comments</th>
-                <th>Setup Cost</th>
-                <th>Material Cost</th>
-                <th>Labor Cost</th>
-                <th>Overhead Cost</th>
               </tr>
             </thead>
             <tbody>
@@ -584,15 +533,15 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         <div class="summary-section">
           <div class="summary-row">
             <span class="summary-label">Sub Total:</span>
-            <span class="summary-value">${this.formatCurrency(this.quotationDetails.totalAmount)}</span>
+            <span class="summary-value">${this.formatCurrency(this.quotationDetails.totalAmount, this.getMainCurrency())}</span>
           </div>
           <div class="summary-row">
             <span class="summary-label">Discount:</span>
-            <span class="summary-value">${this.formatCurrency(this.quotationDetails.discountAmount)}</span>
+            <span class="summary-value">${this.formatCurrency(this.quotationDetails.discountAmount, this.getMainCurrency())}</span>
           </div>
           <div class="summary-row total-row">
             <span class="summary-label">Grand Total:</span>
-            <span class="summary-value">${this.formatCurrency(this.quotationDetails.grandTotal)}</span>
+            <span class="summary-value">${this.formatCurrency(this.quotationDetails.grandTotal, this.getMainCurrency())}</span>
           </div>
         </div>
       </body>
@@ -604,8 +553,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   get formattedQuotationItems() {
     return this.quotationItems.map(item => ({
       ...item,
-      unitPrice: this.formatCurrency(item.unitPrice),
-      totalPrice: this.formatCurrency(item.totalPrice)
+      unitPrice: this.formatCurrency(item.unitPrice, item.currency),
+      totalPrice: this.formatCurrency(item.totalPrice, item.currency)
     }));
   }
 
