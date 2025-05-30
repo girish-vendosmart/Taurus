@@ -12,7 +12,7 @@
       <div class="header-left">
         <h1 class="page-title">{{ rfqDetails.rfq_name || 'Loading...' }}</h1>
         <p class="rfq-id">{{ rfqDetails.name || 'Loading...' }}</p>
-        <span class="status-badge" [ngClass]="getStatusClass()">{{ getStatusText() }}</span>
+        <span class="status-badge mt-2" [ngClass]="getStatusClass()">{{ getStatusText() }}</span>
       </div>
       
       <div class="header-right">
@@ -22,6 +22,7 @@
       </div>
     </div>
   </div>
+
 
   <!-- RFQ Info Bar -->
   <div class="rfq-info-bar" *ngIf="!loading">
