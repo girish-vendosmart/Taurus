@@ -110,6 +110,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
         header: 'Description',
         sortable: true,
         filterable: true,
+        isHtml: true,
       },
       {
         field: 'material',

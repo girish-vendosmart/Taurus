@@ -194,7 +194,12 @@ $danger-red: #EF4444;
   }
 
   .info-separator {
-    display: none;
+    color: rgba($material-finish-silver, 0.6);
+    font-weight: $font-weight-normal;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 }
 
@@ -241,6 +246,29 @@ $danger-red: #EF4444;
     &.active {
       display: block;
     }
+  }
+}
+
+// Description Section
+.description-box {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid $blueprint-blue;
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: $font-weight-semibold;
+    color: $precision-black;
+    margin: 0 0 0.75rem 0;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: $precision-black;
+    line-height: 1.7;
+    margin: 0;
   }
 }
 

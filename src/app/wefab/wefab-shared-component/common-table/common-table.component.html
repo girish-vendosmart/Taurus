@@ -126,12 +126,6 @@
       [showPageLinks]="false"
       [rowsPerPageOptions]="[5, 10, 20, 50]"
     >
-      <!-- Custom Pagination Template -->
-      <ng-template pTemplate="paginatorleft">
-        <span class="paginator-info">
-          Showing {{ (dt.first || 0) + 1 }} to {{ Math.min((dt.first || 0) + (dt.rows || 10), (data.length || sampleData.length)) }} of {{ data.length || sampleData.length }} entries
-        </span>
-      </ng-template>
 
       <ng-template pTemplate="paginatorright">
         <div class="custom-pagination">
@@ -205,6 +199,14 @@
                   <i [class]="btn.icon" *ngIf="btn.icon"></i>
                   <span *ngIf="!btn.iconOnly && btn.label">{{ btn.label }}</span>
                 </button>
+              </div>
+
+              <!-- HTML Content Cell -->
+              <div [class]="col.field + '-cell'" *ngSwitchCase="col.isHtml">
+                <div class="main-content non-linkable-column" [innerHTML]="rowData[col.field]"></div>
+                <div class="sub-info" *ngIf="getSubInfo(col.field, rowData)">
+                  {{ getSubInfo(col.field, rowData) }}
+                </div>
               </div>
 
               <!-- Default Cell -->

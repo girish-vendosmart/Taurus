@@ -173,6 +173,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         header: 'Description',
         sortable: true,
         filterable: true,
+        isHtml: true,
       },
       {
         field: 'quantity',

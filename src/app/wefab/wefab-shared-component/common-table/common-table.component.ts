@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -31,6 +31,7 @@ export interface TableColumn {
   routerLinkField?: string;
   isStatus?: boolean;
   isAction?: boolean;
+  isHtml?: boolean;
   customTemplate?: boolean;
   width?: string;
   actions?: ActionButton[];
@@ -256,6 +257,11 @@ export class CommonTableComponent implements OnInit {
       routerLink: '/company-details/SUP-007302'
     }
   ];
+
+  ngOnChanges(changes: SimpleChanges) {
+    debugger
+    console.log('changes', changes);
+  }
 
   ngOnInit() {
     this.globalFilterFields = this.config.columns

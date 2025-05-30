@@ -78,50 +78,15 @@
     <div class="tab-panel" [class.active]="activeTab === 'overview'">
       <div class="overview-content">
         <!-- RFQ Details Section -->
-        <div class="details-section">
-          <h2>RFQ Details</h2>
-          <p class="section-subtitle">Review the details of this request for quotation</p>
-          
-          <div class="description-box">
-            <h3>Description</h3>
-            <div [innerHTML]="rfqDetails.description"></div>
-          </div>
-
-          <!-- Special Instructions -->
-          <div class="special-instructions" *ngIf="rfqDetails.special_instructions">
-            <h3>Special Instructions</h3>
-            <p>{{ rfqDetails.special_instructions }}</p>
-          </div>
-
-          <!-- Timeline -->
-          <div class="timeline-section">
-            <h3>Timeline</h3>
-            <div class="timeline-grid">
-              <div class="timeline-item">
-                <div class="timeline-label">Created On</div>
-                <div class="timeline-value">{{ formatDate(rfqDetails.creation) }}</div>
-              </div>
-              <div class="timeline-item">
-                <div class="timeline-label">Last Updated</div>
-                <div class="timeline-value">{{ formatDate(rfqDetails.modified) }}</div>
-              </div>
-              <div class="timeline-item">
-                <div class="timeline-label">Target Completion</div>
-                <div class="timeline-value">{{ formatDate(rfqDetails.target_completion) }}</div>
-              </div>
-              <div class="timeline-item">
-                <div class="timeline-label">Expiry Date</div>
-                <div class="timeline-value">{{ formatDate(rfqDetails.expiry_date) }}</div>
-              </div>
-            </div>
-          </div>
+        <div class="description-box">
+          <h3>Description</h3>
+          <div [innerHTML]="rfqDetails.description"></div>
         </div>
 
         <!-- RFQ Items Section -->
         <div class="items-section">
           <div class="items-header">
-            <h3>RFQ Items</h3>
-            <p class="section-subtitle">Review the items requested in this RFQ</p>
+            <h3>Items</h3>
           </div>
 
           <!-- Common Table Component for RFQ Items -->
@@ -152,8 +117,6 @@
                 <h4 class="file-name">{{ attachment.file_name }}</h4>
                 <p class="file-description">{{ attachment.description }}</p>
                 <div class="file-meta">
-                  <span class="file-type">{{ attachment.file_type }}</span>
-                  <span class="file-category">{{ attachment.category }}</span>
                   <span class="upload-date">{{ formatDate(attachment.uploaded_on) }}</span>
                 </div>
               </div>
