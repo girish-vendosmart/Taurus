@@ -8,6 +8,7 @@ import { CommonService } from '../../shared/common.service';
 import { HttpParams } from '@angular/common/http';
 import { ActivityTrailComponent, ActivityLogData } from '../../../common-core-component/activity-trail';
 import { ConversationTrailComponent } from '../../shared/components/conversation-trail/conversation-trail.component';
+import { SplitButtonComponent } from '../../../shared/split-button/split-button.component';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -148,12 +149,15 @@ export interface QuotationItem {
     ButtonModule,
     InputTextModule,
     ActivityTrailComponent,
-    ConversationTrailComponent
+    ConversationTrailComponent,
+    SplitButtonComponent
   ],
   templateUrl: './supplier-quotation-details.component.html',
   styleUrl: './supplier-quotation-details.component.scss'
 })
 export class SupplierQuotationDetailsComponent implements OnInit {
+
+  severityOptions: any[] = [];
 
   // Component data - initialized as empty, will be populated from API
   quotationDetails: QuotationDetails = {
@@ -284,8 +288,37 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       this.quotationId = quotationId;
       if (quotationId) {
         this.getQuotationDetails(quotationId);
+        this.getActionList()
       }
     });
+  }
+
+  getActionList() {
+
+    let obj:any = {
+      doctype: 'Supplier Quotation',
+      name: this.quotationId
+    }
+    let params = new HttpParams();
+    params = params.append('doc', JSON.stringify(obj));
+    let endPoint = `/api/method/frappe.model.workflow.get_transitions`;
+    this.commonService.getWefabData(endPoint, params).subscribe((res:any) => {
+      let updatedActionList = this.modifyActionList(res.message);
+      this.severityOptions = [...updatedActionList];
+    });
+  }
+
+  modifyActionList(actionList: any) {
+    let updatedActionList:any = []
+
+    actionList.forEach((action:any) => {
+      let obj:any = {}
+      obj['label'] = action.action 
+      obj['value'] = action.action
+      updatedActionList.push(obj)
+    })
+
+    return updatedActionList;
   }
 
   getQuotationDetails(quotationId: string) {
@@ -625,10 +658,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   onLinkClick(event: any) {
     console.log('Link clicked:', event);
   }
-
-  onActionClick(event: any) {
-    console.log('Action clicked:', event);
-  }
+  
 
   editQuotation() {
     // Navigate to create quotation page with quotationId and edit mode as query parameters
@@ -911,5 +941,43 @@ export class SupplierQuotationDetailsComponent implements OnInit {
           this.activityTrailLoading = false;
         }
       });
+  }
+
+  onActionClick(event: any) {
+    console.log('Action triggered:', event);
+    
+    if (!event.option) return;
+    
+    // Get the action value from the option
+    const actionValue = event.option.value;
+    console.log('Action value:', actionValue);
+
+    // Update quotation status based on the action
+    this.updateQuotationStatus(actionValue);
+  }
+
+  private updateQuotationStatus(status: string) {
+    console.log('Updating quotation status to:', status);
+    const action = {
+      action: status,
+      doc: {
+        doctype: 'Supplier Quotation',
+        name: this.quotationId
+      }
+    };
+
+    this.commonService.postWefabData('/api/method/frappe.model.workflow.apply_workflow', action).subscribe({
+      next: (res: any) => {
+        console.log(`Quotation ${status} successfully:`, res);
+        // Refresh quotation details
+        this.getQuotationDetails(this.quotationId);
+        // Refresh action list after status change
+        this.getActionList();
+      },
+      error: (error) => {
+        console.error(`Error updating quotation status to ${status}:`, error);
+        // Handle error (show error message to user)
+      }
+    });
   }
 }

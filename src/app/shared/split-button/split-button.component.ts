@@ -34,8 +34,8 @@ export interface SplitButtonOption {
         [disabled]="disabled"
         (click)="onMainButtonClick()"
         [attr.aria-label]="selectedOption?.label || placeholder">
-        <i *ngIf="selectedOption?.icon" [class]="selectedOption?.icon + ' mr-2'"></i>
-        <span>{{ selectedOption?.label || placeholder }}</span>
+        <i *ngIf="selectedOption?.icon || icon" [class]="selectedOption?.icon || icon + ' mr-2'"></i>
+        <span>{{ selectedOption?.label || label || placeholder }}</span>
       </button>
       
       <button 
@@ -44,7 +44,7 @@ export interface SplitButtonOption {
         [class]="'p-button p-component split-button-dropdown ' + severity"
         [disabled]="disabled"
         (click)="toggleDropdown($event)"
-        [attr.aria-label]="'Open dropdown options'"
+        [attr.aria-label]="'Toggle dropdown'"
         #dropdownBtn>
         <i class="pi pi-chevron-down"></i>
       </button>
@@ -67,9 +67,12 @@ export class SplitButtonComponent implements ControlValueAccessor, OnInit, OnCha
   @Input() disabled: boolean = false;
   @Input() severity: string = 'primary'; // primary, secondary, success, info, warning, help, danger
   @Input() allowMainButtonAction: boolean = true;
+  @Input() icon: string = '';
+  @Input() label: string = '';
   
   @Output() optionSelected = new EventEmitter<SplitButtonOption>();
   @Output() mainButtonClicked = new EventEmitter<SplitButtonOption | null>();
+  @Output() actionTriggered = new EventEmitter<{ action: string, option: SplitButtonOption | null }>();
 
   @ViewChild('menu') menu!: Menu;
   @ViewChild('container') container!: ElementRef;
@@ -94,7 +97,10 @@ export class SplitButtonComponent implements ControlValueAccessor, OnInit, OnCha
       icon: option.icon,
       disabled: option.disabled,
       separator: option.separator,
-      command: () => this.selectOption(option)
+      command: () => {
+        this.selectOption(option);
+        this.actionTriggered.emit({ action: 'select', option: option });
+      }
     }));
   }
 
@@ -110,6 +116,9 @@ export class SplitButtonComponent implements ControlValueAccessor, OnInit, OnCha
   onMainButtonClick() {
     if (!this.allowMainButtonAction) return;
     this.mainButtonClicked.emit(this.selectedOption);
+    debugger
+    console.log('Main button clicked:', this.selectedOption);
+    this.actionTriggered.emit({ action: 'click', option: this.selectedOption });
   }
 
   toggleDropdown(event: Event) {
