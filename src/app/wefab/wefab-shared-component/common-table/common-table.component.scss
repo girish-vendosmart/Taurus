@@ -429,39 +429,94 @@
             width: 100%;
             
             .status-badge {
+              display: inline-flex;
+              align-items: center;
               padding: 0.25rem 0.75rem;
-              border-radius: 1rem;
+              border-radius: 12px;
               font-size: 0.75rem;
-              font-weight: normal;
-              display: inline-block;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.025em;
               white-space: nowrap;
+              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+              transition: all 0.2s ease;
 
-              &.status-approved {
-                background-color: #e7f5e7;
-                color: #198754;
-              }
-
-              &.status-under-review {
-                background-color: #fff3cd;
-                color: #664d03;
+              &.status-draft {
+                background-color: rgba(156, 163, 175, 0.15);
+                color: #6b7280;
+                border: 1px solid rgba(156, 163, 175, 0.2);
               }
 
               &.status-open {
-                background-color: rgba($blueprint-blue, 0.1);
-                color: $blueprint-blue;
-                border: 1px solid rgba($blueprint-blue, 0.2);
+                background-color: rgba(59, 130, 246, 0.15);
+                color: #3b82f6;
+                border: 1px solid rgba(59, 130, 246, 0.2);
               }
 
-              &.status-in-progress {
-                background-color: #fff3cd;
-                color: #664d03;
-                border: 1px solid #ffeaa7;
+              &.status-under-review {
+                background-color: rgba(228, 163, 54, 0.15);
+                color: #e4a336;
+                border: 1px solid rgba(228, 163, 54, 0.2);
+              }
+
+              &.status-approved {
+                background-color: rgba(16, 185, 129, 0.15);
+                color: #059669;
+                border: 1px solid rgba(16, 185, 129, 0.2);
+              }
+
+              &.status-progress, &.status-in-progress {
+                background-color: rgba(228, 163, 54, 0.15);
+                color: #e4a336;
+                border: 1px solid rgba(228, 163, 54, 0.2);
               }
 
               &.status-closed {
-                background-color: #e7f5e7;
-                color: #198754;
-                border: 1px solid #c3e6cb;
+                background-color: rgba(107, 114, 128, 0.15);
+                color: #6b7280;
+                border: 1px solid rgba(107, 114, 128, 0.2);
+              }
+
+              &.status-awarded {
+                background-color: rgba(16, 185, 129, 0.15);
+                color: #059669;
+                border: 1px solid rgba(16, 185, 129, 0.2);
+              }
+
+              &.status-rejected {
+                background-color: rgba(239, 68, 68, 0.15);
+                color: #dc2626;
+                border: 1px solid rgba(239, 68, 68, 0.2);
+              }
+
+              &.status-pending {
+                background-color: rgba(168, 85, 247, 0.15);
+                color: #7c3aed;
+                border: 1px solid rgba(168, 85, 247, 0.2);
+              }
+
+              &.status-review {
+                background-color: rgba(228, 163, 54, 0.15);
+                color: #e4a336;
+                border: 1px solid rgba(228, 163, 54, 0.2);
+              }
+
+              &.status-resubmit {
+                background-color: rgba(239, 68, 68, 0.15);
+                color: #dc2626;
+                border: 1px solid rgba(239, 68, 68, 0.2);
+              }
+
+              &.status-default {
+                background-color: rgba(107, 114, 128, 0.15);
+                color: #6b7280;
+                border: 1px solid rgba(107, 114, 128, 0.2);
+              }
+
+              // Hover effect for interactive badges
+              &:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
               }
             }
           }
@@ -649,6 +704,13 @@
         margin: 0;
       }
 
+      .paginator-info {
+        color: $machine-gray;
+        font-size: 0.875rem;
+        font-weight: normal;
+        margin: 0;
+      }
+
       // Hide default pagination elements
       .p-paginator-first,
       .p-paginator-prev,
@@ -770,74 +832,6 @@
   line-height: 1.4;
 }
 
-// Status badge styling to match original design
-.status-badge {
-  display: inline-block;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  text-align: center;
-  font-weight: 500;
-  
-  &.status-approved {
-    background-color: #e8f5e9;
-    color: #1b9b62;
-  }
-  
-  &.status-under-review {
-    background-color: #fff3cd;
-    color: #856404;
-  }
-  
-  &.status-resubmit {
-    background-color: #e0f7fa;
-    color: #0288d1;
-  }
-  
-  &.status-open {
-    background-color: #e3f2fd;
-    color: #1976d2;
-  }
-  
-  &.status-in-progress {
-    background-color: #fff3cd;
-    color: #856404;
-  }
-  
-  &.status-closed {
-    background-color: #e8f5e9;
-    color: #1b9b62;
-  }
-  
-  &.status-default {
-    background-color: #f5f5f5;
-    color: #666;
-  }
-}
-
-// Action button styling
-.action-btn {
-  background: none;
-  border: 1px solid #E0E0E0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #6c757d;
-  border-radius: 4px;
-  margin: 0 2px;
-  
-  &:hover {
-    background-color: #f8f9fa;
-  }
-  
-  i {
-    font-size: 1rem;
-  }
-}
-
 // Table row hover effect
 :host ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
   background-color: #f5f9ff !important;
@@ -862,5 +856,25 @@
     cursor: col-resize !important;
     user-select: none !important;
   }
+}
+
+// Column value styling
+.linkable-column {
+  color: #007bff !important; // Blue color for linkable columns
+  text-decoration: none;
+  cursor: pointer;
+  
+  &:hover {
+    color: #0056b3 !important; // Darker blue on hover
+    text-decoration: underline;
+  }
+  
+  &:visited {
+    color: #007bff !important; // Keep blue even after visiting
+  }
+}
+
+.non-linkable-column {
+  color: #333 !important; // Black color for non-linkable columns
 }
 

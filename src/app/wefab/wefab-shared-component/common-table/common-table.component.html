@@ -72,9 +72,6 @@
           <div class="header-content">
             <span class="header-title">
               {{ col.header }}
-              <i class="pi pi-external-link link-indicator" 
-                 *ngIf="col.isLink" 
-                 title="This column contains clickable links"></i>
             </span>
             <i [class]="getSortIcon(col.field)" 
                *ngIf="col.sortable" 
@@ -124,12 +121,18 @@
       [rowHover]="true"
       responsiveLayout="scroll"
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-      [alwaysShowPaginator]="false"
+      [alwaysShowPaginator]="true"
       [showFirstLastIcon]="false"
       [showPageLinks]="false"
       [rowsPerPageOptions]="[5, 10, 20, 50]"
     >
       <!-- Custom Pagination Template -->
+      <ng-template pTemplate="paginatorleft">
+        <span class="paginator-info">
+          Showing {{ (dt.first || 0) + 1 }} to {{ Math.min((dt.first || 0) + (dt.rows || 10), (data.length || sampleData.length)) }} of {{ data.length || sampleData.length }} entries
+        </span>
+      </ng-template>
+
       <ng-template pTemplate="paginatorright">
         <div class="custom-pagination">
           <button 
@@ -162,24 +165,21 @@
             <ng-container [ngSwitch]="true">
               <!-- Company Cell -->
               <div class="company-cell" *ngSwitchCase="col.isLink">
-                <a class="company-name" 
+                <a class="company-name linkable-column" 
                    *ngIf="!col.routerLink && !rowData.routerLink"
                    (click)="onLinkClick($event, rowData, col)">
-                  <i class="pi pi-external-link link-icon"></i>
                   {{ rowData[col.field] }}
                 </a>
-                <a class="company-name" 
+                <a class="company-name linkable-column" 
                    *ngIf="col.routerLink && !rowData.routerLink"
                    [routerLink]="getRouterLink(col, rowData)"
                    (click)="onLinkClick($event, rowData, col)">
-                  <i class="pi pi-external-link link-icon"></i>
                   {{ rowData[col.field] }}
                 </a>
-                <a class="company-name" 
+                <a class="company-name linkable-column" 
                    *ngIf="rowData.routerLink"
                    [routerLink]="rowData.routerLink"
                    (click)="onLinkClick($event, rowData, col)">
-                  <i class="pi pi-external-link link-icon"></i>
                   {{ rowData[col.field] }}
                 </a>
                 <div class="sub-info" *ngIf="rowData.companySubInfo || rowData.companyId || rowData.name">
@@ -209,7 +209,7 @@
 
               <!-- Default Cell -->
               <div [class]="col.field + '-cell'" *ngSwitchDefault>
-                <div class="main-content">{{ rowData[col.field] }}</div>
+                <div class="main-content non-linkable-column">{{ rowData[col.field] }}</div>
                 <div class="sub-info" *ngIf="getSubInfo(col.field, rowData)">
                   {{ getSubInfo(col.field, rowData) }}
                 </div>

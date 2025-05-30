@@ -71,6 +71,9 @@ export interface TableConfig {
 export class CommonTableComponent implements OnInit {
   @ViewChild('dt') table!: Table;
   
+  // Make Math available in template
+  Math = Math;
+  
   constructor() {}
 
   @Input() config: TableConfig = {
@@ -367,20 +370,32 @@ export class CommonTableComponent implements OnInit {
     
     status = status.toLowerCase();
     switch (status) {
-      case 'approved':
-        return 'status-approved';
-      case 'under review':
-        return 'status-under-review';
-      case 'request to resubmit':
-        return 'status-resubmit';
+      case 'draft':
+        return 'status-draft';
       case 'open':
         return 'status-open';
-      case 'in progress':
-        return 'status-in-progress';
+      case 'under review':
+        return 'status-under-review';
+      case 'approved':
+        return 'status-approved';
       case 'closed':
         return 'status-closed';
+      case 'request to resubmit':
+        return 'status-resubmit';
+      case 'in progress':
+        return 'status-in-progress';
       case 'invited':
         return 'status-under-review'; // Use same styling as under review
+      case 'awarded':
+        return 'status-awarded';
+      case 'submitted':
+        return 'status-awarded';
+      case 'rejected':
+        return 'status-rejected';
+      case 'pending':
+        return 'status-pending';
+      case 'review':
+        return 'status-review';
       default:
         return 'status-default';
     }
