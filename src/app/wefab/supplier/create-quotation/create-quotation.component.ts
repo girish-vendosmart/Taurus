@@ -317,13 +317,13 @@ export class CreateQuotationComponent implements OnInit {
           quotationItems: this.transformCreateQuotationItemsToModel(createQuotationData.items || []),
           subTotal: createQuotationData.total_amount || 0,
           discount: createQuotationData.discount_percentage || 0,
-          shippingCharges: 0, // This might need to be calculated or come from API
+          shippingCharges: createQuotationData.shipping_charges || 0,
           totalAmount: createQuotationData.grand_total || 0
         };
 
         // Set discount percentage and shipping charges for calculations
         this.discountPercentage = createQuotationData.discount_percentage || 0;
-        this.shippingCharges = 0; // Set based on your business logic
+        this.shippingCharges = createQuotationData.shipping_charges || 0;
 
         // Set the selectedTaxType based on loaded data
         if (this.model.cgstSgst) {
@@ -690,7 +690,13 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.form.valid && this.model.termsAndConditions) {
+    // Check if basic required fields are filled
+    const isBasicValidation = this.model.termsAndConditions && this.model.totalLeadTime;
+    
+    // Check email only if no RFQ ID (when field is visible)
+    const isEmailValidation = !this.model.rfqId ? this.model.email : true;
+    
+    if (this.form.valid && isBasicValidation && isEmailValidation) {
       // Transform data to API format
       const apiData = this.transformToApiFormat();
       
@@ -705,27 +711,27 @@ export class CreateQuotationComponent implements OnInit {
         });
         console.warn('Missing API fields:', validation.missingFields);
       }
+
+      debugger
+      console.log("Api Data ", apiData);
       
       if (this.isEditMode) {
         this.updateExistingQuotation(apiData);
-        // Update existing quotation
-        // this.messageService.add({
-        //   severity: 'success',
-        //   summary: 'Success',
-        //   detail: 'Quotation updated successfully!'
-        // });
-        // console.log('Updated Quotation Data (API Format):', apiData);
-        
-        // // Redirect back to quotation details page after a short delay
-        // setTimeout(() => {
-        //   this.router.navigate(['/wefab/supplier/quotation/details', this.quotationId]);
-        // }, 1500);
       } else {
         // Create new quotation
         this.createNewQuotation(apiData);
       }
     } else {
       let errorMessage = 'Please fill all required fields';
+      
+      // More specific error messages
+      if (!this.model.termsAndConditions) {
+        errorMessage = 'Terms & Conditions is required';
+      } else if (!this.model.totalLeadTime) {
+        errorMessage = 'Total Lead Time is required';
+      } else if (!this.model.rfqId && !this.model.email) {
+        errorMessage = 'Email is required';
+      }
       
       this.messageService.add({
         severity: 'error',
@@ -761,23 +767,6 @@ export class CreateQuotationComponent implements OnInit {
       });
       this.router.navigate(['/wefab/supplier/quotation/details', res.data.name]);
     })
-
-    // const quotationId = 'QUO' + Date.now().toString().slice(-6);
-        
-    //     this.messageService.add({
-    //       severity: 'success',
-    //       summary: 'Success',
-    //       detail: 'Quotation sent successfully!'
-    //     });
-    //     console.log('New Quotation Data (API Format):', apiData);
-        
-    //     // Here you would typically make an API call:
-    //     // this.quotationService.createQuotation(apiData).subscribe(...)
-        
-    //     // Redirect to quotation details page after a short delay
-    //     setTimeout(() => {
-    //       this.router.navigate(['/wefab/supplier/quotation/details', quotationId]);
-    //     }, 1500);
   }
 
   // Transform current form data to API expected format
@@ -791,9 +780,12 @@ export class CreateQuotationComponent implements OnInit {
       quotation_from: this.quoteFrom,
       quotation_to: this.quoteTo,
       discount_percentage: this.discountPercentage || 0,
+      shipping_charges: this.shippingCharges || 0,
       payment_terms: this.model.paymentTerms,
       shipping_terms: this.getShippingTerms(),
       notes: `<p>${this.model.termsAndConditions}</p>`,
+      igst_applicable: this.selectedTaxType === 'igst',
+      sgst_cgst_applicable: this.selectedTaxType === 'cgstSgst',
       items: this.transformQuotationItems(),
       attachments: this.transformAttachments()
     };
@@ -1127,13 +1119,13 @@ export class CreateQuotationComponent implements OnInit {
           quotationItems: this.transformApiItemsToModel(quotationData.items || []),
           subTotal: quotationData.total_amount || 0,
           discount: quotationData.discount_percentage || 0,
-          shippingCharges: 0, // This might need to be calculated or come from API
+          shippingCharges: quotationData.shipping_charges || 0,
           totalAmount: quotationData.grand_total || 0
         };
 
         // Set discount percentage and shipping charges for calculations
         this.discountPercentage = quotationData.discount_percentage || 0;
-        this.shippingCharges = 0; // Set based on your business logic
+        this.shippingCharges = quotationData.shipping_charges || 0;
 
         // Set the selectedTaxType based on loaded data
         if (this.model.cgstSgst) {
@@ -1352,13 +1344,17 @@ export class CreateQuotationComponent implements OnInit {
       'estimated_completion_duration',
       'validity',
       'payment_terms',
+      'shipping_charges',
+      'igst_applicable',
+      'sgst_cgst_applicable',
       'items'
     ];
     
     const missingFields: string[] = [];
     
     requiredFields.forEach(field => {
-      if (!apiData[field] || (Array.isArray(apiData[field]) && apiData[field].length === 0)) {
+      if (apiData[field] === undefined || apiData[field] === null || 
+          (Array.isArray(apiData[field]) && apiData[field].length === 0)) {
         missingFields.push(field);
       }
     });

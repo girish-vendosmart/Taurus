@@ -187,6 +187,10 @@
     .info-value {
       color: $precision-black;
       font-weight: $font-weight-semibold;
+
+      ::ng-deep p {
+        margin: 0;
+      }
     }
   }
 

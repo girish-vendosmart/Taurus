@@ -29,13 +29,30 @@ export interface SupplierQuotationApiResponse {
   total_amount: number;
   discount_percentage: number;
   discount_amount: number;
+  shipping_charges: number;
   grand_total: number;
+  tax_applicable: number;
+  sgst_cgst_applicable: number;
+  igst_applicable: number;
+  sgst_rate: number;
+  cgst_rate: number;
+  igst_rate: number;
+  taxable_amount: number;
+  sgst_amount: number;
+  cgst_amount: number;
+  igst_amount: number;
+  total_tax_amount: number;
+  grand_total_with_tax: number;
   payment_terms: string;
   shipping_terms: string;
   notes: string;
   doctype: string;
   items: QuotationLineItem[];
   attachments: any[];
+  quotation_from: string;
+  quotation_to: string;
+  quotation_from_email_address: string;
+  quotation_from_phone_number: string;
 }
 
 export interface QuotationLineItem {
@@ -75,7 +92,20 @@ export interface QuotationDetails {
   totalAmount: number;
   discountPercentage: number;
   discountAmount: number;
+  shippingCharges: number;
   grandTotal: number;
+  taxApplicable: number;
+  sgstCgstApplicable: boolean;
+  igstApplicable: boolean;
+  sgstRate: number;
+  cgstRate: number;
+  igstRate: number;
+  taxableAmount: number;
+  sgstAmount: number;
+  cgstAmount: number;
+  igstAmount: number;
+  totalTaxAmount: number;
+  grandTotalWithTax: number;
   paymentTerms: string;
   shippingTerms: string;
   notes: string;
@@ -134,7 +164,20 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     totalAmount: 0,
     discountPercentage: 0,
     discountAmount: 0,
+    shippingCharges: 0,
     grandTotal: 0,
+    taxApplicable: 0,
+    sgstCgstApplicable: false,
+    igstApplicable: false,
+    sgstRate: 0,
+    cgstRate: 0,
+    igstRate: 0,
+    taxableAmount: 0,
+    sgstAmount: 0,
+    cgstAmount: 0,
+    igstAmount: 0,
+    totalTaxAmount: 0,
+    grandTotalWithTax: 0,
     paymentTerms: '',
     shippingTerms: '',
     notes: '',
@@ -260,6 +303,19 @@ export class SupplierQuotationDetailsComponent implements OnInit {
 
   // Map API response to component data structure
   mapApiResponseToComponent(apiData: SupplierQuotationApiResponse) {
+    console.log('API Tax Data:', {
+      sgst_cgst_applicable: apiData.sgst_cgst_applicable,
+      igst_applicable: apiData.igst_applicable,
+      sgst_rate: apiData.sgst_rate,
+      cgst_rate: apiData.cgst_rate,
+      igst_rate: apiData.igst_rate,
+      sgst_amount: apiData.sgst_amount,
+      cgst_amount: apiData.cgst_amount,
+      igst_amount: apiData.igst_amount,
+      total_amount: apiData.total_amount,
+      discount_amount: apiData.discount_amount
+    });
+
     // Map main quotation details
     this.quotationDetails = {
       quotationId: apiData.name,
@@ -273,20 +329,33 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       totalAmount: apiData.total_amount,
       discountPercentage: apiData.discount_percentage,
       discountAmount: apiData.discount_amount,
+      shippingCharges: apiData.shipping_charges,
       grandTotal: apiData.grand_total,
+      taxApplicable: apiData.tax_applicable,
+      sgstCgstApplicable: apiData.sgst_cgst_applicable === 1,
+      igstApplicable: apiData.igst_applicable === 1,
+      sgstRate: apiData.sgst_rate,
+      cgstRate: apiData.cgst_rate,
+      igstRate: apiData.igst_rate,
+      taxableAmount: apiData.taxable_amount,
+      sgstAmount: apiData.sgst_amount,
+      cgstAmount: apiData.cgst_amount,
+      igstAmount: apiData.igst_amount,
+      totalTaxAmount: apiData.total_tax_amount,
+      grandTotalWithTax: apiData.grand_total_with_tax,
       paymentTerms: apiData.payment_terms,
       shippingTerms: apiData.shipping_terms,
       notes: apiData.notes,
       supplierId: apiData.supplier_id,
       quoteFrom: {
-        company: 'Swiss Electric Solutions AG', // This might need to come from supplier API
-        email: 'daniel.roth@mailinator.com', // This might need to come from supplier API
-        phone: '4121765432' // This might need to come from supplier API
+        company: apiData.quotation_from, // This might need to come from supplier API
+        email: apiData.quotation_from_email_address ? apiData.quotation_from_email_address : '----', // This might need to come from supplier API
+        phone: apiData.quotation_from_phone_number ? apiData.quotation_from_phone_number : '----' // This might need to come from supplier API
       },
       quoteTo: {
-        company: 'Logitech International S.A.', // This might need to come from customer/RFQ API
-        email: 'super_admin_alshaya@mailinator.com', // This might need to come from customer/RFQ API
-        location: 'Lausanne' // This might need to come from customer/RFQ API
+        company: apiData.quotation_to.split('\n')[0],
+        email: apiData.quotation_to.split('\n')[1],
+        location: apiData.quotation_to.split('\n')[2]
       }
     };
 
@@ -334,6 +403,17 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   }
 
   formatCurrency(amount: number, currency: string = 'USD'): string {
+    // Handle INR currency specifically
+    if (currency === 'INR') {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+    
+    // Default formatting for other currencies
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
@@ -342,9 +422,189 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     }).format(amount);
   }
 
-  // Helper method to get the main currency from quotation items
+  // Helper method to get the main currency dynamically from quotation items
   getMainCurrency(): string {
-    return this.quotationItems.length > 0 ? this.quotationItems[0].currency : 'USD';
+    // First priority: Check if we have quotation items with currencies
+    if (this.quotationItems && this.quotationItems.length > 0) {
+      // Get all currencies from items
+      const currencies = this.quotationItems
+        .map(item => item.currency)
+        .filter(currency => currency && currency.trim() !== '');
+      
+      if (currencies.length > 0) {
+        // If all items have the same currency, use it
+        const uniqueCurrencies = [...new Set(currencies)];
+        
+        if (uniqueCurrencies.length === 1) {
+          return uniqueCurrencies[0];
+        }
+        
+        // If multiple currencies, find the most common one
+        if (uniqueCurrencies.length > 1) {
+          const currencyCount = currencies.reduce((acc: {[key: string]: number}, currency) => {
+            acc[currency] = (acc[currency] || 0) + 1;
+            return acc;
+          }, {});
+          
+          const mostCommonCurrency = Object.keys(currencyCount).reduce((a, b) => 
+            currencyCount[a] > currencyCount[b] ? a : b
+          );
+          
+          console.log('Multiple currencies found, using most common:', mostCommonCurrency);
+          return mostCommonCurrency;
+        }
+      }
+    }
+    
+    // Second priority: Check if there's a currency from the API response (quotation level)
+    if (this.quotationDetails && this.quotationItems.length > 0) {
+      const firstItemCurrency = this.quotationItems[0].currency;
+      if (firstItemCurrency && firstItemCurrency.trim() !== '') {
+        return firstItemCurrency;
+      }
+    }
+    
+    // Third priority: Default based on quotation data context
+    // Check if amounts suggest INR (typically larger numbers) or USD
+    const totalAmount = this.quotationDetails?.totalAmount || 0;
+    if (totalAmount > 100000) {
+      return 'INR'; // Likely INR if large amounts
+    }
+    
+    // Final fallback
+    return 'USD';
+  }
+
+  // Get currency specifically for a particular context (items vs totals)
+  getItemsCurrency(): string {
+    if (this.quotationItems && this.quotationItems.length > 0) {
+      return this.quotationItems[0].currency || 'USD';
+    }
+    return 'USD';
+  }
+
+  // Get currency for summary section (could be different logic if needed)
+  getSummaryCurrency(): string {
+    const currency = this.getMainCurrency();
+    console.log('Summary Currency Selected:', currency);
+    return currency;
+  }
+
+  // Calculate total tax amount based on applicable taxes
+  getTotalTaxAmount(): number {
+    let totalTax = 0;
+    
+    // If API provides tax amounts, use them
+    if (this.quotationDetails.sgstCgstApplicable) {
+      const sgstAmount = this.quotationDetails.sgstAmount || 0;
+      const cgstAmount = this.quotationDetails.cgstAmount || 0;
+      
+      // If API amounts are 0, calculate them based on rates
+      if (sgstAmount === 0 && cgstAmount === 0 && (this.quotationDetails.sgstRate > 0 || this.quotationDetails.cgstRate > 0)) {
+        const taxableAmount = this.getTaxableAmount();
+        totalTax += (taxableAmount * (this.quotationDetails.sgstRate || 0) / 100);
+        totalTax += (taxableAmount * (this.quotationDetails.cgstRate || 0) / 100);
+      } else {
+        totalTax += sgstAmount + cgstAmount;
+      }
+    }
+    
+    if (this.quotationDetails.igstApplicable) {
+      const igstAmount = this.quotationDetails.igstAmount || 0;
+      
+      // If API amount is 0, calculate it based on rate
+      if (igstAmount === 0 && this.quotationDetails.igstRate > 0) {
+        const taxableAmount = this.getTaxableAmount();
+        totalTax += (taxableAmount * this.quotationDetails.igstRate / 100);
+      } else {
+        totalTax += igstAmount;
+      }
+    }
+    
+    return totalTax;
+  }
+
+  // Calculate taxable amount (Sub Total - Discount)
+  getTaxableAmount(): number {
+    const subTotal = this.quotationDetails.totalAmount || 0;
+    const discountAmount = this.quotationDetails.discountAmount || 0;
+    return subTotal - discountAmount;
+  }
+
+  // Calculate SGST amount
+  getSGSTAmount(): number {
+    if (!this.quotationDetails.sgstCgstApplicable) return 0;
+    
+    const apiAmount = this.quotationDetails.sgstAmount || 0;
+    if (apiAmount > 0) return apiAmount;
+    
+    // Calculate based on rate if API amount is 0
+    if (this.quotationDetails.sgstRate > 0) {
+      const taxableAmount = this.getTaxableAmount();
+      const calculatedAmount = taxableAmount * this.quotationDetails.sgstRate / 100;
+      console.log('SGST Calculation:', {
+        taxableAmount,
+        sgstRate: this.quotationDetails.sgstRate,
+        calculatedAmount
+      });
+      return calculatedAmount;
+    }
+    
+    return 0;
+  }
+
+  // Calculate CGST amount
+  getCGSTAmount(): number {
+    if (!this.quotationDetails.sgstCgstApplicable) return 0;
+    
+    const apiAmount = this.quotationDetails.cgstAmount || 0;
+    if (apiAmount > 0) return apiAmount;
+    
+    // Calculate based on rate if API amount is 0
+    if (this.quotationDetails.cgstRate > 0) {
+      const taxableAmount = this.getTaxableAmount();
+      const calculatedAmount = taxableAmount * this.quotationDetails.cgstRate / 100;
+      console.log('CGST Calculation:', {
+        taxableAmount,
+        cgstRate: this.quotationDetails.cgstRate,
+        calculatedAmount
+      });
+      return calculatedAmount;
+    }
+    
+    return 0;
+  }
+
+  // Calculate IGST amount
+  getIGSTAmount(): number {
+    if (!this.quotationDetails.igstApplicable) return 0;
+    
+    const apiAmount = this.quotationDetails.igstAmount || 0;
+    if (apiAmount > 0) return apiAmount;
+    
+    // Calculate based on rate if API amount is 0
+    if (this.quotationDetails.igstRate > 0) {
+      const taxableAmount = this.getTaxableAmount();
+      return taxableAmount * this.quotationDetails.igstRate / 100;
+    }
+    
+    return 0;
+  }
+
+  // Calculate grand total based on applicable taxes and shipping charges
+  getGrandTotal(): number {
+    const subTotal = this.quotationDetails.totalAmount || 0;
+    const discountAmount = this.quotationDetails.discountAmount || 0;
+    const shippingCharges = this.quotationDetails.shippingCharges || 0;
+    const taxAmount = this.getTotalTaxAmount();
+    
+    // Grand Total = Sub Total - Discount + Tax + Shipping Charges
+    return subTotal - discountAmount + taxAmount + shippingCharges;
+  }
+
+  // Check if any tax is applicable
+  isTaxApplicable(): boolean {
+    return this.quotationDetails.sgstCgstApplicable || this.quotationDetails.igstApplicable;
   }
 
   // Table event handlers
@@ -400,6 +660,50 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         <td>${item.comments}</td>
       </tr>
     `).join('');
+
+    // Generate tax rows based on applicability
+    let taxRows = '';
+    if (this.isTaxApplicable()) {
+      if (this.quotationDetails.sgstCgstApplicable) {
+        taxRows += `
+          <div class="summary-row">
+            <span class="summary-label">SGST (${this.quotationDetails.sgstRate}%):</span>
+            <span class="summary-value">${this.formatCurrency(this.getSGSTAmount(), this.getSummaryCurrency())}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">CGST (${this.quotationDetails.cgstRate}%):</span>
+            <span class="summary-value">${this.formatCurrency(this.getCGSTAmount(), this.getSummaryCurrency())}</span>
+          </div>
+        `;
+      }
+      if (this.quotationDetails.igstApplicable) {
+        taxRows += `
+          <div class="summary-row">
+            <span class="summary-label">IGST (${this.quotationDetails.igstRate}%):</span>
+            <span class="summary-value">${this.formatCurrency(this.getIGSTAmount(), this.getSummaryCurrency())}</span>
+          </div>
+        `;
+      }
+      taxRows += `
+        <div class="summary-row">
+          <span class="summary-label">Total Tax:</span>
+          <span class="summary-value">${this.formatCurrency(this.getTotalTaxAmount(), this.getSummaryCurrency())}</span>
+        </div>
+      `;
+    }
+
+    // Add shipping charges if applicable
+    let shippingRow = '';
+    if (this.quotationDetails.shippingCharges > 0) {
+      shippingRow = `
+        <div class="summary-row">
+          <span class="summary-label">Shipping Charges:</span>
+          <span class="summary-value">${this.formatCurrency(this.quotationDetails.shippingCharges, this.getSummaryCurrency())}</span>
+        </div>
+      `;
+    }
+
+    const finalTotal = this.getGrandTotal();
 
     return `
       <!DOCTYPE html>
@@ -494,16 +798,17 @@ export class SupplierQuotationDetailsComponent implements OnInit {
           <h1>Quotation ${this.quotationDetails.quotationId}</h1>
         </div>
 
+
         <div class="quote-parties">
           <div class="quote-section">
-            <h3>Quote From :-</h3>
+            <h3>Quote From :</h3>
             <div class="company-name">${this.quotationDetails.quoteFrom.company}</div>
             <div class="contact-info">${this.quotationDetails.quoteFrom.email}</div>
             <div class="contact-info">${this.quotationDetails.quoteFrom.phone}</div>
           </div>
           
           <div class="quote-section">
-            <h3>Quote To :-</h3>
+            <h3>Quote To :</h3>
             <div class="company-name">${this.quotationDetails.quoteTo.company}</div>
             <div class="contact-info">${this.quotationDetails.quoteTo.email}</div>
             <div class="contact-info">${this.quotationDetails.quoteTo.location}</div>
@@ -534,15 +839,17 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         <div class="summary-section">
           <div class="summary-row">
             <span class="summary-label">Sub Total:</span>
-            <span class="summary-value">${this.formatCurrency(this.quotationDetails.totalAmount, this.getMainCurrency())}</span>
+            <span class="summary-value">${this.formatCurrency(this.quotationDetails.totalAmount, this.getSummaryCurrency())}</span>
           </div>
           <div class="summary-row">
-            <span class="summary-label">Discount:</span>
-            <span class="summary-value">${this.formatCurrency(this.quotationDetails.discountAmount, this.getMainCurrency())}</span>
+            <span class="summary-label">Discount (${this.quotationDetails.discountPercentage}%):</span>
+            <span class="summary-value">${this.formatCurrency(this.quotationDetails.discountAmount, this.getSummaryCurrency())}</span>
           </div>
+          ${taxRows}
+          ${shippingRow}
           <div class="summary-row total-row">
             <span class="summary-label">Grand Total:</span>
-            <span class="summary-value">${this.formatCurrency(this.quotationDetails.grandTotal, this.getMainCurrency())}</span>
+            <span class="summary-value">${this.formatCurrency(finalTotal, this.getSummaryCurrency())}</span>
           </div>
         </div>
       </body>
@@ -574,5 +881,10 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     this.commonService.postWefabData(`/api/method/frappe.model.workflow.apply_workflow`, action).subscribe((res: any) => {
       console.log('Quotation sent successfully:', res);
     })
+  }
+
+  // Get taxable amount for display
+  getDisplayTaxableAmount(): number {
+    return this.getTaxableAmount();
   }
 }
