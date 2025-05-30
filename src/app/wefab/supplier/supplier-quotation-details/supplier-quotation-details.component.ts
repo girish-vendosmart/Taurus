@@ -6,6 +6,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
 import { CommonService } from '../../shared/common.service';
 import { HttpParams } from '@angular/common/http';
+import { ActivityTrailComponent, ActivityLogData } from '../../../common-core-component/activity-trail';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -144,7 +145,8 @@ export interface QuotationItem {
     FormsModule,
     CommonTableComponent,
     ButtonModule,
-    InputTextModule
+    InputTextModule,
+    ActivityTrailComponent
   ],
   templateUrl: './supplier-quotation-details.component.html',
   styleUrl: './supplier-quotation-details.component.scss'
@@ -201,6 +203,9 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   itemsPerPage: number = 7;
   totalItems: number = 0;
   loading: boolean = false;
+
+  activityTrail: ActivityLogData[] = [];
+  activityTrailLoading: boolean = false;
 
   // Table configuration
   tableConfig: TableConfig = {
@@ -396,6 +401,9 @@ export class SupplierQuotationDetailsComponent implements OnInit {
 
   setActiveTab(tab: string): void {
     this.activeTab = tab;
+    if (tab === 'activity') {
+      this.loadActivityTrail();
+    }
   }
 
   onBackToRFQs(): void {
@@ -866,6 +874,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     }));
   }
 
+<<<<<<< HEAD
   sendQuotation() {
     let params = new HttpParams()
     let action = {
@@ -886,5 +895,20 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   // Get taxable amount for display
   getDisplayTaxableAmount(): number {
     return this.getTaxableAmount();
+=======
+  private loadActivityTrail(): void {
+    this.activityTrailLoading = true;
+    this.commonService.getData('/api/method/proq_buyer.api.core.versioning.get_new_versions_trail?doctype=pq_rfq&docname=' + 'RFQ0000000050')
+      .subscribe({
+        next: (response: any) => {
+          this.activityTrail = response.data || [];
+          this.activityTrailLoading = false;
+        },
+        error: () => {
+          this.activityTrail = [];
+          this.activityTrailLoading = false;
+        }
+      });
+>>>>>>> 7e899e5 (activity trail integrated)
   }
 }
