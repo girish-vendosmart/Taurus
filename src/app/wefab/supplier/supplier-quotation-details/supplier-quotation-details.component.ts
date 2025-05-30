@@ -876,7 +876,6 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     }));
   }
 
-<<<<<<< HEAD
   sendQuotation() {
     let params = new HttpParams()
     let action = {
@@ -897,7 +896,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   // Get taxable amount for display
   getDisplayTaxableAmount(): number {
     return this.getTaxableAmount();
-=======
+  }
+  
   private loadActivityTrail(): void {
     this.activityTrailLoading = true;
     this.commonService.getData('/api/method/proq_buyer.api.core.versioning.get_new_versions_trail?doctype=pq_rfq&docname=' + 'RFQ0000000050')
@@ -911,6 +911,5 @@ export class SupplierQuotationDetailsComponent implements OnInit {
           this.activityTrailLoading = false;
         }
       });
->>>>>>> 7e899e5 (activity trail integrated)
   }
 }
