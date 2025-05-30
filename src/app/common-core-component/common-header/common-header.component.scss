@@ -43,6 +43,96 @@
   align-items: center;
 }
 
+.avatar-dropdown {
+  position: relative;
+}
+
+.avatar-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: $technical-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: $font-weight-medium;
+  font-family: $font-family-sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: $technical-white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  padding: 0.5rem 0;
+  z-index: 1001;
+  display: none;
+  
+  &.show {
+    display: block;
+  }
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  color: $precision-black;
+  font-size: 0.9rem;
+  font-weight: $font-weight-medium;
+  font-family: $font-family-sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+
+  i {
+    font-size: 1rem;
+    color: $machine-gray;
+  }
+
+  &:hover {
+    background: rgba($blueprint-blue, 0.05);
+    color: $blueprint-blue;
+
+    i {
+      color: $blueprint-blue;
+    }
+  }
+}
+
 .btn-logout {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -73,6 +163,18 @@
   &:active {
     transform: translateY(0);
   }
+}
+
+// Add debugging styles
+.dropdown-state {
+  position: absolute;
+  bottom: -20px;
+  right: 0;
+  font-size: 12px;
+  color: white;
+  background: rgba(0,0,0,0.5);
+  padding: 2px 5px;
+  border-radius: 3px;
 }
 
 // Responsive design

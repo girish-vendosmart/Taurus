@@ -1,33 +1,70 @@
-import { Component, Output, EventEmitter, Input } from '@angular/core';
+import { Component, Output, EventEmitter, Input, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../app/core/services/auth.service';
 
-
 @Component({
   selector: 'app-common-header',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './common-header.component.html',
   styleUrl: './common-header.component.scss'
 })
 export class CommonHeaderComponent {
   @Input() title: string = 'Supplier Onboarding Portal';
   @Output() logoutEvent = new EventEmitter<void>();
+  
+  isDropdownOpen = false;
+  userInitials: string = '';
+  // Dummy user data
+  dummyUserEmail: string = 'michael.doe@mailinator.com';
 
-  constructor(private router: Router,     public authService: AuthService,  ) {}
+  constructor(
+    private router: Router,
+    public authService: AuthService,
+  ) {
+    // Set initials using dummy data
+    this.userInitials = this.getInitials(this.dummyUserEmail);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const dropdown = document.querySelector('.avatar-dropdown');
+    if (!dropdown?.contains(target)) {
+      this.isDropdownOpen = false;
+    }
+  }
+
+  toggleDropdown(): void {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  getInitials(email: string): string {
+    const parts = email.split('@')[0].split('.');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return email.substring(0, 2).toUpperCase();
+  }
+
+  onProfile(): void {
+    this.isDropdownOpen = false;
+    console.log('Profile clicked for user:', this.dummyUserEmail);
+    this.router.navigate(['/wefab/supplier/profile-review']);
+    // For demo purposes, just log instead of navigation
+    // this.router.navigate(['/profile']);
+  }
 
   onLogout(): void {
-    // Emit logout event for parent components to handle
+    this.isDropdownOpen = false;
+    console.log('Logout clicked');
     this.logoutEvent.emit();
-    
-    // Default logout behavior - can be customized
     this.performLogout();
   }
 
   private performLogout(): void {
-    // Logout from the auth service
-    this.authService.logout().subscribe();
+    console.log('Performing logout for user:', this.dummyUserEmail);
     
     // Clear any stored authentication data
     localStorage.removeItem('authToken');
