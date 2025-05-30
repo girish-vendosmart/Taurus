@@ -28,41 +28,43 @@
   </div>
 
   <!-- Chart and Recent RFQs Section -->
-  <div class="content-grid">
+  <div class="row g-3">
     <!-- Quote Performance Chart -->
-    <div class="chart-section">
-      <h2>Quote Performance</h2>
-      <p class="chart-subtitle">Your quotation success rate over time</p>
-      <div class="chart-container">
-        <apx-chart
-          #chart
-          [series]="chartOptions.series!"
-          [chart]="chartOptions.chart!"
-          [xaxis]="chartOptions.xaxis!"
-          [yaxis]="chartOptions.yaxis!"
-          [stroke]="chartOptions.stroke!"
-          [dataLabels]="chartOptions.dataLabels!"
-          [grid]="chartOptions.grid!"
-          [markers]="chartOptions.markers!"
-          [tooltip]="chartOptions.tooltip!"
-          [legend]="chartOptions.legend!"
-          [colors]="chartOptions.colors!">
-        </apx-chart>
+    <div class="col-lg-6 col-md-12">
+      <div class="card h-100">
+        <div class="card-body">
+          <h2>Recent RFQs</h2>
+          <div class="rfqs-list">
+            <div *ngFor="let rfq of recentRFQs" class="rfq-item">
+              <div class="rfq-content">
+                <h4>{{ rfq.title }}</h4>
+                <p class="rfq-number">{{ rfq.rfqNumber }}</p>
+                <div class="rfq-actions">
+                  <span class="status-badge" [ngClass]="rfq.statusClass">{{ rfq.status }}</span>
+                  <button class="action-btn view-btn">View</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Recent RFQs -->
-    <div class="recent-rfqs-section">
-      <h2>Recent RFQs</h2>
-      <p class="section-subtitle">Latest requests for quotation</p>
-      <div class="rfqs-list">
-        <div *ngFor="let rfq of recentRFQs" class="rfq-item">
-          <div class="rfq-content">
-            <h4>{{ rfq.title }}</h4>
-            <p class="rfq-number">{{ rfq.rfqNumber }}</p>
-            <div class="rfq-actions">
-              <span class="status-badge" [ngClass]="rfq.statusClass">{{ rfq.status }}</span>
-              <button class="action-btn view-btn">View</button>
+    <div class="col-lg-6 col-md-12">
+      <div class="card h-100">
+        <div class="card-body">
+          <h2>Recent Quotations</h2>
+          <div class="rfqs-list">
+            <div *ngFor="let rfq of recentRFQs" class="rfq-item">
+              <div class="rfq-content">
+                <h4>{{ rfq.title }}</h4>
+                <p class="rfq-number">{{ rfq.rfqNumber }}</p>
+                <div class="rfq-actions">
+                  <span class="status-badge" [ngClass]="rfq.statusClass">{{ rfq.status }}</span>
+                  <button class="action-btn view-btn">View</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
