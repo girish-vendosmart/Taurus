@@ -15,6 +15,8 @@ import {
   ApexLegend,
   ApexMarkers
 } from 'ng-apexcharts';
+import { CommonService } from '../../shared/common.service';
+import { Router } from '@angular/router';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -44,27 +46,29 @@ interface DashboardCard {
 }
 
 interface RecentQuotation {
-  title: string;
-  quoteNumber: string;
-  amount: number;
-  submittedDate: Date;
-  status: 'Pending' | 'Awarded' | 'Rejected' | 'Under Review';
+  name: string;
+  quotation_id?: string;
+  amount?: number;
+  creation: string;
+  modified: string;
+  status: string;
   statusClass: string;
+  supplier_id?: string;
+  timeAgo: string;
+  urgencyClass: string;
 }
 
 interface RecentRFQ {
-  title: string;
-  rfqNumber: string;
-  status: 'Open' | 'In Progress' | 'Closed';
+  name: string;
+  rfq_id: string;
+  status: string;
   statusClass: string;
-  category: string;
-  dueDate: Date;
-  timeLeft: string;
+  creation: string;
+  modified: string;
+  supplier_id: string;
+  supplier_company_name: string | null;
+  timeAgo: string;
   urgencyClass: string;
-  quantity: number;
-  unit: string;
-  material: string;
-  materialSpec: string;
 }
 
 @Component({
@@ -80,7 +84,7 @@ export class SupplierDashboardComponent {
   
   supplierName: string = '';
   
-  constructor() {
+  constructor(private commonService: CommonService, private router: Router) {
     // Get supplier information from session storage
     this.supplierName = sessionStorage.getItem('supplier_name') || 'Supplier';
     
@@ -199,6 +203,163 @@ export class SupplierDashboardComponent {
     };
   }
 
+  ngOnInit(): void {
+    this.getRecentRFQs()
+    this.getRecentQuotations()
+  }
+
+  getRecentQuotations() {
+    let endPoint = `/api/resource/Supplier Quotation?fields=["*"]`
+    this.commonService.getWefabData(endPoint).subscribe((res: any) => {
+      debugger
+      console.log('Recent Quotations:', res);
+      
+      if (res && res.data && Array.isArray(res.data)) {
+        // Sort by creation date (most recent first) and take the first 5
+        const sortedQuotations = res.data
+          .sort((a: any, b: any) => new Date(b.creation).getTime() - new Date(a.creation).getTime())
+          .slice(0, 5);
+
+        // Map the API response to our RecentQuotation interface
+        this.recentQuotations = sortedQuotations.map((quotation: any) => {
+          const creationDate = new Date(quotation.creation);
+          const now = new Date();
+          const timeDiff = now.getTime() - creationDate.getTime();
+          
+          return {
+            name: quotation.name || quotation.quotation_id || `Quotation ${quotation.idx || ''}`,
+            quotation_id: quotation.quotation_id,
+            amount: quotation.total_amount || quotation.grand_total || 0,
+            creation: quotation.creation,
+            modified: quotation.modified,
+            status: quotation.status || quotation.workflow_state || 'Draft',
+            statusClass: this.getQuotationStatusClass(quotation.status || quotation.workflow_state),
+            supplier_id: quotation.supplier_id,
+            timeAgo: this.getTimeAgo(timeDiff),
+            urgencyClass: this.getUrgencyClass(quotation.status || quotation.workflow_state, timeDiff)
+          };
+        });
+      }
+    }, (error) => {
+      console.error('Error fetching Quotations:', error);
+    });
+  }
+
+  private getQuotationStatusClass(status: string): string {
+    switch (status?.toUpperCase()) {
+      case 'DRAFT':
+        return 'status-draft';
+      case 'SUBMITTED':
+        return 'status-awarded';
+      case 'PENDING':
+        return 'status-pending';
+      case 'UNDER REVIEW':
+      case 'UNDER_REVIEW':
+        return 'status-review';
+      case 'APPROVED':
+      case 'AWARDED':
+        return 'status-awarded';
+      case 'REJECTED':
+      case 'DECLINED':
+        return 'status-rejected';
+      case 'EXPIRED':
+        return 'status-closed';
+      default:
+        return 'status-draft';
+    }
+  }
+
+  getRecentRFQs() {
+    let endPoint = `/api/resource/Supplier Request for Quotation?fields=["*"]`
+    this.commonService.getWefabData(endPoint).subscribe((res: any) => {
+      console.log('Recent RFQs:', res);
+      
+      if (res && res.data && Array.isArray(res.data)) {
+        // Sort by creation date (most recent first) and take the first 5
+        const sortedRFQs = res.data
+          .sort((a: any, b: any) => new Date(b.creation).getTime() - new Date(a.creation).getTime())
+          .slice(0, 5);
+
+        // Map the API response to our RecentRFQ interface
+        this.recentRFQs = sortedRFQs.map((rfq: any) => {
+          const creationDate = new Date(rfq.creation);
+          const now = new Date();
+          const timeDiff = now.getTime() - creationDate.getTime();
+          
+          return {
+            name: rfq.name || rfq.rfq_id,
+            rfq_id: rfq.rfq_id,
+            status: rfq.status || 'Draft',
+            statusClass: this.getStatusClass(rfq.status),
+            creation: rfq.creation,
+            modified: rfq.modified,
+            supplier_id: rfq.supplier_id,
+            supplier_company_name: rfq.supplier_company_name,
+            timeAgo: this.getTimeAgo(timeDiff),
+            urgencyClass: this.getUrgencyClass(rfq.status, timeDiff)
+          };
+        });
+      }
+    }, (error) => {
+      console.error('Error fetching RFQs:', error);
+    });
+  }
+
+  private getStatusClass(status: string): string {
+    switch (status?.toUpperCase()) {
+      case 'DRAFT':
+        return 'status-draft';
+      case 'OPEN':
+        return 'status-open';
+      case 'IN PROGRESS':
+      case 'IN_PROGRESS':
+        return 'status-progress';
+      case 'CLOSED':
+        return 'status-closed';
+      case 'AWARDED':
+        return 'status-awarded';
+      case 'REJECTED':
+        return 'status-rejected';
+      case 'PENDING':
+        return 'status-pending';
+      case 'UNDER REVIEW':
+      case 'UNDER_REVIEW':
+        return 'status-review';
+      default:
+        return 'status-draft';
+    }
+  }
+
+  private getTimeAgo(timeDiff: number): string {
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor(timeDiff / (1000 * 60));
+
+    if (days > 0) {
+      return `${days} day${days > 1 ? 's' : ''} ago`;
+    } else if (hours > 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (minutes > 0) {
+      return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else {
+      return 'Just now';
+    }
+  }
+
+  private getUrgencyClass(status: string, timeDiff: number): string {
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    
+    if (status?.toLowerCase() === 'closed' || status?.toLowerCase() === 'awarded') {
+      return 'completed';
+    } else if (days > 7) {
+      return 'normal';
+    } else if (days > 3) {
+      return 'urgent';
+    } else {
+      return 'critical';
+    }
+  }
+
   dashboardCards: DashboardCard[] = [
     {
       title: 'Open RFQs',
@@ -250,99 +411,9 @@ export class SupplierDashboardComponent {
     }
   ];
 
-  recentQuotations: RecentQuotation[] = [
-    {
-      title: 'CNC Machined Aluminum Brackets',
-      quoteNumber: 'QUO-2023-001',
-      amount: 15750.00,
-      submittedDate: new Date('2023-05-10'),
-      status: 'Under Review',
-      statusClass: 'status-review'
-    },
-    {
-      title: 'Sheet Metal Enclosure',
-      quoteNumber: 'QUO-2023-002',
-      amount: 8920.50,
-      submittedDate: new Date('2023-05-08'),
-      status: 'Awarded',
-      statusClass: 'status-awarded'
-    },
-    {
-      title: '3D Printed Prototype Parts',
-      quoteNumber: 'QUO-2023-003',
-      amount: 2340.75,
-      submittedDate: new Date('2023-05-05'),
-      status: 'Pending',
-      statusClass: 'status-pending'
-    },
-    {
-      title: 'Injection Molded Housing',
-      quoteNumber: 'QUO-2023-004',
-      amount: 12500.00,
-      submittedDate: new Date('2023-05-01'),
-      status: 'Rejected',
-      statusClass: 'status-rejected'
-    }
-  ];
+  recentQuotations: RecentQuotation[] = [];
 
-  recentRFQs: RecentRFQ[] = [
-    {
-      title: 'CNC Machined Aluminum Brackets',
-      rfqNumber: 'RFQ-2023-001',
-      status: 'Open',
-      statusClass: 'status-open',
-      category: 'Machining',
-      dueDate: new Date('2023-05-15'),
-      timeLeft: '2 weeks',
-      urgencyClass: 'urgent',
-      quantity: 100,
-      unit: 'pieces',
-      material: 'Aluminum',
-      materialSpec: 'Bracket Specification'
-    },
-    {
-      title: 'Sheet Metal Enclosure',
-      rfqNumber: 'RFQ-2023-002',
-      status: 'Open',
-      statusClass: 'status-open',
-      category: 'Sheet Metal',
-      dueDate: new Date('2023-06-01'),
-      timeLeft: '1 week',
-      urgencyClass: 'normal',
-      quantity: 50,
-      unit: 'sheets',
-      material: 'Stainless Steel',
-      materialSpec: 'Enclosure Specification'
-    },
-    {
-      title: '3D Printed Prototype Parts',
-      rfqNumber: 'RFQ-2023-003',
-      status: 'In Progress',
-      statusClass: 'status-progress',
-      category: '3D Printing',
-      dueDate: new Date('2023-05-20'),
-      timeLeft: 'Ongoing',
-      urgencyClass: 'urgent',
-      quantity: 200,
-      unit: 'parts',
-      material: 'ABS Plastic',
-      materialSpec: 'Prototype Parts Specification'
-    },
-    {
-      title: 'Injection Molded Housing',
-      rfqNumber: 'RFQ-2023-004',
-      status: 'Closed',
-      statusClass: 'status-closed',
-      category: 'Injection Molding',
-      dueDate: new Date('2023-04-30'),
-      timeLeft: 'Completed',
-      urgencyClass: 'completed',
-      quantity: 150,
-      unit: 'units',
-      material: 'Aluminum',
-      materialSpec: 'Housing Specification'
-    }
-  ];
+  recentRFQs: RecentRFQ[] = [];
 
   // Legacy activities for backward compatibility
   recentActivities = [
@@ -359,4 +430,12 @@ export class SupplierDashboardComponent {
       type: 'info'
     }
   ];
+
+  viewRFQ(rfqId: string) {
+    this.router.navigate(['/wefab/supplier/rfq/details/', rfqId]);
+  }
+
+  viewQuotation(quotationId: string) {
+    this.router.navigate(['/wefab/supplier/quotation/details/', quotationId]);
+  }
 } 

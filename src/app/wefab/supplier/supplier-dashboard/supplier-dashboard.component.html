@@ -32,40 +32,53 @@
     <!-- Quote Performance Chart -->
     <div class="col-lg-6 col-md-12">
       <div class="card h-100">
+        <!-- Recent RFQs -->
         <div class="card-body">
           <h2>Recent RFQs</h2>
           <div class="rfqs-list">
             <div *ngFor="let rfq of recentRFQs" class="rfq-item">
               <div class="rfq-content">
-                <h4>{{ rfq.title }}</h4>
-                <p class="rfq-number">{{ rfq.rfqNumber }}</p>
+                <h4>{{ rfq.name }}</h4>
+                <div class="rfq-meta">
+                  <span class="amount">{{ rfq.rfq_id }}</span>
+                  <span class="time-ago">{{ rfq.timeAgo }}</span>
+                </div>
                 <div class="rfq-actions">
                   <span class="status-badge" [ngClass]="rfq.statusClass">{{ rfq.status }}</span>
-                  <button class="action-btn view-btn">View</button>
+                  <button class="action-btn view-btn" (click)="viewRFQ(rfq.rfq_id)">View</button>
                 </div>
               </div>
             </div>
+            <!-- <div *ngIf="recentQuotations.length === 0" class="no-data">
+              <p>No recent quotations found</p>
+            </div> -->
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Recent RFQs -->
+    <!-- Recent Quotations -->
     <div class="col-lg-6 col-md-12">
       <div class="card h-100">
         <div class="card-body">
           <h2>Recent Quotations</h2>
           <div class="rfqs-list">
-            <div *ngFor="let rfq of recentRFQs" class="rfq-item">
+            <div *ngFor="let quotation of recentQuotations" class="rfq-item">
               <div class="rfq-content">
-                <h4>{{ rfq.title }}</h4>
-                <p class="rfq-number">{{ rfq.rfqNumber }}</p>
+                <h4>{{ quotation.name }}</h4>
+                <div class="rfq-meta" *ngIf="quotation.amount">
+                  <span class="amount">₹{{ quotation.amount | number:'1.2-2' }}</span>
+                  <span class="time-ago">{{ quotation.timeAgo }}</span>
+                </div>
                 <div class="rfq-actions">
-                  <span class="status-badge" [ngClass]="rfq.statusClass">{{ rfq.status }}</span>
-                  <button class="action-btn view-btn">View</button>
+                  <span class="status-badge" [ngClass]="quotation.statusClass">{{ quotation.status }}</span>
+                  <button class="action-btn view-btn" (click)="viewQuotation(quotation.name)">View</button>
                 </div>
               </div>
             </div>
+            <!-- <div *ngIf="recentQuotations.length === 0" class="no-data">
+              <p>No recent quotations found</p>
+            </div> -->
           </div>
         </div>
       </div>
