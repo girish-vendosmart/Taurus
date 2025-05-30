@@ -289,7 +289,7 @@
                       [(ngModel)]="selectedTaxType"
                       [ngModelOptions]="{standalone: true}"
                       (change)="onTaxTypeChange('cgstSgst')">
-                    <label class="form-check-label small" for="cgstSgst">
+                    <label class="form-check-label small" for="cgstSgst" style="margin-left: 5px; margin-top: 0px;">
                       CGST & SGST
                     </label>
                   </div>
@@ -303,7 +303,7 @@
                       [(ngModel)]="selectedTaxType"
                       [ngModelOptions]="{standalone: true}"
                       (change)="onTaxTypeChange('igst')">
-                    <label class="form-check-label small" for="igst">
+                    <label class="form-check-label small" for="igst" style="margin-left: 5px; margin-top: 0px;">
                       IGST
                     </label>
                   </div>
@@ -317,7 +317,7 @@
                       [(ngModel)]="selectedTaxType"
                       [ngModelOptions]="{standalone: true}"
                       (change)="onTaxTypeChange('none')">
-                    <label class="form-check-label small" for="noTax">
+                    <label class="form-check-label small" for="noTax" style="margin-left: 5px; margin-top: 0px;">
                       No Tax
                     </label>
                   </div>
@@ -408,20 +408,6 @@
           required>
       </div>
       <div class="col-md-6 mb-3">
-        <label class="form-label">Reference <span class="text-danger">*</span></label>
-        <input 
-          type="text" 
-          class="form-control"
-          [(ngModel)]="model.reference"
-          [ngModelOptions]="{standalone: true}"
-          placeholder="Enter text"
-          required>
-      </div>
-    </div>
-
-    <!-- Delivery Address and Shipping Terms Row -->
-    <div class="row mb-4">
-      <div class="col-md-6 mb-3">
         <label class="form-label">Delivery Address</label>
         <input 
           type="text" 
@@ -430,30 +416,10 @@
           [ngModelOptions]="{standalone: true}"
           placeholder="Enter delivery address">
       </div>
-      <div class="col-md-6 mb-3">
-        <label class="form-label">Shipping Terms</label>
-        <input 
-          type="text" 
-          class="form-control"
-          [(ngModel)]="model.shippingTerms"
-          [ngModelOptions]="{standalone: true}"
-          placeholder="e.g., FOB Origin, CIF, etc.">
-      </div>
     </div>
 
-    <!-- Terms & Conditions and Attachments Row -->
+    <!-- Delivery Address and Shipping Terms Row -->
     <div class="row mb-4">
-      <div class="col-md-6 mb-3">
-        <label class="form-label">Terms & Conditions <span class="text-danger">*</span></label>
-        <textarea 
-          class="form-control" 
-          rows="4"
-          [(ngModel)]="model.termsAndConditions"
-          [ngModelOptions]="{standalone: true}"
-          placeholder="Terms & Conditions"
-          required>
-        </textarea>
-      </div>
       <div class="col-md-6 mb-3">
         <label class="form-label">Attachments</label>
         <div class="attachment-area">
@@ -475,21 +441,53 @@
           <div *ngIf="attachedFiles.length > 0" class="attached-files mt-3">
             <h6>Attached Files:</h6>
             <div class="file-list">
-              <div *ngFor="let file of attachedFiles; let i = index" class="file-item">
-                <i class="pi pi-file me-2"></i>
-                <span class="file-name">{{ file.name }}</span>
-                <span class="file-size text-muted">({{ formatFileSize(file.size) }})</span>
-                <button 
-                  type="button" 
-                  class="btn btn-link btn-sm text-danger ms-2 p-0"
-                  (click)="removeAttachment(i)"
-                  title="Remove file">
-                  <i class="pi pi-times"></i>
-                </button>
+              <div *ngFor="let fileUrl of attachedFiles; let i = index" class="file-item d-flex align-items-center mb-2 p-2 border rounded">
+                <i class="pi {{ getFileIcon(fileUrl) }} me-2 text-primary"></i>
+                <span class="file-name flex-grow-1">{{ getFileNameFromUrl(fileUrl) }}</span>
+                <div class="btn-group">
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-primary btn-sm"
+                    (click)="viewAttachment(fileUrl)"
+                    title="View file">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-danger btn-sm"
+                    (click)="removeAttachment(i)"
+                    title="Remove file">
+                    <i class="pi pi-times"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Terms & Conditions <span class="text-danger">*</span></label>
+        <textarea 
+          class="form-control" 
+          rows="4"
+          [(ngModel)]="model.termsAndConditions"
+          [ngModelOptions]="{standalone: true}"
+          placeholder="Terms & Conditions"
+          required>
+        </textarea>
+      </div>
+    </div>
+
+    <!-- Terms & Conditions and Attachments Row -->
+    <div class="row mb-4">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Shipping Terms</label>
+        <input 
+          type="text" 
+          class="form-control"
+          [(ngModel)]="model.shippingTerms"
+          [ngModelOptions]="{standalone: true}"
+          placeholder="e.g., FOB Origin, CIF, etc.">
       </div>
     </div>
 

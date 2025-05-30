@@ -82,10 +82,69 @@ import { FormlyFieldDropdownComponent } from '../../../dropdown-type.component';
     .border-top {
       border-top: 2px solid #0d6efd !important;
     }
+
+    .upload-area {
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+    
+    .upload-area:hover {
+      border-color: #0d6efd;
+      background-color: #f0f8ff;
+    }
+    
+    .upload-area i {
+      font-size: 2rem;
+      color: #6c757d;
+      margin-bottom: 0.5rem;
+    }
+
+    .file-item {
+      background-color: #f8f9fa;
+      transition: all 0.2s ease;
+    }
+    
+    .file-item:hover {
+      background-color: #e9ecef;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .file-name {
+      font-size: 14px;
+      color: #495057;
+      word-break: break-word;
+    }
+    
+    .attached-files h6 {
+      color: #495057;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .btn-sm {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
     
     @media (max-width: 768px) {
       .totals-section {
         margin-top: 1rem;
+      }
+      
+      .file-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .file-item .btn-group {
+        margin-top: 0.5rem;
+        align-self: flex-end;
       }
     }
   `]
@@ -144,7 +203,7 @@ export class CreateQuotationComponent implements OnInit {
   selectedTaxType: string = 'none'; // 'cgstSgst', 'igst', or 'none'
 
   // Attachment properties
-  attachedFiles: File[] = [];
+  attachedFiles: string[] = [];
 
   // Dropdown options
   paymentTermsOptions = [
@@ -772,10 +831,10 @@ export class CreateQuotationComponent implements OnInit {
 
   // Transform attachments to API format
   transformAttachments(): any[] {
-    return this.attachedFiles.map((file: File) => ({
-      file_name: file.name,
-      file_url: `/files/${file.name}`, // This would be updated after file upload
-      description: this.getFileDescription(file)
+    return this.attachedFiles.map((fileUrl: string) => ({
+      file_name: this.getFileNameFromUrl(fileUrl),
+      file_url: fileUrl,
+      description: this.getFileDescriptionFromUrl(fileUrl)
     }));
   }
 
@@ -853,27 +912,6 @@ export class CreateQuotationComponent implements OnInit {
     }
     
     return comments.join('; ') || 'Standard manufacturing specifications';
-  }
-
-  private getFileDescription(file: File): string {
-    const extension = file.name.split('.').pop()?.toLowerCase();
-    
-    switch (extension) {
-      case 'pdf':
-        return 'Technical specifications and documentation';
-      case 'doc':
-      case 'docx':
-        return 'Supporting documentation';
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-        return 'Technical drawings and images';
-      case 'xlsx':
-      case 'xls':
-        return 'Technical data and specifications';
-      default:
-        return 'Supporting file';
-    }
   }
 
   exportCSV() {
@@ -1224,7 +1262,8 @@ export class CreateQuotationComponent implements OnInit {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (this.isValidFileType(file)) {
-          this.attachedFiles.push(file);
+          this.uploadFileOnS3(file)
+          // this.attachedFiles.push(file);
         } else {
           this.messageService.add({
             severity: 'warn',
@@ -1234,6 +1273,18 @@ export class CreateQuotationComponent implements OnInit {
         }
       }
     }
+  }
+
+  uploadFileOnS3(file: File) {
+    this.commonService.uploadFile(file).subscribe((res: any) => {
+      if(res.body && res.body.message) {
+         debugger
+         console.log("file Uploaded Successfully ", res.body.message.file_url)
+         this.attachedFiles.push(res.body.message.file_url)
+      }
+    }, (error: any) => {
+      console.error('Error uploading file:', error);
+    });
   }
 
   onDragOver(event: DragEvent) {
@@ -1250,7 +1301,7 @@ export class CreateQuotationComponent implements OnInit {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (this.isValidFileType(file)) {
-          this.attachedFiles.push(file);
+          this.uploadFileOnS3(file)
         } else {
           this.messageService.add({
             severity: 'warn',
@@ -1264,14 +1315,6 @@ export class CreateQuotationComponent implements OnInit {
 
   removeAttachment(index: number) {
     this.attachedFiles.splice(index, 1);
-  }
-
-  formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   private isValidFileType(file: File): boolean {
@@ -1336,5 +1379,117 @@ export class CreateQuotationComponent implements OnInit {
       isValid: missingFields.length === 0,
       missingFields
     };
+  }
+
+  // Method to extract filename from URL
+  getFileNameFromUrl(url: string): string {
+    if (!url) return 'Unknown File';
+    
+    try {
+      // Extract filename from URL path
+      const urlParts = url.split('/');
+      const filename = urlParts[urlParts.length - 1];
+      
+      // Remove any query parameters
+      const cleanFilename = filename.split('?')[0];
+      
+      // If filename has underscore prefix (like SS0E29F5_Screenshot_...), remove it
+      const parts = cleanFilename.split('_');
+      if (parts.length > 1 && parts[0].length <= 8) {
+        return parts.slice(1).join('_');
+      }
+      
+      return cleanFilename || 'Unknown File';
+    } catch (error) {
+      console.error('Error extracting filename from URL:', error);
+      return 'Unknown File';
+    }
+  }
+
+  // Method to view attachment in new tab
+  viewAttachment(fileUrl: string) {
+    if (fileUrl) {
+      window.open(fileUrl, '_blank');
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Unable to open file. Invalid URL.'
+      });
+    }
+  }
+
+  // Method to get file extension from URL
+  getFileExtensionFromUrl(url: string): string {
+    if (!url) return '';
+    
+    try {
+      const filename = this.getFileNameFromUrl(url);
+      const parts = filename.split('.');
+      return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  // Method to get appropriate icon based on file type
+  getFileIcon(url: string): string {
+    const extension = this.getFileExtensionFromUrl(url);
+    
+    switch (extension) {
+      case 'pdf':
+        return 'pi-file-pdf';
+      case 'doc':
+      case 'docx':
+        return 'pi-file-word';
+      case 'xlsx':
+      case 'xls':
+        return 'pi-file-excel';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return 'pi-image';
+      case 'txt':
+        return 'pi-file';
+      default:
+        return 'pi-file';
+    }
+  }
+
+  // Method to get file description from URL
+  getFileDescriptionFromUrl(url: string): string {
+    const extension = this.getFileExtensionFromUrl(url);
+    
+    switch (extension) {
+      case 'pdf':
+        return 'Technical specifications and documentation';
+      case 'doc':
+      case 'docx':
+        return 'Supporting documentation';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return 'Technical drawings and images';
+      case 'xlsx':
+      case 'xls':
+        return 'Technical data and specifications';
+      default:
+        return 'Supporting file';
+    }
+  }
+
+  // Method for testing attachment display (can be removed in production)
+  addTestAttachments() {
+    this.attachedFiles = [
+      "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/SS0E29F5_Screenshot_from_2025-05-30_11-38-14.png",
+      "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/TVX4YE51_Screenshot_from_2025-05-30_12-57-47.png",
+      "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/ABC123_Technical_Specifications.pdf",
+      "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/XYZ789_Project_Details.docx"
+    ];
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Test Attachments Added',
+      detail: 'Sample file attachments have been added for testing'
+    });
   }
 }
