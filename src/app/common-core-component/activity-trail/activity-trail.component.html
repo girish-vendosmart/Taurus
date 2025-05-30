@@ -1,4 +1,5 @@
-<div class="activity-trail-container">
+<!-- Activity Trail Container -->
+<div class="activity-trail-container" role="complementary" [attr.aria-label]="title">
   <!-- Header -->
   <div class="activity-trail-header" *ngIf="showHeader">
     <h3 class="activity-trail-title">{{ title }}</h3>
@@ -10,26 +11,28 @@
       class="p-button-text p-button-sm refresh-btn"
       (click)="refresh()"
       [disabled]="loading"
+      [attr.aria-label]="'Refresh ' + title.toLowerCase()"
       pTooltip="Refresh activity trail"
-      tooltipPosition="top">
+      tooltipPosition="left">
     </button>
   </div>
 
   <!-- Content -->
-  <div class="activity-trail-content" [style.max-height]="maxHeight">
+  <div class="activity-trail-content" [style.max-height]="maxHeight" role="log">
     <!-- Loading State -->
-    <div class="loading-container" *ngIf="loading">
+    <div class="loading-container" *ngIf="loading" role="status" aria-live="polite">
       <p-progressSpinner 
-        [style]="{ width: '24px', height: '24px' }" 
+        [style]="{ width: '28px', height: '28px' }" 
         strokeWidth="4"
-        animationDuration="1s">
+        animationDuration="1s"
+        aria-label="Loading">
       </p-progressSpinner>
       <span class="loading-text">Loading activity trail...</span>
     </div>
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="!loading && processedActivities.length === 0">
-      <i class="pi pi-history empty-icon"></i>
+    <div class="empty-state" *ngIf="!loading && processedActivities.length === 0" role="status" aria-live="polite">
+      <i class="pi pi-history empty-icon" aria-hidden="true"></i>
       <p class="empty-message">{{ emptyMessage }}</p>
     </div>
 
@@ -38,10 +41,11 @@
       <div 
         class="activity-item" 
         *ngFor="let activity of processedActivities; trackBy: trackByActivityId"
-        [class]="getStatusColorClass(activity.action)">
+        [class]="getStatusColorClass(activity.action)"
+        role="article">
         
         <!-- Timeline Connector -->
-        <div class="timeline-connector">
+        <div class="timeline-connector" aria-hidden="true">
           <i [class]="'pi ' + getStatusIcon(activity.action)"></i>
         </div>
 
@@ -51,12 +55,14 @@
           <div class="activity-header">
             <div class="activity-title-section">
               <h4 class="activity-title">{{ activity.title }}</h4>
-              <span class="activity-status-badge">
+              <span class="activity-status-badge" role="status">
                 {{ activity.action }}
               </span>
             </div>
             <div class="activity-meta">
-              <span class="activity-time">{{ activity.time_since }}</span>
+              <time class="activity-time" [attr.datetime]="activity.date | date:'yyyy-MM-ddTHH:mm:ssZ'">
+                {{ activity.time_since }}
+              </time>
               <span class="activity-user">{{ activity.user }}</span>
             </div>
           </div>
@@ -66,14 +72,14 @@
             <p>{{ activity.description }}</p>
           </div>
 
-          <!-- Activity Changes (if any) - Only show if changes are meaningful -->
+          <!-- Activity Changes -->
           <div class="activity-changes" *ngIf="activity.changes && activity.changes.length > 0 && !isLongProfileChange(activity.changes)">
             <div class="changes-header">
-              <i class="pi pi-list"></i>
-              <span>Details:</span>
+              <i class="pi pi-list" aria-hidden="true"></i>
+              <span>Changes Made:</span>
             </div>
-            <ul class="changes-list">
-              <li *ngFor="let change of activity.changes" class="change-item">
+            <ul class="changes-list" role="list">
+              <li *ngFor="let change of activity.changes" class="change-item" role="listitem">
                 {{ change }}
               </li>
             </ul>
@@ -81,8 +87,10 @@
 
           <!-- Activity Date -->
           <div class="activity-date">
-            <i class="pi pi-calendar"></i>
-            <span>{{ activity.date | date:'MMM d, y, h:mm a' }}</span>
+            <i class="pi pi-calendar" aria-hidden="true"></i>
+            <time [attr.datetime]="activity.date | date:'yyyy-MM-ddTHH:mm:ssZ'">
+              {{ activity.date | date:'MMM d, y, h:mm a' }}
+            </time>
           </div>
         </div>
       </div>
