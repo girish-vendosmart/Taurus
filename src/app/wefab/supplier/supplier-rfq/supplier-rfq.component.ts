@@ -17,6 +17,7 @@ export interface RFQItem {
   modified?: string;
   docstatus?: number;
   routerLink?: string;
+  companySubInfo?: string;
 }
 
 @Component({
@@ -86,17 +87,11 @@ export class SupplierRfqComponent implements OnInit {
   tableConfig: any = {
     columns: [
       {
-        field: 'rfqId',
-        header: 'RFQ ID',
-        sortable: true,
-        filterable: true,
-        isLink: true,
-      },
-      {
         field: 'rfqName',
         header: 'RFQ Name',
         sortable: true,
         filterable: true,
+        isHtml: true,
       },
       {
         field: 'creationDate',
@@ -156,12 +151,11 @@ export class SupplierRfqComponent implements OnInit {
 
     return apiData.map(item => ({
       // Map API fields to match the table configuration
-      rfqId: item.rfq_id || '',
-      rfqName: item.name || '',
+      name: item.rfq_name || '',
+      rfqName: `${item.rfq_name || ''}<br><a href="/wefab/supplier/rfq/details/${item.rfq_id}" class="rfq-id-link">${item.rfq_id || ''}</a>`,
       creationDate: this.formatApiDate(item.creation),
       status: this.mapApiStatusToRFQStatus(item.status),
       // Additional fields for potential use
-      // name: item.name || '',
       owner: item.owner || '',
       modified: item.modified || '',
       docstatus: item.docstatus || 0,
@@ -233,10 +227,13 @@ export class SupplierRfqComponent implements OnInit {
     console.log('Row clicked:', event.rowData);
   }
 
-  onLinkClick(event: { rowData: RFQItem, column: any }) {
-    console.log('RFQ link clicked:', event.rowData);
-    // Navigate to RFQ details page using the name field for routing
-    this.router.navigate(['/wefab/supplier/rfq/details', event.rowData.name || event.rowData.rfqId]);
+  onLinkClick(event: { rowData: RFQItem, column: any, event: Event }) {
+    // Only handle link clicks if they come from the RFQ ID link
+    const target = event.event.target as HTMLElement;
+    if (target?.classList?.contains('rfq-id-link')) {
+      console.log('RFQ link clicked:', event.rowData);
+      this.router.navigate(['/wefab/supplier/rfq/details', event.rowData.name || event.rowData.rfqId]);
+    }
   }
 
   onActionClick(event: { action: string, rowData: RFQItem }) {

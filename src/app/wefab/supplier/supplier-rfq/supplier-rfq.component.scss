@@ -761,3 +761,23 @@ $transition: all 0.3s ease;
   overflow: hidden;
   border: 1px solid rgba($material-finish-silver, 0.2);
 }
+
+.rfq-id-link {
+  color: $blueprint-blue;
+  text-decoration: none;
+  font-size: 0.9em;
+  margin-top: 4px;
+  display: inline-block;
+
+  &:hover {
+    text-decoration: none;
+    color: $blueprint-blue;
+  }
+}
+
+// Add some spacing between RFQ Name and ID
+.rfqName-cell {
+  .main-content {
+    margin-bottom: 4px;
+  }
+}
