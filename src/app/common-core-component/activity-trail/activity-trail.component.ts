@@ -4,6 +4,7 @@ import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { RippleModule } from 'primeng/ripple';
+import { DateFormatPipe } from '../../shared/pipes/date-format.pipe';
 
 // Interface for the raw activity log data from API
 export interface ActivityLogData {
@@ -38,7 +39,8 @@ export interface ActivityItem {
     ButtonModule,
     TooltipModule,
     ProgressSpinnerModule,
-    RippleModule
+    RippleModule,
+    DateFormatPipe
   ],
   templateUrl: './activity-trail.component.html',
   styleUrls: ['./activity-trail.component.scss'],

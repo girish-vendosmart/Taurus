@@ -172,17 +172,31 @@ export class SupplierRfqComponent implements OnInit {
     try {
       // Handle the datetime format from API: "2025-05-28 17:56:55.424710"
       const date = new Date(apiDate);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
+      
+      const day = date.getDate();
+      const month = date.toLocaleString('en-US', { month: 'long' });
+      const year = date.getFullYear();
+      
+      let hours = date.getHours();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // Convert 0 to 12
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      
+      return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
     } catch {
-      return new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
+      const date = new Date();
+      const day = date.getDate();
+      const month = date.toLocaleString('en-US', { month: 'long' });
+      const year = date.getFullYear();
+      
+      let hours = date.getHours();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // Convert 0 to 12
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      
+      return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
     }
   }
 
@@ -299,11 +313,18 @@ export class SupplierRfqComponent implements OnInit {
   // Utility methods
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    
+    const day = date.getDate();
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    
+    let hours = date.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Convert 0 to 12
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    
+    return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
   }
 }
 

@@ -3,7 +3,7 @@
   <div class="review-header">
     <div class="header-left">
       <h1 class="review-title">Supplier Profile Review</h1>
-      <p class="review-subtitle">Last updated: {{ lastUpdated | date:'MMM d, yyyy' }} • Status: 
+      <p class="review-subtitle">Last updated: {{ lastUpdated | dateFormat }} • Status: 
         <span [ngClass]="{
           'status-not-started': verificationStatus.onboarding_status?.includes('Not Started'),
           'status-under-review': verificationStatus.onboarding_status?.includes('Under Review'),
@@ -292,7 +292,7 @@
                   <h3 class="certification-name">{{ cert.certificationName }}</h3>
                   <div class="certification-info">
                     <p class="certification-issuer"><strong>Certification Body:</strong> {{ cert.certifyingBody }}</p>
-                    <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expirationDate | date:'mediumDate' }}</p>
+                    <p class="certification-expiry"><strong>Valid Until:</strong> {{ cert.expirationDate | dateFormat }}</p>
                   </div>
                   <div class="certification-status">
                     <span class="status-badge verified">

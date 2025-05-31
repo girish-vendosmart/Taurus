@@ -51,8 +51,8 @@ export class DateFormatPipe implements PipeTransform {
   }
   
   private formatMedium(date: Date): string {
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = date.toLocaleString('en-US', { month: 'short' });
+    const day = date.getDate();
+    const month = date.toLocaleString('en-US', { month: 'long' });
     const year = date.getFullYear();
     
     let hours = date.getHours();
@@ -65,7 +65,7 @@ export class DateFormatPipe implements PipeTransform {
   }
   
   private formatLong(date: Date): string {
-    const day = date.getDate().toString().padStart(2, '0');
+    const day = date.getDate();
     const month = date.toLocaleString('en-US', { month: 'long' });
     const year = date.getFullYear();
     
@@ -81,7 +81,7 @@ export class DateFormatPipe implements PipeTransform {
   
   private formatFull(date: Date): string {
     const dayName = date.toLocaleString('en-US', { weekday: 'long' });
-    const day = date.getDate().toString().padStart(2, '0');
+    const day = date.getDate();
     const month = date.toLocaleString('en-US', { month: 'long' });
     const year = date.getFullYear();
     

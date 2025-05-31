@@ -15,6 +15,7 @@ import { forkJoin, of, BehaviorSubject, Observable } from 'rxjs';
 import { map, tap, catchError, finalize, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { ActivityTrailComponent, ActivityLogData } from '../../../common-core-component/activity-trail';
+import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 
 interface DocumentSummary {
   companyDocuments: number;
@@ -64,7 +65,8 @@ interface CacheEntry<T> {
     ToastModule,
     RippleModule,
     TooltipModule,
-    ActivityTrailComponent
+    ActivityTrailComponent,
+    DateFormatPipe
   ],
   providers: [MessageService],
   templateUrl: './supplier-profile-review.component.html',

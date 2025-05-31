@@ -305,7 +305,7 @@
                 </div>
                 <div class="info-item">
                   <span class="info-label">Expiration Date</span>
-                  <span class="info-value">{{cert.expirationDate | date:'shortDate' || 'N/A'}}</span>
+                  <span class="info-value">{{cert.expirationDate ? (cert.expirationDate | dateFormat) : 'N/A'}}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">Document</span>

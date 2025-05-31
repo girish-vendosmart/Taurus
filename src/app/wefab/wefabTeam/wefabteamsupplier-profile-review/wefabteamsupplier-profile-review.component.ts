@@ -7,6 +7,7 @@ import { MessageService } from 'primeng/api';
 import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
 import { CommonService } from '../../shared/common.service';
+import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import e from 'express';
 
 interface DocumentSummary {
@@ -30,7 +31,8 @@ interface CompletionStatus {
     ButtonModule,
     ToastModule,
     RippleModule,
-    TooltipModule
+    TooltipModule,
+    DateFormatPipe
   ],
   providers: [MessageService],
   templateUrl: './wefabteamsupplier-profile-review.component.html',

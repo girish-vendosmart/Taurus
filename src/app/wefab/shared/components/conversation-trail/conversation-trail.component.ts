@@ -6,11 +6,12 @@ import { CommonService } from './../../common.service';
 import { DialogModule } from 'primeng/dialog';
 import { FileUploadService, FileUploadResult } from '../../file-upload.service';
 import { EditorModule } from 'primeng/editor';
+import { DateFormatPipe } from '../../../../shared/pipes/date-format.pipe';
 
 @Component({
   selector: 'app-conversation-trail',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, EditorModule],
+  imports: [CommonModule, FormsModule, DialogModule, EditorModule, DateFormatPipe],
   templateUrl: './conversation-trail.component.html',
   styleUrls: ['./conversation-trail.component.scss']
 })

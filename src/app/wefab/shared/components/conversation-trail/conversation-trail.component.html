@@ -74,7 +74,7 @@
             <span class="sender-name">{{ msg.sender }}</span>
             <span class="sender-email">{{ msg.email }}</span>
           </div>
-          <span class="message-timestamp">{{ msg.timestamp | date:'M/d/yy, h:mm a' }}</span>
+          <span class="message-timestamp">{{ msg.timestamp | dateFormat }}</span>
         </div>
         <div class="message-content">
           <p class="message-text">{{ msg.text }}</p>

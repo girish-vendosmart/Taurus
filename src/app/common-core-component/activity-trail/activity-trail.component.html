@@ -95,7 +95,7 @@
             </div>
             <span class="user-name">{{ activity.user }}</span>
             <time class="activity-time" [attr.datetime]="activity.date | date:'yyyy-MM-ddTHH:mm:ssZ'">
-              {{ activity.date | date:'MMM d • HH:mm' }}
+              {{ activity.date | dateFormat }}
             </time>
           </div>
         </div>
