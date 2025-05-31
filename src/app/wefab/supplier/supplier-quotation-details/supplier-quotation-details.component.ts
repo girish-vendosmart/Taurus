@@ -9,7 +9,6 @@ import { HttpParams } from '@angular/common/http';
 import { ActivityTrailComponent, ActivityLogData } from '../../../common-core-component/activity-trail';
 import { ConversationTrailComponent } from '../../shared/components/conversation-trail/conversation-trail.component';
 import { SplitButtonComponent } from '../../../shared/split-button/split-button.component';
-import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -151,8 +150,7 @@ export interface QuotationItem {
     InputTextModule,
     ActivityTrailComponent,
     ConversationTrailComponent,
-    SplitButtonComponent,
-    DateFormatPipe
+    SplitButtonComponent
   ],
   templateUrl: './supplier-quotation-details.component.html',
   styleUrl: './supplier-quotation-details.component.scss'
@@ -424,8 +422,19 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     
     try {
       const date = new Date(dateString);
-      const dateFormatPipe = new DateFormatPipe();
-      return dateFormatPipe.transform(date);
+      
+      // Use the same formatting logic as DateFormatPipe formatMedium method
+      const day = date.getDate();
+      const month = date.toLocaleString('en-US', { month: 'long' });
+      const year = date.getFullYear();
+      
+      let hours = date.getHours();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // Convert 0 to 12
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      
+      return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
     } catch {
       return dateString; // Return original string if parsing fails
     }

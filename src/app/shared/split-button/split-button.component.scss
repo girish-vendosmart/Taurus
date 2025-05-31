@@ -17,10 +17,15 @@
     font-family: $font-family-sans-serif;
     font-weight: $font-weight-medium;
     font-size: $font-size-base;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 0.75rem;
     min-width: 120px;
     text-align: left;
+    text-decoration: none !important;
     
+    span, i {
+      text-decoration: none !important;
+    }
+
     &:focus {
       box-shadow: 0 0 0 0.2rem rgba(26, 58, 95, 0.25) !important;
     }
@@ -183,71 +188,112 @@
 // Enhanced dropdown menu styling with modern design
 ::ng-deep .split-button-menu {
   .p-menu {
-    background: white !important;
-    border: 1px solid #e0e0e0 !important;
-    border-radius: 4px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    min-width: 180px !important;
-    padding: 8px 0 !important;
-    margin-top: 4px !important;
-    left: 0 !important;
-    right: auto !important;
-    text-align: left !important;
+    background: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    min-width: 160px !important;
+    padding: 4px !important;
+    margin-top: 2px !important;
+    font-family: $font-family-sans-serif !important;
+
+    // Remove underlines from all elements
+    *, *::before, *::after {
+      text-decoration: none !important;
+      text-decoration-line: none !important;
+      text-decoration-style: none !important;
+      text-decoration-color: transparent !important;
+    }
 
     .p-menuitem {
       margin: 0 !important;
+      list-style: none !important;
+      text-decoration: none !important;
 
       .p-menuitem-link {
-        padding: 8px 16px !important;
-        transition: all 0.2s ease !important;
+        padding: 8px 12px !important;
+        margin: 2px !important;
+        transition: all 0.15s ease !important;
         display: flex !important;
         align-items: center !important;
-        color: #333333 !important;
+        color: #374151 !important;
         font-size: 14px !important;
-        font-weight: normal !important;
+        font-weight: 500 !important;
         text-decoration: none !important;
+        text-decoration-line: none !important;
+        text-decoration-style: none !important;
         cursor: pointer !important;
         background: transparent !important;
         border: none !important;
+        border-radius: 4px !important;
+        line-height: 1.4 !important;
 
         &:hover {
-          background-color: #f5f5f5 !important;
-          color: #000000 !important;
+          background-color: #f3f4f6 !important;
+          color: #111827 !important;
           text-decoration: none !important;
+          text-decoration-line: none !important;
+          text-decoration-style: none !important;
         }
 
         &:active {
-          background-color: #eeeeee !important;
+          background-color: #e5e7eb !important;
           text-decoration: none !important;
+          text-decoration-line: none !important;
+          text-decoration-style: none !important;
+        }
+
+        &:focus {
+          outline: none !important;
+          background-color: #dbeafe !important;
+          color: #1e40af !important;
+          text-decoration: none !important;
+          text-decoration-line: none !important;
+          text-decoration-style: none !important;
+        }
+
+        &:link, &:visited, &:active {
+          text-decoration: none !important;
+          text-decoration-line: none !important;
+          text-decoration-style: none !important;
         }
 
         .p-menuitem-icon {
-          margin-right: 12px !important;
-          font-size: 16px !important;
-          color: #666666 !important;
+          margin-right: 8px !important;
+          font-size: 14px !important;
+          color: #6b7280 !important;
+          flex-shrink: 0 !important;
+          text-decoration: none !important;
         }
 
         .p-menuitem-text {
           flex: 1 !important;
           text-decoration: none !important;
+          text-decoration-line: none !important;
+          text-decoration-style: none !important;
+          white-space: nowrap !important;
         }
       }
 
       &.p-disabled {
         .p-menuitem-link {
-          opacity: 0.6 !important;
+          opacity: 0.5 !important;
           cursor: not-allowed !important;
+          text-decoration: none !important;
           
           &:hover {
             background: transparent !important;
+            color: #374151 !important;
+            text-decoration: none !important;
           }
         }
       }
     }
 
     .p-separator {
-      border-top: 1px solid #e0e0e0 !important;
-      margin: 4px 0 !important;
+      border-top: 1px solid #e5e7eb !important;
+      margin: 4px 8px !important;
+      height: 0 !important;
     }
   }
 }
@@ -260,29 +306,24 @@
     position: absolute !important;
     top: 100% !important;
     left: 0 !important;
-    transform-origin: top left !important;
-    margin-top: 4px !important;
+    z-index: 10000 !important;
+    margin-top: 2px !important;
   }
 }
 
-// Enhanced animation for menu appearance
+// Simple fade-in animation for menu appearance
 ::ng-deep .split-button-menu .p-menu {
-  animation: menuSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  animation: menuFadeIn 0.2s ease-out !important;
 }
 
-// Enhanced keyframe animation for smooth menu appearance
-@keyframes menuSlideIn {
+@keyframes menuFadeIn {
   0% {
     opacity: 0;
-    transform: translateY(-12px) scale(0.9) rotateX(-10deg);
-  }
-  50% {
-    opacity: 0.8;
-    transform: translateY(-4px) scale(0.95) rotateX(-2deg);
+    transform: translateY(-8px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1) rotateX(0deg);
+    transform: translateY(0);
   }
 }
 
@@ -363,3 +404,50 @@
     }
   }
 } 
+
+::ng-deep .p-menu-list {
+  padding-left: 0px !important;
+  
+  // Remove all underlines from menu list items
+  * {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    text-decoration-style: none !important;
+  }
+  
+  // Target specific PrimeNG classes
+  .p-menuitem-link, .p-menuitem-text, .p-menuitem-icon {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    text-decoration-style: none !important;
+  }
+  
+  // Target any anchor tags that might be present
+  a, a:hover, a:focus, a:active, a:visited {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    text-decoration-style: none !important;
+  }
+}
+
+// Global override for any split-button related underlines
+::ng-deep .split-button-container {
+  * {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    text-decoration-style: none !important;
+  }
+  
+  // Remove underlines from all possible states
+  a, span, div, button, i {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    text-decoration-style: none !important;
+    
+    &:hover, &:focus, &:active, &:visited {
+      text-decoration: none !important;
+      text-decoration-line: none !important;
+      text-decoration-style: none !important;
+    }
+  }
+}

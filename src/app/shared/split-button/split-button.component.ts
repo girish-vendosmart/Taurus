@@ -34,8 +34,8 @@ export interface SplitButtonOption {
         [disabled]="disabled"
         (click)="onMainButtonClick()"
         [attr.aria-label]="selectedOption?.label || placeholder">
-        <i *ngIf="selectedOption?.icon || icon" [class]="selectedOption?.icon || icon + ' mr-2'"></i>
-        <span>{{ selectedOption?.label || label || placeholder }}</span>
+        <i *ngIf="selectedOption?.icon || icon" [class]="selectedOption?.icon || icon" style="margin-right: 8px;"></i>
+        <span style="text-decoration: none;">{{ selectedOption?.label || label || placeholder }}</span>
       </button>
       
       <button 
@@ -99,7 +99,6 @@ export class SplitButtonComponent implements ControlValueAccessor, OnInit, OnCha
       separator: option.separator,
       command: () => {
         this.selectOption(option);
-        this.actionTriggered.emit({ action: 'select', option: option });
       }
     }));
   }
@@ -111,12 +110,17 @@ export class SplitButtonComponent implements ControlValueAccessor, OnInit, OnCha
     this.onChange(option.value);
     this.onTouched();
     this.optionSelected.emit(option);
+    
+    // Emit the actionTriggered event with proper structure for supplier quotation details
+    this.actionTriggered.emit({ action: 'select', option: option });
+    
+    console.log('Option selected:', option);
+    console.log('Action triggered event emitted:', { action: 'select', option: option });
   }
 
   onMainButtonClick() {
     if (!this.allowMainButtonAction) return;
     this.mainButtonClicked.emit(this.selectedOption);
-    debugger
     console.log('Main button clicked:', this.selectedOption);
     this.actionTriggered.emit({ action: 'click', option: this.selectedOption });
   }
