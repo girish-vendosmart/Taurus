@@ -170,6 +170,8 @@ export class SupplierRfqDetailsComponent implements OnInit {
     pageSize: 10,
     showActions: false
   };
+  supplierRfqId: string = '';
+  supplierRfqDetails: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -182,16 +184,18 @@ export class SupplierRfqDetailsComponent implements OnInit {
       this.rfqId = params['id'];
       debugger
       console.log(this.rfqId)
+      this.supplierRfqId = sessionStorage.getItem('supplier_rfq_id') || '';
       this.loadRFQDetails();
       this.loadSupplierDetails();
     });
+
   }
 
   loadSupplierDetails() {
-    let endPoint = `/api/resource/Supplier Request for Quotation/${this.rfqId}`;
+    let endPoint = `/api/resource/Supplier Request for Quotation/${this.rfqId}-${this.supplierRfqId}`;
     this.commonService.getWefabData(endPoint).subscribe((res: any) => {
       debugger
-      console.log(res)
+      this.supplierRfqDetails = res.data;
     });
   }
 
@@ -339,7 +343,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
   }
 
   getStatusClass(): string {
-    switch (this.rfqDetails.docstatus) {
+    switch (this.supplierRfqDetails.docstatus) {
       case 1:
         return 'status-published';
       case 0:
@@ -352,7 +356,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
   }
 
   getStatusText(): string {
-    switch (this.rfqDetails.docstatus) {
+    switch (this.supplierRfqDetails.docstatus) {
       case 1:
         return 'Published';
       case 0:

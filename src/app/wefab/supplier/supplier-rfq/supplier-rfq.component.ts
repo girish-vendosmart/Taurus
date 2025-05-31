@@ -33,6 +33,7 @@ export interface RFQItem {
   styleUrl: './supplier-rfq.component.scss'
 })
 export class SupplierRfqComponent implements OnInit {
+  supplierId: string = '';
 
   constructor(private router: Router, private commonService: CommonService) { }
   
@@ -120,12 +121,15 @@ export class SupplierRfqComponent implements OnInit {
   ngOnInit() {
     // Remove sample data loading since we're using real API data
     // this.loadSampleData();
+    this.supplierId = sessionStorage.getItem('supplier_id') || '';
     this.getRfqList();
   }
 
   getRfqList() {
     this.loading = true;
     let endpoint = `/api/resource/Supplier Request for Quotation?fields=["*"]`
+    // let endpoint = `/api/resource/Supplier Request for Quotation?fields=["*"]&filters=[["supplier_id", "=", "${this.supplierId}"]]`
+
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
@@ -160,6 +164,7 @@ export class SupplierRfqComponent implements OnInit {
       status: this.mapApiStatusToRFQStatus(item.status),
       // Additional fields for potential use
       owner: item.owner || '',
+      suppler_rfq_id: item.supplier_id || '',
       modified: item.modified || '',
       docstatus: item.docstatus || 0,
       routerLink: `/wefab/supplier/rfq/details/${item.rfq_id}`
@@ -250,9 +255,9 @@ export class SupplierRfqComponent implements OnInit {
     console.log('Row clicked:', event.rowData);
   }
 
-  onLinkClick(event: { rowData: RFQItem, column: any, event: Event }) {
+  onLinkClick(event: any) {
     console.log('Link clicked:', event.rowData);
-    
+    debugger
     // Handle click on RFQ ID link
     const target = event.event.target as HTMLElement;
     if (target?.classList?.contains('rfq-id-link')) {
@@ -263,6 +268,7 @@ export class SupplierRfqComponent implements OnInit {
       // Call the onRfqIdLinkClick function with the RFQ ID
       const rfqId = event.rowData.rfqId || event.rowData.name || '';
       if (rfqId) {
+        sessionStorage.setItem('supplier_rfq_id', event.rowData.suppler_rfq_id);
         this.onRfqIdLinkClick(rfqId);
       }
     } else {
