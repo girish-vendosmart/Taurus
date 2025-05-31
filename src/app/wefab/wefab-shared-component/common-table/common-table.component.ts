@@ -148,7 +148,7 @@ export class CommonTableComponent implements OnInit {
   @Input() loading: boolean = false;
 
   @Output() rowClick = new EventEmitter<any>();
-  @Output() linkClick = new EventEmitter<any>();
+  @Output() linkClick = new EventEmitter<{rowData: any, column: TableColumn, event: any}>();
   @Output() actionClick = new EventEmitter<{action: string, rowData: any}>();
 
   // Search state
@@ -344,7 +344,7 @@ export class CommonTableComponent implements OnInit {
   onLinkClick(event: any, rowData: any, column: TableColumn) {
     event.preventDefault();
     event.stopPropagation();
-    this.linkClick.emit({ rowData, column });
+    this.linkClick.emit({ rowData, column, event });
   }
 
   onActionClick(action: string, rowData: any, event: any) {

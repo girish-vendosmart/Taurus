@@ -154,7 +154,7 @@ export class SupplierRfqComponent implements OnInit {
     return apiData.map(item => ({
       // Map API fields to match the table configuration
       name: item.rfq_name || '',
-      rfqName: `${item.rfq_name || ''}<br><a href="/wefab/supplier/rfq/details/${item.rfq_id}" class="rfq-id-link">${item.rfq_id || ''}</a>`,
+      rfqName: `${item.rfq_name || ''}<br><span class="rfq-id-link">${item.rfq_id || ''}</span>`,
       creationDate: this.formatApiDate(item.creation),
       status: this.mapApiStatusToRFQStatus(item.status),
       // Additional fields for potential use
@@ -244,11 +244,19 @@ export class SupplierRfqComponent implements OnInit {
   }
 
   onLinkClick(event: { rowData: RFQItem, column: any, event: Event }) {
-    // Only handle link clicks if they come from the RFQ ID link
+    console.log('Link clicked:', event.rowData);
+    
+    // Handle click on RFQ ID link
     const target = event.event.target as HTMLElement;
     if (target?.classList?.contains('rfq-id-link')) {
-      console.log('RFQ link clicked:', event.rowData);
-      this.router.navigate(['/wefab/supplier/rfq/details', event.rowData.name || event.rowData.rfqId]);
+      console.log('RFQ ID link clicked:', event.rowData);
+      event.event.preventDefault();
+      event.event.stopPropagation();
+      // Navigate to RFQ details page using the name field
+      this.router.navigate(['/wefab/supplier/rfq/details', event.rowData.name]);
+    } else {
+      // Handle other link clicks (if any)
+      console.log('Other link clicked');
     }
   }
 

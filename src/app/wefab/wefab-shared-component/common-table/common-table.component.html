@@ -203,7 +203,9 @@
 
               <!-- HTML Content Cell -->
               <div [class]="col.field + '-cell'" *ngSwitchCase="col.isHtml">
-                <div class="main-content non-linkable-column" [innerHTML]="rowData[col.field]"></div>
+                <div class="main-content non-linkable-column" 
+                     [innerHTML]="rowData[col.field]"
+                     (click)="onLinkClick($event, rowData, col)"></div>
                 <div class="sub-info" *ngIf="getSubInfo(col.field, rowData)">
                   {{ getSubInfo(col.field, rowData) }}
                 </div>

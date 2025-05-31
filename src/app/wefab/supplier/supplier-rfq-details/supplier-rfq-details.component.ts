@@ -183,6 +183,15 @@ export class SupplierRfqDetailsComponent implements OnInit {
       debugger
       console.log(this.rfqId)
       this.loadRFQDetails();
+      this.loadSupplierDetails();
+    });
+  }
+
+  loadSupplierDetails() {
+    let endPoint = `/api/resource/Supplier Request for Quotation/${this.rfqId}`;
+    this.commonService.getWefabData(endPoint).subscribe((res: any) => {
+      debugger
+      console.log(res)
     });
   }
 

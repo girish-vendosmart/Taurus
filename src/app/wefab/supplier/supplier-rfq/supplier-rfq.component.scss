@@ -762,21 +762,23 @@ $transition: all 0.3s ease;
   border: 1px solid rgba($material-finish-silver, 0.2);
 }
 
-.rfq-id-link {
-  color: $blueprint-blue;
-  text-decoration: none;
+// Use ::ng-deep to make styles apply to dynamically injected HTML
+:host ::ng-deep .rfq-id-link {
+  text-decoration: none !important;
+  color: #0056b3 !important;
   font-size: 0.9em;
   margin-top: 4px;
   display: inline-block;
+  cursor: pointer;
 
   &:hover {
-    text-decoration: none;
-    color: $blueprint-blue;
+    text-decoration: underline !important;
+    color: #003d82 !important;
   }
 }
 
 // Add some spacing between RFQ Name and ID
-.rfqName-cell {
+:host ::ng-deep .rfqName-cell {
   .main-content {
     margin-bottom: 4px;
   }
