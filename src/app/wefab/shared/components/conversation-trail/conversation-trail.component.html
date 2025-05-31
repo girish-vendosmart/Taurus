@@ -1,65 +1,129 @@
 <div class="conversation-container">
-    <div class="send-section">
-      <div class="editor-attachment-wrapper">
-        <p-editor [(ngModel)]="newMessage"  placeholder="Type a message..." [style]="{ height: '100px' }"></p-editor>
-        <label class="attach-btn" pTooltip="Attach file">
-          <i class="pi pi-paperclip"></i>
-          <input type="file" (change)="onFileSelected($event)" multiple hidden>
-        </label>
+  <!-- Componse Section container -->
+  <!-- Compose Section -->
+  <div class="compose-section">
+    <!-- Rich Text Editor -->
+    <div class="editor-section">
+      <p-editor 
+        [(ngModel)]="newMessage" 
+        placeholder="Type your message..." 
+        [style]="{ height: '120px' }"
+        [modules]="editorModules">
+      </p-editor>
+    </div>
+
+    <!-- Pending Attachments -->
+    <div *ngIf="attachments.length > 0" class="pending-attachments">
+      <div class="pending-attachment-card" *ngFor="let att of attachments; let i = index">
+        <div class="attachment-preview">
+          <ng-container *ngIf="isImageFileByUrl(att.file_url); else fileIconTemplate">
+            <img [src]="att.file_url" [alt]="getFileName(att.file_url)" class="attachment-thumbnail" />
+          </ng-container>
+          <ng-template #fileIconTemplate>
+            <div class="file-icon-container">
+              <i [ngClass]="getFileIcon(att)" class="file-icon"></i>
+            </div>
+          </ng-template>
+        </div>
+        <div class="attachment-info">
+          <span class="attachment-filename">{{ getFileName(att.file_url) }}</span>
+          <span class="attachment-filetype">{{ getFileExtension(att.file_url).toUpperCase() }}</span>
+        </div>
+        <div class="attachment-actions">
+          <button class="action-btn view-btn" (click)="viewAttachment(att.file_url)" title="View">
+            <i class="pi pi-eye"></i>
+          </button>
+          <button class="action-btn remove-btn" (click)="removeAttachment(i)" title="Remove">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
       </div>
-      <button class="send-btn" (click)="sendMessage()" [disabled]="uploading">
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-section">
+      <label class="attach-file-btn" for="file-input">
+        <i class="pi pi-paperclip"></i>
+        <span>Attach File</span>
+        <input 
+          id="file-input" 
+          type="file" 
+          (change)="onFileSelected($event)" 
+          multiple 
+          hidden>
+      </label>
+      
+      <button 
+        class="send-message-btn" 
+        (click)="sendMessage()" 
+        [disabled]="!hasValidMessage() || uploading">
         <i class="pi pi-send"></i>
+        <span>Send</span>
       </button>
     </div>
-    <div *ngIf="attachments.length > 0" class="pending-attachments-list">
-      <div class="pending-attachment-item" *ngFor="let att of attachments; let i = index">
-        <i [ngClass]="getFileIcon(att)"></i>
-        <span class="filename body-small" [title]="att.file_url">{{ att.file_url.split('/').pop() }}</span>
-        <button (click)="removeAttachment(i)" class="remove-btn"><i class="pi pi-times"></i></button>
+  </div>
+  <!-- Messages Section -->
+  <div class="messages-section">
+    <div class="message" *ngFor="let msg of messages">
+      <div class="profile-avatar">
+        <span class="avatar-text">{{ getInitials(msg.sender) }}</span>
       </div>
-    </div>
-    <div class="messages-section">
-      <div class="message" *ngFor="let msg of messages">
-        <div class="profile-icon">{{ getInitials(msg.sender) }}</div>
-        <div class="message-content">
-          <div class="message-header">
-            <div class="header-main">
-              <div class="company" *ngIf="msg.company">{{ msg.company }}</div>
-              <div class="user-row">
-                <span class="user-name">{{ msg.sender }}</span>
-              </div>
-              <div class="email caption" *ngIf="msg.email">{{ msg.email }}</div>
-            </div>
-            <span class="timestamp caption">{{ msg.timestamp | date:'short' }}</span>
+      <div class="message-bubble">
+        <div class="message-header">
+          <div class="sender-info">
+            <span class="sender-name">{{ msg.sender }}</span>
+            <span class="sender-email">{{ msg.email }}</span>
           </div>
-          <div class="message-text body-default" [innerHTML]="msg.text"></div>
-          <div *ngIf="msg.attachments?.length" class="attachments-list">
+          <span class="message-timestamp">{{ msg.timestamp | date:'M/d/yy, h:mm a' }}</span>
+        </div>
+        <div class="message-content">
+          <p class="message-text">{{ msg.text }}</p>
+          
+          <!-- Attachments -->
+          <div *ngIf="msg.attachments?.length" class="message-attachments">
             <div class="attachment-item" *ngFor="let file of msg.attachments">
-              <ng-container *ngIf="isImageFile(file.file_type); else nonImage">
-                <img [src]="file.file_url" [alt]="file.file_name" class="attachment-thumb" (click)="openImagePreview(file.file_url)" style="cursor:pointer;" />
-              </ng-container>
-              <ng-template #nonImage>
-                <ng-container *ngIf="isPdfFile(file.file_type); else otherFile">
-                  <i class="pi pi-file-pdf pdf-icon"></i>
+              <div class="attachment-preview">
+                <ng-container *ngIf="isImageFile(file.file_type); else fileIcon">
+                  <img [src]="file.file_url" [alt]="file.file_name" class="attachment-image" (click)="openImagePreview(file.file_url)" />
                 </ng-container>
-                <ng-template #otherFile>
-                  <i class="pi pi-file file-icon"></i>
+                <ng-template #fileIcon>
+                  <div class="file-icon-wrapper">
+                    <i [ngClass]="getFileIconClass(file.file_type)" class="file-icon"></i>
+                  </div>
                 </ng-template>
-              </ng-template>
-              <a [href]="file.file_url" target="_blank" class="attachment-filename caption">{{ file.file_name }}</a>
+              </div>
+              <div class="attachment-details">
+                <span class="attachment-name">{{ file.file_name }}</span>
+                <span class="attachment-type">{{ file.file_type?.toUpperCase() || 'FILE' }}</span>
+              </div>
+              <div class="attachment-actions">
+                <button class="action-btn view-btn" (click)="viewAttachment(file.file_url)">
+                  <i class="pi pi-eye"></i>
+                </button>
+                <button class="action-btn download-btn" (click)="downloadAttachment(file.file_url, file.file_name)">
+                  <i class="pi pi-download"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  
-  <p-dialog [(visible)]="!!previewImageUrl"
-            [modal]="true"
-            [closable]="true"
-            [dismissableMask]="true"
-            [style]="{width: '90vw', maxWidth: '900px'}"
-            contentStyle="display:flex;justify-content:center;align-items:center;background:#222;"
-            (onHide)="closeImagePreview()">
-    <img *ngIf="previewImageUrl" [src]="previewImageUrl" alt="Preview" style="max-width: 100%; max-height: 80vh; border-radius: 8px;" />
-  </p-dialog> 
+
+  <!-- Image Preview Dialog -->
+  <p-dialog 
+    [(visible)]="!!previewImageUrl"
+    [modal]="true"
+    [closable]="true"
+    [dismissableMask]="true"
+    [style]="{width: '90vw', maxWidth: '900px'}"
+    styleClass="image-preview-dialog"
+    (onHide)="closeImagePreview()">
+    <img 
+      *ngIf="previewImageUrl" 
+      [src]="previewImageUrl" 
+      alt="Image Preview" 
+      class="preview-image" />
+  </p-dialog>
+</div> 
