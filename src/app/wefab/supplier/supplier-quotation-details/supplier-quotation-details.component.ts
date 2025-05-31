@@ -9,6 +9,7 @@ import { HttpParams } from '@angular/common/http';
 import { ActivityTrailComponent, ActivityLogData } from '../../../common-core-component/activity-trail';
 import { ConversationTrailComponent } from '../../shared/components/conversation-trail/conversation-trail.component';
 import { SplitButtonComponent } from '../../../shared/split-button/split-button.component';
+import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -150,7 +151,8 @@ export interface QuotationItem {
     InputTextModule,
     ActivityTrailComponent,
     ConversationTrailComponent,
-    SplitButtonComponent
+    SplitButtonComponent,
+    DateFormatPipe
   ],
   templateUrl: './supplier-quotation-details.component.html',
   styleUrl: './supplier-quotation-details.component.scss'
@@ -422,13 +424,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      const dateFormatPipe = new DateFormatPipe();
+      return dateFormatPipe.transform(date);
     } catch {
       return dateString; // Return original string if parsing fails
     }
