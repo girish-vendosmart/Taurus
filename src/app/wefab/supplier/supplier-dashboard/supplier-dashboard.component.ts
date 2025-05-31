@@ -431,8 +431,10 @@ export class SupplierDashboardComponent {
     }
   ];
 
-  viewRFQ(rfqId: string) {
-    this.router.navigate(['/wefab/supplier/rfq/details/', rfqId]);
+  viewRFQ(rfq: any) {
+    sessionStorage.setItem('supplier_rfq_id', rfq.supplier_id);
+    // sessionStorage.setItem('supplier_rfq_name', rfq.name);
+    this.router.navigate(['/wefab/supplier/rfq/details/', rfq.rfq_id]);
   }
 
   viewQuotation(quotationId: string) {
