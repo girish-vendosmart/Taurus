@@ -35,6 +35,7 @@ export class ConversationTrailComponent implements OnInit {
       ['link']
     ]
   };
+  hasValidMessageStatus: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -71,9 +72,19 @@ export class ConversationTrailComponent implements OnInit {
   }
 
   stripHtml(html: string): string {
+    if (!html) return '';
+    
     const div = document.createElement('div');
     div.innerHTML = html;
-    return div.textContent || div.innerText || '';
+    
+    // Get text content and clean up common editor artifacts
+    let textContent = div.textContent || div.innerText || '';
+    
+    // Remove common rich text editor artifacts like zero-width spaces, non-breaking spaces
+    textContent = textContent.replace(/[\u200B-\u200D\uFEFF]/g, ''); // Zero-width characters
+    textContent = textContent.replace(/\u00A0/g, ' '); // Non-breaking spaces to regular spaces
+    
+    return textContent;
   }
 
   hasValidMessage(): boolean {
@@ -163,6 +174,8 @@ export class ConversationTrailComponent implements OnInit {
         }
       });
       this.uploading = false;
+      // Update validation status after adding attachments
+      this.updateValidationStatus();
       // Clear the input
       event.target.value = '';
     }).catch(() => {
@@ -176,7 +189,7 @@ export class ConversationTrailComponent implements OnInit {
     const payload = {
       document_id: this.supplierId,
       sender: this.currentUser,
-      comment: this.newMessage,
+      comment: this.newMessage || '', // Allow empty message if there are attachments
       attachment: this.attachments
     };
     
@@ -200,6 +213,8 @@ export class ConversationTrailComponent implements OnInit {
 
   removeAttachment(index: number) {
     this.attachments.splice(index, 1);
+    // Update validation status after removing attachment
+    this.updateValidationStatus();
   }
 
   getFileIcon(att: { file_url: string }): string {
@@ -225,5 +240,28 @@ export class ConversationTrailComponent implements OnInit {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  // Add method to handle editor text change
+  onEditorTextChange(event: any): void {
+    // This can help debug what's happening with the editor content
+    console.log('Editor content:', this.newMessage);
+    console.log('Has valid message:', this.hasValidMessage());
+    
+    this.newMessage = event.textValue;
+    
+    // Check if we have valid content (either text or attachments)
+    const hasText = this.newMessage && this.newMessage.trim().length > 0;
+    const hasAttachments = this.attachments && this.attachments.length > 0;
+    
+    // Set to false when button should be DISABLED (no content), true when button should be ENABLED
+    this.hasValidMessageStatus = hasText || hasAttachments;
+  }
+
+  // Add method to update validation status
+  updateValidationStatus(): void {
+    const hasText = this.newMessage && this.newMessage.trim().length > 0;
+    const hasAttachments = this.attachments && this.attachments.length > 0;
+    this.hasValidMessageStatus = hasText || hasAttachments;
   }
 } 

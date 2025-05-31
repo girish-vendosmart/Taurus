@@ -8,7 +8,8 @@
         [(ngModel)]="newMessage" 
         placeholder="Type your message..." 
         [style]="{ height: '120px' }"
-        [modules]="editorModules">
+        [modules]="editorModules"
+        (onTextChange)="onEditorTextChange($event)">
       </p-editor>
     </div>
 
@@ -55,8 +56,7 @@
       
       <button 
         class="send-message-btn" 
-        (click)="sendMessage()" 
-        [disabled]="!hasValidMessage() || uploading">
+        (click)="sendMessage()">
         <i class="pi pi-send"></i>
         <span>Send</span>
       </button>
