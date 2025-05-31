@@ -40,56 +40,62 @@
     <div class="activity-timeline" *ngIf="!loading && processedActivities.length > 0">
       <div 
         class="activity-item" 
-        *ngFor="let activity of processedActivities; trackBy: trackByActivityId"
-        [class]="getStatusColorClass(activity.action)"
+        *ngFor="let activity of processedActivities; trackBy: trackByActivityId; let isFirst = first; let isLast = last"
         role="article">
         
-        <!-- Timeline Connector -->
-        <div class="timeline-connector" aria-hidden="true">
-          <i [class]="'pi ' + getStatusIcon(activity.action)"></i>
+        <!-- Timeline Connector (Left Side) -->
+        <div class="timeline-connector">
+          <!-- Timeline Line Above Dot (only show if not first item) -->
+          <div class="timeline-line timeline-line-top" *ngIf="!isFirst" aria-hidden="true"></div>
+          
+          <!-- Timeline Dot -->
+          <div class="timeline-dot" [ngClass]="getTimelineDotClass(activity.action)" aria-hidden="true">
+            <i [class]="getActivityIcon(activity.action)"></i>
+          </div>
+          
+          <!-- Timeline Line Below Dot (only show if not last item) -->
+          <div class="timeline-line timeline-line-bottom" *ngIf="!isLast" aria-hidden="true"></div>
         </div>
 
-        <!-- Activity Content -->
-        <div class="activity-content">
-          <!-- Activity Header -->
-          <div class="activity-header">
-            <div class="activity-title-section">
-              <h4 class="activity-title">{{ activity.title }}</h4>
-              <span class="activity-status-badge" role="status">
-                {{ activity.action }}
-              </span>
-            </div>
-            <div class="activity-meta">
-              <time class="activity-time" [attr.datetime]="activity.date | date:'yyyy-MM-ddTHH:mm:ssZ'">
-                {{ activity.time_since }}
-              </time>
-              <span class="activity-user">{{ activity.user }}</span>
-            </div>
+        <!-- Activity Content Box (Right Side) -->
+        <div class="activity-content-box">
+          <!-- Activity Badge -->
+          <div class="activity-badge" [ngClass]="getActivityBadgeClass(activity.action)">
+            {{ getActivityBadgeText(activity.action) }}
+          </div>
+          
+          <!-- Timestamp (top right) -->
+          <div class="activity-timestamp">
+            <i class="pi pi-clock" aria-hidden="true"></i>
+            <span class="time-since">{{ activity.time_since }}</span>
           </div>
 
           <!-- Activity Description -->
           <div class="activity-description">
-            <p>{{ activity.description }}</p>
-          </div>
-
-          <!-- Activity Changes -->
-          <div class="activity-changes" *ngIf="activity.changes && activity.changes.length > 0 && !isLongProfileChange(activity.changes)">
-            <div class="changes-header">
-              <i class="pi pi-list" aria-hidden="true"></i>
-              <span>Changes Made:</span>
+            <div class="activity-main-text">
+              <i class="pi pi-sync" aria-hidden="true"></i>
+              <span>{{ activity.description }}</span>
             </div>
-            <ul class="changes-list" role="list">
-              <li *ngFor="let change of activity.changes" class="change-item" role="listitem">
-                {{ change }}
-              </li>
-            </ul>
+            
+            <!-- Data Changes for Data Modified activities -->
+            <div class="activity-changes" *ngIf="activity.action === 'Data Modified' && activity.changes && activity.changes.length > 0">
+              <div class="change-item" *ngFor="let change of activity.changes">
+                <span class="change-indicator" [ngClass]="getChangeIndicator(change)">
+                  {{ getChangeSymbol(change) }}
+                </span>
+                <span class="change-text">{{ formatChangeText(change) }}</span>
+              </div>
+            </div>
           </div>
 
-          <!-- Activity Date -->
-          <div class="activity-date">
-            <i class="pi pi-calendar" aria-hidden="true"></i>
-            <time [attr.datetime]="activity.date | date:'yyyy-MM-ddTHH:mm:ssZ'">
-              {{ activity.date | date:'MMM d, y, h:mm a' }}
+          <!-- User Info - Name and Date on same line -->
+          <div class="user-info">
+            <div class="user-avatar">
+              {{ getUserInitials(activity.user) }}
+            </div>
+            <span class="user-name">{{ activity.user }}</span>
+            <time class="activity-time" [attr.datetime]="activity.date | date:'yyyy-MM-ddTHH:mm:ssZ'">
+              {{ activity.date | date:'MMM d • HH:mm' }}
             </time>
           </div>
         </div>

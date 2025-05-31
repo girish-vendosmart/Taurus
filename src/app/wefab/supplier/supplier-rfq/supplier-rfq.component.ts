@@ -109,6 +109,8 @@ export class SupplierRfqComponent implements OnInit {
     enableSort: true,
     enableFilter: true,
     enablePagination: true,
+    enableColumnHide: true,
+    enableColumnResize: true,
     pageSize: 10,
   };
   

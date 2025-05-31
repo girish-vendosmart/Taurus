@@ -20,7 +20,7 @@ export interface ActivityLogData {
 export interface ActivityItem {
   id: string;
   date: Date;
-  action: 'Approved' | 'Rejected' | 'Updated' | 'Submitted' | 'Created' | 'Under Review';
+  action: 'State Change' | 'Data Modified' | 'Rows Updated';
   title: string;
   description: string;
   user: string;
@@ -73,14 +73,13 @@ export class ActivityTrailComponent implements OnInit, OnChanges {
 
     this.processedActivities = this.activityData.map((log: ActivityLogData, index: number) => {
       const action = this.mapLogAction(log);
-      const title = this.generateLogTitle(log, action);
       const description = this.generateLogDescription(log, action);
       
       return {
         id: log.name.toString(),
         date: new Date(log.creation),
         action: action,
-        title: title,
+        title: '',
         description: description,
         user: log.user || 'System',
         time_since: log.time_since || this.calculateTimeSince(new Date(log.creation)),
@@ -91,114 +90,54 @@ export class ActivityTrailComponent implements OnInit, OnChanges {
     this.cdr.detectChanges();
   }
 
-  private mapLogAction(log: ActivityLogData): 'Approved' | 'Rejected' | 'Updated' | 'Submitted' | 'Created' | 'Under Review' {
+  private mapLogAction(log: ActivityLogData): 'State Change' | 'Data Modified' | 'Rows Updated' {
     if (!log.data?.changed || log.data.changed.length === 0) {
-      return 'Created';
+      return 'Data Modified';
     }
 
     const changes = log.data.changed.join(' ').toLowerCase();
     
-    // Check for status changes first
-    if (changes.includes('onboarding status')) {
-      if (changes.includes('approved')) return 'Approved';
-      if (changes.includes('rejected')) return 'Rejected';
-      if (changes.includes('under review')) return 'Under Review';
-      if (changes.includes('request to resubmit')) return 'Updated';
-      return 'Submitted';
+    // Check for state changes
+    if (changes.includes('workflow state') || changes.includes('onboarding status') || 
+        changes.includes('state changed') || changes.includes('status changed')) {
+      return 'State Change';
     }
     
-    // Check for profile/data changes
-    if (changes.includes('company profile') || changes.includes('profile changed')) {
-      return 'Updated';
+    // Check for row updates
+    if (changes.includes('rows modified') || changes.includes('rows updated') || 
+        changes.includes('rows added') || changes.includes('rows removed')) {
+      return 'Rows Updated';
     }
     
-    // Default to Created for initial entries
-    return 'Created';
-  }
-
-  private generateLogTitle(log: ActivityLogData, action: string): string {
-    const stage = this.getStageFromLog(log);
-    
-    switch (action) {
-      case 'Approved':
-        return `${stage} Approved`;
-      case 'Rejected':
-        return `${stage} Rejected`;
-      case 'Under Review':
-        return `${stage} Under Review`;
-      case 'Updated':
-        return `${stage} Updated`;
-      case 'Submitted':
-        return `${stage} Submitted`;
-      default:
-        return `${stage} Created`;
-    }
+    // Default to data modified
+    return 'Data Modified';
   }
 
   private generateLogDescription(log: ActivityLogData, action: string): string {
     if (!log.data?.changed || log.data.changed.length === 0) {
-      return `Record was created in the system`;
+      return 'Record was created in the system';
     }
 
-    // For status changes, extract the specific status change
-    const statusChange = log.data.changed.find(change => 
-      change.toLowerCase().includes('onboarding status')
-    );
-    
-    if (statusChange) {
-      return this.formatStatusChange(statusChange);
-    }
-
-    // For profile changes, provide a more user-friendly message
-    const profileChange = log.data.changed.find(change => 
-      change.toLowerCase().includes('company profile changed') ||
-      change.toLowerCase().includes('profile changed')
-    );
-    
-    if (profileChange) {
-      // Check if it's a long JSON change
-      if (profileChange.length > 200 || profileChange.includes('{')) {
-        return 'Company profile information was updated with new details';
-      }
-      return 'Profile information was updated';
-    }
-
-    // For other changes, use the first change but truncate if too long
     const firstChange = log.data.changed[0];
-    if (firstChange.length > 150) {
-      return 'System data was updated';
+
+    // For state changes, extract and format the change
+    if (action === 'State Change') {
+      if (firstChange.includes('Workflow State changed') || firstChange.includes('status changed')) {
+        return firstChange;
+      }
     }
 
-    return firstChange || 'Activity recorded';
-  }
+    // For rows updated
+    if (action === 'Rows Updated') {
+      return firstChange;
+    }
 
-  private formatStatusChange(statusChange: string): string {
-    // Extract the status change details
-    const match = statusChange.match(/from\s+"([^"]+)"\s+to\s+"([^"]+)"/i);
-    if (match) {
-      const fromStatus = match[1];
-      const toStatus = match[2];
-      return `Status changed from "${fromStatus}" to "${toStatus}"`;
+    // For data modified, provide a summary or the first change
+    if (firstChange.length > 200 || firstChange.includes('{')) {
+      return 'Data was updated with new information';
     }
-    return statusChange;
-  }
 
-  private getStageFromLog(log: ActivityLogData): string {
-    // Try to determine stage from the log context or changes
-    const changes = log.data?.changed?.join(' ').toLowerCase() || '';
-    
-    if (changes.includes('l1') || changes.includes('basic')) {
-      return 'Basic Information';
-    }
-    if (changes.includes('l2') || changes.includes('manufacturing')) {
-      return 'Manufacturing Capabilities';
-    }
-    if (changes.includes('l3') || changes.includes('financial')) {
-      return 'Financial Information';
-    }
-    
-    // Default to Profile if stage cannot be determined
-    return 'Profile';
+    return firstChange;
   }
 
   private calculateTimeSince(date: Date): string {
@@ -219,29 +158,79 @@ export class ActivityTrailComponent implements OnInit, OnChanges {
     }
   }
 
-  // Status helper methods for styling
-  getStatusColorClass(action: string): string {
-    const statusMap: { [key: string]: string } = {
-      'Approved': 'status-approved',
-      'Rejected': 'status-rejected',
-      'Under Review': 'status-under-review',
-      'Updated': 'status-updated',
-      'Submitted': 'status-submitted',
-      'Created': 'status-created'
-    };
-    return statusMap[action] || 'status-created';
+  // New methods for the redesigned UI
+  getActivityBadgeText(action: string): string {
+    return action;
   }
 
-  getStatusIcon(action: string): string {
-    const iconMap: { [key: string]: string } = {
-      'Approved': 'pi-check-circle',
-      'Rejected': 'pi-times-circle',
-      'Under Review': 'pi-clock',
-      'Updated': 'pi-sync',
-      'Submitted': 'pi-upload',
-      'Created': 'pi-plus-circle'
+  getActivityBadgeClass(action: string): string {
+    const classMap: { [key: string]: string } = {
+      'State Change': 'badge-state-change',
+      'Data Modified': 'badge-data-modified',
+      'Rows Updated': 'badge-rows-updated'
     };
-    return iconMap[action] || 'pi-circle';
+    return classMap[action] || 'badge-default';
+  }
+
+  getTimelineDotClass(action: string): string {
+    const classMap: { [key: string]: string } = {
+      'State Change': 'dot-state-change',
+      'Data Modified': 'dot-data-modified',
+      'Rows Updated': 'dot-rows-updated'
+    };
+    return classMap[action] || 'dot-default';
+  }
+
+  getActivityIcon(action: string): string {
+    const iconMap: { [key: string]: string } = {
+      'State Change': 'pi pi-sync',
+      'Data Modified': 'pi pi-plus',
+      'Rows Updated': 'pi pi-pencil'
+    };
+    return iconMap[action] || 'pi pi-circle';
+  }
+
+  getUserInitials(userName: string): string {
+    if (!userName) return 'U';
+    
+    const words = userName.split(' ');
+    if (words.length >= 2) {
+      return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+    }
+    return userName.charAt(0).toUpperCase();
+  }
+
+  getChangeIndicator(change: string): string {
+    const lowerChange = change.toLowerCase();
+    if (lowerChange.includes('added') || lowerChange.includes('created')) {
+      return 'indicator-added';
+    }
+    if (lowerChange.includes('removed') || lowerChange.includes('deleted')) {
+      return 'indicator-removed';
+    }
+    return 'indicator-modified';
+  }
+
+  getChangeSymbol(change: string): string {
+    const lowerChange = change.toLowerCase();
+    if (lowerChange.includes('added') || lowerChange.includes('created')) {
+      return '+';
+    }
+    if (lowerChange.includes('removed') || lowerChange.includes('deleted')) {
+      return '−';
+    }
+    return '•';
+  }
+
+  formatChangeText(change: string): string {
+    // Remove any JSON or overly technical formatting
+    if (change.length > 100 || change.includes('{')) {
+      if (change.includes('rows added')) {
+        return change.substring(0, change.indexOf(' to ') + 20) + '...';
+      }
+      return 'Data updated';
+    }
+    return change;
   }
 
   // TrackBy function for performance
@@ -254,15 +243,22 @@ export class ActivityTrailComponent implements OnInit, OnChanges {
     this.processActivityData();
   }
 
-  // Helper method to check if changes contain long profile data
+  // Legacy methods for compatibility (can be removed if not used elsewhere)
+  getStatusColorClass(action: string): string {
+    return this.getActivityBadgeClass(action);
+  }
+
+  getStatusIcon(action: string): string {
+    return this.getActivityIcon(action);
+  }
+
   isLongProfileChange(changes: string[]): boolean {
     if (!changes || changes.length === 0) return false;
     
     return changes.some(change => 
-      change.length > 200 || // Very long changes
-      change.includes('Company Profile changed from') || // Profile updates
-      change.includes('{') || // JSON data
-      change.includes('\\\"') // Escaped JSON
+      change.length > 200 || 
+      change.includes('{') || 
+      change.includes('\\\"')
     );
   }
 } 

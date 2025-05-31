@@ -1,11 +1,25 @@
-@import '../../../assets/scss/variables.scss';
+// Brand Colors (inline to ensure they work)
+$blueprint-blue: #1A3A5F;
+$technical-white: #F6F7F9;
+$precision-black: #1A1D21;
+$machine-gray: #545A64;
+$material-finish-silver: #D1D5DB;
+$safety-orange: #FF5722;
+$process-green: #12856E;
+
+// Font weights
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
 
 .activity-trail-container {
-  background-color: $technical-white;
+  background-color: white;
   border-radius: 12px;
   border: 1px solid $material-finish-silver;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   .activity-trail-header {
     display: flex;
@@ -118,304 +132,284 @@
 
   .activity-timeline {
     position: relative;
-    padding: 1rem;
-
-    &::before {
-      content: '';
-      position: absolute;
-      height: calc(100% - 2rem);
-      width: 2px;
-      background-color: $material-finish-silver;
-      left: 24px;
-      top: 1rem;
-    }
+    padding: 1.5rem;
 
     .activity-item {
       position: relative;
-      padding-left: 48px;
+      display: flex;
+      gap: 1rem;
       margin-bottom: 1.5rem;
 
       &:last-child {
-        margin-bottom: 0.5rem;
-
-        &::after {
-          content: '';
-          position: absolute;
-          left: 16px;
-          bottom: -0.5rem;
-          width: 16px;
-          height: 16px;
-          background-color: white;
-          z-index: 1;
-        }
+        margin-bottom: 0;
       }
 
       .timeline-connector {
-        position: absolute;
-        left: 16px;
-        top: 4px;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
+        position: relative;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        background-color: white;
-        border: 2px solid $machine-gray;
-        z-index: 2;
+        flex-shrink: 0;
+        width: 40px;
+        height: auto;
 
-        i {
-          font-size: 10px;
-          color: $machine-gray;
-        }
-      }
+        .timeline-line {
+          width: 2px;
+          background-color: $material-finish-silver;
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
 
-      .activity-content {
-        background-color: white;
-        border: 1px solid $material-finish-silver;
-        border-radius: 10px;
-        padding: 1rem;
-        border-left: 4px solid $machine-gray;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        transition: all 0.2s ease;
+          &.timeline-line-top {
+            top: 0;
+            height: 16px; // Half of dot height (32px / 2)
+          }
 
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+          &.timeline-line-bottom {
+            bottom: 0;
+            height: calc(100% - 16px); // Start from center of dot to bottom
+          }
         }
 
-        .activity-header {
+        .timeline-dot {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
           display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 0.75rem;
+          align-items: center;
+          justify-content: center;
+          background-color: $blueprint-blue;
+          border: 2px solid $blueprint-blue;
+          z-index: 2;
+          flex-shrink: 0;
+          position: relative;
+          margin: 0;
 
-          .activity-title-section {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex: 1;
+          i {
+            font-size: 14px;
+            color: white;
+          }
 
-            .activity-title {
-              margin: 0;
-              font-size: 0.9375rem;
-              font-weight: $font-weight-semibold;
-              color: $precision-black;
-              line-height: 1.3;
-            }
+          // State change styling
+          &.dot-state-change {
+            background-color: $blueprint-blue;
+            border-color: $blueprint-blue;
 
-            .activity-status-badge {
-              display: inline-flex;
-              align-items: center;
-              padding: 0.25rem 0.75rem;
-              border-radius: 16px;
-              font-size: 0.75rem;
-              font-weight: $font-weight-medium;
-              text-transform: uppercase;
+            i {
               color: white;
-              background-color: $machine-gray;
-              letter-spacing: 0.025em;
             }
           }
 
-          .activity-meta {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 0.25rem;
-            font-size: 0.8125rem;
+          // Data modified styling
+          &.dot-data-modified {
+            background-color: $process-green;
+            border-color: $process-green;
+
+            i {
+              color: white;
+            }
+          }
+
+          // Rows updated styling
+          &.dot-rows-updated {
+            background-color: $safety-orange;
+            border-color: $safety-orange;
+
+            i {
+              color: white;
+            }
+          }
+        }
+      }
+
+      .activity-content-box {
+        flex: 1;
+        position: relative;
+        background-color: $technical-white;
+        border-radius: 8px;
+        padding: 1rem;
+        border: 1px solid $material-finish-silver;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        
+        .activity-badge {
+          display: inline-block;
+          padding: 0.25rem 0.75rem;
+          border-radius: 16px;
+          font-size: 0.75rem;
+          font-weight: $font-weight-semibold;
+          text-transform: uppercase;
+          letter-spacing: 0.025em;
+          margin-bottom: 0.75rem;
+
+          &.badge-state-change {
+            background-color: $blueprint-blue;
+            color: white;
+          }
+
+          &.badge-data-modified {
+            background-color: $process-green;
+            color: white;
+          }
+
+          &.badge-rows-updated {
+            background-color: $safety-orange;
+            color: white;
+          }
+
+          &.badge-default {
+            background-color: $machine-gray;
+            color: white;
+          }
+        }
+
+        .activity-timestamp {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          font-size: 0.75rem;
+          color: $machine-gray;
+
+          i {
+            font-size: 0.75rem;
             color: $machine-gray;
-            flex-shrink: 0;
+          }
 
-            .activity-time {
-              font-weight: $font-weight-medium;
-            }
-
-            .activity-user {
-              display: flex;
-              align-items: center;
-              gap: 0.375rem;
-              font-weight: $font-weight-medium;
-
-              &::before {
-                content: '\e923';
-                font-family: 'primeicons';
-                font-size: 0.75rem;
-                color: $blueprint-blue;
-              }
-            }
+          .time-since {
+            font-weight: $font-weight-medium;
           }
         }
 
         .activity-description {
-          margin-bottom: 0.75rem;
+          margin-bottom: 1rem;
 
-          p {
-            margin: 0;
-            color: $machine-gray;
-            font-size: 0.875rem;
-            line-height: 1.5;
-          }
-        }
-
-        .activity-changes {
-          margin-bottom: 0.75rem;
-          padding: 0.75rem;
-          background-color: $technical-white;
-          border-radius: 8px;
-          border: 1px solid $material-finish-silver;
-
-          .changes-header {
+          .activity-main-text {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.75rem;
-            font-weight: $font-weight-semibold;
             color: $precision-black;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-size: 0.875rem;
+            font-weight: $font-weight-medium;
+            line-height: 1.4;
 
             i {
+              font-size: 0.875rem;
               color: $machine-gray;
-              font-size: 0.75rem;
+            }
+
+            span {
+              flex: 1;
             }
           }
 
-          .changes-list {
-            margin: 0;
-            padding-left: 1rem;
-            list-style: none;
+          .activity-changes {
+            margin-top: 0.5rem;
 
             .change-item {
-              position: relative;
-              padding: 0.25rem 0;
+              display: flex;
+              align-items: flex-start;
+              gap: 0.5rem;
+              margin: 0.25rem 0;
               font-size: 0.8125rem;
-              color: $machine-gray;
               line-height: 1.4;
 
-              &::before {
-                content: '';
-                position: absolute;
-                left: -1rem;
-                top: 0.75rem;
-                width: 4px;
-                height: 4px;
+              .change-indicator {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 16px;
+                height: 16px;
                 border-radius: 50%;
-                background-color: $machine-gray;
+                font-size: 0.75rem;
+                font-weight: $font-weight-bold;
+                flex-shrink: 0;
+                margin-top: 0.125rem;
+
+                &.indicator-added {
+                  background-color: $process-green;
+                  color: white;
+                }
+
+                &.indicator-removed {
+                  background-color: $safety-orange;
+                  color: white;
+                }
+
+                &.indicator-modified {
+                  background-color: $machine-gray;
+                  color: white;
+                }
+              }
+
+              .change-text {
+                color: $machine-gray;
+                flex: 1;
               }
             }
           }
         }
 
-        .activity-date {
+        .user-info {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          font-size: 0.75rem;
-          color: $machine-gray;
-          font-weight: $font-weight-medium;
+          justify-content: space-between;
+          width: 100%;
 
-          i {
-            font-size: 0.75rem;
-            color: $blueprint-blue;
-          }
-        }
-      }
-
-      // Status-specific styling
-      &.status-approved {
-        .timeline-connector {
-          background-color: white;
-          border-color: $process-green;
-
-          i {
-            color: $process-green;
-          }
-        }
-
-        .activity-content {
-          border-left-color: $process-green;
-
-          .activity-header .activity-status-badge {
-            background-color: $process-green;
-          }
-        }
-      }
-
-      &.status-rejected {
-        .timeline-connector {
-          background-color: white;
-          border-color: $safety-orange;
-
-          i {
-            color: $safety-orange;
-          }
-        }
-
-        .activity-content {
-          border-left-color: $safety-orange;
-
-          .activity-header .activity-status-badge {
-            background-color: $safety-orange;
-          }
-        }
-      }
-
-      &.status-under-review {
-        .timeline-connector {
-          background-color: white;
-          border-color: #f59e0b;
-
-          i {
-            color: #f59e0b;
-          }
-        }
-
-        .activity-content {
-          border-left-color: #f59e0b;
-
-          .activity-header .activity-status-badge {
-            background-color: #f59e0b;
-          }
-        }
-      }
-
-      &.status-updated,
-      &.status-submitted {
-        .timeline-connector {
-          background-color: white;
-          border-color: $blueprint-blue;
-
-          i {
-            color: $blueprint-blue;
-          }
-        }
-
-        .activity-content {
-          border-left-color: $blueprint-blue;
-
-          .activity-header .activity-status-badge {
+          .user-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
             background-color: $blueprint-blue;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.625rem;
+            font-weight: $font-weight-semibold;
+            text-transform: uppercase;
+            flex-shrink: 0;
+          }
+
+          .user-name {
+            font-size: 0.8125rem;
+            font-weight: $font-weight-medium;
+            color: $precision-black;
+            line-height: 1;
+            flex: 1;
+            margin-left: 0.5rem;
+          }
+
+          .activity-time {
+            font-size: 0.75rem;
+            color: $machine-gray;
+            font-weight: $font-weight-regular;
+            line-height: 1;
+            flex-shrink: 0;
+          }
+        }
+      }
+    }
+
+    // Fix the height of timeline connector to match content height
+    .activity-item {
+      .timeline-connector {
+        // Make connector match the height of content box
+        min-height: 100%;
+        
+        .timeline-line {
+          &.timeline-line-bottom {
+            height: calc(100% + 1.5rem); // Extend to next item
           }
         }
       }
 
-      &.status-created {
+      &:last-child {
         .timeline-connector {
-          background-color: white;
-          border-color: $machine-gray;
-
-          i {
-            color: $machine-gray;
-          }
-        }
-
-        .activity-content {
-          border-left-color: $machine-gray;
-
-          .activity-header .activity-status-badge {
-            background-color: $machine-gray;
+          .timeline-line.timeline-line-bottom {
+            display: none; // No line after last item
           }
         }
       }
@@ -435,42 +429,53 @@
     }
 
     .activity-timeline {
-      padding: 0.75rem;
-
-      &::before {
-        left: 20px;
-      }
+      padding: 1rem;
 
       .activity-item {
-        padding-left: 40px;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
 
         .timeline-connector {
-          left: 12px;
-        }
+          width: 32px;
 
-        .activity-content {
-          padding: 0.75rem;
-
-          .activity-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-
-            .activity-title-section {
-              width: 100%;
-              flex-wrap: wrap;
-              gap: 0.5rem;
-
-              .activity-title {
-                font-size: 0.875rem;
-              }
+          .timeline-line {
+            &.timeline-line-top {
+              height: 14px; // Half of 28px dot
             }
 
-            .activity-meta {
-              width: 100%;
-              flex-direction: row;
-              justify-content: space-between;
-              align-items: center;
+            &.timeline-line-bottom {
+              height: calc(100% + 1rem);
+            }
+          }
+
+          .timeline-dot {
+            width: 28px;
+            height: 28px;
+
+            i {
+              font-size: 12px;
+            }
+          }
+        }
+
+        .activity-content-box {
+          padding: 0.75rem;
+
+          .activity-timestamp {
+            top: 0.75rem;
+            right: 0.75rem;
+          }
+
+          .user-info {
+            flex-wrap: wrap;
+            gap: 0.25rem;
+
+            .user-name {
+              font-size: 0.75rem;
+            }
+
+            .activity-time {
+              font-size: 0.6875rem;
             }
           }
         }
@@ -490,37 +495,73 @@
     }
 
     .activity-timeline {
-      padding: 0.5rem;
+      padding: 0.75rem;
 
       .activity-item {
-        padding-left: 32px;
+        gap: 0.5rem;
         margin-bottom: 1rem;
 
-        .activity-content {
+        .timeline-connector {
+          width: 28px;
+
+          .timeline-line {
+            &.timeline-line-top {
+              height: 12px; // Half of 24px dot
+            }
+
+            &.timeline-line-bottom {
+              height: calc(100% + 1rem);
+            }
+          }
+
+          .timeline-dot {
+            width: 24px;
+            height: 24px;
+
+            i {
+              font-size: 10px;
+            }
+          }
+        }
+
+        .activity-content-box {
           padding: 0.75rem;
 
-          .activity-header {
-            .activity-title-section {
-              .activity-status-badge {
-                font-size: 0.6875rem;
-                padding: 0.125rem 0.5rem;
-              }
-            }
+          .activity-badge {
+            font-size: 0.6875rem;
+            padding: 0.125rem 0.5rem;
+          }
 
-            .activity-meta {
-              font-size: 0.75rem;
+          .activity-timestamp {
+            position: static;
+            margin-bottom: 0.5rem;
+            justify-content: flex-start;
+          }
+
+          .activity-description {
+            .activity-main-text {
+              font-size: 0.8125rem;
             }
           }
 
-          .activity-description p {
-            font-size: 0.8125rem;
-          }
+          .user-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
 
-          .activity-changes {
-            padding: 0.5rem;
+            .user-avatar {
+              width: 20px;
+              height: 20px;
+              font-size: 0.5625rem;
+            }
 
-            .changes-list .change-item {
+            .user-name {
               font-size: 0.75rem;
+              margin-left: 0;
+            }
+
+            .activity-time {
+              font-size: 0.6875rem;
             }
           }
         }

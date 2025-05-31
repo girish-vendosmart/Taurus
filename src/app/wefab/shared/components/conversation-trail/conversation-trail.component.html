@@ -1,7 +1,7 @@
 <div class="conversation-container">
     <div class="send-section">
       <div class="editor-attachment-wrapper">
-        <p-editor [(ngModel)]="newMessage"  placeholder="Type a message..." [style]="{ height: '120px' }"></p-editor>
+        <p-editor [(ngModel)]="newMessage"  placeholder="Type a message..." [style]="{ height: '100px' }"></p-editor>
         <label class="attach-btn" pTooltip="Attach file">
           <i class="pi pi-paperclip"></i>
           <input type="file" (change)="onFileSelected($event)" multiple hidden>
@@ -14,7 +14,7 @@
     <div *ngIf="attachments.length > 0" class="pending-attachments-list">
       <div class="pending-attachment-item" *ngFor="let att of attachments; let i = index">
         <i [ngClass]="getFileIcon(att)"></i>
-        <span class="filename" [title]="att.file_url">{{ att.file_url.split('/').pop() }}</span>
+        <span class="filename body-small" [title]="att.file_url">{{ att.file_url.split('/').pop() }}</span>
         <button (click)="removeAttachment(i)" class="remove-btn"><i class="pi pi-times"></i></button>
       </div>
     </div>
@@ -28,11 +28,11 @@
               <div class="user-row">
                 <span class="user-name">{{ msg.sender }}</span>
               </div>
-              <div class="email" *ngIf="msg.email">{{ msg.email }}</div>
+              <div class="email caption" *ngIf="msg.email">{{ msg.email }}</div>
             </div>
-            <span class="timestamp">{{ msg.timestamp | date:'short' }}</span>
+            <span class="timestamp caption">{{ msg.timestamp | date:'short' }}</span>
           </div>
-          <div class="message-text" [innerHTML]="msg.text"></div>
+          <div class="message-text body-default" [innerHTML]="msg.text"></div>
           <div *ngIf="msg.attachments?.length" class="attachments-list">
             <div class="attachment-item" *ngFor="let file of msg.attachments">
               <ng-container *ngIf="isImageFile(file.file_type); else nonImage">
@@ -46,7 +46,7 @@
                   <i class="pi pi-file file-icon"></i>
                 </ng-template>
               </ng-template>
-              <a [href]="file.file_url" target="_blank" class="attachment-filename">{{ file.file_name }}</a>
+              <a [href]="file.file_url" target="_blank" class="attachment-filename caption">{{ file.file_name }}</a>
             </div>
           </div>
         </div>
