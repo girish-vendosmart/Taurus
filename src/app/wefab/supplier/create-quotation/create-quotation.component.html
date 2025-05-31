@@ -1,6 +1,6 @@
 <div class="quotation-container">
-  <!-- Header -->
-  <div class="quotation-header mb-4">
+  <!-- Header with Back Button -->
+  <div class="quotation-header mb-4 d-flex align-items-center">
     <h2 class="text-blueprint-blue mb-0">Quotation</h2>
   </div>
 
@@ -12,7 +12,7 @@
         <label class="form-label">RFQ ID</label>
         <input 
           type="text" 
-          class="form-control"
+          class="form-control non-editable-field"
           [(ngModel)]="model.rfqId"
           [ngModelOptions]="{standalone: true}"
           readonly
@@ -22,7 +22,7 @@
         <label class="form-label">Quotation Name</label>
         <input 
           type="text" 
-          class="form-control"
+          class="form-control editable-field"
           [(ngModel)]="model.quotationName"
           [ngModelOptions]="{standalone: true}"
           placeholder="Enter quotation name">
@@ -35,7 +35,7 @@
         <label class="form-label">Total lead time (days) <span class="text-danger">*</span></label>
         <input 
           type="number" 
-          class="form-control"
+          class="form-control editable-field"
           [(ngModel)]="model.totalLeadTime"
           [ngModelOptions]="{standalone: true}"
           placeholder="Enter total lead time"
@@ -50,7 +50,7 @@
           optionLabel="label"
           optionValue="value"
           placeholder="Select payment terms"
-          styleClass="w-100">
+          styleClass="w-100 editable-field">
         </p-dropdown>
       </div>
     </div>
@@ -64,7 +64,7 @@
           [ngModelOptions]="{standalone: true}"
           dateFormat="dd/mm/yy"
           placeholder="dd/mm/yyyy"
-          styleClass="w-100">
+          styleClass="w-100 editable-field">
         </p-calendar>
       </div>
     </div>
@@ -80,7 +80,8 @@
               name="currency" 
               value="INR"
               [(ngModel)]="model.currency"
-              [ngModelOptions]="{standalone: true}">
+              [ngModelOptions]="{standalone: true}"
+              (onClick)="onCurrencyChange()">
             </p-radioButton>
             <label for="inr" class="form-check-label ms-2">INR</label>
           </div>
@@ -90,7 +91,8 @@
               name="currency" 
               value="USD"
               [(ngModel)]="model.currency"
-              [ngModelOptions]="{standalone: true}">
+              [ngModelOptions]="{standalone: true}"
+              (onClick)="onCurrencyChange()">
             </p-radioButton>
             <label for="usd" class="form-check-label ms-2">USD</label>
           </div>
@@ -126,7 +128,7 @@
         </button>
         <button 
           type="button" 
-          class="btn btn-outline-primary"
+          class="btn btn-outline-primary me-2"
           (click)="exportCSV()">
           <i class="pi pi-download me-1"></i>
           Export CSV
@@ -163,50 +165,50 @@
           <tr *ngFor="let item of model.quotationItems; let i = index" class="quotation-row">
             <td class="text-center align-middle">{{ i + 1 }}</td>
             
-            <!-- Item Name -->
+            <!-- Item Name - Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm" 
+                class="form-control form-control-sm table-editable-field" 
                 [(ngModel)]="item.actionItemName"
                 [ngModelOptions]="{standalone: true}"
                 placeholder="Enter item name">
             </td>
             
-            <!-- Description -->
+            <!-- Description - Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm" 
+                class="form-control form-control-sm table-editable-field" 
                 [(ngModel)]="item.description"
                 [ngModelOptions]="{standalone: true}"
                 placeholder="Enter description">
             </td>
             
-            <!-- Material -->
+            <!-- Material - Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm" 
+                class="form-control form-control-sm table-editable-field" 
                 [(ngModel)]="item.material"
                 [ngModelOptions]="{standalone: true}"
                 placeholder="Enter material">
             </td>
             
-            <!-- Quantity -->
+            <!-- Quantity - Editable -->
             <td>
               <p-inputNumber
                 [(ngModel)]="item.qty"
                 [min]="0"
                 [style]="{ width: '100%' }"
-                styleClass="w-100"
+                styleClass="w-100 table-editable-field"
                 size="small"
                 (onInput)="onQuantityOrPriceChange(item)"
                 [ngModelOptions]="{standalone: true}">
               </p-inputNumber>
             </td>
             
-            <!-- Unit -->
+            <!-- Unit - Editable -->
             <td>
               <p-dropdown 
                 [(ngModel)]="item.unit"
@@ -215,11 +217,11 @@
                 optionLabel="label"
                 optionValue="value"
                 placeholder="Unit"
-                styleClass="w-100 p-inputtext-sm">
+                styleClass="w-100 p-inputtext-sm table-editable-field">
               </p-dropdown>
             </td>
             
-            <!-- Item Price -->
+            <!-- Item Price - Editable -->
             <td>
               <p-inputNumber
                 [(ngModel)]="item.itemPrice"
@@ -227,28 +229,28 @@
                 mode="decimal"
                 [minFractionDigits]="2"
                 [style]="{ width: '100%' }"
-                styleClass="w-100"
+                styleClass="w-100 table-editable-field"
                 size="small"
                 (onInput)="onQuantityOrPriceChange(item)"
                 [ngModelOptions]="{standalone: true}">
               </p-inputNumber>
             </td>
             
-            <!-- Miscellaneous -->
+            <!-- Miscellaneous - Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm" 
+                class="form-control form-control-sm table-editable-field" 
                 [(ngModel)]="item.miscellaneous"
                 [ngModelOptions]="{standalone: true}"
                 placeholder="Misc">
             </td>
             
-            <!-- Tooling -->
+            <!-- Tooling - Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm" 
+                class="form-control form-control-sm table-editable-field" 
                 [(ngModel)]="item.tooling"
                 [ngModelOptions]="{standalone: true}"
                 placeholder="Tooling">
@@ -274,8 +276,8 @@
     <div class="row mb-4">
       <div class="col-lg-4 col-md-5 offset-lg-8 offset-md-7">
         <div class="totals-section border rounded p-3 bg-light">
-          <!-- Tax Options -->
-          <div class="mb-3">
+          <!-- Tax Options - Show only when currency is INR -->
+          <div class="mb-3" *ngIf="model.currency === 'INR'">
             <div class="row">
               <div class="col-12">
                 <div class="d-flex gap-4">
@@ -329,7 +331,7 @@
           <!-- Sub Total -->
           <div class="d-flex justify-content-between align-items-center mb-2 py-1 border-bottom">
             <span class="total-label small fw-medium">Sub Total:</span>
-            <span class="total-value small fw-bold">{{ calculatedSubTotal | number:'1.2-2' }} {{ model.currency }}</span>
+            <span class="total-value small fw-bold">{{ model.currency }} {{ calculatedSubTotal | number:'1.2-2' }}</span>
           </div>
           
           <!-- Discount -->
@@ -338,7 +340,7 @@
             <div class="d-flex align-items-center">
               <input 
                 type="number" 
-                class="form-control form-control-sm me-1" 
+                class="form-control form-control-sm me-1 editable-field" 
                 [(ngModel)]="discountPercentage"
                 (ngModelChange)="calculateTotals()"
                 [ngModelOptions]="{standalone: true}"
@@ -350,13 +352,19 @@
             </div>
           </div>
           
+          <!-- Discounted Amount (if discount applied) -->
+          <div *ngIf="discountPercentage > 0" class="d-flex justify-content-between align-items-center mb-2 py-1">
+            <span class="total-label small fw-medium">Discounted Amount:</span>
+            <span class="total-value small text-muted">{{ model.currency }} {{ calculatedDiscountedAmount | number:'1.2-2' }}</span>
+          </div>
+          
           <!-- Shipping Charges -->
           <div class="d-flex justify-content-between align-items-center mb-2 py-1">
             <span class="total-label small fw-medium">Shipping Charges:</span>
             <div class="d-flex align-items-center">
               <input 
                 type="number" 
-                class="form-control form-control-sm me-1"
+                class="form-control form-control-sm me-1 editable-field"
                 [(ngModel)]="shippingCharges"
                 (ngModelChange)="calculateTotals()"
                 [ngModelOptions]="{standalone: true}"
@@ -367,29 +375,29 @@
             </div>
           </div>
           
-          <!-- Tax Details -->
-          <div *ngIf="selectedTaxType === 'cgstSgst' && (cgstPercentage > 0 || sgstPercentage > 0)">
+          <!-- Tax Details - Show only when currency is INR -->
+          <div *ngIf="model.currency === 'INR' && selectedTaxType === 'cgstSgst' && (cgstPercentage > 0 || sgstPercentage > 0)">
             <div *ngIf="cgstPercentage > 0" class="d-flex justify-content-between align-items-center mb-1 py-1">
               <span class="total-label small fw-medium">CGST ({{ cgstPercentage }}%):</span>
-              <span class="total-value small">{{ calculatedCGST | number:'1.2-2' }} {{ model.currency }}</span>
+              <span class="total-value small">{{ model.currency }} {{ calculatedCGST | number:'1.2-2' }}</span>
             </div>
             <div *ngIf="sgstPercentage > 0" class="d-flex justify-content-between align-items-center mb-1 py-1">
               <span class="total-label small fw-medium">SGST ({{ sgstPercentage }}%):</span>
-              <span class="total-value small">{{ calculatedSGST | number:'1.2-2' }} {{ model.currency }}</span>
+              <span class="total-value small">{{ model.currency }} {{ calculatedSGST | number:'1.2-2' }}</span>
             </div>
           </div>
           
-          <div *ngIf="selectedTaxType === 'igst' && igstPercentage > 0">
+          <div *ngIf="model.currency === 'INR' && selectedTaxType === 'igst' && igstPercentage > 0">
             <div class="d-flex justify-content-between align-items-center mb-2 py-1">
               <span class="total-label small fw-medium">IGST ({{ igstPercentage }}%):</span>
-              <span class="total-value small">{{ calculatedIGST | number:'1.2-2' }} {{ model.currency }}</span>
+              <span class="total-value small">{{ model.currency }} {{ calculatedIGST | number:'1.2-2' }}</span>
             </div>
           </div>
           
           <!-- Total Amount -->
           <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-2">
             <span class="total-amount-label fw-bold">Total Amount:</span>
-            <span class="total-amount-value fw-bold text-primary">{{ calculatedTotalAmount | number:'1.2-2' }} {{ model.currency }}</span>
+            <span class="total-amount-value fw-bold text-primary">{{ model.currency }} {{ calculatedTotalAmount | number:'1.2-2' }}</span>
           </div>
         </div>
       </div>
@@ -401,7 +409,7 @@
         <label class="form-label">Email <span class="text-danger">*</span></label>
         <input 
           type="email" 
-          class="form-control"
+          class="form-control editable-field"
           [(ngModel)]="model.email"
           [ngModelOptions]="{standalone: true}"
           placeholder="email@example.com"
@@ -411,7 +419,7 @@
         <label class="form-label">Delivery Address</label>
         <input 
           type="text" 
-          class="form-control"
+          class="form-control editable-field"
           [(ngModel)]="model.deliveryAddress"
           [ngModelOptions]="{standalone: true}"
           placeholder="Enter delivery address">
@@ -468,7 +476,7 @@
       <div class="col-md-6 mb-3">
         <label class="form-label">Terms & Conditions <span class="text-danger">*</span></label>
         <textarea 
-          class="form-control" 
+          class="form-control editable-field" 
           rows="4"
           [(ngModel)]="model.termsAndConditions"
           [ngModelOptions]="{standalone: true}"
@@ -484,7 +492,7 @@
         <label class="form-label">Shipping Terms</label>
         <input 
           type="text" 
-          class="form-control"
+          class="form-control editable-field"
           [(ngModel)]="model.shippingTerms"
           [ngModelOptions]="{standalone: true}"
           placeholder="e.g., FOB Origin, CIF, etc.">
@@ -496,8 +504,10 @@
       <button 
         type="button" 
         class="btn btn-outline-secondary px-4"
-        (click)="cancel()">
-        Cancel
+        (click)="cancel()"
+        title="Go back">
+        <i class="pi pi-arrow-left me-1"></i>
+        Back
       </button>
       <button 
         type="submit" 

@@ -14,6 +14,58 @@
   }
 }
 
+// Field styling for editable and non-editable fields
+.editable-field {
+  background-color: #ffffff !important;
+  border: 1px solid $material-finish-silver;
+  
+  &:focus {
+    border-color: $blueprint-blue;
+    box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+  }
+}
+
+.non-editable-field {
+  background-color: #f8f9fa !important;
+  border: 1px solid $material-finish-silver;
+  color: $machine-gray;
+  cursor: not-allowed;
+  
+  &:focus {
+    background-color: #f8f9fa !important;
+    border-color: $material-finish-silver;
+    box-shadow: none;
+  }
+}
+
+// Table specific field styling
+.table-editable-field {
+  background-color: #ffffff !important;
+  border: 1px solid $material-finish-silver;
+  
+  &:focus {
+    border-color: $blueprint-blue;
+    box-shadow: 0 0 0 1px rgba(26, 58, 95, 0.1);
+  }
+}
+
+.table-non-editable-field {
+  background-color: #f8f9fa !important;
+  border: 1px solid $material-finish-silver;
+  color: $machine-gray;
+  cursor: not-allowed;
+  
+  &:focus {
+    background-color: #f8f9fa !important;
+    border-color: $material-finish-silver;
+    box-shadow: none;
+  }
+  
+  &:hover {
+    background-color: #f8f9fa !important;
+  }
+}
+
 // Table Actions Styling
 .btn {
   border-radius: 6px;
@@ -155,6 +207,57 @@
       padding: 4px 6px;
       font-size: 12px;
     }
+    
+    // Editable field styling
+    &.editable-field {
+      background-color: #ffffff !important;
+      
+      &:focus {
+        background-color: #ffffff !important;
+        border-color: $blueprint-blue;
+        box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+      }
+    }
+    
+    // Non-editable field styling
+    &.non-editable-field {
+      background-color: #f8f9fa !important;
+      color: $machine-gray;
+      cursor: not-allowed;
+      
+      &:focus {
+        background-color: #f8f9fa !important;
+        border-color: $material-finish-silver;
+        box-shadow: none;
+      }
+    }
+    
+    // Table specific styling
+    &.table-editable-field {
+      background-color: #ffffff !important;
+      
+      &:focus {
+        background-color: #ffffff !important;
+        border-color: $blueprint-blue;
+        box-shadow: 0 0 0 1px rgba(26, 58, 95, 0.1);
+      }
+    }
+    
+    &.table-non-editable-field {
+      background-color: #f8f9fa !important;
+      color: $machine-gray;
+      cursor: not-allowed;
+      
+      &:focus {
+        background-color: #f8f9fa !important;
+        border-color: $material-finish-silver;
+        box-shadow: none;
+      }
+      
+      &:hover {
+        background-color: #f8f9fa !important;
+      }
+    }
   }
   
   .form-label {
@@ -187,6 +290,36 @@
       .p-dropdown-label {
         padding: 4px 6px;
         font-size: 12px;
+      }
+    }
+    
+    // Editable dropdown styling
+    &.editable-field {
+      background-color: #ffffff !important;
+      
+      .p-dropdown-label {
+        background-color: #ffffff !important;
+      }
+      
+      &.p-focus {
+        background-color: #ffffff !important;
+        border-color: $blueprint-blue;
+        box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+      }
+    }
+    
+    // Table editable dropdown styling
+    &.table-editable-field {
+      background-color: #ffffff !important;
+      
+      .p-dropdown-label {
+        background-color: #ffffff !important;
+      }
+      
+      &.p-focus {
+        background-color: #ffffff !important;
+        border-color: $blueprint-blue;
+        box-shadow: 0 0 0 1px rgba(26, 58, 95, 0.1);
       }
     }
   }
@@ -231,6 +364,19 @@
       padding: 4px 6px;
       font-size: 12px;
     }
+    
+    // Table editable field styling for InputNumber
+    &.table-editable-field {
+      .p-inputtext {
+        background-color: #ffffff !important;
+        
+        &:focus {
+          background-color: #ffffff !important;
+          border-color: $blueprint-blue;
+          box-shadow: 0 0 0 1px rgba(26, 58, 95, 0.1);
+        }
+      }
+    }
   }
   
   // PrimeNG Calendar Styling
@@ -244,6 +390,19 @@
       &:focus {
         border-color: $blueprint-blue;
         box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+      }
+    }
+    
+    // Editable calendar styling
+    &.editable-field {
+      .p-inputtext {
+        background-color: #ffffff !important;
+        
+        &:focus {
+          background-color: #ffffff !important;
+          border-color: $blueprint-blue;
+          box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+        }
       }
     }
   }

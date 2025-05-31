@@ -205,6 +205,9 @@ export class CreateQuotationComponent implements OnInit {
   // Attachment properties
   attachedFiles: string[] = [];
 
+  // Store original state for reset functionality
+  originalQuotationItems: any[] = [];
+
   // Dropdown options
   paymentTermsOptions = [
     { label: 'Net 10', value: 'Net 10' },
@@ -245,6 +248,9 @@ export class CreateQuotationComponent implements OnInit {
     
     this.initializeForm();
     this.calculateTotals();
+    
+    // Store initial state for reset functionality
+    this.storeCurrentStateForReset();
     
     // Listen for route parameter changes to update RFQ ID dynamically
     this.route.params.subscribe(params => {
@@ -350,13 +356,10 @@ export class CreateQuotationComponent implements OnInit {
         // Recalculate totals based on the loaded items
         this.calculateTotals();
 
+        // Store original state for reset functionality
+        this.storeCurrentStateForReset();
+
         console.log('Create quotation data mapped to model:', this.model);
-        
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Data Loaded',
-          detail: 'RFQ data loaded successfully for quotation creation'
-        });
       }
     }, (error) => {
       console.error('Error loading create quotation data:', error);
@@ -578,14 +581,16 @@ export class CreateQuotationComponent implements OnInit {
     const discountAmount = this.subTotal * this.discountPercentage / 100;
     const subtotalAfterDiscount = this.subTotal - discountAmount;
     
-    // Calculate taxes
+    // Calculate taxes only for INR currency
     let totalTax = 0;
-    if (this.model.cgstSgst) {
-      totalTax += (subtotalAfterDiscount * this.cgstPercentage / 100);
-      totalTax += (subtotalAfterDiscount * this.sgstPercentage / 100);
-    }
-    if (this.model.igst) {
-      totalTax += (subtotalAfterDiscount * this.igstPercentage / 100);
+    if (this.model.currency === 'INR') {
+      if (this.model.cgstSgst) {
+        totalTax += (subtotalAfterDiscount * this.cgstPercentage / 100);
+        totalTax += (subtotalAfterDiscount * this.sgstPercentage / 100);
+      }
+      if (this.model.igst) {
+        totalTax += (subtotalAfterDiscount * this.igstPercentage / 100);
+      }
     }
     
     this.totalAmount = subtotalAfterDiscount + totalTax + this.shippingCharges;
@@ -609,19 +614,23 @@ export class CreateQuotationComponent implements OnInit {
     const discountAmount = subTotal * this.discountPercentage / 100;
     const subtotalAfterDiscount = subTotal - discountAmount;
     
+    // Calculate taxes only for INR currency
     let totalTax = 0;
-    if (this.model.cgstSgst) {
-      totalTax += (subtotalAfterDiscount * this.cgstPercentage / 100);
-      totalTax += (subtotalAfterDiscount * this.sgstPercentage / 100);
-    }
-    if (this.model.igst) {
-      totalTax += (subtotalAfterDiscount * this.igstPercentage / 100);
+    if (this.model.currency === 'INR') {
+      if (this.model.cgstSgst) {
+        totalTax += (subtotalAfterDiscount * this.cgstPercentage / 100);
+        totalTax += (subtotalAfterDiscount * this.sgstPercentage / 100);
+      }
+      if (this.model.igst) {
+        totalTax += (subtotalAfterDiscount * this.igstPercentage / 100);
+      }
     }
     
     return subtotalAfterDiscount + totalTax + this.shippingCharges;
   }
 
   get calculatedCGST(): number {
+    if (this.model.currency !== 'INR') return 0;
     const subTotal = this.calculatedSubTotal;
     const discountAmount = subTotal * this.discountPercentage / 100;
     const subtotalAfterDiscount = subTotal - discountAmount;
@@ -629,6 +638,7 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   get calculatedSGST(): number {
+    if (this.model.currency !== 'INR') return 0;
     const subTotal = this.calculatedSubTotal;
     const discountAmount = subTotal * this.discountPercentage / 100;
     const subtotalAfterDiscount = subTotal - discountAmount;
@@ -636,10 +646,16 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   get calculatedIGST(): number {
+    if (this.model.currency !== 'INR') return 0;
     const subTotal = this.calculatedSubTotal;
     const discountAmount = subTotal * this.discountPercentage / 100;
     const subtotalAfterDiscount = subTotal - discountAmount;
     return this.model.igst ? (subtotalAfterDiscount * this.igstPercentage / 100) : 0;
+  }
+
+  get calculatedDiscountedAmount(): number {
+    const subTotal = this.calculatedSubTotal;
+    return subTotal - (subTotal * this.discountPercentage / 100);
   }
 
   // Method to calculate individual row total
@@ -658,13 +674,31 @@ export class CreateQuotationComponent implements OnInit {
     this.model.cgstSgst = false;
     this.model.igst = false;
     
-    // Set the selected tax type
-    if (taxType === 'cgstSgst') {
-      this.model.cgstSgst = true;
-    } else if (taxType === 'igst') {
-      this.model.igst = true;
+    // Set the selected tax type only for INR currency
+    if (this.model.currency === 'INR') {
+      if (taxType === 'cgstSgst') {
+        this.model.cgstSgst = true;
+      } else if (taxType === 'igst') {
+        this.model.igst = true;
+      }
+      // 'none' case: both remain false
     }
-    // 'none' case: both remain false
+    
+    this.calculateTotals();
+  }
+
+  // Method to handle currency change
+  onCurrencyChange() {
+    // If currency is changed to USD, reset tax options
+    if (this.model.currency === 'USD') {
+      this.selectedTaxType = 'none';
+      this.model.cgstSgst = false;
+      this.model.igst = false;
+    } else if (this.model.currency === 'INR' && this.selectedTaxType === 'none') {
+      // If currency is changed to INR and no tax was selected, you might want to set a default
+      // Uncomment the following line if you want to default to 'none' for INR as well
+      // this.selectedTaxType = 'none';
+    }
     
     this.calculateTotals();
   }
@@ -907,11 +941,34 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   exportCSV() {
-    // Create CSV content for quotation items only
+    // Small delay to ensure all pending changes are captured
+    setTimeout(() => {
+      this.performCSVExport();
+    }, 100);
+  }
+
+  private performCSVExport() {
+    // Ensure model is synchronized with current table data
+    this.syncTableDataToModel();
+    
+    // Debug: Log current table data
+    console.log('Current quotation items for export:', this.model.quotationItems);
+    
+    // Ensure we have data to export
+    if (!this.model.quotationItems || this.model.quotationItems.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'No Data',
+        detail: 'No quotation items to export. Please add items to the table first.'
+      });
+      return;
+    }
+
+    // Create CSV content for quotation items with all current data
     const headers = [
       'S.No',
-      'ActionItem Name',
-      'Description',
+      'Item Name',
+      'Description', 
       'Material',
       'Qty',
       'Unit',
@@ -920,40 +977,90 @@ export class CreateQuotationComponent implements OnInit {
       'Tooling'
     ];
 
-    const csvContent = [
-      headers.join(','),
-      ...this.model.quotationItems.map((item: any, index: number) => [
+    const csvRows = this.model.quotationItems.map((item: any, index: number) => {
+      return [
         index + 1,
-        `"${item.actionItemName || ''}"`,
-        `"${item.description || ''}"`,
-        `"${item.material || ''}"`,
+        `"${(item.actionItemName || '').replace(/"/g, '""')}"`,
+        `"${(item.description || '').replace(/"/g, '""')}"`,
+        `"${(item.material || '').replace(/"/g, '""')}"`,
         item.qty || 0,
-        `"${item.unit || ''}"`,
+        `"${(item.unit || '').replace(/"/g, '""')}"`,
         item.itemPrice || 0,
-        `"${item.miscellaneous || ''}"`,
-        `"${item.tooling || ''}"`
-      ].join(','))
-    ].join('\n');
-
-    // Create and download the CSV file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `quotation-items-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Export Successful',
-      detail: 'Quotation items exported to CSV successfully!'
+        `"${(item.miscellaneous || '').replace(/"/g, '""')}"`,
+        `"${(item.tooling || '').replace(/"/g, '""')}"`
+      ].join(',');
     });
+
+    const csvContent = [headers.join(','), ...csvRows].join('\n');
+    
+    // Debug: Log CSV content
+    console.log('CSV Content to be exported:', csvContent);
+
+    try {
+      // Create and download the CSV file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      // Generate filename with current timestamp
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `quotation-items-${timestamp}.csv`;
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Export Successful',
+        detail: `Quotation items exported to ${filename} successfully!`
+      });
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Export Error',
+        detail: 'Failed to export CSV file. Please try again.'
+      });
+    }
+  }
+
+  // Method to ensure table data is synchronized with model
+  syncTableDataToModel() {
+    // Force change detection and model synchronization
+    if (this.model.quotationItems) {
+      // Trigger a small update to ensure all bindings are current
+      this.model.quotationItems = [...this.model.quotationItems];
+    }
+  }
+
+  // Test method to check current table data (for debugging)
+  logCurrentTableData() {
+    console.log('=== CURRENT TABLE DATA DEBUG ===');
+    console.log('Total items:', this.model.quotationItems?.length || 0);
+    this.model.quotationItems?.forEach((item: any, index: number) => {
+      console.log(`Item ${index + 1}:`, {
+        actionItemName: item.actionItemName,
+        description: item.description,
+        material: item.material,
+        qty: item.qty,
+        unit: item.unit,
+        itemPrice: item.itemPrice,
+        miscellaneous: item.miscellaneous,
+        tooling: item.tooling
+      });
+    });
+    console.log('=== END DEBUG ===');
   }
 
   importCSV() {
+    // Store current state before import for potential reset
+    this.storeCurrentStateForReset();
+    
     // Use the ViewChild reference to trigger file selection
     if (this.csvFileInput) {
       this.csvFileInput.nativeElement.click();
@@ -962,13 +1069,14 @@ export class CreateQuotationComponent implements OnInit {
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
-    if (file) {
+    if (file && file.type === 'text/csv') {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         try {
           const csvContent = e.target.result;
           this.parseCSVAndUpdateTable(csvContent);
         } catch (error) {
+          console.error('Error reading CSV file:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Import Error',
@@ -976,8 +1084,24 @@ export class CreateQuotationComponent implements OnInit {
           });
         }
       };
+      reader.onerror = () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Import Error',
+          detail: 'Error reading the selected file.'
+        });
+      };
       reader.readAsText(file);
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Invalid File',
+        detail: 'Please select a valid CSV file.'
+      });
     }
+    
+    // Reset the input to allow selecting the same file again
+    event.target.value = '';
   }
 
   private parseCSVAndUpdateTable(csvContent: string) {
@@ -1008,7 +1132,7 @@ export class CreateQuotationComponent implements OnInit {
             description: values[2] || '',
             material: values[3] || '',
             qty: parseFloat(values[4]) || 0,
-            unit: values[5] || '',
+            unit: values[5] || 'Nos',
             itemPrice: parseFloat(values[6]) || 0,
             miscellaneous: values[7] || '',
             tooling: values[8] || ''
@@ -1044,9 +1168,16 @@ export class CreateQuotationComponent implements OnInit {
     
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
+      const nextChar = line[i + 1];
       
       if (char === '"') {
-        inQuotes = !inQuotes;
+        if (inQuotes && nextChar === '"') {
+          // Handle escaped quotes
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          inQuotes = !inQuotes;
+        }
       } else if (char === ',' && !inQuotes) {
         result.push(current.trim());
         current = '';
@@ -1056,23 +1187,32 @@ export class CreateQuotationComponent implements OnInit {
     }
     
     result.push(current.trim());
-    return result.map(value => value.replace(/^"|"$/g, '')); // Remove surrounding quotes
+    return result;
+  }
+
+  storeCurrentStateForReset() {
+    this.originalQuotationItems = JSON.parse(JSON.stringify(this.model.quotationItems));
   }
 
   resetTable() {
-    // Reset to single empty row
-    this.model.quotationItems = [
-      {
-        actionItemName: '',
-        description: '',
-        material: '',
-        qty: 0,
-        unit: '',
-        itemPrice: 0,
-        miscellaneous: '',
-        tooling: ''
-      }
-    ];
+    if (this.originalQuotationItems.length > 0) {
+      // Reset to original state
+      this.model.quotationItems = JSON.parse(JSON.stringify(this.originalQuotationItems));
+    } else {
+      // Reset to single empty row if no original state
+      this.model.quotationItems = [
+        {
+          actionItemName: '',
+          description: '',
+          material: '',
+          qty: 0,
+          unit: '',
+          itemPrice: 0,
+          miscellaneous: '',
+          tooling: ''
+        }
+      ];
+    }
     
     // Reset totals
     this.discountPercentage = 0;
@@ -1082,7 +1222,7 @@ export class CreateQuotationComponent implements OnInit {
     this.messageService.add({
       severity: 'success',
       summary: 'Reset Successful',
-      detail: 'Table has been reset'
+      detail: 'Table has been reset to previous state'
     });
   }
 
@@ -1153,13 +1293,10 @@ export class CreateQuotationComponent implements OnInit {
         // Recalculate totals
         this.calculateTotals();
 
-        // console.log('Quotation data loaded and mapped to model:', this.model);
-        
-        // this.messageService.add({
-        //   severity: 'success',
-        //   summary: 'Data Loaded',
-        //   detail: 'Quotation data loaded successfully for editing'
-        // });
+        // Store original state for reset functionality
+        this.storeCurrentStateForReset();
+
+        console.log('Quotation data loaded and mapped to model:', this.model);
       }
     }, (error) => {
       console.error('Error loading quotation data:', error);
