@@ -113,7 +113,7 @@
         <button 
           type="button" 
           class="btn btn-outline-secondary me-2"
-          (click)="resetTable()">
+          (click)="resetTableConfirmation()">
           <i class="pi pi-refresh me-1"></i>
           Reset
         </button>
@@ -261,7 +261,7 @@
               <button 
                 type="button" 
                 class="btn btn-outline-danger btn-sm"
-                (click)="removeRow(i)"
+                (click)="removeRowConfirmation(i)"
                 [disabled]="model.quotationItems.length === 1"
                 title="Remove row">
                 <i class="pi pi-trash"></i>
@@ -352,12 +352,6 @@
             </div>
           </div>
           
-          <!-- Discounted Amount (if discount applied) -->
-          <div *ngIf="discountPercentage > 0" class="d-flex justify-content-between align-items-center mb-2 py-1">
-            <span class="total-label small fw-medium">Discounted Amount:</span>
-            <span class="total-value small text-muted">{{ model.currency }} {{ calculatedDiscountedAmount | number:'1.2-2' }}</span>
-          </div>
-          
           <!-- Shipping Charges -->
           <div class="d-flex justify-content-between align-items-center mb-2 py-1">
             <span class="total-label small fw-medium">Shipping Charges:</span>
@@ -373,6 +367,12 @@
                 style="width: 80px; font-size: 12px;">
               <span class="small">{{ model.currency }}</span>
             </div>
+          </div>
+          
+          <!-- Discounted Amount (if discount applied) -->
+          <div *ngIf="discountPercentage > 0" class="d-flex justify-content-between align-items-center mb-2 py-1">
+            <span class="total-label small fw-medium">Discounted Amount:</span>
+            <span class="total-value small text-muted">{{ model.currency }} {{ calculatedDiscountedAmount | number:'1.2-2' }}</span>
           </div>
           
           <!-- Tax Details - Show only when currency is INR -->

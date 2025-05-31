@@ -37,7 +37,6 @@
           (onClick)="sendQuotation()">
         </p-button> -->
         <app-split-button
-        *ngIf="quotationDetails.workflowState === 'Draft'"
           [options]="severityOptions"
           placeholder="Select Action"
           severity="primary"

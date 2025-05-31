@@ -19,7 +19,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { MessageService } from 'primeng/api';
 
 import { CommonService } from '../../shared/common.service';
-
+import { SweetAlertService } from '../../shared/sweet-alert.service';
 // Custom Formly components
 import { FormlyFieldDropdownComponent } from '../../../dropdown-type.component';
 
@@ -239,7 +239,7 @@ export class CreateQuotationComponent implements OnInit {
   quoteFrom: any;
   quoteTo: any;
 
-  constructor(private messageService: MessageService, private router: Router, private route: ActivatedRoute, private commonService: CommonService) {}
+  constructor(private sweetAlert: SweetAlertService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private commonService: CommonService) {}
 
   ngOnInit() {
     debugger
@@ -363,11 +363,7 @@ export class CreateQuotationComponent implements OnInit {
       }
     }, (error) => {
       console.error('Error loading create quotation data:', error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load RFQ data for quotation creation'
-      });
+      this.sweetAlert.error('Failed to load RFQ data for quotation creation');
     });
   }
 
@@ -507,11 +503,7 @@ export class CreateQuotationComponent implements OnInit {
     console.log('Current query params:', this.route.snapshot.queryParams);
     console.log('Extracted RFQ ID:', this.model.rfqId);
     
-    this.messageService.add({
-      severity: 'info',
-      summary: 'RFQ ID Info',
-      detail: `Current RFQ ID: ${this.model.rfqId}`
-    });
+    this.sweetAlert.info(`Current RFQ ID: ${this.model.rfqId}`);
   }
 
   initializeForm() {
@@ -716,6 +708,14 @@ export class CreateQuotationComponent implements OnInit {
     });
   }
 
+  removeRowConfirmation(index: number) {
+    this.sweetAlert.confirm('Are you sure you want to remove this row?', 'Remove Row', 'question', 'Yes', 'No').then((result: any) => {
+      if(result.isConfirmed) {
+        this.removeRow(index);
+      }
+    });
+  }
+
   removeRow(index: number) {
     if (this.model.quotationItems.length > 1) {
       this.model.quotationItems.splice(index, 1);
@@ -738,11 +738,7 @@ export class CreateQuotationComponent implements OnInit {
       const validation = this.validateApiData(apiData);
       
       if (!validation.isValid) {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Validation Warning',
-          detail: `Some fields may be missing: ${validation.missingFields.join(', ')}`
-        });
+        this.sweetAlert.warning(`Some fields may be missing: ${validation.missingFields.join(', ')}`);
         console.warn('Missing API fields:', validation.missingFields);
       }
 
@@ -767,11 +763,7 @@ export class CreateQuotationComponent implements OnInit {
         errorMessage = 'Email is required';
       }
       
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: errorMessage
-      });
+      this.sweetAlert.error(errorMessage);
     }
   }
 
@@ -780,11 +772,7 @@ export class CreateQuotationComponent implements OnInit {
 
     this.commonService.putWefabData(endPoint, apiData).subscribe((res: any) => {
       console.log('Quotation updated successfully:', res);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Quotation Update successfully!'
-      });
+      this.sweetAlert.success('Quotation Update successfully!');
       this.router.navigate(['/wefab/supplier/quotation/details', res.data.name]);
     })
   }
@@ -794,11 +782,7 @@ export class CreateQuotationComponent implements OnInit {
 
     this.commonService.postWefabData(endpoint, apiData).subscribe((res: any) => {
       console.log('Quotation created successfully:', res);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Quotation sent successfully!'
-      });
+      this.sweetAlert.success('Quotation sent successfully!');
       this.router.navigate(['/wefab/supplier/quotation/details', res.data.name]);
     })
   }
@@ -956,11 +940,7 @@ export class CreateQuotationComponent implements OnInit {
     
     // Ensure we have data to export
     if (!this.model.quotationItems || this.model.quotationItems.length === 0) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'No Data',
-        detail: 'No quotation items to export. Please add items to the table first.'
-      });
+      this.sweetAlert.warning('No quotation items to export. Please add items to the table first.');
       return;
     }
 
@@ -1014,18 +994,10 @@ export class CreateQuotationComponent implements OnInit {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Export Successful',
-        detail: `Quotation items exported to ${filename} successfully!`
-      });
+      this.sweetAlert.success(`Quotation items exported to ${filename} successfully!`);
     } catch (error) {
       console.error('Error exporting CSV:', error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Export Error',
-        detail: 'Failed to export CSV file. Please try again.'
-      });
+      this.sweetAlert.error('Failed to export CSV file. Please try again.');
     }
   }
 
@@ -1077,27 +1049,15 @@ export class CreateQuotationComponent implements OnInit {
           this.parseCSVAndUpdateTable(csvContent);
         } catch (error) {
           console.error('Error reading CSV file:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Import Error',
-            detail: 'Error reading CSV file. Please check the file format.'
-          });
+          this.sweetAlert.error('Error reading CSV file. Please check the file format.');
         }
       };
       reader.onerror = () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Import Error',
-          detail: 'Error reading the selected file.'
-        });
+        this.sweetAlert.error('Error reading the selected file.');
       };
       reader.readAsText(file);
     } else {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Invalid File',
-        detail: 'Please select a valid CSV file.'
-      });
+      this.sweetAlert.error('Please select a valid CSV file.');
     }
     
     // Reset the input to allow selecting the same file again
@@ -1111,11 +1071,7 @@ export class CreateQuotationComponent implements OnInit {
     const dataLines = lines.slice(1).filter(line => line.trim() !== '');
     
     if (dataLines.length === 0) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Import Warning',
-        detail: 'No data found in CSV file.'
-      });
+      this.sweetAlert.warning('No data found in CSV file.');
       return;
     }
 
@@ -1147,17 +1103,9 @@ export class CreateQuotationComponent implements OnInit {
     if (importedItems.length > 0) {
       this.model.quotationItems = importedItems;
       this.calculateTotals();
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Import Successful',
-        detail: `Successfully imported ${importedItems.length} quotation items from CSV.`
-      });
+      this.sweetAlert.success(`Successfully imported ${importedItems.length} quotation items from CSV.`);
     } else {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Import Error',
-        detail: 'No valid data could be imported from the CSV file.'
-      });
+      this.sweetAlert.error('No valid data could be imported from the CSV file.');
     }
   }
 
@@ -1194,6 +1142,14 @@ export class CreateQuotationComponent implements OnInit {
     this.originalQuotationItems = JSON.parse(JSON.stringify(this.model.quotationItems));
   }
 
+  resetTableConfirmation() {
+    this.sweetAlert.confirm('Are you sure you want to reset the table?', 'Reset Table', 'question', 'Yes', 'No').then((result: any) => {
+      if(result.isConfirmed) {
+        this.resetTable();
+      }
+    });
+  }
+
   resetTable() {
     if (this.originalQuotationItems.length > 0) {
       // Reset to original state
@@ -1219,11 +1175,7 @@ export class CreateQuotationComponent implements OnInit {
     this.shippingCharges = 0;
     
     this.calculateTotals();
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Reset Successful',
-      detail: 'Table has been reset to previous state'
-    });
+    this.sweetAlert.success('Table has been reset to previous state');
   }
 
   getQuotationDetails(quotationId: string) {
@@ -1300,11 +1252,7 @@ export class CreateQuotationComponent implements OnInit {
       }
     }, (error) => {
       console.error('Error loading quotation data:', error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load quotation data'
-      });
+      this.sweetAlert.error('Failed to load quotation data');
     });
   }
 
@@ -1394,11 +1342,7 @@ export class CreateQuotationComponent implements OnInit {
           this.uploadFileOnS3(file)
           // this.attachedFiles.push(file);
         } else {
-          this.messageService.add({
-            severity: 'warn',
-            summary: 'Invalid File Type',
-            detail: `File "${file.name}" is not supported. Please use PDF, DOC, DOCX, JPG, PNG, TXT, or XLSX files.`
-          });
+          this.sweetAlert.warning(`File "${file.name}" is not supported. Please use PDF, DOC, DOCX, JPG, PNG, TXT, or XLSX files.`);
         }
       }
     }
@@ -1432,11 +1376,7 @@ export class CreateQuotationComponent implements OnInit {
         if (this.isValidFileType(file)) {
           this.uploadFileOnS3(file)
         } else {
-          this.messageService.add({
-            severity: 'warn',
-            summary: 'Invalid File Type',
-            detail: `File "${file.name}" is not supported. Please use PDF, DOC, DOCX, JPG, PNG, TXT, or XLSX files.`
-          });
+          this.sweetAlert.warning(`File "${file.name}" is not supported. Please use PDF, DOC, DOCX, JPG, PNG, TXT, or XLSX files.`);
         }
       }
     }
@@ -1466,11 +1406,7 @@ export class CreateQuotationComponent implements OnInit {
     const apiData = this.transformToApiFormat();
     console.log('API Data Preview:', JSON.stringify(apiData, null, 2));
     
-    this.messageService.add({
-      severity: 'info',
-      summary: 'API Data Preview',
-      detail: 'Check console for formatted API data structure'
-    });
+    this.sweetAlert.info('Check console for formatted API data structure');
   }
 
   // Method to validate required API fields
@@ -1544,11 +1480,7 @@ export class CreateQuotationComponent implements OnInit {
     if (fileUrl) {
       window.open(fileUrl, '_blank');
     } else {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Unable to open file. Invalid URL.'
-      });
+      this.sweetAlert.error('Unable to open file. Invalid URL.');
     }
   }
 
@@ -1619,10 +1551,6 @@ export class CreateQuotationComponent implements OnInit {
       "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/ABC123_Technical_Specifications.pdf",
       "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/XYZ789_Project_Details.docx"
     ];
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Test Attachments Added',
-      detail: 'Sample file attachments have been added for testing'
-    });
+    this.sweetAlert.info('Sample file attachments have been added for testing');
   }
 }
