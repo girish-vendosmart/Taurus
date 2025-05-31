@@ -287,7 +287,7 @@ export class SupplierDashboardComponent {
           const timeDiff = now.getTime() - creationDate.getTime();
           
           return {
-            name: rfq.name || rfq.rfq_id,
+            name: rfq.rfq_name,
             rfq_id: rfq.rfq_id,
             status: rfq.status || 'Draft',
             statusClass: this.getStatusClass(rfq.status),
