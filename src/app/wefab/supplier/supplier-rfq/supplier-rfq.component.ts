@@ -109,8 +109,8 @@ export class SupplierRfqComponent implements OnInit {
     enableSort: true,
     enableFilter: true,
     enablePagination: true,
-    enableColumnHide: true,
-    enableColumnResize: true,
+    enableColumnHide: false,
+    enableColumnResize: false,
     pageSize: 10,
   };
   
@@ -155,6 +155,7 @@ export class SupplierRfqComponent implements OnInit {
       // Map API fields to match the table configuration
       name: item.rfq_name || '',
       rfqName: `${item.rfq_name || ''}<br><span class="rfq-id-link">${item.rfq_id || ''}</span>`,
+      rfqId: item.rfq_id || '', // Add rfq_id for easier access in click handler
       creationDate: this.formatApiDate(item.creation),
       status: this.mapApiStatusToRFQStatus(item.status),
       // Additional fields for potential use
@@ -163,6 +164,12 @@ export class SupplierRfqComponent implements OnInit {
       docstatus: item.docstatus || 0,
       routerLink: `/wefab/supplier/rfq/details/${item.rfq_id}`
     }));
+  }
+
+  onRfqIdLinkClick(rfqId: string) {
+    console.log('RFQ ID link clicked:', rfqId);
+    // Navigate to RFQ details page
+    this.router.navigate(['/wefab/supplier/rfq/details', rfqId]);
   }
 
   // Helper method to format API date
@@ -252,8 +259,12 @@ export class SupplierRfqComponent implements OnInit {
       console.log('RFQ ID link clicked:', event.rowData);
       event.event.preventDefault();
       event.event.stopPropagation();
-      // Navigate to RFQ details page using the name field
-      this.router.navigate(['/wefab/supplier/rfq/details', event.rowData.name]);
+      
+      // Call the onRfqIdLinkClick function with the RFQ ID
+      const rfqId = event.rowData.rfqId || event.rowData.name || '';
+      if (rfqId) {
+        this.onRfqIdLinkClick(rfqId);
+      }
     } else {
       // Handle other link clicks (if any)
       console.log('Other link clicked');
