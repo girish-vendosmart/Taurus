@@ -9,6 +9,7 @@ import { HttpParams } from '@angular/common/http';
 import { ActivityTrailComponent, ActivityLogData } from '../../../common-core-component/activity-trail';
 import { ConversationTrailComponent } from '../../shared/components/conversation-trail/conversation-trail.component';
 import { SplitButtonComponent } from '../../../shared/split-button/split-button.component';
+import { SweetAlertService } from '../../shared/sweet-alert.service';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -278,7 +279,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private sweetAlert: SweetAlertService
   ) {}
 
   ngOnInit(): void {
@@ -959,7 +961,17 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     console.log('Action value:', actionValue);
 
     // Update quotation status based on the action
-    this.updateQuotationStatus(actionValue);
+    this.sweetAlert.confirm(
+      '',
+      `Are you sure you want to ${event.option.label} this quotation?`,
+      'question',
+      'Yes, ' + event.option.label,
+      'Cancel'
+    ).then((result: any) => {
+      if (result.isConfirmed) {
+        this.updateQuotationStatus(actionValue);
+      }
+    });
   }
 
   private updateQuotationStatus(status: string) {
@@ -974,6 +986,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
 
     this.commonService.postWefabData('/api/method/frappe.model.workflow.apply_workflow', action).subscribe({
       next: (res: any) => {
+        this.sweetAlert.success(`Quotation ${status} successfully`);
         console.log(`Quotation ${status} successfully:`, res);
         // Refresh quotation details
         this.getQuotationDetails(this.quotationId);
@@ -981,6 +994,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         this.getActionList();
       },
       error: (error) => {
+        this.sweetAlert.error(`Error updating quotation status to ${status}:`, error);
         console.error(`Error updating quotation status to ${status}:`, error);
         // Handle error (show error message to user)
       }

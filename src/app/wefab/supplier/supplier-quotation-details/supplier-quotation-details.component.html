@@ -31,17 +31,17 @@
           severity="primary"
           (onClick)="editQuotation()">
         </p-button>
-        <p-button 
+        <!-- <p-button 
           *ngIf="quotationDetails.workflowState === 'Draft'"
           label="Send"
           (onClick)="sendQuotation()">
-        </p-button>
+        </p-button> -->
         <app-split-button
+        *ngIf="quotationDetails.workflowState === 'Draft'"
           [options]="severityOptions"
           placeholder="Select Action"
           severity="primary"
-          (actionTriggered)="onActionClick($event)"
-          class="mb-3">
+          (actionTriggered)="onActionClick($event)">
         </app-split-button>
       </div>
     </div>
