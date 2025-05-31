@@ -28,12 +28,12 @@ export class SupplierComponentComponent {
       route: '/wefab/supplier/dashboard'
     },
     {
-      icon: 'pi pi-user',
-      name: 'RFQ',
+      icon: 'pi pi-book',
+      name: 'RFQ Update',
       route: '/wefab/supplier/rfq'
     },
     {
-      icon: 'pi pi-check-circle',
+      icon: 'pi pi-chart-bar',
       name: 'Quotations',
       route: '/wefab/supplier/quotation'
     }
@@ -95,12 +95,12 @@ export class SupplierComponentComponent {
           route: '/wefab/supplier/dashboard'
         },
         {
-          icon: 'pi pi-user',
+          icon: 'pi pi-book',
           name: 'RFQ',
           route: '/wefab/supplier/rfq'
         },
         {
-          icon: 'pi pi-check-circle',
+          icon: 'pi pi-chart-bar',
           name: 'Quotations',
           route: '/wefab/supplier/quotation'
         }

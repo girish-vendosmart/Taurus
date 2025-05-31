@@ -22,6 +22,12 @@ export class AuthGuard implements CanActivate {
     if (!isPlatformBrowser(this.platformId)) {
       return true;
     }
+
+    // Handle logout route specially
+    if (route.routeConfig?.path === 'logout') {
+      this.authService.logout().subscribe();
+      return this.router.createUrlTree(['/wefab/supplier/login']);
+    }
     
     if (this.authService.isAuthenticated()) {
       return true;

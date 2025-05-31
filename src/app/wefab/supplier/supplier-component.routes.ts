@@ -29,6 +29,15 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
                 component: SupplierCreateAccountComponent
             },
             {
+                path: 'login',
+                component: SupplierCreateAccountComponent
+            },
+            {
+                path: 'logout',
+                component: SupplierCreateAccountComponent,
+                canActivate: [AuthGuard]
+            },
+            {
                 path: 'dashboard',
                 component: SupplierDashboardComponent,
                 canActivate: [AuthGuard]
