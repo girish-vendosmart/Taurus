@@ -64,18 +64,8 @@
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Grand Total:</span>
-      <span class="info-value">{{ formatCurrency(getGrandTotal(), getSummaryCurrency()) }}</span>
-    </div>
-    <div class="info-separator">|</div>
-    <div class="info-item">
       <span class="info-label">Validity:</span>
       <span class="info-value">{{ quotationDetails.validity }}</span>
-    </div>
-    <div class="info-separator">|</div>
-    <div class="info-item">
-      <span class="info-label">Delivery Address:</span>
-      <span class="info-value">{{ quotationDetails.deliveryAddress }}</span>
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
@@ -89,18 +79,8 @@
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Supplier ID:</span>
-      <span class="info-value">{{ quotationDetails.supplierId }}</span>
-    </div>
-    <div class="info-separator">|</div>
-    <div class="info-item">
       <span class="info-label">Last Modified:</span>
       <span class="info-value">{{ quotationDetails.lastModified }}</span>
-    </div>
-    <div class="info-separator" *ngIf="quotationDetails.notes">|</div>
-    <div class="info-item" *ngIf="quotationDetails.notes">
-      <span class="info-label">Notes:</span>
-      <span class="info-value" [innerHTML]="quotationDetails.notes" style="margin: 0;"></span>
     </div>
   </div>
 
@@ -131,6 +111,11 @@
     <!-- Overview Tab -->
     <div class="tab-panel" [class.active]="activeTab === 'overview'">
       <div class="overview-content">
+        <!-- Quotation Terms & Conditions Section -->
+        <div class="description-box">
+          <h3>Terms & Conditions</h3>
+          <div [innerHTML]="quotationDetails.notes"></div>
+        </div>
         <!-- Quote From/To Section -->
         <div class="quote-parties-section">
           <div class="quote-from">

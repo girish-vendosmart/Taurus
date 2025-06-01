@@ -1,9 +1,45 @@
 @import '../../../../assets/scss/variables.scss';
 
+// WE-FAB Style Guide Variables
+$blueprint-blue: #1A3A5F;   // Primary brand color
+$technical-white: #f5f6fa;  // Background color
+$precision-black: #1A1D21;  // Text color
+$machine-gray: #545A64;     // Secondary elements
+$material-silver: #D1D5DB;  // Borders, backgrounds
+$safety-orange: #FF5722;    // CTAs, highlights
+$process-green: #12856E;    // Success states, progress
+$warning-yellow: #F59E0B;   // Warning color
+$info-blue: #3B82F6;       // Info color
+$danger-red: #EF4444; 
+
+
 .quotation-details-page {
   background: $technical-white;
   min-height: 100vh;
   font-family: $font-family-sans-serif;
+}
+
+// Description Section
+.description-box {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid $blueprint-blue;
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: $font-weight-semibold;
+    color: $precision-black;
+    margin: 0 0 0.75rem 0;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: $precision-black;
+    line-height: 1.7;
+    margin: 0;
+  }
 }
 
 // Page Header
