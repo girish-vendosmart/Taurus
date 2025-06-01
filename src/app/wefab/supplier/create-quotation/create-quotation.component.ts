@@ -256,6 +256,11 @@ export class CreateQuotationComponent implements OnInit {
   quoteFrom: any;
   quoteTo: any;
 
+  // Add validation error tracking
+  validationErrors: { [key: string]: string[] } = {};
+  csvImportErrors: string[] = [];
+  showValidationErrors: boolean = false;
+
   constructor(private sweetAlert: SweetAlertService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private commonService: CommonService) {}
 
   ngOnInit() {
@@ -755,47 +760,54 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   onSubmit() {
-    // Check if basic required fields are filled
-    const isBasicValidation = this.model.termsAndConditions && this.model.totalLeadTime;
+    this.showValidationErrors = true;
     
-    // Check email only if no RFQ ID (when field is visible)
-    const isEmailValidation = !this.model.rfqId ? this.model.email : true;
+    // Clear previous errors
+    this.validationErrors = {};
     
-    if (this.form.valid && isBasicValidation && isEmailValidation) {
-      // Transform data to API format
-      const apiData = this.transformToApiFormat();
-      
-      // Validate API data
-      const validation = this.validateApiData(apiData);
-      
-      if (!validation.isValid) {
-        this.sweetAlert.warning(`Some fields may be missing: ${validation.missingFields.join(', ')}`);
-        console.warn('Missing API fields:', validation.missingFields);
-      }
-
-      debugger
-      console.log("Api Data ", apiData);
-      
-      if (this.isEditMode) {
-        this.updateExistingQuotation(apiData);
-      } else {
-        // Create new quotation
-        this.createNewQuotation(apiData);
-      }
-    } else {
-      let errorMessage = 'Please fill all required fields';
-      
-      // More specific error messages
-      if (!this.model.termsAndConditions) {
-        errorMessage = 'Terms & Conditions is required';
-      } else if (!this.model.totalLeadTime) {
-        errorMessage = 'Total Lead Time is required';
-      } else if (!this.model.rfqId && !this.model.email) {
-        errorMessage = 'Email is required';
-      }
+    // Validate form
+    const validation = this.validateForm();
+    
+    if (!validation.isValid) {
+      // Show detailed error message
+      const errorCount = validation.errors.length;
+      let errorMessage = `Please fix the following ${errorCount} error${errorCount > 1 ? 's' : ''}:\n\n`;
+      errorMessage += validation.errors.map((error, index) => `${index + 1}. ${error}`).join('\n');
       
       this.sweetAlert.error(errorMessage);
+      
+      // Scroll to first error field
+      this.scrollToFirstError();
+      return;
     }
+
+    // Transform data to API format
+    const apiData = this.transformToApiFormat();
+    
+    // Validate API data
+    const apiValidation = this.validateApiData(apiData);
+    
+    if (!apiValidation.isValid) {
+      this.sweetAlert.warning(`Some fields may be missing: ${apiValidation.missingFields.join(', ')}`);
+      console.warn('Missing API fields:', apiValidation.missingFields);
+    }
+
+    console.log("Api Data ", apiData);
+    
+    if (this.isEditMode) {
+      this.updateExistingQuotation(apiData);
+    } else {
+      this.createNewQuotation(apiData);
+    }
+  }
+
+  private scrollToFirstError() {
+    setTimeout(() => {
+      const errorElement = document.querySelector('.is-invalid, .error-field');
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   }
 
   updateExistingQuotation(apiData: any) {
@@ -960,6 +972,12 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   exportCSV() {
+    // Clean and validate data first
+    if (!this.validateAndCleanTableData()) {
+      this.sweetAlert.warning('Please add at least one valid quotation item before exporting.');
+      return;
+    }
+
     // Small delay to ensure all pending changes are captured
     setTimeout(() => {
       this.performCSVExport();
@@ -1110,58 +1128,298 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   private parseCSVAndUpdateTable(csvContent: string) {
-    const lines = csvContent.split('\n');
+    this.csvImportErrors = [];
     
-    // Skip header row and filter out empty lines
-    const dataLines = lines.slice(1).filter(line => line.trim() !== '');
-    
-    if (dataLines.length === 0) {
-      this.sweetAlert.warning('No data found in CSV file.');
-      return;
-    }
-
-    const importedItems: any[] = [];
-
-    dataLines.forEach((line, index) => {
-      try {
-        // Parse CSV line (handling quoted values)
-        const values = this.parseCSVLine(line);
-        
-        if (values.length >= 8) {
-          const item = {
-            actionItemName: values[1] || '',
-            description: values[2] || '',
-            material: values[3] || '',
-            qty: parseFloat(values[4]) || 0,
-            unit: values[5] || 'Nos',
-            itemPrice: parseFloat(values[6]) || 0,
-            taxType: values[7] || 'none',
-            miscellaneous: values[9] || '',
-            tooling: values[10] || '',
-            bidType: values[11] || 'bid'
-          };
-          importedItems.push(item);
-        }
-      } catch (error) {
-        console.warn(`Error parsing line ${index + 2}:`, error);
+    try {
+      const lines = csvContent.split('\n').map(line => line.trim()).filter(line => line !== '');
+      
+      if (lines.length === 0) {
+        this.csvImportErrors.push('CSV file is empty');
+        this.showCSVErrors();
+        return;
       }
-    });
 
-    if (importedItems.length > 0) {
+      if (lines.length === 1) {
+        this.csvImportErrors.push('CSV file contains only headers, no data rows found');
+        this.showCSVErrors();
+        return;
+      }
+
+      // Parse and validate header
+      const headerLine = lines[0];
+      const headers = this.parseCSVLine(headerLine);
+      const headerValidation = this.validateCSVHeaders(headers);
+      
+      if (!headerValidation.isValid) {
+        this.csvImportErrors.push(...headerValidation.errors);
+        this.showCSVErrors();
+        return;
+      }
+
+      // Parse data lines
+      const dataLines = lines.slice(1);
+      const importedItems: any[] = [];
+      const rowErrors: string[] = [];
+
+      dataLines.forEach((line, index) => {
+        const rowNumber = index + 2; // +2 because we start from line 2 (after header)
+        
+        try {
+          const values = this.parseCSVLine(line);
+          const itemValidation = this.validateCSVRow(values, rowNumber, headers.length);
+          
+          if (!itemValidation.isValid) {
+            rowErrors.push(...itemValidation.errors);
+            return; // Skip this row
+          }
+
+          const item = this.createItemFromCSVRow(values, rowNumber);
+          
+          if (item) {
+            importedItems.push(item);
+          }
+        } catch (error) {
+          rowErrors.push(`Row ${rowNumber}: Error parsing data - ${error}`);
+        }
+      });
+
+      // Check if we have any valid items
+      if (importedItems.length === 0) {
+        this.csvImportErrors.push('No valid items could be imported from the CSV file');
+        if (rowErrors.length > 0) {
+          this.csvImportErrors.push('Errors found:');
+          this.csvImportErrors.push(...rowErrors);
+        }
+        this.showCSVErrors();
+        return;
+      }
+
+      // Show warnings if some rows failed
+      if (rowErrors.length > 0) {
+        const warningMessage = `Warning: ${rowErrors.length} row(s) had errors and were skipped. ${importedItems.length} item(s) imported successfully.\n\nErrors:\n${rowErrors.join('\n')}`;
+        this.sweetAlert.warning(warningMessage);
+      } else {
+        this.sweetAlert.success(`Successfully imported ${importedItems.length} quotation items from CSV.`);
+      }
+
+      // Update the model with imported items
       this.model.quotationItems = importedItems;
       this.calculateTotals();
-      this.sweetAlert.success(`Successfully imported ${importedItems.length} quotation items from CSV.`);
-    } else {
-      this.sweetAlert.error('No valid data could be imported from the CSV file.');
+
+    } catch (error) {
+      this.csvImportErrors.push(`Critical error parsing CSV file: ${error}`);
+      this.showCSVErrors();
     }
   }
 
+  private validateCSVHeaders(headers: string[]): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+    const requiredHeaders = [
+      'Item Name',
+      'Qty', 
+      'Unit',
+      'Item Price',
+      'Tax Type',
+      'Bid Type',
+      'Tooling'
+    ];
+
+    const expectedHeaders = [
+      'S.No',
+      'Item Name',
+      'Description', 
+      'Material',
+      'Qty',
+      'Unit',
+      'Item Price',
+      'Tax Type',
+      'Taxable Amount',
+      'Miscellaneous',
+      'Tooling',
+      'Bid Type'
+    ];
+
+    if (headers.length < 8) {
+      errors.push(`CSV must have at least 8 columns. Found ${headers.length} columns.`);
+      return { isValid: false, errors };
+    }
+
+    // Check for required headers (case-insensitive)
+    const lowerHeaders = headers.map(h => h.toLowerCase().trim());
+    
+    requiredHeaders.forEach(required => {
+      const found = lowerHeaders.some(header => 
+        header.includes(required.toLowerCase()) || 
+        required.toLowerCase().includes(header)
+      );
+      
+      if (!found) {
+        errors.push(`Required column '${required}' not found in CSV headers`);
+      }
+    });
+
+    if (errors.length > 0) {
+      errors.unshift('CSV Header Validation Failed:');
+      errors.push('Expected headers: ' + expectedHeaders.join(', '));
+      errors.push('Found headers: ' + headers.join(', '));
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
+  private validateCSVRow(values: string[], rowNumber: number, expectedColumns: number): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    // Check column count
+    if (values.length < expectedColumns) {
+      errors.push(`Row ${rowNumber}: Expected ${expectedColumns} columns, found ${values.length}`);
+    }
+
+    // Check if row is completely empty
+    const hasAnyValue = values.some(value => value && value.trim() !== '');
+    if (!hasAnyValue) {
+      errors.push(`Row ${rowNumber}: Empty row detected`);
+      return { isValid: false, errors };
+    }
+
+    // Validate required fields (assuming standard column positions)
+    if (values.length >= 2 && (!values[1] || values[1].trim() === '')) {
+      errors.push(`Row ${rowNumber}: Item Name is required`);
+    }
+
+    if (values.length >= 5) {
+      const qty = values[4];
+      if (!qty || qty.trim() === '') {
+        errors.push(`Row ${rowNumber}: Quantity is required`);
+      } else if (isNaN(Number(qty)) || Number(qty) <= 0) {
+        errors.push(`Row ${rowNumber}: Quantity must be a valid number greater than 0`);
+      }
+    }
+
+    if (values.length >= 6 && (!values[5] || values[5].trim() === '')) {
+      errors.push(`Row ${rowNumber}: Unit is required`);
+    }
+
+    if (values.length >= 7) {
+      const price = values[6];
+      if (!price || price.trim() === '') {
+        errors.push(`Row ${rowNumber}: Item Price is required`);
+      } else if (isNaN(Number(price)) || Number(price) < 0) {
+        errors.push(`Row ${rowNumber}: Item Price must be a valid number`);
+      }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
+  private createItemFromCSVRow(values: string[], rowNumber: number): any | null {
+    try {
+      // Map values to item structure (assuming standard column order)
+      const item = {
+        actionItemName: (values[1] || '').trim(),
+        description: (values[2] || '').trim(),
+        material: (values[3] || '').trim(),
+        qty: this.parseNumber(values[4], 'quantity'),
+        unit: this.validateAndGetUnit(values[5], rowNumber),
+        itemPrice: this.parseNumber(values[6], 'price'),
+        taxType: this.validateAndGetTaxType(values[7], rowNumber),
+        miscellaneous: (values[9] || '').trim(),
+        tooling: (values[10] || '').trim() || 'Standard',
+        bidType: this.validateAndGetBidType(values[11], rowNumber)
+      };
+
+      // Final validation of the created item
+      if (!item.actionItemName) {
+        this.csvImportErrors.push(`Row ${rowNumber}: Item Name cannot be empty`);
+        return null;
+      }
+
+      return item;
+    } catch (error) {
+      this.csvImportErrors.push(`Row ${rowNumber}: Error creating item - ${error}`);
+      return null;
+    }
+  }
+
+  private parseNumber(value: string, fieldName: string): number {
+    const cleanValue = (value || '').toString().replace(/[^\d.-]/g, '');
+    const parsed = parseFloat(cleanValue);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+
+  private validateAndGetUnit(unit: string, rowNumber: number): string {
+    const cleanUnit = (unit || '').trim();
+    if (!cleanUnit) return 'Nos'; // Default unit
+
+    const validUnit = this.unitOptions.find(opt => 
+      opt.value.toLowerCase() === cleanUnit.toLowerCase() ||
+      opt.label.toLowerCase() === cleanUnit.toLowerCase()
+    );
+
+    if (!validUnit) {
+      this.csvImportErrors.push(`Row ${rowNumber}: Invalid unit '${cleanUnit}'. Using default 'Nos'.`);
+      return 'Nos';
+    }
+
+    return validUnit.value;
+  }
+
+  private validateAndGetTaxType(taxType: string, rowNumber: number): string {
+    const cleanTaxType = (taxType || '').trim().toLowerCase();
+    if (!cleanTaxType) return 'none'; // Default tax type
+
+    const validTaxType = this.taxTypeOptions.find(opt => 
+      opt.value.toLowerCase() === cleanTaxType ||
+      opt.label.toLowerCase() === cleanTaxType ||
+      opt.label.toLowerCase().includes(cleanTaxType)
+    );
+
+    if (!validTaxType) {
+      this.csvImportErrors.push(`Row ${rowNumber}: Invalid tax type '${taxType}'. Using 'none'.`);
+      return 'none';
+    }
+
+    return validTaxType.value;
+  }
+
+  private validateAndGetBidType(bidType: string, rowNumber: number): string {
+    const cleanBidType = (bidType || '').trim().toLowerCase();
+    if (!cleanBidType) return 'bid'; // Default bid type
+
+    const validBidType = this.bidTypeOptions.find(opt => 
+      opt.value.toLowerCase() === cleanBidType ||
+      opt.label.toLowerCase() === cleanBidType
+    );
+
+    if (!validBidType) {
+      this.csvImportErrors.push(`Row ${rowNumber}: Invalid bid type '${bidType}'. Using 'bid'.`);
+      return 'bid';
+    }
+
+    return validBidType.value;
+  }
+
+  private showCSVErrors() {
+    if (this.csvImportErrors.length > 0) {
+      const errorMessage = `CSV Import Failed:\n\n${this.csvImportErrors.join('\n')}`;
+      this.sweetAlert.error(errorMessage);
+    }
+  }
+
+  // Enhanced CSV line parsing with better quote handling
   private parseCSVLine(line: string): string[] {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
+    let i = 0;
     
-    for (let i = 0; i < line.length; i++) {
+    while (i < line.length) {
       const char = line[i];
       const nextChar = line[i + 1];
       
@@ -1179,10 +1437,38 @@ export class CreateQuotationComponent implements OnInit {
       } else {
         current += char;
       }
+      i++;
     }
     
     result.push(current.trim());
-    return result;
+    
+    // Clean up quotes from values
+    return result.map(value => {
+      if (value.startsWith('"') && value.endsWith('"')) {
+        return value.slice(1, -1).replace(/""/g, '"');
+      }
+      return value;
+    });
+  }
+
+  // Add method to get validation error for a specific field
+  getValidationError(fieldName: string): string | null {
+    if (!this.showValidationErrors || !this.validationErrors[fieldName]) {
+      return null;
+    }
+    return this.validationErrors[fieldName][0]; // Return first error
+  }
+
+  // Add method to check if field has error
+  hasValidationError(fieldName: string): boolean {
+    return this.showValidationErrors && !!this.validationErrors[fieldName];
+  }
+
+  // Clear validation errors when user starts typing/changing values
+  clearFieldError(fieldName: string) {
+    if (this.validationErrors[fieldName]) {
+      delete this.validationErrors[fieldName];
+    }
   }
 
   storeCurrentStateForReset() {
@@ -1190,7 +1476,23 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   resetTableConfirmation() {
-    this.sweetAlert.confirm('Are you sure you want to reset the table?', 'Reset Table', 'question', 'Yes', 'No').then((result: any) => {
+    const hasData = this.model.quotationItems.some((item: any) => 
+      item.actionItemName || item.description || item.material || 
+      (item.qty && item.qty > 0) || (item.itemPrice && item.itemPrice > 0)
+    );
+
+    if (!hasData) {
+      this.sweetAlert.info('Table is already empty or has no data to reset.');
+      return;
+    }
+
+    this.sweetAlert.confirm(
+      'Are you sure you want to reset the table? This will remove all current data and cannot be undone.', 
+      'Reset Table', 
+      'question', 
+      'Yes, Reset', 
+      'Cancel'
+    ).then((result: any) => {
       if(result.isConfirmed) {
         this.resetTable();
       }
@@ -1610,5 +1912,374 @@ export class CreateQuotationComponent implements OnInit {
       "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/XYZ789_Project_Details.docx"
     ];
     this.sweetAlert.info('Sample file attachments have been added for testing');
+  }
+
+  // Add comprehensive form validation
+  validateForm(): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+    this.validationErrors = {};
+
+    // Basic form validation
+    if (!this.model.totalLeadTime || this.model.totalLeadTime <= 0) {
+      errors.push('Total Lead Time is required and must be greater than 0');
+      this.validationErrors['totalLeadTime'] = ['Total Lead Time is required and must be greater than 0'];
+    }
+
+    if (!this.model.paymentTerms) {
+      errors.push('Payment Terms is required');
+      this.validationErrors['paymentTerms'] = ['Payment Terms is required'];
+    }
+
+    if (!this.model.quoteValidTill) {
+      errors.push('Quote Valid Till date is required');
+      this.validationErrors['quoteValidTill'] = ['Quote Valid Till date is required'];
+    } else {
+      // Validate that date is in the future
+      const selectedDate = new Date(this.model.quoteValidTill);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        errors.push('Quote Valid Till date must be in the future');
+        this.validationErrors['quoteValidTill'] = ['Quote Valid Till date must be in the future'];
+      }
+    }
+
+    if (!this.model.currency) {
+      errors.push('Currency selection is required');
+      this.validationErrors['currency'] = ['Currency selection is required'];
+    }
+
+    if (!this.model.termsAndConditions || this.model.termsAndConditions.trim() === '') {
+      errors.push('Terms & Conditions is required');
+      this.validationErrors['termsAndConditions'] = ['Terms & Conditions is required'];
+    }
+
+    // Email validation only when no RFQ ID
+    if (!this.model.rfqId) {
+      if (!this.model.email || this.model.email.trim() === '') {
+        errors.push('Email is required');
+        this.validationErrors['email'] = ['Email is required'];
+      } else if (!this.isValidEmail(this.model.email)) {
+        errors.push('Please enter a valid email address');
+        this.validationErrors['email'] = ['Please enter a valid email address'];
+      }
+    }
+
+    // Validate quotation items
+    const itemErrors = this.validateQuotationItems();
+    if (itemErrors.length > 0) {
+      errors.push(...itemErrors);
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
+  validateQuotationItems(): string[] {
+    const errors: string[] = [];
+    
+    if (!this.model.quotationItems || this.model.quotationItems.length === 0) {
+      errors.push('At least one quotation item is required');
+      return errors;
+    }
+
+    // Check if all items are empty
+    const hasValidItems = this.model.quotationItems.some((item: any) => 
+      item.actionItemName && item.actionItemName.trim() !== ''
+    );
+
+    if (!hasValidItems) {
+      errors.push('At least one quotation item with a valid Item Name is required');
+      return errors;
+    }
+
+    this.model.quotationItems.forEach((item: any, index: number) => {
+      const itemErrors: string[] = [];
+      const rowNumber = index + 1;
+
+      // Skip validation for completely empty rows
+      const isEmptyRow = !item.actionItemName && !item.description && 
+                        !item.material && (!item.qty || item.qty === 0) && 
+                        !item.unit && (!item.itemPrice || item.itemPrice === 0);
+
+      if (isEmptyRow) {
+        return; // Skip empty rows
+      }
+
+      // Item Name validation
+      if (!item.actionItemName || item.actionItemName.trim() === '') {
+        itemErrors.push('Item Name is required');
+      }
+
+      // Quantity validation
+      if (!item.qty || item.qty <= 0) {
+        itemErrors.push('Quantity must be greater than 0');
+      } else if (isNaN(item.qty)) {
+        itemErrors.push('Quantity must be a valid number');
+      }
+
+      // Unit validation
+      if (!item.unit || item.unit.trim() === '') {
+        itemErrors.push('Unit is required');
+      } else if (!this.unitOptions.find(opt => opt.value === item.unit)) {
+        itemErrors.push('Unit must be selected from the dropdown');
+      }
+
+      // Bid Type validation
+      if (!item.bidType) {
+        itemErrors.push('Bid Type is required');
+      } else if (!this.bidTypeOptions.find(opt => opt.value === item.bidType)) {
+        itemErrors.push('Bid Type must be selected from the dropdown');
+      }
+
+      // Item Price validation (only for bid items)
+      if (item.bidType === 'bid') {
+        if (!item.itemPrice || item.itemPrice <= 0) {
+          itemErrors.push('Item Price must be greater than 0 for bid items');
+        } else if (isNaN(item.itemPrice)) {
+          itemErrors.push('Item Price must be a valid number');
+        }
+      }
+
+      // Tax Type validation
+      if (!item.taxType) {
+        itemErrors.push('Tax Type is required');
+      } else if (!this.taxTypeOptions.find(opt => opt.value === item.taxType)) {
+        itemErrors.push('Tax Type must be selected from the dropdown');
+      }
+
+      // Tooling validation
+      if (!item.tooling || item.tooling.trim() === '') {
+        itemErrors.push('Tooling information is required');
+      }
+
+      if (itemErrors.length > 0) {
+        this.validationErrors[`item_${index}`] = itemErrors;
+        errors.push(`Row ${rowNumber}: ${itemErrors.join(', ')}`);
+      }
+    });
+
+    return errors;
+  }
+
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  // Add method to download CSV template for users
+  downloadCSVTemplate() {
+    const headers = [
+      'S.No',
+      'Item Name',
+      'Description', 
+      'Material',
+      'Qty',
+      'Unit',
+      'Item Price',
+      'Tax Type',
+      'Taxable Amount',
+      'Miscellaneous',
+      'Tooling',
+      'Bid Type'
+    ];
+
+    // Add sample data rows
+    const sampleRows = [
+      [1, 'Sample Item 1', 'Sample description', 'Steel', 10, 'Nos', 100, 'none', '', 'Notes here', 'Standard', 'bid'],
+      [2, 'Sample Item 2', 'Another description', 'Aluminum', 5, 'Kg', 250.50, 'cgstSgst', '', 'Additional info', 'Required', 'bid'],
+      [3, 'Sample Item 3', 'Third item desc', 'Plastic', 20, 'Meter', 0, '', '', 'No bid item', 'Not Required', 'no-bid']
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...sampleRows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    try {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'quotation-template.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      this.sweetAlert.success('CSV template downloaded successfully! You can use this as a reference for importing your data.');
+    } catch (error) {
+      console.error('Error downloading CSV template:', error);
+      this.sweetAlert.error('Failed to download CSV template. Please try again.');
+    }
+  }
+
+  // Add method to validate and clean table data before operations
+  validateAndCleanTableData(): boolean {
+    // Remove completely empty rows
+    this.model.quotationItems = this.model.quotationItems.filter((item: any) => {
+      const hasAnyData = item.actionItemName || item.description || 
+                        item.material || (item.qty && item.qty > 0) || 
+                        item.unit || (item.itemPrice && item.itemPrice > 0) ||
+                        item.miscellaneous || item.tooling;
+      return hasAnyData;
+    });
+
+    // Ensure at least one item exists
+    if (this.model.quotationItems.length === 0) {
+      this.model.quotationItems.push({
+        actionItemName: '',
+        description: '',
+        material: '',
+        qty: 0,
+        unit: '',
+        itemPrice: 0,
+        taxType: 'none',
+        miscellaneous: '',
+        tooling: '',
+        bidType: 'bid'
+      });
+      return false;
+    }
+
+    return true;
+  }
+
+  // Add method to get all validation errors as a summary
+  getAllValidationErrors(): string[] {
+    const allErrors: string[] = [];
+    
+    Object.keys(this.validationErrors).forEach(key => {
+      if (this.validationErrors[key] && this.validationErrors[key].length > 0) {
+        if (key.startsWith('item_')) {
+          const itemIndex = key.replace('item_', '');
+          allErrors.push(`Row ${parseInt(itemIndex) + 1}: ${this.validationErrors[key].join(', ')}`);
+        } else {
+          allErrors.push(...this.validationErrors[key]);
+        }
+      }
+    });
+    
+    return allErrors;
+  }
+
+  // Add method to show validation summary
+  showValidationSummary() {
+    const errors = this.getAllValidationErrors();
+    if (errors.length > 0) {
+      const errorMessage = `Please fix the following issues:\n\n${errors.map((error, index) => `${index + 1}. ${error}`).join('\n')}`;
+      this.sweetAlert.error(errorMessage);
+    }
+  }
+
+  // Add method to add new empty row
+  addNewRow() {
+    const newItem = {
+      actionItemName: '',
+      description: '',
+      material: '',
+      qty: 0,
+      unit: '',
+      itemPrice: 0,
+      taxType: 'none',
+      miscellaneous: '',
+      tooling: '',
+      bidType: 'bid'
+    };
+    
+    this.model.quotationItems.push(newItem);
+    this.calculateTotals();
+    this.sweetAlert.success('New row added to quotation items.');
+  }
+
+  // Add method to remove specific row
+  removeRow(index: number) {
+    if (this.model.quotationItems.length <= 1) {
+      this.sweetAlert.warning('Cannot remove the last remaining row. At least one row is required.');
+      return;
+    }
+
+    this.sweetAlert.confirm(
+      `Are you sure you want to remove row ${index + 1}?`, 
+      'Remove Row', 
+      'question', 
+      'Yes, Remove', 
+      'Cancel'
+    ).then((result: any) => {
+      if(result.isConfirmed) {
+        this.model.quotationItems.splice(index, 1);
+        this.calculateTotals();
+        
+        // Clear any validation errors for removed items
+        Object.keys(this.validationErrors).forEach(key => {
+          if (key.startsWith('item_')) {
+            const itemIndex = parseInt(key.replace('item_', ''));
+            if (itemIndex >= index) {
+              delete this.validationErrors[key];
+            }
+          }
+        });
+        
+        this.sweetAlert.success('Row removed successfully.');
+      }
+    });
+  }
+
+  // Add method to duplicate row
+  duplicateRow(index: number) {
+    const itemToDuplicate = { ...this.model.quotationItems[index] };
+    itemToDuplicate.actionItemName = `Copy of ${itemToDuplicate.actionItemName}`;
+    
+    this.model.quotationItems.splice(index + 1, 0, itemToDuplicate);
+    this.calculateTotals();
+    this.sweetAlert.success(`Row ${index + 1} duplicated successfully.`);
+  }
+
+  // Add method to validate specific field
+  validateField(fieldName: string, value: any): string | null {
+    switch (fieldName) {
+      case 'totalLeadTime':
+        if (!value || value <= 0) {
+          return 'Total Lead Time must be greater than 0';
+        }
+        break;
+      case 'email':
+        if (!this.model.rfqId && (!value || !this.isValidEmail(value))) {
+          return 'Please enter a valid email address';
+        }
+        break;
+      case 'quoteValidTill':
+        if (!value) {
+          return 'Quote Valid Till date is required';
+        }
+        const selectedDate = new Date(value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate < today) {
+          return 'Quote Valid Till date must be in the future';
+        }
+        break;
+    }
+    return null;
+  }
+
+  // Add real-time validation for individual fields
+  onFieldChange(fieldName: string, value: any) {
+    const error = this.validateField(fieldName, value);
+    
+    if (error) {
+      this.validationErrors[fieldName] = [error];
+    } else {
+      this.clearFieldError(fieldName);
+    }
+  }
+
+  // Add getter for unit options display
+  get supportedUnitsDisplay(): string {
+    return this.unitOptions.map(option => option.label).join(', ');
   }
 }

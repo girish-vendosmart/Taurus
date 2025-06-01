@@ -36,10 +36,16 @@
         <input 
           type="number" 
           class="form-control editable-field"
+          [class.is-invalid]="hasValidationError('totalLeadTime')"
           [(ngModel)]="model.totalLeadTime"
           [ngModelOptions]="{standalone: true}"
+          (input)="clearFieldError('totalLeadTime')"
           placeholder="Enter total lead time"
+          min="1"
           required>
+        <div *ngIf="hasValidationError('totalLeadTime')" class="invalid-feedback">
+          {{ getValidationError('totalLeadTime') }}
+        </div>
       </div>
       <div class="col-md-6 mb-3">
         <label class="form-label">Payment Terms <span class="text-danger">*</span></label>
@@ -53,8 +59,13 @@
           [showClear]="false"
           [filter]="true"
           filterBy="label"
+          [class.is-invalid]="hasValidationError('paymentTerms')"
+          (onChange)="clearFieldError('paymentTerms')"
           styleClass="w-100">
         </p-dropdown>
+        <div *ngIf="hasValidationError('paymentTerms')" class="invalid-feedback d-block">
+          {{ getValidationError('paymentTerms') }}
+        </div>
       </div>
     </div>
 
@@ -62,25 +73,24 @@
     <div class="row mb-4">
       <div class="col-md-6 mb-3">
         <label class="form-label">Quote Valid till <span class="text-danger">*</span></label>
-        <input type="date" class="form-control" [(ngModel)]="model.quoteValidTill" [ngModelOptions]="{standalone: true}" required>
-        <!-- <p-calendar 
-          [(ngModel)]="model.quoteValidTill"
+        <input 
+          type="date" 
+          class="form-control"
+          [class.is-invalid]="hasValidationError('quoteValidTill')"
+          [(ngModel)]="model.quoteValidTill" 
           [ngModelOptions]="{standalone: true}"
-          dateFormat="dd/mm/yy"
-          placeholder="Select validity date"
-          [showIcon]="true"
-          [showClear]="true"
-          [showButtonBar]="true"
-          appendTo="body"
-          styleClass="w-100">
-        </p-calendar> -->
+          (change)="clearFieldError('quoteValidTill')"
+          required>
+        <div *ngIf="hasValidationError('quoteValidTill')" class="invalid-feedback">
+          {{ getValidationError('quoteValidTill') }}
+        </div>
       </div>
     </div>
 
     <!-- Currency Selection -->
     <div class="row mb-4">
       <div class="col-12">
-        <label class="form-label me-3">Currency:</label>
+        <label class="form-label me-3">Currency: <span class="text-danger">*</span></label>
         <div class="d-flex gap-4">
           <div class="form-check">
             <p-radioButton 
@@ -89,7 +99,7 @@
               value="INR"
               [(ngModel)]="model.currency"
               [ngModelOptions]="{standalone: true}"
-              (onClick)="onCurrencyChange()">
+              (onClick)="onCurrencyChange(); clearFieldError('currency')">
             </p-radioButton>
             <label for="inr" class="form-check-label ms-2">INR</label>
           </div>
@@ -100,11 +110,28 @@
               value="USD"
               [(ngModel)]="model.currency"
               [ngModelOptions]="{standalone: true}"
-              (onClick)="onCurrencyChange()">
+              (onClick)="onCurrencyChange(); clearFieldError('currency')">
             </p-radioButton>
             <label for="usd" class="form-check-label ms-2">USD</label>
           </div>
         </div>
+        <div *ngIf="hasValidationError('currency')" class="text-danger small mt-1">
+          {{ getValidationError('currency') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- CSV Import Information -->
+    <div class="alert alert-info d-flex align-items-start mb-3" style="font-size: 14px;">
+      <i class="pi pi-info-circle me-2 mt-1" style="color: #0dcaf0;"></i>
+      <div>
+        <strong>Quotation Items Help:</strong>
+        <ul class="mb-0 mt-2 ps-3">
+          <li><strong>Required fields:</strong> Item Name, Quantity (>0), Unit, Bid Type, Item Price (for bid items), Tax Type, and Tooling</li>
+          <li><strong>CSV Import:</strong> Download the template first, fill your data, then import. Supported units: {{ supportedUnitsDisplay }}</li>
+          <li><strong>Tax Types:</strong> No Tax, CGST & SGST (9% each), or IGST (18%)</li>
+          <li><strong>Bid Types:</strong> Bid (requires price) or No Bid (price disabled)</li>
+        </ul>
       </div>
     </div>
 
@@ -117,6 +144,14 @@
         </span>
       </div>
       <div class="table-actions">
+        <button 
+          type="button" 
+          class="btn btn-outline-info btn-sm me-2"
+          (click)="downloadCSVTemplate()"
+          title="Download CSV template">
+          <i class="pi pi-download me-1"></i>
+          CSV Template
+        </button>
         <button 
           type="button" 
           class="btn btn-outline-secondary me-2"
@@ -177,8 +212,10 @@
               <input 
                 type="text" 
                 class="form-control form-control-sm table-editable-field" 
+                [class.is-invalid]="hasValidationError('item_' + i)"
                 [(ngModel)]="item.actionItemName"
                 [ngModelOptions]="{standalone: true}"
+                (input)="clearFieldError('item_' + i)"
                 placeholder="Enter item name">
             </td>
             
@@ -209,8 +246,9 @@
                 [min]="0"
                 [style]="{ width: '100%' }"
                 styleClass="w-100 table-editable-field"
+                [class.is-invalid]="hasValidationError('item_' + i)"
                 size="small"
-                (onInput)="onQuantityOrPriceChange(item)"
+                (onInput)="onQuantityOrPriceChange(item); clearFieldError('item_' + i)"
                 [ngModelOptions]="{standalone: true}">
               </p-inputNumber>
             </td>
@@ -224,6 +262,8 @@
                 optionLabel="label"
                 optionValue="value"
                 placeholder="Unit"
+                [class.is-invalid]="hasValidationError('item_' + i)"
+                (onChange)="clearFieldError('item_' + i)"
                 styleClass="w-100 p-inputtext-sm table-editable-field"
                 appendTo="body">
               </p-dropdown>
@@ -238,7 +278,8 @@
                 optionLabel="label"
                 optionValue="value"
                 placeholder="Bid Type"
-                (onChange)="onBidTypeChange(item)"
+                [class.is-invalid]="hasValidationError('item_' + i)"
+                (onChange)="onBidTypeChange(item); clearFieldError('item_' + i)"
                 styleClass="w-100 p-inputtext-sm table-editable-field"
                 appendTo="body">
               </p-dropdown>
@@ -253,8 +294,9 @@
                 [minFractionDigits]="2"
                 [style]="{ width: '100%' }"
                 styleClass="w-100 table-editable-field"
+                [class.is-invalid]="hasValidationError('item_' + i)"
                 size="small"
-                (onInput)="onQuantityOrPriceChange(item)"
+                (onInput)="onQuantityOrPriceChange(item); clearFieldError('item_' + i)"
                 [ngModelOptions]="{standalone: true}"
                 [disabled]="item.bidType === 'no-bid'"
                 [placeholder]="item.bidType === 'no-bid' ? 'No Bid' : 'Enter price'">
@@ -270,7 +312,8 @@
                 optionLabel="label"
                 optionValue="value"
                 placeholder="Tax Type"
-                (onChange)="onItemTaxTypeChange(item)"
+                [class.is-invalid]="hasValidationError('item_' + i)"
+                (onChange)="onItemTaxTypeChange(item); clearFieldError('item_' + i)"
                 styleClass="w-100 p-inputtext-sm table-editable-field"
                 appendTo="body">
               </p-dropdown>
@@ -296,13 +339,31 @@
               <input 
                 type="text" 
                 class="form-control form-control-sm table-editable-field" 
+                [class.is-invalid]="hasValidationError('item_' + i)"
                 [(ngModel)]="item.tooling"
                 [ngModelOptions]="{standalone: true}"
+                (input)="clearFieldError('item_' + i)"
                 placeholder="Tooling">
             </td>
           </tr>
         </tbody>
       </table>
+      
+      <!-- Table Validation Errors -->
+      <div *ngIf="showValidationErrors" class="table-errors">
+        <div *ngFor="let item of model.quotationItems; let i = index" 
+             class="row-error" 
+             [class.d-none]="!hasValidationError('item_' + i)">
+          <div *ngIf="hasValidationError('item_' + i)" class="alert alert-danger py-2 px-3 mt-2">
+            <small>
+              <strong>Row {{ i + 1 }} Errors:</strong>
+              <span *ngFor="let error of validationErrors['item_' + i]; let last = last">
+                {{ error }}<span *ngIf="!last">, </span>
+              </span>
+            </small>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Totals Section (Moved under table) -->
@@ -392,10 +453,15 @@
         <input 
           type="email" 
           class="form-control editable-field"
+          [class.is-invalid]="hasValidationError('email')"
           [(ngModel)]="model.email"
           [ngModelOptions]="{standalone: true}"
+          (input)="clearFieldError('email')"
           placeholder="email@example.com"
           required>
+        <div *ngIf="hasValidationError('email')" class="invalid-feedback">
+          {{ getValidationError('email') }}
+        </div>
       </div>
       <div class="col-md-6 mb-3">
         <label class="form-label">Delivery Address</label>
@@ -459,12 +525,17 @@
         <label class="form-label">Terms & Conditions <span class="text-danger">*</span></label>
         <textarea 
           class="form-control editable-field" 
+          [class.is-invalid]="hasValidationError('termsAndConditions')"
           rows="4"
           [(ngModel)]="model.termsAndConditions"
           [ngModelOptions]="{standalone: true}"
+          (input)="clearFieldError('termsAndConditions')"
           placeholder="Terms & Conditions"
           required>
         </textarea>
+        <div *ngIf="hasValidationError('termsAndConditions')" class="invalid-feedback">
+          {{ getValidationError('termsAndConditions') }}
+        </div>
       </div>
     </div>
 
@@ -494,8 +565,7 @@
       <button 
         type="submit" 
         class="btn btn-primary px-4"
-        (click)="onSubmit()"
-        [disabled]="!model.termsAndConditions || !model.totalLeadTime || (!model.rfqId && !model.email)">
+        (click)="onSubmit()">
         <i class="pi pi-send me-2"></i>
         {{ isEditMode ? 'Update' : 'Send' }}
       </button>

@@ -71,8 +71,19 @@
   border-radius: 6px;
   font-weight: $font-weight-medium;
   font-size: 14px;
-  padding: 8px 16px;
+  padding: 10px 16px;
+  height: 40px;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  
+  &.btn-sm {
+    padding: 8px 12px;
+    height: 36px;
+    font-size: 13px;
+  }
   
   &.btn-outline-secondary {
     border-color: $material-finish-silver;
@@ -137,13 +148,32 @@
     }
   }
   
-  &.btn-sm {
-    padding: 4px 8px;
-    font-size: 12px;
+  &.btn-outline-info {
+    border-color: #0dcaf0;
+    color: #0dcaf0;
+    
+    &:hover {
+      background-color: #0dcaf0;
+      border-color: #0dcaf0;
+      color: white;
+      transform: translateY(-1px);
+    }
   }
   
   i {
     font-size: 14px;
+    margin-right: 4px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  
+  &.btn-primary:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
   }
 }
 
@@ -215,13 +245,15 @@
   }
 }
 
-// Form Controls Styling
+// Form Controls Styling - Standardized Heights
 :host ::ng-deep {
   .form-control {
     border: 1px solid $material-finish-silver;
     border-radius: 4px;
     font-size: 14px;
-    padding: 8px 12px;
+    padding: 10px 12px; // Standardized padding
+    height: 40px; // Consistent height for all inputs
+    line-height: 1.2;
     
     &:focus {
       border-color: $blueprint-blue;
@@ -229,8 +261,9 @@
     }
     
     &.form-control-sm {
-      padding: 4px 6px;
+      padding: 6px 8px; // Standardized small input padding
       font-size: 12px;
+      height: 32px; // Consistent height for small inputs
     }
     
     // Editable field styling
@@ -284,14 +317,15 @@
   .form-label {
     font-weight: $font-weight-medium;
     color: $precision-black;
-    margin-bottom: 4px;
+    margin-bottom: 6px; // Increased margin for better spacing
     font-size: 14px;
   }
   
-  // PrimeNG Dropdown Styling - Enhanced for table compatibility
+  // PrimeNG Dropdown Styling - Enhanced for consistent heights
   .p-dropdown {
     border: 1px solid $material-finish-silver;
     border-radius: 4px;
+    height: 40px; // Consistent height with form controls
     
     &:hover {
       border-color: $blueprint-blue;
@@ -304,76 +338,16 @@
     
     .p-dropdown-label {
       font-size: 14px;
-      padding: 8px 12px;
+      padding: 10px 12px; // Consistent with form controls
+      line-height: 1.2;
     }
     
     &.p-inputtext-sm {
+      height: 32px; // Consistent with small form controls
+      
       .p-dropdown-label {
-        padding: 4px 6px;
+        padding: 6px 8px; // Consistent with small form controls
         font-size: 12px;
-      }
-    }
-    
-    // Editable dropdown styling
-    &.editable-field {
-      background-color: #ffffff !important;
-      
-      .p-dropdown-label {
-        background-color: #ffffff !important;
-      }
-      
-      &.p-focus {
-        background-color: #ffffff !important;
-        border-color: $blueprint-blue;
-        box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
-      }
-    }
-    
-    // Enhanced dropdown styling
-    &.enhanced-dropdown {
-      background-color: #ffffff;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      
-      &:hover {
-        border-color: $blueprint-blue;
-        box-shadow: 0 4px 12px rgba(26, 58, 95, 0.15);
-        transform: translateY(-1px);
-      }
-      
-      &.p-focus {
-        border-color: $blueprint-blue;
-        box-shadow: 0 0 0 3px rgba(26, 58, 95, 0.1), 0 4px 12px rgba(26, 58, 95, 0.15);
-        transform: translateY(-1px);
-      }
-      
-      .p-dropdown-label {
-        font-size: 14px;
-        font-weight: 500;
-        color: $precision-black;
-        padding: 12px 16px;
-        
-        &.p-placeholder {
-          color: #94a3b8;
-          font-style: italic;
-        }
-      }
-      
-      .p-dropdown-trigger {
-        width: 48px;
-        color: $blueprint-blue;
-        
-        .p-dropdown-trigger-icon {
-          transition: transform 0.3s ease;
-        }
-      }
-      
-      &.p-dropdown-open {
-        .p-dropdown-trigger .p-dropdown-trigger-icon {
-          transform: rotate(180deg);
-        }
       }
     }
     
@@ -393,163 +367,15 @@
     }
   }
   
-  // Critical dropdown panel fixes for table visibility
-  .p-dropdown-panel {
-    border: 1px solid $material-finish-silver;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(26, 58, 95, 0.15);
-    z-index: 9999 !important;
-    min-width: 120px !important;
-    background: white;
-    position: fixed !important;
-    
-    .p-dropdown-items {
-      .p-dropdown-item {
-        font-size: 14px;
-        padding: 8px 12px;
-        white-space: nowrap;
-        
-        &:hover {
-          background-color: rgba(26, 58, 95, 0.05);
-        }
-        
-        &.p-highlight {
-          background-color: $blueprint-blue;
-          color: white;
-        }
-      }
-    }
-  }
-  
-  // Global dropdown panel positioning fix
-  .p-dropdown-panel.p-component {
-    z-index: 9999 !important;
-    position: fixed !important;
-    
-    // Ensure dropdown items are properly sized for table cells
-    .p-dropdown-items {
-      min-width: 100px;
-      
-      .p-dropdown-item {
-        font-size: 12px !important;
-        padding: 6px 8px !important;
-        line-height: 1.2;
-        
-        &:hover {
-          background-color: rgba(26, 58, 95, 0.08) !important;
-        }
-        
-        &.p-highlight {
-          background-color: $blueprint-blue !important;
-          color: white !important;
-        }
-      }
-    }
-  }
-  
-  // Enhanced Dropdown Panel Styling
-  .enhanced-dropdown .p-dropdown-panel {
-    border: 2px solid $blueprint-blue;
-    border-radius: 8px;
-    box-shadow: 0 8px 25px rgba(26, 58, 95, 0.2);
-    margin-top: 4px;
-    overflow: hidden;
-    z-index: 9999 !important;
-    
-    .p-dropdown-header {
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      padding: 12px 16px;
-      border-bottom: 1px solid #e2e8f0;
-      
-      .p-dropdown-filter-container {
-        .p-dropdown-filter {
-          border: 2px solid #e2e8f0;
-          border-radius: 6px;
-          padding: 8px 12px;
-          font-size: 14px;
-          
-          &:focus {
-            border-color: $blueprint-blue;
-            box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
-          }
-        }
-      }
-    }
-    
-    .p-dropdown-items {
-      .p-dropdown-item {
-        padding: 12px 16px;
-        font-size: 14px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        border-bottom: 1px solid #f1f5f9;
-        
-        &:last-child {
-          border-bottom: none;
-        }
-        
-        &:hover {
-          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-          color: $blueprint-blue;
-          transform: translateX(4px);
-        }
-        
-        &.p-highlight {
-          background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
-          color: white;
-          font-weight: 600;
-          transform: translateX(4px);
-        }
-      }
-    }
-  }
-  
-  // Ensure table cells don't clip dropdown panels
-  .quotation-table {
-    td {
-      overflow: visible !important;
-      position: relative;
-    }
-    
-    // Specific dropdown styling within table cells
-    .p-dropdown {
-      width: 100% !important;
-      min-width: 80px;
-      
-      .p-dropdown-label {
-        font-size: 12px !important;
-        padding: 4px 6px !important;
-        line-height: 1.2;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      
-      .p-dropdown-trigger {
-        width: 20px !important;
-        
-        .p-dropdown-trigger-icon {
-          font-size: 10px !important;
-        }
-      }
-    }
-    
-    // Tax Type column specific styling
-    .tax-type-dropdown {
-      .p-dropdown-label {
-        font-size: 11px !important;
-        padding: 3px 4px !important;
-      }
-    }
-  }
-  
-  // PrimeNG InputNumber Styling
+  // PrimeNG InputNumber Styling - Consistent Heights
   .p-inputnumber {
     .p-inputtext {
       border: 1px solid $material-finish-silver;
       border-radius: 4px;
       font-size: 14px;
-      padding: 8px 12px;
+      padding: 10px 12px; // Consistent with form controls
+      height: 40px; // Consistent height
+      line-height: 1.2;
       
       &:focus {
         border-color: $blueprint-blue;
@@ -558,8 +384,9 @@
     }
     
     &.p-inputnumber-sm .p-inputtext {
-      padding: 4px 6px;
+      padding: 6px 8px; // Consistent with small form controls
       font-size: 12px;
+      height: 32px; // Consistent height for small inputs
       
       &:disabled {
         background-color: #f8f9fa !important;
@@ -583,304 +410,11 @@
     }
   }
   
-  // PrimeNG Calendar Styling
-  .p-calendar {
-    .p-inputtext {
-      border: 1px solid $material-finish-silver;
-      border-radius: 4px;
-      font-size: 14px;
-      padding: 8px 12px;
-      
-      &:focus {
-        border-color: $blueprint-blue;
-        box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
-      }
-    }
-    
-    // Editable calendar styling
-    &.editable-field {
-      .p-inputtext {
-        background-color: #ffffff !important;
-        
-        &:focus {
-          background-color: #ffffff !important;
-          border-color: $blueprint-blue;
-          box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
-        }
-      }
-    }
-    
-    // Enhanced calendar styling
-    &.enhanced-calendar {
-      .p-inputtext {
-        background-color: #ffffff;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 12px 48px 12px 16px;
-        font-size: 14px;
-        font-weight: 500;
-        color: $precision-black;
-        transition: all 0.3s ease;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        
-        &::placeholder {
-          color: #94a3b8;
-          font-style: italic;
-        }
-        
-        &:hover {
-          border-color: $blueprint-blue;
-          box-shadow: 0 4px 12px rgba(26, 58, 95, 0.15);
-          transform: translateY(-1px);
-        }
-        
-        &:focus {
-          border-color: $blueprint-blue;
-          box-shadow: 0 0 0 3px rgba(26, 58, 95, 0.1), 0 4px 12px rgba(26, 58, 95, 0.15);
-          transform: translateY(-1px);
-          outline: none;
-        }
-      }
-      
-      .p-datepicker-trigger {
-        right: 12px;
-        width: 32px;
-        height: 32px;
-        background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
-        border: none;
-        border-radius: 6px;
-        color: white;
-        transition: all 0.3s ease;
-        
-        &:hover {
-          background: linear-gradient(135deg, darken($blueprint-blue, 5%) 0%, darken($blueprint-blue, 15%) 100%);
-          transform: scale(1.05);
-        }
-        
-        .p-button-icon {
-          font-size: 14px;
-        }
-      }
-      
-      .p-calendar-clear-icon {
-        right: 50px;
-        color: #94a3b8;
-        font-size: 14px;
-        transition: all 0.2s ease;
-        
-        &:hover {
-          color: $safety-orange;
-          transform: scale(1.1);
-        }
-      }
-    }
-  }
-  
-  // Enhanced Calendar Panel Styling
-  .enhanced-calendar {
-    .p-datepicker {
-      border: 2px solid $blueprint-blue;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(26, 58, 95, 0.2);
-      overflow: hidden;
-      
-      .p-datepicker-header {
-        background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
-        color: white;
-        padding: 16px 20px;
-        border-bottom: none;
-        
-        .p-datepicker-title {
-          font-weight: 600;
-          font-size: 16px;
-          color: white;
-          
-          .p-datepicker-month,
-          .p-datepicker-year {
-            color: white;
-            background: rgba(white, 0.1);
-            border: 1px solid rgba(white, 0.2);
-            border-radius: 6px;
-            padding: 4px 8px;
-            margin: 0 4px;
-            font-weight: 500;
-            
-            &:hover {
-              background: rgba(white, 0.2);
-            }
-            
-            &:focus {
-              outline: none;
-              box-shadow: 0 0 0 2px rgba(white, 0.3);
-            }
-          }
-        }
-        
-        .p-datepicker-prev,
-        .p-datepicker-next {
-          width: 36px;
-          height: 36px;
-          color: white;
-          border-radius: 8px;
-          transition: all 0.2s ease;
-          
-          &:hover {
-            background: rgba(white, 0.15);
-            transform: scale(1.1);
-          }
-          
-          &:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(white, 0.3);
-          }
-        }
-      }
-      
-      .p-datepicker-calendar-container {
-        background: white;
-        padding: 16px;
-        
-        table {
-          width: 100%;
-          
-          th {
-            color: $blueprint-blue;
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 8px 4px;
-            text-align: center;
-          }
-          
-          td {
-            padding: 2px;
-            text-align: center;
-            
-            > span {
-              width: 36px;
-              height: 36px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              border-radius: 8px;
-              font-size: 14px;
-              font-weight: 500;
-              cursor: pointer;
-              transition: all 0.2s ease;
-              margin: 1px;
-              
-              &:hover {
-                background: linear-gradient(135deg, rgba($blueprint-blue, 0.1) 0%, rgba($blueprint-blue, 0.05) 100%);
-                color: $blueprint-blue;
-                transform: scale(1.1);
-              }
-              
-              &.p-highlight {
-                background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(26, 58, 95, 0.3);
-                
-                &:hover {
-                  background: linear-gradient(135deg, darken($blueprint-blue, 5%) 0%, darken($blueprint-blue, 15%) 100%);
-                  transform: scale(1.1);
-                }
-              }
-              
-              &.p-datepicker-today {
-                background: linear-gradient(135deg, rgba($process-green, 0.15) 0%, rgba($process-green, 0.1) 100%);
-                color: $process-green;
-                font-weight: 600;
-                border: 2px solid $process-green;
-              }
-              
-              &.p-datepicker-other-month {
-                color: #cbd5e0;
-                
-                &:hover {
-                  color: #94a3b8;
-                }
-              }
-            }
-          }
-        }
-      }
-      
-      .p-datepicker-buttonbar {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        padding: 12px 16px;
-        border-top: 1px solid #e2e8f0;
-        
-        .p-button {
-          padding: 8px 16px;
-          border-radius: 6px;
-          font-weight: 500;
-          font-size: 14px;
-          
-          &.p-button-text {
-            color: $blueprint-blue;
-            
-            &:hover {
-              background: rgba($blueprint-blue, 0.1);
-              color: darken($blueprint-blue, 10%);
-            }
-          }
-          
-          &.p-button-outlined {
-            border-color: $blueprint-blue;
-            color: $blueprint-blue;
-            
-            &:hover {
-              background: $blueprint-blue;
-              color: white;
-            }
-          }
-        }
-      }
-    }
-  }
-  
-  // PrimeNG RadioButton Styling
-  .p-radiobutton {
-    .p-radiobutton-box {
-      border: 1px solid $material-finish-silver;
-      
-      &.p-highlight {
-        background-color: $blueprint-blue;
-        border-color: $blueprint-blue;
-      }
-      
-      &:hover {
-        border-color: $blueprint-blue;
-      }
-    }
-  }
-  
-  // Form Check Styling
-  .form-check {
-    .form-check-input {
-      border: 1px solid $material-finish-silver;
-      
-      &:checked {
-        background-color: $blueprint-blue;
-        border-color: $blueprint-blue;
-      }
-      
-      &:focus {
-        box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
-      }
-    }
-    
-    .form-check-label {
-      color: $precision-black;
-      font-size: 14px;
-      line-height: $line-height-sm;
-      
-      &.small {
-        font-size: 12px;
-      }
-    }
+  // Textarea specific styling
+  textarea.form-control {
+    height: auto; // Allow textarea to have flexible height
+    min-height: 80px; // Minimum height for textareas
+    resize: vertical; // Allow vertical resize only
   }
 }
 
@@ -1386,6 +920,423 @@
   
   .totals-section {
     padding: 12px;
+  }
+}
+
+// Validation Error Styling
+.is-invalid {
+  border-color: $safety-orange !important;
+  box-shadow: 0 0 0 2px rgba(255, 133, 102, 0.2) !important;
+  
+  &:focus {
+    border-color: $safety-orange !important;
+    box-shadow: 0 0 0 3px rgba(255, 133, 102, 0.3) !important;
+  }
+}
+
+.invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: $safety-orange;
+  font-weight: $font-weight-medium;
+}
+
+.text-danger {
+  color: $safety-orange !important;
+}
+
+// Table validation errors
+.table-errors {
+  margin-top: 1rem;
+  
+  .row-error {
+    .alert {
+      margin-bottom: 0.5rem;
+      border-left: 4px solid $safety-orange;
+      background-color: rgba(255, 133, 102, 0.1);
+      border-color: rgba(255, 133, 102, 0.2);
+      color: $safety-orange;
+      
+      strong {
+        color: $safety-orange;
+        font-weight: $font-weight-semibold;
+      }
+    }
+  }
+}
+
+// Error field highlighting
+.error-field {
+  border-color: $safety-orange !important;
+  background-color: rgba(255, 133, 102, 0.05) !important;
+  
+  &:focus {
+    border-color: $safety-orange !important;
+    box-shadow: 0 0 0 2px rgba(255, 133, 102, 0.2) !important;
+  }
+}
+
+// Enhanced form validation styling
+.form-control {
+  &.is-invalid {
+    border-color: $safety-orange;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    
+    &:focus {
+      border-color: $safety-orange;
+      box-shadow: 0 0 0 0.2rem rgba(255, 133, 102, 0.25);
+    }
+  }
+}
+
+// PrimeNG validation styling overrides
+:host ::ng-deep {
+  .p-dropdown.is-invalid {
+    border-color: $safety-orange !important;
+    
+    &.p-focus {
+      border-color: $safety-orange !important;
+      box-shadow: 0 0 0 2px rgba(255, 133, 102, 0.2) !important;
+    }
+  }
+  
+  .p-inputnumber.is-invalid .p-inputtext {
+    border-color: $safety-orange !important;
+    
+    &:focus {
+      border-color: $safety-orange !important;
+      box-shadow: 0 0 0 2px rgba(255, 133, 102, 0.2) !important;
+    }
+  }
+  
+  .p-calendar.is-invalid .p-inputtext {
+    border-color: $safety-orange !important;
+    
+    &:focus {
+      border-color: $safety-orange !important;
+      box-shadow: 0 0 0 2px rgba(255, 133, 102, 0.2) !important;
+    }
+  }
+  
+  // Radio button validation styling
+  .p-radiobutton.is-invalid .p-radiobutton-box {
+    border-color: $safety-orange !important;
+  }
+}
+
+// Validation summary at the top of form
+.validation-summary {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(255, 133, 102, 0.1);
+  border: 1px solid rgba(255, 133, 102, 0.3);
+  border-radius: 0.375rem;
+  
+  .summary-title {
+    color: $safety-orange;
+    font-weight: $font-weight-semibold;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    
+    i {
+      margin-right: 0.5rem;
+    }
+  }
+  
+  .error-list {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: $safety-orange;
+    
+    li {
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// CSV Import Error Styling
+.csv-error-modal {
+  .error-content {
+    max-height: 400px;
+    overflow-y: auto;
+    
+    .error-item {
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      background-color: rgba(255, 133, 102, 0.1);
+      border-left: 3px solid $safety-orange;
+      border-radius: 0.25rem;
+      font-size: 0.9rem;
+      
+      &.critical {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-left-color: #dc3545;
+      }
+    }
+  }
+}
+
+// Improved button states
+.btn {
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  
+  &.btn-primary:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+  }
+}
+
+// Focus management for better accessibility
+.form-control:focus,
+.form-select:focus {
+  outline: none;
+  border-color: $blueprint-blue;
+  box-shadow: 0 0 0 0.2rem rgba(26, 58, 95, 0.25);
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+  border-color: $safety-orange;
+  box-shadow: 0 0 0 0.2rem rgba(255, 133, 102, 0.25);
+}
+
+// Success state styling
+.is-valid {
+  border-color: $process-green !important;
+  
+  &:focus {
+    border-color: $process-green !important;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2) !important;
+  }
+}
+
+.valid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: $process-green;
+  font-weight: $font-weight-medium;
+}
+
+// Smooth transitions for validation states
+.form-control,
+.form-select {
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+:host ::ng-deep {
+  .p-dropdown,
+  .p-inputnumber .p-inputtext,
+  .p-calendar .p-inputtext {
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+}
+
+// Table cell validation highlighting
+.quotation-table {
+  td.has-error {
+    background-color: rgba(255, 133, 102, 0.05);
+    border-color: rgba(255, 133, 102, 0.3);
+  }
+  
+  tr.has-errors {
+    background-color: rgba(255, 133, 102, 0.03);
+    
+    &:hover {
+      background-color: rgba(255, 133, 102, 0.08);
+    }
+  }
+}
+
+// Loading state for form submission
+.form-loading {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+}
+
+// Responsive validation styling
+@media (max-width: 768px) {
+  .invalid-feedback {
+    font-size: 0.8rem;
+  }
+  
+  .table-errors {
+    .alert {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+    }
+  }
+  
+  .validation-summary {
+    padding: 0.75rem;
+    
+    .error-list {
+      font-size: 0.85rem;
+    }
+  }
+}
+
+// Print styles for validation (hide errors when printing)
+@media print {
+  .invalid-feedback,
+  .table-errors,
+  .validation-summary {
+    display: none !important;
+  }
+  
+  .is-invalid {
+    border-color: #dee2e6 !important;
+    box-shadow: none !important;
+  }
+}
+
+// Information box styling
+.alert.alert-info {
+  background-color: rgba(13, 202, 240, 0.1);
+  border-color: rgba(13, 202, 240, 0.2);
+  color: #055160;
+  border-radius: 8px;
+  
+  strong {
+    color: #055160;
+    font-weight: $font-weight-semibold;
+  }
+  
+  ul {
+    li {
+      margin-bottom: 0.25rem;
+      line-height: 1.4;
+      
+      strong {
+        color: #0a58ca;
+      }
+    }
+  }
+  
+  .pi-info-circle {
+    font-size: 16px;
+    margin-top: 2px;
+  }
+}
+
+// Enhanced table actions section
+.d-flex.justify-content-between.mb-3 {
+  .table-actions {
+    .btn-sm {
+      font-size: 12px;
+      padding: 6px 12px;
+      
+      &.btn-outline-info {
+        border-color: #0dcaf0;
+        color: #0dcaf0;
+        
+        &:hover {
+          background-color: #0dcaf0;
+          color: white;
+        }
+      }
+    }
+  }
+}
+
+// Responsive improvements for small screens
+@media (max-width: 768px) {
+  .alert.alert-info {
+    font-size: 12px;
+    padding: 0.75rem;
+    
+    ul {
+      font-size: 11px;
+      
+      li {
+        margin-bottom: 0.15rem;
+      }
+    }
+  }
+  
+  .table-actions {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    
+    .btn {
+      font-size: 11px;
+      padding: 4px 8px;
+      margin-right: 0 !important;
+      margin-bottom: 0.25rem;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .d-flex.justify-content-between.mb-3 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    
+    .table-info {
+      order: 2;
+    }
+    
+    .table-actions {
+      order: 1;
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+  
+  .alert.alert-info {
+    .pi-info-circle {
+      display: none;
+    }
+  }
+}
+
+// Success and warning states for buttons
+.btn {
+  &.success-state {
+    background-color: $process-green;
+    border-color: $process-green;
+    color: white;
+    
+    &:hover {
+      background-color: darken($process-green, 10%);
+    }
+  }
+  
+  &.warning-state {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+    
+    &:hover {
+      background-color: darken(#ffc107, 10%);
+    }
   }
 }
 
