@@ -34,6 +34,8 @@ interface Supplier {
   location?: string;
   created_at?: string;
   resubmit_request?: boolean;
+  companySubInfo?: string;
+  contactSubInfo?: string;
 }
 
 @Component({
@@ -72,6 +74,7 @@ interface Supplier {
 
       <p-tabView>
         <p-tabPanel header="Active Suppliers">
+          <div class="table-section">
           <app-common-table 
             [config]="activeSupplierTableConfig" 
             [data]="suppliers"
@@ -80,9 +83,11 @@ interface Supplier {
             (linkClick)="onActiveSupplierLinkClick($event)"
             (actionClick)="onActiveSupplierActionClick($event)">
           </app-common-table>
+          </div>
         </p-tabPanel>
         
         <p-tabPanel header="Invited Suppliers">
+          <div class="table-section">
           <app-common-table 
             [config]="invitedSupplierTableConfig" 
             [data]="invitedSuppliers"
@@ -91,6 +96,7 @@ interface Supplier {
             (linkClick)="onInvitedSupplierLinkClick($event)"
             (actionClick)="onInvitedSupplierActionClick($event)">
           </app-common-table>
+          </div>
         </p-tabPanel>
       </p-tabView>
     </div>
@@ -153,6 +159,12 @@ interface Supplier {
     </p-dialog>
   `,
   styles: [`
+    .table-section {
+      background: white;
+      border-radius: 10px !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+      overflow: hidden;
+    }
     .suppliers-container {
       padding: 1.2rem;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -208,6 +220,12 @@ interface Supplier {
       display: inline-flex;
       align-items: center;
       justify-content: center;
+    }
+
+    ::ng-deep .p-tabview .p-tabview-panels {
+      padding: 0 !important;
+      color: black !important;
+      font-weight: 500 !important;
     }
   `]
 })
@@ -336,6 +354,7 @@ export class ManageSuppliersComponent implements OnInit {
           ...supplier,
           // Add sub-information that will be displayed in the company cell
           companySubInfo: supplier.name,
+          // Add sub-information for contact column (phone number)
           contactSubInfo: supplier.primary_phone_number
         }));
         this.loadingSuppliers = false;

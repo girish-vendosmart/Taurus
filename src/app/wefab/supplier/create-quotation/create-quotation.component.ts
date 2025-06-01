@@ -793,14 +793,13 @@ export class CreateQuotationComponent implements OnInit {
       console.warn('Missing API fields:', apiValidation.missingFields);
     }
 
-    debugger
     console.log("Api Data ", apiData);
     
-    // if (this.isEditMode) {
-    //   this.updateExistingQuotation(apiData);
-    // } else {
-    //   this.createNewQuotation(apiData);
-    // }
+    if (this.isEditMode) {
+      this.updateExistingQuotation(apiData);
+    } else {
+      this.createNewQuotation(apiData);
+    }
   }
 
   private scrollToFirstError() {
