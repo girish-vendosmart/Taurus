@@ -311,7 +311,7 @@ export class SupplierOnboardingComponent implements OnInit {
   }
 
   getL1Data(supplierId: any) {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId;
+    let endPoint = '/api/resource/Supplier Onboarding L1/' + supplierId;
     this.commonService.getData(endPoint).subscribe((res: any) => {
       console.log('L1 Data response:', res);
       if (res && res.data && res.data.company_profile) {
@@ -1509,7 +1509,7 @@ export class SupplierOnboardingComponent implements OnInit {
     
     console.log('Submitting L1 data:', body);
     
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L1';
+    let endPoint = '/api/resource/Supplier Onboarding L1';
     
     // Check if we have a supplier_id
     let supplier_id = sessionStorage.getItem('supplier_id');
@@ -1521,7 +1521,7 @@ export class SupplierOnboardingComponent implements OnInit {
     debugger
     console.log('body', body);
     if(supplier_id) {
-      endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplier_id;
+      endPoint = '/api/resource/Supplier Onboarding L1/' + supplier_id;
       this.putDataFunction(endPoint, body);
     } else {
       this.postDataFunction(endPoint, body);
@@ -1529,7 +1529,7 @@ export class SupplierOnboardingComponent implements OnInit {
   }
   
   putSupplierOnboardingL1() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L1/'  + sessionStorage.getItem('supplier_id');
+    let endPoint = '/api/resource/Supplier Onboarding L1/'  + sessionStorage.getItem('supplier_id');
     this.model.phone_verified = this.phoneVerified;
     this.model.registered_lat = this.model.registeredAddress.location.lat;
     this.model.registered_lng = this.model.registeredAddress.location.lng;

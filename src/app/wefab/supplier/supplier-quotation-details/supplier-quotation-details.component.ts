@@ -938,7 +938,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   
   private loadActivityTrail(): void {
     this.activityTrailLoading = true;
-    this.commonService.getData('/api/method/proq_buyer.api.core.versioning.get_new_versions_trail?doctype=pq_rfq&docname=' + 'RFQ0000000050')
+    this.commonService.getData('/api/method/wefab.wefab.api.common.engine.trail.acitivty.get_new_versions_trail?doctype=pq_rfq&docname=' + 'RFQ0000000050')
       .subscribe({
         next: (response: any) => {
           this.activityTrail = response.data || [];

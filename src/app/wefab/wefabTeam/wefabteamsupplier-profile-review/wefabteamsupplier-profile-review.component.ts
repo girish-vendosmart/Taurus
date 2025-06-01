@@ -205,7 +205,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   getVerificationStatus(supplierId: string): void {
     this.isLoadingVerification = true;
     this.verificationError = false;
-    this.commonservice.getData('/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_and_verification_status?supplier_company_id=SUP-000314' + supplierId).subscribe({
+    this.commonservice.getData('/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_and_verification_status?supplier_company_id=SUP-000314' + supplierId).subscribe({
       next: (res: any) => {
         if (res.data) {
           this.verificationStatus = res.data;
@@ -405,7 +405,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   }
 
   getDocumentSummary(supplierId:any) {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId
+    let endPoint = '/api/resource/Supplier Onboarding L2/' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
         this.getDocumentSummaryData = JSON.parse(res.data.company_profile)
         this.numberOfMachinePhoto = this.getDocumentSummaryData.machines.length
@@ -416,7 +416,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
     }
 
     getL1DocumentSummary(supplierId:any) {
-      let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId
+      let endPoint = '/api/resource/Supplier Onboarding L1/' + supplierId
         this.commonservice.getData(endPoint).subscribe((res: any) => {
           this.getDocumentSummaryL1Data = JSON.parse(res.data.company_profile)
           this.phoneVerifiedStatus = this.getDocumentSummaryL1Data.phone_verified
@@ -428,7 +428,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   getL1Data(supplierId: string) {
     this.isLoadingL1 = true;
     this.l1Error = false;
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplierId;
+    let endPoint = '/api/resource/Supplier Onboarding L1/' + supplierId;
     this.commonservice.getData(endPoint).subscribe({
       next: (res: any) => {
         if (res.data && res.data.company_profile) {
@@ -449,7 +449,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   getL2Data(supplierId: string) {
     this.isLoadingL2 = true;
     this.l2Error = false;
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId;
+    let endPoint = '/api/resource/Supplier Onboarding L2/' + supplierId;
     this.commonservice.getData(endPoint).subscribe({
       next: (res: any) => {
         if (res.data && res.data.company_profile) {
@@ -470,7 +470,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   getL3Data(supplierId: string) {
     this.isLoadingL3 = true;
     this.l3Error = false;
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + supplierId;
+    let endPoint = '/api/resource/Supplier Onboarding L3/' + supplierId;
     this.commonservice.getData(endPoint).subscribe({
       next: (res: any) => {
         if (res.data && res.data.company_profile) {
@@ -489,7 +489,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   }
 
   getL1DataStatus(supplierId:any) {
-    let endPoint = '/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=' + supplierId
+    let endPoint = '/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
         this.getCurrentDataStatus = res.data.approval_status
         this.getCurrentL1DataStatus = res.data.approval_statuson
@@ -499,7 +499,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   }
 
   getL2DataStatus(supplierId:any) {
-    let endPoint = '/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=' + supplierId
+    let endPoint = '/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
         this.getCurrentDataStatus = res.data.approval_status
         this.getCurrentL2DataStatus = res.data.approval_status
@@ -509,7 +509,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   }
 
   getL3DataStatus(supplierId:any) {
-    let endPoint = '/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=' + supplierId
+    let endPoint = '/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=' + supplierId
       this.commonservice.getData(endPoint).subscribe((res: any) => {
         this.getCurrentDataStatus = res.data.approval_status
         this.getCurrentL3DataStatus = res.data.approval_status
@@ -545,7 +545,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   }
 
   approveL1() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + this.supplierId;
+    let endPoint = '/api/resource/Supplier Onboarding L1/' + this.supplierId;
     let payload = {
       "onboarding_status": "Approved"
     };
@@ -571,7 +571,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   }
 
   rejectL1() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + this.supplierId;
+    let endPoint = '/api/resource/Supplier Onboarding L1/' + this.supplierId;
     let payload = {
       "onboarding_status": "Rejected"
     };
@@ -597,7 +597,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   }
 
   approveL2() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + this.supplierId;
+    let endPoint = '/api/resource/Supplier Onboarding L2/' + this.supplierId;
     let payload = {
       "onboarding_status": "Approved"
     };
@@ -623,7 +623,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   }
 
   rejectL2() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + this.supplierId;
+    let endPoint = '/api/resource/Supplier Onboarding L2/' + this.supplierId;
     let payload = {
       "onboarding_status": "Rejected"
     };
@@ -649,7 +649,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   }
 
   approveL3() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + this.supplierId;
+    let endPoint = '/api/resource/Supplier Onboarding L3/' + this.supplierId;
     let payload = {
       "onboarding_status": "Approved"
     };
@@ -675,7 +675,7 @@ export class WefabteamsupplierProfileReviewComponent implements OnInit {
   }
 
   rejectL3() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + this.supplierId;
+    let endPoint = '/api/resource/Supplier Onboarding L3/' + this.supplierId;
     let payload = {
       "onboarding_status": "Rejected"
     };

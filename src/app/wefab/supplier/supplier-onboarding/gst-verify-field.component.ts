@@ -487,7 +487,7 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
     // this.showVerificationDialog = false;
     // this.patchCompanyDetails();
     
-    let endPoint = `/api/method/proq_buyer.api.supplier_onboarding.gst_verification.verify_gstin?gstin_number=${this.gstControl.value}`;
+    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.gst_verification.verify_gstin?gstin_number=${this.gstControl.value}`;
 
     this.commonService.getData(endPoint).subscribe((res: any) => {
       this.isLoading = false;

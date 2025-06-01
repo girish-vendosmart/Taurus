@@ -73,9 +73,9 @@ export class SupplierOnboardingStatusComponent {
     this.getOnboardingL1Status();
 
     // firebase trigger
-    this.accessFirebaseTrigger('wfb_supplier_onboarding_L1', this.supplierCompanyId)
-    this.accessFirebaseTrigger('wfb_supplier_onboarding_L2', this.supplierCompanyId)
-    this.accessFirebaseTrigger('wfb_supplier_onboarding_L3', this.supplierCompanyId)
+    this.accessFirebaseTrigger('Supplier Onboarding L1', this.supplierCompanyId)
+    this.accessFirebaseTrigger('Supplier Onboarding L2', this.supplierCompanyId)
+    this.accessFirebaseTrigger('Supplier Onboarding L3', this.supplierCompanyId)
 
   }
 
@@ -90,7 +90,7 @@ export class SupplierOnboardingStatusComponent {
 
   getOnboardingL1Status() {
     console.log('Getting L1 status');
-    let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=${this.supplierCompanyId}`;
+    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=${this.supplierCompanyId}`;
     this.commonService.getData(endPoint).subscribe({
       next: (res: any) => {
         console.log('L1 status response:', res);
@@ -107,7 +107,7 @@ export class SupplierOnboardingStatusComponent {
 
   getOnboardingL2Status() {
     console.log('Getting L2 status');
-    let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=${this.supplierCompanyId}`;
+    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=${this.supplierCompanyId}`;
     this.commonService.getData(endPoint).subscribe({
       next: (res: any) => {
         console.log('L2 status response:', res);
@@ -124,7 +124,7 @@ export class SupplierOnboardingStatusComponent {
 
   getOnboardingL3Status() {
     console.log('Getting L3 status');
-    let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${this.supplierCompanyId}`;
+    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${this.supplierCompanyId}`;
     this.commonService.getData(endPoint).subscribe({
       next: (res: any) => {
         console.log('L3 status response:', res);
