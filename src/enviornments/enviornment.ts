@@ -1,6 +1,6 @@
 export const environment = {
     production: false,
-    apiUrl: 'https://wefabqa.proqsmart.com',
+    apiUrl: 'https://wefabqa.vendosmart.com',
     wefabApiUrl: 'https://wefabqa.vendosmart.com',
     firebaseConfig: {
         apiKey: "AIzaSyDcYuSy6cy-RrJAHKl1xIqmRmC9yb-r5Dw",
