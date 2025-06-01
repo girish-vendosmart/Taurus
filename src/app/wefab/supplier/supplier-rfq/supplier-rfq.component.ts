@@ -107,7 +107,7 @@ export class SupplierRfqComponent implements OnInit {
         header: 'Status',
         sortable: true,
         filterable: true,
-        filterType: 'dropdown',
+        filterType: 'text',
         isStatus: true,
         filterOptions: [] // Will be populated dynamically
       },
@@ -117,7 +117,7 @@ export class SupplierRfqComponent implements OnInit {
     enableFilter: true,
     enablePagination: true,
     enableColumnHide: false,
-    enableColumnResize: false,
+    enableColumnResize: true,
     pageSize: 10,
   };
   
