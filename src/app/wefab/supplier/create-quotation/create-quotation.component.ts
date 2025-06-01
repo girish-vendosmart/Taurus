@@ -175,6 +175,7 @@ export class CreateQuotationComponent implements OnInit {
         material: '',
         qty: 0,
         unit: '',
+        bidType: 'bid',
         itemPrice: 0,
         miscellaneous: '',
         tooling: ''
@@ -232,6 +233,11 @@ export class CreateQuotationComponent implements OnInit {
     { label: 'Liter', value: 'Liter' },
     { label: 'Set', value: 'Set' },
     { label: 'Pair', value: 'Pair' }
+  ];
+
+  bidTypeOptions = [
+    { label: 'Bid', value: 'bid' },
+    { label: 'No Bid', value: 'no-bid' }
   ];
 
   @ViewChild('csvFileInput', { static: false }) csvFileInput!: ElementRef;
@@ -384,7 +390,8 @@ export class CreateQuotationComponent implements OnInit {
         unit: item.unit || 'Pieces',
         itemPrice: item.unit_price || 0,
         miscellaneous: this.buildMiscellaneousFromComments(parsedComments),
-        tooling: parsedComments.processRequired || ''
+        tooling: parsedComments.processRequired || '',
+        bidType: item.bidType || 'bid'
       };
     });
   }
@@ -659,6 +666,13 @@ export class CreateQuotationComponent implements OnInit {
     this.calculateTotals();
   }
 
+  onBidTypeChange(item: any) {
+    if (item.bidType === 'no-bid') {
+      item.itemPrice = 0;
+    }
+    this.calculateTotals();
+  }
+
   onTaxTypeChange(taxType: string) {
     this.selectedTaxType = taxType;
     
@@ -693,34 +707,6 @@ export class CreateQuotationComponent implements OnInit {
     }
     
     this.calculateTotals();
-  }
-
-  addNewRow() {
-    this.model.quotationItems.push({
-      actionItemName: '',
-      description: '',
-      material: '',
-      qty: 0,
-      unit: '',
-      itemPrice: 0,
-      miscellaneous: '',
-      tooling: ''
-    });
-  }
-
-  removeRowConfirmation(index: number) {
-    this.sweetAlert.confirm('Are you sure you want to remove this row?', 'Remove Row', 'question', 'Yes', 'No').then((result: any) => {
-      if(result.isConfirmed) {
-        this.removeRow(index);
-      }
-    });
-  }
-
-  removeRow(index: number) {
-    if (this.model.quotationItems.length > 1) {
-      this.model.quotationItems.splice(index, 1);
-      this.calculateTotals();
-    }
   }
 
   onSubmit() {
@@ -834,7 +820,8 @@ export class CreateQuotationComponent implements OnInit {
         overhead_cost: this.calculateOverheadCost(item, totalItemAmount),
         discount_type: "Percentage",
         discount: 0, // You can add item-level discount if needed
-        comments: this.buildItemComments(item)
+        comments: this.buildItemComments(item),
+        bidType: item.bidType || 'bid'
       };
     });
   }
@@ -954,7 +941,8 @@ export class CreateQuotationComponent implements OnInit {
       'Unit',
       'Item Price',
       'Miscellaneous',
-      'Tooling'
+      'Tooling',
+      'Bid Type'
     ];
 
     const csvRows = this.model.quotationItems.map((item: any, index: number) => {
@@ -967,7 +955,8 @@ export class CreateQuotationComponent implements OnInit {
         `"${(item.unit || '').replace(/"/g, '""')}"`,
         item.itemPrice || 0,
         `"${(item.miscellaneous || '').replace(/"/g, '""')}"`,
-        `"${(item.tooling || '').replace(/"/g, '""')}"`
+        `"${(item.tooling || '').replace(/"/g, '""')}"`,
+        `"${item.bidType || 'bid'}"`
       ].join(',');
     });
 
@@ -1091,7 +1080,8 @@ export class CreateQuotationComponent implements OnInit {
             unit: values[5] || 'Nos',
             itemPrice: parseFloat(values[6]) || 0,
             miscellaneous: values[7] || '',
-            tooling: values[8] || ''
+            tooling: values[8] || '',
+            bidType: values[9] || 'bid'
           };
           importedItems.push(item);
         }
@@ -1165,7 +1155,8 @@ export class CreateQuotationComponent implements OnInit {
           unit: '',
           itemPrice: 0,
           miscellaneous: '',
-          tooling: ''
+          tooling: '',
+          bidType: 'bid'
         }
       ];
     }
@@ -1294,7 +1285,8 @@ export class CreateQuotationComponent implements OnInit {
         unit: item.unit || 'Pieces',
         itemPrice: item.unit_price || 0,
         miscellaneous: parsedComments.miscellaneous || '',
-        tooling: parsedComments.tooling || ''
+        tooling: parsedComments.tooling || '',
+        bidType: item.bidType || 'bid'
       };
     });
   }

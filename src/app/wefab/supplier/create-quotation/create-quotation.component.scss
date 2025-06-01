@@ -149,6 +149,7 @@
 
 .quotation-table {
   font-size: 13px;
+  position: relative;
   
   th {
     background-color: $technical-white;
@@ -169,6 +170,7 @@
     padding: 4px;
     vertical-align: middle;
     border-color: $material-finish-silver;
+    position: relative;
   }
   
   .quotation-row {
@@ -187,6 +189,29 @@
         box-shadow: 0 0 0 1px rgba(26, 58, 95, 0.1);
       }
     }
+  }
+}
+
+// Fix table responsive container overflow
+.table-responsive {
+  overflow: visible !important;
+  
+  // Override Bootstrap's overflow setting for dropdown visibility
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555;
   }
 }
 
@@ -243,19 +268,15 @@
       }
     }
     
-    &.table-non-editable-field {
+    // Disabled input styling for No Bid
+    &:disabled {
       background-color: #f8f9fa !important;
-      color: $machine-gray;
+      color: #adb5bd !important;
       cursor: not-allowed;
+      border-color: #dee2e6 !important;
       
-      &:focus {
-        background-color: #f8f9fa !important;
-        border-color: $material-finish-silver;
-        box-shadow: none;
-      }
-      
-      &:hover {
-        background-color: #f8f9fa !important;
+      &::placeholder {
+        color: #adb5bd !important;
       }
     }
   }
@@ -267,7 +288,7 @@
     font-size: 14px;
   }
   
-  // PrimeNG Dropdown Styling
+  // PrimeNG Dropdown Styling - Enhanced for table compatibility
   .p-dropdown {
     border: 1px solid $material-finish-silver;
     border-radius: 4px;
@@ -308,6 +329,54 @@
       }
     }
     
+    // Enhanced dropdown styling
+    &.enhanced-dropdown {
+      background-color: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      
+      &:hover {
+        border-color: $blueprint-blue;
+        box-shadow: 0 4px 12px rgba(26, 58, 95, 0.15);
+        transform: translateY(-1px);
+      }
+      
+      &.p-focus {
+        border-color: $blueprint-blue;
+        box-shadow: 0 0 0 3px rgba(26, 58, 95, 0.1), 0 4px 12px rgba(26, 58, 95, 0.15);
+        transform: translateY(-1px);
+      }
+      
+      .p-dropdown-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: $precision-black;
+        padding: 12px 16px;
+        
+        &.p-placeholder {
+          color: #94a3b8;
+          font-style: italic;
+        }
+      }
+      
+      .p-dropdown-trigger {
+        width: 48px;
+        color: $blueprint-blue;
+        
+        .p-dropdown-trigger-icon {
+          transition: transform 0.3s ease;
+        }
+      }
+      
+      &.p-dropdown-open {
+        .p-dropdown-trigger .p-dropdown-trigger-icon {
+          transform: rotate(180deg);
+        }
+      }
+    }
+    
     // Table editable dropdown styling
     &.table-editable-field {
       background-color: #ffffff !important;
@@ -324,15 +393,21 @@
     }
   }
   
+  // Critical dropdown panel fixes for table visibility
   .p-dropdown-panel {
     border: 1px solid $material-finish-silver;
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(26, 58, 95, 0.15);
+    z-index: 9999 !important;
+    min-width: 120px !important;
+    background: white;
+    position: fixed !important;
     
     .p-dropdown-items {
       .p-dropdown-item {
         font-size: 14px;
         padding: 8px 12px;
+        white-space: nowrap;
         
         &:hover {
           background-color: rgba(26, 58, 95, 0.05);
@@ -341,6 +416,120 @@
         &.p-highlight {
           background-color: $blueprint-blue;
           color: white;
+        }
+      }
+    }
+  }
+  
+  // Global dropdown panel positioning fix
+  .p-dropdown-panel.p-component {
+    z-index: 9999 !important;
+    position: fixed !important;
+    
+    // Ensure dropdown items are properly sized for table cells
+    .p-dropdown-items {
+      min-width: 100px;
+      
+      .p-dropdown-item {
+        font-size: 12px !important;
+        padding: 6px 8px !important;
+        line-height: 1.2;
+        
+        &:hover {
+          background-color: rgba(26, 58, 95, 0.08) !important;
+        }
+        
+        &.p-highlight {
+          background-color: $blueprint-blue !important;
+          color: white !important;
+        }
+      }
+    }
+  }
+  
+  // Enhanced Dropdown Panel Styling
+  .enhanced-dropdown .p-dropdown-panel {
+    border: 2px solid $blueprint-blue;
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(26, 58, 95, 0.2);
+    margin-top: 4px;
+    overflow: hidden;
+    z-index: 9999 !important;
+    
+    .p-dropdown-header {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      
+      .p-dropdown-filter-container {
+        .p-dropdown-filter {
+          border: 2px solid #e2e8f0;
+          border-radius: 6px;
+          padding: 8px 12px;
+          font-size: 14px;
+          
+          &:focus {
+            border-color: $blueprint-blue;
+            box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+          }
+        }
+      }
+    }
+    
+    .p-dropdown-items {
+      .p-dropdown-item {
+        padding: 12px 16px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #f1f5f9;
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        &:hover {
+          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+          color: $blueprint-blue;
+          transform: translateX(4px);
+        }
+        
+        &.p-highlight {
+          background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
+          color: white;
+          font-weight: 600;
+          transform: translateX(4px);
+        }
+      }
+    }
+  }
+  
+  // Ensure table cells don't clip dropdown panels
+  .quotation-table {
+    td {
+      overflow: visible !important;
+      position: relative;
+    }
+    
+    // Specific dropdown styling within table cells
+    .p-dropdown {
+      width: 100% !important;
+      min-width: 80px;
+      
+      .p-dropdown-label {
+        font-size: 12px !important;
+        padding: 4px 6px !important;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .p-dropdown-trigger {
+        width: 20px !important;
+        
+        .p-dropdown-trigger-icon {
+          font-size: 10px !important;
         }
       }
     }
@@ -363,6 +552,13 @@
     &.p-inputnumber-sm .p-inputtext {
       padding: 4px 6px;
       font-size: 12px;
+      
+      &:disabled {
+        background-color: #f8f9fa !important;
+        color: #adb5bd !important;
+        cursor: not-allowed;
+        border-color: #dee2e6 !important;
+      }
     }
     
     // Table editable field styling for InputNumber
@@ -402,6 +598,236 @@
           background-color: #ffffff !important;
           border-color: $blueprint-blue;
           box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.1);
+        }
+      }
+    }
+    
+    // Enhanced calendar styling
+    &.enhanced-calendar {
+      .p-inputtext {
+        background-color: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 48px 12px 16px;
+        font-size: 14px;
+        font-weight: 500;
+        color: $precision-black;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        
+        &::placeholder {
+          color: #94a3b8;
+          font-style: italic;
+        }
+        
+        &:hover {
+          border-color: $blueprint-blue;
+          box-shadow: 0 4px 12px rgba(26, 58, 95, 0.15);
+          transform: translateY(-1px);
+        }
+        
+        &:focus {
+          border-color: $blueprint-blue;
+          box-shadow: 0 0 0 3px rgba(26, 58, 95, 0.1), 0 4px 12px rgba(26, 58, 95, 0.15);
+          transform: translateY(-1px);
+          outline: none;
+        }
+      }
+      
+      .p-datepicker-trigger {
+        right: 12px;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
+        border: none;
+        border-radius: 6px;
+        color: white;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: linear-gradient(135deg, darken($blueprint-blue, 5%) 0%, darken($blueprint-blue, 15%) 100%);
+          transform: scale(1.05);
+        }
+        
+        .p-button-icon {
+          font-size: 14px;
+        }
+      }
+      
+      .p-calendar-clear-icon {
+        right: 50px;
+        color: #94a3b8;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          color: $safety-orange;
+          transform: scale(1.1);
+        }
+      }
+    }
+  }
+  
+  // Enhanced Calendar Panel Styling
+  .enhanced-calendar {
+    .p-datepicker {
+      border: 2px solid $blueprint-blue;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(26, 58, 95, 0.2);
+      overflow: hidden;
+      
+      .p-datepicker-header {
+        background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
+        color: white;
+        padding: 16px 20px;
+        border-bottom: none;
+        
+        .p-datepicker-title {
+          font-weight: 600;
+          font-size: 16px;
+          color: white;
+          
+          .p-datepicker-month,
+          .p-datepicker-year {
+            color: white;
+            background: rgba(white, 0.1);
+            border: 1px solid rgba(white, 0.2);
+            border-radius: 6px;
+            padding: 4px 8px;
+            margin: 0 4px;
+            font-weight: 500;
+            
+            &:hover {
+              background: rgba(white, 0.2);
+            }
+            
+            &:focus {
+              outline: none;
+              box-shadow: 0 0 0 2px rgba(white, 0.3);
+            }
+          }
+        }
+        
+        .p-datepicker-prev,
+        .p-datepicker-next {
+          width: 36px;
+          height: 36px;
+          color: white;
+          border-radius: 8px;
+          transition: all 0.2s ease;
+          
+          &:hover {
+            background: rgba(white, 0.15);
+            transform: scale(1.1);
+          }
+          
+          &:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(white, 0.3);
+          }
+        }
+      }
+      
+      .p-datepicker-calendar-container {
+        background: white;
+        padding: 16px;
+        
+        table {
+          width: 100%;
+          
+          th {
+            color: $blueprint-blue;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 8px 4px;
+            text-align: center;
+          }
+          
+          td {
+            padding: 2px;
+            text-align: center;
+            
+            > span {
+              width: 36px;
+              height: 36px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 8px;
+              font-size: 14px;
+              font-weight: 500;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              margin: 1px;
+              
+              &:hover {
+                background: linear-gradient(135deg, rgba($blueprint-blue, 0.1) 0%, rgba($blueprint-blue, 0.05) 100%);
+                color: $blueprint-blue;
+                transform: scale(1.1);
+              }
+              
+              &.p-highlight {
+                background: linear-gradient(135deg, $blueprint-blue 0%, darken($blueprint-blue, 10%) 100%);
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(26, 58, 95, 0.3);
+                
+                &:hover {
+                  background: linear-gradient(135deg, darken($blueprint-blue, 5%) 0%, darken($blueprint-blue, 15%) 100%);
+                  transform: scale(1.1);
+                }
+              }
+              
+              &.p-datepicker-today {
+                background: linear-gradient(135deg, rgba($process-green, 0.15) 0%, rgba($process-green, 0.1) 100%);
+                color: $process-green;
+                font-weight: 600;
+                border: 2px solid $process-green;
+              }
+              
+              &.p-datepicker-other-month {
+                color: #cbd5e0;
+                
+                &:hover {
+                  color: #94a3b8;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      .p-datepicker-buttonbar {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 12px 16px;
+        border-top: 1px solid #e2e8f0;
+        
+        .p-button {
+          padding: 8px 16px;
+          border-radius: 6px;
+          font-weight: 500;
+          font-size: 14px;
+          
+          &.p-button-text {
+            color: $blueprint-blue;
+            
+            &:hover {
+              background: rgba($blueprint-blue, 0.1);
+              color: darken($blueprint-blue, 10%);
+            }
+          }
+          
+          &.p-button-outlined {
+            border-color: $blueprint-blue;
+            color: $blueprint-blue;
+            
+            &:hover {
+              background: $blueprint-blue;
+              color: white;
+            }
+          }
         }
       }
     }
@@ -455,6 +881,8 @@
   padding: 20px;
   border-radius: 8px;
   border: 1px solid $material-finish-silver;
+  z-index: 1;
+  position: relative;
   
   .tax-options {
     .form-check {
@@ -554,41 +982,61 @@
   }
 }
 
-// Responsive Design
+// Fix for table container overflow to allow dropdowns
+.table-responsive,
+.quotation-container,
+.table-wrapper {
+  overflow: visible !important;
+  
+  // Add scrolling back only for horizontal overflow when needed
+  &.force-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+}
+
+// Ensure dropdown items padding is removed to fix layout
+::ng-deep .p-dropdown-items {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+}
+
+// Fix specific z-index issues with other elements
+.totals-section {
+  z-index: 1;
+  position: relative;
+}
+
+.attachment-area {
+  z-index: 1;
+  position: relative;
+}
+
+// Additional fixes for small screen dropdowns
 @media (max-width: 1400px) {
-  .quotation-table {
-    font-size: 11px;
-    
-    th, td {
-      padding: 4px 3px;
-    }
-    
-    th {
-      font-size: 11px;
-    }
-    
-    .form-control-sm {
-      padding: 2px 4px;
-      font-size: 11px;
+  :host ::ng-deep {
+    .p-dropdown-panel.p-component {
+      .p-dropdown-items {
+        .p-dropdown-item {
+          font-size: 11px !important;
+          padding: 5px 6px !important;
+        }
+      }
     }
   }
 }
 
 @media (max-width: 1200px) {
-  .quotation-table {
-    font-size: 10px;
-    
-    th, td {
-      padding: 3px 2px;
-    }
-    
-    th {
-      font-size: 10px;
-    }
-    
-    .form-control-sm {
-      padding: 2px 3px;
-      font-size: 10px;
+  :host ::ng-deep {
+    .p-dropdown-panel.p-component {
+      .p-dropdown-items {
+        .p-dropdown-item {
+          font-size: 10px !important;
+          padding: 4px 5px !important;
+        }
+      }
     }
   }
 }
@@ -740,3 +1188,180 @@
     }
   }
 }
+
+// Table Actions and Info Styling
+.d-flex.justify-content-between.mb-3 {
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 1.5rem !important;
+  
+  .table-info {
+    display: flex;
+    align-items: center;
+    
+    .text-muted {
+      font-size: 0.9rem;
+      color: $machine-gray !important;
+      font-weight: $font-weight-medium;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      .pi-info-circle {
+        color: $blueprint-blue;
+        font-size: 0.9rem;
+      }
+    }
+  }
+  
+  .table-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+}
+
+// Global fixes for dropdown panels that use appendTo="body"
+:host ::ng-deep {
+  // Target dropdown panels attached to body
+  body > .p-dropdown-panel,
+  .p-component-overlay .p-dropdown-panel {
+    z-index: 9999 !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 4px !important;
+    background: white !important;
+    
+    .p-dropdown-items {
+      max-height: 200px;
+      overflow-y: auto;
+      
+      .p-dropdown-item {
+        font-size: 12px !important;
+        padding: 6px 8px !important;
+        line-height: 1.3;
+        white-space: nowrap;
+        border: none !important;
+        transition: background-color 0.15s ease;
+        
+        &:hover {
+          background-color: rgba(26, 58, 95, 0.08) !important;
+          color: $precision-black !important;
+        }
+        
+        &.p-highlight {
+          background-color: $blueprint-blue !important;
+          color: white !important;
+        }
+      }
+    }
+  }
+}
+
+// Fix for when dropdown panel is a direct child of body (appendTo="body")
+::ng-deep {
+  body > .p-dropdown-panel {
+    z-index: 99999 !important;
+  }
+  
+  // Ensure no other elements interfere with dropdown z-index
+  .p-component-overlay {
+    z-index: 99998 !important;
+  }
+}
+
+// Additional table-specific fixes
+.table-responsive {
+  // Force visible overflow for all scenarios
+  overflow: visible !important;
+  -webkit-overflow-scrolling: touch;
+  
+  // Re-enable horizontal scrolling only when content exceeds container
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+}
+
+// Ensure quotation table cells allow dropdowns to overflow
+.quotation-table {
+  td,
+  th {
+    overflow: visible !important;
+    position: relative;
+  }
+  
+  // Additional safety for nested elements
+  .p-dropdown,
+  .p-inputnumber,
+  .form-control {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// Responsive Design - restored with dropdown visibility maintained
+@media (max-width: 1400px) {
+  .quotation-table {
+    font-size: 11px;
+    
+    th, td {
+      padding: 4px 3px;
+    }
+    
+    th {
+      font-size: 11px;
+    }
+    
+    .form-control-sm {
+      padding: 2px 4px;
+      font-size: 11px;
+    }
+  }
+}
+
+@media (max-width: 1200px) {
+  .quotation-table {
+    font-size: 10px;
+    
+    th, td {
+      padding: 3px 2px;
+    }
+    
+    th {
+      font-size: 10px;
+    }
+    
+    .form-control-sm {
+      padding: 2px 3px;
+      font-size: 10px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .quotation-container {
+    padding: 16px;
+  }
+  
+  .d-flex.justify-content-between {
+    flex-direction: column;
+    gap: 10px;
+    
+    .btn {
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+  }
+  
+  .table-responsive {
+    font-size: 10px;
+  }
+  
+  .totals-section {
+    padding: 12px;
+  }
+}
+
+

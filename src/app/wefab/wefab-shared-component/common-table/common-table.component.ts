@@ -10,6 +10,7 @@ import { TagModule } from 'primeng/tag';
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { CalendarModule } from 'primeng/calendar';
 
 export interface ActionButton {
   label?: string;
@@ -21,11 +22,18 @@ export interface ActionButton {
   severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'danger';
 }
 
+export interface FilterOption {
+  label: string;
+  value: any;
+}
+
 export interface TableColumn {
   field: string;
   header: string;
   sortable?: boolean;
   filterable?: boolean;
+  filterType?: 'text' | 'dateRange' | 'dropdown' | 'multiselect';
+  filterOptions?: FilterOption[];
   isLink?: boolean;
   routerLink?: string;
   routerLinkField?: string;
@@ -64,7 +72,8 @@ export interface TableConfig {
     TagModule,
     DropdownModule,
     MultiSelectModule,
-    OverlayPanelModule
+    OverlayPanelModule,
+    CalendarModule
   ],
   templateUrl: './common-table.component.html',
   styleUrl: './common-table.component.scss'
@@ -170,6 +179,10 @@ export class CommonTableComponent implements OnInit {
   startX = 0;
   startWidth = 0;
 
+  // Filter states
+  dateRangeFilters: { [key: string]: Date[] } = {};
+  dropdownFilters: { [key: string]: any } = {};
+
   // Sample data for demonstration
   sampleData = [
     {
@@ -270,6 +283,9 @@ export class CommonTableComponent implements OnInit {
     
     // Initialize column visibility
     this.initializeColumnVisibility();
+    
+    // Initialize filter states
+    this.initializeFilters();
   }
 
   initializeColumnVisibility() {
@@ -536,5 +552,171 @@ export class CommonTableComponent implements OnInit {
         rows: this.table.rows || 10
       });
     }
+  }
+
+  initializeFilters() {
+    this.config.columns.forEach(col => {
+      if (col.filterable) {
+        if (col.filterType === 'dateRange') {
+          this.dateRangeFilters[col.field] = [];
+        } else if (col.filterType === 'dropdown') {
+          this.dropdownFilters[col.field] = null;
+        }
+      }
+    });
+  }
+
+  onDateRangeChange(field: string, dates: Date[] | Date) {
+    console.log('Date range changed:', field, dates);
+    // Handle both array and single date events from PrimeNG calendar
+    let dateArray: Date[];
+    if (Array.isArray(dates)) {
+      dateArray = dates;
+    } else if (dates) {
+      dateArray = [dates];
+    } else {
+      dateArray = [];
+    }
+    
+    this.dateRangeFilters[field] = dateArray;
+    console.log('Updated date filters:', this.dateRangeFilters);
+    this.applyDateRangeFilter(field, dateArray);
+  }
+
+  private parseDateFromString(dateStr: string): Date | null {
+    if (!dateStr) return null;
+    
+    try {
+      // Handle different date formats
+      if (typeof dateStr === 'string') {
+        // Format: "28 May 2025, 11:26 PM" or "28 May 2025"
+        if (dateStr.includes(',')) {
+          const datePart = dateStr.split(',')[0].trim();
+          return new Date(datePart);
+        }
+        // Standard date string
+        return new Date(dateStr);
+      }
+      return new Date(dateStr);
+    } catch (error) {
+      console.error('Error parsing date:', dateStr, error);
+      return null;
+    }
+  }
+
+  applyDateRangeFilter(field: string, dates: Date[]) {
+    if (!this.table) return;
+
+    if (!dates || dates.length === 0) {
+      // Clear date range filter
+      this.table.filteredValue = null;
+      this.applyAllFilters();
+      return;
+    }
+
+    const startDate = dates[0];
+    const endDate = dates[1] || dates[0]; // If only one date selected, use it as both start and end
+
+    // Apply all active filters
+    this.applyAllFilters();
+  }
+
+  applyAllFilters() {
+    if (!this.table) return;
+    
+    console.log('Applying all filters. Data length:', this.data.length);
+    console.log('Date filters:', this.dateRangeFilters);
+    console.log('Dropdown filters:', this.dropdownFilters);
+
+    let filteredData = [...this.data];
+
+    // Apply date range filters
+    Object.keys(this.dateRangeFilters).forEach(field => {
+      const dates = this.dateRangeFilters[field];
+      if (dates && dates.length > 0) {
+        console.log(`Applying date filter for ${field}:`, dates);
+        const startDate = dates[0];
+        const endDate = dates[1] || dates[0];
+
+        filteredData = filteredData.filter(item => {
+          const itemDateStr = item[field];
+          if (!itemDateStr) return false;
+          
+          const itemDate = this.parseDateFromString(itemDateStr);
+          
+          // Check if date is valid
+          if (!itemDate || isNaN(itemDate.getTime())) {
+            return false;
+          }
+          
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          
+          // Set time to start/end of day for proper comparison
+          start.setHours(0, 0, 0, 0);
+          end.setHours(23, 59, 59, 999);
+          itemDate.setHours(0, 0, 0, 0);
+          
+          const isInRange = itemDate >= start && itemDate <= end;
+          console.log(`Date check: ${itemDateStr} (${itemDate}) between ${start} and ${end}: ${isInRange}`);
+          return isInRange;
+        });
+        
+        console.log(`After date filter for ${field}: ${filteredData.length} items`);
+      }
+    });
+
+    // Apply dropdown filters
+    Object.keys(this.dropdownFilters).forEach(field => {
+      const value = this.dropdownFilters[field];
+      if (value !== null && value !== undefined && value !== '') {
+        console.log(`Applying dropdown filter for ${field}:`, value);
+        const beforeLength = filteredData.length;
+        filteredData = filteredData.filter(item => item[field] === value);
+        console.log(`After dropdown filter for ${field}: ${filteredData.length} items (was ${beforeLength})`);
+      }
+    });
+
+    // Update table with filtered data
+    this.table.filteredValue = filteredData.length === this.data.length ? null : filteredData;
+    this.table._filter();
+    
+    console.log('Final filtered data length:', filteredData.length);
+  }
+
+  onDropdownChange(field: string, value: any) {
+    console.log('Dropdown changed:', field, value);
+    this.dropdownFilters[field] = value;
+    console.log('Updated dropdown filters:', this.dropdownFilters);
+    this.applyAllFilters();
+  }
+
+  clearDateRangeFilter(field: string) {
+    this.dateRangeFilters[field] = [];
+    this.applyAllFilters();
+  }
+
+  clearDropdownFilter(field: string) {
+    console.log('Clearing dropdown filter:', field);
+    this.dropdownFilters[field] = null;
+    this.applyAllFilters();
+  }
+
+  getFilterOptions(column: TableColumn): FilterOption[] {
+    if (column.filterOptions && column.filterOptions.length > 0) {
+      return column.filterOptions;
+    }
+
+    // Auto-generate filter options for status columns
+    if (column.isStatus && this.data && this.data.length > 0) {
+      const uniqueValues = [...new Set(this.data.map(item => item[column.field]).filter(val => val != null && val !== ''))];
+      console.log('Auto-generated filter options for', column.field, ':', uniqueValues);
+      return uniqueValues.map(value => ({
+        label: value,
+        value: value
+      }));
+    }
+
+    return [];
   }
 }

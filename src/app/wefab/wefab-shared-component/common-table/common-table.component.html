@@ -92,6 +92,8 @@
              *ngFor="let col of getVisibleColumns()"
              [style.width]="col.width"
              [style.flex]="col.width ? 'none' : '1'">
+          
+          <!-- Text Filter -->
           <input 
             type="text" 
             pInputText 
@@ -99,8 +101,47 @@
             (input)="dt.filter($any($event.target).value, col.field, 'contains')"
             class="search-input"
             [disabled]="!col.filterable"
-            *ngIf="col.filterable"
+            *ngIf="col.filterable && (!col.filterType || col.filterType === 'text')"
           />
+          
+          <!-- Date Range Filter -->
+          <div class="date-range-filter" *ngIf="col.filterable && col.filterType === 'dateRange'">
+            <p-calendar 
+              [(ngModel)]="dateRangeFilters[col.field]"
+              (onSelect)="onDateRangeChange(col.field, $event)"
+              (onClear)="clearDateRangeFilter(col.field)"
+              selectionMode="range"
+              [placeholder]="'Select date range'"
+              [showIcon]="true"
+              [showClear]="true"
+              dateFormat="dd/mm/yy"
+              [readonlyInput]="false"
+              [showOnFocus]="false"
+              appendTo="body"
+              styleClass="date-range-input">
+            </p-calendar>
+          </div>
+          
+          <!-- Dropdown Filter -->
+          <div class="dropdown-filter" *ngIf="col.filterable && col.filterType === 'dropdown'">
+            <p-dropdown 
+              [(ngModel)]="dropdownFilters[col.field]"
+              (onChange)="onDropdownChange(col.field, $event.value)"
+              (onClear)="clearDropdownFilter(col.field)"
+              [options]="getFilterOptions(col)"
+              optionLabel="label"
+              optionValue="value"
+              [placeholder]="'Select ' + col.header"
+              [showClear]="true"
+              [filter]="true"
+              filterBy="label"
+              [filterPlaceholder]="'Search ' + col.header"
+              appendTo="body"
+              styleClass="status-dropdown">
+            </p-dropdown>
+          </div>
+          
+          <!-- No Filter -->
           <div class="no-search" *ngIf="!col.filterable"></div>
         </div>
       </div>

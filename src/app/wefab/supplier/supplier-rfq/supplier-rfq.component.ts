@@ -92,18 +92,24 @@ export class SupplierRfqComponent implements OnInit {
         header: 'RFQ Name',
         sortable: true,
         filterable: true,
+        filterType: 'text',
         isHtml: true,
       },
       {
         field: 'creationDate',
         header: 'Creation Date',
         sortable: true,
+        filterable: true,
+        filterType: 'dateRange',
       },
       {
         field: 'status',
         header: 'Status',
         sortable: true,
+        filterable: true,
+        filterType: 'dropdown',
         isStatus: true,
+        filterOptions: [] // Will be populated dynamically
       },
     ],
     enableSearch: true,
@@ -240,6 +246,9 @@ export class SupplierRfqComponent implements OnInit {
     
     // Update dashboard cards with dynamic data
     this.updateDashboardCards();
+    
+    // Update filter options based on actual data
+    this.updateFilterOptions();
   }
 
   // Update dashboard cards with dynamic counts
@@ -248,6 +257,19 @@ export class SupplierRfqComponent implements OnInit {
     this.dashboardCards[1].value = this.openRFQsCount.toString();
     this.dashboardCards[2].value = this.submittedQuotesCount.toString();
     this.dashboardCards[3].value = this.awardedQuotesCount.toString();
+  }
+
+  // Update filter options based on actual data
+  updateFilterOptions() {
+    const statusColumn = this.tableConfig.columns.find((col: any) => col.field === 'status');
+    if (statusColumn && this.allRFQs.length > 0) {
+      const uniqueStatuses = [...new Set(this.allRFQs.map(rfq => rfq.status).filter(status => status))];
+      statusColumn.filterOptions = uniqueStatuses.map(status => ({
+        label: status,
+        value: status
+      }));
+      console.log('Updated filter options:', statusColumn.filterOptions);
+    }
   }
 
   // Event handlers for common table component

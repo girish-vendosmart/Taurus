@@ -50,7 +50,10 @@
           optionLabel="label"
           optionValue="value"
           placeholder="Select payment terms"
-          styleClass="w-100 editable-field">
+          [showClear]="false"
+          [filter]="true"
+          filterBy="label"
+          styleClass="w-100">
         </p-dropdown>
       </div>
     </div>
@@ -59,13 +62,18 @@
     <div class="row mb-4">
       <div class="col-md-6 mb-3">
         <label class="form-label">Quote Valid till <span class="text-danger">*</span></label>
-        <p-calendar 
+        <input type="date" class="form-control" [(ngModel)]="model.quoteValidTill" [ngModelOptions]="{standalone: true}" required>
+        <!-- <p-calendar 
           [(ngModel)]="model.quoteValidTill"
           [ngModelOptions]="{standalone: true}"
           dateFormat="dd/mm/yy"
-          placeholder="dd/mm/yyyy"
-          styleClass="w-100 editable-field">
-        </p-calendar>
+          placeholder="Select validity date"
+          [showIcon]="true"
+          [showClear]="true"
+          [showButtonBar]="true"
+          appendTo="body"
+          styleClass="w-100">
+        </p-calendar> -->
       </div>
     </div>
 
@@ -102,14 +110,13 @@
 
     <!-- Table Actions -->
     <div class="d-flex justify-content-between mb-3">
-      <div>
-        <button 
-          type="button" 
-          class="btn btn-outline-success me-2"
-          (click)="addNewRow()">
-          <i class="pi pi-plus me-1"></i>
-          Add Item
-        </button>
+      <div class="table-info">
+        <span class="text-muted">
+          <i class="pi pi-info-circle me-1"></i>
+          {{ model.quotationItems.length }} item(s) in quotation
+        </span>
+      </div>
+      <div class="table-actions">
         <button 
           type="button" 
           class="btn btn-outline-secondary me-2"
@@ -117,8 +124,6 @@
           <i class="pi pi-refresh me-1"></i>
           Reset
         </button>
-      </div>
-      <div>
         <button 
           type="button" 
           class="btn btn-outline-success me-2"
@@ -145,7 +150,7 @@
       (change)="onFileSelected($event)">
 
     <!-- Quotation Items Table -->
-    <div class="table-responsive mb-4">
+    <div class="table-responsive mb-4" style="overflow: visible;">
       <table class="table table-bordered quotation-table">
         <thead class="table-light">
           <tr>
@@ -155,10 +160,10 @@
             <th style="width: 120px;">Material</th>
             <th style="width: 80px;">Qty <span class="text-danger">*</span></th>
             <th style="width: 100px;">Unit <span class="text-danger">*</span></th>
+            <th style="width: 120px;">Bid Type <span class="text-danger">*</span></th>
             <th style="width: 120px;">Item Price <span class="text-danger">*</span></th>
             <th style="width: 120px;">Miscellaneous</th>
             <th style="width: 100px;">Tooling <span class="text-danger">*</span></th>
-            <th style="width: 60px;">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -217,7 +222,23 @@
                 optionLabel="label"
                 optionValue="value"
                 placeholder="Unit"
-                styleClass="w-100 p-inputtext-sm table-editable-field">
+                styleClass="w-100 p-inputtext-sm table-editable-field"
+                appendTo="body">
+              </p-dropdown>
+            </td>
+            
+            <!-- Bid Type - Editable -->
+            <td>
+              <p-dropdown 
+                [(ngModel)]="item.bidType"
+                [options]="bidTypeOptions"
+                [ngModelOptions]="{standalone: true}"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Bid Type"
+                (onChange)="onBidTypeChange(item)"
+                styleClass="w-100 p-inputtext-sm table-editable-field"
+                appendTo="body">
               </p-dropdown>
             </td>
             
@@ -232,7 +253,9 @@
                 styleClass="w-100 table-editable-field"
                 size="small"
                 (onInput)="onQuantityOrPriceChange(item)"
-                [ngModelOptions]="{standalone: true}">
+                [ngModelOptions]="{standalone: true}"
+                [disabled]="item.bidType === 'no-bid'"
+                [placeholder]="item.bidType === 'no-bid' ? 'No Bid' : 'Enter price'">
               </p-inputNumber>
             </td>
             
@@ -254,18 +277,6 @@
                 [(ngModel)]="item.tooling"
                 [ngModelOptions]="{standalone: true}"
                 placeholder="Tooling">
-            </td>
-            
-            <!-- Action -->
-            <td class="text-center">
-              <button 
-                type="button" 
-                class="btn btn-outline-danger btn-sm"
-                (click)="removeRowConfirmation(i)"
-                [disabled]="model.quotationItems.length === 1"
-                title="Remove row">
-                <i class="pi pi-trash"></i>
-              </button>
             </td>
           </tr>
         </tbody>
