@@ -237,7 +237,7 @@ export class SupplierOnboardingL3Component implements OnInit {
   }
 
   getL3Data(supplierId:any) {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + supplierId
+    let endPoint = '/api/resource/Supplier Onboarding L3/' + supplierId
       this.commonService.getData(endPoint).subscribe((res: any) => {
         
         this.getFinancialData = JSON.parse(res.data.company_profile)
@@ -984,7 +984,7 @@ export class SupplierOnboardingL3Component implements OnInit {
       let body = this.updateData(mergedData);
 
       // Use the existing POST or PUT methods as needed
-      this.commonService.postData('/api/resource/wfb_supplier_onboarding_L3', body).subscribe((res: any) => {
+      this.commonService.postData('/api/resource/Supplier Onboarding L3', body).subscribe((res: any) => {
         this.messageService.add({
           severity: 'success', 
           summary: 'Onboarding Complete', 
@@ -1043,7 +1043,7 @@ export class SupplierOnboardingL3Component implements OnInit {
       
       let body = this.updateData(mergedData);
 
-      let endPoint = '/api/resource/wfb_supplier_onboarding_L3/' + sessionStorage.getItem('supplier_id')
+      let endPoint = '/api/resource/Supplier Onboarding L3/' + sessionStorage.getItem('supplier_id')
 
       this.commonService.putData(endPoint, body).subscribe((res: any) => {
         this.messageService.add({

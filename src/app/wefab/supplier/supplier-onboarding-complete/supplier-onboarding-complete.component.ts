@@ -42,7 +42,7 @@ export class SupplierOnboardingCompleteComponent implements OnInit {
     // // For demo purposes, we're keeping it as false (under review)
     // this.verificationCurrentStatus = false;
 
-    let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${this.supplierId}`;
+    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${this.supplierId}`;
     this.commonService.getData(endPoint).subscribe((res: any) => {
       this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? false : true;
 

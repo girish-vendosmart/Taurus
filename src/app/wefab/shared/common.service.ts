@@ -163,7 +163,7 @@ export class CommonService {
         formData.append('file_name', uploadData.name);
         console.log(formData);
         return this.http.post(
-        `${this.baseUrl}/api/method/proq_buyer.api.supplier_onboarding.geolocation.geolocation_exif.upload_file_preserve_exif`,
+        `${this.baseUrl}/api/method/wefab.wefab.api.supplier.onboarding.geolocation.geolocation_exif.upload_file_preserve_exif`,
         formData,
         {   
             headers,
@@ -181,7 +181,7 @@ export class CommonService {
         });
 
         return this.http.post(
-        `${this.baseUrl}/api/method/proq_buyer.api.supplier_onboarding.geolocation.geolocation_exif.upload_file_preserve_exif`,
+        `${this.baseUrl}/api/method/wefab.wefab.api.supplier.onboarding.geolocation.geolocation_exif.upload_file_preserve_exif`,
         formData,
         {   
             headers,

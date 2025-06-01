@@ -140,7 +140,7 @@ export class SupplierFinderComponent {
   }
 
   sendInvitation(invitationData:any) {
-    let endPoint = `/api/resource/wfb_bulk_supplier_invitation`;
+    let endPoint = `/api/resource/Bulk Supplier Invitation`;
     this.service.postData(endPoint, invitationData).subscribe(
       (res:any) => {
         this.sweetAlert.success('Invitation sent successfully!');
@@ -166,7 +166,7 @@ export class SupplierFinderComponent {
 
   getListOfSupplier(searchTerms:any) {
     this.isLoading = true;
-    let endPoint = `/api/method/proq_buyer.api.supplier_onboarding.supplier_finder.gemini.get_suppliers?country=india&query=${searchTerms}&model_name=gemini-2.0-flash`;
+    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.supplier_finder.gemini.get_suppliers?country=india&query=${searchTerms}&model_name=gemini-2.0-flash`;
     this.service.getCSVData(endPoint).subscribe(
       (res:any) => {
         this.searchData = this.parseCSV(res);

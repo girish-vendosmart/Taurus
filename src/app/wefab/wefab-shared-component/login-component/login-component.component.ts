@@ -112,7 +112,7 @@ export class LoginComponentComponent {
               firebase_token: firebaseToken
             };
 
-            this.commonService.postData('/api/method/proq_buyer.wefab.api.common.core.auth.api_token_auth_frappe', payload).subscribe({
+            this.commonService.postData('/api/method/wefab.wefab.api.common.core.authentication.auth.api_token_auth_frappe', payload).subscribe({
               next: (response: any) => {
                 if (response && response.data && response.data.token) {
                   sessionStorage.setItem('token', response.data.token);
@@ -205,7 +205,7 @@ export class LoginComponentComponent {
 
   getOnboardingL3Status(supplierCompanyId: string) {
     console.log('Getting L3 status');
-    let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${supplierCompanyId}`;
+    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${supplierCompanyId}`;
     this.commonService.getData(endPoint).subscribe((res: any) => {
       if(res?.data?.approval_status === 'Approved') {
         sessionStorage.setItem('supplier_onboarding_complete', 'true');

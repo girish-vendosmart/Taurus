@@ -1,1 +1,0 @@
-import{$c as t,I as n,Ib as a,O as i}from"./chunk-MBGAZ4E5.js";var Q=(()=>{class e{static \u0275fac=function(o){return new(o||e)};static \u0275mod=i({type:e});static \u0275inj=n({imports:[a,t,t]})}return e})();export{Q as a};

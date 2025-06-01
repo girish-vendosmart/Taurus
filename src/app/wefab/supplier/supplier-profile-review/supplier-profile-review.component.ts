@@ -281,9 +281,9 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     this.loadInitialData();
 
     // firebase trigger
-    this.accessFirebaseTrigger('wfb_supplier_onboarding_L1', this.supplierId)
-    this.accessFirebaseTrigger('wfb_supplier_onboarding_L2', this.supplierId)
-    this.accessFirebaseTrigger('wfb_supplier_onboarding_L3', this.supplierId)
+    this.accessFirebaseTrigger('Supplier Onboarding L1', this.supplierId)
+    this.accessFirebaseTrigger('Supplier Onboarding L2', this.supplierId)
+    this.accessFirebaseTrigger('Supplier Onboarding L3', this.supplierId)
   }
 
   private handleUrlParameters(): void {
@@ -355,8 +355,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     }
 
     return forkJoin([
-      this.commonservice.getData(`/api/resource/wfb_supplier_onboarding_L2/${supplierId}`),
-      this.commonservice.getData(`/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=${supplierId}`)
+      this.commonservice.getData(`/api/resource/Supplier Onboarding L2/${supplierId}`),
+      this.commonservice.getData(`/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=${supplierId}`)
     ]).pipe(
       map(([dataRes, statusRes]: [any, any]) => ({
         data: dataRes?.data || null,
@@ -379,8 +379,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     }
 
     return forkJoin([
-      this.commonservice.getData(`/api/resource/wfb_supplier_onboarding_L3/${supplierId}`),
-      this.commonservice.getData(`/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${supplierId}`)
+      this.commonservice.getData(`/api/resource/Supplier Onboarding L3/${supplierId}`),
+      this.commonservice.getData(`/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${supplierId}`)
     ]).pipe(
       map(([dataRes, statusRes]: [any, any]) => ({
         data: dataRes?.data || null,
@@ -470,7 +470,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     this.loadingState.verification = true;
     
     return this.commonservice.getData(
-      `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_and_verification_status?supplier_company_id=${supplierId}`
+      `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_and_verification_status?supplier_company_id=${supplierId}`
     ).pipe(
       map((res: any) => res?.data || {}),
       tap(data => this.setCache(cacheKey, data)),
@@ -496,8 +496,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     this.loadingState.l1Data = true;
 
     return forkJoin([
-      this.commonservice.getData(`/api/resource/wfb_supplier_onboarding_L1/${supplierId}`),
-      this.commonservice.getData(`/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=${supplierId}`)
+      this.commonservice.getData(`/api/resource/Supplier Onboarding L1/${supplierId}`),
+      this.commonservice.getData(`/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=${supplierId}`)
     ]).pipe(
       map(([dataRes, statusRes]: [any, any]) => ({
         data: dataRes?.data || null,
@@ -713,7 +713,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     console.log(`Analyzing machine image: ${fileId}`);
 
     return this.commonservice.getData(
-      `/api/method/proq_buyer.api.supplier_onboarding.machine_image_verification.machine_identification.analyze_machine_image?file_id=${fileId}&facility_lat=${lat}&facility_lon=${lng}`
+      `/api/method/wefab.wefab.api.supplier.onboarding.machine_image_verification.machine_identification.analyze_machine_image?file_id=${fileId}&facility_lat=${lat}&facility_lon=${lng}`
     ).pipe(
       tap((res: any) => {
         if (res?.data) {
@@ -777,7 +777,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     console.log(`Analyzing facility: ${facility.fileId}`);
 
     return this.commonservice.getData(
-      `/api/method/proq_buyer.api.supplier_onboarding.machine_image_verification.machine_identification.factory_geolocation_verification?file_id=${facility.fileId}&registered_address_lat=${lat}&registered_address_lon=${lng}`
+      `/api/method/wefab.wefab.api.supplier.onboarding.machine_image_verification.machine_identification.factory_geolocation_verification?file_id=${facility.fileId}&registered_address_lat=${lat}&registered_address_lon=${lng}`
     ).pipe(
       tap((res: any) => {
         if (res?.data) {
@@ -1017,7 +1017,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     this.activityTrailLoading = true;
 
     // Load real activity trail data from API
-    const endpoint = `/api/method/proq_buyer.api.core.versioning.get_new_versions_trail?doctype=wfb_supplier_onboarding_L1&docname=SUP-000424`;
+    const endpoint = `/api/method/wefab.wefab.api.common.engine.trail.activity.get_new_versions_trail?doctype=Supplier Onboarding L1&docname=SUP-000424`;
     
     this.commonservice.getData(endpoint).subscribe({
       next: (response: any) => {
@@ -1069,7 +1069,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processApproval(level: string): void {
-    let currentLevel = level === 'L1' ? 'wfb_supplier_onboarding_L1': level === 'L2' ? 'wfb_supplier_onboarding_L2' : 'wfb_supplier_onboarding_L3';
+    let currentLevel = level === 'L1' ? 'Supplier Onboarding L1': level === 'L2' ? 'Supplier Onboarding L2' : 'Supplier Onboarding L3';
     const endpoint = `/api/resource/${currentLevel}/${this.supplierId}`
     const data = {
       onboarding_status: 'Approved'
@@ -1102,7 +1102,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processRejection(level: string): void {
-    let currentLevel = level === 'L1' ? 'wfb_supplier_onboarding_L1': level === 'L2' ? 'wfb_supplier_onboarding_L2' : 'wfb_supplier_onboarding_L3';
+    let currentLevel = level === 'L1' ? 'Supplier Onboarding L1': level === 'L2' ? 'Supplier Onboarding L2' : 'Supplier Onboarding L3';
     const endpoint = `/api/resource/${currentLevel}/${this.supplierId}`
     const data = {
       onboarding_status: 'Rejected'
@@ -1145,7 +1145,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   sendUpdateRequest(): void {
     if (!this.updateRequestComment.trim()) return;
 
-    let currentLevel = this.updateRequestLevel === 'L1' ? 'wfb_supplier_onboarding_L1': this.updateRequestLevel === 'L2' ? 'wfb_supplier_onboarding_L2' : 'wfb_supplier_onboarding_L3';
+    let currentLevel = this.updateRequestLevel === 'L1' ? 'Supplier Onboarding L1': this.updateRequestLevel === 'L2' ? 'Supplier Onboarding L2' : 'Supplier Onboarding L3';
 
     const endpoint = `/api/resource/${currentLevel}/${this.supplierId}`
     const data = {

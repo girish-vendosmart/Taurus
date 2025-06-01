@@ -44,7 +44,7 @@ export class SupplierVerificationComponent implements OnInit {
   }
 
   getL1Verification() {
-    let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=${this.supplierId}`
+    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L1&supplier_company_id=${this.supplierId}`
     this.commonService.getData(endPoint).subscribe((res: any) => {
       // Add property to track rejection status
       this.isRejected = res.data.approval_status === 'Rejected';

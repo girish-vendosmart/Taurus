@@ -340,13 +340,13 @@ export class ManageSuppliersComponent implements OnInit {
   ngOnInit() {
     this.loadSuppliers();
     this.loadInvitedSuppliers();
-    this.accessFirebaseTrigger('wfb_supplier_invitation_list_view', 'invitation_list_view');
-    this.accessFirebaseTriggerLoad('wfb_supplier_onboarding_L1_list_view', 'L1_list_view');
+    this.accessFirebaseTrigger('Supplier Invitation_list_view', 'invitation_list_view');
+    this.accessFirebaseTriggerLoad('Supplier Onboarding L1_list_view', 'L1_list_view');
   }
 
   loadSuppliers() {
     this.loadingSuppliers = true;
-    const endPoint = '/api/resource/wfb_supplier_onboarding_L1?fields=["*"]&limit_page_length=0&order_by=modified desc';
+    const endPoint = '/api/resource/Supplier Onboarding L1?fields=["*"]&limit_page_length=0&order_by=modified desc';
     this.commonService.getData(endPoint).subscribe({
       next: (response: any) => {
         // Transform data to include sub-information for display
@@ -369,7 +369,7 @@ export class ManageSuppliersComponent implements OnInit {
 
   loadInvitedSuppliers() {
     this.loadingInvitedSuppliers = true;
-    const endPoint = '/api/resource/wfb_supplier_invitation?fields=["*"]&limit_page_length=0&order_by=modified desc';
+    const endPoint = '/api/resource/Supplier Invitation?fields=["*"]&limit_page_length=0&order_by=modified desc';
     this.commonService.getData(endPoint).subscribe({
       next: (response: any) => {
         // Transform data to add status and sub-information
@@ -432,7 +432,7 @@ export class ManageSuppliersComponent implements OnInit {
   onSubmit() {
     if (this.inviteForm.valid) {
       this.isSubmitting = true;
-      const endPoint = '/api/resource/wfb_supplier_invitation';
+      const endPoint = '/api/resource/Supplier Invitation';
       
       this.commonService.postData(endPoint, this.inviteForm.value).subscribe({
         next: (response) => {
@@ -471,7 +471,7 @@ export class ManageSuppliersComponent implements OnInit {
           company_name: invite.company_name,
           supplier_email_id: invite.supplier_email_id,
         }
-        this.commonService.postData('/api/method/proq_buyer.wefab.api.supplier.supplier_manager.resend_supplier_invitation', data).subscribe((res: any) => {
+        this.commonService.postData('/api/method/wefab.wefab.api.wefab_team.supplier_management.supplier_management.resend_supplier_invitation', data).subscribe((res: any) => {
           this.sweetAlert.success('Invitation resent successfully');
           this.loadInvitedSuppliers(); // Refresh the invited list after resending
         });
@@ -480,13 +480,13 @@ export class ManageSuppliersComponent implements OnInit {
   }
 
   accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
-    this.commonService.commonFirebaseTrigger('wfb_supplier_onboarding_L1_list_view', 'L1_list_view').subscribe((res: any) => {
+    this.commonService.commonFirebaseTrigger('Supplier Onboarding L1_list_view', 'L1_list_view').subscribe((res: any) => {
       this.loadSuppliers();
     });
   }
 
   accessFirebaseTriggerLoad(doctType_name: string, doctypeId: string) {
-    this.commonService.commonFirebaseTrigger('wfb_supplier_invitation_list_view', 'invitation_list_view').subscribe((res: any) => {
+    this.commonService.commonFirebaseTrigger('Supplier Invitation_list_view', 'invitation_list_view').subscribe((res: any) => {
       this.loadInvitedSuppliers();
     });
   }

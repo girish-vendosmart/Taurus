@@ -136,7 +136,7 @@ export class SupplierOnboardingL2Component implements OnInit {
   }
 
   getL2Data(supplierId: any) {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId;
+    let endPoint = '/api/resource/Supplier Onboarding L2/' + supplierId;
     this.commonService.getData(endPoint).subscribe((res: any) => {
       this.getManufacturerData = JSON.parse(res.data.company_profile);
       
@@ -900,7 +900,7 @@ export class SupplierOnboardingL2Component implements OnInit {
         this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
       }, 3000);
     }, (err:any) => {
-      endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + sessionStorage.getItem('supplier_id');
+      endPoint = '/api/resource/Supplier Onboarding L2/' + sessionStorage.getItem('supplier_id');
       this.putDataFunction(endPoint, body);
       // this.messageService.add({
       //   severity: 'error',
@@ -936,13 +936,13 @@ export class SupplierOnboardingL2Component implements OnInit {
   }
 
   postSupplierOnboardingL2() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2';
+    let endPoint = '/api/resource/Supplier Onboarding L2';
     let body = this.updateData(this.model);
     this.postDataFunction(endPoint, body);
   }
 
   putSupplierOnboardingL2() {
-    let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + sessionStorage.getItem('supplier_id');
+    let endPoint = '/api/resource/Supplier Onboarding L2/' + sessionStorage.getItem('supplier_id');
     let body = this.updateData(this.model);
     this.commonService.putData(endPoint, body).subscribe((res: any) => {
       this.messageService.add({

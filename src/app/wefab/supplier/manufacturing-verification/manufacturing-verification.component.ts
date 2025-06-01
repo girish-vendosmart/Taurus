@@ -39,7 +39,7 @@ export class ManufacturingVerificationComponent implements OnInit {
   }
 
   getL2Verification() {
-    let endPoint = `/api/method/proq_buyer.wefab.api.supplier.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=${this.supplierId}`;
+    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=${this.supplierId}`;
     this.commonService.getData(endPoint).subscribe((res: any) => {
       this.isRejected = res.data.approval_status === 'Rejected';
       this.verificationCurrentStatus = res.data.approval_status === 'Under Review' ? false : true;
