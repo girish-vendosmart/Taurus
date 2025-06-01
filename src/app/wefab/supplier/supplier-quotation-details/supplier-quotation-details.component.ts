@@ -25,38 +25,26 @@ export interface SupplierQuotationApiResponse {
   docstatus: number;
   idx: number;
   workflow_state: string;
+  quotation_name: string;
   rfq_id: string;
   supplier_id: string;
+  quotation_from: string;
+  quotation_to: string;
   estimated_completion_duration: string;
   validity: string;
-  delivery_address: string;
-  total_amount: number;
-  discount_percentage: number;
+  sub_total: number;
+  discount_type: string;
+  discount: number;
   discount_amount: number;
+  total_tax_amount: number;
   shipping_charges: number;
   grand_total: number;
-  tax_applicable: number;
-  sgst_cgst_applicable: number;
-  igst_applicable: number;
-  sgst_rate: number;
-  cgst_rate: number;
-  igst_rate: number;
-  taxable_amount: number;
-  sgst_amount: number;
-  cgst_amount: number;
-  igst_amount: number;
-  total_tax_amount: number;
-  grand_total_with_tax: number;
   payment_terms: string;
   shipping_terms: string;
   notes: string;
   doctype: string;
   items: QuotationLineItem[];
   attachments: any[];
-  quotation_from: string;
-  quotation_to: string;
-  quotation_from_email_address: string;
-  quotation_from_phone_number: string;
 }
 
 export interface QuotationLineItem {
@@ -77,6 +65,8 @@ export interface QuotationLineItem {
   comments: string;
   discount_type: string;
   discount: number;
+  tax_type: string;
+  tax_amount: number;
   parent: string;
   parentfield: string;
   parenttype: string;
@@ -137,6 +127,8 @@ export interface QuotationItem {
   comments: string;
   discount: number;
   discountType: string;
+  tax_type: string;
+  tax_amount: number;
 }
 
 @Component({
@@ -204,6 +196,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   };
 
   quotationItems: QuotationItem[] = [];
+  rawQuotationItems: QuotationLineItem[] = []; // Raw API data for table
 
   activeTab: string = 'overview';
   currentPage: number = 1;
@@ -218,13 +211,13 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   tableConfig: TableConfig = {
     columns: [
       {
-        field: 'itemCode',
+        field: 'item_code',
         header: 'Item Code',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'description',
+        field: 'item_description',
         header: 'Description',
         sortable: true,
         filterable: true,
@@ -243,19 +236,25 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         filterable: true,
       },
       {
-        field: 'currency',
-        header: 'Currency',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'unitPrice',
+        field: 'unit_price_formatted',
         header: 'Unit Price',
         sortable: true,
         filterable: true,
       },
       {
-        field: 'totalPrice',
+        field: 'tax_type',
+        header: 'Tax Type',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'tax_amount_formatted',
+        header: 'Tax Amount',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'total_price_formatted',
         header: 'Total Price',
         sortable: true,
         filterable: true,
@@ -272,7 +271,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     enableFilter: true,
     enablePagination: true,
     pageSize: 7,
-    showActions: false
+    showActions: false,
   };
   quotationId: any;
 
@@ -345,18 +344,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
 
   // Map API response to component data structure
   mapApiResponseToComponent(apiData: SupplierQuotationApiResponse) {
-    console.log('API Tax Data:', {
-      sgst_cgst_applicable: apiData.sgst_cgst_applicable,
-      igst_applicable: apiData.igst_applicable,
-      sgst_rate: apiData.sgst_rate,
-      cgst_rate: apiData.cgst_rate,
-      igst_rate: apiData.igst_rate,
-      sgst_amount: apiData.sgst_amount,
-      cgst_amount: apiData.cgst_amount,
-      igst_amount: apiData.igst_amount,
-      total_amount: apiData.total_amount,
-      discount_amount: apiData.discount_amount
-    });
+    console.log('API Data:', apiData);
 
     // Map main quotation details
     this.quotationDetails = {
@@ -367,37 +355,37 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       workflowState: apiData.workflow_state,
       estimatedDuration: apiData.estimated_completion_duration,
       validity: this.formatApiDate(apiData.validity),
-      deliveryAddress: apiData.delivery_address,
-      totalAmount: apiData.total_amount,
-      discountPercentage: apiData.discount_percentage,
+      deliveryAddress: '', // Not available in new API structure
+      totalAmount: 0,
+      discountPercentage: apiData.discount,
       discountAmount: apiData.discount_amount,
       shippingCharges: apiData.shipping_charges,
       grandTotal: apiData.grand_total,
-      taxApplicable: apiData.tax_applicable,
-      sgstCgstApplicable: apiData.sgst_cgst_applicable === 1,
-      igstApplicable: apiData.igst_applicable === 1,
-      sgstRate: apiData.sgst_rate,
-      cgstRate: apiData.cgst_rate,
-      igstRate: apiData.igst_rate,
-      taxableAmount: apiData.taxable_amount,
-      sgstAmount: apiData.sgst_amount,
-      cgstAmount: apiData.cgst_amount,
-      igstAmount: apiData.igst_amount,
+      taxApplicable: 0,
+      sgstCgstApplicable: false,
+      igstApplicable: false,
+      sgstRate: 0,
+      cgstRate: 0,
+      igstRate: 0,
+      taxableAmount: 0,
+      sgstAmount: 0,
+      cgstAmount: 0,
+      igstAmount: 0,
       totalTaxAmount: apiData.total_tax_amount,
-      grandTotalWithTax: apiData.grand_total_with_tax,
+      grandTotalWithTax: apiData.grand_total,
       paymentTerms: apiData.payment_terms,
       shippingTerms: apiData.shipping_terms,
       notes: apiData.notes,
       supplierId: apiData.supplier_id,
       quoteFrom: {
-        company: apiData.quotation_from, // This might need to come from supplier API
-        email: apiData.quotation_from_email_address ? apiData.quotation_from_email_address : '----', // This might need to come from supplier API
-        phone: apiData.quotation_from_phone_number ? apiData.quotation_from_phone_number : '----' // This might need to come from supplier API
+        company: apiData.quotation_from,
+        email: '----', // Not available in new API structure
+        phone: '----' // Not available in new API structure
       },
       quoteTo: {
         company: apiData.quotation_to.split('\n')[0],
-        email: apiData.quotation_to.split('\n')[1],
-        location: apiData.quotation_to.split('\n')[2]
+        email: apiData.quotation_to.split('\n')[1] || '----',
+        location: apiData.quotation_to.split('\n')[2] || '----'
       }
     };
 
@@ -412,9 +400,22 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       totalPrice: item.total_price,
       comments: item.comments,
       discount: item.discount,
-      discountType: item.discount_type
+      discountType: item.discount_type,
+      tax_type: item.tax_type,
+      tax_amount: item.tax_amount
     }));
 
+    this.rawQuotationItems = apiData.items.map(item => ({
+      ...item,
+      unit_price_formatted: item.unit_price.toLocaleString('en-US'),
+      total_price_formatted: item.total_price.toLocaleString('en-US'),
+      tax_amount_formatted: item.tax_amount.toLocaleString('en-US')
+    }));
+
+    // Calculate sub total from items since API returns 0
+    const calculatedSubTotal = apiData.items.reduce((total, item) => total + item.total_price, 0);
+    this.quotationDetails.totalAmount = calculatedSubTotal;
+    
     this.totalItems = this.quotationItems.length;
   }
 
@@ -543,36 +544,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
 
   // Calculate total tax amount based on applicable taxes
   getTotalTaxAmount(): number {
-    let totalTax = 0;
-    
-    // If API provides tax amounts, use them
-    if (this.quotationDetails.sgstCgstApplicable) {
-      const sgstAmount = this.quotationDetails.sgstAmount || 0;
-      const cgstAmount = this.quotationDetails.cgstAmount || 0;
-      
-      // If API amounts are 0, calculate them based on rates
-      if (sgstAmount === 0 && cgstAmount === 0 && (this.quotationDetails.sgstRate > 0 || this.quotationDetails.cgstRate > 0)) {
-        const taxableAmount = this.getTaxableAmount();
-        totalTax += (taxableAmount * (this.quotationDetails.sgstRate || 0) / 100);
-        totalTax += (taxableAmount * (this.quotationDetails.cgstRate || 0) / 100);
-      } else {
-        totalTax += sgstAmount + cgstAmount;
-      }
-    }
-    
-    if (this.quotationDetails.igstApplicable) {
-      const igstAmount = this.quotationDetails.igstAmount || 0;
-      
-      // If API amount is 0, calculate it based on rate
-      if (igstAmount === 0 && this.quotationDetails.igstRate > 0) {
-        const taxableAmount = this.getTaxableAmount();
-        totalTax += (taxableAmount * this.quotationDetails.igstRate / 100);
-      } else {
-        totalTax += igstAmount;
-      }
-    }
-    
-    return totalTax;
+    // Use direct value from API
+    return this.quotationDetails.totalTaxAmount;
   }
 
   // Calculate taxable amount (Sub Total - Discount)
@@ -582,80 +555,30 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     return subTotal - discountAmount;
   }
 
-  // Calculate SGST amount
+  // Calculate SGST amount - not applicable in new API structure
   getSGSTAmount(): number {
-    if (!this.quotationDetails.sgstCgstApplicable) return 0;
-    
-    const apiAmount = this.quotationDetails.sgstAmount || 0;
-    if (apiAmount > 0) return apiAmount;
-    
-    // Calculate based on rate if API amount is 0
-    if (this.quotationDetails.sgstRate > 0) {
-      const taxableAmount = this.getTaxableAmount();
-      const calculatedAmount = taxableAmount * this.quotationDetails.sgstRate / 100;
-      console.log('SGST Calculation:', {
-        taxableAmount,
-        sgstRate: this.quotationDetails.sgstRate,
-        calculatedAmount
-      });
-      return calculatedAmount;
-    }
-    
     return 0;
   }
 
-  // Calculate CGST amount
+  // Calculate CGST amount - not applicable in new API structure
   getCGSTAmount(): number {
-    if (!this.quotationDetails.sgstCgstApplicable) return 0;
-    
-    const apiAmount = this.quotationDetails.cgstAmount || 0;
-    if (apiAmount > 0) return apiAmount;
-    
-    // Calculate based on rate if API amount is 0
-    if (this.quotationDetails.cgstRate > 0) {
-      const taxableAmount = this.getTaxableAmount();
-      const calculatedAmount = taxableAmount * this.quotationDetails.cgstRate / 100;
-      console.log('CGST Calculation:', {
-        taxableAmount,
-        cgstRate: this.quotationDetails.cgstRate,
-        calculatedAmount
-      });
-      return calculatedAmount;
-    }
-    
     return 0;
   }
 
-  // Calculate IGST amount
+  // Calculate IGST amount - not applicable in new API structure
   getIGSTAmount(): number {
-    if (!this.quotationDetails.igstApplicable) return 0;
-    
-    const apiAmount = this.quotationDetails.igstAmount || 0;
-    if (apiAmount > 0) return apiAmount;
-    
-    // Calculate based on rate if API amount is 0
-    if (this.quotationDetails.igstRate > 0) {
-      const taxableAmount = this.getTaxableAmount();
-      return taxableAmount * this.quotationDetails.igstRate / 100;
-    }
-    
     return 0;
   }
 
   // Calculate grand total based on applicable taxes and shipping charges
   getGrandTotal(): number {
-    const subTotal = this.quotationDetails.totalAmount || 0;
-    const discountAmount = this.quotationDetails.discountAmount || 0;
-    const shippingCharges = this.quotationDetails.shippingCharges || 0;
-    const taxAmount = this.getTotalTaxAmount();
-    
-    // Grand Total = Sub Total - Discount + Tax + Shipping Charges
-    return subTotal - discountAmount + taxAmount + shippingCharges;
+    // Use direct value from API
+    return this.quotationDetails.grandTotal;
   }
 
   // Check if any tax is applicable
   isTaxApplicable(): boolean {
-    return this.quotationDetails.sgstCgstApplicable || this.quotationDetails.igstApplicable;
+    return this.quotationDetails.totalTaxAmount > 0;
   }
 
   // Table event handlers
@@ -704,6 +627,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         <td>${item.unit}</td>
         <td>${item.currency}</td>
         <td>${this.formatCurrency(item.unitPrice, item.currency)}</td>
+        <td>${item.tax_type}</td>
+        <td>${this.formatCurrency(item.tax_amount, this.getSummaryCurrency())}</td>
         <td>${this.formatCurrency(item.totalPrice, item.currency)}</td>
         <td>${item.comments}</td>
       </tr>
@@ -874,6 +799,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
                 <th>Unit</th>
                 <th>Currency</th>
                 <th>Unit Price</th>
+                <th>Tax Type</th>
+                <th>Tax Amount</th>
                 <th>Total Price</th>
                 <th>Comments</th>
               </tr>
@@ -934,6 +861,14 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   // Get taxable amount for display
   getDisplayTaxableAmount(): number {
     return this.getTaxableAmount();
+  }
+
+  // Calculate total quantity from raw quotation items
+  getTotalQuantity(): number {
+    return this.rawQuotationItems.reduce((total, item) => {
+      const quantity = Number(item.quantity) || 0;
+      return total + quantity;
+    }, 0);
   }
   
   private loadActivityTrail(): void {
@@ -999,5 +934,13 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         // Handle error (show error message to user)
       }
     });
+  }
+
+  /**
+   * Check if there are any actions available for the split button
+   * @returns boolean indicating if actions are available
+   */
+  hasAvailableActions(): boolean {
+    return this.severityOptions && this.severityOptions.length > 0;
   }
 }

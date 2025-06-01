@@ -65,19 +65,19 @@ export class SweetAlertService {
         box-shadow: 0 4px 12px rgba(26, 29, 33, 0.1);
       }
       .swal2-title {
-        font-weight: 600;
-        font-size: 15px;
+        font-weight: 600 !important;
+        font-size: 15px !important;
       }
       .swal2-html-container {
-        font-weight: 400;
-        font-size: 15px;
-        line-height: 1.5;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        line-height: 1.5 !important;
       }
       .swal2-confirm, .swal2-cancel, .swal2-deny {
-        font-weight: 500;
-        font-size: 15px;
-        padding: 10px 24px;
-        border-radius: 4px;
+        font-weight: 500 !important;
+        font-size: 15px !important;
+        padding: 10px 24px !important;
+        border-radius: 4px !important;
       }
     `;
     document.head.appendChild(style);

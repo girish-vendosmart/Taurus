@@ -406,10 +406,7 @@ $danger-red: #EF4444;
   margin-bottom: 2rem;
 
   .items-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 2rem;
     border-bottom: 1px solid rgba($material-finish-silver, 0.2);
 
     @media (max-width: 768px) {

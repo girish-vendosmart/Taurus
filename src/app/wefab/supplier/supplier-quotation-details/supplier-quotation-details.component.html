@@ -12,7 +12,7 @@
       <div class="header-left">
         <h1 class="page-title">{{ quotationDetails.quotationId }}</h1>
         <div class="header-badges">
-          <span class="status-badge" [ngClass]="quotationDetails.workflowState?.toLowerCase()">
+          <span class="status-badge" [ngClass]="(quotationDetails.workflowState || '').toLowerCase()">
             {{ quotationDetails.workflowState }}
           </span>
         </div>
@@ -37,6 +37,7 @@
           (onClick)="sendQuotation()">
         </p-button> -->
         <app-split-button
+          *ngIf="hasAvailableActions()"
           [options]="severityOptions"
           placeholder="Select Action"
           severity="primary"
@@ -139,15 +140,16 @@
 
         <!-- Items Section -->
         <div class="items-section">
-          <div class="items-header">
-            <h3>Items ({{ totalItems }})</h3>
+          <div class="items-header p-3">
+            <h3 style="font-size: 14px;">Total Items : {{ rawQuotationItems.length }}</h3>
+            <h3 style="font-size: 14px;" class="mt-2">Total Quantity : {{ getTotalQuantity() }}</h3>
           </div>
 
           <!-- Common Table Component -->
           <div class="items-table-container">
             <app-common-table 
               [config]="tableConfig" 
-              [data]="formattedQuotationItems"
+              [data]="rawQuotationItems"
               [loading]="loading"
               (rowClick)="onRowClick($event)"
               (linkClick)="onLinkClick($event)"
@@ -159,49 +161,28 @@
           <div class="summary-section">
             <div class="summary-row">
               <span class="summary-label">Sub Total:</span>
-              <span class="summary-value">{{ formatCurrency(quotationDetails.totalAmount, getSummaryCurrency()) }}</span>
+              <span class="summary-value">{{ quotationDetails.totalAmount.toLocaleString('en-US') }}</span>
             </div>
             <div class="summary-row">
               <span class="summary-label">Discount ({{ quotationDetails.discountPercentage }}%):</span>
-              <span class="summary-value">{{ formatCurrency(quotationDetails.discountAmount, getSummaryCurrency()) }}</span>
+              <span class="summary-value">{{ quotationDetails.discountAmount.toLocaleString('en-US') }}</span>
             </div>
             
-            <!-- Tax Information - Show only if either IGST or SGST/CGST is applicable -->
-            <ng-container *ngIf="quotationDetails.igstApplicable || quotationDetails.sgstCgstApplicable">
-              <!-- SGST and CGST - Show only if sgst_cgst_applicable is true -->
-              <ng-container *ngIf="quotationDetails.sgstCgstApplicable">
-                <div class="summary-row">
-                  <span class="summary-label">SGST ({{ quotationDetails.sgstRate }}%):</span>
-                  <span class="summary-value">{{ formatCurrency(getSGSTAmount(), getSummaryCurrency()) }}</span>
-                </div>
-                <div class="summary-row">
-                  <span class="summary-label">CGST ({{ quotationDetails.cgstRate }}%):</span>
-                  <span class="summary-value">{{ formatCurrency(getCGSTAmount(), getSummaryCurrency()) }}</span>
-                </div>
-              </ng-container>
-              
-              <!-- IGST - Show only if igst_applicable is true -->
-              <div class="summary-row" *ngIf="quotationDetails.igstApplicable">
-                <span class="summary-label">IGST ({{ quotationDetails.igstRate }}%):</span>
-                <span class="summary-value">{{ formatCurrency(getIGSTAmount(), getSummaryCurrency()) }}</span>
-              </div>
-              
-              <!-- Total Tax - Show only if any tax is applicable -->
-              <div class="summary-row">
-                <span class="summary-label">Total Tax:</span>
-                <span class="summary-value">{{ formatCurrency(getTotalTaxAmount(), getSummaryCurrency()) }}</span>
-              </div>
-            </ng-container>
+            <!-- Total Tax Amount - Show if greater than 0 -->
+            <div class="summary-row" *ngIf="quotationDetails.totalTaxAmount > 0">
+              <span class="summary-label">Total Tax Amount:</span>
+              <span class="summary-value">{{ quotationDetails.totalTaxAmount.toLocaleString('en-US') }}</span>
+            </div>
             
             <!-- Shipping Charges - Show if greater than 0 -->
             <div class="summary-row" *ngIf="quotationDetails.shippingCharges > 0">
               <span class="summary-label">Shipping Charges:</span>
-              <span class="summary-value">{{ formatCurrency(quotationDetails.shippingCharges, getSummaryCurrency()) }}</span>
+              <span class="summary-value">{{ quotationDetails.shippingCharges.toLocaleString('en-US') }}</span>
             </div>
             
             <div class="summary-row total-row">
               <span class="summary-label">Grand Total:</span>
-              <span class="summary-value">{{ formatCurrency(getGrandTotal(), getSummaryCurrency()) }}</span>
+              <span class="summary-value">{{ quotationDetails.grandTotal.toLocaleString('en-US') }}</span>
             </div>
           </div>
         </div>
