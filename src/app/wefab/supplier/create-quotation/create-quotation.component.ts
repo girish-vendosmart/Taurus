@@ -354,23 +354,42 @@ export class CreateQuotationComponent implements OnInit {
           igst: createQuotationData.igst_applicable === 1,
           quotationItems: this.transformCreateQuotationItemsToModel(createQuotationData.items || []),
           subTotal: createQuotationData.total_amount || 0,
-          discount: createQuotationData.discount_percentage || 0,
+          discount: this.discountValue, // Use the processed discount value
           shippingCharges: createQuotationData.shipping_charges || 0,
           totalAmount: createQuotationData.grand_total || 0
         };
 
         // Set discount and shipping charges for calculations
-        if (createQuotationData.discount_type === 'Amount' && createQuotationData.discount_amount) {
+        // First check if there's a discount variable, then check individual fields
+        if (createQuotationData.discount && createQuotationData.discount > 0) {
+          // Use the discount variable and determine type from discount_type
+          if (createQuotationData.discount_type === 'Amount') {
+            this.discountType = 'amount';
+            this.discountValue = createQuotationData.discount;
+          } else {
+            this.discountType = 'percentage';
+            this.discountValue = createQuotationData.discount;
+          }
+        } else if (createQuotationData.discount_type === 'Amount' && createQuotationData.discount_amount) {
           this.discountType = 'amount';
-          this.discountValue = createQuotationData.discount || createQuotationData.discount_amount;
+          this.discountValue = createQuotationData.discount_amount;
         } else if (createQuotationData.discount_percentage) {
           this.discountType = 'percentage';
-          this.discountValue = createQuotationData.discount || createQuotationData.discount_percentage;
+          this.discountValue = createQuotationData.discount_percentage;
         } else {
           this.discountType = 'percentage';
           this.discountValue = 0;
         }
         this.shippingCharges = createQuotationData.shipping_charges || 0;
+
+        console.log('Discount prefilled values:', {
+          discountType: this.discountType,
+          discountValue: this.discountValue,
+          discountVariable: createQuotationData.discount,
+          discountPercentage: createQuotationData.discount_percentage,
+          discountAmount: createQuotationData.discount_amount,
+          discountTypeFromAPI: createQuotationData.discount_type
+        });
 
         // Set the selectedTaxType based on loaded data
         if (this.model.cgstSgst) {
@@ -399,6 +418,16 @@ export class CreateQuotationComponent implements OnInit {
 
         // Store original state for reset functionality
         this.storeCurrentStateForReset();
+
+        // Ensure discount field is properly updated in the UI
+        setTimeout(() => {
+          this.updateTaxCalculations();
+          console.log('Post-load discount state:', {
+            discountType: this.discountType,
+            discountValue: this.discountValue,
+            modelDiscount: this.model.discount
+          });
+        }, 100);
 
         console.log('Create quotation data mapped to model:', this.model);
       }
@@ -631,9 +660,9 @@ export class CreateQuotationComponent implements OnInit {
     
     this.totalAmount = subtotalAfterDiscount + totalTax + this.shippingCharges;
     
-    // Update model
+    // Update model with current values
     this.model.subTotal = this.subTotal;
-    this.model.discount = this.discountValue;
+    this.model.discount = this.discountValue; // Ensure model discount is synchronized
     this.model.shippingCharges = this.shippingCharges;
     this.model.totalAmount = this.totalAmount;
   }
@@ -1690,23 +1719,42 @@ export class CreateQuotationComponent implements OnInit {
           igst: quotationData.igst_applicable === 1,
           quotationItems: this.transformApiItemsToModel(quotationData.items || []),
           subTotal: quotationData.total_amount || 0,
-          discount: quotationData.discount_percentage || 0,
+          discount: this.discountValue, // Use the processed discount value
           shippingCharges: quotationData.shipping_charges || 0,
           totalAmount: quotationData.grand_total || 0
         };
 
         // Set discount and shipping charges for calculations
-        if (quotationData.discount_type === 'Amount' && quotationData.discount_amount) {
+        // First check if there's a discount variable, then check individual fields
+        if (quotationData.discount && quotationData.discount > 0) {
+          // Use the discount variable and determine type from discount_type
+          if (quotationData.discount_type === 'Amount') {
+            this.discountType = 'amount';
+            this.discountValue = quotationData.discount;
+          } else {
+            this.discountType = 'percentage';
+            this.discountValue = quotationData.discount;
+          }
+        } else if (quotationData.discount_type === 'Amount' && quotationData.discount_amount) {
           this.discountType = 'amount';
-          this.discountValue = quotationData.discount || quotationData.discount_amount;
+          this.discountValue = quotationData.discount_amount;
         } else if (quotationData.discount_percentage) {
           this.discountType = 'percentage';
-          this.discountValue = quotationData.discount || quotationData.discount_percentage;
+          this.discountValue = quotationData.discount_percentage;
         } else {
           this.discountType = 'percentage';
           this.discountValue = 0;
         }
         this.shippingCharges = quotationData.shipping_charges || 0;
+
+        console.log('Discount prefilled values:', {
+          discountType: this.discountType,
+          discountValue: this.discountValue,
+          discountVariable: quotationData.discount,
+          discountPercentage: quotationData.discount_percentage,
+          discountAmount: quotationData.discount_amount,
+          discountTypeFromAPI: quotationData.discount_type
+        });
 
         // Set the selectedTaxType based on loaded data
         if (this.model.cgstSgst) {
@@ -1736,6 +1784,16 @@ export class CreateQuotationComponent implements OnInit {
 
         // Store original state for reset functionality
         this.storeCurrentStateForReset();
+
+        // Ensure discount field is properly updated in the UI
+        setTimeout(() => {
+          this.updateTaxCalculations();
+          console.log('Post-load discount state:', {
+            discountType: this.discountType,
+            discountValue: this.discountValue,
+            modelDiscount: this.model.discount
+          });
+        }, 100);
 
         console.log('Quotation data loaded and mapped to model:', this.model);
       }
@@ -3093,5 +3151,30 @@ Check console for detailed information.
       return this.discountValue; // Return amount value
     }
     return 0;
+  }
+
+  // Debug method to test discount prefill functionality
+  debugDiscountPrefill() {
+    console.log('=== DISCOUNT PREFILL DEBUG ===');
+    console.log('Current discount state:');
+    console.log('- discountType:', this.discountType);
+    console.log('- discountValue:', this.discountValue);
+    console.log('- model.discount:', this.model.discount);
+    console.log('- getDiscountVariable():', this.getDiscountVariable());
+    console.log('- getDiscountAmount():', this.getDiscountAmount());
+    
+    const summary = `
+Discount Prefill Status:
+- Type: ${this.discountType}
+- Value: ${this.discountValue}
+- Model Discount: ${this.model.discount}
+- Discount Variable: ${this.getDiscountVariable()}
+- Calculated Amount: ${this.getDiscountAmount()}
+
+${this.discountValue > 0 ? 'Discount field should be filled ✓' : 'No discount value ✗'}
+    `;
+    
+    this.sweetAlert.info(summary);
+    console.log('=== END DEBUG ===');
   }
 }
