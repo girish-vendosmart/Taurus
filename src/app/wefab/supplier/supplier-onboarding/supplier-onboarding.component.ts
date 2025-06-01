@@ -1518,7 +1518,7 @@ export class SupplierOnboardingComponent implements OnInit {
     this.model.registered_lng = this.model.registeredAddress.location.lng;
     this.model.gstVerified = this.gstVerified;
     body = this.updateData(this.model);
-    debugger
+    
     console.log('body', body);
     if(supplier_id) {
       endPoint = '/api/resource/wfb_supplier_onboarding_L1/' + supplier_id;
@@ -1540,7 +1540,7 @@ export class SupplierOnboardingComponent implements OnInit {
   
   submit() {
     if (this.form.valid) {
-      debugger
+      
       console.log('Form submitted successfully', this.model);
       this.postSupplierOnboardingL1();
     } else {

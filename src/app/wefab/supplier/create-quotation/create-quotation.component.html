@@ -8,7 +8,7 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <!-- First Row: RFQ ID and Quotation Name -->
     <div class="row mb-4">
-      <div class="col-md-6 mb-3">
+      <div class="col-md-4 mb-3" [ngClass]="{'col-md-6': !isEditMode}">
         <label class="form-label">RFQ ID</label>
         <input 
           type="text" 
@@ -19,7 +19,7 @@
           placeholder="RFQ ID">
       </div>
       <!-- Quotation ID field - only visible in edit mode -->
-      <div class="col-md-6" *ngIf="isEditMode" [ngClass]="{'mb-3': !isEditMode}">
+      <div class="col-md-4" *ngIf="isEditMode" [ngClass]="{'mb-3': !isEditMode}">
         <label class="form-label">Quotation ID</label>
         <input 
           type="text" 
@@ -31,11 +31,8 @@
           placeholder="Quotation ID"
           style="background-color: #f8f9fa; color: #6c757d;">
       </div>
-    </div>
-
-    <!-- Second Row: Quotation Name -->
-    <div class="row mb-4">
-      <div class="col-md-6 mb-3">
+      <!-- Quotation Name -->
+      <div class="col-md-4 mb-3" [ngClass]="{'col-md-6': !isEditMode}">
         <label class="form-label">Quotation Name</label>
         <input 
           type="text" 
@@ -161,11 +158,9 @@
       <div class="table-info">
         <div class="d-flex flex-column">
           <span class="text-muted mb-1">
-            <i class="pi pi-list me-1"></i>
             <strong>Total Items:</strong> {{ model.quotationItems.length }}
           </span>
           <span class="text-muted">
-            <i class="pi pi-calculator me-1"></i>
             <strong>Total Quantity:</strong> {{ getTotalQuantity() }}
           </span>
         </div>

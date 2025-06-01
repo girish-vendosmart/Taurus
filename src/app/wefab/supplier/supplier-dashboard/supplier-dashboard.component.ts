@@ -211,7 +211,7 @@ export class SupplierDashboardComponent {
   getRecentQuotations() {
     let endPoint = `/api/resource/Supplier Quotation?fields=["*"]`
     this.commonService.getWefabData(endPoint).subscribe((res: any) => {
-      debugger
+      
       console.log('Recent Quotations:', res);
       
       if (res && res.data && Array.isArray(res.data)) {

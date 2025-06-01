@@ -887,7 +887,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     // Now actually perform the upload
     this.commonService.uploadFileWithProgress(formData).subscribe({
       next: (event: any) => {
-        debugger
+        
         console.log('event', event)
         // We're mostly ignoring server progress events since they're unreliable
         // Just log for debugging

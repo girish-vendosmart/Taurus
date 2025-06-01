@@ -139,7 +139,7 @@ export class SupplierRfqComponent implements OnInit {
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
-        debugger;
+        ;
         console.log(res.data);
         // Transform API data to match RFQItem interface
         this.allRFQs = this.transformApiDataToRFQItems(res.data);
@@ -279,7 +279,7 @@ export class SupplierRfqComponent implements OnInit {
 
   onLinkClick(event: any) {
     console.log('Link clicked:', event.rowData);
-    debugger
+    
     // Handle click on RFQ ID link
     const target = event.event.target as HTMLElement;
     if (target?.classList?.contains('rfq-id-link')) {

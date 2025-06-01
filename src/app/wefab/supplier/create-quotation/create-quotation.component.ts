@@ -267,7 +267,7 @@ export class CreateQuotationComponent implements OnInit {
   constructor(private sweetAlert: SweetAlertService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private commonService: CommonService) {}
 
   ngOnInit() {
-    debugger
+    
     // Extract and set RFQ ID from URL
     this.extractRfqIdFromUrl();
     
@@ -280,7 +280,7 @@ export class CreateQuotationComponent implements OnInit {
     // Listen for route parameter changes to update RFQ ID dynamically
     this.route.params.subscribe(params => {
       if (params['rfqId'] && params['rfqId'] !== this.model.rfqId) {
-        debugger
+        
         this.model.rfqId = params['rfqId'];
         console.log('RFQ ID updated from route params:', params['rfqId']);
         
@@ -443,7 +443,7 @@ export class CreateQuotationComponent implements OnInit {
       // Parse comments to extract material, specification, process, etc.
       const parsedComments = this.parseCreateQuotationItemComments(item.comments || '');
       
-      // Extract estimated rate if available
+      // Extract estimated rate if available (but don't use it for new quotations)
       const estimatedRate = this.extractEstimatedRate(item.comments || '');
       
       // Determine tax type based on currency and item properties
@@ -456,13 +456,21 @@ export class CreateQuotationComponent implements OnInit {
         }
       }
       
+      // For new quotations, don't prefill item prices - let suppliers enter their own prices
+      // Only prefill prices when editing existing quotations
+      let itemPrice = 0;
+      if (this.isEditMode && item.unit_price !== undefined && item.unit_price !== null) {
+        itemPrice = item.unit_price;
+      }
+      // Note: We don't use estimatedRate for new quotations as suppliers should provide their own competitive pricing
+      
       return {
         actionItemName: item.item_code || '',
         description: this.stripHtmlTags(item.item_description || ''),
         material: parsedComments.material || '',
         qty: item.quantity || 0,
         unit: item.unit || 'Nos',
-        itemPrice: item.unit_price || estimatedRate || 0,
+        itemPrice: itemPrice,
         tax_type: taxType,
         miscellaneous: this.buildMiscellaneousFromComments(parsedComments),
         tooling: parsedComments.processRequired || 'Standard',
@@ -1014,7 +1022,7 @@ export class CreateQuotationComponent implements OnInit {
       attachments: this.transformAttachments(),
     };
 
-    debugger
+    
     console.log('API Data:', apiData);
 
     return apiData;
@@ -2105,7 +2113,7 @@ export class CreateQuotationComponent implements OnInit {
   uploadFileOnS3(file: File, fileObject: any) {
     this.commonService.uploadFile(file).subscribe((res: any) => {
       if(res.body && res.body.message) {
-         debugger
+         
          console.log("file Uploaded Successfully ", res.body.message.file_url)
          this.attachedFiles.push(res.body.message.file_url)
          fileObject.url = res.body.message.file_url;
@@ -3172,6 +3180,43 @@ Discount Prefill Status:
 - Calculated Amount: ${this.getDiscountAmount()}
 
 ${this.discountValue > 0 ? 'Discount field should be filled ✓' : 'No discount value ✗'}
+    `;
+    
+    this.sweetAlert.info(summary);
+    console.log('=== END DEBUG ===');
+  }
+
+  // Debug method to verify item price handling during creation vs editing
+  debugItemPrices() {
+    console.log('=== ITEM PRICE DEBUG ===');
+    console.log('Current mode state:');
+    console.log('- isEditMode:', this.isEditMode);
+    console.log('- model.isEditMode:', this.model.isEditMode);
+    
+    console.log('Quotation items and their prices:');
+    this.model.quotationItems?.forEach((item: any, index: number) => {
+      console.log(`  Item ${index + 1}:`, {
+        name: item.actionItemName,
+        price: item.itemPrice,
+        qty: item.qty,
+        total: (item.qty || 0) * (item.itemPrice || 0)
+      });
+    });
+    
+    const totalItems = this.model.quotationItems?.length || 0;
+    const itemsWithPrices = this.model.quotationItems?.filter((item: any) => item.itemPrice > 0).length || 0;
+    const itemsWithoutPrices = totalItems - itemsWithPrices;
+    
+    const summary = `
+Item Price Status:
+- Mode: ${this.isEditMode ? 'EDIT' : 'CREATE'}
+- Total Items: ${totalItems}
+- Items with Prices: ${itemsWithPrices}
+- Items without Prices: ${itemsWithoutPrices}
+
+${this.isEditMode 
+  ? 'Edit Mode: Prices should be prefilled from existing data ✓' 
+  : 'Create Mode: Prices should be 0, requiring supplier input ✓'}
     `;
     
     this.sweetAlert.info(summary);

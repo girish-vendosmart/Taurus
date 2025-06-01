@@ -1053,7 +1053,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   // Approval methods
   approve(level: string): void {
-    debugger;
+    ;
     console.log(level);
     this.sweetAlert.confirm(
       '',

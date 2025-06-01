@@ -182,7 +182,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.rfqId = params['id'];
-      debugger
+      
       console.log(this.rfqId)
       this.supplierRfqId = sessionStorage.getItem('supplier_rfq_id') || '';
       this.loadRFQDetails();
@@ -194,7 +194,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
   loadSupplierDetails() {
     let endPoint = `/api/resource/Supplier Request for Quotation/${this.rfqId}-${this.supplierRfqId}`;
     this.commonService.getWefabData(endPoint).subscribe((res: any) => {
-      debugger
+      
       this.supplierRfqDetails = res.data;
     });
   }

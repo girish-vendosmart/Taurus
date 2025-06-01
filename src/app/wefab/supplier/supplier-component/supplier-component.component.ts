@@ -53,7 +53,7 @@ export class SupplierComponentComponent {
   }
 
   checkDashboardVisibility(): void {
-    debugger
+    
     const onboardingComplete = sessionStorage.getItem('supplier_onboarding_complete');
     const showDashboard = sessionStorage.getItem('show_supplier_dashboard');
     const userType = sessionStorage.getItem('user_type');

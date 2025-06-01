@@ -139,7 +139,7 @@ export class SupplierOnboardingL2Component implements OnInit {
     let endPoint = '/api/resource/wfb_supplier_onboarding_L2/' + supplierId;
     this.commonService.getData(endPoint).subscribe((res: any) => {
       this.getManufacturerData = JSON.parse(res.data.company_profile);
-      debugger
+      
       console.log('Retrieved data:', this.getManufacturerData);
       this.patchValueForm();
     });

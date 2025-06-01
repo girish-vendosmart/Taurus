@@ -272,7 +272,7 @@ export class CommonTableComponent implements OnInit {
   ];
 
   ngOnChanges(changes: SimpleChanges) {
-    debugger
+    
     console.log('changes', changes);
   }
 
