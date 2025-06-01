@@ -54,7 +54,7 @@ export class ConversationTrailComponent implements OnInit {
 
   fetchMessages() {
     this.loading = true;
-    const url = `/api/method/proq_buyer.api.capex_request.capex_request_data.get_message_trail?doctype=wfb_supplier_onboarding_messenger&docname=${this.supplierId}`;
+    const url = `/api/method/wefab.wefab.api.common.engine.message.messaging.get_message_trail?doctype=Supplier Onboarding Messenger&docname=${this.supplierId}`;
     this.commonService.getData(url).subscribe({
       next: (res: any) => {
         this.messages = (res?.data || []).map((msg: any) => ({
