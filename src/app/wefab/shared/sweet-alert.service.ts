@@ -66,16 +66,16 @@ export class SweetAlertService {
       }
       .swal2-title {
         font-weight: 600;
-        font-size: 24px;
+        font-size: 15px;
       }
       .swal2-html-container {
         font-weight: 400;
-        font-size: 16px;
+        font-size: 15px;
         line-height: 1.5;
       }
       .swal2-confirm, .swal2-cancel, .swal2-deny {
         font-weight: 500;
-        font-size: 16px;
+        font-size: 15px;
         padding: 10px 24px;
         border-radius: 4px;
       }
@@ -94,7 +94,7 @@ export class SweetAlertService {
     title: string, 
     icon: SweetAlertIcon = 'success', 
     position: SweetAlertPosition = 'top-end', 
-    timer: number = 3000
+    timer: number = 2000
   ): void {
     const Toast = Swal.mixin({
       toast: true,
@@ -120,7 +120,7 @@ export class SweetAlertService {
    * @param position The position of the toast
    * @param timer Duration in milliseconds
    */
-  success(message: string, position: SweetAlertPosition = 'top-end', timer: number = 3000): void {
+  success(message: string, position: SweetAlertPosition = 'top-end', timer: number = 2000): void {
     this.toast(message, 'success', position, timer);
   }
   
@@ -130,7 +130,7 @@ export class SweetAlertService {
    * @param position The position of the toast
    * @param timer Duration in milliseconds
    */
-  error(message: string, position: SweetAlertPosition = 'top-end', timer: number = 3000): void {
+  error(message: string, position: SweetAlertPosition = 'top-end', timer: number = 2000): void {
     this.toast(message, 'error', position, timer);
   }
   
@@ -140,7 +140,7 @@ export class SweetAlertService {
    * @param position The position of the toast
    * @param timer Duration in milliseconds
    */
-  warning(message: string, position: SweetAlertPosition = 'top-end', timer: number = 3000): void {
+  warning(message: string, position: SweetAlertPosition = 'top-end', timer: number = 2000): void {
     this.toast(message, 'warning', position, timer);
   }
   
@@ -150,7 +150,7 @@ export class SweetAlertService {
    * @param position The position of the toast
    * @param timer Duration in milliseconds
    */
-  info(message: string, position: SweetAlertPosition = 'top-end', timer: number = 3000): void {
+  info(message: string, position: SweetAlertPosition = 'top-end', timer: number = 2000): void {
     this.toast(message, 'info', position, timer);
   }
   

@@ -321,11 +321,12 @@
     font-size: 14px;
   }
   
-  // PrimeNG Dropdown Styling - Enhanced for consistent heights
+  // PrimeNG Dropdown Styling - Enhanced for consistent heights and smaller fonts
   .p-dropdown {
     border: 1px solid $material-finish-silver;
     border-radius: 4px;
     height: 40px; // Consistent height with form controls
+    font-size: 13px; // Reduced font size
     
     &:hover {
       border-color: $blueprint-blue;
@@ -337,32 +338,78 @@
     }
     
     .p-dropdown-label {
-      font-size: 14px;
-      padding: 10px 12px; // Consistent with form controls
-      line-height: 1.2;
+      font-size: 13px; // Reduced from 14px
+      padding: 8px 10px; // Slightly reduced padding
+      line-height: 1.3;
+      color: $precision-black;
+    }
+    
+    .p-dropdown-trigger {
+      width: 32px;
+      
+      .p-dropdown-trigger-icon {
+        font-size: 12px;
+        color: $machine-gray;
+      }
     }
     
     &.p-inputtext-sm {
       height: 32px; // Consistent with small form controls
+      font-size: 12px;
       
       .p-dropdown-label {
         padding: 6px 8px; // Consistent with small form controls
         font-size: 12px;
+      }
+      
+      .p-dropdown-trigger {
+        width: 28px;
+        
+        .p-dropdown-trigger-icon {
+          font-size: 11px;
+        }
       }
     }
     
     // Table editable dropdown styling
     &.table-editable-field {
       background-color: #ffffff !important;
+      height: 32px; // Smaller height for table dropdowns
+      font-size: 12px;
       
       .p-dropdown-label {
         background-color: #ffffff !important;
+        font-size: 12px;
+        padding: 6px 8px;
+        line-height: 1.2;
+      }
+      
+      .p-dropdown-trigger {
+        width: 28px;
+        
+        .p-dropdown-trigger-icon {
+          font-size: 11px;
+        }
       }
       
       &.p-focus {
         background-color: #ffffff !important;
         border-color: $blueprint-blue;
         box-shadow: 0 0 0 1px rgba(26, 58, 95, 0.1);
+      }
+    }
+    
+    // Disabled state
+    &.p-disabled {
+      background-color: #f8f9fa !important;
+      border-color: #dee2e6 !important;
+      
+      .p-dropdown-label {
+        color: #6c757d !important;
+      }
+      
+      .p-dropdown-trigger-icon {
+        color: #6c757d !important;
       }
     }
   }
@@ -579,7 +626,7 @@
     .p-dropdown-panel.p-component {
       .p-dropdown-items {
         .p-dropdown-item {
-          font-size: 11px !important;
+          font-size: 2px !important;
           padding: 5px 6px !important;
         }
       }
@@ -702,45 +749,113 @@
       .file-item {
         display: flex;
         align-items: center;
-        padding: 8px 12px;
-        background-color: rgba(26, 58, 95, 0.02);
-        border: 1px solid $material-finish-silver;
-        border-radius: 6px;
+        padding: 12px 16px;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
         margin-bottom: 8px;
+        transition: all 0.2s ease;
         
         &:last-child {
           margin-bottom: 0;
         }
         
-        i.pi-file {
-          color: $blueprint-blue;
-          font-size: 16px;
+        &:hover {
+          background-color: #e9ecef;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        .file-name {
-          flex: 1;
-          color: $precision-black;
-          font-weight: $font-weight-medium;
-          font-size: 14px;
-          margin-left: 8px;
-        }
-        
-        .file-size {
-          color: $machine-gray;
-          font-size: 12px;
-          margin-left: 8px;
-        }
-        
-        .btn-link {
-          color: $safety-orange;
-          text-decoration: none;
-          
-          &:hover {
-            color: darken($safety-orange, 10%);
-          }
+        // File icon on the left
+        .file-icon {
+          width: 40px;
+          height: 40px;
+          background-color: white;
+          border: 1px solid #dee2e6;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 12px;
+          flex-shrink: 0;
+          overflow: hidden;
           
           i {
+            font-size: 18px;
+            color: $blueprint-blue;
+          }
+          
+          .file-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+          }
+        }
+        
+        // File details in the middle
+        .file-details {
+          flex: 1;
+          min-width: 0; // Allow text truncation
+          
+          .file-name {
+            color: $precision-black;
+            font-weight: $font-weight-medium;
             font-size: 14px;
+            margin-bottom: 2px;
+            word-break: break-word;
+            line-height: 1.3;
+          }
+          
+          .file-type {
+            color: $machine-gray;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+          }
+        }
+        
+        // Action buttons on the right
+        .file-actions {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          margin-left: 12px;
+          
+          .btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            
+            i {
+              font-size: 14px;
+            }
+            
+            &.btn-outline-primary {
+              border-color: $blueprint-blue;
+              color: $blueprint-blue;
+              
+              &:hover {
+                background-color: $blueprint-blue;
+                color: white;
+              }
+            }
+            
+            &.btn-outline-danger {
+              border-color: $safety-orange;
+              color: $safety-orange;
+              
+              &:hover {
+                background-color: $safety-orange;
+                color: white;
+              }
+            }
           }
         }
       }
@@ -787,22 +902,26 @@
   body > .p-dropdown-panel,
   .p-component-overlay .p-dropdown-panel {
     z-index: 9999 !important;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
     border: 1px solid #dee2e6 !important;
     border-radius: 4px !important;
     background: white !important;
+    font-family: inherit !important;
     
     .p-dropdown-items {
-      max-height: 200px;
+      max-height: 180px;
       overflow-y: auto;
+      padding: 4px 0;
       
       .p-dropdown-item {
-        font-size: 12px !important;
-        padding: 6px 8px !important;
-        line-height: 1.3;
+        font-size: 30px !important;
+        padding: 8px 12px !important;
+        line-height: 1.4 !important;
         white-space: nowrap;
         border: none !important;
-        transition: background-color 0.15s ease;
+        transition: all 0.15s ease;
+        color: $precision-black !important;
+        font-weight: 400 !important;
         
         &:hover {
           background-color: rgba(26, 58, 95, 0.08) !important;
@@ -812,8 +931,47 @@
         &.p-highlight {
           background-color: $blueprint-blue !important;
           color: white !important;
+          font-weight: 500 !important;
+        }
+        
+        &:first-child {
+          margin-top: 0;
+        }
+        
+        &:last-child {
+          margin-bottom: 0;
         }
       }
+      
+      // Custom scrollbar for dropdown
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+        
+        &:hover {
+          background: #a8a8a8;
+        }
+      }
+    }
+  }
+  
+  // Special styling for table dropdowns
+  .quotation-table .p-dropdown-panel {
+    font-size: 11px !important;
+    
+    .p-dropdown-items .p-dropdown-item {
+      font-size: 2px !important;
+      padding: 6px 10px !important;
+      line-height: 1.3 !important;
     }
   }
 }
@@ -878,6 +1036,33 @@
       font-size: 11px;
     }
   }
+  
+  :host ::ng-deep {
+    .p-dropdown {
+      &.table-editable-field {
+        height: 30px;
+        font-size: 11px;
+        
+        .p-dropdown-label {
+          font-size: 11px;
+          padding: 5px 6px;
+        }
+        
+        .p-dropdown-trigger {
+          width: 26px;
+          
+          .p-dropdown-trigger-icon {
+            font-size: 10px;
+          }
+        }
+      }
+    }
+    
+    .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+      font-size: 2px !important;
+      padding: 6px 8px !important;
+    }
+  }
 }
 
 @media (max-width: 1200px) {
@@ -897,29 +1082,32 @@
       font-size: 10px;
     }
   }
-}
-
-@media (max-width: 768px) {
-  .quotation-container {
-    padding: 16px;
-  }
   
-  .d-flex.justify-content-between {
-    flex-direction: column;
-    gap: 10px;
-    
-    .btn {
-      font-size: 12px;
-      padding: 6px 12px;
+  :host ::ng-deep {
+    .p-dropdown {
+      &.table-editable-field {
+        height: 28px;
+        font-size: 10px;
+        
+        .p-dropdown-label {
+          font-size: 10px;
+          padding: 4px 5px;
+        }
+        
+        .p-dropdown-trigger {
+          width: 24px;
+          
+          .p-dropdown-trigger-icon {
+            font-size: 9px;
+          }
+        }
+      }
     }
-  }
-  
-  .table-responsive {
-    font-size: 10px;
-  }
-  
-  .totals-section {
-    padding: 12px;
+    
+    .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+      font-size: 2px !important;
+      padding: 5px 7px !important;
+    }
   }
 }
 
@@ -1336,6 +1524,132 @@
     
     &:hover {
       background-color: darken(#ffc107, 10%);
+    }
+  }
+}
+
+// Additional mobile responsive styles for dropdowns
+@media (max-width: 768px) {
+  .quotation-container {
+    padding: 16px;
+  }
+  
+  .table-responsive {
+    font-size: 10px;
+  }
+  
+  .totals-section {
+    padding: 12px;
+  }
+  
+  :host ::ng-deep {
+    .p-dropdown {
+      &.table-editable-field {
+        height: 28px;
+        font-size: 10px;
+        
+        .p-dropdown-label {
+          font-size: 10px;
+          padding: 4px 6px;
+        }
+        
+        .p-dropdown-trigger {
+          width: 22px;
+          
+          .p-dropdown-trigger-icon {
+            font-size: 8px;
+          }
+        }
+      }
+    }
+    
+    .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+      font-size: 2px !important;
+      padding: 4px 6px !important;
+    }
+  }
+
+  ::ng-deep {
+    .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+      font-size: 2px !important;
+    }
+  }
+}
+
+// Responsive styling for file attachments
+@media (max-width: 768px) {
+  .attachment-area {
+    .attached-files {
+      .file-list {
+        .file-item {
+          padding: 10px 12px;
+          
+          .file-icon {
+            width: 32px;
+            height: 32px;
+            margin-right: 10px;
+            
+            i {
+              font-size: 16px;
+            }
+          }
+          
+          .file-details {
+            .file-name {
+              font-size: 13px;
+              line-height: 1.2;
+            }
+            
+            .file-type {
+              font-size: 11px;
+            }
+          }
+          
+          .file-actions {
+            gap: 6px;
+            
+            .btn {
+              width: 28px;
+              height: 28px;
+              
+              i {
+                font-size: 12px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .attachment-area {
+    .attached-files {
+      .file-list {
+        .file-item {
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 12px;
+          
+          .file-icon {
+            margin-right: 0;
+            margin-bottom: 8px;
+            align-self: center;
+          }
+          
+          .file-details {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 8px;
+          }
+          
+          .file-actions {
+            align-self: center;
+            margin-left: 0;
+          }
+        }
+      }
     }
   }
 }

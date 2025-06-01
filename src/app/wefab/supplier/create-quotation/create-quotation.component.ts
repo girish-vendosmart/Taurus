@@ -210,6 +210,7 @@ export class CreateQuotationComponent implements OnInit {
 
   // Attachment properties
   attachedFiles: string[] = [];
+  attachedFileObjects: { url: string; file?: File; thumbnail?: string; name: string; type: string }[] = [];
 
   // Store original state for reset functionality
   originalQuotationItems: any[] = [];
@@ -792,13 +793,14 @@ export class CreateQuotationComponent implements OnInit {
       console.warn('Missing API fields:', apiValidation.missingFields);
     }
 
+    debugger
     console.log("Api Data ", apiData);
     
-    if (this.isEditMode) {
-      this.updateExistingQuotation(apiData);
-    } else {
-      this.createNewQuotation(apiData);
-    }
+    // if (this.isEditMode) {
+    //   this.updateExistingQuotation(apiData);
+    // } else {
+    //   this.createNewQuotation(apiData);
+    // }
   }
 
   private scrollToFirstError() {
@@ -825,7 +827,7 @@ export class CreateQuotationComponent implements OnInit {
 
     this.commonService.postWefabData(endpoint, apiData).subscribe((res: any) => {
       console.log('Quotation created successfully:', res);
-      this.sweetAlert.success('Quotation sent successfully!');
+      this.sweetAlert.success('Quotation Create successfully!');
       this.router.navigate(['/wefab/supplier/quotation/details', res.data.name]);
     })
   }
@@ -834,6 +836,7 @@ export class CreateQuotationComponent implements OnInit {
   transformToApiFormat(): any {
     const apiData = {
       rfq_id: this.getRfqId(),
+      quotation_name: this.model.quotationName,
       supplier_id: this.getSupplierId(),
       estimated_completion_duration: `${this.model.totalLeadTime} days`,
       validity: this.formatDateForApi(this.model.quoteValidTill),
@@ -844,6 +847,7 @@ export class CreateQuotationComponent implements OnInit {
       discount_percentage: this.discountType === 'percentage' ? this.discountValue : 0,
       discount_amount: this.discountType === 'amount' ? this.discountValue : 0,
       shipping_charges: this.shippingCharges || 0,
+      total_taxable_amount: this.getTotalTaxAmount(),
       payment_terms: this.model.paymentTerms,
       shipping_terms: this.getShippingTerms(),
       notes: `<p>${this.model.termsAndConditions}</p>`,
@@ -864,7 +868,6 @@ export class CreateQuotationComponent implements OnInit {
     return this.model.quotationItems.map((item: any, index: number) => {
       const unitPrice = item.itemPrice || 0;
       const quantity = item.qty || 0;
-      const totalItemAmount = unitPrice * quantity;
       
       return {
         item_code: this.generateItemCode(item, index),
@@ -873,26 +876,44 @@ export class CreateQuotationComponent implements OnInit {
         unit: item.unit || 'Nos',
         currency_code: this.model.currency,
         unit_price: unitPrice,
-        setup_cost: this.calculateSetupCost(item),
-        material_cost: this.calculateMaterialCost(item, totalItemAmount),
-        labor_cost: this.calculateLaborCost(item, totalItemAmount),
-        overhead_cost: this.calculateOverheadCost(item, totalItemAmount),
         discount_type: "Percentage",
         discount: 0, // You can add item-level discount if needed
         comments: this.buildItemComments(item),
         bidType: item.bidType || 'bid',
-        taxType: item.taxType || 'none'
+        taxType: item.taxType || 'none',
+        taxable_amount: this.getLineTaxAmount(item)
       };
     });
   }
 
   // Transform attachments to API format
   transformAttachments(): any[] {
-    return this.attachedFiles.map((fileUrl: string) => ({
-      file_name: this.getFileNameFromUrl(fileUrl),
-      file_url: fileUrl,
-      description: this.getFileDescriptionFromUrl(fileUrl)
-    }));
+    return this.attachedFileObjects
+      .filter(fileObj => fileObj.url) // Only include files that have been uploaded
+      .map((fileObj: any) => ({
+        file_name: fileObj.name,
+        file_url: fileObj.url,
+        description: this.getFileDescriptionFromType(fileObj.type)
+      }));
+  }
+
+  // Helper method to get file description from type
+  private getFileDescriptionFromType(fileType: string): string {
+    if (!fileType) return 'Supporting file';
+    
+    const type = fileType.toLowerCase();
+    
+    if (type.includes('pdf')) {
+      return 'Technical specifications and documentation';
+    } else if (type.includes('word') || type.includes('doc')) {
+      return 'Supporting documentation';
+    } else if (type.includes('image')) {
+      return 'Technical drawings and images';
+    } else if (type.includes('excel') || type.includes('sheet')) {
+      return 'Technical data and specifications';
+    } else {
+      return 'Supporting file';
+    }
   }
 
   // Helper methods for data transformation
@@ -930,27 +951,6 @@ export class CreateQuotationComponent implements OnInit {
     // Generate item code based on item name or use index
     const baseName = item.actionItemName || `ITEM-${index + 1}`;
     return baseName.toUpperCase().replace(/\s+/g, '-').substring(0, 20);
-  }
-
-  private calculateSetupCost(item: any): number {
-    // Calculate setup cost based on tooling or other factors
-    const baseSetupCost = item.tooling && item.tooling.toLowerCase() === 'required' ? 500 : 200;
-    return baseSetupCost;
-  }
-
-  private calculateMaterialCost(item: any, totalItemAmount: number): number {
-    // Calculate material cost as percentage of total item amount
-    return totalItemAmount * 0.6; // 60% of total as material cost
-  }
-
-  private calculateLaborCost(item: any, totalItemAmount: number): number {
-    // Calculate labor cost as percentage of total item amount
-    return totalItemAmount * 0.3; // 30% of total as labor cost
-  }
-
-  private calculateOverheadCost(item: any, totalItemAmount: number): number {
-    // Calculate overhead cost as percentage of total item amount
-    return totalItemAmount * 0.1; // 10% of total as overhead cost
   }
 
   private buildItemComments(item: any): string {
@@ -1488,7 +1488,7 @@ export class CreateQuotationComponent implements OnInit {
 
     this.sweetAlert.confirm(
       'Are you sure you want to reset the table? This will remove all current data and cannot be undone.', 
-      'Reset Table', 
+      '', 
       'question', 
       'Yes, Reset', 
       'Cancel'
@@ -1683,7 +1683,160 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/wefab/supplier/quotations']);
+    // Check if there are unsaved changes
+    const hasUnsavedChanges = this.hasUnsavedChanges();
+    
+    if (hasUnsavedChanges) {
+      this.sweetAlert.confirm(
+        'You have unsaved changes. Are you sure you want to go back? All changes will be lost.',
+        '',
+        'warning',
+        'Yes, Go Back',
+        'Continue Editing'
+      ).then((result: any) => {
+        if (result.isConfirmed) {
+          window.history.back();
+        }
+      });
+    } else {
+      this.navigateBack();
+    }
+  }
+
+  private hasUnsavedChanges(): boolean {
+    // Check if any form fields have been modified
+    const hasFormChanges = 
+      this.model.quotationName ||
+      (this.model.totalLeadTime && this.model.totalLeadTime > 0) ||
+      this.model.termsAndConditions ||
+      this.model.deliveryAddress ||
+      this.attachedFiles.length > 0;
+
+    // Check if quotation items have data
+    const hasItemChanges = this.model.quotationItems.some((item: any) => 
+      item.actionItemName || 
+      item.description || 
+      item.material || 
+      (item.qty && item.qty > 0) ||
+      (item.itemPrice && item.itemPrice > 0) ||
+      item.miscellaneous ||
+      item.tooling
+    );
+
+    return hasFormChanges || hasItemChanges;
+  }
+
+  private navigateBack() {
+    try {
+      console.log('Cancel button clicked - navigating back...');
+      console.log('Current RFQ ID:', this.model.rfqId);
+      console.log('Is Edit Mode:', this.isEditMode);
+      
+      // Try different navigation paths based on context
+      if (this.model.rfqId) {
+        // If we have an RFQ ID, go back to RFQ details or supplier dashboard
+        console.log('Navigating to supplier dashboard...');
+        this.router.navigate(['/wefab/supplier/dashboard']).then(
+          (success) => {
+            console.log('Navigation successful:', success);
+            if (!success) {
+              console.log('Navigation failed, trying alternate route...');
+              this.tryAlternateNavigation();
+            }
+          }
+        ).catch((error) => {
+          console.error('Navigation error:', error);
+          this.tryAlternateNavigation();
+        });
+      } else {
+        // Default back to quotations list
+        console.log('Navigating to quotations list...');
+        this.router.navigate(['/wefab/supplier/quotations']).then(
+          (success) => {
+            console.log('Navigation successful:', success);
+            if (!success) {
+              console.log('Navigation failed, trying alternate route...');
+              this.tryAlternateNavigation();
+            }
+          }
+        ).catch((error) => {
+          console.error('Navigation error:', error);
+          this.tryAlternateNavigation();
+        });
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      this.tryAlternateNavigation();
+    }
+  }
+
+  private tryAlternateNavigation() {
+    console.log('Trying alternate navigation routes...');
+    
+    // Try various fallback routes
+    const fallbackRoutes = [
+      '/wefab/supplier',
+      '/wefab/supplier/dashboard',
+      '/wefab/supplier/quotations',
+      '/wefab',
+      '/'
+    ];
+
+    let routeIndex = 0;
+    const tryNextRoute = () => {
+      if (routeIndex < fallbackRoutes.length) {
+        const route = fallbackRoutes[routeIndex];
+        console.log(`Trying route ${routeIndex + 1}/${fallbackRoutes.length}: ${route}`);
+        
+        this.router.navigate([route]).then(
+          (success) => {
+            if (success) {
+              console.log(`Successfully navigated to: ${route}`);
+              this.sweetAlert.success('Navigated back successfully.');
+            } else {
+              routeIndex++;
+              tryNextRoute();
+            }
+          }
+        ).catch((error) => {
+          console.error(`Failed to navigate to ${route}:`, error);
+          routeIndex++;
+          tryNextRoute();
+        });
+      } else {
+        console.error('All navigation attempts failed');
+        this.sweetAlert.error('Unable to navigate back. Please refresh the page or use browser back button.');
+        
+        // As a last resort, try browser back
+        try {
+          window.history.back();
+        } catch (historyError) {
+          console.error('Browser back also failed:', historyError);
+        }
+      }
+    };
+
+    tryNextRoute();
+  }
+
+  // Add a test method for debugging navigation (can be removed in production)
+  testNavigation() {
+    console.log('=== NAVIGATION DEBUG TEST ===');
+    console.log('Router instance:', this.router);
+    console.log('Current URL:', this.router.url);
+    console.log('Model RFQ ID:', this.model.rfqId);
+    console.log('Is Edit Mode:', this.isEditMode);
+    
+    // Test a simple navigation
+    this.router.navigate(['/wefab/supplier/dashboard']).then(
+      (success) => {
+        console.log('Test navigation result:', success);
+        this.sweetAlert.info(`Navigation test result: ${success ? 'SUCCESS' : 'FAILED'}`);
+      }
+    ).catch((error) => {
+      console.error('Test navigation error:', error);
+      this.sweetAlert.error('Navigation test failed: ' + error.message);
+    });
   }
 
   // Attachment methods
@@ -1699,8 +1852,29 @@ export class CreateQuotationComponent implements OnInit {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (this.isValidFileType(file)) {
-          this.uploadFileOnS3(file)
-          // this.attachedFiles.push(file);
+          // Generate thumbnail for image files
+          if (this.isImageFile(file)) {
+            this.generateThumbnail(file).then((thumbnail: string) => {
+              const fileObject = {
+                url: '',
+                file: file,
+                thumbnail: thumbnail,
+                name: file.name,
+                type: file.type
+              };
+              this.attachedFileObjects.push(fileObject);
+              this.uploadFileOnS3(file, fileObject);
+            });
+          } else {
+            const fileObject = {
+              url: '',
+              file: file,
+              name: file.name,
+              type: file.type
+            };
+            this.attachedFileObjects.push(fileObject);
+            this.uploadFileOnS3(file, fileObject);
+          }
         } else {
           this.sweetAlert.warning(`File "${file.name}" is not supported. Please use PDF, DOC, DOCX, JPG, PNG, TXT, or XLSX files.`);
         }
@@ -1708,12 +1882,13 @@ export class CreateQuotationComponent implements OnInit {
     }
   }
 
-  uploadFileOnS3(file: File) {
+  uploadFileOnS3(file: File, fileObject: any) {
     this.commonService.uploadFile(file).subscribe((res: any) => {
       if(res.body && res.body.message) {
          debugger
          console.log("file Uploaded Successfully ", res.body.message.file_url)
          this.attachedFiles.push(res.body.message.file_url)
+         fileObject.url = res.body.message.file_url;
       }
     }, (error: any) => {
       console.error('Error uploading file:', error);
@@ -1734,7 +1909,29 @@ export class CreateQuotationComponent implements OnInit {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (this.isValidFileType(file)) {
-          this.uploadFileOnS3(file)
+          // Generate thumbnail for image files
+          if (this.isImageFile(file)) {
+            this.generateThumbnail(file).then((thumbnail: string) => {
+              const fileObject = {
+                url: '',
+                file: file,
+                thumbnail: thumbnail,
+                name: file.name,
+                type: file.type
+              };
+              this.attachedFileObjects.push(fileObject);
+              this.uploadFileOnS3(file, fileObject);
+            });
+          } else {
+            const fileObject = {
+              url: '',
+              file: file,
+              name: file.name,
+              type: file.type
+            };
+            this.attachedFileObjects.push(fileObject);
+            this.uploadFileOnS3(file, fileObject);
+          }
         } else {
           this.sweetAlert.warning(`File "${file.name}" is not supported. Please use PDF, DOC, DOCX, JPG, PNG, TXT, or XLSX files.`);
         }
@@ -1744,6 +1941,7 @@ export class CreateQuotationComponent implements OnInit {
 
   removeAttachment(index: number) {
     this.attachedFiles.splice(index, 1);
+    this.attachedFileObjects.splice(index, 1);
   }
 
   private isValidFileType(file: File): boolean {
@@ -1759,6 +1957,64 @@ export class CreateQuotationComponent implements OnInit {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     ];
     return allowedTypes.includes(file.type);
+  }
+
+  private isImageFile(file: File): boolean {
+    const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    return imageTypes.includes(file.type);
+  }
+
+  private generateThumbnail(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Set thumbnail size
+          const maxWidth = 40;
+          const maxHeight = 40;
+          let { width, height } = img;
+          
+          // Calculate new dimensions maintaining aspect ratio
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+          }
+          
+          canvas.width = maxWidth;
+          canvas.height = maxHeight;
+          
+          // Fill with white background
+          if (ctx) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, maxWidth, maxHeight);
+            
+            // Center the image
+            const x = (maxWidth - width) / 2;
+            const y = (maxHeight - height) / 2;
+            
+            ctx.drawImage(img, x, y, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.8));
+          } else {
+            reject('Canvas context not available');
+          }
+        };
+        img.onerror = () => reject('Error loading image');
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject('Error reading file');
+      reader.readAsDataURL(file);
+    });
   }
 
   // Method to preview API data format (useful for debugging)
@@ -1905,12 +2161,23 @@ export class CreateQuotationComponent implements OnInit {
 
   // Method for testing attachment display (can be removed in production)
   addTestAttachments() {
-    this.attachedFiles = [
-      "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/SS0E29F5_Screenshot_from_2025-05-30_11-38-14.png",
-      "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/TVX4YE51_Screenshot_from_2025-05-30_12-57-47.png",
-      "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/ABC123_Technical_Specifications.pdf",
-      "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/XYZ789_Project_Details.docx"
+    this.attachedFileObjects = [
+      {
+        url: "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/SS0E29F5_Screenshot_from_2025-05-30_11-38-14.png",
+        name: "75TPAEH6_Screenshot_from_2025-05-30_11-38-14.png",
+        type: "image/png",
+        thumbnail: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2ODApLCBxdWFsaXR5ID0gODAK/9sAQwAGBAUGBQQGBgUGBwcGCAoQCgoJCQoUDg0NDhQUExMTExQUExMTExMTExMTExMTExMTExMTExMTExMTExMTExMT/9sAQwEHBwcKCAoTCgoTExQTFBMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMT/8AAEQgAKAAoAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBkQgUobHBwfBDUuHxCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/2Q=="
+      },
+      {
+        url: "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/RXO4IUIM_chirag_agar.pdf",
+        name: "RXO4IUIM_chirag_agar.pdf",
+        type: "application/pdf"
+      }
     ];
+    
+    // Also update the old attachedFiles array for backward compatibility
+    this.attachedFiles = this.attachedFileObjects.map(obj => obj.url);
+    
     this.sweetAlert.info('Sample file attachments have been added for testing');
   }
 
@@ -2281,5 +2548,51 @@ export class CreateQuotationComponent implements OnInit {
   // Add getter for unit options display
   get supportedUnitsDisplay(): string {
     return this.unitOptions.map(option => option.label).join(', ');
+  }
+
+  // Method to get file extension from filename
+  getFileExtensionFromName(filename: string): string {
+    if (!filename) return '';
+    
+    try {
+      const parts = filename.split('.');
+      return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  // Method to get file icon based on file type
+  getFileIconByType(fileType: string): string {
+    if (!fileType) return 'pi-file';
+    
+    const type = fileType.toLowerCase();
+    
+    if (type.includes('pdf')) {
+      return 'pi-file-pdf';
+    } else if (type.includes('word') || type.includes('doc')) {
+      return 'pi-file-word';
+    } else if (type.includes('excel') || type.includes('sheet')) {
+      return 'pi-file-excel';
+    } else if (type.includes('image')) {
+      return 'pi-image';
+    } else if (type.includes('text')) {
+      return 'pi-file';
+    } else {
+      return 'pi-file';
+    }
+  }
+
+  // Method to view attachment by file object
+  viewAttachmentByObject(fileObj: any) {
+    if (fileObj.url) {
+      window.open(fileObj.url, '_blank');
+    } else if (fileObj.file) {
+      // If file hasn't been uploaded yet, create a blob URL for preview
+      const blobUrl = URL.createObjectURL(fileObj.file);
+      window.open(blobUrl, '_blank');
+    } else {
+      this.sweetAlert.error('Unable to open file. File not available.');
+    }
   }
 }
