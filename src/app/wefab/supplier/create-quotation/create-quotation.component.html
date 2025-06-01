@@ -40,6 +40,10 @@
           [(ngModel)]="model.totalLeadTime"
           [ngModelOptions]="{standalone: true}"
           (input)="clearFieldError('totalLeadTime')"
+          (keypress)="onIntegerKeyPress($event)"
+          (input)="onIntegerInput($event)"
+          (paste)="onIntegerPaste($event)"
+          pattern="[0-9]*"
           placeholder="Enter total lead time"
           min="1"
           required>
@@ -294,8 +298,8 @@
                 [minFractionDigits]="2"
                 [maxFractionDigits]="2"
                 [min]="0"
-                [disabled]="item.bid_type === 'no-bid'"
-                [placeholder]="item.bid_type === 'no-bid' ? 'No Bid' : 'Enter price'"
+                [disabled]="item.bid_type === 'No Bid'"
+                [placeholder]="item.bid_type === 'No Bid' ? 'No Bid' : 'Enter price'"
                 [ngModelOptions]="{standalone: true}"
                 (onInput)="onQuantityOrPriceChange(item); clearFieldError('item_' + i)"
                 styleClass="w-100 table-editable-field"
@@ -389,6 +393,10 @@
                 min="0" 
                 [max]="discountType === 'percentage' ? 100 : calculatedSubTotal"
                 placeholder="0"
+                (keypress)="onNumberKeyPress($event)"
+                (input)="onNumberInput($event)"
+                (paste)="onNumberPaste($event)"
+                pattern="[0-9]*\.?[0-9]*"
                 style="width: 60px; font-size: 12px;">
               <select 
                 class="form-select form-select-sm me-2 editable-field"
@@ -417,6 +425,10 @@
                 [ngModelOptions]="{standalone: true}"
                 min="0"
                 placeholder="0"
+                (keypress)="onNumberKeyPress($event)"
+                (input)="onNumberInput($event)"
+                (paste)="onNumberPaste($event)"
+                pattern="[0-9]*\.?[0-9]*"
                 style="width: 80px; font-size: 12px;">
               <span class="small me-2">{{ model.currency }}</span>
               <span *ngIf="shippingCharges > 0" class="shipping-amount amount-display small">
@@ -571,6 +583,7 @@
 
     <!-- Submit Buttons -->
     <div class="d-flex justify-content-end gap-2 mt-4">
+      
       <button 
         type="button" 
         class="btn btn-outline-secondary px-4"

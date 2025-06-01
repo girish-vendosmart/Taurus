@@ -175,9 +175,9 @@ export class CreateQuotationComponent implements OnInit {
         material: '',
         qty: 0,
         unit: '',
-        bid_type: 'bid',
+        bid_type: 'Bid',
         itemPrice: 0,
-        tax_type: 'none',
+        tax_type: 'No Tax',
         miscellaneous: '',
         tooling: ''
       }
@@ -206,7 +206,7 @@ export class CreateQuotationComponent implements OnInit {
   igstPercentage: number = 18;
 
   // Tax selection
-  selectedTaxType: string = 'none'; // 'cgstSgst', 'igst', or 'none'
+  selectedTaxType: string = 'No Tax'; // 'cgstSgst', 'igst', or 'No Tax'
 
   // Attachment properties
   attachedFiles: string[] = [];
@@ -242,14 +242,14 @@ export class CreateQuotationComponent implements OnInit {
   ];
 
   bidTypeOptions = [
-    { label: 'Bid', value: 'bid' },
-    { label: 'No Bid', value: 'no-bid' }
+    { label: 'Bid', value: 'Bid' },
+    { label: 'No Bid', value: 'No Bid' }
   ];
 
   taxTypeOptions = [
-    { label: 'No Tax', value: 'none' },
-    { label: 'CGST & SGST', value: 'cgstSgst' },
-    { label: 'IGST', value: 'igst' }
+    { label: 'No Tax', value: 'No Tax' },
+    { label: 'CGST & SGST', value: 'SGCT & CGST' },
+    { label: 'IGST', value: 'IGST' }
   ];
 
   @ViewChild('csvFileInput', { static: false }) csvFileInput!: ElementRef;
@@ -362,11 +362,11 @@ export class CreateQuotationComponent implements OnInit {
 
         // Set the selectedTaxType based on loaded data
         if (this.model.cgstSgst) {
-          this.selectedTaxType = 'cgstSgst';
+          this.selectedTaxType = 'SGCT & CGST';
         } else if (this.model.igst) {
-          this.selectedTaxType = 'igst';
+          this.selectedTaxType = 'IGST';
         } else {
-          this.selectedTaxType = 'none';
+          this.selectedTaxType = 'No Tax';
         }
 
         // Update the form with loaded data
@@ -412,10 +412,10 @@ export class CreateQuotationComponent implements OnInit {
         qty: item.quantity || 0,
         unit: item.unit || 'Pieces',
         itemPrice: item.unit_price || 0,
-        tax_type: item.taxType || 'none',
+        tax_type: item.taxType || 'No Tax',
         miscellaneous: this.buildMiscellaneousFromComments(parsedComments),
         tooling: parsedComments.processRequired || '',
-        bid_type: item.bidType || 'bid'
+        bid_type: item.bidType || 'Bid'
       };
     });
   }
@@ -522,7 +522,7 @@ export class CreateQuotationComponent implements OnInit {
     }
   }
 
-  // Generate a default RFQ ID if none is provided
+  // Generate a default RFQ ID if No Tax is provided
   private generateDefaultRfqId(): string {
     const timestamp = Date.now().toString().slice(-6);
     return `RFQ${timestamp}`;
@@ -651,7 +651,7 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   onBidTypeChange(item: any) {
-    if (item.bid_type === 'no-bid') {
+    if (item.bid_type === 'No Bid') {
       item.itemPrice = 0;
     }
     this.calculateTotals();
@@ -680,7 +680,7 @@ export class CreateQuotationComponent implements OnInit {
   // Methods to get aggregated tax amounts from all line items
   getTotalCGST(): number {
     return this.model.quotationItems?.reduce((total: number, item: any) => {
-      if (item.tax_type === 'cgstSgst') {
+      if (item.tax_type === 'SGCT & CGST') {
         const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
         return total + (itemTotal * 0.09); // 9% CGST
       }
@@ -690,7 +690,7 @@ export class CreateQuotationComponent implements OnInit {
 
   getTotalSGST(): number {
     return this.model.quotationItems?.reduce((total: number, item: any) => {
-      if (item.tax_type === 'cgstSgst') {
+      if (item.tax_type === 'SGCT & CGST') {
         const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
         return total + (itemTotal * 0.09); // 9% SGST
       }
@@ -700,7 +700,7 @@ export class CreateQuotationComponent implements OnInit {
 
   getTotalIGST(): number {
     return this.model.quotationItems?.reduce((total: number, item: any) => {
-      if (item.tax_type === 'igst') {
+      if (item.tax_type === 'IGST') {
         const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
         return total + (itemTotal * 0.18); // 18% IGST
       }
@@ -723,9 +723,9 @@ export class CreateQuotationComponent implements OnInit {
     
     if (itemTotal <= 0) return 0;
     
-    if (item.tax_type === 'cgstSgst') {
+    if (item.tax_type === 'SGCT & CGST') {
       return itemTotal * 0.18; // 9% CGST + 9% SGST = 18%
-    } else if (item.tax_type === 'igst') {
+    } else if (item.tax_type === 'IGST') {
       return itemTotal * 0.18; // 18% IGST
     }
     return 0; // No tax
@@ -757,12 +757,12 @@ export class CreateQuotationComponent implements OnInit {
     
     // Set the selected tax type only for INR currency
     if (this.model.currency === 'INR') {
-      if (taxType === 'cgstSgst') {
+      if (taxType === 'SGCT & CGST') {
         this.model.cgstSgst = true;
-      } else if (taxType === 'igst') {
+      } else if (taxType === 'IGST') {
         this.model.igst = true;
       }
-      // 'none' case: both remain false
+      // 'No Tax' case: both remain false
     }
     
     this.calculateTotals();
@@ -772,28 +772,37 @@ export class CreateQuotationComponent implements OnInit {
   onCurrencyChange() {
     // If currency is changed to USD, reset tax options
     if (this.model.currency === 'USD') {
-      this.selectedTaxType = 'none';
+      this.selectedTaxType = 'No Tax';
       this.model.cgstSgst = false;
       this.model.igst = false;
-    } else if (this.model.currency === 'INR' && this.selectedTaxType === 'none') {
+    } else if (this.model.currency === 'INR' && this.selectedTaxType === 'No Tax') {
       // If currency is changed to INR and no tax was selected, you might want to set a default
-      // Uncomment the following line if you want to default to 'none' for INR as well
-      // this.selectedTaxType = 'none';
+      // Uncomment the following line if you want to default to 'No Tax' for INR as well
+      // this.selectedTaxType = 'No Tax';
     }
     
     this.calculateTotals();
   }
 
   onSubmit() {
+    console.log('=== ONSUBMIT DEBUG START ===');
+    console.log('Is Edit Mode:', this.isEditMode);
+    console.log('Form Valid:', this.form.valid);
+    console.log('Model Data:', this.model);
+    console.log('Quotation Items:', this.model.quotationItems);
+    
     this.showValidationErrors = true;
     
     // Clear previous errors
     this.validationErrors = {};
     
     // Validate form
+    console.log('Starting form validation...');
     const validation = this.validateForm();
+    console.log('Validation result:', validation);
     
     if (!validation.isValid) {
+      console.log('Form validation failed with errors:', validation.errors);
       // Show detailed error message
       const errorCount = validation.errors.length;
       let errorMessage = `Please fix the following ${errorCount} error${errorCount > 1 ? 's' : ''}:\n\n`;
@@ -806,24 +815,30 @@ export class CreateQuotationComponent implements OnInit {
       return;
     }
 
+    console.log('Form validation passed, transforming to API format...');
     // Transform data to API format
     const apiData = this.transformToApiFormat();
     
+    console.log('API data transformation completed');
     // Validate API data
     const apiValidation = this.validateApiData(apiData);
+    console.log('API validation result:', apiValidation);
     
     if (!apiValidation.isValid) {
       this.sweetAlert.warning(`Some fields may be missing: ${apiValidation.missingFields.join(', ')}`);
       console.warn('Missing API fields:', apiValidation.missingFields);
     }
 
-    console.log("Api Data ", apiData);
+    console.log("Final Api Data to be sent:", apiData);
     
     if (this.isEditMode) {
+      console.log('Calling updateExistingQuotation...');
       this.updateExistingQuotation(apiData);
     } else {
+      console.log('Calling createNewQuotation...');
       this.createNewQuotation(apiData);
     }
+    console.log('=== ONSUBMIT DEBUG END ===');
   }
 
   private scrollToFirstError() {
@@ -846,13 +861,39 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   createNewQuotation(apiData: any) {
+    console.log('=== CREATE NEW QUOTATION DEBUG ===');
+    console.log('API Data being sent:', JSON.stringify(apiData, null, 2));
+    
     let endpoint = `/api/resource/Supplier Quotation`
+    console.log('API Endpoint:', endpoint);
 
-    this.commonService.postWefabData(endpoint, apiData).subscribe((res: any) => {
-      console.log('Quotation created successfully:', res);
-      this.sweetAlert.success('Quotation Create successfully!');
-      this.router.navigate(['/wefab/supplier/quotation/details', res.data.name]);
-    })
+    this.commonService.postWefabData(endpoint, apiData).subscribe({
+      next: (res: any) => {
+        console.log('Quotation created successfully:', res);
+        this.sweetAlert.success('Quotation Create successfully!');
+        this.router.navigate(['/wefab/supplier/quotation/details', res.data.name]);
+      },
+      error: (error: any) => {
+        console.error('Error creating quotation:', error);
+        console.error('Error details:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          error: error.error
+        });
+        
+        let errorMessage = 'Failed to create quotation. ';
+        if (error.error && error.error.message) {
+          errorMessage += error.error.message;
+        } else if (error.message) {
+          errorMessage += error.message;
+        } else {
+          errorMessage += 'Please check your data and try again.';
+        }
+        
+        this.sweetAlert.error(errorMessage);
+      }
+    });
   }
 
   // Transform current form data to API expected format
@@ -884,10 +925,10 @@ export class CreateQuotationComponent implements OnInit {
       payment_terms: this.model.paymentTerms,
       shipping_terms: this.getShippingTerms(),
       notes: `<p>${this.model.termsAndConditions}</p>`,
-      igst_applicable: this.selectedTaxType === 'igst',
-      sgst_cgst_applicable: this.selectedTaxType === 'cgstSgst',
+      igst_applicable: this.selectedTaxType === 'IGST',
+      sgst_cgst_applicable: this.selectedTaxType === 'SGCT & CGST',
       items: this.transformQuotationItems(),
-      attachments: this.transformAttachments()
+      attachments: this.transformAttachments(),
     };
 
     debugger
@@ -910,8 +951,8 @@ export class CreateQuotationComponent implements OnInit {
         currency_code: this.model.currency,
         unit_price: unitPrice,
         comments: this.buildItemComments(item),
-        bid_type: item.bid_type || 'bid',
-        tax_type: item.tax_type || 'none',
+        bid_type: item.bid_type || 'Bid',
+        tax_type: item.tax_type || 'No Tax',
         tax_amount: this.getLineTaxAmount(item)
       };
     });
@@ -1055,11 +1096,11 @@ export class CreateQuotationComponent implements OnInit {
         item.qty || 0,
         `"${(item.unit || '').replace(/"/g, '""')}"`,
         item.itemPrice || 0,
-        `"${item.tax_type || 'none'}"`,
+        `"${item.tax_type || 'No Tax'}"`,
         this.getLineTaxAmount(item),
         `"${(item.miscellaneous || '').replace(/"/g, '""')}"`,
         `"${(item.tooling || '').replace(/"/g, '""')}"`,
-        `"${item.bid_type || 'bid'}"`,
+        `"${item.bid_type || 'Bid'}"`,
         `"${this.discountType}"`,
         `"${this.discountValue}"`
       ].join(',');
@@ -1403,7 +1444,7 @@ export class CreateQuotationComponent implements OnInit {
 
   private validateAndGetTaxType(taxType: string, rowNumber: number): string {
     const cleanTaxType = (taxType || '').trim().toLowerCase();
-    if (!cleanTaxType) return 'none'; // Default tax type
+    if (!cleanTaxType) return 'No Tax'; // Default tax type
 
     const validTaxType = this.taxTypeOptions.find(opt => 
       opt.value.toLowerCase() === cleanTaxType ||
@@ -1412,8 +1453,8 @@ export class CreateQuotationComponent implements OnInit {
     );
 
     if (!validTaxType) {
-      this.csvImportErrors.push(`Row ${rowNumber}: Invalid tax type '${taxType}'. Using 'none'.`);
-      return 'none';
+      this.csvImportErrors.push(`Row ${rowNumber}: Invalid tax type '${taxType}'. Using 'No Tax'.`);
+      return 'No Tax';
     }
 
     return validTaxType.value;
@@ -1421,7 +1462,7 @@ export class CreateQuotationComponent implements OnInit {
 
   private validateAndGetBidType(bidType: string, rowNumber: number): string {
     const cleanBidType = (bidType || '').trim().toLowerCase();
-    if (!cleanBidType) return 'bid'; // Default bid type
+      if (!cleanBidType) return 'Bid'; // Default bid type
 
     const validBidType = this.bidTypeOptions.find(opt => 
       opt.value.toLowerCase() === cleanBidType ||
@@ -1430,7 +1471,7 @@ export class CreateQuotationComponent implements OnInit {
 
     if (!validBidType) {
       this.csvImportErrors.push(`Row ${rowNumber}: Invalid bid type '${bidType}'. Using 'bid'.`);
-      return 'bid';
+      return 'Bid';
     }
 
     return validBidType.value;
@@ -1544,10 +1585,10 @@ export class CreateQuotationComponent implements OnInit {
           qty: 0,
           unit: '',
           itemPrice: 0,
-          tax_type: 'none',
+          tax_type: 'No Tax',
           miscellaneous: '',
           tooling: '',
-          bid_type: 'bid'
+          bid_type: 'Bid'
         }
       ];
     }
@@ -1610,11 +1651,11 @@ export class CreateQuotationComponent implements OnInit {
 
         // Set the selectedTaxType based on loaded data
         if (this.model.cgstSgst) {
-          this.selectedTaxType = 'cgstSgst';
+          this.selectedTaxType = 'SGCT & CGST';
         } else if (this.model.igst) {
-          this.selectedTaxType = 'igst';
+          this.selectedTaxType = 'IGST';
         } else {
-          this.selectedTaxType = 'none';
+          this.selectedTaxType = 'No Tax';
         }
 
         // Update the form with loaded data
@@ -1682,10 +1723,10 @@ export class CreateQuotationComponent implements OnInit {
         qty: item.quantity || 0,
         unit: item.unit || 'Pieces',
         itemPrice: item.unit_price || 0,
-        tax_type: item.taxType || 'none',
+        tax_type: item.taxType || 'No Tax',
         miscellaneous: parsedComments.miscellaneous || '',
         tooling: parsedComments.tooling || '',
-        bid_type: item.bidType || 'bid'
+        bid_type: item.bidType || 'Bid'
       };
     });
   }
@@ -2333,7 +2374,7 @@ export class CreateQuotationComponent implements OnInit {
       }
 
       // Item Price validation (only for bid items)
-      if (item.bid_type === 'bid') {
+      if (item.bid_type === 'Bid') {
         if (!item.itemPrice || item.itemPrice <= 0) {
           itemErrors.push('Item Price must be greater than 0 for bid items');
         } else if (isNaN(item.itemPrice)) {
@@ -2386,9 +2427,9 @@ export class CreateQuotationComponent implements OnInit {
 
     // Add sample data rows
     const sampleRows = [
-      [1, 'Sample Item 1', 'Sample description', 'Steel', 10, 'Nos', 100, 'none', '', 'Notes here', 'Standard', 'bid'],
-      [2, 'Sample Item 2', 'Another description', 'Aluminum', 5, 'Kg', 250.50, 'cgstSgst', '', 'Additional info', 'Required', 'bid'],
-      [3, 'Sample Item 3', 'Third item desc', 'Plastic', 20, 'Meter', 0, '', '', 'No bid item', 'Not Required', 'no-bid']
+      [1, 'Sample Item 1', 'Sample description', 'Steel', 10, 'Nos', 100, 'No Tax', '', 'Notes here', 'Standard', 'Bid'],
+      [2, 'Sample Item 2', 'Another description', 'Aluminum', 5, 'Kg', 250.50, 'SGCT & CGST', '', 'Additional info', 'Required', 'Bid'],
+      [3, 'Sample Item 3', 'Third item desc', 'Plastic', 20, 'Meter', 0, '', '', 'No bid item', 'Not Required', 'No Bid']
     ];
 
     const csvContent = [
@@ -2436,10 +2477,10 @@ export class CreateQuotationComponent implements OnInit {
         qty: 0,
         unit: '',
         itemPrice: 0,
-        tax_type: 'none',
+        tax_type: 'No Tax',
         miscellaneous: '',
         tooling: '',
-        bid_type: 'bid'
+        bid_type: 'Bid'
       });
       return false;
     }
@@ -2483,10 +2524,10 @@ export class CreateQuotationComponent implements OnInit {
       qty: 0,
       unit: '',
       itemPrice: 0,
-      tax_type: 'none',
+      tax_type: 'No Tax',
       miscellaneous: '',
       tooling: '',
-      bid_type: 'bid'
+      bid_type: 'Bid'
     };
     
     this.model.quotationItems.push(newItem);
@@ -2625,5 +2666,241 @@ export class CreateQuotationComponent implements OnInit {
     } else {
       this.sweetAlert.error('Unable to open file. File not available.');
     }
+  }
+
+  // Add this method for debugging purposes
+  debugQuotationState() {
+    console.log('=== QUOTATION STATE DEBUG ===');
+    console.log('1. Component state:');
+    console.log('   - isEditMode:', this.isEditMode);
+    console.log('   - quotationId:', this.quotationId);
+    console.log('   - showValidationErrors:', this.showValidationErrors);
+    
+    console.log('2. Model data:');
+    console.log('   - rfqId:', this.model.rfqId);
+    console.log('   - quotationName:', this.model.quotationName);
+    console.log('   - totalLeadTime:', this.model.totalLeadTime);
+    console.log('   - paymentTerms:', this.model.paymentTerms);
+    console.log('   - quoteValidTill:', this.model.quoteValidTill);
+    console.log('   - currency:', this.model.currency);
+    console.log('   - termsAndConditions:', this.model.termsAndConditions);
+    console.log('   - quotationItems count:', this.model.quotationItems?.length || 0);
+    
+    console.log('3. Form state:');
+    console.log('   - form.valid:', this.form.valid);
+    console.log('   - form.errors:', this.form.errors);
+    console.log('   - form.value:', this.form.value);
+    
+    console.log('4. Validation test:');
+    const validation = this.validateForm();
+    console.log('   - validation.isValid:', validation.isValid);
+    console.log('   - validation.errors:', validation.errors);
+    
+    console.log('5. Quotation items details:');
+    this.model.quotationItems?.forEach((item: any, index: number) => {
+      console.log(`   Item ${index + 1}:`, {
+        actionItemName: item.actionItemName,
+        qty: item.qty,
+        unit: item.unit,
+        itemPrice: item.itemPrice,
+        bid_type: item.bid_type,
+        tax_type: item.tax_type,
+        tooling: item.tooling
+      });
+    });
+    
+    console.log('6. Supplier ID:', this.getSupplierId());
+    console.log('7. RFQ ID from method:', this.getRfqId());
+    
+    console.log('=== END DEBUG ===');
+    
+    // Show summary in alert
+    const summary = `
+Debug Summary:
+- Edit Mode: ${this.isEditMode}
+- Form Valid: ${this.form.valid}
+- Validation Valid: ${validation.isValid}
+- Items Count: ${this.model.quotationItems?.length || 0}
+- RFQ ID: ${this.model.rfqId}
+- Supplier ID: ${this.getSupplierId()}
+
+${validation.isValid ? 'Form should submit successfully!' : 'Form has validation errors - check console for details'}
+    `;
+    
+    this.sweetAlert.info(summary);
+  }
+
+  // Test method to force API call (for debugging)
+  forceCreateQuotation() {
+    console.log('=== FORCE CREATE QUOTATION ===');
+    
+    // Skip validation and force create
+    const apiData = this.transformToApiFormat();
+    console.log('Forcing API call with data:', apiData);
+    
+    this.createNewQuotation(apiData);
+  }
+
+  // Number input validation methods
+  onNumberKeyPress(event: KeyboardEvent): boolean {
+    // Allow: backspace, delete, tab, escape, enter
+    if ([8, 9, 27, 13, 46].indexOf(event.keyCode) !== -1 ||
+        // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        (event.keyCode === 65 && event.ctrlKey === true) || // Ctrl+A
+        (event.keyCode === 67 && event.ctrlKey === true) || // Ctrl+C
+        (event.keyCode === 86 && event.ctrlKey === true) || // Ctrl+V
+        (event.keyCode === 88 && event.ctrlKey === true) || // Ctrl+X
+        // Allow: home, end, left, right
+        (event.keyCode >= 35 && event.keyCode <= 39)) {
+      return true;
+    }
+    
+    // Ensure that it is a number and stop the keypress
+    if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && 
+        (event.keyCode < 96 || event.keyCode > 105)) {
+      // Allow decimal point (period) only once
+      const currentValue = (event.target as HTMLInputElement).value;
+      if (event.key === '.' && !currentValue.includes('.')) {
+        return true;
+      }
+      event.preventDefault();
+      return false;
+    }
+    
+    return true;
+  }
+
+  onNumberInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+    
+    // Remove any non-numeric characters except decimal point
+    value = value.replace(/[^0-9.]/g, '');
+    
+    // Ensure only one decimal point
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Limit decimal places to 2
+    if (parts.length === 2 && parts[1].length > 2) {
+      value = parts[0] + '.' + parts[1].substring(0, 2);
+    }
+    
+    // Update the input value if it was changed
+    if (input.value !== value) {
+      input.value = value;
+      
+      // Trigger ngModel update
+      const ngModelChange = new Event('input', { bubbles: true });
+      input.dispatchEvent(ngModelChange);
+    }
+  }
+
+  onNumberPaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    
+    const clipboardData = event.clipboardData || (window as any).clipboardData;
+    const pastedText = clipboardData.getData('text');
+    
+    // Clean the pasted text to allow only numbers and one decimal point
+    let cleanedText = pastedText.replace(/[^0-9.]/g, '');
+    
+    // Ensure only one decimal point
+    const parts = cleanedText.split('.');
+    if (parts.length > 2) {
+      cleanedText = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Limit decimal places to 2
+    if (parts.length === 2 && parts[1].length > 2) {
+      cleanedText = parts[0] + '.' + parts[1].substring(0, 2);
+    }
+    
+    // Set the cleaned value
+    const input = event.target as HTMLInputElement;
+    const selectionStart = input.selectionStart || 0;
+    const selectionEnd = input.selectionEnd || 0;
+    const currentValue = input.value;
+    
+    const newValue = currentValue.substring(0, selectionStart) + cleanedText + currentValue.substring(selectionEnd);
+    input.value = newValue;
+    
+    // Position cursor after pasted content
+    const newCursorPosition = selectionStart + cleanedText.length;
+    input.setSelectionRange(newCursorPosition, newCursorPosition);
+    
+    // Trigger ngModel update
+    const ngModelChange = new Event('input', { bubbles: true });
+    input.dispatchEvent(ngModelChange);
+  }
+
+  // Integer input validation methods (for lead time - no decimals allowed)
+  onIntegerKeyPress(event: KeyboardEvent): boolean {
+    // Allow: backspace, delete, tab, escape, enter
+    if ([8, 9, 27, 13, 46].indexOf(event.keyCode) !== -1 ||
+        // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        (event.keyCode === 65 && event.ctrlKey === true) || // Ctrl+A
+        (event.keyCode === 67 && event.ctrlKey === true) || // Ctrl+C
+        (event.keyCode === 86 && event.ctrlKey === true) || // Ctrl+V
+        (event.keyCode === 88 && event.ctrlKey === true) || // Ctrl+X
+        // Allow: home, end, left, right
+        (event.keyCode >= 35 && event.keyCode <= 39)) {
+      return true;
+    }
+    
+    // Ensure that it is a number and stop the keypress
+    if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && 
+        (event.keyCode < 96 || event.keyCode > 105)) {
+      event.preventDefault();
+      return false;
+    }
+    
+    return true;
+  }
+
+  onIntegerInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+    
+    // Remove any non-numeric characters (no decimal point for integers)
+    value = value.replace(/[^0-9]/g, '');
+    
+    // Update the input value if it was changed
+    if (input.value !== value) {
+      input.value = value;
+      
+      // Trigger ngModel update
+      const ngModelChange = new Event('input', { bubbles: true });
+      input.dispatchEvent(ngModelChange);
+    }
+  }
+
+  onIntegerPaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    
+    const clipboardData = event.clipboardData || (window as any).clipboardData;
+    const pastedText = clipboardData.getData('text');
+    
+    // Clean the pasted text to allow only integers
+    const cleanedText = pastedText.replace(/[^0-9]/g, '');
+    
+    // Set the cleaned value
+    const input = event.target as HTMLInputElement;
+    const selectionStart = input.selectionStart || 0;
+    const selectionEnd = input.selectionEnd || 0;
+    const currentValue = input.value;
+    
+    const newValue = currentValue.substring(0, selectionStart) + cleanedText + currentValue.substring(selectionEnd);
+    input.value = newValue;
+    
+    // Position cursor after pasted content
+    const newCursorPosition = selectionStart + cleanedText.length;
+    input.setSelectionRange(newCursorPosition, newCursorPosition);
+    
+    // Trigger ngModel update
+    const ngModelChange = new Event('input', { bubbles: true });
+    input.dispatchEvent(ngModelChange);
   }
 }

@@ -1404,6 +1404,55 @@
   }
 }
 
+// Number input specific styling
+.form-control[type="number"] {
+  // Hide number input spinners in most browsers
+  -moz-appearance: textfield;
+  
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  // Add subtle animation for invalid input feedback
+  &.invalid-input {
+    animation: shake 0.3s ease-in-out;
+    border-color: $safety-orange !important;
+  }
+}
+
+// Shake animation for invalid input
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+// Enhanced styling for number inputs in totals section
+.totals-section {
+  .form-control[type="number"] {
+    text-align: center;
+    font-weight: $font-weight-medium;
+    
+    &:focus {
+      background-color: rgba(26, 58, 95, 0.05);
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 2px rgba(26, 58, 95, 0.15);
+    }
+    
+    &::placeholder {
+      color: #999;
+      font-weight: $font-weight-normal;
+    }
+    
+    // Prevent text selection of placeholder
+    &:placeholder-shown {
+      text-align: center;
+    }
+  }
+}
+
 // Information box styling
 .alert.alert-info {
   background-color: rgba(13, 202, 240, 0.1);
