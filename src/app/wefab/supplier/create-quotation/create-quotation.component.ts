@@ -157,6 +157,8 @@ export class CreateQuotationComponent implements OnInit {
   model: any = {
     rfqId: '',
     quotationName: '',
+    quotationId: '', // Add quotation ID field
+    isEditMode: false, // Add edit mode flag for form visibility
     totalLeadTime: '',
     paymentTerms: 'Net 10',
     quoteValidTill: null,
@@ -294,10 +296,12 @@ export class CreateQuotationComponent implements OnInit {
       // Check if this is edit mode first
       if (params['mode'] === 'edit' && params['quotationId']) {
         this.isEditMode = true;
+        this.model.isEditMode = true; // Set model flag for form visibility
         this.quotationId = params['quotationId'];
         console.log('Edit mode activated for quotation:', this.quotationId);
         this.loadQuotationForEdit(this.quotationId);
       } else {
+        this.model.isEditMode = false; // Set model flag for form visibility
         // Not in edit mode, handle RFQ ID updates and load create quotation data
         let rfqIdFromQuery = params['rfqId'] || params['rfq_id'];
         
@@ -313,6 +317,11 @@ export class CreateQuotationComponent implements OnInit {
         }
       }
     });
+    
+    // Initialize tax calculations
+    setTimeout(() => {
+      this.updateTaxCalculations();
+    }, 500);
   }
 
   loadCreateQuotation(rfqId: string) {
@@ -334,7 +343,7 @@ export class CreateQuotationComponent implements OnInit {
           quotationTo: createQuotationData.quotation_to || '',
           totalLeadTime: this.extractDaysFromDuration(createQuotationData.estimated_completion_duration),
           paymentTerms: createQuotationData.payment_terms || 'Net 30',
-          quoteValidTill: this.parseApiDate(createQuotationData.validity),
+          quoteValidTill: this.parseApiDateForInput(createQuotationData.validity),
           currency: createQuotationData.items?.[0]?.currency_code || 'USD',
           email: 'email@example.com', // This might come from user/supplier data
           reference: createQuotationData.quotation_id || '',
@@ -353,10 +362,13 @@ export class CreateQuotationComponent implements OnInit {
         // Set discount and shipping charges for calculations
         if (createQuotationData.discount_type === 'Amount' && createQuotationData.discount_amount) {
           this.discountType = 'amount';
-          this.discountValue = createQuotationData.discount_amount;
+          this.discountValue = createQuotationData.discount || createQuotationData.discount_amount;
+        } else if (createQuotationData.discount_percentage) {
+          this.discountType = 'percentage';
+          this.discountValue = createQuotationData.discount || createQuotationData.discount_percentage;
         } else {
           this.discountType = 'percentage';
-          this.discountValue = createQuotationData.discount_percentage || 0;
+          this.discountValue = 0;
         }
         this.shippingCharges = createQuotationData.shipping_charges || 0;
 
@@ -405,17 +417,27 @@ export class CreateQuotationComponent implements OnInit {
       // Extract estimated rate if available
       const estimatedRate = this.extractEstimatedRate(item.comments || '');
       
+      // Determine tax type based on currency and item properties
+      let taxType = 'No Tax';
+      if (item.currency_code === 'INR') {
+        if (item.igst_applicable || this.model.igst) {
+          taxType = 'IGST';
+        } else if (item.sgst_cgst_applicable || this.model.cgstSgst) {
+          taxType = 'SGCT & CGST';
+        }
+      }
+      
       return {
         actionItemName: item.item_code || '',
         description: this.stripHtmlTags(item.item_description || ''),
         material: parsedComments.material || '',
         qty: item.quantity || 0,
-        unit: item.unit || 'Pieces',
-        itemPrice: item.unit_price || 0,
-        tax_type: item.taxType || 'No Tax',
+        unit: item.unit || 'Nos',
+        itemPrice: item.unit_price || estimatedRate || 0,
+        tax_type: taxType,
         miscellaneous: this.buildMiscellaneousFromComments(parsedComments),
-        tooling: parsedComments.processRequired || '',
-        bid_type: item.bidType || 'Bid'
+        tooling: parsedComments.processRequired || 'Standard',
+        bid_type: item.bid_type || 'Bid'
       };
     });
   }
@@ -662,6 +684,9 @@ export class CreateQuotationComponent implements OnInit {
     this.calculateTotals();
     // Force UI update for tax amounts
     this.updateTaxAmounts();
+    // Debug log
+    console.log('Tax type changed for item:', item.actionItemName, 'New tax type:', item.tax_type);
+    console.log('Item total tax amount:', this.getLineTaxAmount(item));
   }
 
   // Method to force update tax amounts in the UI
@@ -710,7 +735,26 @@ export class CreateQuotationComponent implements OnInit {
 
   // Method to get total tax amount from all line items
   getTotalTaxAmount(): number {
-    return this.getTotalCGST() + this.getTotalSGST() + this.getTotalIGST();
+    if (!this.model.quotationItems || this.model.quotationItems.length === 0) {
+      return 0;
+    }
+    
+    let totalTax = 0;
+    
+    this.model.quotationItems.forEach((item: any) => {
+      if (item.qty && item.itemPrice && item.qty > 0 && item.itemPrice > 0) {
+        const itemTotal = item.qty * item.itemPrice;
+        
+        if (item.tax_type === 'SGCT & CGST') {
+          totalTax += itemTotal * 0.18; // 9% CGST + 9% SGST = 18%
+        } else if (item.tax_type === 'IGST') {
+          totalTax += itemTotal * 0.18; // 18% IGST
+        }
+        // For 'No Tax', add 0
+      }
+    });
+    
+    return totalTax;
   }
 
   // Method to get tax amount for a specific line item
@@ -900,10 +944,19 @@ export class CreateQuotationComponent implements OnInit {
   transformToApiFormat(): any {
     const calculatedDiscountAmount = this.getDiscountAmount(); // Always calculate the actual discount amount
     
+    // Create discount variable - use discount_percentage if exists, otherwise use discount_amount
+    let discount = 0;
+    if (this.discountType === 'percentage' && this.discountValue > 0) {
+      discount = this.discountValue; // Use percentage value
+    } else if (this.discountType === 'amount' && this.discountValue > 0) {
+      discount = this.discountValue; // Use amount value
+    }
+    
     // Log discount calculation details for debugging
     console.log('=== DISCOUNT CALCULATION DEBUG ===');
     console.log('Discount Type:', this.discountType);
     console.log('Discount Value:', this.discountValue);
+    console.log('Discount Variable:', discount);
     console.log('Sub Total:', this.calculatedSubTotal);
     console.log('Calculated Discount Amount:', calculatedDiscountAmount);
     console.log('=====================================');
@@ -920,6 +973,7 @@ export class CreateQuotationComponent implements OnInit {
       discount_type: this.discountType === 'percentage' ? 'Percentage' : 'Amount',
       discount_percentage: this.discountType === 'percentage' ? this.discountValue : 0,
       discount_amount: calculatedDiscountAmount, // Always set the calculated discount amount
+      discount: discount, // New single discount variable
       shipping_charges: this.shippingCharges || 0,
       total_tax_amount: this.getTotalTaxAmount(),
       payment_terms: this.model.paymentTerms,
@@ -1620,10 +1674,12 @@ export class CreateQuotationComponent implements OnInit {
         // Map API data to component model
         this.model = {
           rfqId: quotationData.rfq_id || currentRfqId,
-          quotationName: quotationData.name || '',
+          quotationName: quotationData.quotation_name || '',
+          quotationId: quotationData.name || quotationId, // Set the quotation ID from API response
+          isEditMode: true, // Ensure edit mode flag is set
           totalLeadTime: this.extractDaysFromDuration(quotationData.estimated_completion_duration),
           paymentTerms: quotationData.payment_terms || 'Net 30',
-          quoteValidTill: this.parseApiDate(quotationData.validity),
+          quoteValidTill: this.parseApiDateForInput(quotationData.validity),
           currency: quotationData.items?.[0]?.currency_code || 'USD',
           email: 'email@example.com', // This might come from user/supplier data
           reference: quotationData.name || '',
@@ -1642,10 +1698,13 @@ export class CreateQuotationComponent implements OnInit {
         // Set discount and shipping charges for calculations
         if (quotationData.discount_type === 'Amount' && quotationData.discount_amount) {
           this.discountType = 'amount';
-          this.discountValue = quotationData.discount_amount;
+          this.discountValue = quotationData.discount || quotationData.discount_amount;
+        } else if (quotationData.discount_percentage) {
+          this.discountType = 'percentage';
+          this.discountValue = quotationData.discount || quotationData.discount_percentage;
         } else {
           this.discountType = 'percentage';
-          this.discountValue = quotationData.discount_percentage || 0;
+          this.discountValue = 0;
         }
         this.shippingCharges = quotationData.shipping_charges || 0;
 
@@ -1693,6 +1752,25 @@ export class CreateQuotationComponent implements OnInit {
     return match ? parseInt(match[1], 10) : 0;
   }
 
+  // Helper method to parse API date format for input field
+  private parseApiDateForInput(dateString: string): string | null {
+    if (!dateString) return null;
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return null;
+      
+      // Format as YYYY-MM-DD for HTML date input
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}`;
+    } catch (error) {
+      console.warn('Error parsing date:', dateString);
+      return null;
+    }
+  }
+
   // Helper method to parse API date format
   private parseApiDate(dateString: string): Date | null {
     if (!dateString) return null;
@@ -1716,17 +1794,29 @@ export class CreateQuotationComponent implements OnInit {
       // Parse comments to extract material, miscellaneous, and tooling info
       const parsedComments = this.parseItemComments(item.comments || '');
       
+      // Determine tax type based on item properties
+      let taxType = 'No Tax';
+      if (item.tax_type) {
+        taxType = item.tax_type;
+      } else if (item.currency_code === 'INR') {
+        if (item.igst_applicable || this.model.igst) {
+          taxType = 'IGST';
+        } else if (item.sgst_cgst_applicable || this.model.cgstSgst) {
+          taxType = 'SGCT & CGST';
+        }
+      }
+      
       return {
         actionItemName: item.item_code || '',
         description: item.item_description || '',
         material: parsedComments.material || '',
         qty: item.quantity || 0,
-        unit: item.unit || 'Pieces',
+        unit: item.unit || 'Nos',
         itemPrice: item.unit_price || 0,
-        tax_type: item.taxType || 'No Tax',
+        tax_type: taxType,
         miscellaneous: parsedComments.miscellaneous || '',
-        tooling: parsedComments.tooling || '',
-        bid_type: item.bidType || 'Bid'
+        tooling: parsedComments.tooling || 'Standard',
+        bid_type: item.bid_type || 'Bid'
       };
     });
   }
@@ -2238,7 +2328,7 @@ export class CreateQuotationComponent implements OnInit {
         url: "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/SS0E29F5_Screenshot_from_2025-05-30_11-38-14.png",
         name: "75TPAEH6_Screenshot_from_2025-05-30_11-38-14.png",
         type: "image/png",
-        thumbnail: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2ODApLCBxdWFsaXR5ID0gODAK/9sAQwAGBAUGBQQGBgUGBwcGCAoQCgoJCQoUDg0NDhQUExMTExQUExMTExMTExMTExMTExMTExMTExMTExMTExMTExMT/9sAQwEHBwcKCAoTCgoTExQTFBMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMT/8AAEQgAKAAoAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBkQgUobHBwfBDUuHxCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/2Q=="
+        thumbnail: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2ODApLCBxdWFsaXR5ID0gODAK/9sAQwAGBAUGBQQGBgUGBwcGCAoQCgoJCQoUDg0NDhQUExMTExQUExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMT/9sAQwEHBwcKCAoTCgoTExQTFBMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMT/8AAEQgAKAAoAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBkQgUobHBwfBDUuHxCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/2Q=="
       },
       {
         url: "https://s3.ap-south-1.amazonaws.com/www.vendosmart.com/ap-south-1/2025/05/30/File/RXO4IUIM_chirag_agar.pdf",
@@ -2902,5 +2992,106 @@ ${validation.isValid ? 'Form should submit successfully!' : 'Form has validation
     // Trigger ngModel update
     const ngModelChange = new Event('input', { bubbles: true });
     input.dispatchEvent(ngModelChange);
+  }
+
+  // Test method to verify quotation ID field (can be removed in production)
+  testQuotationIdField() {
+    console.log('=== QUOTATION ID FIELD TEST ===');
+    console.log('Is Edit Mode:', this.isEditMode);
+    console.log('Model Edit Mode Flag:', this.model.isEditMode);
+    console.log('Quotation ID in Model:', this.model.quotationId);
+    console.log('Quotation ID from Component:', this.quotationId);
+    
+    // Test setting a sample quotation ID
+    this.model.quotationId = 'QTN0000041';
+    this.isEditMode = true;
+    this.model.isEditMode = true;
+    
+    console.log('After test update:');
+    console.log('- Edit Mode:', this.isEditMode);
+    console.log('- Model Edit Mode:', this.model.isEditMode);
+    console.log('- Quotation ID:', this.model.quotationId);
+    
+    this.sweetAlert.info(`Quotation ID Test:\nEdit Mode: ${this.isEditMode}\nQuotation ID: ${this.model.quotationId}\n\nThe quotation ID field should now be visible and frozen.`);
+  }
+
+  // Method to force tax calculation update
+  updateTaxCalculations() {
+    // Force recalculation of all tax amounts
+    this.calculateTotals();
+    
+    // Log for debugging
+    console.log('Tax calculations updated:');
+    console.log('Total CGST:', this.getTotalCGST());
+    console.log('Total SGST:', this.getTotalSGST());
+    console.log('Total IGST:', this.getTotalIGST());
+    console.log('Total Tax Amount:', this.getTotalTaxAmount());
+  }
+
+  // Add this method for debugging purposes
+  debugQuotationFixedIssues() {
+    console.log('=== QUOTATION FIXED ISSUES DEBUG ===');
+    console.log('1. Quote Valid Till field:');
+    console.log('   - Value:', this.model.quoteValidTill);
+    console.log('   - Type:', typeof this.model.quoteValidTill);
+    
+    console.log('2. Tax Type and Tax Amount for each item:');
+    this.model.quotationItems?.forEach((item: any, index: number) => {
+      console.log(`   Item ${index + 1}:`, {
+        name: item.actionItemName,
+        taxType: item.tax_type,
+        qty: item.qty,
+        price: item.itemPrice,
+        taxAmount: this.getLineTaxAmount(item)
+      });
+    });
+    
+    console.log('3. Total Tax Amount:');
+    console.log('   - Calculated:', this.getTotalTaxAmount());
+    console.log('   - Total CGST:', this.getTotalCGST());
+    console.log('   - Total SGST:', this.getTotalSGST());
+    console.log('   - Total IGST:', this.getTotalIGST());
+    
+    console.log('4. Field Alignment:');
+    console.log('   - Edit Mode:', this.isEditMode);
+    console.log('   - RFQ ID:', this.model.rfqId);
+    console.log('   - Quotation ID:', this.model.quotationId);
+    
+    console.log('=== END DEBUG ===');
+    
+    // Show summary in alert
+    const summary = `
+Fixed Issues Status:
+1. Quote Valid Till: ${this.model.quoteValidTill ? 'Filled ✓' : 'Empty ✗'}
+2. Tax Types Filled: ${this.model.quotationItems?.filter((item: any) => item.tax_type && item.tax_type !== 'No Tax').length || 0} items
+3. Total Tax Amount: ${this.getTotalTaxAmount()} ${this.model.currency}
+4. Edit Mode: ${this.isEditMode ? 'Active ✓' : 'Inactive'}
+
+Check console for detailed information.
+    `;
+    
+    this.sweetAlert.info(summary);
+  }
+
+  // Method to get total quantity from all quotation items
+  getTotalQuantity(): number {
+    if (!this.model.quotationItems || this.model.quotationItems.length === 0) {
+      return 0;
+    }
+    
+    return this.model.quotationItems.reduce((total: number, item: any) => {
+      const quantity = Number(item.qty) || 0;
+      return total + quantity;
+    }, 0);
+  }
+
+  // Method to get discount variable - returns discount_percentage if percentage type, otherwise discount_amount
+  getDiscountVariable(): number {
+    if (this.discountType === 'percentage' && this.discountValue > 0) {
+      return this.discountValue; // Return percentage value
+    } else if (this.discountType === 'amount' && this.discountValue > 0) {
+      return this.discountValue; // Return amount value
+    }
+    return 0;
   }
 }

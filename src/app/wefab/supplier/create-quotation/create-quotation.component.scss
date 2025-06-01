@@ -27,14 +27,15 @@
 
 .non-editable-field {
   background-color: #f8f9fa !important;
-  border: 1px solid $material-finish-silver;
-  color: $machine-gray;
+  color: #6c757d !important;
   cursor: not-allowed;
+  border-color: #dee2e6;
   
   &:focus {
     background-color: #f8f9fa !important;
-    border-color: $material-finish-silver;
-    box-shadow: none;
+    color: #6c757d !important;
+    border-color: #dee2e6 !important;
+    box-shadow: none !important;
   }
 }
 
@@ -304,12 +305,10 @@
     // Disabled input styling for No Bid
     &:disabled {
       background-color: #f8f9fa !important;
-      color: #adb5bd !important;
       cursor: not-allowed;
       border-color: #dee2e6 !important;
       
       &::placeholder {
-        color: #adb5bd !important;
       }
     }
   }
@@ -437,7 +436,6 @@
       
       &:disabled {
         background-color: #f8f9fa !important;
-        color: #adb5bd !important;
         cursor: not-allowed;
         border-color: #dee2e6 !important;
       }
