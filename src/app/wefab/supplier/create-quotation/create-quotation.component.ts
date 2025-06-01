@@ -196,6 +196,10 @@ export class CreateQuotationComponent implements OnInit {
   shippingCharges: number = 0;
   totalAmount: number = 0;
 
+  // Discount properties
+  discountType: string = 'percentage'; // 'percentage' or 'amount'
+  discountValue: number = 0;
+
   // Tax calculation properties - Fixed values
   cgstPercentage: number = 9;
   sgstPercentage: number = 9;
@@ -340,8 +344,14 @@ export class CreateQuotationComponent implements OnInit {
           totalAmount: createQuotationData.grand_total || 0
         };
 
-        // Set discount percentage and shipping charges for calculations
-        this.discountPercentage = createQuotationData.discount_percentage || 0;
+        // Set discount and shipping charges for calculations
+        if (createQuotationData.discount_type === 'Amount' && createQuotationData.discount_amount) {
+          this.discountType = 'amount';
+          this.discountValue = createQuotationData.discount_amount;
+        } else {
+          this.discountType = 'percentage';
+          this.discountValue = createQuotationData.discount_percentage || 0;
+        }
         this.shippingCharges = createQuotationData.shipping_charges || 0;
 
         // Set the selectedTaxType based on loaded data
@@ -585,7 +595,7 @@ export class CreateQuotationComponent implements OnInit {
       return sum + itemTotal;
     }, 0) || 0;
     
-    const discountAmount = this.subTotal * this.discountPercentage / 100;
+    const discountAmount = this.getDiscountAmount();
     const subtotalAfterDiscount = this.subTotal - discountAmount;
     
     // Calculate taxes from individual line items
@@ -595,7 +605,7 @@ export class CreateQuotationComponent implements OnInit {
     
     // Update model
     this.model.subTotal = this.subTotal;
-    this.model.discount = this.discountPercentage;
+    this.model.discount = this.discountValue;
     this.model.shippingCharges = this.shippingCharges;
     this.model.totalAmount = this.totalAmount;
   }
@@ -609,7 +619,7 @@ export class CreateQuotationComponent implements OnInit {
 
   get calculatedTotalAmount(): number {
     const subTotal = this.calculatedSubTotal;
-    const discountAmount = subTotal * this.discountPercentage / 100;
+    const discountAmount = this.getDiscountAmount();
     const subtotalAfterDiscount = subTotal - discountAmount;
     
     // Calculate taxes from individual line items
@@ -620,7 +630,7 @@ export class CreateQuotationComponent implements OnInit {
 
   get calculatedDiscountedAmount(): number {
     const subTotal = this.calculatedSubTotal;
-    return subTotal - (subTotal * this.discountPercentage / 100);
+    return subTotal - this.getDiscountAmount();
   }
 
   // Method to calculate individual row total
@@ -689,6 +699,23 @@ export class CreateQuotationComponent implements OnInit {
       return itemTotal * 0.18; // 18% IGST
     }
     return 0; // No tax
+  }
+
+  // Method to get discount amount for display
+  getDiscountAmount(): number {
+    const subTotal = this.calculatedSubTotal;
+    if (this.discountType === 'percentage') {
+      return subTotal * (this.discountValue || 0) / 100;
+    } else {
+      return this.discountValue || 0;
+    }
+  }
+
+  // Method to handle discount type change
+  onDiscountTypeChange() {
+    // Reset discount value when changing type to avoid confusion
+    this.discountValue = 0;
+    this.calculateTotals();
   }
 
   onTaxTypeChange(taxType: string) {
@@ -801,7 +828,9 @@ export class CreateQuotationComponent implements OnInit {
       delivery_address: this.getDeliveryAddress(),
       quotation_from: this.quoteFrom,
       quotation_to: this.quoteTo,
-      discount_percentage: this.discountPercentage || 0,
+      discount_type: this.discountType === 'percentage' ? 'Percentage' : 'Amount',
+      discount_percentage: this.discountType === 'percentage' ? this.discountValue : 0,
+      discount_amount: this.discountType === 'amount' ? this.discountValue : 0,
       shipping_charges: this.shippingCharges || 0,
       payment_terms: this.model.paymentTerms,
       shipping_terms: this.getShippingTerms(),
@@ -963,7 +992,9 @@ export class CreateQuotationComponent implements OnInit {
       'Taxable Amount',
       'Miscellaneous',
       'Tooling',
-      'Bid Type'
+      'Bid Type',
+      'Discount Type',
+      'Discount Value'
     ];
 
     const csvRows = this.model.quotationItems.map((item: any, index: number) => {
@@ -979,7 +1010,9 @@ export class CreateQuotationComponent implements OnInit {
         this.getLineTaxAmount(item),
         `"${(item.miscellaneous || '').replace(/"/g, '""')}"`,
         `"${(item.tooling || '').replace(/"/g, '""')}"`,
-        `"${item.bidType || 'bid'}"`
+        `"${item.bidType || 'bid'}"`,
+        `"${this.discountType}"`,
+        `"${this.discountValue}"`
       ].join(',');
     });
 
@@ -1187,7 +1220,8 @@ export class CreateQuotationComponent implements OnInit {
     }
     
     // Reset totals
-    this.discountPercentage = 0;
+    this.discountType = 'percentage';
+    this.discountValue = 0;
     this.shippingCharges = 0;
     
     this.calculateTotals();
@@ -1231,8 +1265,14 @@ export class CreateQuotationComponent implements OnInit {
           totalAmount: quotationData.grand_total || 0
         };
 
-        // Set discount percentage and shipping charges for calculations
-        this.discountPercentage = quotationData.discount_percentage || 0;
+        // Set discount and shipping charges for calculations
+        if (quotationData.discount_type === 'Amount' && quotationData.discount_amount) {
+          this.discountType = 'amount';
+          this.discountValue = quotationData.discount_amount;
+        } else {
+          this.discountType = 'percentage';
+          this.discountValue = quotationData.discount_percentage || 0;
+        }
         this.shippingCharges = quotationData.shipping_charges || 0;
 
         // Set the selectedTaxType based on loaded data
