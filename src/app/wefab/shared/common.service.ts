@@ -69,10 +69,15 @@ export class CommonService {
 
     postData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
-        const headers = new HttpHeaders({
-            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+        let headers = new HttpHeaders({
             'Content-Type': 'application/json'
         });
+        if (sessionStorage.getItem('token')) {
+            headers = new HttpHeaders({
+                'Authorization': `Token ${sessionStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            });
+        }
     
         // Return the HTTP request with headers, body and params
         return this.http.post(
