@@ -177,6 +177,7 @@ export class CreateQuotationComponent implements OnInit {
         unit: '',
         bidType: 'bid',
         itemPrice: 0,
+        taxType: 'none',
         miscellaneous: '',
         tooling: ''
       }
@@ -238,6 +239,12 @@ export class CreateQuotationComponent implements OnInit {
   bidTypeOptions = [
     { label: 'Bid', value: 'bid' },
     { label: 'No Bid', value: 'no-bid' }
+  ];
+
+  taxTypeOptions = [
+    { label: 'No Tax', value: 'none' },
+    { label: 'CGST & SGST', value: 'cgstSgst' },
+    { label: 'IGST', value: 'igst' }
   ];
 
   @ViewChild('csvFileInput', { static: false }) csvFileInput!: ElementRef;
@@ -389,6 +396,7 @@ export class CreateQuotationComponent implements OnInit {
         qty: item.quantity || 0,
         unit: item.unit || 'Pieces',
         itemPrice: item.unit_price || 0,
+        taxType: item.taxType || 'none',
         miscellaneous: this.buildMiscellaneousFromComments(parsedComments),
         tooling: parsedComments.processRequired || '',
         bidType: item.bidType || 'bid'
@@ -580,17 +588,8 @@ export class CreateQuotationComponent implements OnInit {
     const discountAmount = this.subTotal * this.discountPercentage / 100;
     const subtotalAfterDiscount = this.subTotal - discountAmount;
     
-    // Calculate taxes only for INR currency
-    let totalTax = 0;
-    if (this.model.currency === 'INR') {
-      if (this.model.cgstSgst) {
-        totalTax += (subtotalAfterDiscount * this.cgstPercentage / 100);
-        totalTax += (subtotalAfterDiscount * this.sgstPercentage / 100);
-      }
-      if (this.model.igst) {
-        totalTax += (subtotalAfterDiscount * this.igstPercentage / 100);
-      }
-    }
+    // Calculate taxes from individual line items
+    const totalTax = this.getTotalTaxAmount();
     
     this.totalAmount = subtotalAfterDiscount + totalTax + this.shippingCharges;
     
@@ -613,43 +612,10 @@ export class CreateQuotationComponent implements OnInit {
     const discountAmount = subTotal * this.discountPercentage / 100;
     const subtotalAfterDiscount = subTotal - discountAmount;
     
-    // Calculate taxes only for INR currency
-    let totalTax = 0;
-    if (this.model.currency === 'INR') {
-      if (this.model.cgstSgst) {
-        totalTax += (subtotalAfterDiscount * this.cgstPercentage / 100);
-        totalTax += (subtotalAfterDiscount * this.sgstPercentage / 100);
-      }
-      if (this.model.igst) {
-        totalTax += (subtotalAfterDiscount * this.igstPercentage / 100);
-      }
-    }
+    // Calculate taxes from individual line items
+    const totalTax = this.getTotalTaxAmount();
     
     return subtotalAfterDiscount + totalTax + this.shippingCharges;
-  }
-
-  get calculatedCGST(): number {
-    if (this.model.currency !== 'INR') return 0;
-    const subTotal = this.calculatedSubTotal;
-    const discountAmount = subTotal * this.discountPercentage / 100;
-    const subtotalAfterDiscount = subTotal - discountAmount;
-    return this.model.cgstSgst ? (subtotalAfterDiscount * this.cgstPercentage / 100) : 0;
-  }
-
-  get calculatedSGST(): number {
-    if (this.model.currency !== 'INR') return 0;
-    const subTotal = this.calculatedSubTotal;
-    const discountAmount = subTotal * this.discountPercentage / 100;
-    const subtotalAfterDiscount = subTotal - discountAmount;
-    return this.model.cgstSgst ? (subtotalAfterDiscount * this.sgstPercentage / 100) : 0;
-  }
-
-  get calculatedIGST(): number {
-    if (this.model.currency !== 'INR') return 0;
-    const subTotal = this.calculatedSubTotal;
-    const discountAmount = subTotal * this.discountPercentage / 100;
-    const subtotalAfterDiscount = subTotal - discountAmount;
-    return this.model.igst ? (subtotalAfterDiscount * this.igstPercentage / 100) : 0;
   }
 
   get calculatedDiscountedAmount(): number {
@@ -671,6 +637,58 @@ export class CreateQuotationComponent implements OnInit {
       item.itemPrice = 0;
     }
     this.calculateTotals();
+  }
+
+  onItemTaxTypeChange(item: any) {
+    // Recalculate totals when tax type changes for any item
+    this.calculateTotals();
+  }
+
+  // Methods to get aggregated tax amounts from all line items
+  getTotalCGST(): number {
+    return this.model.quotationItems?.reduce((total: number, item: any) => {
+      if (item.taxType === 'cgstSgst') {
+        const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
+        return total + (itemTotal * 0.09); // 9% CGST
+      }
+      return total;
+    }, 0) || 0;
+  }
+
+  getTotalSGST(): number {
+    return this.model.quotationItems?.reduce((total: number, item: any) => {
+      if (item.taxType === 'cgstSgst') {
+        const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
+        return total + (itemTotal * 0.09); // 9% SGST
+      }
+      return total;
+    }, 0) || 0;
+  }
+
+  getTotalIGST(): number {
+    return this.model.quotationItems?.reduce((total: number, item: any) => {
+      if (item.taxType === 'igst') {
+        const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
+        return total + (itemTotal * 0.18); // 18% IGST
+      }
+      return total;
+    }, 0) || 0;
+  }
+
+  // Method to get total tax amount from all line items
+  getTotalTaxAmount(): number {
+    return this.getTotalCGST() + this.getTotalSGST() + this.getTotalIGST();
+  }
+
+  // Method to get tax amount for a specific line item
+  getLineTaxAmount(item: any): number {
+    const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
+    if (item.taxType === 'cgstSgst') {
+      return itemTotal * 0.18; // 9% CGST + 9% SGST = 18%
+    } else if (item.taxType === 'igst') {
+      return itemTotal * 0.18; // 18% IGST
+    }
+    return 0; // No tax
   }
 
   onTaxTypeChange(taxType: string) {
@@ -821,7 +839,8 @@ export class CreateQuotationComponent implements OnInit {
         discount_type: "Percentage",
         discount: 0, // You can add item-level discount if needed
         comments: this.buildItemComments(item),
-        bidType: item.bidType || 'bid'
+        bidType: item.bidType || 'bid',
+        taxType: item.taxType || 'none'
       };
     });
   }
@@ -940,6 +959,8 @@ export class CreateQuotationComponent implements OnInit {
       'Qty',
       'Unit',
       'Item Price',
+      'Tax Type',
+      'Taxable Amount',
       'Miscellaneous',
       'Tooling',
       'Bid Type'
@@ -954,6 +975,8 @@ export class CreateQuotationComponent implements OnInit {
         item.qty || 0,
         `"${(item.unit || '').replace(/"/g, '""')}"`,
         item.itemPrice || 0,
+        `"${item.taxType || 'none'}"`,
+        this.getLineTaxAmount(item),
         `"${(item.miscellaneous || '').replace(/"/g, '""')}"`,
         `"${(item.tooling || '').replace(/"/g, '""')}"`,
         `"${item.bidType || 'bid'}"`
@@ -1079,9 +1102,10 @@ export class CreateQuotationComponent implements OnInit {
             qty: parseFloat(values[4]) || 0,
             unit: values[5] || 'Nos',
             itemPrice: parseFloat(values[6]) || 0,
-            miscellaneous: values[7] || '',
-            tooling: values[8] || '',
-            bidType: values[9] || 'bid'
+            taxType: values[7] || 'none',
+            miscellaneous: values[9] || '',
+            tooling: values[10] || '',
+            bidType: values[11] || 'bid'
           };
           importedItems.push(item);
         }
@@ -1154,6 +1178,7 @@ export class CreateQuotationComponent implements OnInit {
           qty: 0,
           unit: '',
           itemPrice: 0,
+          taxType: 'none',
           miscellaneous: '',
           tooling: '',
           bidType: 'bid'
@@ -1284,6 +1309,7 @@ export class CreateQuotationComponent implements OnInit {
         qty: item.quantity || 0,
         unit: item.unit || 'Pieces',
         itemPrice: item.unit_price || 0,
+        taxType: item.taxType || 'none',
         miscellaneous: parsedComments.miscellaneous || '',
         tooling: parsedComments.tooling || '',
         bidType: item.bidType || 'bid'

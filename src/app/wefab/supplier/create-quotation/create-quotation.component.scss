@@ -533,6 +533,14 @@
         }
       }
     }
+    
+    // Tax Type column specific styling
+    .tax-type-dropdown {
+      .p-dropdown-label {
+        font-size: 11px !important;
+        padding: 3px 4px !important;
+      }
+    }
   }
   
   // PrimeNG InputNumber Styling
