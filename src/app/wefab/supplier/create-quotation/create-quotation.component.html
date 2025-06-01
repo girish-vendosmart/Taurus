@@ -204,7 +204,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of model.quotationItems; let i = index" class="quotation-row">
+          <tr *ngFor="let item of model.quotationItems; let i = index; trackBy: trackByItemIndex" class="quotation-row">
             <td class="text-center align-middle">{{ i + 1 }}</td>
             
             <!-- Item Name - Editable -->
@@ -272,16 +272,17 @@
             <!-- Bid Type - Editable -->
             <td>
               <p-dropdown 
-                [(ngModel)]="item.bidType"
+                [(ngModel)]="item.bid_type"
                 [options]="bidTypeOptions"
                 [ngModelOptions]="{standalone: true}"
                 optionLabel="label"
                 optionValue="value"
-                placeholder="Bid Type"
-                [class.is-invalid]="hasValidationError('item_' + i)"
+                [showClear]="false"
+                [filter]="false"
+                placeholder="Select Bid Type"
                 (onChange)="onBidTypeChange(item); clearFieldError('item_' + i)"
-                styleClass="w-100 p-inputtext-sm table-editable-field"
-                appendTo="body">
+                class="w-100"
+                [ngClass]="{'ng-invalid': hasValidationError('item_' + i)}">
               </p-dropdown>
             </td>
             
@@ -289,24 +290,23 @@
             <td>
               <p-inputNumber
                 [(ngModel)]="item.itemPrice"
-                [min]="0"
                 mode="decimal"
                 [minFractionDigits]="2"
-                [style]="{ width: '100%' }"
-                styleClass="w-100 table-editable-field"
-                [class.is-invalid]="hasValidationError('item_' + i)"
-                size="small"
-                (onInput)="onQuantityOrPriceChange(item); clearFieldError('item_' + i)"
+                [maxFractionDigits]="2"
+                [min]="0"
+                [disabled]="item.bid_type === 'no-bid'"
+                [placeholder]="item.bid_type === 'no-bid' ? 'No Bid' : 'Enter price'"
                 [ngModelOptions]="{standalone: true}"
-                [disabled]="item.bidType === 'no-bid'"
-                [placeholder]="item.bidType === 'no-bid' ? 'No Bid' : 'Enter price'">
+                (onInput)="onQuantityOrPriceChange(item); clearFieldError('item_' + i)"
+                styleClass="w-100 table-editable-field"
+                [class.is-invalid]="hasValidationError('item_' + i)">
               </p-inputNumber>
             </td>
             
             <!-- Tax Type - Editable -->
             <td>
               <p-dropdown 
-                [(ngModel)]="item.taxType"
+                [(ngModel)]="item.tax_type"
                 [options]="taxTypeOptions"
                 [ngModelOptions]="{standalone: true}"
                 optionLabel="label"
@@ -319,7 +319,7 @@
               </p-dropdown>
             </td>
             
-            <!-- Taxable Amount -->
+            <!-- Tax Amount -->
             <td>
               <span class="text-muted small">{{ model.currency }} {{ getLineTaxAmount(item) | number:'1.2-2' }}</span>
             </td>

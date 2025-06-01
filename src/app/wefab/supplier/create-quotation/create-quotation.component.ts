@@ -175,9 +175,9 @@ export class CreateQuotationComponent implements OnInit {
         material: '',
         qty: 0,
         unit: '',
-        bidType: 'bid',
+        bid_type: 'bid',
         itemPrice: 0,
-        taxType: 'none',
+        tax_type: 'none',
         miscellaneous: '',
         tooling: ''
       }
@@ -412,10 +412,10 @@ export class CreateQuotationComponent implements OnInit {
         qty: item.quantity || 0,
         unit: item.unit || 'Pieces',
         itemPrice: item.unit_price || 0,
-        taxType: item.taxType || 'none',
+        tax_type: item.taxType || 'none',
         miscellaneous: this.buildMiscellaneousFromComments(parsedComments),
         tooling: parsedComments.processRequired || '',
-        bidType: item.bidType || 'bid'
+        bid_type: item.bidType || 'bid'
       };
     });
   }
@@ -646,10 +646,12 @@ export class CreateQuotationComponent implements OnInit {
 
   onQuantityOrPriceChange(item: any) {
     this.calculateTotals();
+    // Force change detection to update tax amounts in the table
+    this.updateTaxAmounts();
   }
 
   onBidTypeChange(item: any) {
-    if (item.bidType === 'no-bid') {
+    if (item.bid_type === 'no-bid') {
       item.itemPrice = 0;
     }
     this.calculateTotals();
@@ -658,12 +660,27 @@ export class CreateQuotationComponent implements OnInit {
   onItemTaxTypeChange(item: any) {
     // Recalculate totals when tax type changes for any item
     this.calculateTotals();
+    // Force UI update for tax amounts
+    this.updateTaxAmounts();
+  }
+
+  // Method to force update tax amounts in the UI
+  updateTaxAmounts() {
+    // This will trigger change detection and update all tax amount displays
+    if (this.model.quotationItems) {
+      this.model.quotationItems = [...this.model.quotationItems];
+    }
+  }
+
+  // TrackBy function for ngFor to improve change detection
+  trackByItemIndex(index: number, item: any): number {
+    return index;
   }
 
   // Methods to get aggregated tax amounts from all line items
   getTotalCGST(): number {
     return this.model.quotationItems?.reduce((total: number, item: any) => {
-      if (item.taxType === 'cgstSgst') {
+      if (item.tax_type === 'cgstSgst') {
         const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
         return total + (itemTotal * 0.09); // 9% CGST
       }
@@ -673,7 +690,7 @@ export class CreateQuotationComponent implements OnInit {
 
   getTotalSGST(): number {
     return this.model.quotationItems?.reduce((total: number, item: any) => {
-      if (item.taxType === 'cgstSgst') {
+      if (item.tax_type === 'cgstSgst') {
         const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
         return total + (itemTotal * 0.09); // 9% SGST
       }
@@ -683,7 +700,7 @@ export class CreateQuotationComponent implements OnInit {
 
   getTotalIGST(): number {
     return this.model.quotationItems?.reduce((total: number, item: any) => {
-      if (item.taxType === 'igst') {
+      if (item.tax_type === 'igst') {
         const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
         return total + (itemTotal * 0.18); // 18% IGST
       }
@@ -698,10 +715,17 @@ export class CreateQuotationComponent implements OnInit {
 
   // Method to get tax amount for a specific line item
   getLineTaxAmount(item: any): number {
-    const itemTotal = (item.qty || 0) * (item.itemPrice || 0);
-    if (item.taxType === 'cgstSgst') {
+    if (!item) return 0;
+    
+    const quantity = Number(item.qty) || 0;
+    const price = Number(item.itemPrice) || 0;
+    const itemTotal = quantity * price;
+    
+    if (itemTotal <= 0) return 0;
+    
+    if (item.tax_type === 'cgstSgst') {
       return itemTotal * 0.18; // 9% CGST + 9% SGST = 18%
-    } else if (item.taxType === 'igst') {
+    } else if (item.tax_type === 'igst') {
       return itemTotal * 0.18; // 18% IGST
     }
     return 0; // No tax
@@ -846,7 +870,7 @@ export class CreateQuotationComponent implements OnInit {
       discount_percentage: this.discountType === 'percentage' ? this.discountValue : 0,
       discount_amount: this.discountType === 'amount' ? this.discountValue : 0,
       shipping_charges: this.shippingCharges || 0,
-      total_taxable_amount: this.getTotalTaxAmount(),
+      total_tax_amount: this.getTotalTaxAmount(),
       payment_terms: this.model.paymentTerms,
       shipping_terms: this.getShippingTerms(),
       notes: `<p>${this.model.termsAndConditions}</p>`,
@@ -875,12 +899,10 @@ export class CreateQuotationComponent implements OnInit {
         unit: item.unit || 'Nos',
         currency_code: this.model.currency,
         unit_price: unitPrice,
-        discount_type: "Percentage",
-        discount: 0, // You can add item-level discount if needed
         comments: this.buildItemComments(item),
-        bidType: item.bidType || 'bid',
-        taxType: item.taxType || 'none',
-        taxable_amount: this.getLineTaxAmount(item)
+        bid_type: item.bid_type || 'bid',
+        tax_type: item.tax_type || 'none',
+        tax_amount: this.getLineTaxAmount(item)
       };
     });
   }
@@ -1023,11 +1045,11 @@ export class CreateQuotationComponent implements OnInit {
         item.qty || 0,
         `"${(item.unit || '').replace(/"/g, '""')}"`,
         item.itemPrice || 0,
-        `"${item.taxType || 'none'}"`,
+        `"${item.tax_type || 'none'}"`,
         this.getLineTaxAmount(item),
         `"${(item.miscellaneous || '').replace(/"/g, '""')}"`,
         `"${(item.tooling || '').replace(/"/g, '""')}"`,
-        `"${item.bidType || 'bid'}"`,
+        `"${item.bid_type || 'bid'}"`,
         `"${this.discountType}"`,
         `"${this.discountValue}"`
       ].join(',');
@@ -1327,10 +1349,10 @@ export class CreateQuotationComponent implements OnInit {
         qty: this.parseNumber(values[4], 'quantity'),
         unit: this.validateAndGetUnit(values[5], rowNumber),
         itemPrice: this.parseNumber(values[6], 'price'),
-        taxType: this.validateAndGetTaxType(values[7], rowNumber),
+        tax_type: this.validateAndGetTaxType(values[7], rowNumber),
         miscellaneous: (values[9] || '').trim(),
         tooling: (values[10] || '').trim() || 'Standard',
-        bidType: this.validateAndGetBidType(values[11], rowNumber)
+        bid_type: this.validateAndGetBidType(values[11], rowNumber)
       };
 
       // Final validation of the created item
@@ -1512,10 +1534,10 @@ export class CreateQuotationComponent implements OnInit {
           qty: 0,
           unit: '',
           itemPrice: 0,
-          taxType: 'none',
+          tax_type: 'none',
           miscellaneous: '',
           tooling: '',
-          bidType: 'bid'
+          bid_type: 'bid'
         }
       ];
     }
@@ -1650,10 +1672,10 @@ export class CreateQuotationComponent implements OnInit {
         qty: item.quantity || 0,
         unit: item.unit || 'Pieces',
         itemPrice: item.unit_price || 0,
-        taxType: item.taxType || 'none',
+        tax_type: item.taxType || 'none',
         miscellaneous: parsedComments.miscellaneous || '',
         tooling: parsedComments.tooling || '',
-        bidType: item.bidType || 'bid'
+        bid_type: item.bidType || 'bid'
       };
     });
   }
@@ -2294,14 +2316,14 @@ export class CreateQuotationComponent implements OnInit {
       }
 
       // Bid Type validation
-      if (!item.bidType) {
+      if (!item.bid_type) {
         itemErrors.push('Bid Type is required');
-      } else if (!this.bidTypeOptions.find(opt => opt.value === item.bidType)) {
+      } else if (!this.bidTypeOptions.find(opt => opt.value === item.bid_type)) {
         itemErrors.push('Bid Type must be selected from the dropdown');
       }
 
       // Item Price validation (only for bid items)
-      if (item.bidType === 'bid') {
+      if (item.bid_type === 'bid') {
         if (!item.itemPrice || item.itemPrice <= 0) {
           itemErrors.push('Item Price must be greater than 0 for bid items');
         } else if (isNaN(item.itemPrice)) {
@@ -2310,9 +2332,9 @@ export class CreateQuotationComponent implements OnInit {
       }
 
       // Tax Type validation
-      if (!item.taxType) {
+      if (!item.tax_type) {
         itemErrors.push('Tax Type is required');
-      } else if (!this.taxTypeOptions.find(opt => opt.value === item.taxType)) {
+      } else if (!this.taxTypeOptions.find(opt => opt.value === item.tax_type)) {
         itemErrors.push('Tax Type must be selected from the dropdown');
       }
 
@@ -2404,10 +2426,10 @@ export class CreateQuotationComponent implements OnInit {
         qty: 0,
         unit: '',
         itemPrice: 0,
-        taxType: 'none',
+        tax_type: 'none',
         miscellaneous: '',
         tooling: '',
-        bidType: 'bid'
+        bid_type: 'bid'
       });
       return false;
     }
@@ -2451,10 +2473,10 @@ export class CreateQuotationComponent implements OnInit {
       qty: 0,
       unit: '',
       itemPrice: 0,
-      taxType: 'none',
+      tax_type: 'none',
       miscellaneous: '',
       tooling: '',
-      bidType: 'bid'
+      bid_type: 'bid'
     };
     
     this.model.quotationItems.push(newItem);
