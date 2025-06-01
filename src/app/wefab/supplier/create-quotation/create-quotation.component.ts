@@ -857,6 +857,16 @@ export class CreateQuotationComponent implements OnInit {
 
   // Transform current form data to API expected format
   transformToApiFormat(): any {
+    const calculatedDiscountAmount = this.getDiscountAmount(); // Always calculate the actual discount amount
+    
+    // Log discount calculation details for debugging
+    console.log('=== DISCOUNT CALCULATION DEBUG ===');
+    console.log('Discount Type:', this.discountType);
+    console.log('Discount Value:', this.discountValue);
+    console.log('Sub Total:', this.calculatedSubTotal);
+    console.log('Calculated Discount Amount:', calculatedDiscountAmount);
+    console.log('=====================================');
+    
     const apiData = {
       rfq_id: this.getRfqId(),
       quotation_name: this.model.quotationName,
@@ -868,7 +878,7 @@ export class CreateQuotationComponent implements OnInit {
       quotation_to: this.quoteTo,
       discount_type: this.discountType === 'percentage' ? 'Percentage' : 'Amount',
       discount_percentage: this.discountType === 'percentage' ? this.discountValue : 0,
-      discount_amount: this.discountType === 'amount' ? this.discountValue : 0,
+      discount_amount: calculatedDiscountAmount, // Always set the calculated discount amount
       shipping_charges: this.shippingCharges || 0,
       total_tax_amount: this.getTotalTaxAmount(),
       payment_terms: this.model.paymentTerms,
