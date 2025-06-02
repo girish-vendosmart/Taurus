@@ -170,8 +170,14 @@
           <p *ngIf="activeLevelTab === 'manufacturing' && requestToResubmitCommentL2">{{ requestToResubmitCommentL2 }}</p>
           <p *ngIf="activeLevelTab === 'financial' && requestToResubmitCommentL3">{{ requestToResubmitCommentL3 }}</p>
         </div>
-        <div class="resubmit-actions" *ngIf="userType === 'supplier'">
-          <button pButton type="button" label="Edit & Resubmit" icon="pi pi-pencil" class="p-button-outlined" (click)="navigateToEdit()"></button>
+        <div class="resubmit-actions">
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            (click)="navigateToEdit()">
+            <i class="pi pi-pencil prime-ng-font-icon-font-size"></i>
+            Edit & Resubmit
+      </button>
         </div>
       </div>
 

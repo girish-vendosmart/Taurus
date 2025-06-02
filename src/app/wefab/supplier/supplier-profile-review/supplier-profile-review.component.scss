@@ -366,12 +366,12 @@
 .resubmit-comment-box {
   margin: 1.5rem;
   background-color: #fef3c7;
-  border: 1px solid #f59e0b;
+  border: 1px solid lightgray;
   border-radius: 8px;
   overflow: hidden;
   
   .resubmit-header {
-    background-color: #f59e0b;
+    background-color: #2b4868;
     color: white;
     padding: 0.75rem 1rem;
     display: flex;
@@ -386,16 +386,17 @@
   
   .resubmit-message {
     padding: 1rem;
+    background-color: white;
     
     p {
       margin: 0;
-      color: #92400e;
       line-height: 1.5;
     }
   }
   
   .resubmit-actions {
     padding: 0 1rem 1rem;
+    background-color: white;
     
     .p-button {
       background-color: #f59e0b;
@@ -2403,7 +2404,6 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-
 // Utility classes
 .text-center {
   text-align: center;

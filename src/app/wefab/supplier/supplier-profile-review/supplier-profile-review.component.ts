@@ -1127,7 +1127,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     this.activityTrailLoading = true;
 
     // Load real activity trail data from API
-    const endpoint = `/api/method/wefab.wefab.api.common.engine.trail.activity.get_new_versions_trail?doctype=Supplier Onboarding L1&docname=SUP-000424`;
+    const endpoint = `/api/method/wefab.wefab.api.common.engine.trail.activity.get_new_versions_trail?doctype=Supplier Onboarding L1&docname=${this.supplierId}`;
     
     this.commonservice.getData(endpoint).subscribe({
       next: (response: any) => {
@@ -1301,21 +1301,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   // Utility methods for error handling
   private showSuccess(message: string): void {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: message,
-      life: 3000
-    });
+    this.sweetAlert.success(message);
   }
 
   private showError(message: string): void {
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: message,
-      life: 5000
-    });
+    this.sweetAlert.error(message);
   }
 
   accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
