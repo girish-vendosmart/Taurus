@@ -309,6 +309,7 @@ export class SupplierDashboardComponent {
   }
 
   private getStatusClass(status: string): string {
+    console.log('Dashboard Status:', status);
     switch (status?.toUpperCase()) {
       case 'DRAFT':
         return 'status-draft';
@@ -328,6 +329,12 @@ export class SupplierDashboardComponent {
       case 'UNDER REVIEW':
       case 'UNDER_REVIEW':
         return 'status-review';
+      case 'CANCELLED':
+        return 'status-rejected';
+      case 'QUOTED':
+        return 'status-awarded';
+      case 'NOT OPENED':
+        return 'status-open';
       default:
         return 'status-draft';
     }

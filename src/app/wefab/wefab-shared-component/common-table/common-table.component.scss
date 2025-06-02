@@ -771,6 +771,18 @@
                 border: 1px solid rgba(228, 163, 54, 0.2);
               }
 
+              &.status-deactivate {
+                background-color: rgba(239, 68, 68, 0.15);
+                color: #dc2626;
+                border: 1px solid rgba(239, 68, 68, 0.2);
+              }
+
+              &.status-paused {
+                background-color: rgba(239, 68, 68, 0.15);
+                color: #dc2626;
+                border: 1px solid rgba(239, 68, 68, 0.2);
+              }
+
               &.status-resubmit {
                 background-color: rgba(239, 68, 68, 0.15);
                 color: #dc2626;

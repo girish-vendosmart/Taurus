@@ -370,6 +370,18 @@ $transition: all 0.3s ease;
     border: 1px solid rgba(245, 158, 11, 0.2);
   }
 
+  &.status-deactivate {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  &.status-paused {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
   // Hover effect for interactive badges
   &:hover {
     transform: translateY(-1px);

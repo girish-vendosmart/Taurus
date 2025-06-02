@@ -133,7 +133,7 @@ export class SupplierRfqComponent implements OnInit {
 
   getRfqList() {
     this.loading = true;
-    let endpoint = `/api/resource/Supplier Request for Quotation?fields=["*"]&filters=[["status", "not in", ["Draft"]]]`
+    let endpoint = `/api/resource/Supplier Request for Quotation?fields=["*"]&filters=[["status", "not in", ["Draft"]],["supplier_id", "=", "${this.supplierId}"]]`
     // let endpoint = `/api/resource/Supplier Request for Quotation?fields=["*"]&filters=[["supplier_id", "=", "${this.supplierId}"]]`
 
     
@@ -167,7 +167,7 @@ export class SupplierRfqComponent implements OnInit {
       rfqName: `${item.rfq_name || ''}<br><span class="rfq-id-link">${item.rfq_id || ''}</span>`,
       rfqId: item.rfq_id || '', // Add rfq_id for easier access in click handler
       creationDate: this.formatApiDate(item.creation),
-      status: this.mapApiStatusToRFQStatus(item.status),
+      status: item.status[0].toUpperCase() + item.status.slice(1).toLowerCase(),
       // Additional fields for potential use
       owner: item.owner || '',
       suppler_rfq_id: item.supplier_id || '',
@@ -219,19 +219,23 @@ export class SupplierRfqComponent implements OnInit {
   }
 
   // Helper method to map API status to RFQ status
-  private mapApiStatusToRFQStatus(apiStatus: string): 'Open' | 'In Progress' | 'Closed' | 'Draft' {
+  private mapApiStatusToRFQStatus(apiStatus: string): 'Open' | 'In Progress' | 'Closed' | 'Draft' | 'Quoted' | 'Cancelled' | 'Not Opened' {
     if (!apiStatus) return 'Draft';
     
     const status = apiStatus.toLowerCase();
     
     if (status.includes('draft')) {
       return 'Draft';
-    } else if (status.includes('open') || status.includes('pending')) {
+    } else if (status.includes('Not Opened')) {
+      return 'Not Opened';
+    } else if (status.includes('open')) {
       return 'Open';
     } else if (status.includes('submitted') || status.includes('review') || status.includes('progress') || status.includes('in progress')) {
       return 'In Progress';
-    } else if (status.includes('closed') || status.includes('completed') || status.includes('cancelled') || status.includes('approved')) {
-      return 'Closed';
+    } else if (status.includes('closed') || status.includes('completed') || status.includes('Cancelled') || status.includes('approved')) {
+      return 'Cancelled';
+    } else if (status.includes('quoted')) {
+      return 'Quoted';
     }
     
     return 'Draft'; // Default fallback

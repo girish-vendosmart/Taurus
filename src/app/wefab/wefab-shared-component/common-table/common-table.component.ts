@@ -306,10 +306,11 @@ export class CommonTableComponent implements OnInit {
     if (!status) return 'status-default';
     
     status = status.toLowerCase();
+    console.log('status', status);
     switch (status) {
-      case 'draft':
+      case 'Draft':
         return 'status-draft';
-      case 'open':
+      case '':
         return 'status-open';
       case 'under review':
         return 'status-under-review';
@@ -325,6 +326,16 @@ export class CommonTableComponent implements OnInit {
         return 'status-under-review'; // Use same styling as under review
       case 'awarded':
         return 'status-awarded';
+      case 'quoted':
+        return 'status-awarded';
+      case 'opened':
+        return 'status-open';
+      case 'cancelled':
+        return 'status-rejected';
+      case 'deactivate':
+        return 'status-deactivate';
+      case 'paused':
+        return 'status-paused';
       case 'submitted':
         return 'status-awarded';
       case 'rejected':
