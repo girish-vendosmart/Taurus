@@ -1312,3 +1312,9 @@
   color: #333 !important; // Black color for non-linkable columns
 }
 
+.fix-loading-state {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
