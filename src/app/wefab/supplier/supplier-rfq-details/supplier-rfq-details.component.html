@@ -14,8 +14,9 @@
         <p class="rfq-id">{{ rfqDetails.name || 'Loading...' }}</p>
         <span class="status-badge mt-2" [ngClass]="getStatusClass(supplierRfqDetails.status)">{{ supplierRfqDetails.status }}</span>
       </div>
+
       
-      <div class="header-right">
+      <div class="header-right" *ngIf="supplierRfqDetails.status === 'Opened'">
         <button class="btn btn-primary" (click)="createQuotation()" [disabled]="loading">
           Create Quotation
         </button>

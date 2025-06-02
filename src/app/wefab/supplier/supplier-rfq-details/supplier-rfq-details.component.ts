@@ -185,7 +185,6 @@ export class SupplierRfqDetailsComponent implements OnInit {
       
       console.log(this.rfqId)
       this.supplierRfqId = sessionStorage.getItem('supplier_rfq_id') || '';
-      this.loadRFQDetails();
       this.loadSupplierDetails();
     });
 
@@ -196,6 +195,22 @@ export class SupplierRfqDetailsComponent implements OnInit {
     this.commonService.getWefabData(endPoint).subscribe((res: any) => {
       
       this.supplierRfqDetails = res.data;
+      console.log('Supplier RFQ Details', this.supplierRfqDetails.status);
+      if(this.supplierRfqDetails.status === 'Not Opened') {
+        this.updateRFQStatus();
+      } else {
+        this.loadRFQDetails();
+      }
+    });
+  }
+
+  updateRFQStatus() {
+    let apiEndpoint = `/api/resource/Supplier Request for Quotation/${this.rfqId}-${this.supplierRfqId}`;
+    this.commonService.putWefabData(apiEndpoint, {
+      status: 'Opened'
+    }).subscribe((res: any) => {
+      console.log('Update RFQ Status', res);
+      this.loadRFQDetails();  
     });
   }
 
