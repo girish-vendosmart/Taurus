@@ -409,7 +409,6 @@
           <button class="edit-section-btn" *ngIf="(getCurrentL2DataStatus === 'Under Review' || getCurrentL2DataStatus === 'Request to Resubmit') && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
-          
         </div>
 
         <!-- Zero State for Manufacturing Section -->
@@ -452,16 +451,16 @@
               <div class="manufacturing-grid">
                 <div class="manufacturing-card" *ngFor="let machine of manufacturingData.machines">
                   <div class="manufacturing-image-container">
-                    <img [src]="isArray(machine.machinePhotos) ? machine.machinePhotos[0].url : machine.machinePhotos.url"
+                    <img [src]="getMachineUrl(machine.machinePhotos)"
                         [alt]="machine.make" 
                         class="manufacturing-image"
                         loading="lazy">
                     <!-- Document action buttons -->
                     <div class="document-actions">
-                      <button class="action-button view-button" (click)="viewDocument(machine.machinePhotos.url, $event)" title="View">
+                      <button class="action-button view-button" (click)="viewDocument(getMachineUrl(machine.machinePhotos), $event)" title="View">
                         <i class="pi pi-eye"></i>
                       </button>
-                      <button class="action-button download-button" (click)="downloadDocument(machine.machinePhotos.url, $event)" title="Download">
+                      <button class="action-button download-button" (click)="downloadDocument(getMachineUrl(machine.machinePhotos), $event)" title="Download">
                         <i class="pi pi-download"></i>
                       </button>
                     </div>
@@ -470,13 +469,13 @@
                     <h3 class="manufacturing-title">{{ machine.make }}</h3>
                     
                     <div class="verification-badge" 
-                        [ngClass]="{'verified': machine.machinePhotos.machine_status, 
-                                    'not-verified': !machine.machinePhotos.machine_status}">
-                      <i *ngIf="machine.machinePhotos.machine_status" 
+                        [ngClass]="{'verified': getMachineStatus(machine.machinePhotos), 
+                                    'not-verified': !getMachineStatus(machine.machinePhotos)}">
+                      <i *ngIf="getMachineStatus(machine.machinePhotos)" 
                         class="pi pi-check-circle"></i>
-                      <i *ngIf="!machine.machinePhotos.machine_status" 
+                      <i *ngIf="!getMachineStatus(machine.machinePhotos)" 
                         class="pi pi-times-circle"></i>
-                      <span>{{ machine.machinePhotos.machine_status ? 'Verified Machine' : 'Not Verified' }}</span>
+                      <span>{{ getMachineStatus(machine.machinePhotos) ? 'Verified Machine' : 'Not Verified' }}</span>
                     </div>
                     
                     <div class="manufacturing-info">
@@ -495,9 +494,9 @@
                     </div>
                     
                     <!-- Admin comment section -->
-                    <div class="admin-comment" *ngIf="machine.machinePhotos.machine_status_comment">
+                    <div class="admin-comment" *ngIf="getMachineComment(machine.machinePhotos)">
                       <i class="pi pi-comment comment-icon"></i>
-                      <div class="comment-text">{{ machine.machinePhotos.machine_status_comment }}</div>
+                      <div class="comment-text">{{ getMachineComment(machine.machinePhotos) }}</div>
                     </div>
                   </div>
                 </div>
@@ -546,26 +545,26 @@
               </div>
             </ng-container>
 
-            <!--maachine tab for a duplicating -->
+            <!--certifications tab -->
             <ng-container *ngIf="manufacturingTab === 'certifications'">
               <div class="manufacturing-grid">
-                <div class="manufacturing-card" *ngFor="let machine of manufacturingData.certifications">
+                <div class="manufacturing-card" *ngFor="let certification of manufacturingData.certifications">
                   <div class="manufacturing-image-container">
-                    <img [src]="isArray(machine.certificateDocument) ? machine.certificateDocument[0].url : machine.certificateDocument.url"
-                        [alt]="machine.certificationName" 
+                    <img [src]="isArray(certification.certificateDocument) ? certification.certificateDocument[0].url : certification.certificateDocument.url"
+                        [alt]="certification.certificationName" 
                         class="manufacturing-image"
                         loading="lazy">
                     <div class="document-actions">
-                      <button class="action-button view-button" (click)="viewDocument(machine.certificateDocument.url, $event)" title="View">
+                      <button class="action-button view-button" (click)="viewDocument(isArray(certification.certificateDocument) ? certification.certificateDocument[0].url : certification.certificateDocument.url, $event)" title="View">
                         <i class="pi pi-eye"></i>
                       </button>
-                      <button class="action-button download-button" (click)="downloadDocument(machine.certificateDocument.url, $event)" title="Download">
+                      <button class="action-button download-button" (click)="downloadDocument(isArray(certification.certificateDocument) ? certification.certificateDocument[0].url : certification.certificateDocument.url, $event)" title="Download">
                         <i class="pi pi-download"></i>
                       </button>
                     </div>
                   </div>
                   <div class="manufacturing-details">
-                    <h3 class="manufacturing-title">{{ machine.certificationName }}</h3>
+                    <h3 class="manufacturing-title">{{ certification.certificationName }}</h3>
 
                     <div class="verification-badge verified">
                       <i class="pi pi-check-circle"></i>
@@ -575,11 +574,11 @@
                     <div class="manufacturing-info">
                       <p>
                         <span class="info-label">Certification Body:</span>
-                        <span class="info-value">{{ machine.certifyingBody }}</span>
+                        <span class="info-value">{{ certification.certifyingBody }}</span>
                       </p>
                       <p>
                         <span class="info-label">Valid Until:</span>
-                        <span class="info-value">{{ machine.expirationDate | dateFormat }}</span>
+                        <span class="info-value">{{ certification.expirationDate | dateFormat }}</span>
                       </p>
                     </div>
 

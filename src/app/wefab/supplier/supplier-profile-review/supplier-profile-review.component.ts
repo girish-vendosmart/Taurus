@@ -547,8 +547,18 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         this.numberOfFacilityPhoto = this.manufacturingData?.facilityPhotos?.length || 0;
         this.numberOfCertificationPhoto = this.manufacturingData?.certifications?.length || 0;
 
-        // Process machine verification in background
-        this.processMachineVerificationAsync();
+        // Debug machine structure after data is loaded
+        setTimeout(() => {
+          // this.logMachineStructure();
+        }, 100);
+
+        // Force fresh machine verification analysis (bypass cache and existing status)
+        // This runs automatically every time data loads to ensure fresh API results
+        setTimeout(() => {
+          console.log('🚀 === AUTO-TRIGGERING FRESH ANALYSIS ===');
+          console.log('📝 This happens automatically on every data load to ensure fresh API results');
+          this.forceAnalyzeAllMachines();
+        }, 200);
       } catch (error) {
         console.error('Error parsing L2 data:', error);
         this.manufacturingData = null;
@@ -577,29 +587,48 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processMachineVerificationAsync(): void {
-    if (!this.manufacturingData?.machines?.length && !this.manufacturingData?.facilityPhotos?.length) return;
+    console.log('🔄 processMachineVerificationAsync called');
+    console.log('📊 Manufacturing data:', this.manufacturingData);
+    
+    if (!this.manufacturingData?.machines?.length && !this.manufacturingData?.facilityPhotos?.length) {
+      console.log('❌ No machines or facility photos to analyze');
+      return;
+    }
 
     // Check if machine analysis is already in progress
-    if (this.loadingState.machineAnalysis || this.loadingState.facilityAnalysis) return;
+    if (this.loadingState.machineAnalysis || this.loadingState.facilityAnalysis) {
+      console.log('⏳ Analysis already in progress, skipping');
+      return;
+    }
 
     // Prepare machine analysis requests
     const machineRequests: Observable<any>[] = [];
     if (this.manufacturingData?.machines?.length) {
+      console.log(`🔍 Checking ${this.manufacturingData.machines.length} machines for analysis...`);
+      
       const needsMachineAnalysis = this.manufacturingData.machines.some((machine: any) => {
         const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
-        if (!fileId) return false;
+        if (!fileId) {
+          console.log('⚠️ Machine missing fileId:', machine);
+          return false;
+        }
         
         const cacheKey = `machine_analysis_${fileId}`;
         const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
         
         if (cached) {
+          console.log(`💾 Found cached result for ${fileId}:`, cached);
           machine.machinePhotos.machine_status = cached.machine_status;
           machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
           return false;
         }
         
-        return machine.machinePhotos.machine_status === undefined;
+        const needsAnalysis = machine.machinePhotos.machine_status === undefined;
+        console.log(`🔍 Machine ${fileId} needs analysis:`, needsAnalysis);
+        return needsAnalysis;
       });
+
+      console.log('🎯 needsMachineAnalysis:', needsMachineAnalysis);
 
       if (needsMachineAnalysis) {
         const machinesToAnalyze = this.manufacturingData.machines.filter((machine: any) => {
@@ -611,6 +640,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           return !cached && machine.machinePhotos.machine_status === undefined;
         });
 
+        console.log(`🚀 Starting analysis for ${machinesToAnalyze.length} machines:`, machinesToAnalyze);
         machineRequests.push(...machinesToAnalyze.map((machine: any) => this.analyzeMachine(machine)));
       }
     }
@@ -618,6 +648,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     // Prepare facility analysis requests
     const facilityRequests: Observable<any>[] = [];
     if (this.manufacturingData?.facilityPhotos?.length) {
+      console.log(`🏭 Checking ${this.manufacturingData.facilityPhotos.length} facility photos for analysis...`);
+      
       const needsFacilityAnalysis = this.manufacturingData.facilityPhotos.some((facility: any) => {
         if (!facility?.fileId) return false;
         
@@ -648,27 +680,34 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
     // If no analysis is needed, return early
     if (machineRequests.length === 0 && facilityRequests.length === 0) {
-      console.log('All machines and facilities already analyzed, skipping API calls');
+      console.log('✅ All machines and facilities already analyzed, skipping API calls');
       this.updateFacilityVerificationStatus();
       return;
     }
 
     // Set loading states
-    if (machineRequests.length > 0) this.loadingState.machineAnalysis = true;
-    if (facilityRequests.length > 0) this.loadingState.facilityAnalysis = true;
+    if (machineRequests.length > 0) {
+      console.log(`⏳ Setting machine analysis loading state (${machineRequests.length} requests)`);
+      this.loadingState.machineAnalysis = true;
+    }
+    if (facilityRequests.length > 0) {
+      console.log(`⏳ Setting facility analysis loading state (${facilityRequests.length} requests)`);
+      this.loadingState.facilityAnalysis = true;
+    }
 
     // Combine all requests and execute in parallel
     const allRequests = [...machineRequests, ...facilityRequests];
     
-    console.log(`Starting parallel analysis: ${machineRequests.length} machines and ${facilityRequests.length} facilities`);
+    console.log(`🚀 Starting parallel analysis: ${machineRequests.length} machines and ${facilityRequests.length} facilities`);
 
     // Execute all requests in parallel
     forkJoin(allRequests.length > 0 ? allRequests : [of(null)]).pipe(
       catchError(error => {
-        console.error('Error during parallel analysis:', error);
+        console.error('💥 Error during parallel analysis:', error);
         return of([]);
       }),
       finalize(() => {
+        console.log('🏁 Parallel analysis completed');
         this.loadingState.machineAnalysis = false;
         this.loadingState.facilityAnalysis = false;
         this.updateFacilityVerificationStatus();
@@ -676,75 +715,146 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: (results) => {
-        console.log(`Parallel analysis completed. Processed ${results.length} items.`);
+        console.log(`✅ Parallel analysis completed. Processed ${results.length} items.`);
+        console.log('📊 Final results:', results);
       },
       error: (error) => {
-        console.error('Error in parallel analysis:', error);
+        console.error('💥 Error in parallel analysis:', error);
       }
     });
   }
 
   private analyzeMachine(machine: any): Observable<any> {
-    if (!machine?.machinePhotos) return of(null);
+    console.log('🔍 analyzeMachine called for machine:', machine);
+    
+    if (!machine?.machinePhotos) {
+      console.log('❌ No machinePhotos found');
+      return of(null);
+    }
 
-    const fileId = machine.machinePhotos.fileId || machine.machinePhotos[0]?.file_id;
-    if (!fileId) return of(null);
+    // Handle both array and object structures
+    let machinePhoto: any;
+    let fileId: string;
+    
+    if (Array.isArray(machine.machinePhotos)) {
+      machinePhoto = machine.machinePhotos[0];
+      fileId = machinePhoto?.file_id || machinePhoto?.fileId;
+      console.log('📦 Array structure - machinePhoto:', machinePhoto);
+    } else {
+      machinePhoto = machine.machinePhotos;
+      fileId = machinePhoto.fileId || machinePhoto.file_id;
+      console.log('📦 Object structure - machinePhoto:', machinePhoto);
+    }
+    
+    console.log('🆔 Extracted fileId:', fileId);
+    
+    if (!fileId) {
+      console.log('❌ No fileId found');
+      return of(null);
+    }
 
     // Check cache first
     const cacheKey = `machine_analysis_${fileId}`;
     const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
     
     if (cached) {
-      console.log(`Using cached analysis for machine ${fileId}`);
-      machine.machinePhotos.machine_status = cached.machine_status;
-      machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
+      console.log(`💾 Using cached analysis for machine ${fileId}:`, cached);
+      // Apply to the correct object structure
+      if (Array.isArray(machine.machinePhotos)) {
+        machine.machinePhotos[0].machine_status = cached.machine_status;
+        machine.machinePhotos[0].machine_status_comment = cached.machine_status_comment;
+      } else {
+        machine.machinePhotos.machine_status = cached.machine_status;
+        machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
+      }
+      this.cdr.detectChanges();
       return of(cached);
     }
 
     // Check if machine already has analysis results
-    if (machine.machinePhotos.machine_status !== undefined) {
-      console.log(`Machine ${fileId} already analyzed, skipping API call`);
+    if (machinePhoto.machine_status !== undefined) {
+      console.log(`✅ Machine ${fileId} already analyzed, current status:`, machinePhoto.machine_status);
       return of(null);
     }
 
     const lat = this.getCompanyProfile?.registered_lat;
     const lng = this.getCompanyProfile?.registered_lng;
 
-    console.log(`Analyzing machine image: ${fileId}`);
+    console.log(`🌍 Coordinates: lat=${lat}, lng=${lng}`);
+    console.log(`🚀 Starting API call for machine image: ${fileId}`);
 
-    return this.commonservice.getData(
-      `/api/method/wefab.wefab.api.supplier.onboarding.machine_image_verification.machine_identification.analyze_machine_image?file_id=${fileId}&facility_lat=${lat}&facility_lon=${lng}`
-    ).pipe(
+    const apiUrl = `/api/method/wefab.wefab.api.supplier.onboarding.machine_image_verification.machine_identification.analyze_machine_image?file_id=${fileId}&facility_lat=${lat}&facility_lon=${lng}`;
+    console.log('📡 API URL:', apiUrl);
+
+    return this.commonservice.getData(apiUrl).pipe(
       tap((res: any) => {
+        console.log('📥 Raw API response:', res);
+        
         if (res?.data) {
           const { machine_image, within_facility, verification_comment } = res.data;
+          console.log("🔍 Machine Verification Result:");
+          console.log("  - machine_image:", machine_image);
+          console.log("  - within_facility:", within_facility);
+          console.log("  - verification_comment:", verification_comment);
+          
           const analysisResult = {
             machine_status: machine_image && within_facility,
             machine_status_comment: verification_comment
           };
           
-          // Apply results to machine
-          machine.machinePhotos.machine_status = analysisResult.machine_status;
-          machine.machinePhotos.machine_status_comment = analysisResult.machine_status_comment;
+          console.log("📋 Final analysisResult:", analysisResult);
+          
+          // Apply results to the correct structure and trigger change detection
+          if (Array.isArray(machine.machinePhotos)) {
+            console.log('📝 Applying to array structure');
+            machine.machinePhotos[0].machine_status = analysisResult.machine_status;
+            machine.machinePhotos[0].machine_status_comment = analysisResult.machine_status_comment;
+            console.log('✅ Updated array machine:', machine.machinePhotos[0]);
+          } else {
+            console.log('📝 Applying to object structure');
+            machine.machinePhotos.machine_status = analysisResult.machine_status;
+            machine.machinePhotos.machine_status_comment = analysisResult.machine_status_comment;
+            console.log('✅ Updated object machine:', machine.machinePhotos);
+          }
+
+          console.log("🔄 Updated Machine Object:", machine);
+          console.log(`✅ Machine analysis completed for ${fileId}`);
           
           // Cache the results for future use
           this.setCache(cacheKey, analysisResult);
           
-          console.log(`Machine analysis completed for ${fileId}:`, analysisResult);
+          // Trigger change detection immediately after setting the properties
+          console.log('🔄 Triggering change detection...');
+          this.cdr.detectChanges();
+          console.log('✅ Change detection triggered');
+        } else {
+          console.log('❌ No data in API response');
         }
       }),
       catchError(error => {
-        console.error('Error analyzing machine:', error);
+        console.error('💥 Error analyzing machine:', error);
         const errorResult = {
           machine_status: false,
           machine_status_comment: 'Error during verification'
         };
         
-        machine.machinePhotos.machine_status = errorResult.machine_status;
-        machine.machinePhotos.machine_status_comment = errorResult.machine_status_comment;
+        console.log('📝 Applying error result:', errorResult);
+        
+        // Apply error results to the correct structure
+        if (Array.isArray(machine.machinePhotos)) {
+          machine.machinePhotos[0].machine_status = errorResult.machine_status;
+          machine.machinePhotos[0].machine_status_comment = errorResult.machine_status_comment;
+        } else {
+          machine.machinePhotos.machine_status = errorResult.machine_status;
+          machine.machinePhotos.machine_status_comment = errorResult.machine_status_comment;
+        }
         
         // Cache the error result to avoid retrying immediately
         this.setCache(cacheKey, errorResult);
+        
+        // Trigger change detection for error case too
+        console.log('🔄 Triggering change detection for error...');
+        this.cdr.detectChanges();
         
         return of(null);
       })
@@ -1216,46 +1326,77 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Method to clear analysis cache when machines/facilities are updated
-  private clearAnalysisCache(): void {
-    const keysToDelete: string[] = [];
+  // Method to force refresh analysis (bypass cache) - now handles both machines and facilities
+  forceAnalyzeAllMachines(): void {
+    console.log('🔄 === FORCE ANALYZE ALL MACHINES & FACILITIES ===');
     
-    this.cache.forEach((value, key) => {
-      if (key.startsWith('machine_analysis_') || key.startsWith('facility_analysis_')) {
-        keysToDelete.push(key);
-      }
-    });
-    
-    keysToDelete.forEach(key => {
-      this.cache.delete(key);
-      console.log(`Cleared analysis cache for: ${key}`);
-    });
-  }
+    if (!this.manufacturingData) {
+      console.log('❌ No manufacturing data available');
+      return;
+    }
 
-  // Method to force refresh analysis (useful for testing or manual refresh)
-  forceRefreshAnalysis(): void {
-    console.log('Forcing refresh of machine and facility analysis');
-    this.clearAnalysisCache();
-    
-    // Reset analysis status for all machines and facilities
-    if (this.manufacturingData?.machines) {
-      this.manufacturingData.machines.forEach((machine: any) => {
-        if (machine.machinePhotos) {
-          machine.machinePhotos.machine_status = undefined;
-          machine.machinePhotos.machine_status_comment = undefined;
+    let hasItems = false;
+
+    // Process machines
+    if (this.manufacturingData.machines?.length) {
+      console.log(`🔄 Processing ${this.manufacturingData.machines.length} machines...`);
+      hasItems = true;
+      
+      // Clear cache and reset status for all machines
+      this.manufacturingData.machines.forEach((machine: any, index: number) => {
+        const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
+        if (fileId) {
+          const cacheKey = `machine_analysis_${fileId}`;
+          this.cache.delete(cacheKey);
+          console.log(`🗑️ Cleared machine cache for ${index} (${fileId})`);
+        }
+        
+        // Clear existing status to force new analysis
+        if (Array.isArray(machine.machinePhotos)) {
+          delete machine.machinePhotos[0].machine_status;
+          delete machine.machinePhotos[0].machine_status_comment;
+          console.log(`🔄 Reset array machine ${index} status`);
+        } else {
+          delete machine.machinePhotos.machine_status;
+          delete machine.machinePhotos.machine_status_comment;
+          console.log(`🔄 Reset object machine ${index} status`);
         }
       });
     }
-    
-    if (this.manufacturingData?.facilityPhotos) {
-      this.manufacturingData.facilityPhotos.forEach((facility: any) => {
-        facility.facility_status = undefined;
-        facility.facility_comment = undefined;
+
+    // Process facility photos
+    if (this.manufacturingData.facilityPhotos?.length) {
+      console.log(`🔄 Processing ${this.manufacturingData.facilityPhotos.length} facility photos...`);
+      hasItems = true;
+      
+      // Clear cache and reset status for all facilities
+      this.manufacturingData.facilityPhotos.forEach((facility: any, index: number) => {
+        if (facility.fileId) {
+          const cacheKey = `facility_analysis_${facility.fileId}`;
+          this.cache.delete(cacheKey);
+          console.log(`🗑️ Cleared facility cache for ${index} (${facility.fileId})`);
+        }
+        
+        // Clear existing status to force new analysis
+        delete facility.facility_status;
+        delete facility.facility_comment;
+        console.log(`🔄 Reset facility ${index} status`);
       });
     }
-    
-    // Restart parallel analysis
+
+    if (!hasItems) {
+      console.log('❌ No machines or facilities to analyze');
+      return;
+    }
+
+    // Reset loading states
+    this.loadingState.machineAnalysis = false;
+    this.loadingState.facilityAnalysis = false;
+
+    // Force new analysis
+    console.log('🚀 Starting fresh verification analysis...');
     this.processMachineVerificationAsync();
+    console.log('🔄 === FORCE ANALYZE COMPLETED ===');
   }
 
   // Getter methods for template
@@ -1284,6 +1425,28 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     return this.getCurrentL1DataStatus === 'Approved' && 
            this.getCurrentL2DataStatus === 'Approved' && 
            this.getCurrentL3DataStatus === 'Approved';
+  }
+
+  // Helper methods for template to safely access machine properties
+  getMachineStatus(machinePhotos: any): boolean {
+    if (Array.isArray(machinePhotos)) {
+      return machinePhotos[0]?.machine_status || false;
+    }
+    return machinePhotos?.machine_status || false;
+  }
+
+  getMachineComment(machinePhotos: any): string {
+    if (Array.isArray(machinePhotos)) {
+      return machinePhotos[0]?.machine_status_comment || '';
+    }
+    return machinePhotos?.machine_status_comment || '';
+  }
+
+  getMachineUrl(machinePhotos: any): string {
+    if (Array.isArray(machinePhotos)) {
+      return machinePhotos[0]?.url || '';
+    }
+    return machinePhotos?.url || '';
   }
 
   // Navigate to dashboard when all stages are approved
