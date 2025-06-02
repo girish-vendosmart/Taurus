@@ -502,14 +502,14 @@
       .info-card {
         border-radius: 6px;
         padding: 1rem;
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        transition: all 0.2s ease;
+        // background-color: #f8f9fa;
+        // border: 1px solid #e9ecef;
+        // transition: all 0.2s ease;
         
-        &:hover {
-          background-color: #f1f3f4;
-          border-color: #dee2e6;
-        }
+        // &:hover {
+        //   background-color: #f1f3f4;
+        //   border-color: #dee2e6;
+        // }
         
         &.info-card-large {
           grid-column: 1 / -1;
@@ -1472,7 +1472,6 @@
   padding: 16px;
   border-radius: 8px;
   background-color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .capacity-percentage {
