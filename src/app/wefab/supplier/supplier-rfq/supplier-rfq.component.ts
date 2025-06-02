@@ -133,7 +133,7 @@ export class SupplierRfqComponent implements OnInit {
 
   getRfqList() {
     this.loading = true;
-    let endpoint = `/api/resource/Supplier Request for Quotation?fields=["*"]`
+    let endpoint = `/api/resource/Supplier Request for Quotation?fields=["*"]&filters=[["status", "not in", ["Draft"]]]`
     // let endpoint = `/api/resource/Supplier Request for Quotation?fields=["*"]&filters=[["supplier_id", "=", "${this.supplierId}"]]`
 
     

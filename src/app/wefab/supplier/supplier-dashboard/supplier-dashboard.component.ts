@@ -83,10 +83,13 @@ export class SupplierDashboardComponent {
   public chartOptions: Partial<ChartOptions>;
   
   supplierName: string = '';
+  supplierId: string;
   
   constructor(private commonService: CommonService, private router: Router) {
     // Get supplier information from session storage
     this.supplierName = sessionStorage.getItem('supplier_name') || 'Supplier';
+
+    this.supplierId = sessionStorage.getItem('supplier_id') || '';
     
     // Initialize chart options
     this.chartOptions = {
@@ -209,7 +212,7 @@ export class SupplierDashboardComponent {
   }
 
   getRecentQuotations() {
-    let endPoint = `/api/resource/Supplier Quotation?fields=["*"]`
+    let endPoint = `/api/resource/Supplier Quotation?fields=["*"]&filters=[["supplier_id", "=", "${this.supplierId}"]]`
     this.commonService.getWefabData(endPoint).subscribe((res: any) => {
       
       console.log('Recent Quotations:', res);
@@ -270,7 +273,7 @@ export class SupplierDashboardComponent {
   }
 
   getRecentRFQs() {
-    let endPoint = `/api/resource/Supplier Request for Quotation?fields=["*"]`
+    let endPoint = `/api/resource/Supplier Request for Quotation?fields=["*"]&filters=[["supplier_id", "=", "${this.supplierId}"],["status", "not in", ["Draft"]]]`
     this.commonService.getWefabData(endPoint).subscribe((res: any) => {
       console.log('Recent RFQs:', res);
       
