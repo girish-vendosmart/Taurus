@@ -28,6 +28,8 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { TabViewModule } from 'primeng/tabview';
 import { TabMenuModule } from 'primeng/tabmenu';
 
+import { SweetAlertService } from '../../shared/sweet-alert.service';
+
 // Import Components
 import { FileUploadComponent } from '../supplier-onboarding/file-upload.component';
 import { FormlyRepeatTypeComponent } from '../../../../app/formly-repeat-type.component';
@@ -125,6 +127,7 @@ export class SupplierOnboardingL3Component implements OnInit {
     private messageService: MessageService,
     private router: Router,
     private commonService: CommonService,
+    private sweetAlert: SweetAlertService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.form = this.fb.group({});
@@ -225,12 +228,7 @@ export class SupplierOnboardingL3Component implements OnInit {
         
         this.getL3Data(supplierId);
       } else {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Supplier ID not found. Please try again.',
-          life: 3000
-        });
+        this.sweetAlert.error('Supplier ID not found. Please try again.');
         this.router.navigate(['/wefab/supplier/supplier-verification']);
       }
     }
@@ -846,11 +844,7 @@ export class SupplierOnboardingL3Component implements OnInit {
         this.markFieldsAsTouched(this.currentFields);
         
         // Show error message to user
-        this.messageService.add({
-          severity: 'error', 
-          summary: 'Validation Error', 
-          detail: 'Please fill in all required fields correctly before proceeding.'
-        });
+        this.sweetAlert.error('Please fill in all required fields correctly before proceeding.');
       }
     } else {
       // If this is the last step, submit the form
@@ -985,11 +979,7 @@ export class SupplierOnboardingL3Component implements OnInit {
 
       // Use the existing POST or PUT methods as needed
       this.commonService.postData('/api/resource/Supplier Onboarding L3', body).subscribe((res: any) => {
-        this.messageService.add({
-          severity: 'success', 
-          summary: 'Onboarding Complete', 
-          detail: 'Thank you! Your supplier onboarding process has been completed successfully. We will review your information and contact you shortly.'
-        });
+        this.sweetAlert.success('Thank you! Your supplier onboarding process has been completed successfully. We will review your information and contact you shortly.');
         
         // Here you might redirect to a supplier dashboard or confirmation page
         setTimeout(() => {
@@ -1000,11 +990,7 @@ export class SupplierOnboardingL3Component implements OnInit {
       });
     } else {
       this.markFieldsAsTouched(this.stepFields.flat());
-      this.messageService.add({
-        severity: 'error', 
-        summary: 'Validation Error', 
-        detail: 'Please fill in all required fields correctly.'
-      });
+      this.sweetAlert.error('Please fill in all required fields correctly.');
     }
   }
 
@@ -1046,31 +1032,18 @@ export class SupplierOnboardingL3Component implements OnInit {
       let endPoint = '/api/resource/Supplier Onboarding L3/' + sessionStorage.getItem('supplier_id')
 
       this.commonService.putData(endPoint, body).subscribe((res: any) => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Update Successful',
-          detail: 'Your data has been updated successfully. We will review the changes and get back to you if necessary.'
-        });
+        this.sweetAlert.success('Your data has been updated successfully. We will review the changes and get back to you if necessary.');
         
         // Here you might redirect to a supplier dashboard or confirmation page
         setTimeout(() => {
           this.router.navigate(['/wefab/supplier/profile-review']);
         }, 3000);
       }, (err: any) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Submission Error',
-          detail: err.error?.message || 'An error occurred while submitting the form. Please try again later.',
-          life: 5000
-        });
+        this.sweetAlert.error(err.error?.message || 'An error occurred while submitting the form. Please try again later.');
       });
     } else {
       this.markFieldsAsTouched(this.stepFields.flat());
-      this.messageService.add({
-        severity: 'error', 
-        summary: 'Validation Error', 
-        detail: 'Please fill in all required fields correctly.'
-      });
+      this.sweetAlert.error('Please fill in all required fields correctly.');
     }
   }
 }
