@@ -12,7 +12,7 @@
       <div class="header-left">
         <h1 class="page-title">{{ quotationDetails.quotationId }}</h1>
         <div class="header-badges">
-          <span class="status-badge" [ngClass]="(quotationDetails.workflowState || '').toLowerCase()">
+          <span class="status-badge" [ngClass]="getStatusClass(quotationDetails.workflowState)">
             {{ quotationDetails.workflowState }}
           </span>
         </div>

@@ -25,6 +25,7 @@ export interface SupplierQuotationApiResponse {
   docstatus: number;
   idx: number;
   workflow_state: string;
+  status: string;
   quotation_name: string;
   rfq_id: string;
   supplier_id: string;
@@ -80,6 +81,7 @@ export interface QuotationDetails {
   createdOn: string;
   lastModified: string;
   workflowState: string;
+  status: string;
   estimatedDuration: string;
   validity: string;
   deliveryAddress: string;
@@ -159,6 +161,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     createdOn: '',
     lastModified: '',
     workflowState: '',
+    status: '',
     estimatedDuration: '',
     validity: '',
     deliveryAddress: '',
@@ -352,7 +355,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       rfqId: apiData.rfq_id,
       createdOn: this.formatApiDate(apiData.creation),
       lastModified: this.formatApiDate(apiData.modified),
-      workflowState: apiData.workflow_state,
+      workflowState: apiData.status,
+      status: apiData.status,
       estimatedDuration: apiData.estimated_completion_duration,
       validity: this.formatApiDate(apiData.validity),
       deliveryAddress: '', // Not available in new API structure
@@ -942,5 +946,34 @@ export class SupplierQuotationDetailsComponent implements OnInit {
    */
   hasAvailableActions(): boolean {
     return this.severityOptions && this.severityOptions.length > 0;
+  }
+
+  // 
+  getStatusClass(status:any) {
+    console.log('RFQ Details page status', status);
+    switch (status) {
+      case 'Cancelled':
+        return 'status-rejected';
+      case 'Draft':
+        return 'status-draft';
+      case 'Opened': 
+        return 'status-open';
+      case 'Not Opened':
+        return 'status-open';
+      case 'Paused':
+        return 'status-paused';
+      case 'Deactivate':
+        return 'status-deactivate';
+      case 'Closed':
+        return 'status-closed';
+      case 'Quoted':
+        return 'status-awarded';
+      case 'Not Opened':
+        return 'status-open';
+      case 'In Progress':
+        return 'status-progress';
+      default:
+        return 'status-default';
+    }
   }
 }
