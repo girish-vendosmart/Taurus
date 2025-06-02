@@ -15,6 +15,7 @@ export interface SupplierQuotationData {
   docstatus: number;
   idx: number;
   workflow_state: string;
+  status: string;
   quotation_id: string | null;
   rfq_id: string;
   supplier_id: string;
@@ -65,6 +66,7 @@ export interface QuotationTableItem {
   styleUrl: './supplier-quotation.component.scss'
 })
 export class SupplierQuotationComponent implements OnInit {
+  supplierId: string = '';
 
   constructor(private router: Router, private commonService: CommonService) { }
   
@@ -166,12 +168,13 @@ export class SupplierQuotationComponent implements OnInit {
   };
 
   ngOnInit() {
+    this.supplierId = sessionStorage.getItem('supplier_id') || '';
     this.getQuotationList();
   }
 
   getQuotationList() {
     this.loading = true;
-    let endPoint = '/api/resource/Supplier Quotation?fields=["*"]';
+    let endPoint = `/api/resource/Supplier Quotation?fields=["*"]&filters=[["supplier_id", "=", "${this.supplierId}"]]`;
     this.commonService.getWefabData(endPoint).subscribe({
       next: (res: any) => {
         console.log('API Response:', res);
@@ -211,8 +214,8 @@ export class SupplierQuotationComponent implements OnInit {
       title: `Quotation ${apiItem.name}`,
       parts: 1, // Default value as not provided in API
       submittedDate: this.formatDate(apiItem.creation),
-      status: apiItem.workflow_state,
-      statusClass: this.getStatusClass(apiItem.workflow_state),
+      status: apiItem.status,
+      statusClass: this.getStatusClass(apiItem.status),
       description: apiItem.notes ? apiItem.notes.substring(0, 100) + '...' : '',
       totalAmount: this.formatCurrency(apiItem.total_amount),
       grandTotal: this.formatCurrency(apiItem.grand_total),
