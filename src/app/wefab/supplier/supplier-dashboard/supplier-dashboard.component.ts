@@ -313,7 +313,7 @@ export class SupplierDashboardComponent {
     switch (status?.toUpperCase()) {
       case 'DRAFT':
         return 'status-draft';
-      case 'OPEN':
+      case 'OPENED':
         return 'status-open';
       case 'IN PROGRESS':
       case 'IN_PROGRESS':

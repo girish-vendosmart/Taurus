@@ -342,14 +342,29 @@ export class SupplierRfqDetailsComponent implements OnInit {
     console.log('Downloading file for RFQ:', this.rfqId);
   }
 
-  getStatusClass(): string {
-    switch (this.supplierRfqDetails.docstatus) {
-      case 1:
-        return 'status-published';
-      case 0:
+  getStatusClass(status:any) {
+    console.log('RFQ Details page status', status);
+    switch (status) {
+      case 'Cancelled':
+        return 'status-rejected';
+      case 'Draft':
         return 'status-draft';
-      case 2:
+      case 'Opened': 
+        return 'status-open';
+      case 'Not Opened':
+        return 'status-open';
+      case 'Paused':
+        return 'status-paused';
+      case 'Deactivate':
+        return 'status-deactivate';
+      case 'Closed':
         return 'status-closed';
+      case 'Quoted':
+        return 'status-awarded';
+      case 'Not Opened':
+        return 'status-open';
+      case 'In Progress':
+        return 'status-progress';
       default:
         return 'status-default';
     }

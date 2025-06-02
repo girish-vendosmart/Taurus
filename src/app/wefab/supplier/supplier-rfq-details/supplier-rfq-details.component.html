@@ -1,6 +1,3 @@
-{{supplierRfqDetails | json}}
-
-
 <div class="rfq-details-page">
   <!-- Header Section -->
   <div class="page-header">
@@ -15,7 +12,7 @@
       <div class="header-left">
         <h1 class="page-title">{{ rfqDetails.rfq_name || 'Loading...' }}</h1>
         <p class="rfq-id">{{ rfqDetails.name || 'Loading...' }}</p>
-        <span class="status-badge mt-2" [ngClass]="getStatusClass()">{{ getStatusText() }}</span>
+        <span class="status-badge mt-2" [ngClass]="getStatusClass(supplierRfqDetails.status)">{{ supplierRfqDetails.status }}</span>
       </div>
       
       <div class="header-right">
