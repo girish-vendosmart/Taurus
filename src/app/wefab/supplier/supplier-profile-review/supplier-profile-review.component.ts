@@ -1263,7 +1263,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       comment: this.updateRequestComment
     };
 
-    this.commonservice.postData(endpoint, data).subscribe({
+    this.commonservice.putData(endpoint, data).subscribe({
       next: (res) => {
         this.showSuccess('Update request sent successfully');
         this.cancelUpdateRequest();

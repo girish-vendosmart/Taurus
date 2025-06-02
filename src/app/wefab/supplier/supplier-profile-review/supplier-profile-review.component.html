@@ -24,9 +24,6 @@
       <button class="btn-view-activity" (click)="toggleActivityTrail()" *ngIf="!showActivityTrail">
         <i class="pi pi-history"></i> View Activity Trail
       </button>
-      <button class="btn-success" (click)="goToDashboard()" *ngIf="areAllStagesApproved && userType === 'supplier'">
-        <i class="pi pi-home"></i> Go to Dashboard
-      </button>
       <button class="btn-navigation" (click)="goBack()">
         <i class="pi pi-arrow-left"></i> Back
       </button>
@@ -170,15 +167,16 @@
           <p *ngIf="activeLevelTab === 'manufacturing' && requestToResubmitCommentL2">{{ requestToResubmitCommentL2 }}</p>
           <p *ngIf="activeLevelTab === 'financial' && requestToResubmitCommentL3">{{ requestToResubmitCommentL3 }}</p>
         </div>
-        <div class="resubmit-actions">
+        <!-- <div class="resubmit-actions">
           <button 
             type="button" 
             class="btn btn-primary" 
+            *ngIf="userType === 'supplier'"
             (click)="navigateToEdit()">
             <i class="pi pi-pencil prime-ng-font-icon-font-size"></i>
             Edit & Resubmit
-      </button>
-        </div>
+          </button>
+        </div> -->
       </div>
 
       <!-- Basic Information Tab Content - Consolidated View -->
