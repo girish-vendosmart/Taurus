@@ -35,6 +35,7 @@ import { PDropdownGroupSearchComponent } from '../../../p-dropdown-group-search.
 import { FormlyFieldPDropdownGroupSearchComponent } from '../../../p-dropdown-group-search-type.component';
 // GST Validator function
 import { ChangeDetectorRef } from '@angular/core';
+import { SweetAlertService } from '../../shared/sweet-alert.service';
 export function gstValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
   
@@ -129,6 +130,7 @@ export class SupplierOnboardingComponent implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef,
     private commonService: CommonService,
+    private sweetAlertService: SweetAlertService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.form = this.fb.group({});
@@ -145,7 +147,7 @@ export class SupplierOnboardingComponent implements OnInit {
   getStates(country: any) {
     if (!country) return;
     
-    let endPoint = `/api/resource/pq_city?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"]]`;
+    let endPoint = `/api/resource/City?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"]]`;
     console.log('Fetching states for country:', country);
     
     this.commonService.getData(endPoint).subscribe((res: any) => {
@@ -289,12 +291,7 @@ export class SupplierOnboardingComponent implements OnInit {
         if (supplierId) {
           this.getL1Data(supplierId);
         } else {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Supplier ID not found. Please try again.',
-            life: 3000
-          });
+          this.sweetAlertService.error('Supplier ID not found. Please try again.');
           this.router.navigate(['/wefab/supplier/supplier-verification']);
         }
       }
@@ -1356,12 +1353,7 @@ export class SupplierOnboardingComponent implements OnInit {
     if (this.isStepValid(formlyFields)) {
       // For step 1 to 2, check if phone verification is required (only if not already verified)
       if (this.activeStepIndex === 1 && !this.phoneVerified) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Validation Error',
-          detail: 'Please verify your phone number before submitting the form.',
-          life: 4000
-        });
+        this.sweetAlertService.error('Please verify your phone number before submitting the form.');
         return;
       }
       
@@ -1376,12 +1368,7 @@ export class SupplierOnboardingComponent implements OnInit {
         1: 'Please complete all required manufacturing capabilities and document details.'
       };
       
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Validation Error',
-        detail: errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.',
-        life: 4000
-      });
+      this.sweetAlertService.error(errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.');
     }
   }
 
@@ -1436,12 +1423,7 @@ export class SupplierOnboardingComponent implements OnInit {
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
       sessionStorage.setItem('supplier_id', res.data.name);
       this.hasExistingSupplier = true;
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Form Submitted Successfully',
-        detail: 'Your information has been saved. Redirecting to the next step of the onboarding process.',
-        life: 3000
-      });
+      this.sweetAlertService.success('Your information has been saved. Redirecting to the next step of the onboarding process.');
       // Navigate to verification page after 3 seconds
       setTimeout(() => {
         this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
@@ -1455,24 +1437,14 @@ export class SupplierOnboardingComponent implements OnInit {
     this.commonService.putData(endPoint, body).subscribe((res: any) => {
       sessionStorage.setItem('supplier_id', res.data.name);
       this.hasExistingSupplier = true;
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Update Successful',
-        detail: 'Your supplier information has been updated. Redirecting to the next step of the onboarding process.',
-        life: 3000
-      });      
+      this.sweetAlertService.success('Your supplier information has been updated. Redirecting to the next step of the onboarding process.');
       
       // Navigate to verification page after 3 seconds
       this.router.navigateByUrl('/wefab/supplier/profile-review')
 
     }, (err) => {
       console.error('Error updating form:', err);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Submission Error',
-        detail: err.error?.message || 'An error occurred while submitting the form. Please try again later.',
-        life: 5000
-      });
+      this.sweetAlertService.error(err.error?.message || 'An error occurred while submitting the form. Please try again later.');
     });
   }
   
@@ -1545,12 +1517,7 @@ export class SupplierOnboardingComponent implements OnInit {
       this.postSupplierOnboardingL1();
     } else {
       this.form.markAllAsTouched();
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Validation Error',
-        detail: 'Please fill all required fields correctly before submitting the form.',
-        life: 4000
-      });
+      this.sweetAlertService.error('Please fill all required fields correctly before submitting the form.');
     }
   }
   
@@ -1614,7 +1581,7 @@ export class SupplierOnboardingComponent implements OnInit {
   getCities(country: string, state: string) {
     if (!country || !state) return;
 
-    let endPoint = `/api/resource/pq_city?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"], ["state_title", "=", "${state}"]]`;
+    let endPoint = `/api/resource/City?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"], ["state_title", "=", "${state}"]]`;
     console.log('Fetching cities for country:', country, 'and state:', state);
     
     this.commonService.getData(endPoint).subscribe((res: any) => {
@@ -1716,12 +1683,7 @@ export class SupplierOnboardingComponent implements OnInit {
         queryParams: { supplier_id: supplierId }
       });
     } else {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Supplier ID not found. Please try again.',
-        life: 3000
-      });
+      this.sweetAlertService.error('Supplier ID not found. Please try again.');
     }
   }
 
@@ -1762,12 +1724,7 @@ export class SupplierOnboardingComponent implements OnInit {
   // ... existing verifyGST method but make it call a GST verification service or API
   verifyGST(gstNumber: string) {
     if (!gstNumber) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Please enter a GST number first',
-        life: 3000
-      });
+      this.sweetAlertService.error('Please enter a GST number first');
       return;
     }
 
@@ -1775,12 +1732,7 @@ export class SupplierOnboardingComponent implements OnInit {
     console.log('Verifying GST number:', gstNumber);
     
     // For now, just show a success message
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Verification',
-      detail: 'GST verification in progress...',
-      life: 3000
-    });
+    this.sweetAlertService.info('GST verification in progress...');
   }
 
   // Method to update GST field verification status

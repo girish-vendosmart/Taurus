@@ -69,7 +69,13 @@ interface Supplier {
     <div class="suppliers-container">
       <div class="header">
         <h1>Manage your vendors</h1>
-        <button pButton label="Invite Vendor" icon="pi pi-plus" class="p-button-primary" (click)="showInviteDialog()"></button>
+         <button 
+          type="button" 
+          class="btn btn-primary px-3 mb-2"
+          (click)="showInviteDialog()">
+          <i class="pi pi-plus ms-2" style="font-size: 13px; margin-right: 5px;"></i>
+          Invite Vendor
+        </button>
       </div>
 
       <p-tabView>
@@ -141,18 +147,19 @@ interface Supplier {
         </div>
 
         <div class="dialog-footer">
-          <button pButton type="button" label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideInviteDialog()"></button>
-          <button
-            pButton
-            type="submit"
-            class="p-button-primary"
-            [disabled]="inviteForm.invalid || isSubmitting">
-            <ng-container *ngIf="isSubmitting">
-              <i class="pi pi-spin pi-spinner" style="margin-right: 8px;"></i> Sending...
-            </ng-container>
-            <ng-container *ngIf="!isSubmitting">
-              Send Invitation
-            </ng-container>
+          <button 
+            type="button" 
+            class="btn btn-outline-secondary" 
+            (click)="hideInviteDialog()">
+            <i class="pi pi-times prime-ng-font-icon-font-size"></i>
+            Cancel
+          </button>
+          <button 
+                type="button" 
+                (click)="onSubmit()"
+                class="btn btn-primary" >
+                <i class="pi pi-send prime-ng-font-icon-font-size"></i>
+                Send Invitations
           </button>
         </div>
       </form>

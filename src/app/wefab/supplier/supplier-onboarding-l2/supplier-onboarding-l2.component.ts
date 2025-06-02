@@ -30,6 +30,9 @@ import { FormlyFieldFileUploadComponent } from '../../../../app/file-upload-type
 import { FormlyFieldRangeSliderComponent } from '../../../../app/range-slider-type.component';
 import { FormlyFieldDropdownComponent } from '../../../../app/dropdown-type.component';
 
+// SweetAlertService
+import { SweetAlertService } from '../../shared/sweet-alert.service';
+
 @Component({
   selector: 'app-supplier-onboarding-l2',
   standalone: true,
@@ -89,7 +92,8 @@ export class SupplierOnboardingL2Component implements OnInit {
     private messageService: MessageService,
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private sweetAlertService: SweetAlertService
   ) {
     this.form = this.fb.group({});
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -124,12 +128,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       if (supplierId) {
         this.getL2Data(supplierId);
       } else {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Supplier ID not found. Please try again.',
-          life: 3000
-        });
+        this.sweetAlertService.error('Supplier ID not found. Please try again.');
         this.router.navigate(['/wefab/supplier/supplier-verification']);
       }
     }
@@ -835,12 +834,7 @@ export class SupplierOnboardingL2Component implements OnInit {
         1: 'Please complete all required facility verification details.'
       };
       
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Validation Error',
-        detail: errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.',
-        life: 4000
-      });
+      this.sweetAlertService.error(errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.');
     }
   }
 
@@ -888,12 +882,7 @@ export class SupplierOnboardingL2Component implements OnInit {
 
   postDataFunction(endPoint: string, body: any) {
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Form Submitted Successfully',
-        detail: 'Your information has been saved. Redirecting to the next step of the onboarding process.',
-        life: 3000
-      });
+      this.sweetAlertService.success('Your information has been saved. Redirecting to the next step of the onboarding process.');
       
       // Navigate to manufacturing verification after 3 seconds
       setTimeout(() => {
@@ -913,12 +902,7 @@ export class SupplierOnboardingL2Component implements OnInit {
 
   putDataFunction(endPoint: string, body: any) {
     this.commonService.putData(endPoint, body).subscribe((res: any) => {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Update Successful',
-        detail: 'Your supplier information has been updated. Redirecting to the next step of the onboarding process.',
-        life: 3000
-      });      
+      this.sweetAlertService.success('Your supplier information has been updated. Redirecting to the next step of the onboarding process.');
       
       // Navigate to manufacturing verification after 3 seconds
       setTimeout(() => {
@@ -926,12 +910,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       }, 3000);
     }, (err:any) => {
       console.error('Error submitting form:', err);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Submission Error',
-        detail: err.error?.message || 'An error occurred while submitting the form. Please try again later.',
-        life: 5000
-      });
+      this.sweetAlertService.error(err.error?.message || 'An error occurred while submitting the form. Please try again later.');
     });
   }
 
@@ -945,12 +924,7 @@ export class SupplierOnboardingL2Component implements OnInit {
     let endPoint = '/api/resource/Supplier Onboarding L2/' + sessionStorage.getItem('supplier_id');
     let body = this.updateData(this.model);
     this.commonService.putData(endPoint, body).subscribe((res: any) => {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Update Successful',
-        detail: 'Your supplier information has been updated. We are reviewing the changes and will proceed with verification shortly.',
-        life: 3000
-      });      
+      this.sweetAlertService.success('Your supplier information has been updated. We are reviewing the changes and will proceed with verification shortly.');
       
       // Navigate to manufacturing verification after 3 seconds
       setTimeout(() => {
@@ -976,12 +950,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       console.log('L2 Form submitted successfully', this.model);
       this.postSupplierOnboardingL2();
     } else {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Validation Error',
-        detail: 'Please fill all required fields correctly before submitting the form.',
-        life: 4000
-      });
+      this.sweetAlertService.error('Please fill all required fields correctly before submitting the form.');
     }
   }
 }

@@ -226,19 +226,19 @@
       </div>
     </div>
     <div class="dialog-footer">
-      <button pButton 
-              type="button" 
-              label="Cancel" 
-              icon="pi pi-times" 
-              class="p-button-text cancel-btn" 
-              (click)="showInvitationDialog = false">
+      <button 
+            type="button" 
+            class="btn btn-outline-secondary" 
+            (click)="showInvitationDialog = false">
+            <i class="pi pi-times"></i>
+            Cancel
       </button>
-      <button pButton 
-              type="button" 
-              label="Send Invitations" 
-              icon="pi pi-send" 
-              class="p-button-primary send-btn" 
-              (click)="sendInvitations()">
+      <button 
+            type="button" 
+            class="btn btn-primary" 
+            (click)="sendInvitations()">
+            <i class="pi pi-send"></i>
+            Send Invitations
       </button>
     </div>
   </div>

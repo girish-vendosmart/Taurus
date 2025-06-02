@@ -552,6 +552,14 @@ export interface DropdownGroup {
       border: none;
       background: transparent;
     }
+
+    ::ng-deep .p-multiselect-panel .p-multiselect-items {
+      padding-left: 0px !important;
+    }
+
+    ::ng-deep .p-multiselect-item-group {
+      padding: 0px !important;
+    }
   `]
 })
 export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccessor {
