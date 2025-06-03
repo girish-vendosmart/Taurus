@@ -139,12 +139,6 @@ export class SupplierRfqDetailsComponent implements OnInit {
         filterable: true,
       },
       {
-        field: 'estimated_rate',
-        header: 'Estimated Rate',
-        sortable: true,
-        filterable: true,
-      },
-      {
         field: 'process_required',
         header: 'Process Required',
         sortable: true,
@@ -185,6 +179,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
       
       console.log(this.rfqId)
       this.supplierRfqId = sessionStorage.getItem('supplier_rfq_id') || '';
+      this.loadRFQDetails();
       this.loadSupplierDetails();
     });
 
@@ -195,12 +190,6 @@ export class SupplierRfqDetailsComponent implements OnInit {
     this.commonService.getWefabData(endPoint).subscribe((res: any) => {
       
       this.supplierRfqDetails = res.data;
-      console.log('Supplier RFQ Details', this.supplierRfqDetails.status);
-      if(this.supplierRfqDetails.status === 'Not Opened') {
-        this.updateRFQStatus();
-      } else {
-        this.loadRFQDetails();
-      }
     });
   }
 

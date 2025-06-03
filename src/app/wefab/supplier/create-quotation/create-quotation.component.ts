@@ -998,6 +998,9 @@ export class CreateQuotationComponent implements OnInit {
     console.log('Calculated Discount Amount:', calculatedDiscountAmount);
     console.log('=====================================');
     
+    // Calculate totals to ensure they're current
+    this.calculateTotals();
+    
     const apiData = {
       rfq_id: this.getRfqId(),
       quotation_name: this.model.quotationName,
@@ -1007,12 +1010,15 @@ export class CreateQuotationComponent implements OnInit {
       delivery_address: this.getDeliveryAddress(),
       quotation_from: this.quoteFrom,
       quotation_to: this.quoteTo,
+      currency: this.model.currency, // Add currency at quotation level
       discount_type: this.discountType === 'percentage' ? 'Percentage' : 'Amount',
       discount_percentage: this.discountType === 'percentage' ? this.discountValue : 0,
       discount_amount: calculatedDiscountAmount, // Always set the calculated discount amount
       discount: discount, // New single discount variable
       shipping_charges: this.shippingCharges || 0,
       total_tax_amount: this.getTotalTaxAmount(),
+      sub_total: this.calculatedSubTotal, // Sub Total (before discount and tax)
+      grand_total: this.calculatedTotalAmount, // Final total amount (after discount, tax, and shipping)
       payment_terms: this.model.paymentTerms,
       shipping_terms: this.getShippingTerms(),
       notes: `<p>${this.model.termsAndConditions}</p>`,
@@ -1090,7 +1096,9 @@ export class CreateQuotationComponent implements OnInit {
     // For now, using a placeholder - in real app, get from authentication service
     return localStorage.getItem('supplierId') || 
            sessionStorage.getItem('supplierId') ||
-           'f9m9s21tsu';
+           localStorage.getItem('supplier_id') || 
+           sessionStorage.getItem('supplier_id') ||
+           'f9m9s21tsu'; // Default supplier ID as fallback
   }
 
   private getDeliveryAddress(): string {

@@ -95,6 +95,8 @@ export interface QuotationDetails {
   igstApplicable: boolean;
   sgstRate: number;
   cgstRate: number;
+  sub_total: number;
+  quotation_name: string;
   igstRate: number;
   taxableAmount: number;
   sgstAmount: number;
@@ -177,6 +179,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     cgstRate: 0,
     igstRate: 0,
     taxableAmount: 0,
+    quotation_name: '',
+    sub_total: 0,
     sgstAmount: 0,
     cgstAmount: 0,
     igstAmount: 0,
@@ -349,6 +353,9 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   mapApiResponseToComponent(apiData: SupplierQuotationApiResponse) {
     console.log('API Data:', apiData);
 
+    // Calculate sub total from items since API might return 0
+    const calculatedSubTotal = apiData.items.reduce((total, item) => total + item.total_price, 0);
+
     // Map main quotation details
     this.quotationDetails = {
       quotationId: apiData.name,
@@ -360,16 +367,18 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       estimatedDuration: apiData.estimated_completion_duration,
       validity: this.formatApiDate(apiData.validity),
       deliveryAddress: '', // Not available in new API structure
-      totalAmount: 0,
+      totalAmount: calculatedSubTotal, // Use calculated value
       discountPercentage: apiData.discount,
       discountAmount: apiData.discount_amount,
       shippingCharges: apiData.shipping_charges,
       grandTotal: apiData.grand_total,
       taxApplicable: 0,
       sgstCgstApplicable: false,
+      quotation_name: apiData.quotation_name,
       igstApplicable: false,
       sgstRate: 0,
       cgstRate: 0,
+      sub_total: apiData.sub_total, // Use calculated value if available, otherwise API value
       igstRate: 0,
       taxableAmount: 0,
       sgstAmount: 0,
@@ -415,10 +424,6 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       total_price_formatted: item.total_price.toLocaleString('en-US'),
       tax_amount_formatted: item.tax_amount.toLocaleString('en-US')
     }));
-
-    // Calculate sub total from items since API returns 0
-    const calculatedSubTotal = apiData.items.reduce((total, item) => total + item.total_price, 0);
-    this.quotationDetails.totalAmount = calculatedSubTotal;
     
     this.totalItems = this.quotationItems.length;
   }
@@ -818,7 +823,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         <div class="summary-section">
           <div class="summary-row">
             <span class="summary-label">Sub Total:</span>
-            <span class="summary-value">${this.formatCurrency(this.quotationDetails.totalAmount, this.getSummaryCurrency())}</span>
+            <span class="summary-value">${this.formatCurrency(this.quotationDetails.sub_total, this.getSummaryCurrency())}</span>
           </div>
           <div class="summary-row">
             <span class="summary-label">Discount (${this.quotationDetails.discountPercentage}%):</span>
@@ -877,7 +882,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   
   private loadActivityTrail(): void {
     this.activityTrailLoading = true;
-    this.commonService.getData('/api/method/wefab.wefab.api.common.engine.trail.acitivty.get_new_versions_trail?doctype=pq_rfq&docname=' + 'RFQ0000000050')
+    this.commonService.getData('/api/method/wefab.wefab.api.common.engine.trail.activity.get_new_versions_trail?doctype=Supplier Quotation&docname=' + this.quotationId)
       .subscribe({
         next: (response: any) => {
           this.activityTrail = response.data || [];
@@ -952,6 +957,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   getStatusClass(status:any) {
     console.log('RFQ Details page status', status);
     switch (status) {
+      case 'Submitted':
+        return 'status-awarded';
       case 'Cancelled':
         return 'status-rejected';
       case 'Draft':

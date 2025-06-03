@@ -83,6 +83,11 @@
       <span class="info-label">Last Modified:</span>
       <span class="info-value">{{ quotationDetails.lastModified }}</span>
     </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Last Modified:</span>
+      <span class="info-value">{{ quotationDetails.quotation_name }}</span>
+    </div>
   </div>
 
   <!-- Tab Navigation -->
@@ -161,7 +166,7 @@
           <div class="summary-section">
             <div class="summary-row">
               <span class="summary-label">Sub Total:</span>
-              <span class="summary-value">{{ quotationDetails.totalAmount.toLocaleString('en-US') }}</span>
+              <span class="summary-value">{{ quotationDetails.sub_total.toLocaleString('en-US') }}</span>
             </div>
             <div class="summary-row">
               <span class="summary-label">Discount ({{ quotationDetails.discountPercentage }}%):</span>

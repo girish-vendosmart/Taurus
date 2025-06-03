@@ -140,7 +140,7 @@ export class SweetAlertService {
    * @param position The position of the toast
    * @param timer Duration in milliseconds
    */
-  warning(message: string, position: SweetAlertPosition = 'top-end', timer: number = 2000): void {
+  warning(message: string, position: SweetAlertPosition = 'top-end', timer: number = 5000): void {
     this.toast(message, 'warning', position, timer);
   }
   

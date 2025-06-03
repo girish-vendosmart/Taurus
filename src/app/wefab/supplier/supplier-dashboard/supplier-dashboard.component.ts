@@ -17,6 +17,7 @@ import {
 } from 'ng-apexcharts';
 import { CommonService } from '../../shared/common.service';
 import { Router } from '@angular/router';
+import { SweetAlertService } from '../../shared/sweet-alert.service';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -85,7 +86,7 @@ export class SupplierDashboardComponent {
   supplierName: string = '';
   supplierId: string;
   
-  constructor(private commonService: CommonService, private router: Router) {
+  constructor(private commonService: CommonService, private router: Router, private sweetAlertService: SweetAlertService) {
     // Get supplier information from session storage
     this.supplierName = sessionStorage.getItem('supplier_name') || 'Supplier';
 
@@ -442,9 +443,28 @@ export class SupplierDashboardComponent {
   ];
 
   viewRFQ(rfq: any) {
+    if(rfq.status === "Cancelled" || rfq.status === "Paused" || rfq.status === "Deactivated") {
+      this.sweetAlertService.warning('RFQ is unavailable. It may be paused or deactivated by the buyer.');
+      return;
+   } else if (rfq.status === "Not opened") {
+    this.updateRFQStatus(rfq.rfq_id);
+    return;
+  } else {
+    console.log('Dashboard RFQ:', rfq);
     sessionStorage.setItem('supplier_rfq_id', rfq.supplier_id);
     // sessionStorage.setItem('supplier_rfq_name', rfq.name);
     this.router.navigate(['/wefab/supplier/rfq/details/', rfq.rfq_id]);
+   }
+  }
+
+  updateRFQStatus(rfqId: string) {
+    let apiEndpoint = `/api/resource/Supplier Request for Quotation/${rfqId}-${this.supplierId}`;
+    this.commonService.putWefabData(apiEndpoint, {
+      status: 'Opened'
+    }).subscribe((res: any) => {
+      console.log('Update RFQ Status', res);
+      this.router.navigate(['/wefab/supplier/rfq/details', rfqId]);
+    });
   }
 
   viewQuotation(quotationId: string) {

@@ -44,12 +44,13 @@ export class ConversationTrailComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
-      this.supplierId = params.get('supplierId') || 'SUP-000403';
-      if (this.supplierId) {
-        this.fetchMessages();
-      }
-    });
+    this.supplierId = sessionStorage.getItem('supplier_id') || '';
+    // this.route.paramMap.subscribe(params => {
+    //   this.supplierId = params.get('supplierId') || 'SUP-000403';
+    //   if (this.supplierId) {
+    //     this.fetchMessages();
+    //   }
+    // });
   }
 
   fetchMessages() {
@@ -190,11 +191,11 @@ export class ConversationTrailComponent implements OnInit {
       document_id: this.supplierId,
       sender: this.currentUser,
       comment: this.newMessage || '', // Allow empty message if there are attachments
-      attachment: this.attachments
+      attachments: this.attachments
     };
     
     try {
-      await this.commonService.postData('/api/resource/wfb_supplier_onboarding_messenger', payload).toPromise();
+      await this.commonService.postData('/api/resource/Supplier Onboarding Messenger', payload).toPromise();
       this.newMessage = '';
       this.attachments = [];
       this.fetchMessages();

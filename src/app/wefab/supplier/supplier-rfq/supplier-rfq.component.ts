@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
 import { CommonService } from '../../shared/common.service';
+import { SweetAlertService } from '../../shared/sweet-alert.service';
 
 export interface RFQItem {
   rfqId: string;
@@ -35,7 +36,7 @@ export interface RFQItem {
 export class SupplierRfqComponent implements OnInit {
   supplierId: string = '';
 
-  constructor(private router: Router, private commonService: CommonService) { }
+  constructor(private router: Router, private commonService: CommonService, private sweetAlertService: SweetAlertService) { }
   
   // Consolidated RFQ data
   allRFQs: RFQItem[] = [];
@@ -177,10 +178,27 @@ export class SupplierRfqComponent implements OnInit {
     }));
   }
 
-  onRfqIdLinkClick(rfqId: string) {
-    console.log('RFQ ID link clicked:', rfqId);
-    // Navigate to RFQ details page
-    this.router.navigate(['/wefab/supplier/rfq/details', rfqId]);
+  onRfqIdLinkClick(rfqId: string, status: string = '') {
+    if(status === "Cancelled" || status === "Paused" || status === "Deactivated") {
+       this.sweetAlertService.warning('RFQ is unavailable. It may be paused or deactivated by the buyer.');
+       return;
+    } else if (status === "Not opened") {
+      this.updateRFQStatus(rfqId);
+      return;
+    } else {
+      this.router.navigate(['/wefab/supplier/rfq/details', rfqId]);
+    }
+    // this.router.navigate(['/wefab/supplier/rfq/details', rfqId]);
+  }
+
+  updateRFQStatus(rfqId: string) {
+    let apiEndpoint = `/api/resource/Supplier Request for Quotation/${rfqId}-${this.supplierId}`;
+    this.commonService.putWefabData(apiEndpoint, {
+      status: 'Opened'
+    }).subscribe((res: any) => {
+      console.log('Update RFQ Status', res);
+      this.router.navigate(['/wefab/supplier/rfq/details', rfqId]);
+    });
   }
 
   // Helper method to format API date
@@ -295,7 +313,7 @@ export class SupplierRfqComponent implements OnInit {
       const rfqId = event.rowData.rfqId || event.rowData.name || '';
       if (rfqId) {
         sessionStorage.setItem('supplier_rfq_id', event.rowData.suppler_rfq_id);
-        this.onRfqIdLinkClick(rfqId);
+        this.onRfqIdLinkClick(rfqId, event.rowData.status);
       }
     } else {
       // Handle other link clicks (if any)
