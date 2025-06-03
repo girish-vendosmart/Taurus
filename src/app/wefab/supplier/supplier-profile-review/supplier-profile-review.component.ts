@@ -362,6 +362,14 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     switch (this.activeLevelTab) {
       case 'manufacturing':
         this.loadManufacturingData();
+        
+        // If manufacturing data is already available, trigger analysis immediately
+        if (this.manufacturingData) {
+          console.log('🔄 Manufacturing tab active with existing data, triggering analysis...');
+          setTimeout(() => {
+            this.triggerMachineAnalysisForManufacturingTab();
+          }, 100);
+        }
         break;
       case 'financial':
         this.loadFinancialData();
@@ -384,6 +392,15 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         next: (l2Data) => {
           this.processL2Data(l2Data);
           // Don't recalculate profile completeness here - it's already calculated
+          
+          // If user is currently on manufacturing tab, auto-trigger analysis
+          if (this.activeLevelTab === 'manufacturing') {
+            console.log('📊 Manufacturing data loaded, auto-triggering analysis...');
+            // Small delay to ensure data is fully processed
+            setTimeout(() => {
+              this.triggerMachineAnalysisForManufacturingTab();
+            }, 100);
+          }
         },
         error: (error) => {
           console.error('Error loading manufacturing data:', error);
@@ -613,18 +630,26 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processL2Data(result: any): void {
+    console.log('🔍 processL2Data called with result:', result);
+    
     if (result.data) {
       try {
         this.manufacturingData = JSON.parse(result.data.company_profile);
         this.requestToResubmitCommentL2 = result.data.comment || '';
+        
+        console.log('✅ Manufacturing data parsed successfully:', this.manufacturingData);
+        console.log('🔧 Machines available:', this.manufacturingData?.machines?.length || 0);
+        console.log('🏭 Facilities available:', this.manufacturingData?.facilityPhotos?.length || 0);
         
         // Count documents
         this.numberOfMachinePhoto = this.manufacturingData?.machines?.length || 0;
         this.numberOfFacilityPhoto = this.manufacturingData?.facilityPhotos?.length || 0;
         this.numberOfCertificationPhoto = this.manufacturingData?.certifications?.length || 0;
 
-        // REMOVED: Automatic machine analysis trigger
-        // Only trigger analysis when user specifically requests it or views machines
+        // Log machine structure for debugging
+        if (this.manufacturingData?.machines?.length) {
+          console.log('🔍 First machine structure:', this.manufacturingData.machines[0]);
+        }
         
       } catch (error) {
         console.error('Error parsing L2 data:', error);
@@ -634,6 +659,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
     if (result.status) {
       this.getCurrentL2DataStatus = result.status.approval_status;
+      console.log('📊 L2 Status set to:', this.getCurrentL2DataStatus);
     }
   }
 
@@ -947,6 +973,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     if (this.activeLevelTab === tab) return;
 
     this.activeLevelTab = tab;
+
+    if(this.activeLevelTab === 'manufacturing'){
+      this.changeManufacturingTab('machines');
+    }
     
     // Update URL without navigation
     this.updateUrl({ tab });
@@ -957,11 +987,66 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  // New method to trigger machine analysis when Manufacturing tab is selected
+  private triggerMachineAnalysisForManufacturingTab(): void {
+    console.log('🔄 triggerMachineAnalysisForManufacturingTab called');
+    console.log('📋 Current state check:');
+    console.log('  - manufacturingData exists:', !!this.manufacturingData);
+    console.log('  - hasLoadedMachineAnalysis:', this.hasLoadedMachineAnalysis);
+    console.log('  - hasLoadedFacilityAnalysis:', this.hasLoadedFacilityAnalysis);
+    console.log('  - activeLevelTab:', this.activeLevelTab);
+    console.log('  - manufacturingTab:', this.manufacturingTab);
+    
+    if (!this.manufacturingData) {
+      console.log('⚠️ Manufacturing data not yet loaded, cannot trigger analysis');
+      return;
+    }
+
+    console.log('📊 Manufacturing data available:', this.manufacturingData);
+    console.log('🏭 Machines count:', this.manufacturingData?.machines?.length || 0);
+    console.log('🏭 Facilities count:', this.manufacturingData?.facilityPhotos?.length || 0);
+    
+    // Trigger machine analysis if there are machines and not already loaded
+    if (!this.hasLoadedMachineAnalysis && this.manufacturingData?.machines?.length) {
+      console.log('🚀 Starting machine analysis automatically...');
+      this.hasLoadedMachineAnalysis = true;
+      
+      // Add extra debugging for machine analysis
+      console.log('🔍 About to call processMachineVerificationAsync...');
+      this.processMachineVerificationAsync();
+    } else {
+      if (this.hasLoadedMachineAnalysis) {
+        console.log('⏭️ Machine analysis already loaded');
+      } else {
+        console.log('⏭️ No machines available for analysis');
+      }
+    }
+    
+    // Trigger facility analysis if there are facilities and not already loaded
+    if (!this.hasLoadedFacilityAnalysis && this.manufacturingData?.facilityPhotos?.length) {
+      console.log('🏭 Starting facility analysis automatically...');
+      this.hasLoadedFacilityAnalysis = true;
+      this.processFacilityVerificationAsync();
+    } else {
+      if (this.hasLoadedFacilityAnalysis) {
+        console.log('⏭️ Facility analysis already loaded');
+      } else {
+        console.log('⏭️ No facilities available for analysis');
+      }
+    }
+
+    // If both analyses are already done, log that
+    if (this.hasLoadedMachineAnalysis && this.hasLoadedFacilityAnalysis) {
+      console.log('✅ Machine and facility analyses already completed');
+    }
+  }
+
   changeManufacturingTab(tab: string): void {
     this.manufacturingTab = tab;
     this.updateUrl({ tab: this.activeLevelTab, mtab: tab });
 
-    // Trigger machine analysis only when user views machines tab
+    // Keep the existing logic for individual tab triggers
+    // This handles when user specifically clicks on machine/facility tabs
     if (tab === 'machines' && !this.hasLoadedMachineAnalysis && this.manufacturingData?.machines?.length) {
       this.loadMachineAnalysis();
     } else if (tab === 'facility' && !this.hasLoadedFacilityAnalysis && this.manufacturingData?.facilityPhotos?.length) {
@@ -1293,7 +1378,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
     this.commonservice.putData(endpoint, data).subscribe({
       next: (res) => {
-        this.showSuccess(`Rejected successfully`);
+        this.showSuccess('Rejected successfully');
         this.refreshStatusData(level);
       },
       error: (error) => {
@@ -1640,4 +1725,4 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       })
     );
   }
-} 
+}
