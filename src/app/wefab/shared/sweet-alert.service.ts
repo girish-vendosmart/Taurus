@@ -131,7 +131,7 @@ export class SweetAlertService {
    * @param timer Duration in milliseconds
    */
   error(message: string, position: SweetAlertPosition = 'top-end', timer: number = 2000): void {
-    this.toast(message, 'error', position, timer);
+    this.toast(message, 'error', 'top-end', timer);
   }
   
   /**

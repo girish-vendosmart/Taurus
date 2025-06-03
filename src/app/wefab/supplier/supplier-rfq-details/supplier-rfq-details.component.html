@@ -16,9 +16,14 @@
       </div>
 
       
-      <div class="header-right" *ngIf="supplierRfqDetails.status === 'Opened'">
+      <div class="header-right" *ngIf="!supplierQuotationId">
         <button class="btn btn-primary" (click)="createQuotation()" [disabled]="loading">
           Create Quotation
+        </button>
+      </div>
+      <div class="header-right" *ngIf="supplierQuotationId">
+        <button class="btn btn-primary" (click)="viewQuotation()" [disabled]="loading">
+          View Quotation
         </button>
       </div>
     </div>

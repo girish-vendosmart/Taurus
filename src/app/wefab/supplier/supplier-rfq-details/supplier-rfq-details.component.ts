@@ -166,6 +166,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
   };
   supplierRfqId: string = '';
   supplierRfqDetails: any;
+  supplierQuotationId: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -190,6 +191,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
     this.commonService.getWefabData(endPoint).subscribe((res: any) => {
       
       this.supplierRfqDetails = res.data;
+      this.supplierQuotationId = res.data.quotation_id
     });
   }
 
@@ -444,5 +446,9 @@ export class SupplierRfqDetailsComponent implements OnInit {
       link.click();
       document.body.removeChild(link);
     }
+  }
+
+  viewQuotation() {
+    this.router.navigateByUrl(`/wefab/supplier/quotation/details/${this.supplierQuotationId}`);
   }
 }
