@@ -179,7 +179,7 @@ export class CreateQuotationComponent implements OnInit {
         unit: '',
         bid_type: 'Bid',
         itemPrice: 0,
-        tax_type: 'No Tax',
+        tax_type: 'Non-Taxable',
         miscellaneous: '',
         tooling: ''
       }
@@ -249,9 +249,12 @@ export class CreateQuotationComponent implements OnInit {
   ];
 
   taxTypeOptions = [
-    { label: 'No Tax', value: 'No Tax' },
-    { label: 'CGST & SGST', value: 'SGCT & CGST' },
-    { label: 'IGST', value: 'IGST' }
+    { label: 'Non-Taxable', value: 'Non-Taxable' },
+    { label: 'GST0 [0%]', value: 'GST0 [0%]' },
+    { label: 'GST5 [5%]', value: 'GST5 [5%]' },
+    { label: 'GST12 [12%]', value: 'GST12 [12%]' },
+    { label: 'GST18 [18%]', value: 'GST18 [18%]' },
+    { label: 'GST28 [28%]', value: 'GST28 [28%]' },
   ];
 
   @ViewChild('csvFileInput', { static: false }) csvFileInput!: ElementRef;
@@ -447,12 +450,12 @@ export class CreateQuotationComponent implements OnInit {
       const estimatedRate = this.extractEstimatedRate(item.comments || '');
       
       // Determine tax type based on currency and item properties
-      let taxType = 'No Tax';
+      let taxType = 'Non-Taxable';
       if (item.currency_code === 'INR') {
         if (item.igst_applicable || this.model.igst) {
-          taxType = 'IGST';
+          taxType = 'IGST [18%]';
         } else if (item.sgst_cgst_applicable || this.model.cgstSgst) {
-          taxType = 'SGCT & CGST';
+          taxType = 'GST18 [18%]';
         }
       }
       
@@ -779,16 +782,7 @@ export class CreateQuotationComponent implements OnInit {
     let totalTax = 0;
     
     this.model.quotationItems.forEach((item: any) => {
-      if (item.qty && item.itemPrice && item.qty > 0 && item.itemPrice > 0) {
-        const itemTotal = item.qty * item.itemPrice;
-        
-        if (item.tax_type === 'SGCT & CGST') {
-          totalTax += itemTotal * 0.18; // 9% CGST + 9% SGST = 18%
-        } else if (item.tax_type === 'IGST') {
-          totalTax += itemTotal * 0.18; // 18% IGST
-        }
-        // For 'No Tax', add 0
-      }
+      totalTax += this.getLineTaxAmount(item);
     });
     
     return totalTax;
@@ -804,12 +798,8 @@ export class CreateQuotationComponent implements OnInit {
     
     if (itemTotal <= 0) return 0;
     
-    if (item.tax_type === 'SGCT & CGST') {
-      return itemTotal * 0.18; // 9% CGST + 9% SGST = 18%
-    } else if (item.tax_type === 'IGST') {
-      return itemTotal * 0.18; // 18% IGST
-    }
-    return 0; // No tax
+    const taxPercentage = this.getTaxPercentage(item.tax_type || 'Non-Taxable');
+    return itemTotal * (taxPercentage / 100);
   }
 
   // Method to get discount amount for display
@@ -912,13 +902,13 @@ export class CreateQuotationComponent implements OnInit {
 
     console.log("Final Api Data to be sent:", apiData);
     
-    if (this.isEditMode) {
-      console.log('Calling updateExistingQuotation...');
-      this.updateExistingQuotation(apiData);
-    } else {
-      console.log('Calling createNewQuotation...');
-      this.createNewQuotation(apiData);
-    }
+    // if (this.isEditMode) {
+    //   console.log('Calling updateExistingQuotation...');
+    //   this.updateExistingQuotation(apiData);
+    // } else {
+    //   console.log('Calling createNewQuotation...');
+    //   this.createNewQuotation(apiData);
+    // }
     console.log('=== ONSUBMIT DEBUG END ===');
   }
 
@@ -1049,21 +1039,17 @@ export class CreateQuotationComponent implements OnInit {
         unit_price: unitPrice,
         comments: this.buildItemComments(item),
         bid_type: item.bid_type || 'Bid',
-        tax_type: item.tax_type || 'No Tax',
+        tax_type: item.tax_type || 'Non-Taxable',
         tax_amount: this.getLineTaxAmount(item)
       };
     });
   }
 
   // Transform attachments to API format
-  transformAttachments(): any[] {
+  transformAttachments(): string[] {
     return this.attachedFileObjects
       .filter(fileObj => fileObj.url) // Only include files that have been uploaded
-      .map((fileObj: any) => ({
-        file_name: fileObj.name,
-        file_url: fileObj.url,
-        description: this.getFileDescriptionFromType(fileObj.type)
-      }));
+      .map((fileObj: any) => fileObj.url);
   }
 
   // Helper method to get file description from type
@@ -1195,7 +1181,7 @@ export class CreateQuotationComponent implements OnInit {
         item.qty || 0,
         `"${(item.unit || '').replace(/"/g, '""')}"`,
         item.itemPrice || 0,
-        `"${item.tax_type || 'No Tax'}"`,
+        `"${item.tax_type || 'Non-Taxable'}"`,
         this.getLineTaxAmount(item),
         `"${(item.miscellaneous || '').replace(/"/g, '""')}"`,
         `"${(item.tooling || '').replace(/"/g, '""')}"`,
@@ -1543,7 +1529,7 @@ export class CreateQuotationComponent implements OnInit {
 
   private validateAndGetTaxType(taxType: string, rowNumber: number): string {
     const cleanTaxType = (taxType || '').trim().toLowerCase();
-    if (!cleanTaxType) return 'No Tax'; // Default tax type
+    if (!cleanTaxType) return 'Non-Taxable'; // Default tax type
 
     const validTaxType = this.taxTypeOptions.find(opt => 
       opt.value.toLowerCase() === cleanTaxType ||
@@ -1552,8 +1538,8 @@ export class CreateQuotationComponent implements OnInit {
     );
 
     if (!validTaxType) {
-      this.csvImportErrors.push(`Row ${rowNumber}: Invalid tax type '${taxType}'. Using 'No Tax'.`);
-      return 'No Tax';
+      this.csvImportErrors.push(`Row ${rowNumber}: Invalid tax type '${taxType}'. Using 'Non-Taxable'.`);
+      return 'Non-Taxable';
     }
 
     return validTaxType.value;
@@ -1684,7 +1670,7 @@ export class CreateQuotationComponent implements OnInit {
           qty: 0,
           unit: '',
           itemPrice: 0,
-          tax_type: 'No Tax',
+          tax_type: 'Non-Taxable',
           miscellaneous: '',
           tooling: '',
           bid_type: 'Bid'
@@ -1868,15 +1854,17 @@ export class CreateQuotationComponent implements OnInit {
       // Parse comments to extract material, miscellaneous, and tooling info
       const parsedComments = this.parseItemComments(item.comments || '');
       
-      // Determine tax type based on item properties
-      let taxType = 'No Tax';
-      if (item.tax_type) {
-        taxType = item.tax_type;
-      } else if (item.currency_code === 'INR') {
-        if (item.igst_applicable || this.model.igst) {
-          taxType = 'IGST';
-        } else if (item.sgst_cgst_applicable || this.model.cgstSgst) {
-          taxType = 'SGCT & CGST';
+      // Use the tax_type from API if available, otherwise determine from flags
+      let taxType = item.tax_type || 'Non-Taxable';
+      
+      // If tax_type is not available, determine from legacy flags
+      if (!item.tax_type) {
+        if (item.currency_code === 'INR') {
+          if (item.igst_applicable || this.model.igst) {
+            taxType = 'IGST [18%]';
+          } else if (item.sgst_cgst_applicable || this.model.cgstSgst) {
+            taxType = 'GST18 [18%]';
+          }
         }
       }
       
@@ -2688,7 +2676,7 @@ export class CreateQuotationComponent implements OnInit {
       qty: 0,
       unit: '',
       itemPrice: 0,
-      tax_type: 'No Tax',
+      tax_type: 'Non-Taxable',
       miscellaneous: '',
       tooling: '',
       bid_type: 'Bid'
@@ -3229,5 +3217,26 @@ ${this.isEditMode
     
     this.sweetAlert.info(summary);
     console.log('=== END DEBUG ===');
+  }
+
+  // Add method to get tax percentage from tax type
+  private getTaxPercentage(taxType: string): number {
+    switch (taxType) {
+      case 'Non-Taxable':
+      case 'GST0 [0%]':
+        return 0;
+      case 'GST5 [5%]':
+        return 5;
+      case 'GST12 [12%]':
+        return 12;
+      case 'GST18 [18%]':
+      case 'IGST [18%]':
+        return 18;
+      case 'GST28 [28%]':
+      case 'IGST [28%]':
+        return 28;
+      default:
+        return 0;
+    }
   }
 }
