@@ -1116,10 +1116,10 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   // Transform attachments to API format
-  transformAttachments(): string[] {
+  transformAttachments(): { file_url: string }[] {
     return this.attachedFileObjects
       .filter(fileObj => fileObj.url) // Only include files that have been uploaded
-      .map((fileObj: any) => fileObj.url);
+      .map((fileObj: any) => ({ file_url: fileObj.url }));
   }
 
   // Helper method to get file description from type
