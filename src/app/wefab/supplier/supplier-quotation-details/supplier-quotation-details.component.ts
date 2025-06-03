@@ -284,6 +284,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   };
   quotationId: any;
 
+  discountType: string = '';
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -373,8 +375,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       validity: this.formatApiDate(apiData.validity),
       deliveryAddress: '', // Not available in new API structure
       totalAmount: calculatedSubTotal, // Use calculated value
-      discountPercentage: apiData.discount,
-      discountAmount: apiData.discount_amount,
+      discountPercentage: apiData.discount_type === 'Percentage' ? apiData.discount_amount : apiData.discount,
+      discountAmount: this.calculateDiscountAmount(apiData.sub_total, apiData.discount_type, apiData.discount_amount),
       shippingCharges: apiData.shipping_charges,
       grandTotal: apiData.grand_total,
       taxApplicable: 0,
@@ -406,6 +408,9 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         location: apiData.quotation_to.split('\n')[2] || '----'
       }
     };
+
+    // Store discount type for reference
+    this.discountType = apiData.discount_type;
 
     // Map quotation items
     this.quotationItems = apiData.items.map(item => ({
@@ -833,7 +838,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
             <span class="summary-value">${this.getFormattedCurrencyAmount(this.quotationDetails.sub_total)}</span>
           </div>
           <div class="summary-row">
-            <span class="summary-label">Discount (${this.quotationDetails.discountPercentage}%):</span>
+            <span class="summary-label">${this.getDiscountDisplayText()}</span>
             <span class="summary-value">${this.getFormattedCurrencyAmount(this.quotationDetails.discountAmount)}</span>
           </div>
           ${taxRows}
@@ -1009,5 +1014,42 @@ export class SupplierQuotationDetailsComponent implements OnInit {
    */
   getPrimaryCurrencyCode(): string {
     return this.currencyCode;
+  }
+
+  /**
+   * Calculate discount amount based on discount type
+   * @param subTotal - The subtotal amount
+   * @param discountType - The type of discount ('Percentage' or 'Amount')
+   * @param discountValue - The discount value from API
+   * @returns Calculated discount amount
+   */
+  calculateDiscountAmount(subTotal: number, discountType: string, discountValue: number): number {
+    if (discountType === 'Percentage') {
+      // If discount type is percentage, calculate the discount amount
+      return (subTotal * discountValue) / 100;
+    } else {
+      // If discount type is amount, use the value directly
+      return discountValue;
+    }
+  }
+
+  /**
+   * Get discount display text for UI
+   * @returns Formatted discount text with percentage or amount
+   */
+  getDiscountDisplayText(): string {
+    if (this.discountType === 'Percentage') {
+      return `Discount (${this.quotationDetails.discountPercentage}%):`;
+    } else {
+      return 'Discount (Amount):';
+    }
+  }
+
+  /**
+   * Get the discount percentage for display
+   * @returns Discount percentage or 0 if amount type
+   */
+  getDiscountPercentage(): number {
+    return this.discountType === 'Percentage' ? this.quotationDetails.discountPercentage : 0;
   }
 }

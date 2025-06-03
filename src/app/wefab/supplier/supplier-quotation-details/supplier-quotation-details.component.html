@@ -169,7 +169,7 @@
               <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.sub_total) }}</span>
             </div>
             <div class="summary-row">
-              <span class="summary-label">Discount ({{ quotationDetails.discountPercentage }}%):</span>
+              <span class="summary-label">{{ getDiscountDisplayText() }}</span>
               <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.discountAmount) }}</span>
             </div>
             
