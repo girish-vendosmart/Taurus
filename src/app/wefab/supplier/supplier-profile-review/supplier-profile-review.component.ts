@@ -318,10 +318,12 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Load only basic data and verification status initially
+    // Load basic data, verification status, and ALL status data for profile completeness
     const essentialRequests = [
       this.getVerificationStatusObservable(this.supplierId),
-      this.getL1DataObservable(this.supplierId)
+      this.getL1DataObservable(this.supplierId),
+      this.getL2StatusObservable(this.supplierId), // Only status, not full data
+      this.getL3StatusObservable(this.supplierId)  // Only status, not full data
     ];
 
     this.subscription.add(
@@ -332,15 +334,19 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         })
       ).subscribe({
-        next: ([verificationData, l1Data]) => {
+        next: ([verificationData, l1Data, l2Status, l3Status]) => {
           // Process essential data
           this.verificationStatus = verificationData;
           this.processL1Data(l1Data);
           
-          // Calculate profile completeness with available data
+          // Store status data for profile completeness
+          this.getCurrentL2DataStatus = l2Status?.approval_status;
+          this.getCurrentL3DataStatus = l3Status?.approval_status;
+          
+          // Calculate profile completeness with ALL status data at once
           this.calculateProfileCompleteness();
           
-          // Load additional data based on active tab
+          // Load additional data based on active tab (content only, not status)
           this.loadDataForActiveTab();
         },
         error: (error) => {
@@ -377,7 +383,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       ).subscribe({
         next: (l2Data) => {
           this.processL2Data(l2Data);
-          this.calculateProfileCompleteness();
+          // Don't recalculate profile completeness here - it's already calculated
         },
         error: (error) => {
           console.error('Error loading manufacturing data:', error);
@@ -400,7 +406,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       ).subscribe({
         next: (l3Data) => {
           this.processL3Data(l3Data);
-          this.calculateProfileCompleteness();
+          // Don't recalculate profile completeness here - it's already calculated
         },
         error: (error) => {
           console.error('Error loading financial data:', error);
@@ -466,6 +472,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       financialAdditional: 0
     };
     
+    console.log('🧮 Calculating profile completeness with all status data:');
+    console.log('L1 Status:', this.getCurrentL1DataStatus);
+    console.log('L2 Status:', this.getCurrentL2DataStatus);
+    console.log('L3 Status:', this.getCurrentL3DataStatus);
+    
     // Calculate based on current approval status for all levels
     // For Stage 1: Basic Information
     if (this.getCurrentL1DataStatus) {
@@ -503,7 +514,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     // Update main status after calculating completeness
     this.updateMainStatus();
     
-    console.log('Profile completeness calculated:', this.completionStatus);
+    console.log('✅ Profile completeness calculated ONCE:', this.completionStatus);
+    console.log('📊 Overall completion percentage:', this.completionPercentage);
   }
 
   private getFromCache<T>(key: string): T | null {
@@ -1292,7 +1304,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private refreshStatusData(level: string): void {
-    // Clear cache and reload status
+    // Clear both data and status caches
     this.clearSpecificCache(`Supplier Onboarding ${level}`);
     
     // Trigger Firebase and reload data
@@ -1387,18 +1399,80 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   private clearSpecificCache(docType: string): void {
     const level = docType.includes('L1') ? 'l1' : docType.includes('L2') ? 'l2' : 'l3';
-    const cacheKey = `${level}_data_${this.supplierId}`;
-    this.cache.delete(cacheKey);
+    const dataKey = `${level}_data_${this.supplierId}`;
+    const statusKey = `${level}_status_${this.supplierId}`;
+    
+    // Clear both data and status caches
+    this.cache.delete(dataKey);
+    this.cache.delete(statusKey);
   }
 
   private reloadSpecificData(docType: string): void {
     if (docType.includes('L1')) {
-      this.loadEssentialData();
+      this.reloadL1DataAndStatus();
     } else if (docType.includes('L2')) {
-      this.loadManufacturingData();
+      this.reloadL2Status();
     } else if (docType.includes('L3')) {
-      this.loadFinancialData();
+      this.reloadL3Status();
     }
+  }
+
+  // New method to reload L1 data and recalculate completeness
+  private reloadL1DataAndStatus(): void {
+    this.subscription.add(
+      this.getL1DataObservable(this.supplierId).subscribe({
+        next: (l1Data) => {
+          this.processL1Data(l1Data);
+          // Recalculate completeness since L1 status changed
+          this.calculateProfileCompleteness();
+        },
+        error: (error) => {
+          console.error('Error reloading L1 data:', error);
+        }
+      })
+    );
+  }
+
+  // New method to reload only L2 status and recalculate completeness
+  private reloadL2Status(): void {
+    this.subscription.add(
+      this.getL2StatusObservable(this.supplierId).subscribe({
+        next: (l2Status) => {
+          this.getCurrentL2DataStatus = l2Status?.approval_status;
+          // Recalculate completeness since L2 status changed
+          this.calculateProfileCompleteness();
+          
+          // If manufacturing data is currently loaded and displayed, reload it too
+          if (this.manufacturingData && this.activeLevelTab === 'manufacturing') {
+            this.loadManufacturingData();
+          }
+        },
+        error: (error) => {
+          console.error('Error reloading L2 status:', error);
+        }
+      })
+    );
+  }
+
+  // New method to reload only L3 status and recalculate completeness
+  private reloadL3Status(): void {
+    this.subscription.add(
+      this.getL3StatusObservable(this.supplierId).subscribe({
+        next: (l3Status) => {
+          this.getCurrentL3DataStatus = l3Status?.approval_status;
+          // Recalculate completeness since L3 status changed
+          this.calculateProfileCompleteness();
+          
+          // If financial data is currently loaded and displayed, reload it too
+          if (this.newFinancialData && this.activeLevelTab === 'financial') {
+            this.loadFinancialData();
+          }
+        },
+        error: (error) => {
+          console.error('Error reloading L3 status:', error);
+        }
+      })
+    );
   }
 
   // Modified method - remove auto-triggering and cache bypass
@@ -1523,5 +1597,47 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   changeFinancialTab(tab: string): void {
     this.financialTab = tab;
+  }
+
+  // New method to get only L2 status (lightweight)
+  private getL2StatusObservable(supplierId: string): Observable<any> {
+    const cacheKey = `l2_status_${supplierId}`;
+    const cached = this.getFromCache(cacheKey);
+    
+    if (cached) {
+      return of(cached);
+    }
+
+    return this.commonservice.getData(
+      `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=${supplierId}`
+    ).pipe(
+      map((statusRes: any) => statusRes?.data || null),
+      tap(result => this.setCache(cacheKey, result)),
+      catchError(error => {
+        console.error('Error fetching L2 status:', error);
+        return of(null);
+      })
+    );
+  }
+
+  // New method to get only L3 status (lightweight)
+  private getL3StatusObservable(supplierId: string): Observable<any> {
+    const cacheKey = `l3_status_${supplierId}`;
+    const cached = this.getFromCache(cacheKey);
+    
+    if (cached) {
+      return of(cached);
+    }
+
+    return this.commonservice.getData(
+      `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${supplierId}`
+    ).pipe(
+      map((statusRes: any) => statusRes?.data || null),
+      tap(result => this.setCache(cacheKey, result)),
+      catchError(error => {
+        console.error('Error fetching L3 status:', error);
+        return of(null);
+      })
+    );
   }
 } 
