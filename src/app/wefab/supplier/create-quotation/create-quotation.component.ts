@@ -320,6 +320,14 @@ export class CreateQuotationComponent implements OnInit {
           this.loadCreateQuotation(this.model.rfqId);
         }
       }
+
+      if(params['quotationId'] && params['quotationId'] !== this.quotationId && params['mode'] === 'edit') {
+        this.isEditMode = true;
+        this.model.isEditMode = true; // Set model flag for form visibility
+        this.quotationId = params['quotationId'];
+        console.log('Edit mode activated for quotation:', this.quotationId);
+        this.loadQuotationForEdit(this.quotationId);
+      }
     });
     
     // Get query parameters
@@ -1021,9 +1029,6 @@ export class CreateQuotationComponent implements OnInit {
     })
   }
 
-
-
-
   private scrollToFirstError() {
     setTimeout(() => {
       const errorElement = document.querySelector('.is-invalid, .error-field');
@@ -1090,7 +1095,162 @@ export class CreateQuotationComponent implements OnInit {
 
   loadQuotationForEdit(quotationId: string) {
     console.log('Loading quotation data for editing:', quotationId);
-    // Implementation would go here
+    
+    let endPoint = `/api/resource/Supplier Quotation/${quotationId}`;
+    
+    this.commonService.getWefabData(endPoint).subscribe({
+      next: (res: any) => {
+        if (res && res.data) {
+          const quotationData = res.data;
+          console.log('Quotation data loaded for editing:', quotationData);
+          
+          // Map API data to component model
+          this.model = {
+            rfqId: quotationData.rfq_id || '',
+            quotationName: quotationData.quotation_name || '',
+            quotationId: quotationData.name || this.quotationId,
+            isEditMode: true,
+            totalLeadTime: this.extractDaysFromDuration(quotationData.estimated_completion_duration),
+            paymentTerms: quotationData.payment_terms || 'Net 30',
+            quoteValidTill: this.parseApiDateForInput(quotationData.validity),
+            currency_code: quotationData.currency_code || 'USD',
+            email: 'email@example.com',
+            reference: quotationData.name || '',
+            termsAndConditions: this.stripHtmlTags(quotationData.notes || ''),
+            deliveryAddress: quotationData.delivery_address || '',
+            shippingTerms: quotationData.shipping_terms || 'FOB Origin',
+            cgstSgst: quotationData.sgst_cgst_applicable || false,
+            igst: quotationData.igst_applicable || false,
+            quotationItems: this.transformEditQuotationItemsToModel(quotationData.items || []),
+            subTotal: quotationData.sub_total || 0,
+            discount: quotationData.discount || 0,
+            shippingCharges: quotationData.shipping_charges || 0,
+            totalAmount: quotationData.grand_total || 0
+          };
+
+          // Set quote from and to data
+          this.quoteFrom = quotationData.quotation_from || '';
+          this.quoteTo = quotationData.quotation_to || '';
+
+          // Set discount values
+          if (quotationData.discount_type === 'Amount') {
+            this.discountType = 'amount';
+            this.discountValue = quotationData.discount_amount || 0;
+          } else {
+            this.discountType = 'percentage';
+            this.discountValue = quotationData.discount || 0;
+          }
+          
+          this.shippingCharges = quotationData.shipping_charges || 0;
+
+          // Set tax type based on loaded data
+          if (quotationData.sgst_cgst_applicable) {
+            this.selectedTaxType = 'SGCT & CGST';
+          } else if (quotationData.igst_applicable) {
+            this.selectedTaxType = 'IGST';
+          } else {
+            this.selectedTaxType = 'No Tax';
+          }
+
+          // Update the form with loaded data
+          this.form.patchValue({
+            quotationName: this.model.quotationName,
+            totalLeadTime: this.model.totalLeadTime,
+            paymentTerms: this.model.paymentTerms,
+            quoteValidTill: this.model.quoteValidTill
+          });
+
+          // Handle attachments if any
+          if (quotationData.attachments && quotationData.attachments.length > 0) {
+            this.attachedFileObjects = quotationData.attachments.map((attachment: any) => ({
+              url: attachment.file_url,
+              name: this.getFileNameFromUrl(attachment.file_url),
+              type: this.getFileTypeFromUrl(attachment.file_url)
+            }));
+            this.attachedFiles = this.attachedFileObjects.map(file => file.name);
+          }
+
+          // Recalculate totals based on the loaded items
+          this.calculateTotals();
+
+          // Store original state for reset functionality
+          this.storeCurrentStateForReset();
+
+          // Update tax calculations
+          setTimeout(() => {
+            this.updateTaxCalculations();
+          }, 100);
+
+          console.log('Edit quotation data mapped to model:', this.model);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading quotation data for editing:', error);
+        this.sweetAlert.error('Failed to load quotation data for editing');
+      }
+    });
+  }
+
+  // Helper method to transform edit quotation API items to component model format (for editing existing quotations)
+  private transformEditQuotationItemsToModel(apiItems: any[]): any[] {
+    return apiItems.map(item => {
+      // Parse comments to extract material, specification, process, etc.
+      const parsedComments = this.parseCreateQuotationItemComments(item.comments || '');
+      
+      // For edit mode, use the existing values from the API
+      return {
+        actionItemName: item.item_code || '',
+        description: this.stripHtmlTags(item.item_description || ''),
+        material: parsedComments.material || '',
+        qty: item.quantity || 0,
+        unit: item.unit || 'Nos',
+        itemPrice: item.unit_price || 0,
+        tax_type: item.tax_type || 'Non-Taxable',
+        miscellaneous: this.buildMiscellaneousFromComments(parsedComments),
+        tooling: parsedComments.processRequired || 'Standard',
+        no_bid: item.no_bid || 0
+      };
+    });
+  }
+
+  // Helper method to extract filename from URL
+  private getFileNameFromUrl(url: string): string {
+    if (!url) return 'Unknown File';
+    try {
+      const urlParts = url.split('/');
+      return urlParts[urlParts.length - 1] || 'Unknown File';
+    } catch (error) {
+      return 'Unknown File';
+    }
+  }
+
+  // Helper method to determine file type from URL
+  private getFileTypeFromUrl(url: string): string {
+    if (!url) return 'application/octet-stream';
+    try {
+      const extension = url.split('.').pop()?.toLowerCase();
+      switch (extension) {
+        case 'pdf':
+          return 'application/pdf';
+        case 'doc':
+        case 'docx':
+          return 'application/msword';
+        case 'xls':
+        case 'xlsx':
+          return 'application/vnd.ms-excel';
+        case 'jpg':
+        case 'jpeg':
+          return 'image/jpeg';
+        case 'png':
+          return 'image/png';
+        case 'txt':
+          return 'text/plain';
+        default:
+          return 'application/octet-stream';
+      }
+    } catch (error) {
+      return 'application/octet-stream';
+    }
   }
 
   // Add method to get validation error for a specific field
