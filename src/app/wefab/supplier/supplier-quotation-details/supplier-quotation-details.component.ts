@@ -136,6 +136,16 @@ export interface QuotationItem {
   tax_amount: number;
 }
 
+export interface QuotationAttachment {
+  name: string;
+  file: string;
+  file_name: string;
+  file_url: string;
+  file_type: string;
+  category: string;
+  uploaded_on: string;
+}
+
 @Component({
   selector: 'app-supplier-quotation-details',
   standalone: true,
@@ -206,6 +216,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   quotationItems: QuotationItem[] = [];
   rawQuotationItems: QuotationLineItem[] = []; // Raw API data for table
   currencyCode: string = 'USD'; // Default currency code
+
+  quotationAttachments: QuotationAttachment[] = [];
 
   activeTab: string = 'overview';
   currentPage: number = 1;
@@ -436,6 +448,21 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     }));
     
     this.totalItems = this.quotationItems.length;
+
+    // Map quotation attachments if they exist
+    if (apiData.attachments && apiData.attachments.length > 0) {
+      this.quotationAttachments = apiData.attachments.map(attachment => ({
+        name: attachment.name || '',
+        file: attachment.file || '',
+        file_name: attachment.name || '',
+        file_type: attachment.file_type || '',
+        category: attachment.category || '',
+        uploaded_on: attachment.uploaded_on || '',
+        file_url: attachment.file_url || ''
+      }));
+    } else {
+      this.quotationAttachments = [];
+    }
   }
 
   // Helper method to format API date
@@ -1051,5 +1078,66 @@ export class SupplierQuotationDetailsComponent implements OnInit {
    */
   getDiscountPercentage(): number {
     return this.discountType === 'Percentage' ? this.quotationDetails.discountPercentage : 0;
+  }
+
+  // Attachment methods
+  /**
+   * Check if file is a PDF
+   * @param fileName - The file name to check
+   * @returns boolean indicating if file is PDF
+   */
+  isFileTypePdf(fileName: string): boolean {
+    if (!fileName) return false;
+    const extension = fileName.toLowerCase().split('.').pop();
+    return extension === 'pdf';
+  }
+
+  /**
+   * Check if file is an image
+   * @param fileName - The file name to check
+   * @returns boolean indicating if file is an image
+   */
+  isFileTypeImage(fileName: string): boolean {
+    if (!fileName) return false;
+    const extension = fileName.toLowerCase().split('.').pop();
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'];
+    return imageExtensions.includes(extension || '');
+  }
+
+  /**
+   * Check if file is a document
+   * @param fileName - The file name to check
+   * @returns boolean indicating if file is a document
+   */
+  isFileTypeDocument(fileName: string): boolean {
+    if (!fileName) return false;
+    const extension = fileName.toLowerCase().split('.').pop();
+    const documentExtensions = ['doc', 'docx', 'txt', 'rtf', 'odt'];
+    return documentExtensions.includes(extension || '');
+  }
+
+  /**
+   * View quotation attachment
+   * @param attachment - The attachment to view
+   */
+  viewQuotationAttachment(attachment: QuotationAttachment): void {
+    if (attachment.file_url) {
+      window.open(attachment.file_url, '_blank');
+    }
+  }
+
+  /**
+   * Download quotation attachment
+   * @param attachment - The attachment to download
+   */
+  downloadQuotationAttachment(attachment: QuotationAttachment): void {
+    if (attachment.file_url) {
+      const link = document.createElement('a');
+      link.href = attachment.file_url;
+      link.download = attachment.file_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   }
 }

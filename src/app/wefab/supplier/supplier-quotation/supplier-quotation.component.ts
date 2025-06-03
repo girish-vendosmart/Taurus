@@ -30,6 +30,7 @@ export interface SupplierQuotationData {
   shipping_terms: string;
   notes: string;
   amended_from: string | null;
+  currency_code: string;
 }
 
 export interface QuotationTableItem {
@@ -51,6 +52,7 @@ export interface QuotationTableItem {
   validity?: string;
   duration?: string;
   notes?: string;
+  currency_code?: string;
 }
 
 @Component({
@@ -122,12 +124,6 @@ export class SupplierQuotationComponent implements OnInit {
       {
         field: 'rfqId',
         header: 'RFQ Id',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'totalAmount',
-        header: 'Total Amount',
         sortable: true,
         filterable: true,
       },
@@ -217,8 +213,8 @@ export class SupplierQuotationComponent implements OnInit {
       status: apiItem.status,
       statusClass: this.getStatusClass(apiItem.status),
       description: apiItem.notes ? apiItem.notes.substring(0, 100) + '...' : '',
-      totalAmount: this.formatCurrency(apiItem.total_amount),
-      grandTotal: this.formatCurrency(apiItem.grand_total),
+      totalAmount: this.formatCurrency(apiItem.total_amount, apiItem.currency_code),
+      grandTotal: this.formatCurrency(apiItem.grand_total, apiItem.currency_code),
       paymentTerms: apiItem.payment_terms,
       shippingTerms: apiItem.shipping_terms,
       validity: this.formatDate(apiItem.validity),
@@ -255,14 +251,27 @@ export class SupplierQuotationComponent implements OnInit {
     return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
   }
 
-  formatCurrency(amount: number): string {
+  formatCurrency(amount: number, currency_code: string): string {
     if (amount == null || isNaN(amount)) {
-      return '$0.00';
+      return this.getCurrencyPrefix(currency_code) + ' 0.00';
     }
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      style: 'decimal',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount);
+
+    return `${this.getCurrencyPrefix(currency_code)} ${formattedAmount}`;
+  }
+
+  private getCurrencyPrefix(currency_code: string): string {
+    if (!currency_code) return 'INR';
+    switch(currency_code.toUpperCase()) {
+      case 'INR': return 'INR';
+      case 'USD': return 'USD';
+      default: return 'INR';
+    }
   }
 
   // Common Table Event Handlers

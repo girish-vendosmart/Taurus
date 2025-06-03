@@ -190,6 +190,39 @@
               <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.grandTotal) }}</span>
             </div>
           </div>
+
+          <!-- Attachments Section -->
+          <!-- <div class="attachments-section" *ngIf="quotationAttachments && quotationAttachments.length > 0">
+            <div class="attachments-header">
+              <h3>Attachments</h3>
+              <p class="section-subtitle">Documents and files related to this quotation</p>
+            </div>
+
+            <div class="attachments-grid">
+              <div class="attachment-card" *ngFor="let attachment of quotationAttachments">
+                <div class="file-icon">
+                  <i class="bi bi-file-earmark-pdf" *ngIf="isFileTypePdf(attachment.file_name)"></i>
+                  <i class="bi bi-file-earmark-image" *ngIf="isFileTypeImage(attachment.file_name)"></i>
+                  <i class="bi bi-file-earmark-text" *ngIf="isFileTypeDocument(attachment.file_name)"></i>
+                  <i class="bi bi-file-earmark" *ngIf="!isFileTypePdf(attachment.file_name) && !isFileTypeImage(attachment.file_name) && !isFileTypeDocument(attachment.file_name)"></i>
+                </div>
+                <div class="file-info">
+                  <h4 class="file-name">{{ attachment.name }}</h4>
+                  <div class="file-meta">
+                    <span class="upload-date">{{ formatApiDate(attachment.uploaded_on) }}</span>
+                  </div>
+                </div>
+                <div class="file-actions">
+                  <button class="view-btn" (click)="viewQuotationAttachment(attachment)" title="View">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button class="download-btn" (click)="downloadQuotationAttachment(attachment)" title="Download">
+                    <i class="bi bi-download"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div> -->
         </div>
       </div>
     </div>
