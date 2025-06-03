@@ -502,33 +502,27 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     // For Stage 1: Basic Information
     if (this.getCurrentL1DataStatus) {
       if (this.getCurrentL1DataStatus === 'Approved' || 
-          this.getCurrentL1DataStatus === 'Under Review' || 
+          this.getCurrentL1DataStatus === 'Under Review' || this.getCurrentL1DataStatus === 'Rejected' ||
           this.getCurrentL1DataStatus === 'Request to Resubmit') {
         this.completionStatus.basicInformation = 100;
-      } else if (this.getCurrentL1DataStatus === 'Rejected') {
-        this.completionStatus.basicInformation = 50; // Set to 50% if rejected
       }
     }
     
     // For Stage 2: Manufacturing Capabilities
     if (this.getCurrentL2DataStatus) {
       if (this.getCurrentL2DataStatus === 'Approved' || 
-          this.getCurrentL2DataStatus === 'Under Review' || 
+          this.getCurrentL2DataStatus === 'Under Review' || this.getCurrentL2DataStatus === 'Rejected' ||
           this.getCurrentL2DataStatus === 'Request to Resubmit') {
         this.completionStatus.manufacturingCapabilities = 100;
-      } else if (this.getCurrentL2DataStatus === 'Rejected') {
-        this.completionStatus.manufacturingCapabilities = 50; // Set to 50% if rejected
       }
     }
     
     // For Stage 3: Financial & Additional
     if (this.getCurrentL3DataStatus) {
       if (this.getCurrentL3DataStatus === 'Approved' || 
-          this.getCurrentL3DataStatus === 'Under Review' || 
+          this.getCurrentL3DataStatus === 'Under Review' || this.getCurrentL3DataStatus === 'Rejected' ||
           this.getCurrentL3DataStatus === 'Request to Resubmit') {
         this.completionStatus.financialAdditional = 100;
-      } else if (this.getCurrentL3DataStatus === 'Rejected') {
-        this.completionStatus.financialAdditional = 50; // Set to 50% if rejected
       }
     }
 
