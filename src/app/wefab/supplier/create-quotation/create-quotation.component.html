@@ -213,16 +213,32 @@
           <tr>
             <th style="width: 40px;">S.No</th>
             <th style="width: 150px;">Item Name <span class="text-danger">*</span></th>
-            <th style="width: 200px;">Description</th>
-            <th style="width: 120px;">Material</th>
-            <th style="width: 80px;">Qty <span class="text-danger">*</span></th>
+            <th style="width: 200px;">
+              Description
+            </th>
+            <th style="width: 200px;">
+              Material
+            </th>
+            <th style="width: 40px;">Qty <span class="text-danger">*</span></th>
             <th style="width: 100px;">Unit <span class="text-danger">*</span></th>
-            <th style="width: 120px;">Bid Type <span class="text-danger">*</span></th>
-            <th style="width: 120px;">Item Price <span class="text-danger">*</span></th>
+            <th style="width: 100px;">
+              No Bid <span class="text-danger">*</span>
+              <i class="pi pi-info-circle ms-1" 
+                 style="color: #6c757d; cursor: help; font-size: 12px;" 
+                 title="No bid are the items excluded from the quote"
+                 pTooltip="No bid are the items excluded from the quote"
+                 tooltipPosition="top"></i>
+            </th>
+            <th style="width: 40px;">Item Price <span class="text-danger">*</span></th>
+            <th style="width: 100px;">Total Price</th>
             <th style="width: 120px;">Tax Type <span class="text-danger">*</span></th>
             <th style="width: 120px;">Tax Amount</th>
-            <th style="width: 120px;">Miscellaneous</th>
-            <th style="width: 100px;">Tooling <span class="text-danger">*</span></th>
+            <th style="width: 120px;">
+              Miscellaneous
+            </th>
+            <th style="width: 100px;">
+              Tooling <span class="text-danger">*</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -233,32 +249,39 @@
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm table-editable-field" 
+                class="form-control form-control-sm table-input-field" 
                 [class.is-invalid]="hasValidationError('item_' + i)"
                 [(ngModel)]="item.actionItemName"
                 [ngModelOptions]="{standalone: true}"
                 (input)="clearFieldError('item_' + i)"
-                placeholder="Enter item name">
+                placeholder="Enter item name"
+                style="height: 32px; font-size: 13px;">
             </td>
             
             <!-- Description - Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm table-editable-field" 
+                class="form-control form-control-sm table-input-field" 
                 [(ngModel)]="item.description"
                 [ngModelOptions]="{standalone: true}"
-                placeholder="Enter description">
+                placeholder="Enter description"
+                [pTooltip]="item.description || 'Enter item description and specifications'"
+                tooltipPosition="top"
+                style="height: 32px; font-size: 13px;">
             </td>
             
             <!-- Material - Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm table-editable-field" 
+                class="form-control form-control-sm table-input-field" 
                 [(ngModel)]="item.material"
                 [ngModelOptions]="{standalone: true}"
-                placeholder="Enter material">
+                placeholder="Enter material"
+                [pTooltip]="item.material || 'Enter material type and specifications'"
+                tooltipPosition="top"
+                style="height: 32px; font-size: 13px;">
             </td>
             
             <!-- Quantity - Editable -->
@@ -266,12 +289,15 @@
               <p-inputNumber
                 [(ngModel)]="item.qty"
                 [min]="0"
-                [style]="{ width: '100%' }"
-                styleClass="w-100 table-editable-field"
+                [max]="99999"
+                [style]="{ height: '32px' }"
+                styleClass="w-100 table-input-field"
                 [class.is-invalid]="hasValidationError('item_' + i)"
                 size="small"
                 (onInput)="onQuantityOrPriceChange(item); clearFieldError('item_' + i); updateTaxCalculations()"
-                [ngModelOptions]="{standalone: true}">
+                [ngModelOptions]="{standalone: true}"
+                inputStyleClass="form-control-sm"
+                [inputStyle]="{ 'font-size': '13px', 'height': '32px' }">
               </p-inputNumber>
             </td>
             
@@ -286,26 +312,21 @@
                 placeholder="Unit"
                 [class.is-invalid]="hasValidationError('item_' + i)"
                 (onChange)="clearFieldError('item_' + i)"
-                styleClass="w-100 p-inputtext-sm table-editable-field"
+                styleClass="w-100 table-input-field"
+                [style]="{ 'height': '32px' }"
                 appendTo="body">
               </p-dropdown>
             </td>
             
-            <!-- Bid Type - Editable -->
-            <td>
-              <p-dropdown 
-                [(ngModel)]="item.bid_type"
-                [options]="bidTypeOptions"
+            <!-- No Bid Checkbox -->
+            <td class="text-center align-middle">
+              <p-checkbox 
+                [ngModel]="getNoBidCheckboxState(item)"
+                (ngModelChange)="setNoBidCheckboxState(item, $event); clearFieldError('item_' + i)"
                 [ngModelOptions]="{standalone: true}"
-                optionLabel="label"
-                optionValue="value"
-                [showClear]="false"
-                [filter]="false"
-                placeholder="Select Bid Type"
-                (onChange)="onBidTypeChange(item); clearFieldError('item_' + i)"
-                class="w-100"
-                [ngClass]="{'ng-invalid': hasValidationError('item_' + i)}">
-              </p-dropdown>
+                [class.is-invalid]="hasValidationError('item_' + i)"
+                binary="true">
+              </p-checkbox>
             </td>
             
             <!-- Item Price - Editable -->
@@ -316,13 +337,23 @@
                 [minFractionDigits]="2"
                 [maxFractionDigits]="2"
                 [min]="0"
+                [max]="99999.99"
                 [disabled]="item.bid_type === 'No Bid'"
                 [placeholder]="item.bid_type === 'No Bid' ? 'No Bid' : 'Enter price'"
                 [ngModelOptions]="{standalone: true}"
                 (onInput)="onQuantityOrPriceChange(item); clearFieldError('item_' + i); updateTaxCalculations()"
-                styleClass="w-100 table-editable-field"
-                [class.is-invalid]="hasValidationError('item_' + i)">
+                styleClass="w-100 table-input-field"
+                [class.is-invalid]="hasValidationError('item_' + i)"
+                [style]="{ 'height': '32px' }"
+                [inputStyle]="{ 'font-size': '13px', 'height': '32px' }">
               </p-inputNumber>
+            </td>
+            
+            <!-- Total Price -->
+            <td class="text-center align-middle">
+              <span class="text-muted small fw-medium" style="font-size: 13px;">
+                {{ model.currency }} {{ getLineTotalPrice(item) | number:'1.2-2' }}
+              </span>
             </td>
             
             <!-- Tax Type - Editable -->
@@ -336,36 +367,45 @@
                 placeholder="Tax Type"
                 [class.is-invalid]="hasValidationError('item_' + i)"
                 (onChange)="onItemTaxTypeChange(item); clearFieldError('item_' + i); updateTaxCalculations()"
-                styleClass="w-100 p-inputtext-sm table-editable-field"
+                styleClass="w-100 table-input-field"
+                [style]="{ 'height': '32px' }"
                 appendTo="body">
               </p-dropdown>
             </td>
             
             <!-- Tax Amount -->
-            <td>
-              <span class="text-muted small">{{ model.currency }} {{ getLineTaxAmount(item) | number:'1.2-2' }}</span>
+            <td class="text-center align-middle">
+              <span class="text-muted small" style="font-size: 13px;">
+                {{ model.currency }} {{ getLineTaxAmount(item) | number:'1.2-2' }}
+              </span>
             </td>
             
             <!-- Miscellaneous - Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm table-editable-field" 
+                class="form-control form-control-sm table-input-field" 
                 [(ngModel)]="item.miscellaneous"
                 [ngModelOptions]="{standalone: true}"
-                placeholder="Misc">
+                placeholder="Misc"
+                [pTooltip]="item.miscellaneous || 'Enter additional notes and specifications'"
+                tooltipPosition="top"
+                style="height: 32px; font-size: 13px;">
             </td>
             
             <!-- Tooling - Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm table-editable-field" 
+                class="form-control form-control-sm table-input-field" 
                 [class.is-invalid]="hasValidationError('item_' + i)"
                 [(ngModel)]="item.tooling"
                 [ngModelOptions]="{standalone: true}"
                 (input)="clearFieldError('item_' + i)"
-                placeholder="Tooling">
+                placeholder="Tooling"
+                [pTooltip]="item.tooling || 'Enter tooling requirements and specifications'"
+                tooltipPosition="top"
+                style="height: 32px; font-size: 13px;">
             </td>
           </tr>
         </tbody>

@@ -16,6 +16,7 @@ import { ToastModule } from 'primeng/toast';
 import { CalendarModule } from 'primeng/calendar';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { CheckboxModule } from 'primeng/checkbox';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
 
 import { CommonService } from '../../shared/common.service';
@@ -42,6 +43,7 @@ import { FormlyFieldDropdownComponent } from '../../../dropdown-type.component';
     CalendarModule,
     RadioButtonModule,
     CheckboxModule,
+    TooltipModule,
     FormlyFieldDropdownComponent
   ],
   providers: [MessageService],
@@ -81,6 +83,37 @@ import { FormlyFieldDropdownComponent } from '../../../dropdown-type.component';
     
     .border-top {
       border-top: 2px solid #0d6efd !important;
+    }
+
+    .table-input-field {
+      font-size: 13px !important;
+      height: 32px !important;
+      border-radius: 4px;
+    }
+
+    .table-input-field .p-inputtext {
+      font-size: 13px !important;
+      height: 32px !important;
+    }
+
+    .table-input-field .p-dropdown {
+      height: 32px !important;
+    }
+
+    .table-input-field .p-dropdown .p-dropdown-label {
+      font-size: 13px !important;
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      line-height: 20px !important;
+    }
+
+    .table-input-field .p-dropdown .p-dropdown-trigger {
+      height: 32px !important;
+    }
+
+    .table-input-field .p-inputnumber input {
+      font-size: 13px !important;
+      height: 32px !important;
     }
 
     .upload-area {
@@ -706,6 +739,13 @@ export class CreateQuotationComponent implements OnInit {
     return (item.qty || 0) * (item.itemPrice || 0);
   }
 
+  // Method to calculate line total price (same as getRowTotal but with better naming for template)
+  getLineTotalPrice(item: any): number {
+    const quantity = Number(item.qty) || 0;
+    const price = Number(item.itemPrice) || 0;
+    return quantity * price;
+  }
+
   onQuantityOrPriceChange(item: any) {
     this.calculateTotals();
     // Force change detection to update tax amounts in the table
@@ -717,6 +757,34 @@ export class CreateQuotationComponent implements OnInit {
       item.itemPrice = 0;
     }
     this.calculateTotals();
+  }
+
+  // Add method to handle No Bid checkbox change
+  onNoBidChange(item: any, isNoBid: boolean) {
+    if (isNoBid) {
+      item.bid_type = 'No Bid';
+      item.itemPrice = 0;
+    } else {
+      item.bid_type = 'Bid';
+      // Don't automatically set a price, let user enter it
+    }
+    this.calculateTotals();
+    console.log('No Bid changed for item:', item.actionItemName, 'Is No Bid:', isNoBid);
+  }
+
+  // Helper method to check if item is No Bid
+  isNoBid(item: any): boolean {
+    return item.bid_type === 'No Bid';
+  }
+
+  // Helper method to get checkbox state for ngModel
+  getNoBidCheckboxState(item: any): boolean {
+    return item.bid_type === 'No Bid';
+  }
+
+  // Helper method to set checkbox state for ngModel
+  setNoBidCheckboxState(item: any, value: boolean) {
+    this.onNoBidChange(item, value);
   }
 
   onItemTaxTypeChange(item: any) {
@@ -1029,6 +1097,7 @@ export class CreateQuotationComponent implements OnInit {
     return this.model.quotationItems.map((item: any, index: number) => {
       const unitPrice = item.itemPrice || 0;
       const quantity = item.qty || 0;
+      const totalPrice = quantity * unitPrice;
       
       return {
         item_code: this.generateItemCode(item, index),
@@ -1037,6 +1106,7 @@ export class CreateQuotationComponent implements OnInit {
         unit: item.unit || 'Nos',
         currency_code: this.model.currency,
         unit_price: unitPrice,
+        total_price: totalPrice,
         comments: this.buildItemComments(item),
         bid_type: item.bid_type || 'Bid',
         tax_type: item.tax_type || 'Non-Taxable',
@@ -1163,6 +1233,7 @@ export class CreateQuotationComponent implements OnInit {
       'Qty',
       'Unit',
       'Item Price',
+      'Total Price',
       'Tax Type',
       'Taxable Amount',
       'Miscellaneous',
@@ -1181,6 +1252,7 @@ export class CreateQuotationComponent implements OnInit {
         item.qty || 0,
         `"${(item.unit || '').replace(/"/g, '""')}"`,
         item.itemPrice || 0,
+        this.getLineTotalPrice(item),
         `"${item.tax_type || 'Non-Taxable'}"`,
         this.getLineTaxAmount(item),
         `"${(item.miscellaneous || '').replace(/"/g, '""')}"`,
@@ -2570,6 +2642,7 @@ export class CreateQuotationComponent implements OnInit {
       'Qty',
       'Unit',
       'Item Price',
+      'Total Price',
       'Tax Type',
       'Taxable Amount',
       'Miscellaneous',
@@ -2579,9 +2652,9 @@ export class CreateQuotationComponent implements OnInit {
 
     // Add sample data rows
     const sampleRows = [
-      [1, 'Sample Item 1', 'Sample description', 'Steel', 10, 'Nos', 100, 'No Tax', '', 'Notes here', 'Standard', 'Bid'],
-      [2, 'Sample Item 2', 'Another description', 'Aluminum', 5, 'Kg', 250.50, 'SGCT & CGST', '', 'Additional info', 'Required', 'Bid'],
-      [3, 'Sample Item 3', 'Third item desc', 'Plastic', 20, 'Meter', 0, '', '', 'No bid item', 'Not Required', 'No Bid']
+      [1, 'Sample Item 1', 'Sample description', 'Steel', 10, 'Nos', 100, 1000, 'No Tax', '', 'Notes here', 'Standard', 'Bid'],
+      [2, 'Sample Item 2', 'Another description', 'Aluminum', 5, 'Kg', 250.50, 1252.50, 'SGCT & CGST', '', 'Additional info', 'Required', 'Bid'],
+      [3, 'Sample Item 3', 'Third item desc', 'Plastic', 20, 'Meter', 0, 0, '', '', 'No bid item', 'Not Required', 'No Bid']
     ];
 
     const csvContent = [
