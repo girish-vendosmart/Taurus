@@ -1194,7 +1194,7 @@ export class CreateQuotationComponent implements OnInit {
             this.discountValue = quotationData.discount_amount || 0;
           } else {
             this.discountType = 'percentage';
-            this.discountValue = quotationData.discount || 0;
+            this.discountValue = quotationData.discount_amount || 0;
           }
           
           this.shippingCharges = quotationData.shipping_charges || 0;
@@ -2053,6 +2053,14 @@ export class CreateQuotationComponent implements OnInit {
   transformToApiFormat(): any {
     const calculatedDiscountAmount = this.getDiscountAmount();
     
+    // Debug logging for discount handling
+    console.log('Discount Debug - transformToApiFormat:', {
+      discountType: this.discountType,
+      discountValue: this.discountValue,
+      calculatedDiscountAmount: calculatedDiscountAmount,
+      subTotal: this.calculatedSubTotal
+    });
+    
     const apiData = {
       rfq_id: this.getRfqId(),
       quotation_name: this.model.quotationName,
@@ -2065,7 +2073,7 @@ export class CreateQuotationComponent implements OnInit {
       currency_code: this.model.currency_code,
       discount_type: this.discountType === 'percentage' ? 'Percentage' : 'Amount',
       discount_percentage: this.discountType === 'percentage' ? this.discountValue : 0,
-      discount_amount: calculatedDiscountAmount,
+      discount_amount: this.discountValue || 0, // Always send the raw input value
       shipping_charges: this.shippingCharges || 0,
       total_tax_amount: this.getTotalTaxAmount(),
       sub_total: this.calculatedSubTotal,
