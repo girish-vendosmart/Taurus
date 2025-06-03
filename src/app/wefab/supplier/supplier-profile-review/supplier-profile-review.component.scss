@@ -425,6 +425,12 @@
     margin: 0;
   }
   
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
   .edit-section-btn {
     background: none;
     border: none;
@@ -446,6 +452,43 @@
     
     i {
       font-size: 1rem;
+    }
+  }
+
+  .refresh-analysis-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: $blueprint-blue;
+    color: white;
+    border: 1px solid $blueprint-blue;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover:not(:disabled) {
+      background-color: darken($blueprint-blue, 10%);
+      border-color: darken($blueprint-blue, 10%);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba($blueprint-blue, 0.3);
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    i {
+      font-size: 0.9rem;
+      
+      &.spinning {
+        animation: spin 1s linear infinite;
+      }
     }
   }
 }
@@ -739,6 +782,39 @@
   margin-top: 20px;
 }
 
+// Analysis loading banner
+.analysis-loading-banner {
+  background-color: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #0369a1;
+  font-weight: 500;
+  
+  i {
+    color: #0ea5e9;
+    font-size: 1.1rem;
+  }
+  
+  span {
+    flex: 1;
+  }
+}
+
+// Tab loading indicator
+.tab-loading {
+  margin-left: 0.5rem;
+  
+  i {
+    color: $blueprint-blue;
+    font-size: 0.85rem;
+  }
+}
+
 .manufacturing-card {
   display: flex;
   flex-direction: column;
@@ -853,6 +929,17 @@
     i {
       margin-right: 6px;
       color: $safety-orange;
+    }
+  }
+
+  &.analyzing {
+    background-color: rgba($blueprint-blue, 0.1);
+    color: $blueprint-blue;
+    border: 1px solid rgba($blueprint-blue, 0.2);
+    
+    i {
+      margin-right: 6px;
+      color: $blueprint-blue;
     }
   }
 }
@@ -2370,16 +2457,15 @@
 
 // Loading states
 .loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.8);
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
+  padding: 2rem;
+  border-radius: 8px;
+  margin: 1.5rem;
   
   .loading-spinner {
     display: flex;
@@ -2396,6 +2482,7 @@
     span {
       color: $machine-gray;
       font-size: 0.9rem;
+      font-weight: 500;
     }
   }
 }

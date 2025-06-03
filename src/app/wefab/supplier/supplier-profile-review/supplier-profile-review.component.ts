@@ -76,7 +76,7 @@ interface CacheEntry<T> {
 export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   private cache = new Map<string, CacheEntry<any>>();
-  private readonly CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_EXPIRY = 10 * 60 * 1000; // Increased to 10 minutes for better caching
   
   // Loading states
   loadingState: LoadingState = {
@@ -236,6 +236,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   updateRequestLevel: string = '';
   updateRequestComment: string = '';
 
+  // Add lazy loading flags
+  private hasLoadedMachineAnalysis = false;
+  private hasLoadedFacilityAnalysis = false;
+  private isInitialLoad = true;
+
   constructor(
     private router: Router,
     private messageService: MessageService,
@@ -277,13 +282,13 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     // Handle URL parameters
     this.handleUrlParameters();
 
-    // Load initial data in parallel
-    this.loadInitialData();
+    // Load only essential data initially
+    this.loadEssentialData();
 
-    // firebase trigger
-    this.accessFirebaseTrigger('Supplier Onboarding L1', this.supplierId)
-    this.accessFirebaseTrigger('Supplier Onboarding L2', this.supplierId)
-    this.accessFirebaseTrigger('Supplier Onboarding L3', this.supplierId)
+    // Remove automatic Firebase triggers - only call when needed
+    // this.accessFirebaseTrigger('Supplier Onboarding L1', this.supplierId)
+    // this.accessFirebaseTrigger('Supplier Onboarding L2', this.supplierId)
+    // this.accessFirebaseTrigger('Supplier Onboarding L3', this.supplierId)
   }
 
   private handleUrlParameters(): void {
@@ -306,41 +311,100 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  private loadInitialData(): void {
+  private loadEssentialData(): void {
     if (!this.supplierId) {
       this.showError('Supplier ID is missing');
       this.dataLoadingSubject.next(false);
       return;
     }
 
-    // Load all data in parallel for profile completeness calculation
-    const allRequests = [
+    // Load only basic data and verification status initially
+    const essentialRequests = [
       this.getVerificationStatusObservable(this.supplierId),
-      this.getL1DataObservable(this.supplierId),
-      this.getL2DataObservable(this.supplierId),
-      this.getL3DataObservable(this.supplierId)
+      this.getL1DataObservable(this.supplierId)
     ];
 
     this.subscription.add(
-      forkJoin(allRequests).pipe(
+      forkJoin(essentialRequests).pipe(
         finalize(() => {
           this.dataLoadingSubject.next(false);
+          this.isInitialLoad = false;
           this.cdr.detectChanges();
         })
       ).subscribe({
-        next: ([verificationData, l1Data, l2Data, l3Data]) => {
-          // Process all data
+        next: ([verificationData, l1Data]) => {
+          // Process essential data
           this.verificationStatus = verificationData;
           this.processL1Data(l1Data);
-          this.processL2Data(l2Data);
-          this.processL3Data(l3Data);
           
-          // Calculate profile completeness once with all data
+          // Calculate profile completeness with available data
+          this.calculateProfileCompleteness();
+          
+          // Load additional data based on active tab
+          this.loadDataForActiveTab();
+        },
+        error: (error) => {
+          console.error('Error loading essential data:', error);
+          this.showError('Failed to load profile data');
+        }
+      })
+    );
+  }
+
+  private loadDataForActiveTab(): void {
+    // Load data lazily based on the active tab
+    switch (this.activeLevelTab) {
+      case 'manufacturing':
+        this.loadManufacturingData();
+        break;
+      case 'financial':
+        this.loadFinancialData();
+        break;
+      // Basic data is already loaded
+    }
+  }
+
+  private loadManufacturingData(): void {
+    if (this.manufacturingData) return; // Already loaded
+
+    this.loadingState.l2Data = true;
+    this.subscription.add(
+      this.getL2DataObservable(this.supplierId).pipe(
+        finalize(() => {
+          this.loadingState.l2Data = false;
+          this.cdr.detectChanges();
+        })
+      ).subscribe({
+        next: (l2Data) => {
+          this.processL2Data(l2Data);
           this.calculateProfileCompleteness();
         },
         error: (error) => {
-          console.error('Error loading initial data:', error);
-          this.showError('Failed to load profile data');
+          console.error('Error loading manufacturing data:', error);
+          this.showError('Failed to load manufacturing data');
+        }
+      })
+    );
+  }
+
+  private loadFinancialData(): void {
+    if (this.newFinancialData) return; // Already loaded
+
+    this.loadingState.l3Data = true;
+    this.subscription.add(
+      this.getL3DataObservable(this.supplierId).pipe(
+        finalize(() => {
+          this.loadingState.l3Data = false;
+          this.cdr.detectChanges();
+        })
+      ).subscribe({
+        next: (l3Data) => {
+          this.processL3Data(l3Data);
+          this.calculateProfileCompleteness();
+        },
+        error: (error) => {
+          console.error('Error loading financial data:', error);
+          this.showError('Failed to load financial data');
         }
       })
     );
@@ -547,18 +611,9 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         this.numberOfFacilityPhoto = this.manufacturingData?.facilityPhotos?.length || 0;
         this.numberOfCertificationPhoto = this.manufacturingData?.certifications?.length || 0;
 
-        // Debug machine structure after data is loaded
-        setTimeout(() => {
-          // this.logMachineStructure();
-        }, 100);
-
-        // Force fresh machine verification analysis (bypass cache and existing status)
-        // This runs automatically every time data loads to ensure fresh API results
-        setTimeout(() => {
-          console.log('🚀 === AUTO-TRIGGERING FRESH ANALYSIS ===');
-          console.log('📝 This happens automatically on every data load to ensure fresh API results');
-          this.forceAnalyzeAllMachines();
-        }, 200);
+        // REMOVED: Automatic machine analysis trigger
+        // Only trigger analysis when user specifically requests it or views machines
+        
       } catch (error) {
         console.error('Error parsing L2 data:', error);
         this.manufacturingData = null;
@@ -588,138 +643,66 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   private processMachineVerificationAsync(): void {
     console.log('🔄 processMachineVerificationAsync called');
-    console.log('📊 Manufacturing data:', this.manufacturingData);
     
-    if (!this.manufacturingData?.machines?.length && !this.manufacturingData?.facilityPhotos?.length) {
-      console.log('❌ No machines or facility photos to analyze');
+    if (!this.manufacturingData?.machines?.length) {
+      console.log('❌ No machines to analyze');
       return;
     }
 
     // Check if machine analysis is already in progress
-    if (this.loadingState.machineAnalysis || this.loadingState.facilityAnalysis) {
-      console.log('⏳ Analysis already in progress, skipping');
+    if (this.loadingState.machineAnalysis) {
+      console.log('⏳ Machine analysis already in progress, skipping');
       return;
     }
 
     // Prepare machine analysis requests
     const machineRequests: Observable<any>[] = [];
-    if (this.manufacturingData?.machines?.length) {
-      console.log(`🔍 Checking ${this.manufacturingData.machines.length} machines for analysis...`);
+    
+    const machinesToAnalyze = this.manufacturingData.machines.filter((machine: any) => {
+      const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
+      if (!fileId) return false;
       
-      const needsMachineAnalysis = this.manufacturingData.machines.some((machine: any) => {
-        const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
-        if (!fileId) {
-          console.log('⚠️ Machine missing fileId:', machine);
-          return false;
-        }
-        
-        const cacheKey = `machine_analysis_${fileId}`;
-        const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
-        
-        if (cached) {
-          console.log(`💾 Found cached result for ${fileId}:`, cached);
+      const cacheKey = `machine_analysis_${fileId}`;
+      const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
+      
+      if (cached) {
+        // Apply cached results
+        if (Array.isArray(machine.machinePhotos)) {
+          machine.machinePhotos[0].machine_status = cached.machine_status;
+          machine.machinePhotos[0].machine_status_comment = cached.machine_status_comment;
+        } else {
           machine.machinePhotos.machine_status = cached.machine_status;
           machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
-          return false;
         }
-        
-        const needsAnalysis = machine.machinePhotos.machine_status === undefined;
-        console.log(`🔍 Machine ${fileId} needs analysis:`, needsAnalysis);
-        return needsAnalysis;
-      });
-
-      console.log('🎯 needsMachineAnalysis:', needsMachineAnalysis);
-
-      if (needsMachineAnalysis) {
-        const machinesToAnalyze = this.manufacturingData.machines.filter((machine: any) => {
-          const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
-          if (!fileId) return false;
-          
-          const cacheKey = `machine_analysis_${fileId}`;
-          const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
-          return !cached && machine.machinePhotos.machine_status === undefined;
-        });
-
-        console.log(`🚀 Starting analysis for ${machinesToAnalyze.length} machines:`, machinesToAnalyze);
-        machineRequests.push(...machinesToAnalyze.map((machine: any) => this.analyzeMachine(machine)));
+        return false;
       }
-    }
-
-    // Prepare facility analysis requests
-    const facilityRequests: Observable<any>[] = [];
-    if (this.manufacturingData?.facilityPhotos?.length) {
-      console.log(`🏭 Checking ${this.manufacturingData.facilityPhotos.length} facility photos for analysis...`);
       
-      const needsFacilityAnalysis = this.manufacturingData.facilityPhotos.some((facility: any) => {
-        if (!facility?.fileId) return false;
-        
-        const cacheKey = `facility_analysis_${facility.fileId}`;
-        const cached = this.getFromCache<FacilityAnalysisResult>(cacheKey);
-        
-        if (cached) {
-          facility.facility_status = cached.facility_status;
-          facility.facility_comment = cached.facility_comment;
-          return false;
-        }
-        
-        return facility.facility_status === undefined;
-      });
+      return machine.machinePhotos.machine_status === undefined;
+    });
 
-      if (needsFacilityAnalysis) {
-        const facilitiesToAnalyze = this.manufacturingData.facilityPhotos.filter((facility: any) => {
-          if (!facility?.fileId) return false;
-          
-          const cacheKey = `facility_analysis_${facility.fileId}`;
-          const cached = this.getFromCache<FacilityAnalysisResult>(cacheKey);
-          return !cached && facility.facility_status === undefined;
-        });
-
-        facilityRequests.push(...facilitiesToAnalyze.map((facility: any) => this.analyzeFacility(facility)));
-      }
-    }
-
-    // If no analysis is needed, return early
-    if (machineRequests.length === 0 && facilityRequests.length === 0) {
-      console.log('✅ All machines and facilities already analyzed, skipping API calls');
-      this.updateFacilityVerificationStatus();
+    if (machinesToAnalyze.length === 0) {
+      console.log('✅ All machines already analyzed, skipping API calls');
       return;
     }
 
-    // Set loading states
-    if (machineRequests.length > 0) {
-      console.log(`⏳ Setting machine analysis loading state (${machineRequests.length} requests)`);
-      this.loadingState.machineAnalysis = true;
-    }
-    if (facilityRequests.length > 0) {
-      console.log(`⏳ Setting facility analysis loading state (${facilityRequests.length} requests)`);
-      this.loadingState.facilityAnalysis = true;
-    }
-
-    // Combine all requests and execute in parallel
-    const allRequests = [...machineRequests, ...facilityRequests];
-    
-    console.log(`🚀 Starting parallel analysis: ${machineRequests.length} machines and ${facilityRequests.length} facilities`);
+    console.log(`🚀 Starting analysis for ${machinesToAnalyze.length} machines`);
+    this.loadingState.machineAnalysis = true;
+    machineRequests.push(...machinesToAnalyze.map((machine: any) => this.analyzeMachine(machine)));
 
     // Execute all requests in parallel
-    forkJoin(allRequests.length > 0 ? allRequests : [of(null)]).pipe(
+    forkJoin(machineRequests).pipe(
       catchError(error => {
-        console.error('💥 Error during parallel analysis:', error);
+        console.error('💥 Error during machine analysis:', error);
         return of([]);
       }),
       finalize(() => {
-        console.log('🏁 Parallel analysis completed');
+        console.log('🏁 Machine analysis completed');
         this.loadingState.machineAnalysis = false;
-        this.loadingState.facilityAnalysis = false;
-        this.updateFacilityVerificationStatus();
         this.cdr.detectChanges();
       })
     ).subscribe({
       next: (results) => {
-        console.log(`✅ Parallel analysis completed. Processed ${results.length} items.`);
-        console.log('📊 Final results:', results);
-      },
-      error: (error) => {
-        console.error('💥 Error in parallel analysis:', error);
+        console.log(`✅ Machine analysis completed. Processed ${results.length} machines.`);
       }
     });
   }
@@ -947,7 +930,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Optimized tab change methods
+  // Optimized tab change methods with lazy loading
   changeLevelTab(tab: string): void {
     if (this.activeLevelTab === tab) return;
 
@@ -956,17 +939,95 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     // Update URL without navigation
     this.updateUrl({ tab });
 
-    // All data is already loaded during initialization, no need to load again
+    // Load data for the new tab if not already loaded
+    this.loadDataForActiveTab();
+
     this.cdr.detectChanges();
   }
 
   changeManufacturingTab(tab: string): void {
     this.manufacturingTab = tab;
     this.updateUrl({ tab: this.activeLevelTab, mtab: tab });
+
+    // Trigger machine analysis only when user views machines tab
+    if (tab === 'machines' && !this.hasLoadedMachineAnalysis && this.manufacturingData?.machines?.length) {
+      this.loadMachineAnalysis();
+    } else if (tab === 'facility' && !this.hasLoadedFacilityAnalysis && this.manufacturingData?.facilityPhotos?.length) {
+      this.loadFacilityAnalysis();
+    }
   }
 
-  changeFinancialTab(tab: string): void {
-    this.financialTab = tab;
+  // New method to load machine analysis only when needed
+  private loadMachineAnalysis(): void {
+    if (this.hasLoadedMachineAnalysis || this.loadingState.machineAnalysis) return;
+    
+    console.log('🔍 Loading machine analysis on demand...');
+    this.hasLoadedMachineAnalysis = true;
+    this.processMachineVerificationAsync();
+  }
+
+  // New method to load facility analysis only when needed
+  private loadFacilityAnalysis(): void {
+    if (this.hasLoadedFacilityAnalysis || this.loadingState.facilityAnalysis) return;
+    
+    console.log('🏭 Loading facility analysis on demand...');
+    this.hasLoadedFacilityAnalysis = true;
+    this.processFacilityVerificationAsync();
+  }
+
+  // Separate method for facility verification
+  private processFacilityVerificationAsync(): void {
+    if (!this.manufacturingData?.facilityPhotos?.length) {
+      console.log('❌ No facility photos to analyze');
+      return;
+    }
+
+    if (this.loadingState.facilityAnalysis) {
+      console.log('⏳ Facility analysis already in progress');
+      return;
+    }
+
+    const facilityRequests: Observable<any>[] = [];
+    
+    const facilitiesToAnalyze = this.manufacturingData.facilityPhotos.filter((facility: any) => {
+      if (!facility?.fileId) return false;
+      
+      const cacheKey = `facility_analysis_${facility.fileId}`;
+      const cached = this.getFromCache<FacilityAnalysisResult>(cacheKey);
+      
+      if (cached) {
+        facility.facility_status = cached.facility_status;
+        facility.facility_comment = cached.facility_comment;
+        return false;
+      }
+      
+      return facility.facility_status === undefined;
+    });
+
+    if (facilitiesToAnalyze.length === 0) {
+      console.log('✅ All facilities already analyzed');
+      this.updateFacilityVerificationStatus();
+      return;
+    }
+
+    this.loadingState.facilityAnalysis = true;
+    facilityRequests.push(...facilitiesToAnalyze.map((facility: any) => this.analyzeFacility(facility)));
+
+    forkJoin(facilityRequests).pipe(
+      catchError(error => {
+        console.error('💥 Error during facility analysis:', error);
+        return of([]);
+      }),
+      finalize(() => {
+        this.loadingState.facilityAnalysis = false;
+        this.updateFacilityVerificationStatus();
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: (results) => {
+        console.log(`✅ Facility analysis completed. Processed ${results.length} facilities.`);
+      }
+    });
   }
 
   private updateUrl(params: { [key: string]: string }): void {
@@ -1232,10 +1293,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   private refreshStatusData(level: string): void {
     // Clear cache and reload status
-    this.cache.delete(`${level.toLowerCase()}_data_${this.supplierId}`);
+    this.clearSpecificCache(`Supplier Onboarding ${level}`);
     
-    // Reload all data and recalculate completeness when Firebase triggers update
-    this.loadInitialData();
+    // Trigger Firebase and reload data
+    this.accessFirebaseTrigger(`Supplier Onboarding ${level}`, this.supplierId);
   }
 
   // Update request methods
@@ -1309,68 +1370,83 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
-    this.commonservice.commonFirebaseTrigger(doctType_name, doctypeId).subscribe((res: any) => {
-       // When Firebase triggers, clear cache and reload all data to recalculate completeness
-      this.cache.clear();
-      this.loadInitialData();
+    console.log(`🔥 Firebase trigger called for ${doctType_name}`);
+    this.commonservice.commonFirebaseTrigger(doctType_name, doctypeId).subscribe({
+      next: (res: any) => {
+        console.log(`✅ Firebase trigger completed for ${doctType_name}`);
+        // Only clear specific cache entries, not entire cache
+        this.clearSpecificCache(doctType_name);
+        // Reload only the specific data that changed
+        this.reloadSpecificData(doctType_name);
+      },
+      error: (error) => {
+        console.error(`❌ Firebase trigger failed for ${doctType_name}:`, error);
+      }
     });
   }
 
-  // Method to force refresh analysis (bypass cache) - now handles both machines and facilities
+  private clearSpecificCache(docType: string): void {
+    const level = docType.includes('L1') ? 'l1' : docType.includes('L2') ? 'l2' : 'l3';
+    const cacheKey = `${level}_data_${this.supplierId}`;
+    this.cache.delete(cacheKey);
+  }
+
+  private reloadSpecificData(docType: string): void {
+    if (docType.includes('L1')) {
+      this.loadEssentialData();
+    } else if (docType.includes('L2')) {
+      this.loadManufacturingData();
+    } else if (docType.includes('L3')) {
+      this.loadFinancialData();
+    }
+  }
+
+  // Modified method - remove auto-triggering and cache bypass
   forceAnalyzeAllMachines(): void {
-    console.log('🔄 === FORCE ANALYZE ALL MACHINES & FACILITIES ===');
+    console.log('🔄 === MANUAL FORCE ANALYZE TRIGGERED ===');
     
     if (!this.manufacturingData) {
       console.log('❌ No manufacturing data available');
       return;
     }
 
+    // Only clear cache and reset status if user specifically requests it
+    // This method should only be called on user action, not automatically
+    
     let hasItems = false;
 
     // Process machines
     if (this.manufacturingData.machines?.length) {
-      console.log(`🔄 Processing ${this.manufacturingData.machines.length} machines...`);
       hasItems = true;
-      
-      // Clear cache and reset status for all machines
-      this.manufacturingData.machines.forEach((machine: any, index: number) => {
+      this.manufacturingData.machines.forEach((machine: any) => {
         const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
         if (fileId) {
           const cacheKey = `machine_analysis_${fileId}`;
           this.cache.delete(cacheKey);
-          console.log(`🗑️ Cleared machine cache for ${index} (${fileId})`);
         }
         
         // Clear existing status to force new analysis
         if (Array.isArray(machine.machinePhotos)) {
           delete machine.machinePhotos[0].machine_status;
           delete machine.machinePhotos[0].machine_status_comment;
-          console.log(`🔄 Reset array machine ${index} status`);
         } else {
           delete machine.machinePhotos.machine_status;
           delete machine.machinePhotos.machine_status_comment;
-          console.log(`🔄 Reset object machine ${index} status`);
         }
       });
     }
 
     // Process facility photos
     if (this.manufacturingData.facilityPhotos?.length) {
-      console.log(`🔄 Processing ${this.manufacturingData.facilityPhotos.length} facility photos...`);
       hasItems = true;
-      
-      // Clear cache and reset status for all facilities
-      this.manufacturingData.facilityPhotos.forEach((facility: any, index: number) => {
+      this.manufacturingData.facilityPhotos.forEach((facility: any) => {
         if (facility.fileId) {
           const cacheKey = `facility_analysis_${facility.fileId}`;
           this.cache.delete(cacheKey);
-          console.log(`🗑️ Cleared facility cache for ${index} (${facility.fileId})`);
         }
         
-        // Clear existing status to force new analysis
         delete facility.facility_status;
         delete facility.facility_comment;
-        console.log(`🔄 Reset facility ${index} status`);
       });
     }
 
@@ -1379,14 +1455,13 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Reset loading states
-    this.loadingState.machineAnalysis = false;
-    this.loadingState.facilityAnalysis = false;
+    // Reset flags to allow re-analysis
+    this.hasLoadedMachineAnalysis = false;
+    this.hasLoadedFacilityAnalysis = false;
 
     // Force new analysis
-    console.log('🚀 Starting fresh verification analysis...');
     this.processMachineVerificationAsync();
-    console.log('🔄 === FORCE ANALYZE COMPLETED ===');
+    this.processFacilityVerificationAsync();
   }
 
   // Getter methods for template
@@ -1444,5 +1519,9 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     sessionStorage.setItem('show_supplier_dashboard', 'true');
     sessionStorage.setItem('supplier_onboarding_complete', 'true');
     this.router.navigate(['/wefab/supplier/dashboard']);
+  }
+
+  changeFinancialTab(tab: string): void {
+    this.financialTab = tab;
   }
 } 

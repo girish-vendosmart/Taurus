@@ -416,7 +416,7 @@
         </div>
 
         <!-- Zero State for Manufacturing Section -->
-        <div *ngIf="!manufacturingData" class="zero-state-container">
+        <div *ngIf="!manufacturingData && !loadingState.l2Data" class="zero-state-container">
           <div class="zero-state-content">
             <i class="pi pi-cog zero-state-icon"></i>
             <h3>No Manufacturing Data Available</h3>
@@ -434,20 +434,23 @@
         </div>
 
         <!-- Manufacturing content only shown when manufacturingData exists -->
-        <div *ngIf="manufacturingData">
+        <div *ngIf="manufacturingData && !loadingState.l2Data">
           <!-- Manufacturing Tabs Navigation -->
           <div class="manufacturing-tabs">
             <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'machines'"
-              (click)="changeManufacturingTab('machines')">Machine Details</a>
+              (click)="changeManufacturingTab('machines')">
+              Machine Details
+            </a>
             <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'facility'"
-              (click)="changeManufacturingTab('facility')">Facility Verification</a>
+              (click)="changeManufacturingTab('facility')">
+              Facility Verification
+            </a>
             <a href="javascript:void(0)" class="manufacturing-tab"
               [class.active]="manufacturingTab === 'certifications'"
               (click)="changeManufacturingTab('certifications')">Certifications</a>
             <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'capacity'"
               (click)="changeManufacturingTab('capacity')">Production Capacity</a>
           </div>
-
 
           <!-- Machine Details Tab -->
           <div class="machines-container">
@@ -474,12 +477,13 @@
                     
                     <div class="verification-badge" 
                         [ngClass]="{'verified': getMachineStatus(machine.machinePhotos), 
-                                    'not-verified': !getMachineStatus(machine.machinePhotos)}">
+                                    'not-verified': !getMachineStatus(machine.machinePhotos),
+                                    'analyzing': loadingState.machineAnalysis && getMachineStatus(machine.machinePhotos) === undefined}">
                       <i *ngIf="getMachineStatus(machine.machinePhotos)" 
                         class="pi pi-check-circle"></i>
-                      <i *ngIf="!getMachineStatus(machine.machinePhotos)" 
+                      <i *ngIf="!getMachineStatus(machine.machinePhotos) && !loadingState.machineAnalysis" 
                         class="pi pi-times-circle"></i>
-                      <span>{{ getMachineStatus(machine.machinePhotos) ? 'Verified Machine' : 'Not Verified' }}</span>
+                      <span *ngIf="!loadingState.machineAnalysis">{{ getMachineStatus(machine.machinePhotos) ? 'Verified Machine' : 'Not Verified' }}</span>
                     </div>
                     
                     <div class="manufacturing-info">
@@ -531,12 +535,13 @@
                     
                     <div class="verification-badge" 
                          [ngClass]="{'verified': facility.facility_status, 
-                                    'not-verified': !facility.facility_status}">
+                                    'not-verified': !facility.facility_status && !loadingState.facilityAnalysis,
+                                    'analyzing': loadingState.facilityAnalysis && facility.facility_status === undefined}">
                       <i *ngIf="facility.facility_status" 
                         class="pi pi-check-circle"></i>
-                      <i *ngIf="!facility.facility_status" 
+                      <i *ngIf="!facility.facility_status && !loadingState.facilityAnalysis" 
                         class="pi pi-times-circle"></i>
-                      <span>{{ facility.facility_status ? 'Verified Facility' : 'Not Verified' }}</span>
+                      <span *ngIf="!loadingState.facilityAnalysis">{{ facility.facility_status ? 'Verified Facility' : 'Not Verified' }}</span>
                     </div>
                     
                     <!-- Admin comment section -->
@@ -630,7 +635,7 @@
         </div>
 
         <!-- Zero State for Financial Section -->
-        <div *ngIf="!newFinancialData" class="zero-state-container">
+        <div *ngIf="!newFinancialData && !loadingState.l3Data" class="zero-state-container">
           <div class="zero-state-content">
             <i class="pi pi-chart-bar zero-state-icon"></i>
             <h3>No Financial Data Available</h3>
@@ -648,7 +653,7 @@
         </div>
 
         <!-- Financial content only shown when newFinancialData exists -->
-        <div *ngIf="newFinancialData">
+        <div *ngIf="newFinancialData && !loadingState.l3Data">
           <!-- Financial & Additional Sub-tabs Navigation -->
           <div class="financial-tabs">
             <a href="javascript:void(0)" class="financial-tab" [class.active]="financialTab === 'financial'"
