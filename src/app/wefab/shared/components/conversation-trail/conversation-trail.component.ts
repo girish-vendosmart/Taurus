@@ -45,6 +45,7 @@ export class ConversationTrailComponent implements OnInit {
 
   ngOnInit() {
     this.supplierId = sessionStorage.getItem('supplier_id') || '';
+    this.fetchMessages();
     // this.route.paramMap.subscribe(params => {
     //   this.supplierId = params.get('supplierId') || 'SUP-000403';
     //   if (this.supplierId) {

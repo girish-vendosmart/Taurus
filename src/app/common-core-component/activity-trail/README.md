@@ -182,7 +182,6 @@ export class SupplierProfileReviewComponent {
   [activityData]="activityTrail"
   [loading]="activityTrailLoading"
   [showHeader]="false"
-  [maxHeight]="'500px'"
   [emptyMessage]="'No activity records found for this supplier profile.'">
 </app-activity-trail>
 ```

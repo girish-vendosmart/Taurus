@@ -18,7 +18,7 @@
   </div>
 
   <!-- Content -->
-  <div class="activity-trail-content" [style.max-height]="maxHeight" role="log">
+  <div class="activity-trail-content" role="log">
     <!-- Loading State -->
     <div class="loading-container" *ngIf="loading" role="status" aria-live="polite">
       <p-progressSpinner 
@@ -65,10 +65,10 @@
           </div>
           
           <!-- Timestamp (top right) -->
-          <div class="activity-timestamp">
+          <!-- <div class="activity-timestamp">
             <i class="pi pi-clock" aria-hidden="true"></i>
             <span class="time-since">{{ activity.time_since }}</span>
-          </div>
+          </div> -->
 
           <!-- Activity Description -->
           <div class="activity-description">
