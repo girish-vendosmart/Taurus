@@ -331,22 +331,17 @@
             
             <!-- Item Price - Editable -->
             <td>
-              <p-inputNumber
+              <input
+                type="number"
+                class="form-control"
                 [(ngModel)]="item.itemPrice"
-                mode="decimal"
-                [minFractionDigits]="2"
-                [maxFractionDigits]="2"
-                [min]="0"
-                [max]="99999.99"
-                [disabled]="item.bid_type === 'No Bid'"
-                [placeholder]="item.bid_type === 'No Bid' ? 'No Bid' : 'Enter price'"
+                [disabled]="item.no_bid === 1"
+                [placeholder]="item.no_bid === 1 ? 'No Bid' : 'Enter price'"
+                (input)="onQuantityOrPriceChange(item)"
                 [ngModelOptions]="{standalone: true}"
-                (onInput)="onQuantityOrPriceChange(item); clearFieldError('item_' + i); updateTaxCalculations()"
-                styleClass="w-100 table-input-field"
-                [class.is-invalid]="hasValidationError('item_' + i)"
-                [style]="{ 'height': '32px' }"
-                [inputStyle]="{ 'font-size': '13px', 'height': '32px' }">
-              </p-inputNumber>
+                (keypress)="onNumberKeyPress($event)"
+                (input)="onNumberInput($event)"
+                (paste)="onNumberPaste($event)">
             </td>
             
             <!-- Total Price -->
