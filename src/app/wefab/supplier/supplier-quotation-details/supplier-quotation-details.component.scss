@@ -527,6 +527,43 @@ $danger-red: #EF4444;
 .items-table-container {
   overflow-x: auto;
 
+  ::ng-deep .p-datatable {
+    .p-datatable-tbody tr td {
+      // General cell styling
+      padding: 0.75rem;
+      vertical-align: top;
+      word-wrap: break-word;
+      
+      // Specific styling for comment cells
+      &:last-child {
+        max-width: 200px;
+        white-space: normal;
+        word-wrap: break-word;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.4;
+        max-height: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
+    }
+    
+    .p-datatable-thead tr th {
+      padding: 0.75rem;
+      font-weight: $font-weight-semibold;
+      background-color: rgba($technical-white, 0.9);
+      border-bottom: 2px solid rgba($material-finish-silver, 0.3);
+      
+      &:last-child {
+        max-width: 200px;
+      }
+    }
+  }
+
+  // Legacy table styles (if not using PrimeNG table)
   .items-table {
     width: 100%;
     min-width: 1200px;
@@ -553,6 +590,7 @@ $danger-red: #EF4444;
 
         &:last-child {
           border-right: none;
+          max-width: 200px;
         }
 
         &:hover {
@@ -591,9 +629,23 @@ $danger-red: #EF4444;
           display: flex;
           align-items: center;
           word-break: break-word;
+          vertical-align: top;
 
           &:last-child {
             border-right: none;
+            max-width: 200px;
+            white-space: normal;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.4;
+            max-height: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            align-items: flex-start;
           }
 
           &.description-col {

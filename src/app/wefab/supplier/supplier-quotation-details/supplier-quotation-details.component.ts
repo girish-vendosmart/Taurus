@@ -29,6 +29,7 @@ export interface SupplierQuotationApiResponse {
   quotation_name: string;
   rfq_id: string;
   supplier_id: string;
+  currency_code: string;
   quotation_from: string;
   quotation_to: string;
   estimated_completion_duration: string;
@@ -204,6 +205,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
 
   quotationItems: QuotationItem[] = [];
   rawQuotationItems: QuotationLineItem[] = []; // Raw API data for table
+  currencyCode: string = 'USD'; // Default currency code
 
   activeTab: string = 'overview';
   currentPage: number = 1;
@@ -356,6 +358,9 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     // Calculate sub total from items since API might return 0
     const calculatedSubTotal = apiData.items.reduce((total, item) => total + item.total_price, 0);
 
+    // Extract currency code from first item or default to USD
+    this.currencyCode = apiData.currency_code;
+
     // Map main quotation details
     this.quotationDetails = {
       quotationId: apiData.name,
@@ -420,9 +425,9 @@ export class SupplierQuotationDetailsComponent implements OnInit {
 
     this.rawQuotationItems = apiData.items.map(item => ({
       ...item,
-      unit_price_formatted: item.unit_price.toLocaleString('en-US'),
-      total_price_formatted: item.total_price.toLocaleString('en-US'),
-      tax_amount_formatted: item.tax_amount.toLocaleString('en-US')
+      unit_price_formatted: this.getFormattedCurrencyAmount(item.unit_price, item.currency_code),
+      total_price_formatted: this.getFormattedCurrencyAmount(item.total_price, item.currency_code),
+      tax_amount_formatted: this.getFormattedCurrencyAmount(item.tax_amount, item.currency_code)
     }));
     
     this.totalItems = this.quotationItems.length;
@@ -635,10 +640,10 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         <td>${item.quantity}</td>
         <td>${item.unit}</td>
         <td>${item.currency}</td>
-        <td>${this.formatCurrency(item.unitPrice, item.currency)}</td>
+        <td>${this.getFormattedCurrencyAmount(item.unitPrice, item.currency)}</td>
         <td>${item.tax_type}</td>
-        <td>${this.formatCurrency(item.tax_amount, this.getSummaryCurrency())}</td>
-        <td>${this.formatCurrency(item.totalPrice, item.currency)}</td>
+        <td>${this.getFormattedCurrencyAmount(item.tax_amount, item.currency)}</td>
+        <td>${this.getFormattedCurrencyAmount(item.totalPrice, item.currency)}</td>
         <td>${item.comments}</td>
       </tr>
     `).join('');
@@ -650,11 +655,11 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         taxRows += `
           <div class="summary-row">
             <span class="summary-label">SGST (${this.quotationDetails.sgstRate}%):</span>
-            <span class="summary-value">${this.formatCurrency(this.getSGSTAmount(), this.getSummaryCurrency())}</span>
+            <span class="summary-value">${this.getFormattedCurrencyAmount(this.getSGSTAmount())}</span>
           </div>
           <div class="summary-row">
             <span class="summary-label">CGST (${this.quotationDetails.cgstRate}%):</span>
-            <span class="summary-value">${this.formatCurrency(this.getCGSTAmount(), this.getSummaryCurrency())}</span>
+            <span class="summary-value">${this.getFormattedCurrencyAmount(this.getCGSTAmount())}</span>
           </div>
         `;
       }
@@ -662,14 +667,14 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         taxRows += `
           <div class="summary-row">
             <span class="summary-label">IGST (${this.quotationDetails.igstRate}%):</span>
-            <span class="summary-value">${this.formatCurrency(this.getIGSTAmount(), this.getSummaryCurrency())}</span>
+            <span class="summary-value">${this.getFormattedCurrencyAmount(this.getIGSTAmount())}</span>
           </div>
         `;
       }
       taxRows += `
         <div class="summary-row">
           <span class="summary-label">Total Tax:</span>
-          <span class="summary-value">${this.formatCurrency(this.getTotalTaxAmount(), this.getSummaryCurrency())}</span>
+          <span class="summary-value">${this.getFormattedCurrencyAmount(this.getTotalTaxAmount())}</span>
         </div>
       `;
     }
@@ -680,7 +685,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       shippingRow = `
         <div class="summary-row">
           <span class="summary-label">Shipping Charges:</span>
-          <span class="summary-value">${this.formatCurrency(this.quotationDetails.shippingCharges, this.getSummaryCurrency())}</span>
+          <span class="summary-value">${this.getFormattedCurrencyAmount(this.quotationDetails.shippingCharges)}</span>
         </div>
       `;
     }
@@ -740,6 +745,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
+            word-wrap: break-word;
+            max-width: 200px;
           }
           th {
             background-color: #f8f9fa;
@@ -823,17 +830,17 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         <div class="summary-section">
           <div class="summary-row">
             <span class="summary-label">Sub Total:</span>
-            <span class="summary-value">${this.formatCurrency(this.quotationDetails.sub_total, this.getSummaryCurrency())}</span>
+            <span class="summary-value">${this.getFormattedCurrencyAmount(this.quotationDetails.sub_total)}</span>
           </div>
           <div class="summary-row">
             <span class="summary-label">Discount (${this.quotationDetails.discountPercentage}%):</span>
-            <span class="summary-value">${this.formatCurrency(this.quotationDetails.discountAmount, this.getSummaryCurrency())}</span>
+            <span class="summary-value">${this.getFormattedCurrencyAmount(this.quotationDetails.discountAmount)}</span>
           </div>
           ${taxRows}
           ${shippingRow}
           <div class="summary-row total-row">
             <span class="summary-label">Grand Total:</span>
-            <span class="summary-value">${this.formatCurrency(finalTotal, this.getSummaryCurrency())}</span>
+            <span class="summary-value">${this.getFormattedCurrencyAmount(finalTotal)}</span>
           </div>
         </div>
       </body>
@@ -982,5 +989,25 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       default:
         return 'status-default';
     }
+  }
+
+  /**
+   * Format currency amount with currency code
+   * @param amount - The amount to format
+   * @param currency - Optional currency code, defaults to component's currencyCode
+   * @returns Formatted currency string like "INR 2,000"
+   */
+  getFormattedCurrencyAmount(amount: number, currency?: string): string {
+    const currencyToUse = currency || this.currencyCode;
+    const formattedAmount = amount.toLocaleString('en-US');
+    return `${currencyToUse} ${formattedAmount}`;
+  }
+
+  /**
+   * Get the primary currency code for this quotation
+   * @returns Currency code string
+   */
+  getPrimaryCurrencyCode(): string {
+    return this.currencyCode;
   }
 }

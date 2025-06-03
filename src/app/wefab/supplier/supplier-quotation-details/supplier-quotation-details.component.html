@@ -60,6 +60,11 @@
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
+      <span class="info-label">Quotation Name:</span>
+      <span class="info-value">{{ quotationDetails.quotation_name }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
       <span class="info-label">Payment Terms:</span>
       <span class="info-value">{{ quotationDetails.paymentTerms }}</span>
     </div>
@@ -82,11 +87,6 @@
     <div class="info-item">
       <span class="info-label">Last Modified:</span>
       <span class="info-value">{{ quotationDetails.lastModified }}</span>
-    </div>
-    <div class="info-separator">|</div>
-    <div class="info-item">
-      <span class="info-label">Last Modified:</span>
-      <span class="info-value">{{ quotationDetails.quotation_name }}</span>
     </div>
   </div>
 
@@ -166,28 +166,28 @@
           <div class="summary-section">
             <div class="summary-row">
               <span class="summary-label">Sub Total:</span>
-              <span class="summary-value">{{ quotationDetails.sub_total.toLocaleString('en-US') }}</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.sub_total) }}</span>
             </div>
             <div class="summary-row">
               <span class="summary-label">Discount ({{ quotationDetails.discountPercentage }}%):</span>
-              <span class="summary-value">{{ quotationDetails.discountAmount.toLocaleString('en-US') }}</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.discountAmount) }}</span>
             </div>
             
             <!-- Total Tax Amount - Show if greater than 0 -->
             <div class="summary-row" *ngIf="quotationDetails.totalTaxAmount > 0">
               <span class="summary-label">Total Tax Amount:</span>
-              <span class="summary-value">{{ quotationDetails.totalTaxAmount.toLocaleString('en-US') }}</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.totalTaxAmount) }}</span>
             </div>
             
             <!-- Shipping Charges - Show if greater than 0 -->
             <div class="summary-row" *ngIf="quotationDetails.shippingCharges > 0">
               <span class="summary-label">Shipping Charges:</span>
-              <span class="summary-value">{{ quotationDetails.shippingCharges.toLocaleString('en-US') }}</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.shippingCharges) }}</span>
             </div>
             
             <div class="summary-row total-row">
               <span class="summary-label">Grand Total:</span>
-              <span class="summary-value">{{ quotationDetails.grandTotal.toLocaleString('en-US') }}</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.grandTotal) }}</span>
             </div>
           </div>
         </div>
