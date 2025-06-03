@@ -318,12 +318,13 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Load basic data, verification status, and ALL status data for profile completeness
+    // Load basic data, verification status, ALL status data, and document summary for one-shot calculation
     const essentialRequests = [
       this.getVerificationStatusObservable(this.supplierId),
       this.getL1DataObservable(this.supplierId),
       this.getL2StatusObservable(this.supplierId), // Only status, not full data
-      this.getL3StatusObservable(this.supplierId)  // Only status, not full data
+      this.getL3StatusObservable(this.supplierId), // Only status, not full data
+      this.getDocumentSummaryObservable(this.supplierId) // New: Document summary in one shot
     ];
 
     this.subscription.add(
@@ -334,7 +335,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         })
       ).subscribe({
-        next: ([verificationData, l1Data, l2Status, l3Status]) => {
+        next: ([verificationData, l1Data, l2Status, l3Status, docSummary]) => {
           // Process essential data
           this.verificationStatus = verificationData;
           this.processL1Data(l1Data);
@@ -343,10 +344,13 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           this.getCurrentL2DataStatus = l2Status?.approval_status;
           this.getCurrentL3DataStatus = l3Status?.approval_status;
           
+          // Process document summary in one shot
+          this.processDocumentSummary(docSummary);
+          
           // Calculate profile completeness with ALL status data at once
           this.calculateProfileCompleteness();
           
-          // Load additional data based on active tab (content only, not status)
+          // Load additional data based on active tab (content only, not status or counts)
           this.loadDataForActiveTab();
         },
         error: (error) => {
@@ -609,6 +613,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processL1Data(result: any): void {
+    console.log('🔍 processL1Data called with result:', result);
+    
     if (result.data) {
       try {
         this.getCompanyProfile = JSON.parse(result.data.company_profile);
@@ -616,8 +622,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         this.phoneVerified = this.getCompanyProfile?.phone_verified || false;
         this.requestToResubmitCommentL1 = result.data.comment || '';
         
-        // Count documents
-        this.numberOfCompanyDocuments = this.getCompanyProfile?.companyDocuments?.length || 0;
+        console.log('✅ L1 data processed, document count already handled in summary');
       } catch (error) {
         console.error('Error parsing L1 data:', error);
         this.getCompanyProfile = null;
@@ -626,6 +631,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
     if (result.status) {
       this.getCurrentL1DataStatus = result.status.approval_status;
+      console.log('📊 L1 Status set to:', this.getCurrentL1DataStatus);
     }
   }
 
@@ -641,10 +647,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         console.log('🔧 Machines available:', this.manufacturingData?.machines?.length || 0);
         console.log('🏭 Facilities available:', this.manufacturingData?.facilityPhotos?.length || 0);
         
-        // Count documents
-        this.numberOfMachinePhoto = this.manufacturingData?.machines?.length || 0;
-        this.numberOfFacilityPhoto = this.manufacturingData?.facilityPhotos?.length || 0;
-        this.numberOfCertificationPhoto = this.manufacturingData?.certifications?.length || 0;
+        console.log('✅ L2 data processed, document counts already handled in summary');
 
         // Log machine structure for debugging
         if (this.manufacturingData?.machines?.length) {
@@ -1486,10 +1489,17 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     const level = docType.includes('L1') ? 'l1' : docType.includes('L2') ? 'l2' : 'l3';
     const dataKey = `${level}_data_${this.supplierId}`;
     const statusKey = `${level}_status_${this.supplierId}`;
+    const docSummaryKey = `doc_summary_${this.supplierId}`;
     
     // Clear both data and status caches
     this.cache.delete(dataKey);
     this.cache.delete(statusKey);
+    
+    // Clear document summary cache when any level data changes
+    // This ensures document counts are recalculated on next load
+    this.cache.delete(docSummaryKey);
+    
+    console.log(`🗑️ Cleared cache for ${level} data, status, and document summary`);
   }
 
   private reloadSpecificData(docType: string): void {
@@ -1505,11 +1515,16 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   // New method to reload L1 data and recalculate completeness
   private reloadL1DataAndStatus(): void {
     this.subscription.add(
-      this.getL1DataObservable(this.supplierId).subscribe({
-        next: (l1Data) => {
+      forkJoin([
+        this.getL1DataObservable(this.supplierId),
+        this.getDocumentSummaryObservable(this.supplierId) // Reload document summary too
+      ]).subscribe({
+        next: ([l1Data, docSummary]) => {
           this.processL1Data(l1Data);
+          this.processDocumentSummary(docSummary); // Update document counts
           // Recalculate completeness since L1 status changed
           this.calculateProfileCompleteness();
+          console.log('🔄 L1 data and document summary reloaded');
         },
         error: (error) => {
           console.error('Error reloading L1 data:', error);
@@ -1521,9 +1536,13 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   // New method to reload only L2 status and recalculate completeness
   private reloadL2Status(): void {
     this.subscription.add(
-      this.getL2StatusObservable(this.supplierId).subscribe({
-        next: (l2Status) => {
+      forkJoin([
+        this.getL2StatusObservable(this.supplierId),
+        this.getDocumentSummaryObservable(this.supplierId) // Reload document summary too
+      ]).subscribe({
+        next: ([l2Status, docSummary]) => {
           this.getCurrentL2DataStatus = l2Status?.approval_status;
+          this.processDocumentSummary(docSummary); // Update document counts
           // Recalculate completeness since L2 status changed
           this.calculateProfileCompleteness();
           
@@ -1531,6 +1550,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           if (this.manufacturingData && this.activeLevelTab === 'manufacturing') {
             this.loadManufacturingData();
           }
+          console.log('🔄 L2 status and document summary reloaded');
         },
         error: (error) => {
           console.error('Error reloading L2 status:', error);
@@ -1724,5 +1744,88 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         return of(null);
       })
     );
+  }
+
+  // New method to get document summary without loading full data
+  private getDocumentSummaryObservable(supplierId: string): Observable<any> {
+    const cacheKey = `doc_summary_${supplierId}`;
+    const cached = this.getFromCache(cacheKey);
+    
+    if (cached) {
+      return of(cached);
+    }
+
+    // Use lightweight API calls to get document counts
+    const summaryRequests = [
+      // Get L1 data for company documents count (we need this data anyway)
+      this.commonservice.getData(`/api/resource/Supplier Onboarding L1/${supplierId}`).pipe(
+        map((res: any) => {
+          try {
+            const profile = JSON.parse(res?.data?.company_profile || '{}');
+            return {
+              companyDocuments: profile?.companyDocuments?.length || 0
+            };
+          } catch {
+            return { companyDocuments: 0 };
+          }
+        }),
+        catchError(() => of({ companyDocuments: 0 }))
+      ),
+      
+      // Get L2 data summary for manufacturing counts
+      this.commonservice.getData(`/api/resource/Supplier Onboarding L2/${supplierId}`).pipe(
+        map((res: any) => {
+          try {
+            const profile = JSON.parse(res?.data?.company_profile || '{}');
+            return {
+              machinePhotos: profile?.machines?.length || 0,
+              facilityPhotos: profile?.facilityPhotos?.length || 0,
+              certifications: profile?.certifications?.length || 0
+            };
+          } catch {
+            return { machinePhotos: 0, facilityPhotos: 0, certifications: 0 };
+          }
+        }),
+        catchError(() => of({ machinePhotos: 0, facilityPhotos: 0, certifications: 0 }))
+      )
+    ];
+
+    return forkJoin(summaryRequests).pipe(
+      map(([l1Summary, l2Summary]) => ({
+        ...l1Summary,
+        ...l2Summary
+      })),
+      tap(result => this.setCache(cacheKey, result)),
+      catchError(error => {
+        console.error('Error fetching document summary:', error);
+        return of({ companyDocuments: 0, machinePhotos: 0, facilityPhotos: 0, certifications: 0 });
+      })
+    );
+  }
+
+  // New method to process document summary
+  private processDocumentSummary(summary: any): void {
+    console.log('📊 Processing document summary in one shot:', summary);
+    
+    // Set all document counts at once
+    this.numberOfCompanyDocuments = summary?.companyDocuments || 0;
+    this.numberOfMachinePhoto = summary?.machinePhotos || 0;
+    this.numberOfFacilityPhoto = summary?.facilityPhotos || 0;
+    this.numberOfCertificationPhoto = summary?.certifications || 0;
+    
+    // Update the documentSummary object for consistency
+    this.documentSummary = {
+      companyDocuments: this.numberOfCompanyDocuments,
+      machinePhotos: this.numberOfMachinePhoto,
+      facilityPhotos: this.numberOfFacilityPhoto,
+      certifications: this.numberOfCertificationPhoto
+    };
+    
+    console.log('✅ Document summary calculated:', {
+      companyDocuments: this.numberOfCompanyDocuments,
+      machinePhotos: this.numberOfMachinePhoto,
+      facilityPhotos: this.numberOfFacilityPhoto,
+      certifications: this.numberOfCertificationPhoto
+    });
   }
 }
