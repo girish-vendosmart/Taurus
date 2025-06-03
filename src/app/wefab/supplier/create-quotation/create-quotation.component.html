@@ -562,7 +562,8 @@
           <div *ngIf="attachedFileObjects.length > 0" class="attached-files mt-3">
             <h6>Attached Files:</h6>
             <div class="file-list">
-              <div *ngFor="let fileObj of attachedFileObjects; let i = index" class="file-item">
+              <div *ngFor="let fileObj of attachedFileObjects; let i = index" class="file-item" 
+                   [class.uploading]="fileObj.uploading">
                 <!-- File icon/thumbnail on the left -->
                 <div class="file-icon">
                   <!-- Show thumbnail for images -->
@@ -573,32 +574,60 @@
                   <!-- Show icon for non-images -->
                   <i *ngIf="!fileObj.thumbnail" 
                      class="pi {{ getFileIconByType(fileObj.type) }}"></i>
+                  
+                  <!-- Upload progress overlay -->
+                  <div *ngIf="fileObj.uploading" class="upload-overlay">
+                    <i class="pi pi-spinner pi-spin"></i>
+                  </div>
                 </div>
                 
                 <!-- File details in the middle -->
                 <div class="file-details">
                   <div class="file-name">{{ fileObj.name }}</div>
                   <div class="file-type">{{ getFileExtensionFromName(fileObj.name) }}</div>
+                  
+                  <!-- Upload progress bar -->
+                  <div *ngIf="fileObj.uploading" class="upload-progress mt-1">
+                    <div class="progress progress-sm">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                           role="progressbar" 
+                           [style.width]="(fileObj.progress || 0) + '%'"
+                           [attr.aria-valuenow]="fileObj.progress || 0" 
+                           aria-valuemin="0" 
+                           aria-valuemax="100">
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
                 <!-- Action buttons on the right -->
                 <div class="file-actions">
                   <button 
+                    *ngIf="!fileObj.uploading && fileObj.url"
                     type="button" 
-                    class="btn btn-outline-primary"
+                    class="btn btn-outline-primary btn-sm"
                     (click)="viewAttachmentByObject(fileObj)"
                     title="View file">
                     <i class="pi pi-eye"></i>
                   </button>
                   <button 
                     type="button" 
-                    class="btn btn-outline-danger"
+                    class="btn btn-outline-danger btn-sm"
                     (click)="removeAttachment(i)"
+                    [disabled]="fileObj.uploading"
                     title="Remove file">
                     <i class="pi pi-times"></i>
                   </button>
                 </div>
               </div>
+            </div>
+            
+            <!-- Upload status summary -->
+            <div *ngIf="isUploadingFiles" class="upload-status-summary mt-2">
+              <small class="text-info">
+                <i class="pi pi-spinner pi-spin me-1"></i>
+                Uploading files...
+              </small>
             </div>
           </div>
         </div>
@@ -648,9 +677,10 @@
       <button 
         type="submit" 
         class="btn btn-primary px-4"
+        [disabled]="isUploadingFiles"
         (click)="onSubmit()">
-        <i class="{{ isEditMode ? 'pi pi-save' : 'pi pi-plus' }} me-2"></i>
-        {{ isEditMode ? 'Update Quotation' : 'Create Quotation' }}
+        <i class="{{ isUploadingFiles ? 'pi pi-spinner pi-spin' : (isEditMode ? 'pi pi-save' : 'pi pi-plus') }} me-2"></i>
+        {{ isUploadingFiles ? 'Please wait...' : (isEditMode ? 'Update Quotation' : 'Create Quotation') }}
       </button>
     </div>
   </form>

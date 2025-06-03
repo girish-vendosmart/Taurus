@@ -21,6 +21,7 @@ import { MessageService } from 'primeng/api';
 
 import { CommonService } from '../../shared/common.service';
 import { SweetAlertService } from '../../shared/sweet-alert.service';
+import { FileUploadService, FileUploadResult } from '../../shared/file-upload.service';
 // Custom Formly components
 import { FormlyFieldDropdownComponent } from '../../../dropdown-type.component';
 
@@ -148,6 +149,53 @@ import { FormlyFieldDropdownComponent } from '../../../dropdown-type.component';
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
+    .file-item.uploading {
+      opacity: 0.8;
+      background-color: #f0f8ff;
+      border: 1px solid #0d6efd;
+    }
+
+    .file-icon {
+      position: relative;
+    }
+
+    .upload-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .progress-sm {
+      height: 4px;
+    }
+
+    .upload-progress {
+      width: 100%;
+    }
+
+    .upload-success small {
+      font-size: 0.75rem;
+    }
+
+    .upload-failed small {
+      font-size: 0.75rem;
+    }
+
+    .upload-status-summary {
+      text-align: center;
+      padding: 0.5rem;
+      background-color: #e7f3ff;
+      border-radius: 4px;
+    }
+    
     .file-name {
       font-size: 14px;
       color: #495057;
@@ -245,7 +293,8 @@ export class CreateQuotationComponent implements OnInit {
 
   // Attachment properties
   attachedFiles: string[] = [];
-  attachedFileObjects: { url: string; file?: File; thumbnail?: string; name: string; type: string }[] = [];
+  attachedFileObjects: { url: string; file?: File; thumbnail?: string; name: string; type: string; uploading?: boolean; progress?: number }[] = [];
+  isUploadingFiles: boolean = false;
 
   // Store original state for reset functionality
   originalQuotationItems: any[] = [];
@@ -295,7 +344,7 @@ export class CreateQuotationComponent implements OnInit {
   csvImportErrors: string[] = [];
   showValidationErrors: boolean = false;
 
-  constructor(private sweetAlert: SweetAlertService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private commonService: CommonService) {}
+  constructor(private sweetAlert: SweetAlertService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private commonService: CommonService, private fileUploadService: FileUploadService) {}
 
   ngOnInit() {
     
@@ -932,6 +981,13 @@ export class CreateQuotationComponent implements OnInit {
     console.log('Form Valid:', this.form.valid);
     console.log('Model Data:', this.model);
     console.log('Quotation Items:', this.model.quotationItems);
+    console.log('Is Uploading Files:', this.isUploadingFiles);
+    
+    // Check if files are still uploading
+    if (this.isUploadingFiles) {
+      this.sweetAlert.warning('Please wait for file uploads to complete before submitting.');
+      return;
+    }
     
     this.showValidationErrors = true;
     
@@ -1594,13 +1650,11 @@ export class CreateQuotationComponent implements OnInit {
 
   onAttachmentSelected(event: any) {
     const files = event.target.files;
-    if (files) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        console.log('File selected:', file.name);
-        // File processing would go here
-      }
+    if (files && files.length > 0) {
+      this.processSelectedFiles(Array.from(files));
     }
+    // Reset the input to allow selecting the same file again
+    event.target.value = '';
   }
 
   onDragOver(event: DragEvent) {
@@ -1613,18 +1667,158 @@ export class CreateQuotationComponent implements OnInit {
     event.stopPropagation();
     
     const files = event.dataTransfer?.files;
-    if (files) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        console.log('File dropped:', file.name);
-        // File processing would go here
-      }
+    if (files && files.length > 0) {
+      this.processSelectedFiles(Array.from(files));
     }
   }
 
+  private processSelectedFiles(files: File[]) {
+    console.log(`Processing ${files.length} files for upload...`);
+    
+    // Validate file types and size
+    const validFiles = this.validateFiles(files);
+    if (validFiles.length === 0) {
+      return;
+    }
+    
+    this.isUploadingFiles = true;
+    
+    // Add files to the display with uploading state
+    validFiles.forEach(file => {
+      const fileObj = {
+        url: '',
+        file: file,
+        name: file.name,
+        type: file.type,
+        uploading: true,
+        progress: 0
+      };
+      this.attachedFileObjects.push(fileObj);
+    });
+    
+    // Upload files one by one
+    this.uploadFilesSequentially(validFiles, 0);
+  }
+
+  private validateFiles(files: File[]): File[] {
+    const validFiles: File[] = [];
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    const allowedTypes = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.txt', '.xlsx', '.xls'];
+    
+    files.forEach(file => {
+      // Check file size
+      if (file.size > maxSize) {
+        this.sweetAlert.error(`File "${file.name}" is too large. Maximum size is 100MB.`);
+        return;
+      }
+      
+      // Check file type
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!allowedTypes.includes(fileExtension)) {
+        this.sweetAlert.error(`File type "${fileExtension}" is not supported. Allowed types: ${allowedTypes.join(', ')}`);
+        return;
+      }
+      
+      validFiles.push(file);
+    });
+    
+    return validFiles;
+  }
+
+  private uploadFilesSequentially(files: File[], index: number) {
+    if (index >= files.length) {
+      this.isUploadingFiles = false;
+      console.log('All files uploaded successfully');
+      return;
+    }
+    
+    const file = files[index];
+    const fileObjIndex = this.attachedFileObjects.findIndex(obj => obj.file === file);
+    
+    if (fileObjIndex === -1) {
+      this.uploadFilesSequentially(files, index + 1);
+      return;
+    }
+    
+    console.log(`Uploading file ${index + 1}/${files.length}: ${file.name}`);
+    
+    // Simulate progress updates
+    const progressInterval = setInterval(() => {
+      if (this.attachedFileObjects[fileObjIndex] && this.attachedFileObjects[fileObjIndex].uploading) {
+        const currentProgress = this.attachedFileObjects[fileObjIndex].progress || 0;
+        if (currentProgress < 90) {
+          this.attachedFileObjects[fileObjIndex].progress = Math.min(90, currentProgress + Math.random() * 20);
+        }
+      }
+    }, 200);
+    
+    this.fileUploadService.uploadFile(file).subscribe({
+      next: (result: FileUploadResult) => {
+        clearInterval(progressInterval);
+        
+        if (result.success && result.url) {
+          // Update the file object with the uploaded URL
+          this.attachedFileObjects[fileObjIndex] = {
+            ...this.attachedFileObjects[fileObjIndex],
+            url: result.url,
+            uploading: false,
+            progress: 100
+          };
+          
+          // Add to attached files list if not already there
+          if (!this.attachedFiles.includes(file.name)) {
+            this.attachedFiles.push(file.name);
+          }
+          
+          console.log(`File uploaded successfully: ${file.name} -> ${result.url}`);
+        } else {
+          // Handle upload failure
+          this.attachedFileObjects[fileObjIndex] = {
+            ...this.attachedFileObjects[fileObjIndex],
+            uploading: false,
+            progress: 0
+          };
+          
+          const errorMessage = result.error || 'Upload failed';
+          console.error(`File upload failed: ${file.name} - ${errorMessage}`);
+        }
+        
+        // Continue with next file
+        this.uploadFilesSequentially(files, index + 1);
+      },
+      error: (error) => {
+        clearInterval(progressInterval);
+        
+        // Handle upload error
+        this.attachedFileObjects[fileObjIndex] = {
+          ...this.attachedFileObjects[fileObjIndex],
+          uploading: false,
+          progress: 0
+        };
+        
+        console.error(`File upload error: ${file.name}`, error);
+        
+        // Continue with next file
+        this.uploadFilesSequentially(files, index + 1);
+      }
+    });
+  }
+
   removeAttachment(index: number) {
-    this.attachedFiles.splice(index, 1);
-    this.attachedFileObjects.splice(index, 1);
+    if (index >= 0 && index < this.attachedFileObjects.length) {
+      const fileObj = this.attachedFileObjects[index];
+      
+      // Remove from attachedFileObjects array
+      this.attachedFileObjects.splice(index, 1);
+      
+      // Remove from attachedFiles array if it exists
+      const fileNameIndex = this.attachedFiles.indexOf(fileObj.name);
+      if (fileNameIndex !== -1) {
+        this.attachedFiles.splice(fileNameIndex, 1);
+      }
+      
+      console.log(`Removed attachment: ${fileObj.name}`);
+    }
   }
 
   // Method to get file icon based on file type
