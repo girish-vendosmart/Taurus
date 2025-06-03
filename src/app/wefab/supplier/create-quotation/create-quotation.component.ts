@@ -195,7 +195,7 @@ export class CreateQuotationComponent implements OnInit {
     totalLeadTime: '',
     paymentTerms: 'Net 10',
     quoteValidTill: null,
-    currency: 'USD',
+    currency_code: 'USD',
     email: 'email@example.com',
     reference: '',
     termsAndConditions: '',
@@ -380,7 +380,7 @@ export class CreateQuotationComponent implements OnInit {
           totalLeadTime: this.extractDaysFromDuration(createQuotationData.estimated_completion_duration),
           paymentTerms: createQuotationData.payment_terms || 'Net 30',
           quoteValidTill: this.parseApiDateForInput(createQuotationData.validity),
-          currency: createQuotationData.items?.[0]?.currency_code || 'USD',
+          currency_code: createQuotationData.items?.[0]?.currency_code || 'USD',
           email: 'email@example.com', // This might come from user/supplier data
           reference: createQuotationData.quotation_id || '',
           termsAndConditions: this.stripHtmlTags(createQuotationData.notes || ''),
@@ -895,7 +895,7 @@ export class CreateQuotationComponent implements OnInit {
     this.model.igst = false;
     
     // Set the selected tax type only for INR currency
-    if (this.model.currency === 'INR') {
+    if (this.model.currency_code === 'INR') {
       if (taxType === 'SGCT & CGST') {
         this.model.cgstSgst = true;
       } else if (taxType === 'IGST') {
@@ -910,11 +910,11 @@ export class CreateQuotationComponent implements OnInit {
   // Method to handle currency change
   onCurrencyChange() {
     // If currency is changed to USD, reset tax options
-    if (this.model.currency === 'USD') {
+    if (this.model.currency_code === 'USD') {
       this.selectedTaxType = 'No Tax';
       this.model.cgstSgst = false;
       this.model.igst = false;
-    } else if (this.model.currency === 'INR' && this.selectedTaxType === 'No Tax') {
+    } else if (this.model.currency_code === 'INR' && this.selectedTaxType === 'No Tax') {
       // If currency is changed to INR and no tax was selected, you might want to set a default
       // Uncomment the following line if you want to default to 'No Tax' for INR as well
       // this.selectedTaxType = 'No Tax';
@@ -1068,7 +1068,7 @@ export class CreateQuotationComponent implements OnInit {
       delivery_address: this.getDeliveryAddress(),
       quotation_from: this.quoteFrom,
       quotation_to: this.quoteTo,
-      currency: this.model.currency, // Add currency at quotation level
+      currency_code: this.model.currency_code, // Add currency_code at quotation level
       discount_type: this.discountType === 'percentage' ? 'Percentage' : 'Amount',
       discount_percentage: this.discountType === 'percentage' ? this.discountValue : 0,
       discount_amount: calculatedDiscountAmount, // Always set the calculated discount amount
@@ -1104,7 +1104,7 @@ export class CreateQuotationComponent implements OnInit {
         item_description: item.description || item.actionItemName || '',
         quantity: quantity,
         unit: item.unit || 'Nos',
-        currency_code: this.model.currency,
+        currency_code: this.model.currency_code,
         unit_price: unitPrice,
         total_price: totalPrice,
         comments: this.buildItemComments(item),
@@ -1783,7 +1783,7 @@ export class CreateQuotationComponent implements OnInit {
           totalLeadTime: this.extractDaysFromDuration(quotationData.estimated_completion_duration),
           paymentTerms: quotationData.payment_terms || 'Net 30',
           quoteValidTill: this.parseApiDateForInput(quotationData.validity),
-          currency: quotationData.items?.[0]?.currency_code || 'USD',
+          currency_code: quotationData.items?.[0]?.currency_code || 'USD',
           email: 'email@example.com', // This might come from user/supplier data
           reference: quotationData.name || '',
           termsAndConditions: this.stripHtmlTags(quotationData.notes || ''),
@@ -2507,9 +2507,9 @@ export class CreateQuotationComponent implements OnInit {
       }
     }
 
-    if (!this.model.currency) {
+    if (!this.model.currency_code) {
       errors.push('Currency selection is required');
-      this.validationErrors['currency'] = ['Currency selection is required'];
+      this.validationErrors['currency_code'] = ['Currency selection is required'];
     }
 
     if (!this.model.termsAndConditions || this.model.termsAndConditions.trim() === '') {
@@ -2907,7 +2907,7 @@ export class CreateQuotationComponent implements OnInit {
     console.log('   - totalLeadTime:', this.model.totalLeadTime);
     console.log('   - paymentTerms:', this.model.paymentTerms);
     console.log('   - quoteValidTill:', this.model.quoteValidTill);
-    console.log('   - currency:', this.model.currency);
+    console.log('   - currency_code:', this.model.currency_code);
     console.log('   - termsAndConditions:', this.model.termsAndConditions);
     console.log('   - quotationItems count:', this.model.quotationItems?.length || 0);
     
@@ -3199,7 +3199,7 @@ ${validation.isValid ? 'Form should submit successfully!' : 'Form has validation
 Fixed Issues Status:
 1. Quote Valid Till: ${this.model.quoteValidTill ? 'Filled ✓' : 'Empty ✗'}
 2. Tax Types Filled: ${this.model.quotationItems?.filter((item: any) => item.tax_type && item.tax_type !== 'No Tax').length || 0} items
-3. Total Tax Amount: ${this.getTotalTaxAmount()} ${this.model.currency}
+3. Total Tax Amount: ${this.getTotalTaxAmount()} ${this.model.currency_code}
 4. Edit Mode: ${this.isEditMode ? 'Active ✓' : 'Inactive'}
 
 Check console for detailed information.

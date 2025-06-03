@@ -115,9 +115,9 @@
               inputId="inr" 
               name="currency" 
               value="INR"
-              [(ngModel)]="model.currency"
+              [(ngModel)]="model.currency_code"
               [ngModelOptions]="{standalone: true}"
-              (onClick)="onCurrencyChange(); clearFieldError('currency')">
+              (onClick)="onCurrencyChange(); clearFieldError('currency_code')">
             </p-radioButton>
             <label for="inr" class="form-check-label ms-2">INR</label>
           </div>
@@ -126,15 +126,15 @@
               inputId="usd" 
               name="currency" 
               value="USD"
-              [(ngModel)]="model.currency"
+              [(ngModel)]="model.currency_code"
               [ngModelOptions]="{standalone: true}"
-              (onClick)="onCurrencyChange(); clearFieldError('currency')">
+              (onClick)="onCurrencyChange(); clearFieldError('currency_code')">
             </p-radioButton>
             <label for="usd" class="form-check-label ms-2">USD</label>
           </div>
         </div>
-        <div *ngIf="hasValidationError('currency')" class="text-danger small mt-1">
-          {{ getValidationError('currency') }}
+        <div *ngIf="hasValidationError('currency_code')" class="text-danger small mt-1">
+          {{ getValidationError('currency_code') }}
         </div>
       </div>
     </div>
@@ -352,7 +352,7 @@
             <!-- Total Price -->
             <td class="text-center align-middle">
               <span class="text-muted small fw-medium" style="font-size: 13px;">
-                {{ model.currency }} {{ getLineTotalPrice(item) | number:'1.2-2' }}
+                {{ model.currency_code }} {{ getLineTotalPrice(item) | number:'1.2-2' }}
               </span>
             </td>
             
@@ -376,7 +376,7 @@
             <!-- Tax Amount -->
             <td class="text-center align-middle">
               <span class="text-muted small" style="font-size: 13px;">
-                {{ model.currency }} {{ getLineTaxAmount(item) | number:'1.2-2' }}
+                {{ model.currency_code }} {{ getLineTaxAmount(item) | number:'1.2-2' }}
               </span>
             </td>
             
@@ -435,7 +435,7 @@
           <!-- Sub Total -->
           <div class="d-flex justify-content-between align-items-center mb-2 py-1 border-bottom">
             <span class="total-label small fw-medium">Sub Total:</span>
-            <span class="total-value small fw-bold">{{ model.currency }} {{ calculatedSubTotal | number:'1.2-2' }}</span>
+            <span class="total-value small fw-bold">{{ model.currency_code }} {{ calculatedSubTotal | number:'1.2-2' }}</span>
           </div>
           
           <!-- Discount -->
@@ -463,10 +463,10 @@
                 [ngModelOptions]="{standalone: true}"
                 style="width: 60px; font-size: 12px;">
                 <option value="percentage">%</option>
-                <option value="amount">{{ model.currency }}</option>
+                <option value="amount">{{ model.currency_code }}</option>
               </select>
               <span *ngIf="getDiscountAmount() > 0" class="discount-amount amount-display small">
-                -{{ model.currency }} {{ getDiscountAmount() | number:'1.2-2' }}
+                -{{ model.currency_code }} {{ getDiscountAmount() | number:'1.2-2' }}
               </span>
             </div>
           </div>
@@ -488,9 +488,9 @@
                 (paste)="onNumberPaste($event)"
                 pattern="[0-9]*\.?[0-9]*"
                 style="width: 80px; font-size: 12px;">
-              <span class="small me-2">{{ model.currency }}</span>
+              <span class="small me-2">{{ model.currency_code }}</span>
               <span *ngIf="shippingCharges > 0" class="shipping-amount amount-display small">
-                +{{ model.currency }} {{ shippingCharges | number:'1.2-2' }}
+                +{{ model.currency_code }} {{ shippingCharges | number:'1.2-2' }}
               </span>
             </div>
           </div>
@@ -498,19 +498,19 @@
           <!-- Discounted Amount (if discount applied) -->
           <!-- <div *ngIf="getDiscountAmount() > 0" class="d-flex justify-content-between align-items-center mb-2 py-1">
             <span class="total-label small fw-medium">Discounted Amount:</span>
-            <span class="total-value small text-muted">{{ model.currency }} {{ calculatedDiscountedAmount | number:'1.2-2' }}</span>
+            <span class="total-value small text-muted">{{ model.currency_code }} {{ calculatedDiscountedAmount | number:'1.2-2' }}</span>
           </div> -->
           
           <!-- Total Taxable Amount -->
           <div class="d-flex justify-content-between align-items-center mb-2 py-1">
             <span class="total-label small fw-medium">Total Tax Amount:</span>
-            <span class="total-value small">{{ model.currency }} {{ getTotalTaxAmount() | number:'1.2-2' }}</span>
+            <span class="total-value small">{{ model.currency_code }} {{ getTotalTaxAmount() | number:'1.2-2' }}</span>
           </div>
           
           <!-- Total Amount -->
           <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-2">
             <span class="total-amount-label fw-bold">Total Amount:</span>
-            <span class="total-amount-value fw-bold text-primary">{{ model.currency }} {{ calculatedTotalAmount | number:'1.2-2' }}</span>
+            <span class="total-amount-value fw-bold text-primary">{{ model.currency_code }} {{ calculatedTotalAmount | number:'1.2-2' }}</span>
           </div>
         </div>
       </div>
