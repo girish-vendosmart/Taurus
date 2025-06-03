@@ -286,9 +286,9 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     this.loadEssentialData();
 
     // Remove automatic Firebase triggers - only call when needed
-    // this.accessFirebaseTrigger('Supplier Onboarding L1', this.supplierId)
-    // this.accessFirebaseTrigger('Supplier Onboarding L2', this.supplierId)
-    // this.accessFirebaseTrigger('Supplier Onboarding L3', this.supplierId)
+    this.accessFirebaseTrigger('Supplier Onboarding L1', this.supplierId)
+    this.accessFirebaseTrigger('Supplier Onboarding L2', this.supplierId)
+    this.accessFirebaseTrigger('Supplier Onboarding L3', this.supplierId)
   }
 
   private handleUrlParameters(): void {
@@ -1525,6 +1525,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           // Recalculate completeness since L1 status changed
           this.calculateProfileCompleteness();
           console.log('🔄 L1 data and document summary reloaded');
+
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Error reloading L1 data:', error);
@@ -1551,6 +1553,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
             this.loadManufacturingData();
           }
           console.log('🔄 L2 status and document summary reloaded');
+
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Error reloading L2 status:', error);
@@ -1572,6 +1576,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           if (this.newFinancialData && this.activeLevelTab === 'financial') {
             this.loadFinancialData();
           }
+
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Error reloading L3 status:', error);
