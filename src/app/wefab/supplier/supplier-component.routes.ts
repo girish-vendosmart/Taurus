@@ -93,7 +93,7 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
                 canActivate: [AuthGuard]
             },
             {
-                path: 'profile-review',
+                path: 'profile-review/:id',
                 component: SupplierProfileReviewComponent,
                 canActivate: [AuthGuard]
             },

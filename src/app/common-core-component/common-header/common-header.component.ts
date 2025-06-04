@@ -19,6 +19,7 @@ export class CommonHeaderComponent {
   // Dummy user data
   dummyUserEmail: string = 'michael.doe@mailinator.com';
   supplierEmailId: any = '';
+  supplierId: string | null;
 
   constructor(
     private router: Router,
@@ -26,6 +27,7 @@ export class CommonHeaderComponent {
   ) {
     // Supplier email id
     this.supplierEmailId = sessionStorage.getItem('primary_email_id');
+    this.supplierId = sessionStorage.getItem('supplier_id');
     // Set initials using dummy data
     this.userInitials = this.getInitials(this.supplierEmailId);
   }
@@ -54,7 +56,7 @@ export class CommonHeaderComponent {
   onProfile(): void {
     this.isDropdownOpen = false;
     console.log('Profile clicked for user:', this.dummyUserEmail);
-    this.router.navigate(['/wefab/supplier/profile-review']);
+    this.router.navigate(['/wefab/supplier/profile-review/', this.supplierId]);
     // For demo purposes, just log instead of navigation
     // this.router.navigate(['/profile']);
   }

@@ -983,7 +983,7 @@ export class SupplierOnboardingL3Component implements OnInit {
         
         // Here you might redirect to a supplier dashboard or confirmation page
         setTimeout(() => {
-          this.router.navigate(['/wefab/supplier/profile-review']);
+          this.router.navigate(['/wefab/supplier/profile-review/', sessionStorage.getItem('supplier_id')]);
         }, 3000);
       }, (err: any) => {
         this.putSupplierOnboardingL3()
@@ -1036,7 +1036,7 @@ export class SupplierOnboardingL3Component implements OnInit {
         
         // Here you might redirect to a supplier dashboard or confirmation page
         setTimeout(() => {
-          this.router.navigate(['/wefab/supplier/profile-review']);
+          this.router.navigate(['/wefab/supplier/profile-review/', sessionStorage.getItem('supplier_id')]);
         }, 3000);
       }, (err: any) => {
         this.sweetAlert.error(err.error?.message || 'An error occurred while submitting the form. Please try again later.');

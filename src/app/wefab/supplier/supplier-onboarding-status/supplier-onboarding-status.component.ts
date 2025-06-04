@@ -392,7 +392,7 @@ export class SupplierOnboardingStatusComponent {
       } else {
         // If no next section, go to profile review
         console.log('No next section, going to profile review');
-        this.router.navigate(['/wefab/supplier/profile-review']);
+        this.router.navigate(['/wefab/supplier/profile-review/', this.supplierCompanyId]);
       }
     } else if (this.onboardingSteps[stepId - 1].status === 'rejected' || 
                this.onboardingSteps[stepId - 1].status === 'request-to-update') {
@@ -499,7 +499,7 @@ export class SupplierOnboardingStatusComponent {
 
   goToProfileReview(): void {
     console.log('Going to profile review');
-    this.router.navigate(['/wefab/supplier/profile-review']);
+    this.router.navigate(['/wefab/supplier/profile-review/', this.supplierCompanyId]);
   }
 
   shouldShowProfileReviewButton(): boolean {

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -91,7 +91,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   // Core properties
   status: string = 'Pending';
   lastUpdated: Date = new Date(2025, 4, 8); // May 8, 2025
-  supplierId: any = sessionStorage.getItem('supplier_id');
+  supplierId: any = ''
   userType: any = sessionStorage.getItem('user_type');
   
   // Contact information
@@ -249,6 +249,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     private sweetAlert: SweetAlertService,
     private location: Location,
     private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -262,6 +263,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         });
       });
     }
+
+    // Getting supplier Id from url
+    this.route.params.subscribe((params: any) => {
+      this.supplierId = params['id'];
+    });
   }
 
   ngOnInit(): void {

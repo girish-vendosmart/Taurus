@@ -39,6 +39,7 @@ export class SupplierComponentComponent {
     }
   ];
   userType: any;
+  supplierId: any = ''
 
   constructor(private http: HttpClient, private router: Router) {
     // Check if onboarding is complete and dashboard should be shown
@@ -50,6 +51,8 @@ export class SupplierComponentComponent {
     ).subscribe(() => {
       this.checkDashboardVisibility();
     });
+
+    this.supplierId = sessionStorage.getItem('supplier_id');
   }
 
   checkDashboardVisibility(): void {
@@ -127,7 +130,7 @@ export class SupplierComponentComponent {
 
     this.http.post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyB6l9WmhjQhmNYXQKryWvuGr3Rp3V45fOM', obj).subscribe((res: any) => {
       this.loginError = '';
-      this.router.navigate(['/wefab/supplier/profile-review']);
+      this.router.navigate(['/wefab/supplier/profile-review/', this.supplierId]);
     }, (err: any) => {
       // Handle different authentication error cases
       if (err.error && err.error.error) {

@@ -102,7 +102,7 @@ export class SupplierVerificationComponent implements OnInit {
   }
 
   viewReviewPage(): void {
-    this.router.navigate(['/wefab/supplier/profile-review']);
+    this.router.navigate(['/wefab/supplier/profile-review/', this.supplierId]);
   }
 
   editVerification(): void {

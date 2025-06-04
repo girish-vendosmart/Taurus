@@ -65,7 +65,7 @@ export class SupplierOnboardingCompleteComponent implements OnInit {
   
   // Navigate to the profile review page
   viewReviewPage(): void {
-    this.router.navigate(['/wefab/supplier/profile-review']);
+    this.router.navigate(['/wefab/supplier/profile-review/', this.supplierId]);
   }
   
   // Edit information if needed - navigate to the L3 onboarding form in edit mode

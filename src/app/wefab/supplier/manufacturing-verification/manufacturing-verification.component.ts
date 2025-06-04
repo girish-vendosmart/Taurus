@@ -30,7 +30,8 @@ export class ManufacturingVerificationComponent implements OnInit {
   constructor(
     private router: Router,
     private commonService: CommonService
-  ) { }
+  ) { 
+  }
 
   ngOnInit(): void {
     // Get supplier ID and verification status
@@ -96,7 +97,7 @@ export class ManufacturingVerificationComponent implements OnInit {
 
   // Navigate to L2 review form
   reviewL2Form() {
-    this.router.navigate(['/wefab/supplier/profile-review'], { 
+    this.router.navigate(['/wefab/supplier/profile-review/', this.supplierId], { 
       queryParams: { 
         tab : 'manufacturing'
       } 

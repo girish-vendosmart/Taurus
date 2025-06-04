@@ -1440,7 +1440,7 @@ export class SupplierOnboardingComponent implements OnInit {
       this.sweetAlertService.success('Your supplier information has been updated. Redirecting to the next step of the onboarding process.');
       
       // Navigate to verification page after 3 seconds
-      this.router.navigateByUrl('/wefab/supplier/profile-review')
+      this.router.navigateByUrl('/wefab/supplier/profile-review/' + sessionStorage.getItem('supplier_id'))
 
     }, (err) => {
       console.error('Error updating form:', err);
