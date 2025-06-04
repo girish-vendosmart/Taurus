@@ -207,6 +207,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
       } else {
         this.supplierRfqDetails = res.data;
         this.supplierQuotationId = res.data.quotation_id
+        this.loadRFQDetails();  
       }
     });
   }
