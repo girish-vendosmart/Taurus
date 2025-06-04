@@ -191,7 +191,6 @@ export class SupplierRfqDetailsComponent implements OnInit {
     console.log(`🔥 Firebase trigger called for ${doctType_name}`);
     this.commonService.commonFirebaseTrigger(doctType_name, doctypeId).subscribe({
       next: (res: any) => {
-        this.loadRFQDetails();
         this.loadSupplierDetails();
       },
       error: (error) => {
@@ -203,9 +202,12 @@ export class SupplierRfqDetailsComponent implements OnInit {
   loadSupplierDetails() {
     let endPoint = `/api/resource/Supplier Request for Quotation/${this.rfqId}-${this.supplierRfqId}`;
     this.commonService.getWefabData(endPoint).subscribe((res: any) => {
-      
-      this.supplierRfqDetails = res.data;
-      this.supplierQuotationId = res.data.quotation_id
+      if(res.data.status === 'Not Opened') {
+        this.updateRFQStatus();
+      } else {
+        this.supplierRfqDetails = res.data;
+        this.supplierQuotationId = res.data.quotation_id
+      }
     });
   }
 

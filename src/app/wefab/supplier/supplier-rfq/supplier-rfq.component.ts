@@ -182,23 +182,10 @@ export class SupplierRfqComponent implements OnInit {
     if(status === "Cancelled" || status === "Paused" || status === "Deactivated") {
        this.sweetAlertService.warning('RFQ is unavailable. It may be paused or deactivated by the buyer.');
        return;
-    } else if (status === "Not opened") {
-      this.updateRFQStatus(rfqId);
-      return;
     } else {
       this.router.navigate(['/wefab/supplier/rfq/details', rfqId]);
     }
     // this.router.navigate(['/wefab/supplier/rfq/details', rfqId]);
-  }
-
-  updateRFQStatus(rfqId: string) {
-    let apiEndpoint = `/api/resource/Supplier Request for Quotation/${rfqId}-${this.supplierId}`;
-    this.commonService.putWefabData(apiEndpoint, {
-      status: 'Opened'
-    }).subscribe((res: any) => {
-      console.log('Update RFQ Status', res);
-      this.router.navigate(['/wefab/supplier/rfq/details', rfqId]);
-    });
   }
 
   // Helper method to format API date
