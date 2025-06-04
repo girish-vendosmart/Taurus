@@ -92,7 +92,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   status: string = 'Pending';
   lastUpdated: Date = new Date(2025, 4, 8); // May 8, 2025
   supplierId: any = ''
-  userType: any = sessionStorage.getItem('user_type');
+  userType: any = localStorage.getItem('user_type');
   
   // Contact information
   contactEmail: string = 'contact@wefabsolutions.com';
@@ -1701,8 +1701,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   // Navigate to dashboard when all stages are approved
   goToDashboard(): void {
-    sessionStorage.setItem('show_supplier_dashboard', 'true');
-    sessionStorage.setItem('supplier_onboarding_complete', 'true');
+    localStorage.setItem('show_supplier_dashboard', 'true');
+    localStorage.setItem('supplier_onboarding_complete', 'true');
     this.router.navigate(['/wefab/supplier/dashboard']);
   }
 

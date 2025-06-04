@@ -46,7 +46,7 @@ export class CommonService {
     getData(endPoint: string, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+            'Authorization': `Token ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
         });
         return this.http.get(`${this.baseUrl}${endPoint}`, { headers, params });
@@ -55,7 +55,7 @@ export class CommonService {
     getCSVData(endPoint: string, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+            'Authorization': `Token ${localStorage.getItem('token')}`,
             'Accept': 'text/csv, application/csv' // Tell server we want CSV
         });
         
@@ -72,9 +72,9 @@ export class CommonService {
         let headers = new HttpHeaders({
             'Content-Type': 'application/json'
         });
-        if (sessionStorage.getItem('token')) {
+        if (localStorage.getItem('token')) {
             headers = new HttpHeaders({
-                'Authorization': `Token ${sessionStorage.getItem('token')}`,
+                'Authorization': `Token ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json'
             });
         }
@@ -90,7 +90,7 @@ export class CommonService {
     putData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+            'Authorization': `Token ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
         });
     
@@ -160,7 +160,7 @@ export class CommonService {
     uploadFile(uploadData: File): Observable<any> {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+            'Authorization': `Token ${localStorage.getItem('token')}`,
         });
 
         const formData = new FormData();
@@ -182,7 +182,7 @@ export class CommonService {
     uploadFileWithProgress(formData: FormData): Observable<any> {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+            'Authorization': `Token ${localStorage.getItem('token')}`,
         });
 
         return this.http.post(
@@ -212,7 +212,7 @@ export class CommonService {
 
     getWefabData(endPoint: string, params?: HttpParams) {
         const headers = new HttpHeaders({
-            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+            'Authorization': `Token ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
         });
         return this.http.get(`${environment.wefabApiUrl}${endPoint}`, { headers, params });
@@ -221,7 +221,7 @@ export class CommonService {
     postWefabData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+            'Authorization': `Token ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
         });
     
@@ -236,7 +236,7 @@ export class CommonService {
     putWefabData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+            'Authorization': `Token ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
         });
     
@@ -251,7 +251,7 @@ export class CommonService {
     patchWefabData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${sessionStorage.getItem('token')}`,
+            'Authorization': `Token ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
         });
     

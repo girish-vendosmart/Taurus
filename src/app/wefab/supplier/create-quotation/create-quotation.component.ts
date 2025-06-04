@@ -1159,9 +1159,9 @@ export class CreateQuotationComponent implements OnInit {
     // You might get this from user session or service
     // For now, using a placeholder - in real app, get from authentication service
     return localStorage.getItem('supplierId') || 
-           sessionStorage.getItem('supplierId') ||
+           localStorage.getItem('supplierId') ||
            localStorage.getItem('supplier_id') || 
-           sessionStorage.getItem('supplier_id') ||
+           localStorage.getItem('supplier_id') ||
            'f9m9s21tsu'; // Default supplier ID as fallback
   }
 

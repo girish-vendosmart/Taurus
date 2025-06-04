@@ -52,14 +52,14 @@ export class SupplierComponentComponent {
       this.checkDashboardVisibility();
     });
 
-    this.supplierId = sessionStorage.getItem('supplier_id');
+    this.supplierId = localStorage.getItem('supplier_id');
   }
 
   checkDashboardVisibility(): void {
     
-    const onboardingComplete = sessionStorage.getItem('supplier_onboarding_complete');
-    const showDashboard = sessionStorage.getItem('show_supplier_dashboard');
-    const userType = sessionStorage.getItem('user_type');
+    const onboardingComplete = localStorage.getItem('supplier_onboarding_complete');
+    const showDashboard = localStorage.getItem('show_supplier_dashboard');
+    const userType = localStorage.getItem('user_type');
     this.userType = userType;
     
     this.showDashboardLayout = onboardingComplete === 'true' || showDashboard === 'true' || userType === 'wefab_team';
@@ -113,9 +113,9 @@ export class SupplierComponentComponent {
 
   logout(): void {
     // Clear session storage
-    sessionStorage.removeItem('supplier_onboarding_complete');
-    sessionStorage.removeItem('show_supplier_dashboard');
-    sessionStorage.removeItem('supplier_id');
+    localStorage.removeItem('supplier_onboarding_complete');
+    localStorage.removeItem('show_supplier_dashboard');
+    localStorage.removeItem('supplier_id');
     
     // Navigate to login or home page
     this.router.navigate(['/wefab/supplier']);

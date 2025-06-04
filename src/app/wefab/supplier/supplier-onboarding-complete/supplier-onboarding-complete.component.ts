@@ -20,7 +20,7 @@ import { CommonService } from '../../shared/common.service';
 export class SupplierOnboardingCompleteComponent implements OnInit {
   // Flag to determine whether verification is complete or under review
   verificationCurrentStatus: boolean = false;
-  supplierId: any = sessionStorage.getItem('supplier_id');
+  supplierId: any = localStorage.getItem('supplier_id');
   isRejected: boolean = false
   
   constructor(private router: Router, private commonService: CommonService) { }

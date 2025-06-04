@@ -21,7 +21,7 @@ export class AuthService {
     if (!this.isBrowser()) {
       return false; // Return false for server-side rendering
     }
-    const token = sessionStorage.getItem('token');
+    const token = localStorage.getItem('token');
     return !!token;
   }
 
@@ -30,13 +30,13 @@ export class AuthService {
     if (!this.isBrowser()) {
       return null; // Return null for server-side rendering
     }
-    return sessionStorage.getItem('token');
+    return localStorage.getItem('token');
   }
 
   // Logout user
   logout(): Observable<boolean> {
     if (this.isBrowser()) {
-      sessionStorage.removeItem('token');
+      localStorage.removeItem('token');
     }
     this.router.navigate(['/wefab/supplier/login']);
     return of(true);

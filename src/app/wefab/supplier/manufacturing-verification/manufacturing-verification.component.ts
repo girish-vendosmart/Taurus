@@ -35,7 +35,7 @@ export class ManufacturingVerificationComponent implements OnInit {
 
   ngOnInit(): void {
     // Get supplier ID and verification status
-    this.supplierId = sessionStorage.getItem('supplier_id');
+    this.supplierId = localStorage.getItem('supplier_id');
     this.getL2Verification();
   }
 

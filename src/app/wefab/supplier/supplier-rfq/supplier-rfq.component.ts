@@ -128,7 +128,7 @@ export class SupplierRfqComponent implements OnInit {
   ngOnInit() {
     // Remove sample data loading since we're using real API data
     // this.loadSampleData();
-    this.supplierId = sessionStorage.getItem('supplier_id') || '';
+    this.supplierId = localStorage.getItem('supplier_id') || '';
     this.getRfqList();
   }
 
@@ -299,7 +299,7 @@ export class SupplierRfqComponent implements OnInit {
       // Call the onRfqIdLinkClick function with the RFQ ID
       const rfqId = event.rowData.rfqId || event.rowData.name || '';
       if (rfqId) {
-        sessionStorage.setItem('supplier_rfq_id', event.rowData.suppler_rfq_id);
+        localStorage.setItem('supplier_rfq_id', event.rowData.suppler_rfq_id);
         this.onRfqIdLinkClick(rfqId, event.rowData.status);
       }
     } else {

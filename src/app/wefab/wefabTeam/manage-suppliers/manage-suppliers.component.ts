@@ -460,8 +460,8 @@ export class ManageSuppliersComponent implements OnInit {
   }
 
   viewSupplierProfile(supplier: Supplier) {
-    sessionStorage.setItem('supplier_id', supplier.name);
-    this.router.navigate(['/wefab/supplier/profile-review/', sessionStorage.getItem('supplier_id')]);
+    localStorage.setItem('supplier_id', supplier.name);
+    this.router.navigate(['/wefab/supplier/profile-review/', localStorage.getItem('supplier_id')]);
   }
 
   resendInvitation(invite: any) {

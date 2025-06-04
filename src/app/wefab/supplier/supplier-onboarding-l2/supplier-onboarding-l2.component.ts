@@ -124,7 +124,7 @@ export class SupplierOnboardingL2Component implements OnInit {
     // Check if we're in edit mode
     const route = this.router.url;
     if (route.includes('mode=edit')) {
-      const supplierId = sessionStorage.getItem('supplier_id');
+      const supplierId = localStorage.getItem('supplier_id');
       if (supplierId) {
         this.getL2Data(supplierId);
       } else {
@@ -873,7 +873,7 @@ export class SupplierOnboardingL2Component implements OnInit {
   updateData(data:any) {
     console.log(data);
     let body = {
-      supplier_company_id: sessionStorage.getItem('supplier_id'),
+      supplier_company_id: localStorage.getItem('supplier_id'),
       onboarding_status: 'Under Review',
       company_profile: JSON.stringify(data)
     };
@@ -889,7 +889,7 @@ export class SupplierOnboardingL2Component implements OnInit {
         this.router.navigate(['/wefab/supplier/supplier-onboarding-l3']);
       }, 3000);
     }, (err:any) => {
-      endPoint = '/api/resource/Supplier Onboarding L2/' + sessionStorage.getItem('supplier_id');
+      endPoint = '/api/resource/Supplier Onboarding L2/' + localStorage.getItem('supplier_id');
       this.putDataFunction(endPoint, body);
       // this.messageService.add({
       //   severity: 'error',
@@ -906,7 +906,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       
       // Navigate to manufacturing verification after 3 seconds
       setTimeout(() => {
-        this.router.navigateByUrl('/wefab/supplier/profile-review/' + sessionStorage.getItem('supplier_id'))
+        this.router.navigateByUrl('/wefab/supplier/profile-review/' + localStorage.getItem('supplier_id'))
       }, 3000);
     }, (err:any) => {
       console.error('Error submitting form:', err);
@@ -921,14 +921,14 @@ export class SupplierOnboardingL2Component implements OnInit {
   }
 
   putSupplierOnboardingL2() {
-    let endPoint = '/api/resource/Supplier Onboarding L2/' + sessionStorage.getItem('supplier_id');
+    let endPoint = '/api/resource/Supplier Onboarding L2/' + localStorage.getItem('supplier_id');
     let body = this.updateData(this.model);
     this.commonService.putData(endPoint, body).subscribe((res: any) => {
       this.sweetAlertService.success('Your supplier information has been updated. We are reviewing the changes and will proceed with verification shortly.');
       
       // Navigate to manufacturing verification after 3 seconds
       setTimeout(() => {
-        this.router.navigateByUrl('/wefab/supplier/profile-review/' + sessionStorage.getItem('supplier_id'))
+        this.router.navigateByUrl('/wefab/supplier/profile-review/' + localStorage.getItem('supplier_id'))
       }, 3000);
     }, (err:any) => {
       console.error('Error submitting form:', err);

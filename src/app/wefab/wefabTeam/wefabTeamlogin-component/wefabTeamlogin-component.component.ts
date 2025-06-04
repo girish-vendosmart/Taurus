@@ -46,7 +46,7 @@ export class WefabTeamloginComponentComponent {
 
       this.http.post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyB6l9WmhjQhmNYXQKryWvuGr3Rp3V45fOM', obj).subscribe((res: any) => {
         this.loginError = '';
-        sessionStorage.setItem('token', 'c82020f17e1fd10:f34acaf7862dc9c');
+        localStorage.setItem('token', 'c82020f17e1fd10:f34acaf7862dc9c');
         this.router.navigate(['/wefab/wefabTeam/dashboard']);
       }, (err: any) => {
         // Handle different authentication error cases

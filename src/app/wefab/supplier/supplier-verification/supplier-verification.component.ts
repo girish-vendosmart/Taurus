@@ -38,7 +38,7 @@ export class SupplierVerificationComponent implements OnInit {
 
   ngOnInit(): void {
     // Start the verification animation sequence
-    this.supplierId = sessionStorage.getItem('supplier_id');
+    this.supplierId = localStorage.getItem('supplier_id');
     this.getL1Verification();
     // this.simulateVerification();
   }

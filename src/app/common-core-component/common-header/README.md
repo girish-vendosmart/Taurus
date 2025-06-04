@@ -60,7 +60,7 @@ export class YourComponent {
   private clearUserData(): void {
     // Clear user-specific data
     localStorage.removeItem('userPreferences');
-    sessionStorage.clear();
+    localStorage.clear();
   }
 
   private redirectToLogin(): void {

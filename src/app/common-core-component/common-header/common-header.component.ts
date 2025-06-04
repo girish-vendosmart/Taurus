@@ -26,8 +26,8 @@ export class CommonHeaderComponent {
     public authService: AuthService,
   ) {
     // Supplier email id
-    this.supplierEmailId = sessionStorage.getItem('primary_email_id');
-    this.supplierId = sessionStorage.getItem('supplier_id');
+    this.supplierEmailId = localStorage.getItem('primary_email_id');
+    this.supplierId = localStorage.getItem('supplier_id');
     // Set initials using dummy data
     this.userInitials = this.getInitials(this.supplierEmailId);
   }
@@ -73,7 +73,7 @@ export class CommonHeaderComponent {
     
     // Clear any stored authentication data
     localStorage.removeItem('authToken');
-    sessionStorage.removeItem('authToken');
+    localStorage.removeItem('authToken');
     
     // Navigate to login page or home page
     this.router.navigate(['/wefab/supplier/login']).catch(error => {

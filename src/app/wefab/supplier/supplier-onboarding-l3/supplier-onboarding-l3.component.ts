@@ -223,7 +223,7 @@ export class SupplierOnboardingL3Component implements OnInit {
     // Check if we're in edit mode
     const route = this.router.url;
     if (route.includes('mode=edit')) {
-      const supplierId = sessionStorage.getItem('supplier_id');
+      const supplierId = localStorage.getItem('supplier_id');
       if (supplierId) {
         
         this.getL3Data(supplierId);
@@ -952,7 +952,7 @@ export class SupplierOnboardingL3Component implements OnInit {
     
     // Create final body to send
     let body = {
-      supplier_company_id: sessionStorage.getItem('supplier_id'),
+      supplier_company_id: localStorage.getItem('supplier_id'),
       onboarding_status: 'Under Review',
       company_profile: JSON.stringify(formData)
     }
@@ -983,7 +983,7 @@ export class SupplierOnboardingL3Component implements OnInit {
         
         // Here you might redirect to a supplier dashboard or confirmation page
         setTimeout(() => {
-          this.router.navigate(['/wefab/supplier/profile-review/', sessionStorage.getItem('supplier_id')]);
+          this.router.navigate(['/wefab/supplier/profile-review/', localStorage.getItem('supplier_id')]);
         }, 3000);
       }, (err: any) => {
         this.putSupplierOnboardingL3()
@@ -1029,14 +1029,14 @@ export class SupplierOnboardingL3Component implements OnInit {
       
       let body = this.updateData(mergedData);
 
-      let endPoint = '/api/resource/Supplier Onboarding L3/' + sessionStorage.getItem('supplier_id')
+      let endPoint = '/api/resource/Supplier Onboarding L3/' + localStorage.getItem('supplier_id')
 
       this.commonService.putData(endPoint, body).subscribe((res: any) => {
         this.sweetAlert.success('Your data has been updated successfully. We will review the changes and get back to you if necessary.');
         
         // Here you might redirect to a supplier dashboard or confirmation page
         setTimeout(() => {
-          this.router.navigate(['/wefab/supplier/profile-review/', sessionStorage.getItem('supplier_id')]);
+          this.router.navigate(['/wefab/supplier/profile-review/', localStorage.getItem('supplier_id')]);
         }, 3000);
       }, (err: any) => {
         this.sweetAlert.error(err.error?.message || 'An error occurred while submitting the form. Please try again later.');

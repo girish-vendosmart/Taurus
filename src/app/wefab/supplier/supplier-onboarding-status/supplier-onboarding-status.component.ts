@@ -66,7 +66,7 @@ export class SupplierOnboardingStatusComponent {
 
   constructor(private router: Router, private commonService: CommonService) {
     // Initialize with the supplier ID from session storage
-    const supplierId = sessionStorage.getItem('supplier_id');
+    const supplierId = localStorage.getItem('supplier_id');
     this.supplierCompanyId = supplierId || '';
     
     // Start the API chain to get all statuses
@@ -519,8 +519,8 @@ export class SupplierOnboardingStatusComponent {
     console.log('Going to dashboard - all stages approved');
     
     // Set session storage to indicate onboarding is complete
-    sessionStorage.setItem('supplier_onboarding_complete', 'true');
-    sessionStorage.setItem('show_supplier_dashboard', 'true');
+    localStorage.setItem('supplier_onboarding_complete', 'true');
+    localStorage.setItem('show_supplier_dashboard', 'true');
     
     // Navigate to the supplier dashboard
     this.router.navigate(['/wefab/supplier/dashboard']);

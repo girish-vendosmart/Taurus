@@ -88,9 +88,9 @@ export class SupplierDashboardComponent {
   
   constructor(private commonService: CommonService, private router: Router, private sweetAlertService: SweetAlertService) {
     // Get supplier information from session storage
-    this.supplierName = sessionStorage.getItem('supplier_name') || 'Supplier';
+    this.supplierName = localStorage.getItem('supplier_name') || 'Supplier';
 
-    this.supplierId = sessionStorage.getItem('supplier_id') || '';
+    this.supplierId = localStorage.getItem('supplier_id') || '';
     
     // Initialize chart options
     this.chartOptions = {
@@ -451,8 +451,8 @@ export class SupplierDashboardComponent {
     return;
   } else {
     console.log('Dashboard RFQ:', rfq);
-    sessionStorage.setItem('supplier_rfq_id', rfq.supplier_id);
-    // sessionStorage.setItem('supplier_rfq_name', rfq.name);
+    localStorage.setItem('supplier_rfq_id', rfq.supplier_id);
+    // localStorage.setItem('supplier_rfq_name', rfq.name);
     this.router.navigate(['/wefab/supplier/rfq/details/', rfq.rfq_id]);
    }
   }

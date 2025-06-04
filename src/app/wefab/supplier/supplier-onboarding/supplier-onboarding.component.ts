@@ -279,7 +279,7 @@ export class SupplierOnboardingComponent implements OnInit {
     
     // Check if supplier_id exists in session storage
     if (this.isBrowser) {
-      const supplierId = sessionStorage.getItem('supplier_id');
+      const supplierId = localStorage.getItem('supplier_id');
       if (supplierId) {
         this.hasExistingSupplier = true;
       }
@@ -287,7 +287,7 @@ export class SupplierOnboardingComponent implements OnInit {
       // Check if we're in edit mode
       const route = this.router.url;
       if (route.includes('mode=edit')) {
-        const supplierId = sessionStorage.getItem('supplier_id');
+        const supplierId = localStorage.getItem('supplier_id');
         if (supplierId) {
           this.getL1Data(supplierId);
         } else {
@@ -300,7 +300,7 @@ export class SupplierOnboardingComponent implements OnInit {
   }
 
   patchEmailId() {
-    this.model.primary_email_id = sessionStorage.getItem('primary_email_id');
+    this.model.primary_email_id = localStorage.getItem('primary_email_id');
     
     setTimeout(() => {
       this.form.markAsPristine();
@@ -1421,7 +1421,7 @@ export class SupplierOnboardingComponent implements OnInit {
 
   postDataFunction(endPoint:any, body: any) {
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
-      sessionStorage.setItem('supplier_id', res.data.name);
+      localStorage.setItem('supplier_id', res.data.name);
       this.hasExistingSupplier = true;
       this.sweetAlertService.success('Your information has been saved. Redirecting to the next step of the onboarding process.');
       // Navigate to verification page after 3 seconds
@@ -1435,12 +1435,12 @@ export class SupplierOnboardingComponent implements OnInit {
 
   putDataFunction(endPoint:any, body: any) {
     this.commonService.putData(endPoint, body).subscribe((res: any) => {
-      sessionStorage.setItem('supplier_id', res.data.name);
+      localStorage.setItem('supplier_id', res.data.name);
       this.hasExistingSupplier = true;
       this.sweetAlertService.success('Your supplier information has been updated. Redirecting to the next step of the onboarding process.');
       
       // Navigate to verification page after 3 seconds
-      this.router.navigateByUrl('/wefab/supplier/profile-review/' + sessionStorage.getItem('supplier_id'))
+      this.router.navigateByUrl('/wefab/supplier/profile-review/' + localStorage.getItem('supplier_id'))
 
     }, (err) => {
       console.error('Error updating form:', err);
@@ -1484,7 +1484,7 @@ export class SupplierOnboardingComponent implements OnInit {
     let endPoint = '/api/resource/Supplier Onboarding L1';
     
     // Check if we have a supplier_id
-    let supplier_id = sessionStorage.getItem('supplier_id');
+    let supplier_id = localStorage.getItem('supplier_id');
     this.model.phone_verified = this.phoneVerified;
     this.model.registered_lat = this.model.registeredAddress.location.lat;
     this.model.registered_lng = this.model.registeredAddress.location.lng;
@@ -1501,7 +1501,7 @@ export class SupplierOnboardingComponent implements OnInit {
   }
   
   putSupplierOnboardingL1() {
-    let endPoint = '/api/resource/Supplier Onboarding L1/'  + sessionStorage.getItem('supplier_id');
+    let endPoint = '/api/resource/Supplier Onboarding L1/'  + localStorage.getItem('supplier_id');
     this.model.phone_verified = this.phoneVerified;
     this.model.registered_lat = this.model.registeredAddress.location.lat;
     this.model.registered_lng = this.model.registeredAddress.location.lng;
@@ -1677,7 +1677,7 @@ export class SupplierOnboardingComponent implements OnInit {
 
   // Add a method to navigate to supplier review page
   navigateToReviewPage() {
-    const supplierId = sessionStorage.getItem('supplier_id');
+    const supplierId = localStorage.getItem('supplier_id');
     if (supplierId) {
       this.router.navigate(['/wefab/supplier/supplier-verification'], {
         queryParams: { supplier_id: supplierId }

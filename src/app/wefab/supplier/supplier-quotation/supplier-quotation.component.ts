@@ -164,7 +164,7 @@ export class SupplierQuotationComponent implements OnInit {
   };
 
   ngOnInit() {
-    this.supplierId = sessionStorage.getItem('supplier_id') || '';
+    this.supplierId = localStorage.getItem('supplier_id') || '';
     this.getQuotationList();
   }
 

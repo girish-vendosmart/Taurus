@@ -180,7 +180,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
       this.rfqId = params['id'];
       
       console.log(this.rfqId)
-      this.supplierRfqId = sessionStorage.getItem('supplier_rfq_id') || '';
+      this.supplierRfqId = localStorage.getItem('supplier_rfq_id') || '';
 
       this.accessFirebaseTrigger('Supplier Request for Quotation', this.rfqId)
     });

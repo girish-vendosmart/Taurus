@@ -73,7 +73,7 @@ export class LoginComponentComponent {
       } 
 
       if(this.companyId) {
-        sessionStorage.setItem('company_id', this.companyId)
+        localStorage.setItem('company_id', this.companyId)
       }
   }
   
@@ -115,13 +115,13 @@ export class LoginComponentComponent {
             this.commonService.postData('/api/method/wefab.wefab.api.common.core.authentication.auth.api_token_auth_frappe', payload).subscribe({
               next: (response: any) => {
                 if (response && response.data && response.data.token) {
-                  sessionStorage.setItem('token', response.data.token);
-                  sessionStorage.setItem('primary_email_id', response.data.email_id);
-                  sessionStorage.setItem('user_type', response.data.user_type);
+                  localStorage.setItem('token', response.data.token);
+                  localStorage.setItem('primary_email_id', response.data.email_id);
+                  localStorage.setItem('user_type', response.data.user_type);
                   
                   // Navigate based on user type
                   if (response.data.user_type === 'supplier') {
-                    sessionStorage.setItem('supplier_id', response.data.supplier_info.supplier_company_id);
+                    localStorage.setItem('supplier_id', response.data.supplier_info.supplier_company_id);
                     if(!response.data.supplier_info.supplier_company_id) {
                       this.router.navigate(['/wefab/supplier/supplier-onboarding-welcome']);
                     } else {
@@ -208,8 +208,8 @@ export class LoginComponentComponent {
     let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${supplierCompanyId}`;
     this.commonService.getData(endPoint).subscribe((res: any) => {
       if(res?.data?.approval_status === 'Approved') {
-        sessionStorage.setItem('supplier_onboarding_complete', 'true');
-        sessionStorage.setItem('show_supplier_dashboard', 'true');
+        localStorage.setItem('supplier_onboarding_complete', 'true');
+        localStorage.setItem('show_supplier_dashboard', 'true');
         this.router.navigate(['/wefab/supplier/dashboard']);
       } else {
         this.router.navigate(['/wefab/supplier/supplier-onboarding-status']);
