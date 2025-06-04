@@ -486,7 +486,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                 if (field.formControl) {
                   field.formControl.valueChanges.subscribe((value: string) => {
                     if (value && !value.includes(',')) {
-                      const formatted = this.formatNumber(value);
+                      const formatted = value;
                       if (formatted !== value) {
                         field.formControl.setValue(formatted, { emitEvent: false });
                       }
@@ -516,7 +516,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                 if (field.formControl) {
                   field.formControl.valueChanges.subscribe((value: string) => {
                     if (value && !value.includes(',')) {
-                      const formatted = this.formatNumber(value);
+                      const formatted = value
                       if (formatted !== value) {
                         field.formControl.setValue(formatted, { emitEvent: false });
                       }
@@ -555,7 +555,7 @@ export class SupplierOnboardingL3Component implements OnInit {
                 if (field.formControl) {
                   field.formControl.valueChanges.subscribe((value: string) => {
                     if (value && !value.includes(',')) {
-                      const formatted = this.formatNumber(value);
+                      const formatted = value;
                       if (formatted !== value) {
                         field.formControl.setValue(formatted, { emitEvent: false });
                       }

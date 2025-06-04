@@ -125,7 +125,7 @@ export interface DropdownGroup {
         [showClear]="showClear"
         [appendTo]="appendTo"
         [showToggleAll]="true"
-        [maxSelectedLabels]="3"
+        [maxSelectedLabels]="maxSelectedLabels"
         [selectedItemsLabel]="getSelectedItemsLabel()"
         (onChange)="onSelectionChange($event)"
         (onShow)="onDropdownShow()"
@@ -381,11 +381,12 @@ export interface DropdownGroup {
     
     :host ::ng-deep .p-multiselect .p-multiselect-label {
       padding: 0.5rem 0.75rem;
-      min-height: 1.5rem;
+      min-height: 2.5rem;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       flex-wrap: wrap;
       gap: 0.25rem;
+      line-height: 1.4;
     }
     
     /* OLD CONFLICTING SELECT-ALL CHECKBOX RULES REMOVED */
@@ -490,7 +491,7 @@ export interface DropdownGroup {
       font-size: 0.875rem;
       display: inline-flex;
       align-items: center;
-      max-width: 200px;
+      max-width: 150px;
     }
     
     :host ::ng-deep .p-multiselect-token-label {
@@ -503,6 +504,35 @@ export interface DropdownGroup {
       margin-left: 0.25rem;
       color: #6c757d;
       cursor: pointer;
+      flex-shrink: 0;
+    }
+    
+    /* Improve multiselect label container to handle more tokens */
+    :host ::ng-deep .p-multiselect .p-multiselect-label {
+      padding: 0.5rem 0.75rem;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      line-height: 1.4;
+    }
+    
+    /* Ensure the dropdown trigger adjusts height based on content */
+    :host ::ng-deep .p-multiselect {
+      width: 100% !important;
+      min-height: 2.5rem;
+    }
+    
+    /* Handle overflow better for many selected items */
+    :host ::ng-deep .p-multiselect-label-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      width: 100%;
+      min-height: 1.5rem;
+      max-height: 4rem;
+      overflow-y: auto;
     }
     
     /* Fix header filter styling */
@@ -573,6 +603,7 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   @Input() filterPlaceholder: string = 'Search groups and options...';
   @Input() showDebugInfo: boolean = false;
   @Input() multiselect: boolean = false;
+  @Input() maxSelectedLabels: number = 5;
   
   // PrimeNG dropdown configuration
   @Input() optionLabel: string = 'label';
@@ -788,7 +819,23 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     if (!selectedItems || selectedItems.length === 0) {
       return 'Select items';
     }
-    return selectedItems.map((item: any) => this.getDisplayLabel(item)).join(', ');
+    
+    // If we have selected items, show a proper summary
+    if (selectedItems.length > this.maxSelectedLabels) {
+      return `${selectedItems.length} items selected`;
+    }
+    
+    // For items within the limit, this won't be used as individual labels will show
+    return selectedItems.map((value: any) => {
+      // Find the corresponding label for each selected value
+      for (const group of this.originalOptions) {
+        const item = group.items.find(item => item.value === value);
+        if (item) {
+          return item.label;
+        }
+      }
+      return value; // Fallback to value if label not found
+    }).join(', ');
   }
 
   onSelectAllChange(event: any): void {

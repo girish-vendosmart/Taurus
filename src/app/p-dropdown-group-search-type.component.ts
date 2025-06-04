@@ -17,6 +17,7 @@ import { ReactiveFormsModule } from '@angular/forms';
       [showClear]="props['showClear'] !== false"
       [filterPlaceholder]="props['filterPlaceholder'] || 'Search groups and options...'"
       [multiselect]="props['multiselect'] || false"
+      [maxSelectedLabels]="props['maxSelectedLabels'] || 5"
       [options]="getOptions()"
       [formControl]="formControl"
     ></app-p-dropdown-group-search>

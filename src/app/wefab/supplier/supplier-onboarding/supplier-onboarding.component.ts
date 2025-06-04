@@ -1149,7 +1149,8 @@ export class SupplierOnboardingComponent implements OnInit {
               required: true,
               filterPlaceholder: 'Search manufacturing processes...',
               multiselect: true, // Enable multiselect mode
-              options: 
+              maxSelectedLabels: 8, // Allow up to 8 individual labels before showing summary
+              options:
               [
                 {
                   label: 'Precision Machining',
@@ -1506,7 +1507,7 @@ export class SupplierOnboardingComponent implements OnInit {
       // Navigate to verification page after 3 seconds
       setTimeout(() => {
         this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
-      }, 3000);
+      }, 2000);
     }, (err) => {
       console.error('Error submitting form:', err);
     });
