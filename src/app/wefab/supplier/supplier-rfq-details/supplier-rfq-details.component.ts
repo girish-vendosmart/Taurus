@@ -42,6 +42,7 @@ export interface RFQItem {
 export interface RFQAttachment {
   name: string;
   file: string;
+  file_url: string;
   file_name: string;
   file_type: string;
   description: string;
@@ -271,7 +272,8 @@ export class SupplierRfqDetailsComponent implements OnInit {
             name: attachment.name || '',
             file: attachment.file || '',
             file_name: attachment.file_name || '',
-            file_type: attachment.file_type || '',
+            file_type: attachment.file_url.split('.').pop().toLowerCase(),
+            file_url: attachment.file_url || '',
             description: attachment.description || '',
             category: attachment.category || '',
             uploaded_on: attachment.uploaded_on || ''
@@ -448,16 +450,16 @@ export class SupplierRfqDetailsComponent implements OnInit {
   // Attachment methods
   viewAttachment(attachment: RFQAttachment) {
     // Open attachment in new window/tab
-    if (attachment.file) {
-      window.open(attachment.file, '_blank');
+    if (attachment.file_url) {
+      window.open(attachment.file_url, '_blank');
     }
   }
 
   downloadAttachment(attachment: RFQAttachment) {
     // Implement attachment download functionality
-    if (attachment.file) {
+    if (attachment.file_url) {
       const link = document.createElement('a');
-      link.href = attachment.file;
+      link.href = attachment.file_url;
       link.download = attachment.file_name;
       document.body.appendChild(link);
       link.click();

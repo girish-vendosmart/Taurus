@@ -117,12 +117,11 @@
           <div class="attachments-grid">
             <div class="attachment-card" *ngFor="let attachment of rfqAttachments">
               <div class="file-icon">
-                <i class="bi bi-file-earmark-pdf" *ngIf="attachment.file_type === 'Specification' || attachment.file_type === 'Process Document'"></i>
-                <i class="bi bi-file-earmark" *ngIf="attachment.file_type !== 'Specification' && attachment.file_type !== 'Process Document'"></i>
+                <i class="bi bi-file-earmark-pdf" *ngIf="attachment.file_type === 'pdf' || attachment.file_type === 'Process Document'"></i>
+                <i class="bi bi-file-earmark" *ngIf="attachment.file_type !== 'pdf' && attachment.file_type !== 'Process Document'"></i>
               </div>
               <div class="file-info">
-                <h4 class="file-name">{{ attachment.file_name }}</h4>
-                <p class="file-description">{{ attachment.description }}</p>
+                <h4 class="file-name">{{ attachment.name }}</h4>
                 <div class="file-meta">
                   <span class="upload-date">{{ formatDate(attachment.uploaded_on) }}</span>
                 </div>
