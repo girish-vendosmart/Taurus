@@ -206,7 +206,8 @@ export class SupplierOnboardingComponent implements OnInit {
           }, 200);
         }
 
-        this.updateStateDropdownOptions(true);
+        // Always call updateStateDropdownOptions to refresh the dropdown
+        this.updateStateDropdownOptions(false);
 
       } else {
         this.stateList = [];
@@ -237,11 +238,29 @@ export class SupplierOnboardingComponent implements OnInit {
           // Update the options
           stateField.templateOptions.options = this.stateList;
           
+          console.log('Updated state field options:', this.stateList.length, 'options');
+          
           // If forceSelection and we have a selectedState, make sure it's applied
           if (forceSelection && this.selectedState && stateField.formControl) {
             console.log('Forcing state selection to:', this.selectedState);
             stateField.formControl.setValue(this.selectedState);
             stateField.formControl.markAsDirty();
+            stateField.formControl.updateValueAndValidity();
+          }
+          
+          // If we have a selectedState but no forceSelection, still try to set it if the field is empty
+          if (!forceSelection && this.selectedState && stateField.formControl && !stateField.formControl.value) {
+            // Check if the selected state exists in the options
+            const stateExists = this.stateList.some(
+              (option: any) => option.value === this.selectedState
+            );
+            
+            if (stateExists) {
+              console.log('Setting state value as field is empty:', this.selectedState);
+              stateField.formControl.setValue(this.selectedState);
+              stateField.formControl.markAsDirty();
+              stateField.formControl.updateValueAndValidity();
+            }
           }
           
           // Force update the UI
@@ -249,7 +268,9 @@ export class SupplierOnboardingComponent implements OnInit {
             if (stateField.formControl) {
               stateField.formControl.updateValueAndValidity();
             }
-          });
+            // Force change detection
+            this.cdr.detectChanges();
+          }, 50);
         }
       }
     }
@@ -364,12 +385,6 @@ export class SupplierOnboardingComponent implements OnInit {
     
     console.log('Model updated with values:', this.model);
     
-    // If the country is selected, load the states for that country
-    if (this.getCompanyProfile.country) {
-      this.selectedCountry = this.getCompanyProfile.country;
-      this.getStates(this.selectedCountry);
-    }
-    
     // Set phone verification status
     if (this.getCompanyProfile.phone_verified) {
       this.phoneVerified = true;
@@ -382,28 +397,61 @@ export class SupplierOnboardingComponent implements OnInit {
       })
     }
     
-    // Patch form values with a slight delay to ensure form is ready
-    setTimeout(() => {
-      // First patch all other fields
-      this.form.patchValue(this.model);
+    // If the country is selected, load the states for that country first
+    if (this.getCompanyProfile.country) {
+      this.selectedCountry = this.getCompanyProfile.country;
       
-      // Update GST field verification status after form is patched
-      this.updateGstFieldVerificationStatus();
+      // Load states first, then patch form after states are loaded
+      this.getStates(this.selectedCountry);
       
-      // Then handle Google Places separately with specialized approach
-      this.patchGooglePlacesField(0);
+      // Patch form values with a longer delay to ensure states are loaded first
+      setTimeout(() => {
+        // First patch all other fields except state (it will be handled by getStates)
+        const formData = { ...this.model };
+        
+        // Patch the form with all data
+        this.form.patchValue(formData);
+        
+        // Force set state value again after form patch to ensure it's not overridden
+        if (this.selectedState) {
+          setTimeout(() => {
+            const stateControl = this.form.get('state');
+            if (stateControl) {
+              stateControl.setValue(this.selectedState);
+              stateControl.markAsDirty();
+              stateControl.updateValueAndValidity();
+              console.log('State control re-set after form patch:', this.selectedState);
+            }
+          }, 100);
+        }
+        
+        // Update GST field verification status after form is patched
+        this.updateGstFieldVerificationStatus();
+        
+        // Then handle Google Places separately with specialized approach
+        this.patchGooglePlacesField(0);
 
-      // Handle city prefill after states are loaded
-      if (selectedCity && this.selectedCountry && this.selectedState) {
-        setTimeout(() => {
-          this.setCityValue(selectedCity);
-        }, 1000); // Give time for states to load
-      }
+        // Mark form as touched/dirty
+        this.form.markAsDirty();
+        console.log('Final form model:', this.model);
+      }, 800); // Increased delay to ensure states are loaded
+    } else {
+      // If no country, patch form normally with shorter delay
+      setTimeout(() => {
+        // First patch all other fields
+        this.form.patchValue(this.model);
+        
+        // Update GST field verification status after form is patched
+        this.updateGstFieldVerificationStatus();
+        
+        // Then handle Google Places separately with specialized approach
+        this.patchGooglePlacesField(0);
 
-      // Mark form as touched/dirty
-      this.form.markAsDirty();
-      console.log('Final form model:', this.model);
-    }, 300);
+        // Mark form as touched/dirty
+        this.form.markAsDirty();
+        console.log('Final form model:', this.model);
+      }, 300);
+    }
   }
 
   /**
@@ -952,16 +1000,6 @@ export class SupplierOnboardingComponent implements OnInit {
                 console.log('State field initialized');
                 this.stateFieldInitialized = true;
                 
-                // If we already have a selected state, set it
-                if (this.selectedState && field.formControl) {
-                  console.log('Setting state to previously selected value:', this.selectedState);
-                  setTimeout(() => {
-                    field.formControl!.setValue(this.selectedState);
-                    field.formControl!.markAsDirty();
-                    field.formControl!.updateValueAndValidity();
-                  }, 200);
-                }
-                
                 // Watch for state changes
                 field.formControl?.valueChanges.subscribe(selectedState => {
                   console.log('State changed to:', selectedState);
@@ -969,6 +1007,47 @@ export class SupplierOnboardingComponent implements OnInit {
                     this.selectedState = selectedState;
                   }
                 });
+                
+                // Set up a more robust state initialization
+                const initializeStateValue = () => {
+                  // If we already have a selected state and the field is empty, set it
+                  if (this.selectedState && field.formControl && !field.formControl.value) {
+                    // Check if the selected state exists in the current options
+                    const currentOptions = field.templateOptions?.options || [];
+                    const stateExists = Array.isArray(currentOptions) && currentOptions.some(
+                      (option: any) => option.value === this.selectedState
+                    );
+                    
+                    if (stateExists) {
+                      console.log('Setting state to previously selected value during init:', this.selectedState);
+                      field.formControl.setValue(this.selectedState);
+                      field.formControl.markAsDirty();
+                      field.formControl.updateValueAndValidity();
+                    } else {
+                      console.log('Selected state not found in current options, will set when states load');
+                    }
+                  }
+                };
+                
+                // Try to initialize immediately
+                initializeStateValue();
+                
+                // Also try after a delay to handle async loading
+                setTimeout(initializeStateValue, 500);
+                setTimeout(initializeStateValue, 1000);
+                
+                // Watch for template options changes (when state list gets updated)
+                const originalOptions = field.templateOptions?.options;
+                const checkOptionsChange = () => {
+                  const currentOptions = field.templateOptions?.options;
+                  if (currentOptions !== originalOptions && currentOptions && Array.isArray(currentOptions) && currentOptions.length > 0) {
+                    console.log('State options updated, trying to set selected state');
+                    initializeStateValue();
+                  }
+                  // Continue checking
+                  setTimeout(checkOptionsChange, 200);
+                };
+                setTimeout(checkOptionsChange, 100);
               }
             },
             validation: {
