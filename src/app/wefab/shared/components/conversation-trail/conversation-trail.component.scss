@@ -225,6 +225,43 @@ $process-green: #12856E;
   }
 }
 
+// Zero State
+.zero-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  min-height: 200px;
+  
+  .zero-state-content {
+    max-width: 400px;
+    
+    .zero-state-icon {
+      font-size: 3rem;
+      color: $material-finish-silver;
+      margin-bottom: 1rem;
+    }
+    
+    .zero-state-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $precision-black;
+      margin: 0 0 0.5rem 0;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .zero-state-description {
+      font-size: 0.875rem;
+      color: $machine-gray;
+      margin: 0;
+      line-height: 1.5;
+      font-family: 'Inter', sans-serif;
+    }
+  }
+}
+
 // Compose Section
 .compose-section {
   background: white;

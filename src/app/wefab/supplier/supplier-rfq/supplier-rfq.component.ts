@@ -43,7 +43,7 @@ export class SupplierRfqComponent implements OnInit {
 
   dashboardCards = [
     {
-      title: 'Draft RFQs',
+      title: 'Total RFQs',
       value: '0',
       icon: 'pi pi-file-edit',
       color: 'secondary',
@@ -57,14 +57,14 @@ export class SupplierRfqComponent implements OnInit {
       description: '',
     },
     {
-      title: 'Under Review',
+      title: 'Quouted RFQ',
       value: '0',
       icon: 'pi pi-check-circle',
-      color: 'warning',
+      color: 'success',
       description: '',
     },
     {
-      title: 'Closed RFQs',
+      title: 'Expired RFQs',
       value: '0',
       icon: 'pi pi-lock',
       color: 'danger',
@@ -129,7 +129,41 @@ export class SupplierRfqComponent implements OnInit {
     // Remove sample data loading since we're using real API data
     // this.loadSampleData();
     this.supplierId = localStorage.getItem('supplier_id') || '';
+    this.getSupplierCount()
     this.getRfqList();
+  }
+
+  getSupplierCount() {
+    let endPoint  = `/api/method/wefab.wefab.api.supplier.dashboard.rfq_dashboard.get_rfq_summary_stats?supplier_company_id=${this.supplierId}`
+    this.commonService.getWefabData(endPoint).subscribe({
+      next: (res: any) => {
+        console.log('RFQ Summary Stats:', res.message);
+        if (res.message) {
+          this.updateDashboardCardsFromAPI(res.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching RFQ summary stats:', error);
+      }
+    })
+  }
+
+  // Update dashboard cards with API data
+  updateDashboardCardsFromAPI(apiData: any) {
+    // Map API response to dashboard cards
+    // Draft RFQs -> Not Opened
+    this.dashboardCards[0].value = (apiData['total_rfqs'] || 0).toString();
+    
+    // Open RFQs -> Opened  
+    this.dashboardCards[1].value = (apiData['Opened'] || 0).toString();
+    
+    // Under Review -> Quoted
+    this.dashboardCards[2].value = (apiData['Quoted'] || 0).toString();
+    
+    // Closed RFQs -> Expired + Cancelled
+    this.dashboardCards[3].value = (apiData['Expired'] || 0).toString();
+
+    console.log('Updated dashboard cards:', this.dashboardCards);
   }
 
   getRfqList() {

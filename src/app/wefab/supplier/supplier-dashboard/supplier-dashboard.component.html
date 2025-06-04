@@ -29,13 +29,12 @@
 
   <!-- Chart and Recent RFQs Section -->
   <div class="row g-3">
-    <!-- Quote Performance Chart -->
+    <!-- Recent RFQs -->
     <div class="col-lg-6 col-md-12">
       <div class="card h-100">
-        <!-- Recent RFQs -->
         <div class="card-body">
           <h2>Recent RFQs</h2>
-          <div class="rfqs-list">
+          <div class="rfqs-list" *ngIf="recentRFQs.length > 0">
             <div *ngFor="let rfq of recentRFQs" class="rfq-item">
               <div class="rfq-content">
                 <h4>{{ rfq.name }}</h4>
@@ -49,9 +48,17 @@
                 </div>
               </div>
             </div>
-            <!-- <div *ngIf="recentQuotations.length === 0" class="no-data">
-              <p>No recent quotations found</p>
-            </div> -->
+          </div>
+          <div *ngIf="recentRFQs.length === 0" class="zero-state">
+            <div class="zero-state-icon">
+              <i class="pi pi-file-o"></i>
+            </div>
+            <h3>No Recent RFQs</h3>
+            <p>You haven't received any RFQs yet. New requests for quotations will appear here.</p>
+            <button class="action-btn primary-btn" routerLink="/wefab/supplier/rfq">
+              <i class="pi pi-search"></i>
+              Browse All RFQs
+            </button>
           </div>
         </div>
       </div>
@@ -62,7 +69,7 @@
       <div class="card h-100">
         <div class="card-body">
           <h2>Recent Quotations</h2>
-          <div class="rfqs-list">
+          <div class="rfqs-list" *ngIf="recentQuotations.length > 0">
             <div *ngFor="let quotation of recentQuotations" class="rfq-item">
               <div class="rfq-content">
                 <h4>{{ quotation.name }}</h4>
@@ -76,9 +83,17 @@
                 </div>
               </div>
             </div>
-            <!-- <div *ngIf="recentQuotations.length === 0" class="no-data">
-              <p>No recent quotations found</p>
-            </div> -->
+          </div>
+          <div *ngIf="recentQuotations.length === 0" class="zero-state">
+            <div class="zero-state-icon">
+              <i class="pi pi-send"></i>
+            </div>
+            <h3>No Recent Quotations</h3>
+            <p>You haven't submitted any quotations yet. Start by responding to available RFQs.</p>
+            <button class="action-btn primary-btn" routerLink="/wefab/supplier/quotation">
+              <i class="pi pi-plus"></i>
+              Create Quotation
+            </button>
           </div>
         </div>
       </div>

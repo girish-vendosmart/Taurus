@@ -219,7 +219,7 @@ export class SupplierRfqDetailsComponent implements OnInit {
       status: 'Opened'
     }).subscribe((res: any) => {
       console.log('Update RFQ Status', res);
-      this.loadRFQDetails();  
+      this.loadSupplierDetails();
     });
   }
 

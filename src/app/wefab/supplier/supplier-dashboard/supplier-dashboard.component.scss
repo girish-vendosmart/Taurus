@@ -608,4 +608,271 @@ $transition: all 0.3s ease;
     font-size: 0.85rem;
     font-style: italic;
   }
+}
+
+// Zero State Styles
+.zero-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1rem;
+  min-height: 200px;
+  
+  .zero-state-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: rgba($blueprint-blue, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    
+    i {
+      font-size: 1.5rem;
+      color: $blueprint-blue;
+    }
+  }
+  
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $precision-black;
+    margin: 0 0 0.5rem 0;
+  }
+  
+  p {
+    font-size: 0.85rem;
+    color: $machine-gray;
+    line-height: 1.4;
+    margin: 0 0 1.5rem 0;
+    max-width: 280px;
+  }
+  
+  .primary-btn {
+    background-color: $blueprint-blue;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: $transition;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    
+    &:hover {
+      background-color: darken($blueprint-blue, 8%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba($blueprint-blue, 0.3);
+    }
+    
+    i {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// Combined Zero State (when both sections are empty)
+.combined-zero-state {
+  background-color: white;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  padding: 2rem;
+  margin-top: 1.5rem;
+  
+  .zero-state-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    max-width: 500px;
+    margin: 0 auto;
+    
+    .zero-state-illustration {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba($blueprint-blue, 0.1) 0%, rgba($process-green, 0.1) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      
+      i {
+        font-size: 2rem;
+        color: $blueprint-blue;
+      }
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $precision-black;
+      margin: 0 0 0.75rem 0;
+    }
+    
+    p {
+      font-size: 1rem;
+      color: $machine-gray;
+      line-height: 1.5;
+      margin: 0 0 2rem 0;
+    }
+    
+    .zero-state-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      
+      .primary-btn {
+        background-color: $blueprint-blue;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: $transition;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        
+        &:hover {
+          background-color: darken($blueprint-blue, 8%);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba($blueprint-blue, 0.3);
+        }
+        
+        i {
+          font-size: 0.8rem;
+        }
+      }
+      
+      .secondary-btn {
+        background-color: transparent;
+        color: $blueprint-blue;
+        border: 2px solid $blueprint-blue;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: $transition;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        
+        &:hover {
+          background-color: $blueprint-blue;
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba($blueprint-blue, 0.3);
+        }
+        
+        i {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments for zero states
+@media (max-width: 768px) {
+  .zero-state {
+    padding: 1.5rem 1rem;
+    min-height: 180px;
+    
+    .zero-state-icon {
+      width: 50px;
+      height: 50px;
+      
+      i {
+        font-size: 1.25rem;
+      }
+    }
+    
+    h3 {
+      font-size: 1rem;
+    }
+    
+    p {
+      font-size: 0.8rem;
+    }
+    
+    .primary-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+    }
+  }
+  
+  .combined-zero-state {
+    padding: 1.5rem;
+    margin-top: 1rem;
+    
+    .zero-state-content {
+      .zero-state-illustration {
+        width: 70px;
+        height: 70px;
+        margin-bottom: 1rem;
+        
+        i {
+          font-size: 1.75rem;
+        }
+      }
+      
+      h2 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      p {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .zero-state-actions {
+        flex-direction: column;
+        align-items: center;
+        
+        .primary-btn,
+        .secondary-btn {
+          padding: 0.6rem 1.2rem;
+          font-size: 0.8rem;
+          min-width: 180px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .zero-state {
+    padding: 1rem;
+    min-height: 160px;
+  }
+  
+  .combined-zero-state {
+    padding: 1rem;
+    
+    .zero-state-content {
+      .zero-state-actions {
+        .primary-btn,
+        .secondary-btn {
+          min-width: 160px;
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
 } 

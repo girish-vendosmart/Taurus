@@ -64,6 +64,16 @@
   </div>
   <!-- Messages Section -->
   <div class="messages-section">
+    <!-- Zero State -->
+    <div *ngIf="!loading && messages.length === 0" class="zero-state">
+      <div class="zero-state-content">
+        <i class="pi pi-comments zero-state-icon"></i>
+        <h3 class="zero-state-title">No messages yet</h3>
+        <p class="zero-state-description">Start a conversation by sending your first message above.</p>
+      </div>
+    </div>
+
+    <!-- Messages -->
     <div class="message" *ngFor="let msg of messages">
       <div class="profile-avatar">
         <span class="avatar-text">{{ getInitials(msg.sender) }}</span>
