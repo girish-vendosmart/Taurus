@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -26,6 +26,7 @@ export class ConversationTrailComponent implements OnInit {
   selectedFiles: File[] = [];
   attachments: { file_url: string }[] = [];
   uploading: boolean = false;
+  @Input() docType: string = ''
 
   // Editor configuration
   editorModules = {
@@ -56,7 +57,7 @@ export class ConversationTrailComponent implements OnInit {
 
   fetchMessages() {
     this.loading = true;
-    const url = `/api/method/wefab.wefab.api.common.engine.message.messaging.get_message_trail?doctype=Supplier Onboarding Messenger&docname=${this.supplierId}`;
+    const url = `/api/method/wefab.wefab.api.common.engine.message.messaging.get_message_trail?doctype=${this.docType}&docname=${this.supplierId}`;
     this.commonService.getData(url).subscribe({
       next: (res: any) => {
         this.messages = (res?.data || []).map((msg: any) => ({
@@ -196,7 +197,7 @@ export class ConversationTrailComponent implements OnInit {
     };
     
     try {
-      await this.commonService.postData('/api/resource/Supplier Onboarding Messenger', payload).toPromise();
+      await this.commonService.postData(`/api/resource/${this.docType}`, payload).toPromise();
       this.newMessage = '';
       this.attachments = [];
       this.fetchMessages();
