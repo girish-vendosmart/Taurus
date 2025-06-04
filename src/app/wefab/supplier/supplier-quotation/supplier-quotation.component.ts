@@ -91,14 +91,14 @@ export class SupplierQuotationComponent implements OnInit {
       description: 'All submitted quotations',
     },
     {
-      title: 'Awarded Quotations',
+      title: 'Submitted Quotations',
       value: '0',
       icon: 'pi pi-check-circle',
       color: 'success',
       description: 'Successfully awarded quotations',
     },
     {
-      title: 'Non Awarded Quotations',
+      title: 'Draft Quotations',
       value: '0',
       icon: 'pi pi-times-circle',
       color: 'warning',
@@ -165,7 +165,39 @@ export class SupplierQuotationComponent implements OnInit {
 
   ngOnInit() {
     this.supplierId = localStorage.getItem('supplier_id') || '';
+    this.getQuotationCount()
     this.getQuotationList();
+  }
+
+  getQuotationCount() {
+    let endPoint  = `/api/method/wefab.wefab.api.supplier.dashboard.quotation_dashboard.get_quotation_counts_by_status?supplier_company_id=${this.supplierId}`
+    this.commonService.getWefabData(endPoint).subscribe({
+      next: (res: any) => {
+        console.log('RFQ Summary Stats:', res.message);
+        if (res.message) {
+          this.updateDashboardCardsFromAPI(res.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching RFQ summary stats:', error);
+      }
+    })
+  }
+
+  updateDashboardCardsFromAPI(apiData: any) {
+    // Map API response to dashboard cards
+    // Draft RFQs -> Not Opened
+    this.dashboardCards[0].value = (apiData['total_quotations'] || 0).toString();
+    
+    // Open RFQs -> Opened  
+    this.dashboardCards[1].value = (apiData['Submitted'] || 0).toString();
+    
+    // Under Review -> Quoted
+    this.dashboardCards[2].value = (apiData['Draft'] || 0).toString();
+    
+    // Closed RFQs -> Expired + Cancelled
+
+    console.log('Updated dashboard cards:', this.dashboardCards);
   }
 
   getQuotationList() {
@@ -180,7 +212,7 @@ export class SupplierQuotationComponent implements OnInit {
         } else {
           // No data received, still calculate stats for empty state
           this.allQuotations = [];
-          this.calculateQuotationStats();
+          // this.calculateQuotationStats();
         }
         this.loading = false;
       },
@@ -189,7 +221,7 @@ export class SupplierQuotationComponent implements OnInit {
         this.loading = false;
         // Ensure cards show 0 values when API fails
         this.allQuotations = [];
-        this.calculateQuotationStats();
+        // this.calculateQuotationStats();
         // Optionally load sample data as fallback
         // this.loadSampleData();
       }

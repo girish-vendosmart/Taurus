@@ -178,7 +178,7 @@ export class SupplierRfqComponent implements OnInit {
         console.log(res.data);
         // Transform API data to match RFQItem interface
         this.allRFQs = this.transformApiDataToRFQItems(res.data);
-        this.calculateStatusCounts();
+        // this.calculateStatusCounts();
         this.loading = false;
       },
       error: (error) => {
