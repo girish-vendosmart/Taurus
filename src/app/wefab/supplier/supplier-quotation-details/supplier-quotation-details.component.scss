@@ -348,6 +348,7 @@ $danger-red: #EF4444;
 // Overview Content
 .overview-content {
   padding: 2rem;
+  padding-bottom: 0 !important;
 
   @media (max-width: 768px) {
     padding: 1rem;
@@ -974,12 +975,12 @@ $danger-red: #EF4444;
 
   .attachments-grid {
     padding: 1.5rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
 
     @media (max-width: 768px) {
-      grid-template-columns: 1fr;
+      flex-direction: column;
       padding: 1rem;
     }
   }
@@ -994,6 +995,8 @@ $danger-red: #EF4444;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+    flex: 0 1 280px;
+    min-width: 280px;
 
     &:hover {
       transform: translateY(-1px);
