@@ -180,10 +180,24 @@ export class SupplierRfqDetailsComponent implements OnInit {
       
       console.log(this.rfqId)
       this.supplierRfqId = sessionStorage.getItem('supplier_rfq_id') || '';
-      this.loadRFQDetails();
-      this.loadSupplierDetails();
+
+      this.accessFirebaseTrigger('Supplier Request for Quotation', this.rfqId)
     });
 
+
+  }
+
+  accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
+    console.log(`🔥 Firebase trigger called for ${doctType_name}`);
+    this.commonService.commonFirebaseTrigger(doctType_name, doctypeId).subscribe({
+      next: (res: any) => {
+        this.loadRFQDetails();
+        this.loadSupplierDetails();
+      },
+      error: (error) => {
+        console.error(`❌ Firebase trigger failed for ${doctType_name}:`, error);
+      }
+    });
   }
 
   loadSupplierDetails() {

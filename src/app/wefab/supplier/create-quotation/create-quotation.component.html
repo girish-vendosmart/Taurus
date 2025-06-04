@@ -309,6 +309,7 @@
                 [ngModelOptions]="{standalone: true}"
                 optionLabel="label"
                 optionValue="value"
+                [filter]="true"
                 placeholder="Unit"
                 [class.is-invalid]="hasValidationError('item_' + i)"
                 (onChange)="clearFieldError('item_' + i)"
@@ -359,6 +360,7 @@
                 [ngModelOptions]="{standalone: true}"
                 optionLabel="label"
                 optionValue="value"
+                [filter]="true"
                 placeholder="Tax Type"
                 [class.is-invalid]="hasValidationError('item_' + i)"
                 (onChange)="onItemTaxTypeChange(item); clearFieldError('item_' + i); updateTaxCalculations()"
@@ -436,33 +438,42 @@
           <!-- Discount -->
           <div class="d-flex justify-content-between align-items-center mb-2 py-1">
             <span class="total-label small fw-medium">Discount:</span>
-            <div class="d-flex align-items-center">
-              <input 
-                type="number" 
-                class="form-control form-control-sm me-1 editable-field" 
-                [(ngModel)]="discountValue"
-                (ngModelChange)="calculateTotals()"
-                [ngModelOptions]="{standalone: true}"
-                min="0" 
-                [max]="discountType === 'percentage' ? 100 : calculatedSubTotal"
-                placeholder="0"
-                (keypress)="onNumberKeyPress($event)"
-                (input)="onNumberInput($event)"
-                (paste)="onNumberPaste($event)"
-                pattern="[0-9]*\.?[0-9]*"
-                style="width: 60px; font-size: 12px;">
-              <select 
-                class="form-select form-select-sm me-2 editable-field"
-                [(ngModel)]="discountType"
-                (ngModelChange)="onDiscountTypeChange()"
-                [ngModelOptions]="{standalone: true}"
-                style="width: 60px; font-size: 12px;">
-                <option value="percentage">%</option>
-                <option value="amount">{{ model.currency_code }}</option>
-              </select>
-              <span *ngIf="getDiscountAmount() > 0" class="discount-amount amount-display small">
-                -{{ model.currency_code }} {{ getDiscountAmount() | number:'1.2-2' }}
-              </span>
+            <div class="d-flex align-items-center flex-column">
+              <div class="d-flex align-items-center">
+                <input 
+                  type="number" 
+                  class="form-control form-control-sm me-1 editable-field" 
+                  [class.is-invalid]="hasValidationError('discount')"
+                  [(ngModel)]="discountValue"
+                  (ngModelChange)="onDiscountValueChange()"
+                  (input)="onDiscountInput($event); clearFieldError('discount')"
+                  [ngModelOptions]="{standalone: true}"
+                  min="0" 
+                  [max]="discountType === 'percentage' ? 100 : calculatedSubTotal"
+                  placeholder="0"
+                  (keypress)="onNumberKeyPress($event)"
+                  (paste)="onNumberPaste($event)"
+                  pattern="[0-9]*\.?[0-9]*"
+                  step="0.01"
+                  title="{{ discountType === 'percentage' ? 'Maximum 100%' : 'Enter discount amount' }}"
+                  style="width: 60px; font-size: 12px;">
+                <select 
+                  class="form-select form-select-sm me-2 editable-field"
+                  [(ngModel)]="discountType"
+                  (ngModelChange)="onDiscountTypeChange()"
+                  [ngModelOptions]="{standalone: true}"
+                  style="width: 60px; font-size: 12px;">
+                  <option value="percentage">%</option>
+                  <option value="amount">{{ model.currency_code }}</option>
+                </select>
+                <span *ngIf="getDiscountAmount() > 0" class="discount-amount amount-display small">
+                  -{{ model.currency_code }} {{ getDiscountAmount() | number:'1.2-2' }}
+                </span>
+              </div>
+              <!-- Discount validation error message -->
+              <div *ngIf="hasValidationError('discount')" class="text-danger small mt-1 w-100 text-end">
+                {{ getValidationError('discount') }}
+              </div>
             </div>
           </div>
           

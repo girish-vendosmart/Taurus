@@ -932,8 +932,57 @@ export class CreateQuotationComponent implements OnInit {
     }
   }
 
+  // Add new method to handle discount value change with validation
+  onDiscountValueChange() {
+    // Validate discount percentage not exceeding 100%
+    if (this.discountType === 'percentage' && this.discountValue > 100) {
+      this.discountValue = 100;
+      this.validationErrors['discount'] = ['Discount percentage cannot exceed 100%'];
+      this.sweetAlert.warning('Discount percentage cannot exceed 100%');
+    } else {
+      // Clear discount validation error if valid
+      this.clearFieldError('discount');
+    }
+    
+    // Ensure discount value is not negative
+    if (this.discountValue < 0) {
+      this.discountValue = 0;
+    }
+    
+    this.calculateTotals();
+  }
+
+  // Enhanced discount input handler with real-time validation
+  onDiscountInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = parseFloat(input.value) || 0;
+    
+    // For percentage type, cap at 100%
+    if (this.discountType === 'percentage' && value > 100) {
+      value = 100;
+      input.value = '100';
+      this.discountValue = 100;
+      
+      // Show warning message
+      this.sweetAlert.warning('Discount percentage cannot exceed 100%');
+    } else {
+      this.discountValue = value;
+    }
+    
+    // Ensure non-negative values
+    if (value < 0) {
+      input.value = '0';
+      this.discountValue = 0;
+    }
+    
+    this.calculateTotals();
+  }
+
   // Method to handle discount type change
   onDiscountTypeChange() {
+    // Clear any existing discount validation errors
+    this.clearFieldError('discount');
+    
     // Reset discount value when changing type to avoid confusion
     this.discountValue = 0;
     this.calculateTotals();
@@ -2042,6 +2091,18 @@ export class CreateQuotationComponent implements OnInit {
     if (!this.model.termsAndConditions || this.model.termsAndConditions.trim() === '') {
       errors.push('Terms & Conditions is required');
       this.validationErrors['termsAndConditions'] = ['Terms & Conditions is required'];
+    }
+
+    // Add discount validation
+    if (this.discountType === 'percentage' && this.discountValue > 100) {
+      errors.push('Discount percentage cannot exceed 100%');
+      this.validationErrors['discount'] = ['Discount percentage cannot exceed 100%'];
+    }
+
+    if (this.discountValue < 0) {
+      errors.push('Discount value cannot be negative');
+      this.validationErrors['discount'] = this.validationErrors['discount'] || [];
+      this.validationErrors['discount'].push('Discount value cannot be negative');
     }
 
     return {

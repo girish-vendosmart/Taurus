@@ -27,7 +27,7 @@ export class ConversationTrailComponent implements OnInit {
   attachments: { file_url: string }[] = [];
   uploading: boolean = false;
   @Input() docType: string = ''
-
+  @Input() docName: string = ''
   // Editor configuration
   editorModules = {
     toolbar: [
@@ -57,7 +57,7 @@ export class ConversationTrailComponent implements OnInit {
 
   fetchMessages() {
     this.loading = true;
-    const url = `/api/method/wefab.wefab.api.common.engine.message.messaging.get_message_trail?doctype=${this.docType}&docname=${this.supplierId}`;
+    const url = `/api/method/wefab.wefab.api.common.engine.message.messaging.get_message_trail?doctype=${this.docType}&docname=${this.docName}`;
     this.commonService.getData(url).subscribe({
       next: (res: any) => {
         this.messages = (res?.data || []).map((msg: any) => ({
@@ -190,7 +190,7 @@ export class ConversationTrailComponent implements OnInit {
     if (!this.hasValidMessage() || this.uploading) return;
     
     const payload = {
-      document_id: this.supplierId,
+      document_id: this.docName,
       sender: this.currentUser,
       comment: this.newMessage || '', // Allow empty message if there are attachments
       attachments: this.attachments

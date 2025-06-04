@@ -311,8 +311,20 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       const quotationId = params['id'];
       this.quotationId = quotationId;
       if (quotationId) {
-        this.getQuotationDetails(quotationId);
+        this.accessFirebaseTrigger('Supplier Quotation', quotationId)
+      }
+    });
+  }
+
+  accessFirebaseTrigger(doctType_name: string, doctypeId: string) {
+    console.log(`🔥 Firebase trigger called for ${doctType_name}`);
+    this.commonService.commonFirebaseTrigger(doctType_name, doctypeId).subscribe({
+      next: (res: any) => {
+        this.getQuotationDetails(this.quotationId);
         this.getActionList()
+      },
+      error: (error) => {
+        console.error(`❌ Firebase trigger failed for ${doctType_name}:`, error);
       }
     });
   }
