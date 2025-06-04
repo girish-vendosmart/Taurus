@@ -21,5 +21,9 @@ export const routes: Routes = [
   {
     path: 'wefab',
     loadChildren: () => import('./wefab/wefab-component.routes').then(m => m.WEFAB_ROUTES)
+  },
+  {
+    path: '**',
+    redirectTo: 'wefab'  // Fallback for any undefined routes
   }
 ];

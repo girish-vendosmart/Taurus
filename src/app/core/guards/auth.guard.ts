@@ -1,39 +1,42 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router, UrlTree } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-import { Observable } from 'rxjs';
-import { isPlatformBrowser } from '@angular/common';
+import { inject } from '@angular/core';
+import { CanActivateFn } from '@angular/router';
+import { Router } from '@angular/router';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AuthGuard implements CanActivate {
-  constructor(
-    private authService: AuthService, 
-    private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+export const AuthGuard: CanActivateFn = (route, state) => {
+  const router = inject(Router);
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    // During server-side rendering, allow navigation but client side will recheck
-    if (!isPlatformBrowser(this.platformId)) {
-      return true;
-    }
+  const token = localStorage.getItem('token');
+  const userType = localStorage.getItem('user_type'); // 'supplier' or 'buyer'
+  const supplierId = localStorage.getItem('supplier_id');
+  const isLoggedIn = !!token;
+  const requestedUrl = state.url;
 
-    // Handle logout route specially
-    if (route.routeConfig?.path === 'logout') {
-      this.authService.logout().subscribe();
-      return this.router.createUrlTree(['/wefab/supplier/login']);
-    }
-    
-    if (this.authService.isAuthenticated()) {
-      return true;
-    }
-    
-    // Redirect to login page if not authenticated
-    return this.router.createUrlTree(['/wefab/supplier/login']);
+  console.log("LoggedIn ", isLoggedIn, "RequestedUrl", requestedUrl)
+
+  // Check if the current route is any login route
+  const isLoginRoute = requestedUrl.includes('/login') || 
+                      requestedUrl === '/wefab/supplier/login' ||
+                      requestedUrl.endsWith('/login');
+
+  // 🔴 Not logged in and trying to access a protected page
+  if (!isLoggedIn && !isLoginRoute) {
+    router.navigate(['/wefab/supplier/login']);
+    return false;
   }
-} 
+
+  // 🟡 Logged in but trying to go back to login page
+  if (isLoggedIn && isLoginRoute) {
+    debugger
+    if (userType === 'supplier' && supplierId) {  
+      router.navigate(['/wefab/supplier/dashboard']);
+    } else if(userType === 'supplier' && !supplierId) {
+      router.navigate(['/wefab/supplier/supplier-onboarding-status']);
+    } else if (userType === 'wefab_team') {
+      router.navigate(['/wefab/wefabTeam/manage-suppliers']);
+    }
+    return false;
+  }
+
+  // ✅ Everything OK
+  return true;
+};

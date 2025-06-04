@@ -116,7 +116,12 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
                 path: 'create-quotation',
                 component: CreateQuotationComponent,
                 canActivate: [AuthGuard]
-             }
+             },
+             {
+                path: '**',
+                redirectTo: 'dashboard',
+                pathMatch: 'full'
+              },
         ]
     }
 ]

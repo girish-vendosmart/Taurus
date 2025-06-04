@@ -4,6 +4,7 @@ import { ManageSuppliersComponent } from './manage-suppliers/manage-suppliers.co
 import { WefabTeamLayoutComponent } from './wefabTeam-layout/wefabTeam-layout.component';
 import { WefabteamsupplierProfileReviewComponent } from './wefabteamsupplier-profile-review/wefabteamsupplier-profile-review.component';
 import { SupplierFinderComponent } from '../wefabTeam/supplier-finder/supplier-finder.component';
+import { AuthGuard } from '../../core/guards/auth.guard';
 
 export const WEFAB_TEAM_ROUTES: Routes = [
   {
@@ -11,26 +12,25 @@ export const WEFAB_TEAM_ROUTES: Routes = [
     component: WefabTeamLayoutComponent,
     children: [
       {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
-      },
-      {
-        path: 'dashboard',
-        component: WefabTeamDashboardComponent
-      },
-      {
         path: 'manage-suppliers',
-        component: ManageSuppliersComponent
+        component: ManageSuppliersComponent,
+        canActivate: [AuthGuard]
       },
       {
         path: 'supplier-finder',
-        component: SupplierFinderComponent
+        component: SupplierFinderComponent,
+        canActivate: [AuthGuard]
       },
       {
         path: 'manage-suppliers/:id',
-        component: WefabteamsupplierProfileReviewComponent
-      }
+        component: WefabteamsupplierProfileReviewComponent,
+        canActivate: [AuthGuard]
+      },
+      {
+        path: '**',
+        redirectTo: 'manage-suppliers',
+        pathMatch: 'full'
+      },
     ]
   }
 ]; 

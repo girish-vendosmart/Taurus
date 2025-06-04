@@ -66,14 +66,15 @@ export class CommonHeaderComponent {
     console.log('Logout clicked');
     this.logoutEvent.emit();
     this.performLogout();
+    localStorage.clear();
   }
 
   private performLogout(): void {
     console.log('Performing logout for user:', this.dummyUserEmail);
     
     // Clear any stored authentication data
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('token');
+    localStorage.removeItem('token');
     
     // Navigate to login page or home page
     this.router.navigate(['/wefab/supplier/login']).catch(error => {
