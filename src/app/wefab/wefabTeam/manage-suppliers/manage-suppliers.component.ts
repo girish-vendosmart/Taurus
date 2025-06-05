@@ -22,6 +22,7 @@ import { TagModule } from 'primeng/tag';
 import { SweetAlertService } from '../../../shared/services/sweet-alert.service'
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../../shared/components/common-table/common-table.component';
+import { ConfigurableButtonComponent } from '../../../shared/components/configurable-button/configurable-button.component';
 
 interface Supplier {
   name: string;
@@ -60,7 +61,8 @@ interface Supplier {
     OverlayPanelModule,
     TagModule,
     DateFormatPipe,
-    CommonTableComponent
+    CommonTableComponent,
+    ConfigurableButtonComponent
   ],
   providers: [MessageService],
   template: `
@@ -69,14 +71,10 @@ interface Supplier {
     <div class="suppliers-container">
       <div class="header">
         <h3>Manage your vendors</h3>
-         <button 
-          type="button" 
-          class="btn btn-primary px-3 mb-2"
-          style="font-size: 14px !important;"
-          (click)="showInviteDialog()">
-          <i class="pi pi-plus ms-2" style="font-size: 13px; margin-right: 5px;"></i>
-          Invite Vendor
-        </button>
+        <app-configurable-button
+          [configuration]="inviteButtonConfig"
+          (onClick)="showInviteDialog()">
+        </app-configurable-button>
       </div>
 
       <p-tabView>
@@ -334,6 +332,15 @@ export class ManageSuppliersComponent implements OnInit {
         severity: 'secondary'
       }
     ]
+  };
+
+  inviteButtonConfig = {
+    label: 'Invite Vendor',
+    icon: 'pi pi-plus',
+    severity: 'primary',
+    style: {
+      fontSize: '14px'
+    }
   };
 
   constructor(
