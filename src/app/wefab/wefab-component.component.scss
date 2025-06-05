@@ -1,3 +1,5 @@
+@import '../../assets/scss/variables.scss';
+
 // WE-FAB Style Guide Variables
 $blueprint-blue: #1A3A5F;   // Primary brand color
 $technical-white: #F6F7F9;  // Background color
@@ -18,7 +20,7 @@ $transition: all 0.3s ease;
   display: flex;
   min-height: 100vh;
   background-color: $technical-white;
-  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  font-family: $font-family-sans-serif;
   position: relative;
 }
 

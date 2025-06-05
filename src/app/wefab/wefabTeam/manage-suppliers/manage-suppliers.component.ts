@@ -174,7 +174,7 @@ interface Supplier {
     }
     .suppliers-container {
       padding: 1.2rem;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', sans-serif;
     }
 
     .header {

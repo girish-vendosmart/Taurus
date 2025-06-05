@@ -1,3 +1,5 @@
+@import '../../../../assets/scss/variables.scss';
+
 $blueprint-blue: #1A3A5F;
 $process-green: #1a9d59;
 $safety-orange: #F26830;
@@ -505,7 +507,7 @@ $safety-orange: #F26830;
       
       .percentage {
         fill: $process-green;
-        font-family: sans-serif;
+        font-family: $font-family-sans-serif;
         font-size: 0.6em;
         font-weight: bold;
         text-anchor: middle;
