@@ -1,10 +1,10 @@
 <div class="table-wrapper">
   <div class="common-table-container">
     <!-- Table Controls -->
-    <div class="table-controls" *ngIf="config.enableColumnHide">
-      <div class="column-controls">
-        <label class="control-label">
-          <i class="pi pi-eye control-icon"></i>
+    <div class="table-controls bg-light border-bottom py-4 px-4 d-flex justify-content-end align-items-center shadow-sm" *ngIf="config.enableColumnHide">
+      <div class="column-controls d-flex align-items-center gap-3">
+        <label class="control-label d-flex align-items-center gap-2 mb-0">
+          <i class="pi pi-eye control-icon text-primary"></i>
           Column Visibility:
         </label>
         <p-multiSelect 
@@ -27,7 +27,7 @@
           <ng-template pTemplate="header">
             <div class="multiselect-header">
               <div class="header-content">
-                <div class="header-title">
+                <div class="header-table-title">
                   <i class="pi pi-eye-slash"></i>
                   <span>Show/Hide Table Columns</span>
                 </div>
@@ -64,13 +64,13 @@
 
     <!-- Header with Column Names -->
     <div class="table-header">
-      <div class="header-row">
-        <div class="header-cell" 
+      <div class="header-row d-flex w-100 bg-light border-bottom">
+        <div class="header-cell d-flex align-items-center justify-content-between position-relative border-end px-3 py-2"
              *ngFor="let col of getVisibleColumns()"
              [style.width]="col.width"
              [style.flex]="col.width ? 'none' : '1'">
-          <div class="header-content">
-            <span class="header-title">
+          <div class="header-content d-flex align-items-center justify-content-between w-100">
+            <span class="header-table-title table-header fw-medium">
               {{ col.header }}
             </span>
             <i [class]="getSortIcon(col.field)" 
@@ -87,8 +87,8 @@
       </div>
       
       <!-- Search Fields Row -->
-      <div class="search-row">
-        <div class="search-field" 
+      <div class="search-row d-flex w-100">
+        <div class="search-field d-flex align-items-center bg-light border-end border-bottom px-3 py-2" 
              *ngFor="let col of getVisibleColumns()"
              [style.width]="col.width"
              [style.flex]="col.width ? 'none' : '1'">
@@ -99,13 +99,13 @@
             pInputText 
             [placeholder]="col.filterable ? 'Search ' + col.header : ''"
             (input)="dt.filter($any($event.target).value, col.field, 'contains')"
-            class="search-input"
+            class="form-control form-control-sm"
             [disabled]="!col.filterable"
             *ngIf="col.filterable && (!col.filterType || col.filterType === 'text')"
           />
           
           <!-- Date Range Filter -->
-          <div class="date-range-filter" *ngIf="col.filterable && col.filterType === 'dateRange'">
+          <div class="date-range-filter w-100" *ngIf="col.filterable && col.filterType === 'dateRange'">
             <p-calendar 
               [(ngModel)]="dateRangeFilters[col.field]"
               (onSelect)="onDateRangeChange(col.field, $event)"
@@ -123,7 +123,7 @@
           </div>
           
           <!-- Dropdown Filter -->
-          <div class="dropdown-filter" *ngIf="col.filterable && col.filterType === 'dropdown'">
+          <div class="dropdown-filter w-100" *ngIf="col.filterable && col.filterType === 'dropdown'">
             <p-dropdown 
               [(ngModel)]="dropdownFilters[col.field]"
               (onChange)="onDropdownChange(col.field, $event.value)"
@@ -158,7 +158,7 @@
       [tableStyle]="{ 'min-width': '100%' }"
       [loading]="loading"
       [globalFilterFields]="globalFilterFields"
-      styleClass="p-datatable-sm"
+      styleClass="p-datatable-sm table-hover"
       [rowHover]="true"
       responsiveLayout="scroll"
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
@@ -169,19 +169,19 @@
     >
 
       <ng-template pTemplate="paginatorright">
-        <div class="custom-pagination">
+        <div class="custom-pagination d-flex align-items-center gap-3">
           <button 
-            class="pagination-btn" 
+            class="btn btn-light btn-sm d-flex align-items-center justify-content-center" 
             [disabled]="isFirstPage()"
             (click)="goToPreviousPage()"
             title="Previous Page">
             <i class="pi pi-chevron-left"></i>
           </button>
-          <span class="page-info">
+          <span class="page-info fw-medium">
             Page {{ getCurrentPage() }} of {{ getTotalPages() }}
           </span>
           <button 
-            class="pagination-btn" 
+            class="btn btn-light btn-sm d-flex align-items-center justify-content-center" 
             [disabled]="isLastPage()"
             (click)="goToNextPage()"
             title="Next Page">
@@ -199,25 +199,25 @@
               [style.flex]="col.width ? 'none' : '1'">
             <ng-container [ngSwitch]="true">
               <!-- Company Cell -->
-              <div class="company-cell" *ngSwitchCase="col.isLink">
-                <a class="company-name linkable-column" 
+              <div class="company-cell d-flex flex-column gap-1" *ngSwitchCase="col.isLink">
+                <a class="company-name linkable-column fs-14"
                    *ngIf="!col.routerLink && !rowData.routerLink"
                    (click)="onLinkClick($event, rowData, col)">
                   {{ rowData[col.field] }}
                 </a>
-                <a class="company-name linkable-column" 
+                <a class="company-name linkable-column fs-14"
                    *ngIf="col.routerLink && !rowData.routerLink"
                    [routerLink]="getRouterLink(col, rowData)"
                    (click)="onLinkClick($event, rowData, col)">
                   {{ rowData[col.field] }}
                 </a>
-                <a class="company-name linkable-column" 
+                <a class="company-name linkable-column fs-14" 
                    *ngIf="rowData.routerLink"
                    [routerLink]="rowData.routerLink"
                    (click)="onLinkClick($event, rowData, col)">
                   {{ rowData[col.field] }}
                 </a>
-                <div class="sub-info" *ngIf="rowData.companySubInfo || rowData.companyId || rowData.name">
+                <div class="sub-info text-muted small fs-12" *ngIf="rowData.companySubInfo || rowData.companyId || rowData.name">
                   {{ rowData.companySubInfo || rowData.companyId || rowData.name }}
                 </div>
               </div>
@@ -230,10 +230,10 @@
               </div>
 
               <!-- Action Cell -->
-              <div class="action-cell" *ngSwitchCase="col.isAction">
+              <div class="action-cell d-flex gap-2 flex-wrap" *ngSwitchCase="col.isAction">
                 <button 
                   type="button" 
-                  [class]="'action-btn ' + (btn.class || '') + ' ' + getSeverityClass(btn.severity)"
+                  [class]="'btn btn-sm ' + (btn.class || '') + ' ' + getSeverityClass(btn.severity)"
                   (click)="onActionClick(btn.action, rowData, $event)"
                   [title]="btn.tooltip || btn.label"
                   *ngFor="let btn of getActionButtons()">
@@ -244,18 +244,18 @@
 
               <!-- HTML Content Cell -->
               <div [class]="col.field + '-cell'" *ngSwitchCase="col.isHtml">
-                <div class="main-content non-linkable-column" 
+                <div class="main-content non-linkable-column fs-14" 
                      [innerHTML]="rowData[col.field]"
                      (click)="onLinkClick($event, rowData, col)"></div>
-                <div class="sub-info" *ngIf="getSubInfo(col.field, rowData)">
+                <div class="sub-info text-muted small" *ngIf="getSubInfo(col.field, rowData)">
                   {{ getSubInfo(col.field, rowData) }}
                 </div>
               </div>
 
               <!-- Default Cell -->
               <div [class]="col.field + '-cell'" *ngSwitchDefault>
-                <div class="main-content non-linkable-column">{{ rowData[col.field] }}</div>
-                <div class="sub-info" *ngIf="getSubInfo(col.field, rowData)">
+                <div class="main-content non-linkable-column fs-14">{{ rowData[col.field] }}</div>
+                <div class="sub-info text-muted small" *ngIf="getSubInfo(col.field, rowData)">
                   {{ getSubInfo(col.field, rowData) }}
                 </div>
               </div>

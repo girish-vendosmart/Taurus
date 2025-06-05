@@ -305,25 +305,27 @@ export class CommonTableComponent implements OnInit {
   getStatusClass(status: string): string {
     if (!status) return 'status-default';
     
-    status = status.toLowerCase();
-    console.log('status', status);
+    // Convert to lowercase and replace spaces with hyphens
+    status = status.toLowerCase().replace(/\s+/g, '-');
+    console.log('Table status', status);
+    
     switch (status) {
-      case 'Draft':
-        return 'status-draft';
-      case '':
-        return 'status-open';
-      case 'under review':
+      case 'not-started':
+        return 'status-not-started';
+      case 'under-review':
         return 'status-under-review';
       case 'approved':
         return 'status-approved';
+      case 'rejected':
+        return 'status-rejected';
+      case 'draft':
+        return 'status-draft';
+      case 'open':
+        return 'status-open';
+      case 'in-progress':
+        return 'status-progress';
       case 'closed':
         return 'status-closed';
-      case 'request to resubmit':
-        return 'status-resubmit';
-      case 'in progress':
-        return 'status-in-progress';
-      case 'invited':
-        return 'status-under-review'; // Use same styling as under review
       case 'awarded':
         return 'status-awarded';
       case 'quoted':
@@ -338,8 +340,6 @@ export class CommonTableComponent implements OnInit {
         return 'status-paused';
       case 'submitted':
         return 'status-awarded';
-      case 'rejected':
-        return 'status-rejected';
       case 'pending':
         return 'status-pending';
       case 'review':

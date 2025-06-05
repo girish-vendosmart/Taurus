@@ -23,6 +23,9 @@ $process-green: #12856E;    // Success states, progress
 $warning-yellow: #F59E0B;   // Warning color
 $info-blue: #3B82F6;       // Info color
 $danger-red: #EF4444;       // Danger/error color
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
 
 /* Global typography styles */
 body {
@@ -45,7 +48,6 @@ body {
 }
 
 .body-small {
-  font-size: $font-size-sm;
   line-height: $line-height-sm;
 }
 
@@ -134,82 +136,118 @@ h4, .h4 {
 }
 
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
-
-  &.status-draft {
-    background-color: rgba(156, 163, 175, 0.15);
-    color: #6b7280;
-    border: 1px solid rgba(156, 163, 175, 0.2);
+.status-cell {
+  text-align: left;
+  width: 100%;
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+  
+    &.status-draft {
+      background-color: rgba(156, 163, 175, 0.15);
+      color: #6b7280;
+      border: 1px solid rgba(156, 163, 175, 0.2);
+    }
+  
+    &.status-open {
+      background-color: rgba($info-blue, 0.15);
+      color: $info-blue;
+      border: 1px solid rgba($info-blue, 0.2);
+    }
+  
+    &.status-progress {
+      background-color: rgba($warning-yellow, 0.15);
+      color: #d97706;
+      border: 1px solid rgba($warning-yellow, 0.2);
+    }
+  
+    &.status-closed {
+      background-color: rgba($machine-gray, 0.15);
+      color: $machine-gray;
+      border: 1px solid rgba($machine-gray, 0.2);
+    }
+  
+    &.status-awarded {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+  
+    &.status-rejected {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+  
+    &.status-pending {
+      background-color: rgba(168, 85, 247, 0.15);
+      color: #7c3aed;
+      border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+  
+    &.status-review {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: #d97706;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+  
+    &.status-deactivate {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+  
+    &.status-paused {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+  
+    // Hover effect for interactive badges
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
   }
+}
+.fs-16 {
+  font-size: 16px;
+}
 
-  &.status-open {
-    background-color: rgba($info-blue, 0.15);
-    color: $info-blue;
-    border: 1px solid rgba($info-blue, 0.2);
-  }
+.fs-14 {
+  font-size: 14px;
+}
 
-  &.status-progress {
-    background-color: rgba($warning-yellow, 0.15);
-    color: #d97706;
-    border: 1px solid rgba($warning-yellow, 0.2);
-  }
+.fs-12 {
+  font-size: 12px;
+}
 
-  &.status-closed {
-    background-color: rgba($machine-gray, 0.15);
-    color: $machine-gray;
-    border: 1px solid rgba($machine-gray, 0.2);
-  }
+.fs-10 {
+  font-size: 10px;
+}
 
-  &.status-awarded {
-    background-color: rgba(16, 185, 129, 0.15);
-    color: #059669;
-    border: 1px solid rgba(16, 185, 129, 0.2);
-  }
+.fs-8 {
+  font-size: 8px;
+}
 
-  &.status-rejected {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-  }
+// Table Styles 
+.table-header {
+  font-size: $h5-font-size !important;
+  font-weight: $font-weight-semibold !important;
+}
 
-  &.status-pending {
-    background-color: rgba(168, 85, 247, 0.15);
-    color: #7c3aed;
-    border: 1px solid rgba(168, 85, 247, 0.2);
-  }
-
-  &.status-review {
-    background-color: rgba(245, 158, 11, 0.15);
-    color: #d97706;
-    border: 1px solid rgba(245, 158, 11, 0.2);
-  }
-
-  &.status-deactivate {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-  }
-
-  &.status-paused {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-  }
-
-  // Hover effect for interactive badges
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+:host ::ng-deep {
+  .form-control-sm {
+    font-size: 12px !important;
+    height: 32px !important;
   }
 }
