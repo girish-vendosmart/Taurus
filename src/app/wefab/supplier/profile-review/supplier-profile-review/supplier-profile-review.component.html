@@ -2,12 +2,12 @@
   <!-- Header Section -->
   <div class="review-header">
     <div class="header-left">
-      <h1 class="review-title">Supplier Profile Review</h1>
+      <h3>Supplier Profile Review</h3>
       <p class="review-subtitle">Status: 
         <span class="status-pending" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Under Review')">
           {{ mainCurrentDataStatusTrack }}
         </span>
-        <span class="status-completed" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Approved')">
+        <span class="status-badge status-awarded" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Approved')">
           {{ mainCurrentDataStatusTrack }}
         </span> 
         <span class="status-rejected" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Rejected')">
@@ -21,12 +21,15 @@
     </div>
     <!-- View Activity Trail Button -->
     <div class="navigation-buttons">
-      <button class="btn-view-activity" (click)="toggleActivityTrail()" *ngIf="!showActivityTrail">
-        <i class="pi pi-history"></i> View Activity Trail
-      </button>
-      <button class="btn-navigation" (click)="goBack()">
-        <i class="pi pi-arrow-left"></i> Back
-      </button>
+      <app-configurable-button
+          [configuration]="activityTrailButtonConfig"
+          *ngIf="!showActivityTrail"
+          (onClick)="toggleActivityTrail()">
+      </app-configurable-button>
+      <app-configurable-button
+        [configuration]="backButtonConfig"
+        (onClick)="goBack()">
+      </app-configurable-button>
     </div>
   </div>
 
@@ -968,9 +971,15 @@
     <div class="review-main-content activity-trail-container">
       <div class="activity-trail-header">
         <h2><i class="pi pi-history"></i> Activity Trail</h2>
-        <button class="btn-navigation btn-back" (click)="toggleActivityTrail()">
-          <i class="pi pi-arrow-left"></i> Back to Profile
-        </button>
+        <app-configurable-button
+          [configuration]="{
+            label: 'Back to Profile',
+            icon: 'pi pi-arrow-left',
+            styleClass: 'btn-navigation btn-back',
+            iconPos: 'left'
+          }"
+          (onClick)="toggleActivityTrail()">
+        </app-configurable-button>
       </div>
       
       <!-- Use the new Activity Trail Component -->

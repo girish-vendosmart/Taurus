@@ -136,13 +136,10 @@ h4, .h4 {
 }
 
 
-.status-cell {
-  text-align: left;
-  width: 100%;
   .status-badge {
     display: inline-flex;
     align-items: center;
-    padding: 0.25rem 0.75rem;
+    padding: 0.1rem 0.75rem;
     border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -180,6 +177,8 @@ h4, .h4 {
       background-color: rgba(16, 185, 129, 0.15);
       color: #059669;
       border: 1px solid rgba(16, 185, 129, 0.2);
+      font-size: 12px !important;
+      text-transform: capitalize;
     }
   
     &.status-rejected {
@@ -218,7 +217,6 @@ h4, .h4 {
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
   }
-}
 .fs-16 {
   font-size: 16px;
 }
@@ -255,4 +253,8 @@ h4, .h4 {
 h3 {
   font-size: $h3-font-size;
   font-weight: $font-weight-semibold;
+}
+
+p {
+  font-size: $p-font-size;
 }

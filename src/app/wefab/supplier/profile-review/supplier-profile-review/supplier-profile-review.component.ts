@@ -16,6 +16,7 @@ import { map, tap, catchError, finalize, switchMap, debounceTime, distinctUntilC
 import { Subscription } from 'rxjs';
 import { ActivityTrailComponent, ActivityLogData } from '../../../../shared/components/activity-trail/activity-trail.component';
 import { DateFormatPipe } from '../../../../shared/pipes/date-format.pipe';
+import { ConfigurableButtonComponent } from '../../../../shared/components/configurable-button/configurable-button.component';
 
 interface DocumentSummary {
   companyDocuments: number;
@@ -66,7 +67,8 @@ interface CacheEntry<T> {
     RippleModule,
     TooltipModule,
     ActivityTrailComponent,
-    DateFormatPipe
+    DateFormatPipe,
+    ConfigurableButtonComponent
   ],
   providers: [MessageService],
   templateUrl: './supplier-profile-review.component.html',
@@ -74,6 +76,38 @@ interface CacheEntry<T> {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
+
+  // activityTrailButtonConfig = {
+  //   label: 'View Activity Trail',
+  //   icon: 'pi pi-history',
+  //   styleClass: 'btn-view-activity',
+  //   iconPos: 'left'
+  // };
+
+  activityTrailButtonConfig = {
+    label: 'View Activity Trail',
+    icon: 'pi pi-history',
+    severity: 'primary',
+    iconPos: 'left',
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.4rem 0.8rem',
+      borderRadius: '5px'
+    }
+  };
+
+  backButtonConfig = {
+    label: 'Back',
+    icon: 'pi pi-arrow-left',
+    severity: 'primary',
+    iconPos: 'left',
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.4rem 0.8rem',
+      borderRadius: '5px'
+    }
+  };
+  
   private subscription: Subscription = new Subscription();
   private cache = new Map<string, CacheEntry<any>>();
   private readonly CACHE_EXPIRY = 10 * 60 * 1000; // Increased to 10 minutes for better caching
