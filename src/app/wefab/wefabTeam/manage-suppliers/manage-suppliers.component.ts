@@ -146,20 +146,14 @@ interface Supplier {
         </div>
 
         <div class="dialog-footer">
-          <button 
-            type="button" 
-            class="btn btn-outline-secondary" 
-            (click)="hideInviteDialog()">
-            <i class="pi pi-times prime-ng-font-icon-font-size"></i>
-            Cancel
-          </button>
-          <button 
-                type="button" 
-                (click)="onSubmit()"
-                class="btn btn-primary" >
-                <i class="pi pi-send prime-ng-font-icon-font-size"></i>
-                Send Invitations
-          </button>
+          <app-configurable-button
+            [configuration]="cancelButtonConfig"
+            (onClick)="hideInviteDialog()">
+          </app-configurable-button>
+          <app-configurable-button
+            [configuration]="sendInvitationButtonConfig"
+            (onClick)="onSubmit()">
+          </app-configurable-button>
         </div>
       </form>
     </p-dialog>
@@ -186,7 +180,7 @@ interface Supplier {
     
 
     .invite-form .field {
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
     }
 
     .invite-form .field label {
@@ -209,7 +203,9 @@ interface Supplier {
       display: flex;
       justify-content: flex-end;
       gap: 0.5rem;
-      margin-top: 1.5rem;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #dee2e6;
     }
 
     /* PrimeNG component overrides for better alignment */
@@ -219,9 +215,13 @@ interface Supplier {
     }
 
     :host ::ng-deep .p-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      padding: 0.4rem 0.8rem !important;
+      font-size: 0.875rem !important;
+      border-radius: 5px !important;
+    }
+
+    :host ::ng-deep .p-dialog .p-dialog-content {
+      padding: 1rem !important;
     }
 
     ::ng-deep .p-tabview .p-tabview-panels {
@@ -237,6 +237,12 @@ interface Supplier {
 
     ::ng-deep .p-tabview-nav-link {
       text-decoration: none !important;
+    }
+
+    ::ng-deep .p-dialog-header {
+      padding-bottom: 0px !important;
+      padding-left: 15px !important;
+      padding-right: 15px !important;
     }
   `]
 })
@@ -339,7 +345,35 @@ export class ManageSuppliersComponent implements OnInit {
     icon: 'pi pi-plus',
     severity: 'primary',
     style: {
-      fontSize: '14px'
+      fontSize: '0.875rem',
+      padding: '0.4rem 0.8rem',
+      borderRadius: '5px'
+    }
+  };
+
+  cancelButtonConfig = {
+    label: 'Cancel',
+    icon: 'pi pi-times',
+    severity: 'secondary',
+    outlined: true,
+    style: {
+      marginRight: '0.5rem',
+      padding: '0.4rem 0.8rem',
+      fontSize: '0.875rem',
+      borderRadius: '5px'
+    }
+  };
+
+  sendInvitationButtonConfig = {
+    label: 'Send Invitation',
+    icon: 'pi pi-send',
+    severity: 'primary',
+    loading: false,
+    disabled: false,
+    style: {
+      padding: '0.4rem 0.8rem',
+      fontSize: '0.875rem',
+      borderRadius: '5px'
     }
   };
 
@@ -451,14 +485,19 @@ export class ManageSuppliersComponent implements OnInit {
 
   onSubmit() {
     if (this.inviteForm.valid) {
-      this.isSubmitting = true;
+      this.sendInvitationButtonConfig = {
+        ...this.sendInvitationButtonConfig,
+        loading: true,
+        disabled: true
+      };
+      
       const endPoint = '/api/resource/Supplier Invitation';
       
       this.commonService.postData(endPoint, this.inviteForm.value).subscribe({
         next: (response) => {
           this.sweetAlert.success('Supplier invitation sent successfully!');
           this.hideInviteDialog();
-          this.loadInvitedSuppliers(); // Refresh invited list immediately after sending
+          this.loadInvitedSuppliers();
           this.loadSuppliers();
         },
         error: (error) => {
@@ -466,7 +505,11 @@ export class ManageSuppliersComponent implements OnInit {
           this.sweetAlert.error('error.error?.message');
         },
         complete: () => {
-          this.isSubmitting = false;
+          this.sendInvitationButtonConfig = {
+            ...this.sendInvitationButtonConfig,
+            loading: false,
+            disabled: false
+          };
         }
       });
     }
