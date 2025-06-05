@@ -1,0 +1,1921 @@
+import { Component, OnInit, ViewChild, TemplateRef, Inject, PLATFORM_ID, Renderer2 } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { FormGroup, FormBuilder, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { FormlyFieldConfig, FormlyModule, FormlyFormOptions, FormlyExtension } from '@ngx-formly/core';
+import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
+import { Router } from '@angular/router';
+// PrimeNG imports
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { DropdownModule } from 'primeng/dropdown';
+import { TooltipModule } from 'primeng/tooltip';
+import { StepsModule } from 'primeng/steps';
+import { MenuItem } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
+// Import FileUploadComponent
+import { FileUploadComponent } from './file-upload.component';
+// Import MultiFileUploadComponent
+import { MultiFileUploadComponent } from './multi-file-upload.component';
+// Import PhoneOtpVerificationComponent
+import { PhoneOtpVerificationComponent } from '../../../../../shared/components/phone-otp-verification/phone-otp-verification.component';
+import { CommonService } from '../../../../../shared/services/common.service';
+import { PMultiSelectGroupComponent } from '../../../../../shared/formly-components/p-multiSelect-group.component'
+// Import GstVerifyFieldComponent
+import { GstVerifyFieldComponent } from './gst-verify-field.component';
+// Import the FormlyFieldGstVerifyComponent
+import { FormlyFieldGstVerifyComponent } from '../../../../../shared/formly-components/gst-verify-type.component';
+// Import PDropdownGroupSearchComponent and its Formly wrapper
+import { PDropdownGroupSearchComponent } from '../../../../../shared/formly-components/p-dropdown-group-search.component';
+import { FormlyFieldPDropdownGroupSearchComponent } from '../../../../../shared/formly-components/p-dropdown-group-search-type.component';
+// GST Validator function
+import { ChangeDetectorRef } from '@angular/core';
+import { SweetAlertService } from '../../../../../shared/services/sweet-alert.service';
+export function gstValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  
+  if (!value) {
+    return null; // Let required validation handle empty values
+  }
+  
+  const gstPattern = /^[0-9]{2}[A-Za-z0-9]{10}[A-Za-z0-9]{1}Z[A-Za-z0-9]{1}$/;
+  
+  return gstPattern.test(value) ? null : { 'gstFormat': true };
+}
+
+// PAN Validator function
+export function panValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  
+  if (!value) {
+    return null; // Let required validation handle empty values
+  }
+  
+  const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+  
+  return panPattern.test(value) ? null : { 'panFormat': true };
+}
+
+@Component({
+  selector: 'app-supplier-onboarding',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    FormlyModule,
+    FormlyBootstrapModule,
+    CardModule,
+    ButtonModule,
+    InputTextModule,
+    DropdownModule,
+    TooltipModule,
+    StepsModule,
+    ToastModule,
+    MultiSelectModule,
+    DialogModule,
+    InputNumberModule,
+    FileUploadComponent,
+    PhoneOtpVerificationComponent,
+    MultiFileUploadComponent,
+    PMultiSelectGroupComponent,
+    GstVerifyFieldComponent,
+    FormlyFieldGstVerifyComponent,
+    PDropdownGroupSearchComponent,
+    FormlyFieldPDropdownGroupSearchComponent
+  ],
+  providers: [MessageService],
+  templateUrl: './supplier-onboarding.component.html',
+  styleUrl: './supplier-onboarding.component.scss'
+})
+export class SupplierOnboardingComponent implements OnInit {
+  form: FormGroup;
+  model: any = {};
+  options: FormlyFormOptions = {};
+  
+  activeStepIndex = 0;
+  steps: MenuItem[] = [];
+  
+  // Create arrays of field configurations for each step
+  stepFields: FormlyFieldConfig[][] = [];
+  
+  // Phone verification state
+  phoneVerified = false;
+  // GST verification state
+  gstVerified = false;
+  // Add this property for configurable file types
+  acceptedDocumentTypes: string = '.zip'; 
+  @ViewChild('verifyOtpButton') verifyOtpButtonTemplate!: TemplateRef<any>;
+  isBrowser: boolean;
+  countryList: any = [];
+  selectedCountry: any;
+  selectedState: any; // Add this to track the selected state
+  stateList: any = []; // Initialize as empty array
+  getCompanyProfile: any;
+  stateFieldInitialized = false; // Flag to track state field initialization
+  
+  // New property to check if supplier already exists
+  hasExistingSupplier = false;
+  companyName: any;
+  
+  constructor(
+    private fb: FormBuilder, 
+    private messageService: MessageService,
+    private renderer: Renderer2,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private commonService: CommonService,
+    private sweetAlertService: SweetAlertService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.form = this.fb.group({});
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
+
+  getCountryList() {
+    let endPoint = '/api/resource/Country?limit=300';
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      this.countryList = res.data;
+    });
+  }
+
+  getStates(country: any) {
+    if (!country) return;
+    
+    let endPoint = `/api/resource/City?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"]]`;
+    console.log('Fetching states for country:', country);
+    
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      console.log('States API response:', res);
+      if (res && res.data) {
+        // Extract unique states from the response
+        const states = [...new Set(res.data.map((item: any) => item.state_title))];
+        
+        this.stateList = states.map((state: any) => ({
+          label: state,
+          value: state
+        }));
+        
+        console.log('State list updated:', this.stateList);
+        
+        // After state list is loaded, now set the selected state if we have one
+        if (this.selectedState) {
+          console.log('Setting selected state from stored value:', this.selectedState);
+          
+          // Use setTimeout to ensure the UI has time to update
+          setTimeout(() => {
+            // Find if our selected state exists in the loaded state list
+            const stateExists = this.stateList.some(
+              (option: any) => option.value === this.selectedState
+            );
+            
+            if (stateExists) {
+              // Update the model directly
+              this.model.state = this.selectedState;
+              
+              // Also update the form control
+              const stateControl = this.form.get('state');
+              if (stateControl) {
+                stateControl.setValue(this.selectedState);
+                stateControl.markAsDirty();
+                stateControl.updateValueAndValidity();
+                console.log('State control updated with:', this.selectedState);
+                
+                // Now that state is set, try to get cities and set city value if we have one
+                if (this.getCompanyProfile && this.getCompanyProfile.city) {
+                  this.getCities(country, this.selectedState);
+                  // Set city after a delay to allow cities to load
+                  setTimeout(() => {
+                    this.setCityValue(this.getCompanyProfile.city);
+                  }, 500);
+                }
+              }
+            } else {
+              console.log('Selected state not found in loaded state list:', this.selectedState);
+              // Reset the selectedState since it doesn't exist in the loaded list
+              this.selectedState = null;
+            }
+            
+            // Update the state dropdown options and mark as dirty
+            this.updateStateDropdownOptions(true);
+          }, 200);
+        }
+
+        // Always call updateStateDropdownOptions to refresh the dropdown
+        this.updateStateDropdownOptions(false);
+
+      } else {
+        this.stateList = [];
+      }
+    }, error => {
+      console.error('Error fetching states:', error);
+      this.stateList = [];
+    });
+  }
+
+  // Method to update state dropdown options with an option to force selection
+  updateStateDropdownOptions(forceSelection: boolean = false) {
+    // Find the state field in the form
+    if (this.stepFields && this.stepFields.length > 0) {
+      const basicDetailsFields = this.stepFields[0];
+      
+      // Find the row containing country, state, city fields
+      const addressRow = basicDetailsFields.find((fieldGroup: any) => 
+        fieldGroup.fieldGroup && 
+        fieldGroup.fieldGroup.some((field: any) => field.key === 'country')
+      );
+      
+      if (addressRow && addressRow.fieldGroup) {
+        // Find the state field
+        const stateField = addressRow.fieldGroup.find((field: any) => field.key === 'state');
+        
+        if (stateField && stateField.templateOptions) {
+          // Update the options
+          stateField.templateOptions.options = this.stateList;
+          
+          console.log('Updated state field options:', this.stateList.length, 'options');
+          
+          // If forceSelection and we have a selectedState, make sure it's applied
+          if (forceSelection && this.selectedState && stateField.formControl) {
+            console.log('Forcing state selection to:', this.selectedState);
+            stateField.formControl.setValue(this.selectedState);
+            stateField.formControl.markAsDirty();
+            stateField.formControl.updateValueAndValidity();
+          }
+          
+          // If we have a selectedState but no forceSelection, still try to set it if the field is empty
+          if (!forceSelection && this.selectedState && stateField.formControl && !stateField.formControl.value) {
+            // Check if the selected state exists in the options
+            const stateExists = this.stateList.some(
+              (option: any) => option.value === this.selectedState
+            );
+            
+            if (stateExists) {
+              console.log('Setting state value as field is empty:', this.selectedState);
+              stateField.formControl.setValue(this.selectedState);
+              stateField.formControl.markAsDirty();
+              stateField.formControl.updateValueAndValidity();
+            }
+          }
+          
+          // Force update the UI
+          setTimeout(() => {
+            if (stateField.formControl) {
+              stateField.formControl.updateValueAndValidity();
+            }
+            // Force change detection
+            this.cdr.detectChanges();
+          }, 50);
+        }
+      }
+    }
+  }
+
+  ngOnInit(): void {
+    // Initialize form with empty fields first
+    this.form = this.fb.group({});
+    
+    // Load country list first, then initialize fields after data is loaded
+    this.getCountryListAndInitializeForm();
+    
+    this.steps = [
+      {
+        label: 'Basic Details',
+        command: () => {
+          this.activeStepIndex = 0;
+        }
+      },
+      {
+        label: 'Contact & Capabilities',
+        command: () => {
+          this.activeStepIndex = 1;
+        }
+      }
+    ];
+    
+    // Check if supplier_id exists in session storage
+    if (this.isBrowser) {
+      const supplierId = localStorage.getItem('supplier_id');
+      if (supplierId) {
+        this.hasExistingSupplier = true;
+      }
+      
+      // Check if we're in edit mode
+      const route = this.router.url;
+      if (route.includes('mode=edit')) {
+        const supplierId = localStorage.getItem('supplier_id');
+        if (supplierId) {
+          this.getL1Data(supplierId);
+        } else {
+          this.sweetAlertService.error('Supplier ID not found. Please try again.');
+          this.router.navigate(['/wefab/supplier/supplier-verification']);
+        }
+      }
+      this.patchEmailId();
+    }
+  }
+
+  patchEmailId() {
+    this.model.primary_email_id = localStorage.getItem('primary_email_id');
+    
+    setTimeout(() => {
+      this.form.markAsPristine();
+    }, 1000);
+  }
+
+  getL1Data(supplierId: any) {
+    let endPoint = '/api/resource/Supplier Onboarding L1/' + supplierId;
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      console.log('L1 Data response:', res);
+      if (res && res.data && res.data.company_profile) {
+        try {
+          this.getCompanyProfile = JSON.parse(res.data.company_profile);
+          this.phoneVerified = this.getCompanyProfile.phone_verified || false;
+          
+          // Load GST verification status from the API response
+          this.gstVerified = this.getCompanyProfile.gstVerified || res.data.gst_verified || false;
+          
+          console.log('Company profile loaded:', this.getCompanyProfile);
+          console.log('Phone verified status:', this.phoneVerified);
+          console.log('GST verified status:', this.gstVerified);
+          
+          // Wait for the form to be initialized before patching values
+          setTimeout(() => {
+            this.patchValueForm();
+          }, 500);
+        } catch (e) {
+          console.error('Error parsing company profile:', e);
+        }
+      }
+    }, error => {
+      console.error('Error fetching L1 data:', error);
+    });
+  }
+
+  patchValueForm() {
+    if (!this.getCompanyProfile) {
+      console.log('No company profile to patch');
+      return;
+    }
+    
+    console.log('Patching form with values:', this.getCompanyProfile);
+    
+    // First, store the state and city if they exist
+    if (this.getCompanyProfile.state) {
+      this.selectedState = this.getCompanyProfile.state;
+      console.log('Stored selected state:', this.selectedState);
+    }
+
+    // Store the city for later use
+    let selectedCity = this.getCompanyProfile.city;
+
+    // Properly format registeredAddress according to AddressData interface
+    this.formatGooglePlacesAddress();
+
+    // Update the model with the values from getCompanyProfile
+    this.model = {
+      ...this.model,
+      ...this.getCompanyProfile
+    };
+    
+    console.log('Model updated with values:', this.model);
+    
+    // Set phone verification status
+    if (this.getCompanyProfile.phone_verified) {
+      this.phoneVerified = true;
+    }
+
+    if(this.getCompanyProfile.registeredAddress){
+      this.getCompanyProfile.registeredAddress = JSON.parse(this.getCompanyProfile.registeredAddress);
+      this.form.patchValue({
+        registeredAddress: this.getCompanyProfile.registeredAddress
+      })
+    }
+    
+    // If the country is selected, load the states for that country first
+    if (this.getCompanyProfile.country) {
+      this.selectedCountry = this.getCompanyProfile.country;
+      
+      // Load states first, then patch form after states are loaded
+      this.getStates(this.selectedCountry);
+      
+      // Patch form values with a longer delay to ensure states are loaded first
+      setTimeout(() => {
+        // First patch all other fields except state (it will be handled by getStates)
+        const formData = { ...this.model };
+        
+        // Patch the form with all data
+        this.form.patchValue(formData);
+        
+        // Force set state value again after form patch to ensure it's not overridden
+        if (this.selectedState) {
+          setTimeout(() => {
+            const stateControl = this.form.get('state');
+            if (stateControl) {
+              stateControl.setValue(this.selectedState);
+              stateControl.markAsDirty();
+              stateControl.updateValueAndValidity();
+              console.log('State control re-set after form patch:', this.selectedState);
+            }
+          }, 100);
+        }
+        
+        // Update GST field verification status after form is patched
+        this.updateGstFieldVerificationStatus();
+        
+        // Then handle Google Places separately with specialized approach
+        this.patchGooglePlacesField(0);
+
+        // Mark form as touched/dirty
+        this.form.markAsDirty();
+        console.log('Final form model:', this.model);
+      }, 800); // Increased delay to ensure states are loaded
+    } else {
+      // If no country, patch form normally with shorter delay
+      setTimeout(() => {
+        // First patch all other fields
+        this.form.patchValue(this.model);
+        
+        // Update GST field verification status after form is patched
+        this.updateGstFieldVerificationStatus();
+        
+        // Then handle Google Places separately with specialized approach
+        this.patchGooglePlacesField(0);
+
+        // Mark form as touched/dirty
+        this.form.markAsDirty();
+        console.log('Final form model:', this.model);
+      }, 300);
+    }
+  }
+
+  /**
+   * Format the Google Places address data according to the AddressData interface
+   */
+  formatGooglePlacesAddress() {
+    console.log('getCompanyProfile', this.getCompanyProfile);
+    // Check if registeredAddress exists
+    if (!this.getCompanyProfile.registeredAddress) {
+      // Initialize with basic structure if missing
+      this.getCompanyProfile.registeredAddress = {
+        fullAddress: `${this.getCompanyProfile.city || ''}, ${this.getCompanyProfile.state || ''}, ${this.getCompanyProfile.country || ''}`,
+        placeId: '',
+        streetNumber: '',
+        street: '',
+        city: this.getCompanyProfile.city || '',
+        state: this.getCompanyProfile.state || '',
+        stateCode: '',
+        postalCode: '',
+        country: this.getCompanyProfile.country || '',
+        countryCode: '',
+        location: {
+          lat: this.getCompanyProfile.registered_lat || 0,
+          lng: this.getCompanyProfile.registered_lng || 0
+        }
+      };
+      console.log('Created new registeredAddress object:', this.getCompanyProfile.registeredAddress);
+      return;
+    }
+    
+    if (typeof this.getCompanyProfile.registeredAddress === 'string') {
+      // Convert string to proper object
+      const addressText = this.getCompanyProfile.registeredAddress;
+      this.getCompanyProfile.registeredAddress = {
+        fullAddress: addressText,
+        placeId: '',
+        streetNumber: '',
+        street: '',
+        city: this.getCompanyProfile.city || '',
+        state: this.getCompanyProfile.state || '',
+        stateCode: '',
+        postalCode: '',
+        country: this.getCompanyProfile.country || '',
+        countryCode: '',
+        location: {
+          lat: this.getCompanyProfile.registered_lat || 0,
+          lng: this.getCompanyProfile.registered_lng || 0
+        }
+      };
+      console.log('Converted string to registeredAddress object:', this.getCompanyProfile.registeredAddress);
+    } else {
+      // Ensure all required properties exist on the object
+      const address = this.getCompanyProfile.registeredAddress;
+      if (!address.location) {
+        address.location = {
+          lat: this.getCompanyProfile.registered_lat || 0,
+          lng: this.getCompanyProfile.registered_lng || 0
+        };
+      }
+      
+      // Ensure all required string properties exist
+      address.fullAddress = address.fullAddress || `${this.getCompanyProfile.city || ''}, ${this.getCompanyProfile.state || ''}, ${this.getCompanyProfile.country || ''}`;
+      address.placeId = address.placeId || '';
+      address.streetNumber = address.streetNumber || '';
+      address.street = address.street || '';
+      address.city = address.city || this.getCompanyProfile.city || '';
+      address.state = address.state || this.getCompanyProfile.state || '';
+      address.stateCode = address.stateCode || '';
+      address.postalCode = address.postalCode || '';
+      address.country = address.country || this.getCompanyProfile.country || '';
+      address.countryCode = address.countryCode || '';
+      
+      console.log('Validated and fixed registeredAddress object:', this.getCompanyProfile.registeredAddress);
+    }
+  }
+
+  /**
+   * Patch the Google Places field with retry logic
+   * @param retryCount Current retry attempt
+   * @param maxRetries Maximum number of retries
+   */
+  patchGooglePlacesField(retryCount = 0, maxRetries = 5) {
+    // Give up after max retries
+    if (retryCount >= maxRetries) {
+      console.error('Failed to patch Google Places field after maximum retries');
+      return;
+    }
+
+    // Calculate delay with exponential backoff
+    const delay = 300 + (retryCount * 200);
+    
+    setTimeout(() => {
+      try {
+        if (!this.form || !this.getCompanyProfile?.registeredAddress) {
+          console.log(`Retry ${retryCount + 1}: Form or address not ready`);
+          this.patchGooglePlacesField(retryCount + 1, maxRetries);
+          return;
+        }
+
+        // First try direct form control approach - this should work for most cases
+        const addressControl = this.form.get('registeredAddress');
+        if (addressControl) {
+          // Enable the control temporarily if it's disabled
+          const wasDisabled = addressControl.disabled;
+          if (wasDisabled) {
+            addressControl.enable({emitEvent: false});
+          }
+
+          // Set the value
+          console.log(`Setting registeredAddress via form control (attempt ${retryCount + 1}):`, this.getCompanyProfile.registeredAddress);
+          addressControl.setValue(this.getCompanyProfile.registeredAddress);
+          addressControl.markAsDirty();
+          addressControl.updateValueAndValidity({emitEvent: true});
+          
+          // Disable the control again if it was disabled
+          if (wasDisabled) {
+            addressControl.disable({emitEvent: false});
+          }
+        }
+        
+        // Also try to find and update the Formly field directly - this works when the component is defined in Formly
+        if (this.stepFields && this.stepFields.length > 0) {
+          const basicDetailsFields = this.stepFields[0];
+          
+          // Find the row containing registeredAddress field
+          const addressRow = basicDetailsFields.find((fieldGroup: any) => 
+            fieldGroup.fieldGroup && 
+            fieldGroup.fieldGroup.some((field: any) => field.key === 'registeredAddress')
+          );
+          
+          if (addressRow && addressRow.fieldGroup) {
+            // Find the registeredAddress field
+            const addressField = addressRow.fieldGroup.find((field: any) => field.key === 'registeredAddress');
+            
+            if (addressField && addressField.formControl) {
+              console.log(`Found formly field for registeredAddress, patching value directly`, addressField);
+              addressField.formControl.setValue(this.getCompanyProfile.registeredAddress);
+              addressField.formControl.markAsDirty();
+              addressField.formControl.updateValueAndValidity({emitEvent: true});
+              
+              // Access the component instance if possible
+              setTimeout(() => {
+                if (addressField.templateOptions) {
+                  // Ensure the field has the latest data
+                  addressField.templateOptions['_cachedAddress'] = this.getCompanyProfile.registeredAddress;
+                }
+                
+                // Force update the UI
+                this.cdr.detectChanges();
+                this.form.markAsDirty();
+              }, 100);
+            }
+          }
+        }
+        
+        // Force change detection
+        this.cdr.detectChanges();
+        console.log('Address value after all patching attempts:', this.form.get('registeredAddress')?.value);
+        
+      } catch (error) {
+        console.error(`Error patching Google Places field (attempt ${retryCount + 1}):`, error);
+        this.patchGooglePlacesField(retryCount + 1, maxRetries);
+      }
+    }, delay);
+  }
+
+  // New method to load countries then initialize form
+  getCountryListAndInitializeForm() {
+    let endPoint = '/api/resource/Country?limit=300';
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      // Store country list
+      this.countryList = res.data || [];
+      
+      console.log('Country list loaded:', this.countryList.length);
+      
+      // Initialize form fields after country data is loaded
+      this.stepFields = [
+        this.getBasicDetailsFields(),          // Step 1
+        this.getManufacturingCapabilitiesFields() // Step 2
+      ];
+      
+      // Add icon wrapper to all error messages for validation
+      this.addValidationIconToErrorMessages(this.stepFields);
+    }, error => {
+      console.error('Error loading country list:', error);
+      // Initialize with empty country list if there's an error
+      this.countryList = [];
+      this.stepFields = [
+        this.getBasicDetailsFields(),          // Step 1
+        this.getManufacturingCapabilitiesFields() // Step 2
+      ];
+      this.addValidationIconToErrorMessages(this.stepFields);
+    });
+  }
+
+  // Handle phone verification event
+  onPhoneVerified(verified: boolean): void {
+    this.phoneVerified = verified;
+    console.log('Phone verification status:', verified);
+  }
+
+  // Getter to make accessing the current step's fields easy in template
+  get currentFields(): FormlyFieldConfig[] {
+    const fields = this.stepFields[this.activeStepIndex] || [];
+    console.log(`Getting current fields for step ${this.activeStepIndex}:`, fields.length, 'fields');
+    
+    // If we're on step 0 and have address data, ensure it's properly set
+    if (this.activeStepIndex === 0 && this.model.registeredAddress) {
+      console.log('Step 0 with registered address in model:', this.model.registeredAddress);
+    }
+    
+    return fields;
+  }
+
+  getBasicDetailsFields(): FormlyFieldConfig[] {
+    return [
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6 mb-3',
+            fieldGroup: [
+              {
+                key: 'gstinNumber',
+                type: 'gst-verify',
+                templateOptions: {
+                  label: 'GSTIN',
+                  placeholder: '22AAAAA0000A1Z5',
+                  required: true,
+                  description: '',
+                  parentComponent: this,
+                  isVerified: this.gstVerified
+                },
+                expressionProperties: {
+                  'templateOptions.required': (model: any) => {
+                    console.log('GSTIN field required expression evaluated, model.noGst:', model.noGst);
+                    return !model.noGst;
+                  },
+                  'templateOptions.isVerified': () => this.gstVerified,
+                  'hide': (model: any) => {
+                    console.log('GSTIN field hide expression evaluated, model.noGst:', model.noGst);
+                    return model.noGst;
+                  }
+                },
+                validators: {
+                  validation: [gstValidator]
+                },
+                validation: {
+                  messages: {
+                    required: 'Please enter your GSTIN number',
+                    gstFormat: 'Invalid GSTIN format'
+                  }
+                }
+              },
+              {
+                key: 'panNumber',
+                type: 'input',
+                className: 'mb-2',
+                templateOptions: {
+                  label: 'PAN',
+                  placeholder: 'ABCDE1234F',
+                  required: false,
+                  maxLength: 10,
+                  description: 'Enter 10-character PAN (e.g., ABCDE1234F)'
+                },
+                expressionProperties: {
+                  'hide': (model: any) => {
+                    console.log('PAN field hide expression evaluated, model.noGst:', model.noGst);
+                    return !model.noGst;
+                  },
+                  'templateOptions.required': (model: any) => {
+                    console.log('PAN field required expression evaluated, model.noGst:', model.noGst);
+                    return model.noGst;
+                  },
+                  'templateOptions.disabled': (model: any) => {
+                    console.log('PAN field disabled expression evaluated, model.noGst:', model.noGst);
+                    return !model.noGst;
+                  }
+                },
+                validators: {
+                  validation: [panValidator]
+                },
+                validation: {
+                  messages: {
+                    required: 'Please enter your PAN number',
+                    panFormat: 'Invalid PAN format. Please enter a valid 10-character PAN (e.g., ABCDE1234F)'
+                  }
+                },
+                hooks: {
+                  onInit: (field) => {
+                    console.log('PAN field initialized');
+                    // Clear PAN field when it becomes hidden
+                    field.formControl?.valueChanges.subscribe(() => {
+                      if (!this.model.noGst && field.formControl?.value) {
+                        field.formControl.setValue('');
+                      }
+                    });
+                  }
+                }
+              },
+              {
+                key: 'noGst',
+                type: 'checkbox',
+                defaultValue: false,
+                templateOptions: {
+                  label: 'We don\'t have GST'
+                },
+                hooks: {
+                  onInit: (field) => {
+                    field.formControl?.valueChanges.subscribe(value => {
+                      const gstinField = field.form?.get('gstinNumber');
+                      const panField = field.form?.get('panNumber');
+                      console.log('noGst checkbox changed to:', value);
+                      
+                      if (value && gstinField) {
+                        // When "We don't have GST" is checked, clear GSTIN
+                        gstinField.setErrors(null);
+                        gstinField.setValue('');
+                      }
+                      
+                      // Clear PAN field when GST is available (noGst = false)
+                      if (!value && panField) {
+                        panField.setValue('');
+                        panField.setErrors(null);
+                      }
+                      
+                      // Update model to trigger expressionProperties
+                      this.model.noGst = value;
+                      
+                      // Force Formly to re-evaluate all expression properties
+                      setTimeout(() => {
+                        // Trigger a model change event to force re-evaluation
+                        this.model = { ...this.model };
+                        this.cdr.detectChanges();
+                        
+                        // Use the custom method to update field visibility
+                        this.updateFieldVisibility(value);
+                        
+                        // Also manually trigger field updates
+                        if (panField) {
+                          panField.updateValueAndValidity();
+                        }
+                        if (gstinField) {
+                          gstinField.updateValueAndValidity();
+                        }
+                      }, 0);
+                    });
+                  }
+                }
+              }
+            ]
+          },
+          {
+            className: 'col-md-6 mb-2',
+            key: 'company_name',
+            type: 'input',
+            templateOptions: {
+              label: 'Legal Business Name',
+              placeholder: 'Your company\'s registered name',
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'Please enter legal business name'
+              }
+            }
+          },
+        ]
+      },
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6 mb-2',
+            key: 'primary_email_id',
+            type: 'input',
+            templateOptions: {
+              label: 'Email Id',
+              placeholder: 'Please enter your email id',
+              required: true,
+              disabled: true // 👈 this disables the field
+            },
+            validation: {
+              messages: {
+                required: 'Please enter your email id'
+              }
+            },
+            expressionProperties: {
+              'className': '(formState.disabled || to.disabled) ? "col-md-6 mb-2 disabled-field" : "col-md-6 mb-2"'
+            }
+          },
+          {
+            className: 'col-md-6 mb-3',
+            key: 'registeredAddress',
+            type: 'google-places',
+            defaultValue: this.getCompanyProfile?.registeredAddress || null,
+            templateOptions: {
+              label: 'Registered Address',
+              placeholder: 'Search for your registered address',
+              required: true,
+              _cachedAddress: this.getCompanyProfile?.registeredAddress || null, // Store address for direct access
+              updateFields: {
+                'country': 'country',
+                'state': 'state', 
+                'city': 'city'
+              }
+            },
+            expressionProperties: {
+              'templateOptions.disabled': 'formState.disabled',
+              'className': '(formState.disabled || to.disabled) ? "col-md-6 mb-3 disabled-field" : "col-md-6 mb-3"'
+            },
+            validation: {
+              messages: {
+                required: 'Please select a registered address'
+              }
+            },
+            hooks: {
+              onInit: (field) => {
+                console.log('Google Places field initialized');
+                
+                // Check if form control already has a value (for step navigation)
+                const currentValue = field.formControl?.value;
+                if (currentValue && typeof currentValue === 'object') {
+                  console.log('Google Places field has existing value on init:', currentValue);
+                  // Force the field to recognize the existing value
+                  setTimeout(() => {
+                    if (field.formControl) {
+                      field.formControl.setValue(currentValue, { emitEvent: true });
+                      field.formControl.markAsDirty();
+                      field.formControl.updateValueAndValidity();
+                      this.cdr.detectChanges();
+                    }
+                  }, 100);
+                }
+                
+                // Try to set the value from getCompanyProfile if available
+                if (this.getCompanyProfile?.registeredAddress && field.formControl && !currentValue) {
+                  setTimeout(() => {
+                    console.log('Setting address from getCompanyProfile:', this.getCompanyProfile.registeredAddress);
+                    if (field.formControl) {
+                      field.formControl.setValue(this.getCompanyProfile.registeredAddress);
+                      field.formControl.markAsDirty();
+                      field.formControl.updateValueAndValidity({emitEvent: true});
+                      this.cdr.detectChanges();
+                    }
+                  }, 300);
+                }
+
+                // Watch for address changes to update country, state, city
+                field.formControl?.valueChanges.subscribe(value => {
+                  if (value && typeof value === 'object') {
+                    console.log('Address changed:', value);
+                    // Auto-update country
+                    if (value.country && field.form?.get('country')) {
+                      field.form.get('country')!.setValue(value.country);
+                      // Trigger getStates method
+                      this.selectedCountry = value.country;
+                      this.getStates(value.country);
+                    }
+
+                    // Store state and city to set after states are loaded
+                    if (value.state) {
+                      this.selectedState = value.state;
+                    }
+                    
+                    if (value.city && field.form?.get('city')) {
+                      field.form.get('city')!.setValue(value.city);
+                    }
+                  }
+                });
+              }
+            }
+          }
+        ]
+      },
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-4 mb-2',
+            key: 'country',
+            type: 'searchable-select',
+            templateOptions: {
+              label: 'Country',
+              required: true,
+              placeholder: 'Select country',
+              options: this.countryList.map((country: any) => ({
+                label: country.name,
+                value: country.name
+              }))
+            },
+            hooks: {
+              onInit: (field) => {
+                // Country list should be already loaded at this point
+                const options = field.templateOptions?.options;
+                const optionsLength = Array.isArray(options) ? options.length : 0;
+                console.log('Country field initialized with options:', optionsLength);
+                
+                // If empty, try to update it once more
+                if (optionsLength === 0 && this.countryList.length > 0) {
+                  field.templateOptions!.options = this.countryList.map((country: any) => ({
+                    label: country.name,
+                    value: country.name
+                  }));
+                  field.formControl?.updateValueAndValidity();
+                }
+                
+                // Watch for country changes to update state dropdown
+                field.formControl?.valueChanges.subscribe(selectedCountry => {
+                  console.log('Country changed to:', selectedCountry);
+                  if (selectedCountry) {
+                    this.selectedCountry = selectedCountry;
+                    
+                    // Clear the state when country changes
+                    if (field.form?.get('state')) {
+                      field.form.get('state')!.setValue(null);
+                    }
+                    
+                    // Get states for the new country
+                    this.getStates(selectedCountry);
+                  }
+                });
+              }
+            },
+            validation: {
+              messages: {
+                required: 'Please select a country'
+              }
+            },
+            expressionProperties: {
+              'className': '(formState.disabled || to.disabled) ? "col-md-4 mb-2 disabled-field" : "col-md-4 mb-2"'
+            }
+          },
+          {
+            className: 'col-md-4 mb-2',
+            key: 'state',
+            type: 'searchable-select',
+            templateOptions: {
+              label: 'State',
+              required: true,
+              placeholder: 'Select state',
+              options: this.stateList || []
+            },
+            hooks: {
+              onInit: (field) => {
+                console.log('State field initialized');
+                this.stateFieldInitialized = true;
+                
+                // Watch for state changes
+                field.formControl?.valueChanges.subscribe(selectedState => {
+                  console.log('State changed to:', selectedState);
+                  if (selectedState) {
+                    this.selectedState = selectedState;
+                  }
+                });
+                
+                // Set up a more robust state initialization
+                const initializeStateValue = () => {
+                  // If we already have a selected state and the field is empty, set it
+                  if (this.selectedState && field.formControl && !field.formControl.value) {
+                    // Check if the selected state exists in the current options
+                    const currentOptions = field.templateOptions?.options || [];
+                    const stateExists = Array.isArray(currentOptions) && currentOptions.some(
+                      (option: any) => option.value === this.selectedState
+                    );
+                    
+                    if (stateExists) {
+                      console.log('Setting state to previously selected value during init:', this.selectedState);
+                      field.formControl.setValue(this.selectedState);
+                      field.formControl.markAsDirty();
+                      field.formControl.updateValueAndValidity();
+                    } else {
+                      console.log('Selected state not found in current options, will set when states load');
+                    }
+                  }
+                };
+                
+                // Try to initialize immediately
+                initializeStateValue();
+                
+                // Also try after a delay to handle async loading
+                setTimeout(initializeStateValue, 500);
+                setTimeout(initializeStateValue, 1000);
+                
+                // Watch for template options changes (when state list gets updated)
+                const originalOptions = field.templateOptions?.options;
+                const checkOptionsChange = () => {
+                  const currentOptions = field.templateOptions?.options;
+                  if (currentOptions !== originalOptions && currentOptions && Array.isArray(currentOptions) && currentOptions.length > 0) {
+                    console.log('State options updated, trying to set selected state');
+                    initializeStateValue();
+                  }
+                  // Continue checking
+                  setTimeout(checkOptionsChange, 200);
+                };
+                setTimeout(checkOptionsChange, 100);
+              }
+            },
+            validation: {
+              messages: {
+                required: 'Please select a state'
+              }
+            },
+            expressionProperties: {
+              'templateOptions.disabled': '!model.country',
+              'className': '(formState.disabled || to.disabled || !model.country) ? "col-md-4 mb-2 disabled-field" : "col-md-4 mb-2"'
+            }
+          },
+          {
+            className: 'col-md-4 mb-2',
+            key: 'city',
+            type: 'input',
+            templateOptions: {
+              label: 'City',
+              placeholder: 'Please enter your city',
+              required: true,
+              options: []
+            },
+            hooks: {
+              onInit: (field) => {
+                console.log('City field initialized');
+              }
+            },
+            validation: {
+              messages: {
+                required: 'Please enter city name'
+              }
+            },
+            expressionProperties: {
+              'templateOptions.disabled': '!model.state',
+              'className': '(formState.disabled || to.disabled || !model.state) ? "col-md-4 mb-2 disabled-field" : "col-md-4 mb-2"'
+            }
+          }
+        ]
+      }
+    ];
+  }
+
+  getManufacturingCapabilitiesFields(): FormlyFieldConfig[] {
+    return [
+      {
+        fieldGroupClassName: 'row align-items-end',
+        fieldGroup: [
+          {
+            className: 'col-md-6 mb-2',
+            key: 'primaryContactName',
+            type: 'input',
+            templateOptions: {
+              label: 'Primary Contact Name',
+              placeholder: 'Full name of primary contact person',
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'Please enter primary contact name'
+              }
+            }
+          },
+          {
+            className: 'col-md-6 mb-2',
+            key: 'phoneNumber',
+            type: 'phone-otp',
+            defaultValue: this.model.phoneNumber,
+            templateOptions: {
+              label: 'Phone Number',
+              required: true,
+              placeholder: 'Enter phone number',
+              countryCode: '91',
+              parentComponent: this,
+              isVerified: this.phoneVerified
+            },
+            hooks: {
+              onInit: (field) => {
+                // Ensure the verified state is properly set
+                if (this.phoneVerified) {
+                  console.log('Phone is already verified, updating field display');
+                  field.templateOptions!['isVerified'] = true;
+                }
+              }
+            },
+            validation: {
+              messages: {
+                required: 'Please enter your phone number'
+              }
+            }
+          },
+          {
+            className: 'col-md-6 mb-2',
+            key: 'primaryManufacturingProcess',
+            type: 'p-dropdown-group-search', // Use the new dropdown-group-search type
+            defaultValue: [], // For multiselect, initialize as an empty array
+            templateOptions: {
+              label: 'Primary Manufacturing Process',
+              placeholder: 'Select your manufacturing processes',
+              required: true,
+              filterPlaceholder: 'Search manufacturing processes...',
+              multiselect: true, // Enable multiselect mode
+              maxSelectedLabels: 8, // Allow up to 8 individual labels before showing summary
+              options:
+              [
+                {
+                  label: 'Precision Machining',
+                  items: [
+                    { value: "3axis", label: "3-axis Milling" },
+                    { value: "4axis", label: "4-axis Milling" },
+                    { value: "5axis", label: "5-axis Milling" },
+                    { value: "turning", label: "Turning/Lathe" },
+                    { value: "drilling", label: "Drilling" },
+                    { value: "boring", label: "Boring" },
+                    { value: "grinding", label: "Grinding" },
+                    { value: "wireedm", label: "Wire EDM" },
+                    { value: "sinkeredm", label: "Sinker/Ram EDM" },
+                    { value: "polishing", label: "Polishing" },
+                    { value: "lapping", label: "Lapping" },
+                    { value: "honing", label: "Honing" },
+                    { value: "ultrasonic", label: "Ultrasonic Machining" },
+                    { value: "electrochemical", label: "Electrochemical Machining" },
+                    { value: "waterjet", label: "Waterjet Cutting" },
+                  ]
+                },
+                {
+                  label: '3D Printing',
+                  items: [
+                    { value: "dmls", label: "DMLS" },
+                    { value: "slm", label: "SLM" },
+                    { value: "ebm", label: "EBM" },
+                    { value: "binderjet", label: "Binder Jetting" },
+                    { value: "ded", label: "DED" },
+                    { value: "fdm", label: "FDM" },
+                    { value: "sla", label: "SLA" },
+                    { value: "sls", label: "SLS" },
+                    { value: "polyjet", label: "Material Jetting/PolyJet" },
+                    { value: "dlp", label: "DLP" },
+                    { value: "clip", label: "CLIP" },
+                  ]
+                },
+                {
+                  label: 'Casting & Molding',
+                  items: [
+                    { value: "sandcast", label: "Sand Casting" },
+                    { value: "diecast", label: "Die Casting" },
+                    { value: "investment", label: "Investment Casting" },
+                    { value: "permanentmold", label: "Permanent Mold" },
+                    { value: "centrifugal", label: "Centrifugal Casting" },
+                    { value: "injection", label: "Injection Molding" },
+                    { value: "blow", label: "Blow Molding" },
+                    { value: "compression", label: "Compression Molding" },
+                    { value: "rotational", label: "Rotational Molding" },
+                    { value: "thermoforming", label: "Thermoforming" },
+                    { value: "lostfoam", label: "Lost Foam Casting" },
+                    { value: "shell", label: "Shell Molding" },
+                    { value: "vacuum", label: "Vacuum Casting" },
+                  ]
+                },
+                {
+                  label: 'Sheet Metal Works',
+                  items: [
+                    { value: "lasercut", label: "Laser Cutting" },
+                    { value: "plasmacut", label: "Plasma Cutting" },
+                    { value: "waterjetcut", label: "Waterjet Cutting" },
+                    { value: "punching", label: "Punching" },
+                    { value: "blanking", label: "Blanking/Shearing" },
+                    { value: "bending", label: "Bending/Press Brake" },
+                    { value: "rolling", label: "Rolling" },
+                    { value: "stamping", label: "Stamping" },
+                    { value: "deepdraw", label: "Deep Drawing" },
+                    { value: "spinning", label: "Spinning" },
+                    { value: "spotweld", label: "Spot Welding" },
+                    { value: "seamweld", label: "Seam Welding" },
+                    { value: "clinching", label: "Clinching" },
+                    { value: "riveting", label: "Riveting" },
+                  ]
+                },
+                {
+                  label: 'Fabrication',
+                  items: [
+                    { value: "mig", label: "MIG/MAG Welding" },
+                    { value: "tig", label: "TIG Welding" },
+                    { value: "arc", label: "Stick/Arc Welding" },
+                    { value: "laserweld", label: "Laser Welding" },
+                    { value: "ebeam", label: "Electron Beam Welding" },
+                    { value: "mechanical", label: "Mechanical Fastening" },
+                    { value: "adhesive", label: "Adhesive Bonding" },
+                    { value: "brazing", label: "Brazing" },
+                    { value: "soldering", label: "Soldering" },
+                  ]
+                },
+                {
+                  label: 'Surface Treatment',
+                  items: [
+                    { value: "anodizing", label: "Anodizing" },
+                    { value: "plating", label: "Plating" },
+                    { value: "powdercoat", label: "Powder Coating" },
+                    { value: "painting", label: "Painting" },
+                    { value: "blasting", label: "Sandblasting" },
+                    { value: "heattreating", label: "Heat Treating" },
+                  ]
+                },
+                {
+                  label: 'Tool & Die Making',
+                  items: [
+                    { value: "stampingdies", label: "Stamping Dies" },
+                    { value: "progressivedies", label: "Progressive Dies" },
+                    { value: "forging", label: "Forging Dies" },
+                    { value: "drawingdies", label: "Drawing Dies" },
+                    { value: "moldmaking", label: "Mold Making" },
+                    { value: "fixtures", label: "Fixtures & Jigs" }
+                  ]
+                },
+              ],
+              description: 'Select all manufacturing capabilities that apply to your business'
+            },
+            validation: {
+              messages: {
+                required: 'Please select at least one manufacturing capability'
+              }
+            }
+          }
+        ]
+      },
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6 mb-2',
+            key: 'websiteURL',
+            type: 'input',
+            templateOptions: {
+              label: 'Company Website URL',
+              placeholder: 'https://yourcompany.com',
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'Please enter your company website URL'
+              }
+            }
+          },
+          {
+            className: 'col-md-6 mb-2',
+            key: 'linkedinURL',
+            type: 'input',
+            templateOptions: {
+              label: 'LinkedIn URL',
+              placeholder: 'https://linkedin.com/company/yourcompany',
+              required: false
+            }
+          }
+        ]
+      },
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
+          {
+            className: 'col-md-6 mb-2',
+            key: 'totalEmployees',
+            type: 'input',
+            templateOptions: {
+              type: 'number',
+              label: 'Total Number of Employees',
+              placeholder: 'Enter number of employees',
+              min: 1,
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'Number of employees is required'
+              }
+            }
+          },
+          {
+            className: 'col-md-6 mb-2',
+            key: 'foundedYear',
+            type: 'input',
+            templateOptions: {
+              type: 'number',
+              label: 'Year Founded',
+              placeholder: 'Enter year company was founded',
+              min: 1900,
+              max: new Date().getFullYear(),
+              required: true
+            },
+            validation: {
+              messages: {
+                required: 'Year founded is required'
+              }
+            }
+          }
+        ]
+      },
+      {
+        key: 'companyDocuments',
+        type: 'file-upload',
+        className: 'col-12 mb-2',
+        templateOptions: {
+          label: 'Company Documents',
+          description: 'Upload documents that will help us evaluate your profile more accurately and expedite decision-making',
+          required: true,
+          acceptedTypes: '.pdf',
+          multiple: true
+        },
+        validation: {
+          messages: {
+            required: 'Please upload documents'
+          }
+        }
+      }
+    ];
+  }
+
+  prevStep() {
+    // Synchronize model with current form values before navigating
+    this.synchronizeModelWithForm();
+    
+    this.activeStepIndex--;
+    
+    // If navigating back to Basic Details step (step 0), force refresh the Google Places field
+    if (this.activeStepIndex === 0) {
+      setTimeout(() => {
+        // Patch the form with current model values to ensure all fields are populated
+        this.form.patchValue(this.model);
+        
+        // Force refresh the Google Places field specifically
+        this.refreshGooglePlacesField();
+        
+        // Force change detection
+        this.cdr.detectChanges();
+        
+        console.log('Returned to step 0, form patched with model:', this.model);
+      }, 100);
+    }
+  }
+
+  // Method to synchronize the model with current form values
+  private synchronizeModelWithForm() {
+    if (this.form && this.form.value) {
+      console.log('Synchronizing model with form values:', this.form.value);
+      this.model = { ...this.model, ...this.form.value };
+      console.log('Model synchronized:', this.model);
+    }
+  }
+
+  // Method to force refresh the Google Places field
+  private refreshGooglePlacesField() {
+    const addressControl = this.form.get('registeredAddress');
+    if (addressControl && addressControl.value) {
+      console.log('Refreshing Google Places field with value:', addressControl.value);
+      
+      // Temporarily store the value
+      const currentValue = addressControl.value;
+      
+      // Clear and reset the value to trigger change detection
+      addressControl.setValue(null, { emitEvent: false });
+      
+      // Use setTimeout to ensure the change is processed
+      setTimeout(() => {
+        addressControl.setValue(currentValue, { emitEvent: true });
+        addressControl.markAsDirty();
+        addressControl.updateValueAndValidity();
+        
+        // Force change detection
+        this.cdr.detectChanges();
+        
+        console.log('Google Places field refreshed successfully');
+      }, 50);
+    }
+  }
+
+  nextStep() {
+    // Synchronize model with current form values before validation
+    this.synchronizeModelWithForm();
+    
+    const formlyFields = this.currentFields;
+    
+    // Mark all fields in the current step as touched
+    this.markFieldsAsTouched(formlyFields);
+    
+    // Check if the current step is valid
+    if (this.isStepValid(formlyFields)) {
+      // For step 1 to 2, check if phone verification is required (only if not already verified)
+      if (this.activeStepIndex === 1 && !this.phoneVerified) {
+        this.sweetAlertService.error('Please verify your phone number before submitting the form.');
+        return;
+      }
+      
+      if (this.activeStepIndex < this.steps.length - 1) {
+        this.activeStepIndex++;
+      } else {
+        this.submit();
+      }
+    } else {
+      const errorMessages: { [key: number]: string } = {
+        0: 'Please fill in all required basic details correctly before proceeding.',
+        1: 'Please complete all required manufacturing capabilities and document details.'
+      };
+      
+      this.sweetAlertService.error(errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.');
+    }
+  }
+
+  markFieldsAsTouched(fields: FormlyFieldConfig[]): void {
+    fields.forEach(field => {
+      if (field.fieldGroup) {
+        this.markFieldsAsTouched(field.fieldGroup);
+      } else if (field.key) {
+        const control = this.form.get(field.key as string);
+        if (control) {
+          control.markAsTouched();
+        }
+      }
+    });
+  }
+
+  isStepValid(fields: FormlyFieldConfig[]): boolean {
+    let isValid = true;
+    
+    fields.forEach(field => {
+      if (field.fieldGroup) {
+        if (!this.isStepValid(field.fieldGroup)) {
+          isValid = false;
+        }
+      } else if (field.key) {
+        const control = this.form.get(field.key as string);
+        if (control && control.invalid) {
+          isValid = false;
+        }
+      }
+    });
+    
+    return isValid;
+  }
+  
+  updateData(data: any) {
+    console.log('Preparing data for submission:', data);
+    let body = {
+      company_name: data.company_name,
+      primary_email_id: data.primary_email_id,
+      onboarding_status: 'Under Review',
+      registered_lat: data.registeredAddress.location.lat,
+      registered_lng: data.registeredAddress.location.lng, 
+      phone_verified: this.phoneVerified,
+      gst_verified: this.gstVerified,
+      company_profile: JSON.stringify(data)
+    };
+    return body;
+  }
+
+  postDataFunction(endPoint:any, body: any) {
+    this.commonService.postData(endPoint, body).subscribe((res: any) => {
+      localStorage.setItem('supplier_id', res.data.name);
+      this.hasExistingSupplier = true;
+      this.sweetAlertService.success('Your information has been saved. Redirecting to the next step of the onboarding process.');
+      // Navigate to verification page after 3 seconds
+      setTimeout(() => {
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-l2']);
+      }, 2000);
+    }, (err) => {
+      console.error('Error submitting form:', err);
+    });
+  }
+
+  putDataFunction(endPoint:any, body: any) {
+    this.commonService.putData(endPoint, body).subscribe((res: any) => {
+      localStorage.setItem('supplier_id', res.data.name);
+      this.hasExistingSupplier = true;
+      this.sweetAlertService.success('Your supplier information has been updated. Redirecting to the next step of the onboarding process.');
+      
+      // Navigate to verification page after 3 seconds
+      this.router.navigateByUrl('/wefab/supplier/profile-review/' + localStorage.getItem('supplier_id'))
+
+    }, (err) => {
+      console.error('Error updating form:', err);
+      this.sweetAlertService.error(err.error?.message || 'An error occurred while submitting the form. Please try again later.');
+    });
+  }
+  
+  postSupplierOnboardingL1() {
+    let companyProfile = { ...this.form.value };
+    
+    // Extract city, state, and country from the registeredAddress if it has the new format
+    if (companyProfile.registeredAddress && typeof companyProfile.registeredAddress === 'object') {
+      // Store the structured registeredAddress
+      const addressData = companyProfile.registeredAddress;
+      
+      // Update the city, state, and country from the address components
+      if (!companyProfile.city && addressData.city) {
+        companyProfile.city = addressData.city;
+      }
+      
+      if (!companyProfile.state && addressData.state) {
+        companyProfile.state = addressData.state;
+      }
+      
+      if (!companyProfile.country && addressData.country) {
+        companyProfile.country = addressData.country;
+      }
+    }
+    
+    // Ensure phone verification status is included
+    companyProfile.phone_verified = this.phoneVerified;
+    companyProfile.gstVerified = this.gstVerified;
+    
+    // Create the body for the API
+    let body = {
+      company_profile: JSON.stringify(companyProfile)
+    };
+    
+    console.log('Submitting L1 data:', body);
+    
+    let endPoint = '/api/resource/Supplier Onboarding L1';
+    
+    // Check if we have a supplier_id
+    let supplier_id = localStorage.getItem('supplier_id');
+    this.model.phone_verified = this.phoneVerified;
+    this.model.registered_lat = this.model.registeredAddress.location.lat;
+    this.model.registered_lng = this.model.registeredAddress.location.lng;
+    this.model.gstVerified = this.gstVerified;
+    body = this.updateData(this.model);
+    
+    console.log('body', body);
+    if(supplier_id) {
+      endPoint = '/api/resource/Supplier Onboarding L1/' + supplier_id;
+      this.putDataFunction(endPoint, body);
+    } else {
+      this.postDataFunction(endPoint, body);
+    }
+  }
+  
+  putSupplierOnboardingL1() {
+    let endPoint = '/api/resource/Supplier Onboarding L1/'  + localStorage.getItem('supplier_id');
+    this.model.phone_verified = this.phoneVerified;
+    this.model.registered_lat = this.model.registeredAddress.location.lat;
+    this.model.registered_lng = this.model.registeredAddress.location.lng;
+    this.model.gstVerified = this.gstVerified;
+    console.log('Updating existing form data:', this.model);
+    let body = this.updateData(this.model);
+  }
+  
+  submit() {
+    if (this.form.valid) {
+      
+      console.log('Form submitted successfully', this.model);
+      this.postSupplierOnboardingL1();
+    } else {
+      this.form.markAllAsTouched();
+      this.sweetAlertService.error('Please fill all required fields correctly before submitting the form.');
+    }
+  }
+  
+  sendOTP() {
+    console.log('Sending OTP');
+  }
+  
+  verifyOTP() {
+    console.log('Verifying OTP');
+  }
+  
+  // Add this method to the component
+  addValidationIconToErrorMessages(fields: FormlyFieldConfig[][]) {
+    fields.forEach(step => {
+      step.forEach(field => {
+        // Add a validation message transformer to add an icon
+        if (!field.validators) {
+          field.validators = {};
+        }
+        
+        // Add a wrapper to all fields
+        if (!field.wrappers) {
+          field.wrappers = [];
+        }
+        
+        // Process nested fields
+        if (field.fieldGroup) {
+          this.processFieldGroup(field.fieldGroup);
+        }
+      });
+    });
+  }
+  
+  // Modify processFieldGroup method
+  processFieldGroup(fieldGroup: FormlyFieldConfig[]) {
+    fieldGroup.forEach(field => {
+      if (field.fieldGroup) {
+        this.processFieldGroup(field.fieldGroup);
+      } else {
+        // Add an icon wrapper to this field's error display if needed
+        if (field.type === 'phone-otp') {
+          // Phone OTP fields already have an icon added via component
+          return;
+        }
+        
+        // For other field types, make sure they use proper error formatting
+        if (!field.expressionProperties) {
+          field.expressionProperties = {};
+        }
+        
+        // Add a class to error elements
+        if (!field.className) {
+          field.className = '';
+        }
+        field.className += ' has-validation-icon';
+      }
+    });
+  }
+  
+  // Method to get cities based on country and state
+  getCities(country: string, state: string) {
+    if (!country || !state) return;
+
+    let endPoint = `/api/resource/City?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"], ["state_title", "=", "${state}"]]`;
+    console.log('Fetching cities for country:', country, 'and state:', state);
+    
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      console.log('Cities API response:', res);
+      if (res && res.data) {
+        // Extract unique cities from the response
+        const cities = [...new Set(res.data.map((item: any) => item.city_title))];
+        
+        const cityList = cities.map((city: any) => ({
+          label: city,
+          value: city
+        }));
+        
+        console.log('City list updated:', cityList);
+        
+        // Extract city value from the form or address
+        const addressValue = this.form.get('registeredAddress')?.value;
+        const addressCity = addressValue && typeof addressValue === 'object' ? addressValue.city : null;
+        
+        // Check if we have city value from address
+        if (addressCity) {
+          setTimeout(() => {
+            // Find if our address city exists in the loaded city list
+            const cityExists = cityList.some(
+              (option: any) => option.value.toLowerCase() === addressCity.toLowerCase()
+            );
+            
+            if (cityExists) {
+              // Set city value in form
+              const cityControl = this.form.get('city');
+              if (cityControl) {
+                cityControl.setValue(addressCity);
+                cityControl.markAsDirty();
+                cityControl.updateValueAndValidity();
+                console.log('City control updated with address city:', addressCity);
+              }
+            } else {
+              console.log('Address city not found in loaded city list:', addressCity);
+            }
+          }, 200);
+        }
+        
+        // Update the city dropdown options
+        this.updateCityDropdownOptions(cityList);
+      }
+    }, error => {
+      console.error('Error fetching cities:', error);
+    });
+  }
+  
+  // Method to update city dropdown options
+  updateCityDropdownOptions(cityList: any[]) {
+    // Find the city field in the form
+    if (this.stepFields && this.stepFields.length > 0) {
+      const basicDetailsFields = this.stepFields[0];
+      
+      // Find the row containing country, state, city fields
+      const addressRow = basicDetailsFields.find((fieldGroup: any) => 
+        fieldGroup.fieldGroup && 
+        fieldGroup.fieldGroup.some((field: any) => field.key === 'country')
+      );
+      
+      if (addressRow && addressRow.fieldGroup) {
+        // Find the city field
+        const cityField = addressRow.fieldGroup.find((field: any) => field.key === 'city');
+        
+        if (cityField && cityField.templateOptions) {
+          // Update the options
+          cityField.templateOptions.options = cityList;
+          
+          // Reset the city value if it's not in the new options
+          const cityControl = this.form.get('city');
+          if (cityControl && cityControl.value) {
+            const cityExists = cityList.some(
+              (option: any) => option.value === cityControl.value
+            );
+            
+            if (!cityExists) {
+              cityControl.setValue('');
+            }
+          }
+          
+          // Force update the UI
+          setTimeout(() => {
+            if (cityField.formControl) {
+              cityField.formControl.updateValueAndValidity();
+            }
+          });
+        }
+      }
+    }
+  }
+
+  // Add a method to navigate to supplier review page
+  navigateToReviewPage() {
+    const supplierId = localStorage.getItem('supplier_id');
+    if (supplierId) {
+      this.router.navigate(['/wefab/supplier/supplier-verification'], {
+        queryParams: { supplier_id: supplierId }
+      });
+    } else {
+      this.sweetAlertService.error('Supplier ID not found. Please try again.');
+    }
+  }
+
+  // Handle GST verification event
+  onGstVerified(verified: boolean): void {
+    this.gstVerified = verified;
+    console.log('GST verification status:', verified);
+  }
+
+  onCompanyNameChanged(companyName: string) {
+    console.log('onCompanyNameChanged called with:', companyName);
+    this.companyName = companyName;
+    
+    if (companyName && this.gstVerified) {
+      this.model.company_name = companyName;
+      
+      // If using reactive forms:
+      this.form.patchValue({
+        company_name: companyName
+      });
+
+       // Disable the field
+       this.form.get('company_name')?.disable({ emitEvent: false });
+      
+      console.log('Company name updated to:', this.model.company_name);
+      
+      // Force change detection if needed
+      this.cdr.detectChanges();
+
+      setTimeout(() => {
+        this.form.markAsPristine();
+      }, 1000);
+    } else {
+      console.error('Received empty company name');
+    }
+  }
+
+  // ... existing verifyGST method but make it call a GST verification service or API
+  verifyGST(gstNumber: string) {
+    if (!gstNumber) {
+      this.sweetAlertService.error('Please enter a GST number first');
+      return;
+    }
+
+    // Add your GST verification logic here
+    console.log('Verifying GST number:', gstNumber);
+    
+    // For now, just show a success message
+    this.sweetAlertService.info('GST verification in progress...');
+  }
+
+  // Method to update GST field verification status
+  updateGstFieldVerificationStatus() {
+    if (this.stepFields && this.stepFields.length > 0) {
+      const basicDetailsFields = this.stepFields[0];
+      
+      // Find the row containing GST field
+      const gstRow = basicDetailsFields.find((fieldGroup: any) => 
+        fieldGroup.fieldGroup && 
+        fieldGroup.fieldGroup.some((field: any) => field.key === 'gstinNumber')
+      );
+      
+      if (gstRow && gstRow.fieldGroup) {
+        // Find the GST field
+        const gstField = gstRow.fieldGroup.find((field: any) => field.key === 'gstinNumber');
+        
+        if (gstField && gstField.templateOptions) {
+          // Update the isVerified status
+          gstField.templateOptions['isVerified'] = this.gstVerified;
+          console.log('Updated GST field verification status to:', this.gstVerified);
+          
+          // Force update the UI
+          setTimeout(() => {
+            if (gstField.formControl) {
+              gstField.formControl.updateValueAndValidity();
+            }
+            this.cdr.detectChanges();
+          });
+        }
+      }
+    }
+  }
+
+  // Method to set city value
+  setCityValue(cityValue: string) {
+    if (!cityValue) return;
+    
+    console.log('Setting city value to:', cityValue);
+    
+    // Update the model
+    this.model.city = cityValue;
+    
+    // Update the form control
+    const cityControl = this.form.get('city');
+    if (cityControl) {
+      cityControl.setValue(cityValue);
+      cityControl.markAsDirty();
+      cityControl.updateValueAndValidity();
+      console.log('City control updated with:', cityValue);
+    }
+    
+    // Force change detection
+    this.cdr.detectChanges();
+  }
+
+  // Method to manually update field visibility when expression properties don't trigger properly
+  private updateFieldVisibility(noGstValue: boolean) {
+    // Find the GSTIN and PAN fields in the current step fields
+    const currentFields = this.stepFields[0]; // Basic details step
+    
+    const findAndUpdateFields = (fields: FormlyFieldConfig[]): void => {
+      for (const field of fields) {
+        if (field.fieldGroup) {
+          findAndUpdateFields(field.fieldGroup);
+        } else if (field.key === 'gstinNumber') {
+          // Update GSTIN field - should be hidden when noGst is true
+          if (field.templateOptions) {
+            field.templateOptions.required = !noGstValue;
+          }
+          
+          // Update the hide property
+          field.hide = noGstValue;
+          
+          // Force field to update
+          if (field.formControl) {
+            field.formControl.updateValueAndValidity();
+          }
+          
+          console.log('GSTIN field updated:', { hide: field.hide, required: field.templateOptions?.required });
+        } else if (field.key === 'panNumber') {
+          // Update PAN field - should be visible when noGst is true
+          if (field.templateOptions) {
+            field.templateOptions.required = noGstValue;
+            field.templateOptions.disabled = !noGstValue;
+          }
+          
+          // Update the hide property
+          field.hide = !noGstValue;
+          
+          // Force field to update
+          if (field.formControl) {
+            field.formControl.updateValueAndValidity();
+          }
+          
+          console.log('PAN field updated:', { hide: field.hide, required: field.templateOptions?.required });
+        }
+      }
+    };
+    
+    findAndUpdateFields(currentFields);
+    
+    // Force change detection
+    this.cdr.detectChanges();
+  }
+}

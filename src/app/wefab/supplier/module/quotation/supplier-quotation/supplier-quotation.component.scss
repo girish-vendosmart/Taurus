@@ -1,0 +1,207 @@
+// Import WE-FAB style guide variables
+@import '../../../../../../assets/scss/variables.scss';
+
+// Main page container
+.quotation-page {
+  background-color: $technical-white;
+  min-height: 100vh;
+}
+
+// Content section
+.content-section {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+// Dashboard Cards Section
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.08), 0 2px 4px -4px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.12);
+  }
+  
+  &.success {
+    border-left-color: $process-green;
+    
+    .card-icon {
+      background-color: rgba($process-green, 0.1);
+      color: $process-green;
+    }
+  }
+  
+  &.info {
+    border-left-color: #3B82F6;
+    
+    .card-icon {
+      background-color: rgba(#3B82F6, 0.1);
+      color: #3B82F6;
+    }
+  }
+  
+  &.warning {
+    border-left-color: #F59E0B;
+    
+    .card-icon {
+      background-color: rgba(#F59E0B, 0.1);
+      color: #F59E0B;
+    }
+  }
+  
+  &.primary {
+    border-left-color: $blueprint-blue;
+    
+    .card-icon {
+      background-color: rgba($blueprint-blue, 0.1);
+      color: $blueprint-blue;
+    }
+  }
+
+  &.danger {
+    border-left-color: #EF4444;
+    
+    .card-icon {
+      background-color: rgba(#EF4444, 0.1);
+      color: #EF4444;
+    }
+  }
+}
+
+.card-content {
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  i {
+    font-size: 1.25rem;
+  }
+}
+
+.card-details {
+  flex: 1;
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $precision-black;
+    margin: 0 0 0.125rem 0;
+  }
+  
+  .card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $precision-black;
+    margin: 0 0 0.25rem 0;
+  }
+  
+  .card-description {
+    font-size: 0.8rem;
+    color: $machine-gray;
+    line-height: 1.3;
+    display: block;
+    margin-bottom: 0.375rem;
+  }
+
+  .card-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+
+    &.trend-up {
+      color: $process-green;
+    }
+
+    &.trend-down {
+      color: #EF4444;
+    }
+  }
+}
+
+// Table section container
+.table-section {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid rgba($material-finish-silver, 0.2);
+}
+
+// Custom status overrides for the common table component
+:host ::ng-deep {
+  // Override status badge colors to match quotation-specific styling
+  .status-badge {
+    &.status-draft {
+      background-color: rgba($machine-gray, 0.1) !important;
+      color: $machine-gray !important;
+      border: 1px solid rgba($machine-gray, 0.2) !important;
+    }
+    
+    &.status-submitted,
+    &.status-quoted {
+      background-color: rgba($blueprint-blue, 0.1) !important;
+      color: $blueprint-blue !important;
+      border: 1px solid rgba($blueprint-blue, 0.2) !important;
+    }
+    
+    &.status-awarded {
+      background-color: rgba($process-green, 0.1) !important;
+      color: $process-green !important;
+      border: 1px solid rgba($process-green, 0.2) !important;
+    }
+  }
+
+  // Style the amount columns to be right-aligned
+  .totalamount-column,
+  .grandtotal-column {
+    .data-col {
+      justify-content: flex-end;
+      font-weight: $font-weight-semibold;
+      color: $precision-black;
+    }
+  }
+
+  // Style the quotation ID column as a link
+  .quotationid-column {
+    .company-cell {
+      .company-name {
+        color: $blueprint-blue;
+        font-weight: $font-weight-semibold;
+        
+        &:hover {
+          color: darken($blueprint-blue, 10%);
+        }
+      }
+    }
+  }
+} 

@@ -2,7 +2,7 @@ import { Component, ViewChild, ElementRef, OnInit, ChangeDetectorRef, NgZone } f
 import { CommonModule } from '@angular/common';
 import { FieldType, FieldTypeConfig, FormlyModule } from '@ngx-formly/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { FileUploadComponent } from '../../wefab/supplier/supplier-onboarding/file-upload.component';
+import { FileUploadComponent } from '../../wefab/supplier/module/onboarding/supplier-onboarding/file-upload.component';
 import { CommonService } from '../services/common.service';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
 
