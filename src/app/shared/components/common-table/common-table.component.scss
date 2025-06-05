@@ -9,7 +9,7 @@ $material-silver: #D1D5DB;  // Borders, backgrounds
 $safety-orange: #FF5722;    // CTAs, highlights
 $process-green: #12856E;    // Success states, progress
 $warning-yellow: #F59E0B;   // Warning color
-$info-blue: #3B82F6;       // Info color
+$info-blue: #206ac4;       // Info color
 $danger-red: #EF4444;       // Danger/error color
 $font-weight-medium: 500;
 $font-weight-semibold: 600;
@@ -208,7 +208,7 @@ $font-weight-bold: 700;
             width: 100%;
 
             .company-name {
-              color: $blueprint-blue;
+              color: $info-blue;
               text-decoration: none;
               font-weight: $font-weight-medium;
               cursor: pointer;
@@ -218,7 +218,7 @@ $font-weight-bold: 700;
               gap: 0.375rem;
 
               &:hover {
-                color: darken($blueprint-blue, 10%);
+                color: darken($info-blue, 10%);
                 text-decoration: underline;
               }
             }
@@ -478,11 +478,11 @@ $font-weight-bold: 700;
 }
 
 .linkable-column {
-  color: $blueprint-blue;
+  color: $info-blue;
   cursor: pointer;
   
   &:hover {
-    color: darken($blueprint-blue, 10%);
+    color: darken($info-blue, 10%);
     text-decoration: underline;
   }
 }
