@@ -4,7 +4,6 @@ import { SupplierOnboardingComponent } from './supplier-onboarding/supplier-onbo
 import { SupplierCreateAccountComponent } from './supplier-create-account/supplier-create-account.component';
 import { SupplierOnboardingL2Component } from './supplier-onboarding-l2/supplier-onboarding-l2.component';
 import { SupplierOnboardingL3Component } from './supplier-onboarding-l3/supplier-onboarding-l3.component';
-import { SupplierOnboardingReviewComponent } from './supplier-onboarding-review/supplier-onboarding-review.component';
 import { SupplierProfileReviewComponent } from './supplier-profile-review/supplier-profile-review.component';
 import { SupplierVerificationComponent } from './supplier-verification/supplier-verification.component';
 import { ManufacturingVerificationComponent } from './manufacturing-verification/manufacturing-verification.component';
@@ -13,11 +12,12 @@ import { AuthGuard } from '../../core/guards/auth.guard';
 import { SupplierOnboardingWelcomeComponentComponent } from './supplier-onboarding-welcome-component/supplier-onboarding-welcome-component.component';
 import { SupplierOnboardingStatusComponent } from './supplier-onboarding-status/supplier-onboarding-status.component';
 import { SupplierDashboardComponent } from './supplier-dashboard/supplier-dashboard.component';
-import { SupplierRfqComponent } from './supplier-rfq/supplier-rfq.component';
+import { SupplierRfqComponent } from '../../wefab/supplier/supplier-rfq/supplier-rfq.component';
 import { SupplierRfqDetailsComponent } from './supplier-rfq-details/supplier-rfq-details.component';
 import { SupplierQuotationComponent } from './supplier-quotation/supplier-quotation.component';
 import { SupplierQuotationDetailsComponent } from './supplier-quotation-details/supplier-quotation-details.component';
 import { CreateQuotationComponent } from '../supplier/create-quotation/create-quotation.component';
+import { SupplierOnboardingReviewComponent } from './supplier-onboarding-review/supplier-onboarding-review.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
