@@ -1,19 +1,19 @@
 import { Routes } from '@angular/router';
 import { SupplierComponentComponent } from './supplier-component.component';
-import { SupplierOnboardingComponent } from './module/onboarding/supplier-onboarding/supplier-onboarding.component';
-import { SupplierOnboardingL2Component } from './module/onboarding/supplier-onboarding-l2/supplier-onboarding-l2.component';
-import { SupplierOnboardingL3Component } from './module/onboarding/supplier-onboarding-l3/supplier-onboarding-l3.component';
-import { SupplierProfileReviewComponent } from './module/profile-review/supplier-profile-review/supplier-profile-review.component';
-import { SupplierOnboardingCompleteComponent } from './module/onboarding/supplier-onboarding-complete/supplier-onboarding-complete.component';
+import { SupplierOnboardingComponent } from './onboarding/supplier-onboarding/supplier-onboarding.component';
+import { SupplierOnboardingL2Component } from './onboarding/supplier-onboarding-l2/supplier-onboarding-l2.component';
+import { SupplierOnboardingL3Component } from './onboarding/supplier-onboarding-l3/supplier-onboarding-l3.component';
+import { SupplierProfileReviewComponent } from './profile-review/supplier-profile-review/supplier-profile-review.component';
+import { SupplierOnboardingCompleteComponent } from './onboarding/supplier-onboarding-complete/supplier-onboarding-complete.component';
 import { AuthGuard } from '../../core/guards/auth.guard';
-import { SupplierOnboardingWelcomeComponentComponent } from './module/onboarding/supplier-onboarding-welcome-component/supplier-onboarding-welcome-component.component';
-import { SupplierOnboardingStatusComponent } from './module/onboarding/supplier-onboarding-status/supplier-onboarding-status.component';
-import { SupplierDashboardComponent } from './module/dashboard/supplier-dashboard/supplier-dashboard.component';
-import { SupplierRfqComponent } from './module/rfq/supplier-rfq/supplier-rfq.component';
-import { SupplierRfqDetailsComponent } from './module/rfq/supplier-rfq-details/supplier-rfq-details.component';
-import { SupplierQuotationComponent } from './module/quotation/supplier-quotation/supplier-quotation.component';
-import { SupplierQuotationDetailsComponent } from './module/quotation/supplier-quotation-details/supplier-quotation-details.component';
-import { CreateQuotationComponent } from './module/quotation/create-quotation/create-quotation.component';
+import { SupplierOnboardingWelcomeComponentComponent } from './onboarding/supplier-onboarding-welcome-component/supplier-onboarding-welcome-component.component';
+import { SupplierOnboardingStatusComponent } from './onboarding/supplier-onboarding-status/supplier-onboarding-status.component';
+import { SupplierDashboardComponent } from './dashboard/supplier-dashboard/supplier-dashboard.component';
+import { SupplierRfqComponent } from './rfq/supplier-rfq/supplier-rfq.component';
+import { SupplierRfqDetailsComponent } from './rfq/supplier-rfq-details/supplier-rfq-details.component';
+import { SupplierQuotationComponent } from './quotation/supplier-quotation/supplier-quotation.component';
+import { SupplierQuotationDetailsComponent } from './quotation/supplier-quotation-details/supplier-quotation-details.component';
+import { CreateQuotationComponent } from './quotation/create-quotation/create-quotation.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
