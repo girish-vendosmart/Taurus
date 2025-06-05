@@ -15,9 +15,9 @@ import {
   ApexLegend,
   ApexMarkers
 } from 'ng-apexcharts';
-import { CommonService } from '../../shared/common.service';
+import { CommonService } from '../../../shared/services/common.service';
 import { Router } from '@angular/router';
-import { SweetAlertService } from '../../shared/sweet-alert.service';
+import { SweetAlertService } from '../../../shared/services/sweet-alert.service';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;

@@ -12,7 +12,7 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { AccordionModule } from 'primeng/accordion';
 import { TabViewModule } from 'primeng/tabview';
 import { TooltipModule } from 'primeng/tooltip';
-import { CommonService } from '../../shared/common.service';
+import { CommonService } from '../../../shared/services/common.service';
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 // You might need to import models if you have defined them
 // import { L1DataModel, L2DataModel, L3DataModel } from './your-data-models'; // Example

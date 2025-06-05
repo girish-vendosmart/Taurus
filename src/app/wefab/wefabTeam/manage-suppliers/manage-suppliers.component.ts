@@ -8,7 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { CommonService } from '../../shared/common.service';
+import { CommonService } from '../../../shared/services/common.service';
 import { TableModule } from 'primeng/table';
 import { PaginatorModule } from 'primeng/paginator';
 import { ProgressBarModule } from 'primeng/progressbar';
@@ -19,9 +19,9 @@ import { MenuItem } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { TagModule } from 'primeng/tag';
-import { SweetAlertService } from '../../shared/sweet-alert.service'
+import { SweetAlertService } from '../../../shared/services/sweet-alert.service'
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
-import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
+import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../../shared/components/common-table/common-table.component';
 
 interface Supplier {
   name: string;

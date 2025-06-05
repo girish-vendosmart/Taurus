@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CommonTableComponent, TableConfig, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
-import { CommonService } from '../../shared/common.service';
-import { ConversationTrailComponent } from '../../shared/components/conversation-trail/conversation-trail.component';
+import { CommonTableComponent, TableConfig, ActionButton } from '../../../shared/components/common-table/common-table.component';
+import { CommonService } from '../../../shared/services/common.service';
+import { ConversationTrailComponent } from '../../../shared/components/conversation-trail/conversation-trail.component';
 
 export interface RFQDetails {
   name: string;

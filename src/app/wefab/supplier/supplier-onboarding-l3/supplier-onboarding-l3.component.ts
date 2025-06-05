@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import { Router } from '@angular/router';
-import { CommonService } from '../../shared/common.service';
+import { CommonService } from '../../../shared/services/common.service';
 
 // PrimeNG imports
 import { CardModule } from 'primeng/card';
@@ -28,14 +28,14 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { TabViewModule } from 'primeng/tabview';
 import { TabMenuModule } from 'primeng/tabmenu';
 
-import { SweetAlertService } from '../../shared/sweet-alert.service';
+import { SweetAlertService } from '../../../shared/services/sweet-alert.service';
 
 // Import Components
 import { FileUploadComponent } from '../supplier-onboarding/file-upload.component';
-import { FormlyRepeatTypeComponent } from '../../../../app/formly-repeat-type.component';
-import { FormlyFieldFileUploadComponent } from '../../../../app/file-upload-type.component';
-import { FormlyFieldRangeSliderComponent } from '../../../../app/range-slider-type.component';
-import { FormlyFieldDropdownComponent } from '../../../../app/dropdown-type.component';
+import { FormlyRepeatTypeComponent } from '../../../shared/formly-components/formly-repeat-type.component';
+import { FormlyFieldFileUploadComponent } from '../../../shared/formly-components/file-upload-type.component';
+import { FormlyFieldRangeSliderComponent } from '../../../shared/formly-components/range-slider-type.component';
+import { FormlyFieldDropdownComponent } from '../../../shared/formly-components/dropdown-type.component';
 
 @Component({
   selector: 'app-supplier-onboarding-l3',

@@ -1,14 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CommonService } from '../../shared/common.service';
+import { CommonService } from '../../../shared/services/common.service';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
-import { SweetAlertService } from '../../shared/sweet-alert.service'
+import { SweetAlertService } from '../../../shared/services/sweet-alert.service'
 
 // Interface for supplier data
 interface Supplier {

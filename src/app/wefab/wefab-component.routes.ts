@@ -1,6 +1,6 @@
 import { Routes } from "@angular/router";
-import { WefabComponentComponent } from "./wefab-component/wefab-component.component";
-import { LoginComponentComponent } from "./wefab-shared-component/login-component/login-component.component";
+import { WefabComponentComponent } from "./wefab-component.component";
+import { LoginComponentComponent } from "../shared/components/login-component/login-component.component";
 import { AuthGuard } from "../core/guards/auth.guard";
 
 export const WEFAB_ROUTES: Routes = [

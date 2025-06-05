@@ -23,19 +23,19 @@ import { FileUploadComponent } from './file-upload.component';
 // Import MultiFileUploadComponent
 import { MultiFileUploadComponent } from './multi-file-upload.component';
 // Import PhoneOtpVerificationComponent
-import { PhoneOtpVerificationComponent } from '../../wefab-shared-component/phone-otp-verification/phone-otp-verification.component';
-import { CommonService } from '../../shared/common.service';
-import { PMultiSelectGroupComponent } from '../../../p-multiSelect-group.component'
+import { PhoneOtpVerificationComponent } from '../../../shared/components/phone-otp-verification/phone-otp-verification.component';
+import { CommonService } from '../../../shared/services/common.service';
+import { PMultiSelectGroupComponent } from '../../../shared/formly-components/p-multiSelect-group.component'
 // Import GstVerifyFieldComponent
 import { GstVerifyFieldComponent } from './gst-verify-field.component';
 // Import the FormlyFieldGstVerifyComponent
-import { FormlyFieldGstVerifyComponent } from '../../../gst-verify-type.component';
+import { FormlyFieldGstVerifyComponent } from '../../../shared/formly-components/gst-verify-type.component';
 // Import PDropdownGroupSearchComponent and its Formly wrapper
-import { PDropdownGroupSearchComponent } from '../../../p-dropdown-group-search.component';
-import { FormlyFieldPDropdownGroupSearchComponent } from '../../../p-dropdown-group-search-type.component';
+import { PDropdownGroupSearchComponent } from '../../../shared/formly-components/p-dropdown-group-search.component';
+import { FormlyFieldPDropdownGroupSearchComponent } from '../../../shared/formly-components/p-dropdown-group-search-type.component';
 // GST Validator function
 import { ChangeDetectorRef } from '@angular/core';
-import { SweetAlertService } from '../../shared/sweet-alert.service';
+import { SweetAlertService } from '../../../shared/services/sweet-alert.service';
 export function gstValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
   

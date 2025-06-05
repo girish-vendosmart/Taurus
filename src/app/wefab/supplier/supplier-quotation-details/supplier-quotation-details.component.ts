@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
-import { CommonService } from '../../shared/common.service';
+import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../../shared/components/common-table/common-table.component';
+import { CommonService } from '../../../shared/services/common.service';
 import { HttpParams } from '@angular/common/http';
-import { ActivityTrailComponent, ActivityLogData } from '../../../common-core-component/activity-trail';
-import { ConversationTrailComponent } from '../../shared/components/conversation-trail/conversation-trail.component';
-import { SplitButtonComponent } from '../../../shared/split-button/split-button.component';
-import { SweetAlertService } from '../../shared/sweet-alert.service';
+import { ActivityTrailComponent, ActivityLogData } from '../../../shared/components/activity-trail/activity-trail.component';
+import { ConversationTrailComponent } from '../../../shared/components/conversation-trail/conversation-trail.component';
+import { SplitButtonComponent } from '../../../shared/components/split-button/split-button.component';
+import { SweetAlertService } from '../../../shared/services/sweet-alert.service';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';

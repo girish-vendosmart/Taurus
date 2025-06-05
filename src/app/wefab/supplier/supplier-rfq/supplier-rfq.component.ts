@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CommonTableComponent, TableConfig, ActionButton } from '../../wefab-shared-component/common-table/common-table.component';
-import { CommonService } from '../../shared/common.service';
-import { SweetAlertService } from '../../shared/sweet-alert.service';
+import { CommonTableComponent, TableConfig, ActionButton } from '../../../shared/components/common-table/common-table.component';
+import { CommonService } from '../../../shared/services/common.service';
+import { SweetAlertService } from '../../../shared/services/sweet-alert.service';
 
 export interface RFQItem {
   rfqId: string;

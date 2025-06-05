@@ -19,11 +19,11 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
 
-import { CommonService } from '../../shared/common.service';
-import { SweetAlertService } from '../../shared/sweet-alert.service';
-import { FileUploadService, FileUploadResult } from '../../shared/file-upload.service';
+import { CommonService } from '../../../shared/services/common.service';
+import { SweetAlertService } from '../../../shared/services/sweet-alert.service';
+import { FileUploadService, FileUploadResult } from '../../../shared/services/file-upload.service';
 // Custom Formly components
-import { FormlyFieldDropdownComponent } from '../../../dropdown-type.component';
+import { FormlyFieldDropdownComponent } from '../../../shared/formly-components/dropdown-type.component';
 
 @Component({
   selector: 'app-create-quotation',

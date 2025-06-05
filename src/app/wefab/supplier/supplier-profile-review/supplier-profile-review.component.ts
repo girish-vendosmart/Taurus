@@ -7,14 +7,14 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
-import { CommonService } from '../../shared/common.service';
+import { CommonService } from '../../../shared/services/common.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { SweetAlertService } from '../../shared/sweet-alert.service'
+import { SweetAlertService } from '../../../shared/services/sweet-alert.service'
 import e from 'express';
 import { forkJoin, of, BehaviorSubject, Observable } from 'rxjs';
 import { map, tap, catchError, finalize, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
-import { ActivityTrailComponent, ActivityLogData } from '../../../common-core-component/activity-trail';
+import { ActivityTrailComponent, ActivityLogData } from '../../../shared/components/activity-trail/activity-trail.component';
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 
 interface DocumentSummary {
