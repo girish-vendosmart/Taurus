@@ -3,6 +3,7 @@ import { GooglePlacesComponentComponent } from './shared/components/google-place
 import { CommonSidebarComponent } from './core/components/common-sidebar/common-sidebar.component';
 import { CommonHeaderComponent } from './core/components/common-header/common-header.component';
 import { CommonTableComponent } from './shared/components/common-table/common-table.component';
+import { ConfigurableButtonDemoComponent } from './shared/components/configurable-button/configurable-button.demo.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'wefab', pathMatch: 'full' },
@@ -10,7 +11,7 @@ export const routes: Routes = [
   { path: 'common-header', component: CommonHeaderComponent},
   { path: 'google-places', component: GooglePlacesComponentComponent},
   { path: 'common-table', component: CommonTableComponent},
-  
+  { path: 'configurable-button', component: ConfigurableButtonDemoComponent},
   {
     path: 'wefab',
     loadChildren: () => import('./wefab/wefab-component.routes').then(m => m.WEFAB_ROUTES)
