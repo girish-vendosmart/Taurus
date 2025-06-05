@@ -68,10 +68,11 @@ interface Supplier {
     
     <div class="suppliers-container">
       <div class="header">
-        <h1>Manage your vendors</h1>
+        <h3>Manage your vendors</h3>
          <button 
           type="button" 
           class="btn btn-primary px-3 mb-2"
+          style="font-size: 14px !important;"
           (click)="showInviteDialog()">
           <i class="pi pi-plus ms-2" style="font-size: 13px; margin-right: 5px;"></i>
           Invite Vendor
@@ -184,12 +185,7 @@ interface Supplier {
       margin-bottom: 1.2rem;
     }
 
-    .header h1 {
-      font-size: 1.6rem;
-      font-weight: 600;
-      color: #333;
-      margin: 0;
-    }
+    
 
     .invite-form .field {
       margin-bottom: 1.2rem;
@@ -221,6 +217,7 @@ interface Supplier {
     /* PrimeNG component overrides for better alignment */
     :host ::ng-deep .p-tabview .p-tabview-nav {
       justify-content: flex-start;
+      padding: 0 !important;
     }
 
     :host ::ng-deep .p-button {
@@ -233,6 +230,15 @@ interface Supplier {
       padding: 0 !important;
       color: black !important;
       font-weight: 500 !important;
+      border-radius: 10px !important;
+    }
+
+    ::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+      padding: 14px !important;
+    }
+
+    ::ng-deep .p-tabview-nav-link {
+      text-decoration: none !important;
     }
   `]
 })

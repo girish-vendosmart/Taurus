@@ -245,6 +245,7 @@ $font-weight-bold: 700;
                 color: $process-green;
                 border: 1px solid rgba($process-green, 0.2);
                 font-size: 12px !important;
+                text-transform: capitalize;
               }
             
               &.status-not-started {
@@ -252,6 +253,7 @@ $font-weight-bold: 700;
                 color: $machine-gray;
                 border: 1px solid rgba($machine-gray, 0.2);
                 font-size: 12px !important;
+                text-transform: capitalize;
               }
             
               &.status-rejected {
@@ -259,6 +261,7 @@ $font-weight-bold: 700;
                 color: $danger-red;
                 border: 1px solid rgba($danger-red, 0.2);
                 font-size: 12px !important;
+                text-transform: capitalize;
               }
             
               &.status-under-review {
@@ -266,6 +269,7 @@ $font-weight-bold: 700;
                 color: darken($warning-yellow, 15%);
                 border: 1px solid rgba($warning-yellow, 0.2);
                 font-size: 12px !important;
+                text-transform: capitalize;
               }
             
               &.status-draft {
@@ -273,7 +277,7 @@ $font-weight-bold: 700;
                 color: #6b7280;
                 border: 1px solid rgba(156, 163, 175, 0.2);
                 font-size: 12px !important;
-
+                text-transform: capitalize;
               }
             
               &.status-open {
@@ -281,7 +285,7 @@ $font-weight-bold: 700;
                 color: $info-blue;
                 border: 1px solid rgba($info-blue, 0.2);
                 font-size: 12px !important;
-
+                text-transform: capitalize;
               }
             
               &.status-progress {
@@ -289,7 +293,7 @@ $font-weight-bold: 700;
                 color: #d97706;
                 border: 1px solid rgba($warning-yellow, 0.2);
                 font-size: 12px !important;
-
+                text-transform: capitalize;
               }
             
               &.status-closed {
@@ -297,7 +301,7 @@ $font-weight-bold: 700;
                 color: $machine-gray;
                 border: 1px solid rgba($machine-gray, 0.2);
                 font-size: 12px !important;
-
+                text-transform: capitalize;
               }
             
               &.status-awarded {
@@ -305,7 +309,7 @@ $font-weight-bold: 700;
                 color: #059669;
                 border: 1px solid rgba(16, 185, 129, 0.2);
                 font-size: 12px !important;
-
+                text-transform: capitalize;
               }
             
               &.status-pending {
@@ -313,7 +317,7 @@ $font-weight-bold: 700;
                 color: #7c3aed;
                 border: 1px solid rgba(168, 85, 247, 0.2);
                 font-size: 12px !important;
-
+                text-transform: capitalize;
               }
             
               &.status-review {
@@ -321,7 +325,7 @@ $font-weight-bold: 700;
                 color: #d97706;
                 border: 1px solid rgba(245, 158, 11, 0.2);
                 font-size: 12px !important;
-
+                text-transform: capitalize;
               }
             
               &.status-deactivate {
@@ -329,7 +333,7 @@ $font-weight-bold: 700;
                 color: #dc2626;
                 border: 1px solid rgba(239, 68, 68, 0.2);
                 font-size: 12px !important;
-
+                text-transform: capitalize;
               }
             
               &.status-paused {
@@ -337,6 +341,7 @@ $font-weight-bold: 700;
                 color: #dc2626;
                 border: 1px solid rgba(239, 68, 68, 0.2);
                 font-size: 12px !important;
+                text-transform: capitalize;
               }
             
               // Hover effect for interactive badges
@@ -418,6 +423,11 @@ $font-weight-bold: 700;
       align-items: center;
       justify-content: space-between;
 
+      .p-paginator-current {
+        font-size: 14px !important;
+        height: 1rem !important;
+      }
+
       .custom-pagination {
         display: flex;
         align-items: center;
@@ -460,6 +470,7 @@ $font-weight-bold: 700;
           color: $precision-black;
           font-weight: $font-weight-medium;
           margin: 0 0.5rem;
+          font-size: 14px !important;
         }
       }
     }

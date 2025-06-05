@@ -251,3 +251,8 @@ h4, .h4 {
     height: 32px !important;
   }
 }
+
+h3 {
+  font-size: $h3-font-size;
+  font-weight: $font-weight-semibold;
+}

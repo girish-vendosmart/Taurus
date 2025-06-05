@@ -310,6 +310,8 @@ export class CommonTableComponent implements OnInit {
     console.log('Table status', status);
     
     switch (status) {
+      case 'invited':
+        return 'status-under-review';
       case 'not-started':
         return 'status-not-started';
       case 'under-review':
