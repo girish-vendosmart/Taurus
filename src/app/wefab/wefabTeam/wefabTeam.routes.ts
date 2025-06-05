@@ -1,8 +1,7 @@
 import { Routes } from '@angular/router';
-import { WefabTeamDashboardComponent } from './wefabTeam-dashboard/wefabTeam-dashboard.component';
-import { ManageSuppliersComponent } from './manage-suppliers/manage-suppliers.component';
 import { WefabTeamLayoutComponent } from './wefabTeam-layout/wefabTeam-layout.component';
-import { WefabteamsupplierProfileReviewComponent } from './wefabteamsupplier-profile-review/wefabteamsupplier-profile-review.component';
+import { ManageSuppliersComponent } from './manage-suppliers/manage-suppliers.component';
+import { SupplierProfileReviewComponent } from '../supplier/profile-review/supplier-profile-review/supplier-profile-review.component';
 import { SupplierFinderComponent } from '../wefabTeam/supplier-finder/supplier-finder.component';
 import { AuthGuard } from '../../core/guards/auth.guard';
 
@@ -23,7 +22,7 @@ export const WEFAB_TEAM_ROUTES: Routes = [
       },
       {
         path: 'manage-suppliers/:id',
-        component: WefabteamsupplierProfileReviewComponent,
+        component: SupplierProfileReviewComponent,
         canActivate: [AuthGuard]
       },
       {

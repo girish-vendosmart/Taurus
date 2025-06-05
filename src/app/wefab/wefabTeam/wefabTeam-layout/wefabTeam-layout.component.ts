@@ -1,14 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { WefabTeamSidebarComponent } from '../wefabTeam-sidebar/wefabTeam-sidebar.component';
 import { CommonSidebarComponent } from '../../../core/components/common-sidebar/common-sidebar.component';
 import { CommonHeaderComponent } from '../../../core/components/common-header/common-header.component';
 
 @Component({
   selector: 'app-wefabTeam-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, WefabTeamSidebarComponent, CommonSidebarComponent, CommonHeaderComponent],
+  imports: [CommonModule, RouterModule, CommonSidebarComponent, CommonHeaderComponent],
   template: `
     <div class="wefabTeam-layout">
       <app-common-sidebar 
