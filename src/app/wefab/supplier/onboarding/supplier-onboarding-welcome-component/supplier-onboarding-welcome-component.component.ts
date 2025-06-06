@@ -15,7 +15,7 @@ export class SupplierOnboardingWelcomeComponentComponent {
 
   constructor(private router: Router) {
     // You might want to get the supplier name from a service or route parameter
-    this.supplierName = 'Supplier';
+    this.supplierName = localStorage.getItem('supplier_company_name') || '';
   }
 
   startOnboarding(): void {

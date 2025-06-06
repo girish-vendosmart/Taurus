@@ -48,12 +48,12 @@ $font-family: $font-family-sans-serif;
   padding: 1.5rem 2rem;
   background: $primary-color;
   
-  h1 {
+  h3 {
     color: white;
-    font-size: 30px; // Heading 2 size
-    font-weight: 600; // Semibold
-    margin: 0;
+    font-size: $h3-font-size;
+    font-weight: $h3-font-weight;
     letter-spacing: -0.25px;
+    margin-bottom: 0 !important;
   }
 }
 
@@ -126,20 +126,20 @@ $font-family: $font-family-sans-serif;
 .welcome-text {
   flex: 1;
   
-  h2 {
+  h3 {
     color: $primary-color;
-    font-size: 24px; // Heading 3
-    font-weight: 600; // Semibold
+    font-size: $h3-font-size;
+    font-weight: $h3-font-weight;
     margin-bottom: 0.75rem;
     letter-spacing: -0.25px;
   }
   
   p {
     color: $text-primary;
-    font-size: 16px; // Body Default
+    font-size: $p-font-size;
     line-height: 1.5;
     margin-bottom: 1.5rem;
-    font-weight: 400; // Regular
+    font-weight: $font-weight-normal;
   }
   
   @media (max-width: 992px) {
@@ -156,8 +156,8 @@ $font-family: $font-family-sans-serif;
   
   .benefits-title {
     color: $text-primary;
-    font-size: 20px; // Heading 4
-    font-weight: 500; // Medium
+    font-size: $h3-font-size;
+    font-weight: $h3-font-weight;
     margin-bottom: 0.35rem;
   }
 }
@@ -202,17 +202,17 @@ $font-family: $font-family-sans-serif;
     
     h3 {
       color: $text-primary;
-      font-size: 16px; // Body Default
-      font-weight: 600; // Semibold
+      font-size: $h3-font-size;
+      font-weight: $h3-font-weight;
       margin-bottom: 0.25rem;
     }
     
     p {
       color: $text-secondary;
-      font-size: 14px; // Body Small
+      font-size: $p-font-size;
       line-height: 1.4;
       margin: 0;
-      font-weight: 400; // Regular
+      font-weight: $font-weight-normal;
     }
   }
 }
