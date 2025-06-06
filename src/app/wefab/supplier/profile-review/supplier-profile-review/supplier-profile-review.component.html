@@ -975,8 +975,13 @@
           [configuration]="{
             label: 'Back to Profile',
             icon: 'pi pi-arrow-left',
-            styleClass: 'btn-navigation btn-back',
-            iconPos: 'left'
+            severity: 'primary',
+            iconPos: 'left',
+            style: {
+              fontSize: '0.875rem',
+              padding: '0.5rem 1.8rem',
+              borderRadius: '5px'
+            }
           }"
           (onClick)="toggleActivityTrail()">
         </app-configurable-button>

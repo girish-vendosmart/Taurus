@@ -823,25 +823,6 @@
 }
 
 // Form section title
-h3.text-blueprint-blue {
-  font-size: 1.5rem;
-  font-weight: $font-weight-semibold;
-  position: relative;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba($blueprint-blue, 0.1);
-  margin-bottom: 1rem;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 60px;
-    height: 3px;
-    background-color: $blueprint-blue;
-    border-radius: 3px;
-  }
-}
 
 // Media queries for responsive design
 @media (max-width: 768px) {
