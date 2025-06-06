@@ -1,7 +1,7 @@
 <div class="quotation-page">
   <div class="content-section">
     <!-- Dashboard Cards -->
-    <div class="dashboard-grid">
+    <!-- <div class="dashboard-grid">
       <div *ngFor="let card of dashboardCards" class="dashboard-card" [ngClass]="card.color">
         <div class="card-content">
           <div class="card-icon">
@@ -14,7 +14,9 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
+
+    <app-common-card [cards]="dashboardCards"></app-common-card>
 
     <!-- Common Table Component -->
     <div class="table-section">

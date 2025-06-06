@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonService } from '../../../../shared/services/common.service';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../../../shared/components/common-table/common-table.component';
+import { CommonCardComponent } from '../../../../shared/components/common-card/common-card.component';
 
 export interface SupplierQuotationData {
   name: string;
@@ -62,7 +63,8 @@ export interface QuotationTableItem {
     CommonModule,
     RouterModule,
     FormsModule,
-    CommonTableComponent
+    CommonTableComponent,
+    CommonCardComponent
   ],
   templateUrl: './supplier-quotation.component.html',
   styleUrl: './supplier-quotation.component.scss'

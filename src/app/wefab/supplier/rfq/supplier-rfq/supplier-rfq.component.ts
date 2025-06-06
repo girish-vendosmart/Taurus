@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
 import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
+import { CommonCardComponent } from '../../../../shared/components/common-card/common-card.component';
 
 export interface RFQItem {
   rfqId: string;
@@ -29,6 +30,7 @@ export interface RFQItem {
     RouterModule,
     FormsModule,
     CommonTableComponent,
+    CommonCardComponent
   ],
   templateUrl: './supplier-rfq.component.html',
   styleUrl: './supplier-rfq.component.scss'

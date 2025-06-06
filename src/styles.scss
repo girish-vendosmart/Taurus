@@ -260,6 +260,12 @@ h4 {
   font-weight: $font-weight-semibold;
 }
 
+h6 {
+  font-size: $h6-font-size;
+  font-weight: $font-weight-medium;
+  margin-bottom: 0 !important;
+}
+
 p {
   font-size: $p-font-size;
 }
@@ -270,4 +276,15 @@ p {
 
 .h6-font-size {
   font-size: $h6-font-size;
+  margin-bottom: 0 !important;
+}
+
+.linkable-column {
+  color: $info-blue !important;
+  cursor: pointer;
+  
+  &:hover {
+    color: darken($info-blue, 10%) !important;
+    text-decoration: underline;
+  }
 }
