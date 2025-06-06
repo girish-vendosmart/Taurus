@@ -10,6 +10,7 @@ import { ActivityTrailComponent, ActivityLogData } from '../../../../shared/comp
 import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
 import { SplitButtonComponent } from '../../../../shared/components/split-button/split-button.component';
 import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
+import { ConfigurableButtonComponent } from '../../../../shared/components/configurable-button/configurable-button.component';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
@@ -158,7 +159,8 @@ export interface QuotationAttachment {
     InputTextModule,
     ActivityTrailComponent,
     ConversationTrailComponent,
-    SplitButtonComponent
+    SplitButtonComponent,
+    ConfigurableButtonComponent
   ],
   templateUrl: './supplier-quotation-details.component.html',
   styleUrl: './supplier-quotation-details.component.scss'
@@ -297,6 +299,36 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   quotationId: any;
 
   discountType: string = '';
+
+  // Button configurations
+  printButtonConfig = {
+    label: 'Print',
+    icon: 'pi pi-print',
+    severity: 'secondary',
+    size: 'normal',
+    disabled: false,
+    loading: false,
+    iconPos: 'left',
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.4rem 0.8rem',
+      borderRadius: '5px'
+    }
+  };
+
+  editButtonConfig = {
+    label: 'Edit',
+    severity: 'primary',
+    size: 'normal',
+    disabled: false,
+    loading: false,
+    iconPos: 'left',
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.4rem 0.8rem',
+      borderRadius: '5px'
+    }
+  };
 
   constructor(
     private router: Router,

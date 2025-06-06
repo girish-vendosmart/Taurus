@@ -17,18 +17,15 @@
       </div>
       
       <div class="header-right">
-        <p-button 
-          label="Print" 
-          icon="pi pi-print"
-          severity="secondary"
+        <app-configurable-button
+          [configuration]="printButtonConfig"
           (onClick)="printQuotation()">
-        </p-button>
-        <p-button 
+        </app-configurable-button>
+        <app-configurable-button
           *ngIf="quotationDetails.workflowState === 'Submitted' || quotationDetails.workflowState === 'Draft'"
-          label="Edit" 
-          severity="primary"
+          [configuration]="editButtonConfig"
           (onClick)="editQuotation()">
-        </p-button>
+        </app-configurable-button>
         <!-- <p-button 
           *ngIf="quotationDetails.workflowState === 'Draft'"
           label="Send"
