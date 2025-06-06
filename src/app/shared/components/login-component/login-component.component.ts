@@ -38,6 +38,7 @@ export class LoginComponentComponent {
   emailId: any;
   companyId: any;
   submitted = false;
+  isLoading = false;
   
   constructor(
     private fb: FormBuilder, 
@@ -56,25 +57,25 @@ export class LoginComponentComponent {
     const currentUrl = window.location.href;
     console.log('Current URL:', currentUrl);
 
-      // Get just the query string part (everything after the ?)
-      const queryString = window.location.search;
-      console.log('Query string:', queryString);
-      let queryData:any = this.parseQueryString(queryString)
-      console.log("Query Data", queryData)
+    // Get just the query string part (everything after the ?)
+    const queryString = window.location.search;
+    console.log('Query string:', queryString);
+    let queryData:any = this.parseQueryString(queryString)
+    console.log("Query Data", queryData)
 
-      if(queryData.email_id && queryData.company_name) {
-        this.emailId = queryData.email_id
-        this.companyId = queryData.company_name
-      }
+    if(queryData.email_id && queryData.company_name) {
+      this.emailId = queryData.email_id
+      this.companyId = queryData.company_name
+    }
 
-      if(this.emailId) {
-        this.loginForm.get('email')?.setValue(this.emailId)
-        this.loginForm.get('email')?.disable();
-      } 
+    if(this.emailId) {
+      this.loginForm.get('email')?.setValue(this.emailId)
+      this.loginForm.get('email')?.disable();
+    } 
 
-      if(this.companyId) {
-        localStorage.setItem('company_id', this.companyId)
-      }
+    if(this.companyId) {
+      localStorage.setItem('company_id', this.companyId)
+    }
   }
   
   togglePasswordVisibility() {
@@ -91,8 +92,10 @@ export class LoginComponentComponent {
   
   onSubmit() {
     this.submitted = true;
+    this.isLoading = true;
     
     if (this.loginForm.invalid) {
+      this.isLoading = false;
       return;
     }
 
@@ -114,6 +117,7 @@ export class LoginComponentComponent {
 
             this.commonService.postData('/api/method/wefab.wefab.api.common.core.authentication.auth.api_token_auth_frappe', payload).subscribe({
               next: (response: any) => {
+                this.isLoading = false;
                 if (response && response.data && response.data.token) {
                   localStorage.setItem('token', response.data.token);
                   localStorage.setItem('primary_email_id', response.data.email_id);
@@ -127,9 +131,7 @@ export class LoginComponentComponent {
                       this.router.navigate(['/wefab/supplier/supplier-onboarding-welcome']);
                     } else {
                       this.getOnboardingL3Status(response.data.supplier_info.supplier_company_id);
-                      // this.router.navigate(['/wefab/supplier/supplier-onboarding-status']);
                     }
-                    // this.router.navigate([response.data.route_link]);
                   } else if (response.data.user_type === 'wefab_team') {
                     this.router.navigate(['/wefab/wefabTeam/manage-suppliers']);
                   } else {
@@ -142,18 +144,21 @@ export class LoginComponentComponent {
                 }
               },
               error: (err) => {
+                this.isLoading = false;
                 console.error('API Error:', err);
                 this.loginError = 'Failed to authenticate with the server';
                 this.loginForm.get('password')?.reset();
               }
             });
           } catch (error) {
+            this.isLoading = false;
             console.error('Token Error:', error);
             this.loginError = 'Failed to get authentication token';
             this.loginForm.get('password')?.reset();
           }
         },
         error: (error) => {
+          this.isLoading = false;
           console.error('Firebase Auth Error:', error);
           let errorMessage = 'Failed to login. Please try again.';
           
@@ -217,5 +222,4 @@ export class LoginComponentComponent {
       }
     })
   }
-  
 }
