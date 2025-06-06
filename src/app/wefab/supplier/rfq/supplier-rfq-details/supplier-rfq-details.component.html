@@ -10,9 +10,9 @@
     
     <div class="header-content">
       <div class="header-left">
-        <h3 class="page-title">{{ rfqDetails.rfq_name || 'Loading...' }}</h3>
-        <p class="rfq-id">{{ rfqDetails.name || 'Loading...' }}</p>
-        <span class="status-badge mt-2" [ngClass]="getStatusClass(supplierRfqDetails.status)">{{ supplierRfqDetails.status }}</span>
+        <h3 class="page-title" style="margin-bottom: 0px;">{{ rfqDetails.rfq_name || 'Loading...' }}</h3>
+        <p class="rfq-id" style="margin-bottom: 0px;">{{ rfqDetails.name || 'Loading...' }}</p>
+        <span class="status-badge" [ngClass]="getStatusClass(supplierRfqDetails.status)">{{ supplierRfqDetails.status }}</span>
       </div>
 
       
@@ -22,9 +22,20 @@
         </button>
       </div>
       <div class="header-right" *ngIf="supplierQuotationId">
-        <button class="btn btn-primary" (click)="viewQuotation()" [disabled]="loading">
-          View Quotation
-        </button>
+        <app-configurable-button
+          [configuration]="{
+            label: 'View Quotation',
+            severity: 'primary',
+            disabled: loading,
+            style: {
+              marginRight: '0.5rem',
+              padding: '0.4rem 0.8rem',
+              fontSize: '0.875rem',
+              borderRadius: '5px'
+            }
+          }"
+          (onClick)="viewQuotation()">
+        </app-configurable-button>
       </div>
     </div>
   </div>

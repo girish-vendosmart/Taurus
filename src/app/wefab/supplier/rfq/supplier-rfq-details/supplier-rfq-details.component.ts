@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
 import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
+import { ConfigurableButtonComponent } from '../../../../shared/components/configurable-button/configurable-button.component';
 
 export interface RFQDetails {
   name: string;
@@ -58,7 +59,8 @@ export interface RFQAttachment {
     RouterModule,
     FormsModule,
     CommonTableComponent,
-    ConversationTrailComponent
+    ConversationTrailComponent,
+    ConfigurableButtonComponent
   ],
   templateUrl: './supplier-rfq-details.component.html',
   styleUrl: './supplier-rfq-details.component.scss'
