@@ -1,286 +1,147 @@
 <div class="table-wrapper">
   <div class="common-table-container">
     <!-- Table Controls -->
-    <div class="table-controls bg-light border-bottom py-4 px-4 d-flex justify-content-end align-items-center shadow-sm" *ngIf="config.enableColumnHide">
-      <div class="column-controls d-flex align-items-center gap-3">
-        <label class="control-label d-flex align-items-center gap-2 mb-0">
-          <i class="pi pi-eye control-icon text-primary"></i>
-          Column Visibility:
-        </label>
+    <div class="table-controls" *ngIf="config.enableColumnHide">
+      <div class="column-controls">
         <p-multiSelect 
           [options]="columnOptions" 
           [(ngModel)]="selectedColumns"
           (onChange)="onColumnSelectionChange()"
-          optionLabel="label" 
-          optionValue="value"
-          placeholder="Choose columns to display"
-          [showToggleAll]="true"
-          appendTo="body"
-          styleClass="column-selector"
           [showHeader]="true"
-          [filter]="false"
-          [virtualScroll]="false"
-          [showClear]="false"
-          selectedItemsLabel="{0} columns visible"
-          [maxSelectedLabels]="3">
-          
-          <ng-template pTemplate="header">
-            <div class="multiselect-header">
-              <div class="header-content">
-                <div class="header-table-title">
-                  <i class="pi pi-eye-slash"></i>
-                  <span>Show/Hide Table Columns</span>
-                </div>
-                <div class="header-subtitle">
-                  Select columns to display in the table
-                </div>
-              </div>
-            </div>
-          </ng-template>
-
-          <ng-template pTemplate="item" let-option>
-            <div class="column-option">
-              <div class="option-content">
-                <span class="column-name">{{ option.label }}</span>
-                <span class="visibility-status" [class.visible]="selectedColumns.includes(option.value)">
-                  <i class="pi" [class.pi-eye]="selectedColumns.includes(option.value)" 
-                     [class.pi-eye-slash]="!selectedColumns.includes(option.value)"></i>
-                  {{ selectedColumns.includes(option.value) ? 'Visible' : 'Hidden' }}
-                </span>
-              </div>
-            </div>
-          </ng-template>
-
-          <ng-template pTemplate="selectedItems" let-$any="$any">
-            <div class="selected-columns-display">
-              <span class="selection-count">
-                {{ selectedColumns.length }} of {{ columnOptions.length }} columns visible
-              </span>
-            </div>
-          </ng-template>
+          [showToggleAll]="true"
+          styleClass="column-selector"
+          selectedItemsLabel="{0} columns visible">
         </p-multiSelect>
       </div>
     </div>
 
-    <!-- Header with Column Names -->
-    <div class="table-header">
-      <div class="header-row d-flex w-100 bg-light border-bottom">
-        <div class="header-cell d-flex align-items-center justify-content-between position-relative border-end px-3 py-2"
-             *ngFor="let col of getVisibleColumns()"
-             [style.width]="col.width"
-             [style.flex]="col.width ? 'none' : '1'">
-          <div class="header-content d-flex align-items-center justify-content-between w-100">
-            <span class="header-table-title table-header fw-medium">
-              {{ col.header }}
+    <div class="table-responsive">
+      <!-- Table -->
+      <p-table 
+        #dt 
+        [value]="data.length ? data : sampleData"
+        [columns]="getVisibleColumns()"
+        [paginator]="config.enablePagination"
+        [rows]="config.pageSize || 10"
+        [showCurrentPageReport]="config.enablePagination"
+        [tableStyle]="{ 'min-width': '100%' }"
+        [loading]="loading"
+        [globalFilterFields]="globalFilterFields"
+        styleClass="p-datatable-sm"
+        [rowHover]="true"
+        [scrollable]="true"
+        scrollHeight="flex"
+        [resizableColumns]="config.enableColumnResize"
+        [reorderableColumns]="false"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [alwaysShowPaginator]="true"
+        [showFirstLastIcon]="false"
+        [showPageLinks]="false"
+        [rowsPerPageOptions]="[5, 10, 20, 50]">
+
+        <!-- Table Header -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th *ngFor="let col of getVisibleColumns()" 
+                [pSortableColumn]="col.sortable ? col.field : ''"
+                [style.width]="col.width">
+              <div class="header-content">
+                {{ col.header }}
+                <p-sortIcon *ngIf="col.sortable" [field]="col.field"></p-sortIcon>
+              </div>
+              <div class="resize-handle" *ngIf="config.enableColumnResize"></div>
+            </th>
+          </tr>
+          <!-- Search Row -->
+          <tr>
+            <th *ngFor="let col of getVisibleColumns()">
+              <input pInputText type="text" 
+                     (input)="dt.filter($any($event.target).value, col.field, 'contains')"
+                     [placeholder]="'Search ' + col.header"
+                     *ngIf="col.filterable">
+            </th>
+          </tr>
+        </ng-template>
+
+        <!-- Table Body -->
+        <ng-template pTemplate="body" let-rowData>
+          <tr (click)="onRowClick($event, rowData)">
+            <td *ngFor="let col of getVisibleColumns()" [style.width]="col.width">
+              <ng-container [ngSwitch]="true">
+                <!-- Company Cell -->
+                <div class="company-cell" *ngSwitchCase="col.isLink">
+                  <a class="company-name" (click)="onLinkClick($event, rowData, col)">
+                    {{ rowData[col.field] }}
+                  </a>
+                  <div class="sub-info" *ngIf="rowData.companySubInfo">
+                    {{ rowData.companySubInfo }}
+                  </div>
+                </div>
+
+                <!-- Status Cell -->
+                <div class="status-cell" *ngSwitchCase="col.isStatus">
+                  <span [class]="'status-badge ' + getStatusClass(rowData[col.field])">
+                    {{ rowData[col.field] }}
+                  </span>
+                </div>
+
+                <!-- Action Cell -->
+                <div class="action-cell" *ngSwitchCase="col.isAction">
+                  <button *ngFor="let btn of getActionButtons()"
+                          class="btn btn-sm"
+                          [class]="btn.class"
+                          (click)="onActionClick(btn.action, rowData, $event)">
+                    <i *ngIf="btn.icon" [class]="btn.icon"></i>
+                    <span *ngIf="!btn.iconOnly">{{ btn.label }}</span>
+                  </button>
+                </div>
+
+                <!-- Default Cell -->
+                <div [class]="col.field + '-cell'" *ngSwitchDefault>
+                  {{ rowData[col.field] }}
+                </div>
+              </ng-container>
+            </td>
+          </tr>
+        </ng-template>
+
+        <!-- Empty Message -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [attr.colspan]="getVisibleColumns().length" class="text-center">
+              No records found
+            </td>
+          </tr>
+        </ng-template>
+
+        <!-- Loading Message -->
+        <ng-template pTemplate="loadingbody">
+          <tr>
+            <td [attr.colspan]="getVisibleColumns().length" class="text-center">
+              Loading data...
+            </td>
+          </tr>
+        </ng-template>
+
+        <!-- Paginator -->
+        <ng-template pTemplate="paginatorright">
+          <div class="custom-pagination">
+            <button class="pagination-btn" 
+                    [disabled]="isFirstPage()"
+                    (click)="goToPreviousPage()">
+              <i class="pi pi-chevron-left"></i>
+            </button>
+            <span class="page-info">
+              Page {{ getCurrentPage() }} of {{ getTotalPages() }}
             </span>
-            <i [class]="getSortIcon(col.field)" 
-               *ngIf="col.sortable" 
-               (click)="sortTable(col.field)"
-               [class.active]="currentSortField === col.field && currentSortOrder !== 0"></i>
+            <button class="pagination-btn" 
+                    [disabled]="isLastPage()"
+                    (click)="goToNextPage()">
+              <i class="pi pi-chevron-right"></i>
+            </button>
           </div>
-          <div class="resize-handle" 
-               *ngIf="config.enableColumnResize"
-               (mousedown)="onResizeStart($event, col.field)"
-               title="Drag to resize column">
-          </div>
-        </div>
-      </div>
-      
-      <!-- Search Fields Row -->
-      <div class="search-row d-flex w-100">
-        <div class="search-field d-flex align-items-center bg-light border-end border-bottom px-3 py-2" 
-             *ngFor="let col of getVisibleColumns()"
-             [style.width]="col.width"
-             [style.flex]="col.width ? 'none' : '1'">
-          
-          <!-- Text Filter -->
-          <input 
-            type="text" 
-            pInputText 
-            [placeholder]="col.filterable ? 'Search ' + col.header : ''"
-            (input)="dt.filter($any($event.target).value, col.field, 'contains')"
-            class="form-control form-control-sm"
-            [disabled]="!col.filterable"
-            *ngIf="col.filterable && (!col.filterType || col.filterType === 'text')"
-          />
-          
-          <!-- Date Range Filter -->
-          <div class="date-range-filter w-100" *ngIf="col.filterable && col.filterType === 'dateRange'">
-            <p-calendar 
-              [(ngModel)]="dateRangeFilters[col.field]"
-              (onSelect)="onDateRangeChange(col.field, $event)"
-              (onClear)="clearDateRangeFilter(col.field)"
-              selectionMode="range"
-              [placeholder]="'Select date range'"
-              [showIcon]="true"
-              [showClear]="true"
-              dateFormat="dd/mm/yy"
-              [readonlyInput]="false"
-              [showOnFocus]="false"
-              appendTo="body"
-              styleClass="date-range-input">
-            </p-calendar>
-          </div>
-          
-          <!-- Dropdown Filter -->
-          <div class="dropdown-filter w-100" *ngIf="col.filterable && col.filterType === 'dropdown'">
-            <p-dropdown 
-              [(ngModel)]="dropdownFilters[col.field]"
-              (onChange)="onDropdownChange(col.field, $event.value)"
-              (onClear)="clearDropdownFilter(col.field)"
-              [options]="getFilterOptions(col)"
-              optionLabel="label"
-              optionValue="value"
-              [placeholder]="'Select ' + col.header"
-              [showClear]="true"
-              [filter]="true"
-              filterBy="label"
-              [filterPlaceholder]="'Search ' + col.header"
-              appendTo="body"
-              styleClass="status-dropdown">
-            </p-dropdown>
-          </div>
-          
-          <!-- No Filter -->
-          <div class="no-search" *ngIf="!col.filterable"></div>
-        </div>
-      </div>
+        </ng-template>
+      </p-table>
     </div>
-
-    <!-- Table -->
-    <p-table 
-      #dt 
-      [value]="data.length ? data : sampleData"
-      [columns]="getVisibleColumns()"
-      [paginator]="config.enablePagination"
-      [rows]="config.pageSize || 10"
-      [showCurrentPageReport]="config.enablePagination"
-      [tableStyle]="{ 'min-width': '100%' }"
-      [loading]="loading"
-      [globalFilterFields]="globalFilterFields"
-      styleClass="p-datatable-sm table-hover"
-      [rowHover]="true"
-      responsiveLayout="scroll"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-      [alwaysShowPaginator]="true"
-      [showFirstLastIcon]="false"
-      [showPageLinks]="false"
-      [rowsPerPageOptions]="[5, 10, 20, 50]"
-    >
-
-      <ng-template pTemplate="paginatorright">
-        <div class="custom-pagination d-flex align-items-center gap-3">
-          <button 
-            class="btn btn-light btn-sm d-flex align-items-center justify-content-center" 
-            [disabled]="isFirstPage()"
-            (click)="goToPreviousPage()"
-            title="Previous Page">
-            <i class="pi pi-chevron-left"></i>
-          </button>
-          <span class="page-info fw-medium">
-            Page {{ getCurrentPage() }} of {{ getTotalPages() }}
-          </span>
-          <button 
-            class="btn btn-light btn-sm d-flex align-items-center justify-content-center" 
-            [disabled]="isLastPage()"
-            (click)="goToNextPage()"
-            title="Next Page">
-            <i class="pi pi-chevron-right"></i>
-          </button>
-        </div>
-      </ng-template>
-
-      <!-- Table Content -->
-      <ng-template pTemplate="body" let-rowData>
-        <tr (click)="onRowClick($event, rowData)">
-          <td *ngFor="let col of getVisibleColumns()" 
-              [ngClass]="col.field + '-column'"
-              [style.width]="col.width"
-              [style.flex]="col.width ? 'none' : '1'">
-            <ng-container [ngSwitch]="true">
-              <!-- Company Cell -->
-              <div class="company-cell d-flex flex-column gap-1" *ngSwitchCase="col.isLink">
-                <a class="company-name linkable-column fs-14"
-                   *ngIf="!col.routerLink && !rowData.routerLink"
-                   (click)="onLinkClick($event, rowData, col)">
-                  {{ rowData[col.field] }}
-                </a>
-                <a class="company-name linkable-column fs-14"
-                   *ngIf="col.routerLink && !rowData.routerLink"
-                   [routerLink]="getRouterLink(col, rowData)"
-                   (click)="onLinkClick($event, rowData, col)">
-                  {{ rowData[col.field] }}
-                </a>
-                <a class="company-name linkable-column fs-14" 
-                   *ngIf="rowData.routerLink"
-                   [routerLink]="rowData.routerLink"
-                   (click)="onLinkClick($event, rowData, col)">
-                  {{ rowData[col.field] }}
-                </a>
-                <div class="sub-info text-muted small fs-12" *ngIf="rowData.companySubInfo || rowData.companyId || rowData.name">
-                  {{ rowData.companySubInfo || rowData.companyId || rowData.name }}
-                </div>
-              </div>
-
-              <!-- Status Cell -->
-              <div class="status-cell" *ngSwitchCase="col.isStatus">
-                <span [class]="'status-badge ' + getStatusClass(rowData[col.field])">
-                  {{ rowData[col.field] }}
-                </span>
-              </div>
-
-              <!-- Action Cell -->
-              <div class="action-cell d-flex gap-2 flex-wrap" *ngSwitchCase="col.isAction">
-                <button 
-                  type="button" 
-                  [class]="'btn btn-sm ' + (btn.class || '') + ' ' + getSeverityClass(btn.severity)"
-                  (click)="onActionClick(btn.action, rowData, $event)"
-                  [title]="btn.tooltip || btn.label"
-                  *ngFor="let btn of getActionButtons()">
-                  <i [class]="btn.icon" *ngIf="btn.icon"></i>
-                  <span *ngIf="!btn.iconOnly && btn.label">{{ btn.label }}</span>
-                </button>
-              </div>
-
-              <!-- HTML Content Cell -->
-              <div [class]="col.field + '-cell'" *ngSwitchCase="col.isHtml">
-                <div class="main-content non-linkable-column fs-14" 
-                     [innerHTML]="rowData[col.field]"
-                     (click)="onLinkClick($event, rowData, col)"></div>
-                <div class="sub-info text-muted small" *ngIf="getSubInfo(col.field, rowData)">
-                  {{ getSubInfo(col.field, rowData) }}
-                </div>
-              </div>
-
-              <!-- Default Cell -->
-              <div [class]="col.field + '-cell'" *ngSwitchDefault>
-                <div class="main-content non-linkable-column fs-14">{{ rowData[col.field] }}</div>
-                <div class="sub-info text-muted small" *ngIf="getSubInfo(col.field, rowData)">
-                  {{ getSubInfo(col.field, rowData) }}
-                </div>
-              </div>
-            </ng-container>
-          </td>
-        </tr>
-      </ng-template>
-
-      <!-- Empty State -->
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td [attr.colspan]="getVisibleColumns().length" class="text-center p-4 fix-loading-state">
-            No records found.
-          </td>
-        </tr>
-      </ng-template>
-
-      <!-- Loading State -->
-      <ng-template pTemplate="loadingbody">
-        <tr>
-          <td [attr.colspan]="getVisibleColumns().length" class="text-center p-4">
-            Loading data...
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
   </div>
 </div>

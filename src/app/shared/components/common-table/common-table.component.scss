@@ -18,11 +18,14 @@ $font-weight-bold: 700;
 .table-wrapper {
   border-radius: 0.5rem;
   overflow: hidden;
+  width: 100%;
+  position: relative;
 }
 
 .common-table-container {
   border-radius: 0;
   overflow: hidden;
+  width: 100%;
 
   // Table controls styling
   .table-controls {
@@ -33,34 +36,24 @@ $font-weight-bold: 700;
     justify-content: flex-end;
     align-items: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-    .column-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-
-      .control-label {
-        color: $precision-black;
-        font-weight: $font-weight-medium;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin: 0;
-
-        .control-icon {
-          color: $blueprint-blue;
-        }
-      }
-    }
+    position: sticky;
+    top: 0;
+    z-index: 2;
   }
 
   // Header styling
   .table-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #fff;
+
     .header-row {
       display: flex;
       width: 100%;
       background: #f8f9fa;
       border-bottom: 1px solid #dee2e6;
+      min-width: max-content;
 
       .header-cell {
         padding: 0.75rem 1rem;
@@ -114,6 +107,7 @@ $font-weight-bold: 700;
     .search-row {
       display: flex;
       width: 100%;
+      min-width: max-content;
 
       .search-field {
         padding: 0.5rem 0.75rem;
@@ -151,6 +145,170 @@ $font-weight-bold: 700;
 }
 
 :host ::ng-deep {
+  .p-datatable {
+    .p-datatable-wrapper {
+      overflow: auto;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+    }
+
+    .p-datatable-thead {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+
+      > tr {
+        background: #f8f9fa;
+        
+        > th {
+          position: sticky;
+          top: 0;
+          z-index: 1;
+          background: #f8f9fa;
+          white-space: nowrap;
+          padding: 0.75rem 1rem;
+          font-weight: 600;
+          color: $precision-black;
+          text-align: left;
+          border: 1px solid #dee2e6;
+          border-width: 0 1px 1px 0;
+
+          &:first-child {
+            border-left: 0;
+          }
+
+          &:last-child {
+            border-right: 0;
+          }
+
+          .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            width: 100%;
+
+            .p-sortable-column-icon {
+              margin-left: 0.5rem;
+            }
+          }
+
+          .resize-handle {
+            position: absolute;
+            right: -4px;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            cursor: col-resize;
+            background: transparent;
+            z-index: 10;
+
+            &:hover {
+              background: rgba($blueprint-blue, 0.1);
+            }
+          }
+        }
+
+        // Search row specific styles
+        &:last-child > th {
+          border-bottom: 2px solid #dee2e6;
+          padding: 0.5rem 1rem;
+
+          input {
+            width: 100%;
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            
+            &:focus {
+              border-color: $blueprint-blue;
+              outline: 0;
+              box-shadow: 0 0 0 0.2rem rgba($blueprint-blue, 0.25);
+            }
+
+            &::placeholder {
+              color: #6c757d;
+              opacity: 0.75;
+            }
+          }
+        }
+      }
+    }
+
+    .p-datatable-tbody {
+      > tr {
+        border-bottom: 1px solid #dee2e6;
+
+        > td {
+          padding: 0.75rem 1rem;
+          border-right: 1px solid #dee2e6;
+          background: white;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+
+          &:first-child {
+            border-left: none;
+          }
+
+          &:last-child {
+            border-right: none;
+          }
+        }
+
+        &:hover {
+          > td {
+            background: #f8f9fa;
+          }
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+    }
+
+    .p-datatable-header {
+      background: white;
+      border: none;
+      padding: 1rem;
+    }
+
+    .p-paginator {
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
+      background: white;
+      border-top: 1px solid #dee2e6;
+      padding: 0.5rem 1rem;
+    }
+
+    // Search row styling
+    .search-row {
+      th {
+        padding: 0.5rem 1rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+
+        input {
+          width: 100%;
+          padding: 0.375rem 0.75rem;
+          border: 1px solid #ced4da;
+          border-radius: 0.25rem;
+          
+          &:focus {
+            border-color: $blueprint-blue;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba($blueprint-blue, 0.25);
+          }
+        }
+      }
+    }
+  }
+
   // Multi-select dropdown styling
   .column-selector {
     min-width: 280px;
@@ -180,301 +338,6 @@ $font-weight-bold: 700;
       }
     }
   }
-
-  .p-datatable {
-    .p-datatable-tbody {
-      > tr {
-        border-bottom: 1px solid #dee2e6;
-        display: flex;
-        width: 100%;
-        cursor: pointer;
-        transition: background-color 0.15s ease;
-
-        > td {
-          text-align: left;
-          border-right: 1px solid #dee2e6;
-          background: white;
-          display: flex;
-          align-items: center;
-
-          &:last-child {
-            border-right: none;
-          }
-
-          .company-cell {
-            display: flex;
-            flex-direction: column;
-            gap: 0.125rem;
-            width: 100%;
-
-            .company-name {
-              color: $info-blue;
-              text-decoration: none;
-              font-weight: $font-weight-medium;
-              cursor: pointer;
-              word-break: break-word;
-              display: flex;
-              align-items: center;
-              gap: 0.375rem;
-
-              &:hover {
-                color: darken($info-blue, 10%);
-                text-decoration: underline;
-              }
-            }
-          }
-
-          .status-cell {
-            text-align: left;
-            width: 100%;
-            .status-badge {
-              display: inline-flex;
-              align-items: center;
-              padding: 0.1rem 0.75rem;
-              border-radius: 12px;
-              font-size: 0.75rem;
-              font-weight: 600;
-              text-transform: uppercase;
-              letter-spacing: 0.025em;
-              white-space: nowrap;
-              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-              transition: all 0.2s ease;
-            
-              &.status-approved {
-                background-color: rgba($process-green, 0.15);
-                color: $process-green;
-                border: 1px solid rgba($process-green, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-not-started {
-                background-color: rgba($machine-gray, 0.15);
-                color: $machine-gray;
-                border: 1px solid rgba($machine-gray, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-rejected {
-                background-color: rgba($danger-red, 0.15);
-                color: $danger-red;
-                border: 1px solid rgba($danger-red, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-under-review {
-                background-color: rgba($warning-yellow, 0.15);
-                color: darken($warning-yellow, 15%);
-                border: 1px solid rgba($warning-yellow, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-draft {
-                background-color: rgba(156, 163, 175, 0.15);
-                color: #6b7280;
-                border: 1px solid rgba(156, 163, 175, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-open {
-                background-color: rgba($info-blue, 0.15);
-                color: $info-blue;
-                border: 1px solid rgba($info-blue, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-progress {
-                background-color: rgba($warning-yellow, 0.15);
-                color: #d97706;
-                border: 1px solid rgba($warning-yellow, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-closed {
-                background-color: rgba($machine-gray, 0.15);
-                color: $machine-gray;
-                border: 1px solid rgba($machine-gray, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-awarded {
-                background-color: rgba(16, 185, 129, 0.15);
-                color: #059669;
-                border: 1px solid rgba(16, 185, 129, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-pending {
-                background-color: rgba(168, 85, 247, 0.15);
-                color: #7c3aed;
-                border: 1px solid rgba(168, 85, 247, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-review {
-                background-color: rgba(245, 158, 11, 0.15);
-                color: #d97706;
-                border: 1px solid rgba(245, 158, 11, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-deactivate {
-                background-color: rgba(239, 68, 68, 0.15);
-                color: #dc2626;
-                border: 1px solid rgba(239, 68, 68, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              &.status-paused {
-                background-color: rgba(239, 68, 68, 0.15);
-                color: #dc2626;
-                border: 1px solid rgba(239, 68, 68, 0.2);
-                font-size: 12px !important;
-                text-transform: capitalize;
-              }
-            
-              // Hover effect for interactive badges
-              &:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-              }
-            }
-          }
-
-          .action-cell {
-            display: flex;
-            gap: 0.375rem;
-            width: 100%;
-            justify-content: flex-start;
-            flex-wrap: wrap;
-
-            .action-btn {
-              padding: 0.25rem 0.5rem;
-              border-radius: 0.25rem;
-              font-weight: $font-weight-medium;
-              border: 1px solid;
-              cursor: pointer;
-              transition: all 0.15s ease;
-              min-width: 50px;
-              display: flex;
-              align-items: center;
-              gap: 0.25rem;
-              justify-content: center;
-
-              i {
-              }
-
-              // Icon-only buttons
-              &:has(i):not(:has(span)) {
-                min-width: 32px;
-                width: 32px;
-                height: 32px;
-                padding: 0.375rem;
-                
-                i {
-                }
-              }
-            }
-          }
-
-          div[class$="-cell"] {
-            width: 100%;
-            word-break: break-word;
-            display: flex;
-            flex-direction: column;
-            
-            .main-content {
-              line-height: 1.4;
-            }
-            
-            .sub-info {
-              color: #888;
-              margin-top: 3px;
-              line-height: 1.2;
-            }
-          }
-        }
-
-        &:hover {
-          background-color: #f1f3f5 !important;
-          
-          > td {
-            background-color: #f1f3f5 !important;
-          }
-        }
-      }
-    }
-
-    .p-paginator {
-      background: white;
-      border-top: 1px solid #dee2e6;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      .p-paginator-current {
-        font-size: 14px !important;
-        height: 1rem !important;
-      }
-
-      .custom-pagination {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-
-        .pagination-btn {
-          background: white;
-          border: 1px solid #dee2e6;
-          color: $machine-gray;
-          cursor: pointer;
-          padding: 0.5rem;
-          border-radius: 0.25rem;
-          transition: all 0.15s ease;
-          min-width: 40px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          &:hover:not(:disabled) {
-            background: #f8f9fa;
-            border-color: $blueprint-blue;
-            color: $blueprint-blue;
-          }
-
-          &:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            background: #f8f9fa;
-            
-            &:hover {
-              background: #f8f9fa;
-              border-color: #dee2e6;
-              color: $machine-gray;
-            }
-          }
-        }
-
-        .page-info {
-          color: $precision-black;
-          font-weight: $font-weight-medium;
-          margin: 0 0.5rem;
-          font-size: 14px !important;
-        }
-      }
-    }
-  }
 }
 
 .linkable-column {
@@ -498,13 +361,12 @@ $font-weight-bold: 700;
 }
 
 // Fix for table container overflow
-.table-responsive,
-.table-wrapper {
-  overflow: visible !important;
+.table-responsive {
+  overflow: auto !important;
   
   &.force-scroll {
-    overflow-x: auto;
-    overflow-y: visible;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
   }
 }
 
