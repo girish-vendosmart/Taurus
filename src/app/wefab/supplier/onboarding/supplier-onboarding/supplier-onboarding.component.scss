@@ -636,6 +636,44 @@
       }
     }
   }
+
+  app-configurable-button {
+    .p-button {
+      &.p-button-secondary {
+        &.p-button-outlined {
+          border-color: #6c757d;
+          color: #6c757d;
+          
+          &:enabled:hover {
+            background: rgba(108, 117, 125, 0.04);
+            color: #6c757d;
+            border-color: #6c757d;
+          }
+          
+          &:enabled:active {
+            background: rgba(108, 117, 125, 0.16);
+            color: #6c757d;
+            border-color: #6c757d;
+          }
+        }
+      }
+      
+      &.p-button-primary {
+        background: #1b3a5f;
+        border-color: #1b3a5f;
+        
+        &:enabled:hover {
+          background: darken(#1b3a5f, 10%);
+          border-color: darken(#1b3a5f, 10%);
+        }
+        
+        &:enabled:active {
+          background: darken(#1b3a5f, 15%);
+          border-color: darken(#1b3a5f, 15%);
+        }
+      }
+    }
+  }
 }
 
 // Custom Toast Styling

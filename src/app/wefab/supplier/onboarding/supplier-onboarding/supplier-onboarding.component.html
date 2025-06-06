@@ -86,22 +86,17 @@
                 <!-- Form Navigation Buttons -->
                 <div class="d-flex justify-content-between flex-wrap mt-3">
                   <div>
-                    <button 
+                    <app-configurable-button
                       *ngIf="activeStepIndex > 0"
-                      type="button" 
-                      class="btn btn-outline-secondary px-3 me-2 mb-2"
-                      (click)="prevStep()">
-                      <i class="pi pi-arrow-left me-2"></i> Previous
-                    </button>
+                      [configuration]="previousButtonConfig"
+                      (onClick)="prevStep()">
+                    </app-configurable-button>
                   </div>
                   
-                  <button 
-                    type="button" 
-                    class="btn btn-primary px-3 mb-2"
-                    (click)="nextStep()">
-                    {{ activeStepIndex < steps.length - 1 ? 'Next' : 'Save & Continue' }}
-                    <i *ngIf="activeStepIndex < steps.length - 1" class="pi pi-arrow-right ms-2"></i>
-                  </button>
+                  <app-configurable-button
+                    [configuration]="activeStepIndex < steps.length - 1 ? nextButtonConfig : saveButtonConfig"
+                    (onClick)="nextStep()">
+                  </app-configurable-button>
                 </div>
               </form>
             </div>

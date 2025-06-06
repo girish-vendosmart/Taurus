@@ -33,6 +33,8 @@ import { FormlyFieldGstVerifyComponent } from '../../../../shared/formly-compone
 // Import PDropdownGroupSearchComponent and its Formly wrapper
 import { PDropdownGroupSearchComponent } from '../../../../shared/formly-components/p-dropdown-group-search.component';
 import { FormlyFieldPDropdownGroupSearchComponent } from '../../../../shared/formly-components/p-dropdown-group-search-type.component';
+// Import ConfigurableButtonComponent
+import { ConfigurableButtonComponent } from '../../../../shared/components/configurable-button/configurable-button.component';
 // GST Validator function
 import { ChangeDetectorRef } from '@angular/core';
 import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
@@ -87,7 +89,8 @@ export function panValidator(control: AbstractControl): ValidationErrors | null 
     GstVerifyFieldComponent,
     FormlyFieldGstVerifyComponent,
     PDropdownGroupSearchComponent,
-    FormlyFieldPDropdownGroupSearchComponent
+    FormlyFieldPDropdownGroupSearchComponent,
+    ConfigurableButtonComponent
   ],
   providers: [MessageService],
   templateUrl: './supplier-onboarding.component.html',
@@ -122,6 +125,51 @@ export class SupplierOnboardingComponent implements OnInit {
   // New property to check if supplier already exists
   hasExistingSupplier = false;
   companyName: any;
+  
+  // Add button configurations
+  previousButtonConfig = {
+    label: 'Previous',
+    icon: 'pi pi-arrow-left',
+    severity: 'secondary',
+    size: 'normal',
+    outlined: true,
+    disabled: false,
+    loading: false,
+    iconPos: 'left',
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.5rem 1.8rem',
+      borderRadius: '5px'
+    }
+  };
+
+  nextButtonConfig = {
+    label: 'Next',
+    icon: 'pi pi-arrow-right',
+    severity: 'primary',
+    size: 'normal',
+    disabled: false,
+    loading: false,
+    iconPos: 'right',
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.5rem 1.8rem',
+      borderRadius: '5px'
+    }
+  };
+
+  saveButtonConfig = {
+    label: 'Save & Continue',
+    severity: 'primary',
+    size: 'normal',
+    disabled: false,
+    loading: false,
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.5rem 1.8rem',
+      borderRadius: '5px'
+    }
+  };
   
   constructor(
     private fb: FormBuilder, 
