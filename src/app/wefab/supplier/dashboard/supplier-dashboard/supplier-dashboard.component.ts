@@ -18,6 +18,7 @@ import {
 import { CommonService } from '../../../../shared/services/common.service';
 import { Router } from '@angular/router';
 import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
+import { ConfigurableButtonComponent } from '../../../../shared/components/configurable-button/configurable-button.component';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -75,7 +76,7 @@ interface RecentRFQ {
 @Component({
   selector: 'app-supplier-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgApexchartsModule],
+  imports: [CommonModule, RouterModule, NgApexchartsModule, ConfigurableButtonComponent],
   templateUrl: './supplier-dashboard.component.html',
   styleUrl: './supplier-dashboard.component.scss'
 })
@@ -247,7 +248,6 @@ export class SupplierDashboardComponent {
           };
         });
 
-        this.recentQuotations = []
       }
     }, (error) => {
       console.error('Error fetching Quotations:', error);
@@ -309,7 +309,6 @@ export class SupplierDashboardComponent {
           };
         });
 
-        this.recentRFQs = []
       }
     }, (error) => {
       console.error('Error fetching RFQs:', error);
@@ -476,5 +475,43 @@ export class SupplierDashboardComponent {
 
   viewQuotation(quotationId: string) {
     this.router.navigate(['/wefab/supplier/quotation/details/', quotationId]);
+  }
+
+  browseRFQsConfig = {
+    label: 'Browse All RFQs',
+    icon: 'pi pi-search',
+    severity: 'primary',
+    size: 'normal',
+    disabled: false,
+    loading: false,
+    iconPos: 'left',
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.4rem 0.8rem',
+      borderRadius: '5px'
+    }
+  };
+
+  createQuotationConfig = {
+    label: 'Create Quotation',
+    icon: 'pi pi-plus',
+    severity: 'primary',
+    size: 'normal',
+    disabled: false,
+    loading: false,
+    iconPos: 'left',
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.4rem 0.8rem',
+      borderRadius: '5px'
+    }
+  };
+
+  navigateToRFQs(): void {
+    this.router.navigate(['/wefab/supplier/rfq']);
+  }
+
+  navigateToQuotation(): void {
+    this.router.navigate(['/wefab/supplier/quotation']);
   }
 } 

@@ -55,10 +55,10 @@
             </div>
             <h4>No Recent RFQs</h4>
             <p>You haven't received any RFQs yet. New requests for quotations will appear here.</p>
-            <button class="action-btn primary-btn" routerLink="/wefab/supplier/rfq">
-              <i class="pi pi-search"></i>
-              Browse All RFQs
-            </button>
+            <app-configurable-button
+              [configuration]="browseRFQsConfig"
+              (onClick)="navigateToRFQs()"
+            ></app-configurable-button>
           </div>
         </div>
       </div>
@@ -90,10 +90,10 @@
             </div>
             <h4>No Recent Quotations</h4>
             <p>You haven't submitted any quotations yet. Start by responding to available RFQs.</p>
-            <button class="action-btn primary-btn" routerLink="/wefab/supplier/quotation">
-              <i class="pi pi-plus"></i>
-              Create Quotation
-            </button>
+            <app-configurable-button
+              [configuration]="createQuotationConfig"
+              (onClick)="navigateToQuotation()"
+            ></app-configurable-button>
           </div>
         </div>
       </div>
