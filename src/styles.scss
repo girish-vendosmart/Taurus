@@ -136,87 +136,107 @@ h4, .h4 {
 }
 
 
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.1rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
-    white-space: nowrap;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
-  
-    &.status-draft {
-      background-color: rgba(156, 163, 175, 0.15);
-      color: #6b7280;
-      border: 1px solid rgba(156, 163, 175, 0.2);
-    }
-  
-    &.status-open {
-      background-color: rgba($info-blue, 0.15);
-      color: $info-blue;
-      border: 1px solid rgba($info-blue, 0.2);
-    }
-  
-    &.status-progress {
-      background-color: rgba($warning-yellow, 0.15);
-      color: #d97706;
-      border: 1px solid rgba($warning-yellow, 0.2);
-    }
-  
-    &.status-closed {
-      background-color: rgba($machine-gray, 0.15);
-      color: $machine-gray;
-      border: 1px solid rgba($machine-gray, 0.2);
-    }
-  
-    &.status-awarded {
-      background-color: rgba(16, 185, 129, 0.15);
-      color: #059669;
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      font-size: 12px !important;
-      text-transform: capitalize;
-    }
-  
-    &.status-rejected {
-      background-color: rgba(239, 68, 68, 0.15);
-      color: #dc2626;
-      border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-  
-    &.status-pending {
-      background-color: rgba(168, 85, 247, 0.15);
-      color: #7c3aed;
-      border: 1px solid rgba(168, 85, 247, 0.2);
-    }
-  
-    &.status-review {
-      background-color: rgba(245, 158, 11, 0.15);
-      color: #d97706;
-      border: 1px solid rgba(245, 158, 11, 0.2);
-    }
-  
-    &.status-deactivate {
-      background-color: rgba(239, 68, 68, 0.15);
-      color: #dc2626;
-      border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-  
-    &.status-paused {
-      background-color: rgba(239, 68, 68, 0.15);
-      color: #dc2626;
-      border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-  
-    // Hover effect for interactive badges
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+
+  &.status-draft {
+    background-color: rgba(156, 163, 175, 0.15);
+    color: #6b7280;
+    border: 1px solid rgba(156, 163, 175, 0.2);
+    text-transform: capitalize;
+    font-size: 12px !important;
   }
+
+  &.status-open {
+    background-color: rgba($info-blue, 0.15);
+    color: $info-blue;
+    border: 1px solid rgba($info-blue, 0.2);
+    text-transform: capitalize;
+    font-size: 12px !important;
+  }
+
+  &.status-progress {
+    background-color: rgba($warning-yellow, 0.15);
+    color: #d97706;
+    border: 1px solid rgba($warning-yellow, 0.2);
+    text-transform: capitalize;
+    font-size: 12px !important;
+  }
+
+  &.status-closed {
+    background-color: rgba($machine-gray, 0.15);
+    color: $machine-gray;
+    border: 1px solid rgba($machine-gray, 0.2);
+    text-transform: capitalize;
+    font-size: 12px !important;
+  }
+
+  &.status-awarded {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    font-size: 12px !important;
+    text-transform: capitalize;
+  }
+
+  &.status-rejected {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    text-transform: capitalize;
+    font-size: 12px !important;
+  }
+
+  &.status-pending {
+    background-color: rgba(168, 85, 247, 0.15);
+    color: #7c3aed;
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    text-transform: capitalize;
+    font-size: 12px !important;
+  }
+
+  &.status-review {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    text-transform: capitalize;
+    font-size: 12px !important;
+  }
+
+  &.status-deactivate {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    text-transform: capitalize;
+    font-size: 12px !important;
+  }
+
+  &.status-paused {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    text-transform: capitalize;
+    font-size: 12px !important;
+  }
+
+  // Hover effect for interactive badges
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+
 .fs-16 {
   font-size: 16px;
 }
@@ -548,4 +568,40 @@ p {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+
+// Tab Navigation
+// Tab Navigation
+.tab-navigation {
+  background: white;
+  border-bottom: 1px solid $material-finish-silver;
+  padding: 0 1rem;
+  display: flex;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  .tab-btn {
+    background: none;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: $font-weight-medium;
+    color: $machine-gray;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+
+    &:hover {
+      color: $blueprint-blue;
+      background: rgba($blueprint-blue, 0.05);
+    }
+
+    &.active {
+      color: $blueprint-blue;
+      border-bottom-color: $blueprint-blue;
+      font-weight: $font-weight-semibold;
+      background: rgba($blueprint-blue, 0.08);
+    }
+  }
 }

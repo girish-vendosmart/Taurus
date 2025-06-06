@@ -119,40 +119,6 @@ $danger-red: #EF4444;
   }
 }
 
-// Tab Navigation
-.tab-navigation {
-  background: white;
-  border-bottom: 1px solid $material-finish-silver;
-  padding: 0 1rem;
-  display: flex;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-
-  .tab-btn {
-    background: none;
-    border: none;
-    padding: 1rem 1.5rem;
-    font-size: 0.875rem;
-    font-weight: $font-weight-medium;
-    color: $machine-gray;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s ease;
-    position: relative;
-
-    &:hover {
-      color: $blueprint-blue;
-      background: rgba($blueprint-blue, 0.05);
-    }
-
-    &.active {
-      color: $blueprint-blue;
-      border-bottom-color: $blueprint-blue;
-      font-weight: $font-weight-semibold;
-      background: rgba($blueprint-blue, 0.08);
-    }
-  }
-}
-
 // Tab Content
 .tab-content {
   .tab-panel {

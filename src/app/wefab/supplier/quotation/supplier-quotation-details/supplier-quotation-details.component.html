@@ -10,12 +10,10 @@
     
     <div class="header-content">
       <div class="header-left">
-        <h1 class="page-title">{{ quotationDetails.quotationId }}</h1>
-        <div class="header-badges">
-          <span class="status-badge" [ngClass]="getStatusClass(quotationDetails.workflowState)">
-            {{ quotationDetails.workflowState }}
-          </span>
-        </div>
+        <h3 class="page-title">{{ quotationDetails.quotationId }}</h3>
+        <span class="status-badge" [ngClass]="getStatusClass(quotationDetails.workflowState)">
+          {{ quotationDetails.workflowState }}
+        </span>
       </div>
       
       <div class="header-right">
@@ -48,7 +46,7 @@
   </div>
 
   <!-- Quotation Info Bar -->
-  <div class="quotation-info-bar">
+  <div class="rfq-info-bar">
     <div class="info-item">
       <span class="info-label">Created On:</span>
       <span class="info-value">{{ quotationDetails.createdOn }}</span>
