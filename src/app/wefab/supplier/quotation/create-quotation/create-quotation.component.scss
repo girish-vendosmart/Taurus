@@ -83,7 +83,7 @@
   &.btn-sm {
     padding: 8px 12px;
     height: 36px;
-    font-size: 13px;
+    font-size: 14px;
   }
   
   &.btn-outline-secondary {
@@ -179,7 +179,7 @@
 }
 
 .quotation-table {
-  font-size: 13px;
+  font-size: 14px;
   position: relative;
   
   th {
@@ -190,7 +190,7 @@
     padding: 8px 6px;
     vertical-align: middle;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: 14px;
     
     .text-danger {
       color: $safety-orange;
@@ -202,6 +202,11 @@
     vertical-align: middle;
     border-color: $material-finish-silver;
     position: relative;
+    font-size: 14px;
+
+    span {
+      font-size: 14px;
+    }
   }
   
   .quotation-row {
@@ -325,7 +330,7 @@
     border: 1px solid $material-finish-silver;
     border-radius: 4px;
     height: 40px; // Consistent height with form controls
-    font-size: 13px; // Reduced font size
+    font-size: 14px; // Reduced font size
     
     &:hover {
       border-color: $blueprint-blue;
@@ -337,7 +342,7 @@
     }
     
     .p-dropdown-label {
-      font-size: 13px; // Reduced from 14px
+      font-size: 14px; // Reduced from 14px
       padding: 8px 10px; // Slightly reduced padding
       line-height: 1.3;
       color: $precision-black;
@@ -486,7 +491,7 @@
     
     .tax-inputs {
       .form-label-sm {
-        font-size: 12px;
+        font-size: 14px;
         font-weight: $font-weight-medium;
         color: $precision-black;
         margin-bottom: 4px;
@@ -873,8 +878,7 @@
     align-items: center;
     
     .text-muted {
-      font-size: 0.9rem;
-      color: $machine-gray !important;
+      font-size: $h6-font-size;
       font-weight: $font-weight-medium;
       display: flex;
       align-items: center;
@@ -882,7 +886,7 @@
       
       .pi-info-circle {
         color: $blueprint-blue;
-        font-size: 0.9rem;
+        font-size: $h6-font-size;
       }
     }
   }
@@ -1643,7 +1647,7 @@
           
           .file-details {
             .file-name {
-              font-size: 13px;
+              font-size: 14px;
               line-height: 1.2;
             }
             
