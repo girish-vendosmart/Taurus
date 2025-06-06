@@ -103,7 +103,7 @@ export class SupplierRfqComponent implements OnInit {
         header: 'Creation Date',
         sortable: true,
         filterable: true,
-        filterType: 'dateRange',
+        filterType: 'text',
       },
       {
         field: 'status',
