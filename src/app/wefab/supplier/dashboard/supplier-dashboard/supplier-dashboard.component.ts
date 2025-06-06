@@ -85,12 +85,15 @@ export class SupplierDashboardComponent {
   
   supplierName: string = '';
   supplierId: string;
+  supplierCompanyName: string;
   
   constructor(private commonService: CommonService, private router: Router, private sweetAlertService: SweetAlertService) {
     // Get supplier information from session storage
     this.supplierName = localStorage.getItem('supplier_name') || 'Supplier';
 
     this.supplierId = localStorage.getItem('supplier_id') || '';
+
+    this.supplierCompanyName = localStorage.getItem('supplier_company_name') || '';
     
     // Initialize chart options
     this.chartOptions = {
@@ -243,6 +246,8 @@ export class SupplierDashboardComponent {
             urgencyClass: this.getUrgencyClass(quotation.status || quotation.workflow_state, timeDiff)
           };
         });
+
+        this.recentQuotations = []
       }
     }, (error) => {
       console.error('Error fetching Quotations:', error);
@@ -303,6 +308,8 @@ export class SupplierDashboardComponent {
             urgencyClass: this.getUrgencyClass(rfq.status, timeDiff)
           };
         });
+
+        this.recentRFQs = []
       }
     }, (error) => {
       console.error('Error fetching RFQs:', error);
