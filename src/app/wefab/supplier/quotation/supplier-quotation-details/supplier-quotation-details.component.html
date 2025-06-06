@@ -117,13 +117,13 @@
       <div class="overview-content">
         <!-- Quotation Terms & Conditions Section -->
         <div class="description-box">
-          <h3>Terms & Conditions</h3>
+          <h4>Terms & Conditions</h4>
           <div [innerHTML]="quotationDetails.notes"></div>
         </div>
         <!-- Quote From/To Section -->
         <div class="quote-parties-section">
           <div class="quote-from">
-            <h3>Quote From :</h3>
+            <h4>Quote From :</h4>
             <div class="party-details">
               <div class="company-name">{{ quotationDetails.quoteFrom.company }}</div>
               <div class="contact-info">{{ quotationDetails.quoteFrom.email }}</div>
@@ -132,7 +132,7 @@
           </div>
           
           <div class="quote-to">
-            <h3>Quote To :</h3>
+            <h4>Quote To :</h4>
             <div class="party-details">
               <div class="company-name">{{ quotationDetails.quoteTo.company }}</div>
               <div class="contact-info">{{ quotationDetails.quoteTo.email }}</div>
@@ -144,8 +144,8 @@
         <!-- Items Section -->
         <div class="items-section">
           <div class="items-header p-3">
-            <h3 style="font-size: 14px;">Total Items : {{ rawQuotationItems.length }}</h3>
-            <h3 style="font-size: 14px;" class="mt-2">Total Quantity : {{ getTotalQuantity() }}</h3>
+            <h6>Total Items : {{ rawQuotationItems.length }}</h6>
+            <h6>Total Quantity : {{ getTotalQuantity() }}</h6>
           </div>
 
           <!-- Common Table Component -->

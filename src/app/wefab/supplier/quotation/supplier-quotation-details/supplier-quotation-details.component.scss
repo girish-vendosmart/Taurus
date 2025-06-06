@@ -47,7 +47,7 @@ $danger-red: #EF4444;
 .page-header {
   background: white;
   border-bottom: 1px solid rgba($material-finish-silver, 0.3);
-  padding: 1.5rem 2rem;
+  padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
   .header-top {
@@ -152,8 +152,9 @@ $danger-red: #EF4444;
 .tab-navigation {
   background: white;
   border-bottom: 1px solid rgba($material-finish-silver, 0.3);
-  padding: 0 2rem;
   display: flex;
+  padding-left: 1rem;
+  padding-right: 1rem;
 
   @media (max-width: 768px) {
     padding: 0 1rem;
@@ -210,7 +211,7 @@ $danger-red: #EF4444;
 
 // Overview Content
 .overview-content {
-  padding: 2rem;
+  padding: 1rem;
   padding-bottom: 0 !important;
 
   @media (max-width: 768px) {
@@ -246,14 +247,14 @@ $danger-red: #EF4444;
 
     .party-details {
       .company-name {
-        font-size: 0.875rem;
+        font-size: $p-font-size;
         font-weight: $font-weight-semibold;
         color: $precision-black;
         margin-bottom: 0.5rem;
       }
 
       .contact-info {
-        font-size: 0.875rem;
+        font-size: $p-font-size;
         color: $machine-gray;
         margin-bottom: 0.25rem;
       }
@@ -981,3 +982,5 @@ $danger-red: #EF4444;
     }
   }
 }
+
+

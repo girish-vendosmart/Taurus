@@ -283,7 +283,6 @@ h4 {
 h6 {
   font-size: $h6-font-size;
   font-weight: $font-weight-medium;
-  margin-bottom: 0 !important;
 }
 
 p {
@@ -319,7 +318,7 @@ p {
   align-items: center;
   gap: 0.25rem;
   flex-wrap: wrap;
-  font-size: $h6-font-size;
+  font-size: $p-font-size;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
   .info-item {
@@ -568,40 +567,4 @@ p {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-
-// Tab Navigation
-// Tab Navigation
-.tab-navigation {
-  background: white;
-  border-bottom: 1px solid $material-finish-silver;
-  padding: 0 1rem;
-  display: flex;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-
-  .tab-btn {
-    background: none;
-    border: none;
-    padding: 1rem 1.5rem;
-    font-size: 0.875rem;
-    font-weight: $font-weight-medium;
-    color: $machine-gray;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s ease;
-    position: relative;
-
-    &:hover {
-      color: $blueprint-blue;
-      background: rgba($blueprint-blue, 0.05);
-    }
-
-    &.active {
-      color: $blueprint-blue;
-      border-bottom-color: $blueprint-blue;
-      font-weight: $font-weight-semibold;
-      background: rgba($blueprint-blue, 0.08);
-    }
-  }
 }
