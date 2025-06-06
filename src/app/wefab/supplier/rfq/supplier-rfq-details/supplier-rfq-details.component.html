@@ -4,13 +4,13 @@
     <div class="header-top">
       <button class="back-btn" (click)="goBack()">
         <i class="bi bi-arrow-left"></i>
-        Back to RFQs
+        <p style="margin: 0; font-size: 14px;">Back to RFQs</p>
       </button>
     </div>
     
     <div class="header-content">
       <div class="header-left">
-        <h1 class="page-title">{{ rfqDetails.rfq_name || 'Loading...' }}</h1>
+        <h3 class="page-title">{{ rfqDetails.rfq_name || 'Loading...' }}</h3>
         <p class="rfq-id">{{ rfqDetails.name || 'Loading...' }}</p>
         <span class="status-badge mt-2" [ngClass]="getStatusClass(supplierRfqDetails.status)">{{ supplierRfqDetails.status }}</span>
       </div>

@@ -60,18 +60,18 @@ $danger-red: #EF4444;
 
     .header-left {
       .page-title {
-        font-size: 1.75rem;
-        font-weight: $font-weight-bold;
+        font-size: $h3-font-size;
+        font-weight: $h3-font-weight;
         color: $precision-black;
         margin: 0 0 0.25rem 0;
         line-height: 1.2;
       }
 
       .rfq-id {
-        font-size: 0.875rem;
+        font-size: $h6-font-size;
         color: $machine-gray;
         margin: 0;
-        font-weight: $font-weight-medium;
+        font-weight: $h6-font-weight;
       }
     }
 
