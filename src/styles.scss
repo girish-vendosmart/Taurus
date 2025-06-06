@@ -12,6 +12,18 @@
 @import "../node_modules/quill/dist/quill.core.css";
 @import "../node_modules/quill/dist/quill.snow.css";
 
+// Font Awesome
+/* styles.scss */
+@import '@fontsource/inter/300.css'; // Inter Light (weight 300)
+@import '@fontsource/inter/400.css'; // Inter Regular
+@import '@fontsource/inter/500.css'; // Inter Medium
+@import '@fontsource/inter/700.css'; // Inter Bold
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+
 // WE-FAB Style Guide Variables
 $blueprint-blue: #1A3A5F;   // Primary brand color
 $technical-white: #f5f6fa;  // Background color
