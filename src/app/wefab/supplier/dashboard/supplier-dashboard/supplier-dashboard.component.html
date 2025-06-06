@@ -2,7 +2,7 @@
   <!-- Welcome Section -->
   <div class="welcome-section">
     <div class="welcome-content">
-      <h3 class="dashboard-title">Welcome {{ supplierCompanyName }}!</h3>
+      <h4 class="dashboard-title">Welcome {{ supplierCompanyName }}!</h4>
       <p>Here's an overview of your supplier portal activity</p>
     </div>
   </div>
@@ -15,7 +15,7 @@
           <i [ngClass]="card.icon"></i>
         </div>
         <div class="card-details">
-          <h3>{{ card.value }}</h3>
+          <h4>{{ card.value }}</h4>
           <p class="card-title">{{ card.title }}</p>
           <span class="card-description">{{ card.description }}</span>
           <div *ngIf="card.trend" class="card-trend" [ngClass]="'trend-' + card.trend.direction">
@@ -33,7 +33,7 @@
     <div class="col-lg-6 col-md-12">
       <div class="card h-100">
         <div class="card-body">
-          <h3>Recent RFQs</h3>
+          <h4>Recent RFQs</h4>
           <div class="rfqs-list" *ngIf="recentRFQs.length > 0">
             <div *ngFor="let rfq of recentRFQs" class="rfq-item">
               <div class="rfq-content">
@@ -68,7 +68,7 @@
     <div class="col-lg-6 col-md-12">
       <div class="card h-100">
         <div class="card-body">
-          <h3>Recent Quotations</h3>
+          <h4>Recent Quotations</h4>
           <div class="rfqs-list" *ngIf="recentQuotations.length > 0">
             <div *ngFor="let quotation of recentQuotations" class="rfq-item">
               <div class="rfq-content">

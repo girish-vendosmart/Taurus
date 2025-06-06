@@ -10,7 +10,7 @@
     
     <div class="header-content">
       <div class="header-left">
-        <h3 class="page-title" style="margin-bottom: 0px;">{{ rfqDetails.rfq_name || 'Loading...' }}</h3>
+        <h4 class="page-title" style="margin-bottom: 0px;">{{ rfqDetails.rfq_name || 'Loading...' }}</h4>
         <p class="rfq-id" style="margin-bottom: 0px;">{{ rfqDetails.name || 'Loading...' }}</p>
         <span class="status-badge" [ngClass]="getStatusClass(supplierRfqDetails.status)">{{ supplierRfqDetails.status }}</span>
       </div>
@@ -42,7 +42,7 @@
 
 
   <!-- RFQ Info Bar -->
-  <div class="rfq-info-bar" *ngIf="!loading">
+  <div class="rfq-info-bar p-2" *ngIf="!loading">
     <div class="info-item">
       <span class="info-label">Creation:</span>
       <span class="info-value">{{ formatDate(rfqDetails.creation) }}</span>
@@ -97,14 +97,14 @@
       <div class="overview-content">
         <!-- RFQ Details Section -->
         <div class="description-box">
-          <h3>Description</h3>
-          <div [innerHTML]="rfqDetails.description"></div>
+          <h4>Description</h4>
+          <p [innerHTML]="rfqDetails.description"></p>
         </div>
 
         <!-- RFQ Items Section -->
         <div class="items-section">
           <div class="items-header">
-            <h3>Items</h3>
+            <h4>Items</h4>
           </div>
 
           <!-- Common Table Component for RFQ Items -->
@@ -121,7 +121,7 @@
         <!-- Attachments Section -->
         <div class="attachments-section" *ngIf="rfqAttachments && rfqAttachments.length > 0">
           <div class="attachments-header">
-            <h3>Attachments</h3>
+            <h4>Attachments</h4>
             <p class="section-subtitle">Documents and files related to this RFQ</p>
           </div>
 
@@ -178,7 +178,7 @@
 <div class="contract-modal-overlay" [class.show]="showContractModal" (click)="closeContractModal()">
   <div class="contract-modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Contract Terms and Conditions</h3>
+      <h4>Contract Terms and Conditions</h4>
       <button class="close-btn" (click)="closeContractModal()">
         <i class="bi bi-x-lg"></i>
       </button>
