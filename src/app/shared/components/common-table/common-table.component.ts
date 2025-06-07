@@ -376,6 +376,10 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
     console.log('Table status', status);
     
     switch (status) {
+      case 'published':
+        return 'status-approved';
+      case 'deactivated':
+        return 'status-paused'; 
       case 'invited':
         return 'status-open';
       case 'not-started':
