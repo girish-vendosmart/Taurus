@@ -272,8 +272,8 @@ interface Country {
       .verify-otp-button {
         border-radius: 4px;
         white-space: nowrap;
-        background-color: #1a3a60;
-        color: white;
+        background-color: #2f59eb !important;
+        color: white !important;
         border: none;
         font-weight: 500;
         padding: 0.5rem 1.5rem;
@@ -282,7 +282,8 @@ interface Country {
         height: 40px;
         
         &:hover:not(:disabled) {
-          background-color: #15304f;
+          background-color: #2f59eb !important;
+          color: white !important;
         }
         
         &:disabled {
@@ -385,8 +386,8 @@ interface Country {
           }
           
           .verify-btn {
-            background-color: #1a3a60;
-            color: white;
+            background-color: #2f59eb !important;
+            color: white !important;
             border: none;
             border-radius: 4px;
             padding: 0 1.5rem;
@@ -395,7 +396,8 @@ interface Country {
             white-space: nowrap;
             
             &:hover:not(:disabled) {
-              background-color: #15304f;
+              background-color: #2f59eb !important;
+              color: white !important;
             }
             
             &:disabled {
