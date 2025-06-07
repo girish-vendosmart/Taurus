@@ -54,10 +54,23 @@
           <!-- Search Row -->
           <tr>
             <th *ngFor="let col of getVisibleColumns()">
+              <!-- Status Column Dropdown Filter -->
+              <p-dropdown *ngIf="col.isStatus && col.filterable"
+                [options]="getFilterOptions(col)"
+                [(ngModel)]="dropdownFilters[col.field]"
+                (onChange)="onDropdownChange(col.field, $event.value)"
+                [placeholder]="'Filter ' + col.header"
+                [showClear]="true"
+                appendTo="body"
+                [style]="{'width': '100%'}"
+                styleClass="p-column-filter">
+              </p-dropdown>
+
+              <!-- Default Text Filter -->
               <input pInputText type="text" 
+                     *ngIf="!col.isStatus && col.filterable"
                      (input)="dt.filter($any($event.target).value, col.field, 'contains')"
-                     [placeholder]="'Search ' + col.header"
-                     *ngIf="col.filterable">
+                     [placeholder]="'Search ' + col.header">
             </th>
           </tr>
         </ng-template>

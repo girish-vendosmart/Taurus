@@ -58,6 +58,15 @@ export interface TableConfig {
   enableColumnResize?: boolean;
 }
 
+// Add default status options at the top level
+const DEFAULT_STATUS_OPTIONS: FilterOption[] = [
+  { label: 'Draft', value: 'Draft' },
+  { label: 'Awarded', value: 'Awarded' },
+  { label: 'Under Review', value: 'Under Review' },
+  { label: 'Submitted', value: 'Submitted' },
+  { label: 'Quoted', value: 'Quoted' }
+];
+
 @Component({
   selector: 'app-common-table',
   standalone: true,
@@ -201,6 +210,14 @@ export class CommonTableComponent implements OnInit {
     
     // Initialize filter states
     this.initializeFilters();
+
+    // Set default filter options for status columns
+    this.config.columns.forEach(col => {
+      if (col.isStatus) {
+        col.filterType = 'dropdown';
+        col.filterOptions = DEFAULT_STATUS_OPTIONS;
+      }
+    });
   }
 
   initializeColumnVisibility() {
@@ -615,10 +632,13 @@ export class CommonTableComponent implements OnInit {
   }
 
   onDropdownChange(field: string, value: any) {
-    console.log('Dropdown changed:', field, value);
-    this.dropdownFilters[field] = value;
-    console.log('Updated dropdown filters:', this.dropdownFilters);
-    this.applyAllFilters();
+    if (this.table) {
+      if (value === null || value === undefined) {
+        this.table.filter('', field, 'equals');
+      } else {
+        this.table.filter(value, field, 'equals');
+      }
+    }
   }
 
   clearDateRangeFilter(field: string) {
@@ -633,20 +653,9 @@ export class CommonTableComponent implements OnInit {
   }
 
   getFilterOptions(column: TableColumn): FilterOption[] {
-    if (column.filterOptions && column.filterOptions.length > 0) {
-      return column.filterOptions;
+    if (column.isStatus) {
+      return DEFAULT_STATUS_OPTIONS;
     }
-
-    // Auto-generate filter options for status columns
-    if (column.isStatus && this.data && this.data.length > 0) {
-      const uniqueValues = [...new Set(this.data.map(item => item[column.field]).filter(val => val != null && val !== ''))];
-      console.log('Auto-generated filter options for', column.field, ':', uniqueValues);
-      return uniqueValues.map(value => ({
-        label: value,
-        value: value
-      }));
-    }
-
-    return [];
+    return column.filterOptions || [];
   }
 }
