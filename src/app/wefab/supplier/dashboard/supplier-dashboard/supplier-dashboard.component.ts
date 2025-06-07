@@ -51,6 +51,7 @@ interface RecentQuotation {
   name: string;
   quotation_id?: string;
   amount?: number;
+  currencyCode?: string;
   creation: string;
   modified: string;
   status: string;
@@ -239,6 +240,7 @@ export class SupplierDashboardComponent {
             quotation_id: quotation.quotation_id,
             amount: quotation.total_amount || quotation.grand_total || 0,
             creation: quotation.creation,
+            currencyCode: quotation.currency_code || 'INR',
             modified: quotation.modified,
             status: quotation.status || quotation.workflow_state || 'Draft',
             statusClass: this.getQuotationStatusClass(quotation.status || quotation.workflow_state),

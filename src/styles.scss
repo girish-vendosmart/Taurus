@@ -349,13 +349,13 @@ p {
     border-radius: 6px;
 
     .info-label {
-      color: $precision-black;
-      font-weight: $font-weight-bold;
+      color: $machine-gray;
+      font-weight: $font-weight-medium;
     }
 
     .info-value {
-      color: $machine-gray;
-      font-weight: $font-weight-medium;
+      color: $precision-black;
+      font-weight: $font-weight-bold;
     }
   }
 
@@ -587,4 +587,16 @@ p {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+info-label {
+  color: $machine-gray !important;
+  font-weight: $font-weight-medium !important;
+  margin: 0 !important;
+}
+
+.info-value {
+  color: $precision-black !important;
+  font-weight: $font-weight-bold !important;
+  margin: 0 !important;
 }

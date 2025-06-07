@@ -72,9 +72,9 @@
           <div class="rfqs-list" *ngIf="recentQuotations.length > 0">
             <div *ngFor="let quotation of recentQuotations" class="rfq-item">
               <div class="rfq-content">
-                <h6>{{ quotation.name }}</h6>
+                <h6 class="linkable-column" (click)="viewQuotation(quotation.name)">{{ quotation.name }}</h6>
                 <div class="rfq-meta" *ngIf="quotation.amount">
-                  <span class="amount linkable-column" (click)="viewQuotation(quotation.name)">₹{{ quotation.amount | number:'1.2-2' }}</span>
+                  <span class="amount">{{quotation.currencyCode}} {{ quotation.amount | number:'1.2-2' }}</span>
                   <span class="time-ago">{{ quotation.timeAgo }}</span>
                 </div>
                 <!-- <div class="rfq-actions">

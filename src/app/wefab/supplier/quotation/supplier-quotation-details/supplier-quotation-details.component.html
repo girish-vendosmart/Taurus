@@ -141,8 +141,8 @@
         <!-- Items Section -->
         <div class="items-section">
           <div class="items-header p-3">
-            <h6>Total Items : {{ rawQuotationItems.length }}</h6>
-            <h6>Total Quantity : {{ getTotalQuantity() }}</h6>
+            <p class="info-label" style="margin: 0 !important;">Total Items : <span class="info-value">{{ rawQuotationItems.length }}</span></p>
+            <p class="info-label" style="margin: 0 !important;">Total Quantity : <span class="info-value">{{ getTotalQuantity() }}</span></p>
           </div>
 
           <!-- Common Table Component -->
@@ -193,7 +193,7 @@
     <!-- Attachments Section -->
     <div class="attachments-section m-4" *ngIf="quotationAttachments && quotationAttachments.length > 0 && activeTab === 'overview'">
       <div class="attachments-header">
-        <h3>Attachments</h3>
+        <h3>Attachments ({{ quotationAttachments.length }})</h3>
         <p class="section-subtitle">Documents and files related to this quotation</p>
       </div>
 
