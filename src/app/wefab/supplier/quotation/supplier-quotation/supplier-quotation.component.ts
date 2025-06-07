@@ -140,6 +140,7 @@ export class SupplierQuotationComponent implements OnInit {
         header: 'Submitted Date',
         sortable: true,
         filterable: true,
+        filterType: 'dateRange',
       },
       {
         field: 'validity',
