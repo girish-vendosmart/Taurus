@@ -1,0 +1,154 @@
+.workflow-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.5rem 1rem;
+}
+
+.workflow-step {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  min-height: 60px;
+}
+
+.step-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-right: 16px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+}
+
+.step-indicator.done {
+  background: #1b7b5a;
+  color: #fff;
+  border-color: #1b7b5a;
+}
+
+.step-indicator.current {
+  background: #183b56;
+  color: #fff;
+  border-color: #183b56;
+}
+
+.step-indicator.pending {
+  background: #f3f4f6;
+  color: #b0b3b8;
+  border-color: #d1d5db;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.icon.done {
+  font-size: 1.3rem;
+}
+
+.icon.current {
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  border: 4px solid #183b56;
+  margin: auto;
+}
+
+.icon.pending {
+  width: 16px;
+  height: 16px;
+  background: #f3f4f6;
+  border-radius: 50%;
+  border: 4px solid #d1d5db;
+  margin: auto;
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2px;
+}
+
+.step-label {
+  font-weight: 600;
+  color: #183b56;
+  font-size: 1.05rem;
+}
+
+.step-description {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+}
+
+.current-badge {
+  display: inline-block;
+  background: #e3e8f0;
+  color: #183b56;
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 8px;
+  margin-top: 2px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.approve-btn {
+  background: #1b7b5a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: background 0.2s;
+}
+
+.approve-btn:hover {
+  background: #14613e;
+}
+
+.reject-btn {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: background 0.2s;
+}
+
+.reject-btn:hover {
+  background: #c0392b;
+}
+
+.step-connector {
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  width: 2px;
+  height: calc(100% - 32px);
+  background: #d1d5db;
+  z-index: 0;
+} 

@@ -1,0 +1,41 @@
+<div class="workflow-progress">
+  @for (step of steps; track step.label; let i = $index) {
+    <div class="workflow-step">
+      <div class="step-indicator" [ngClass]="step.status">
+        @switch (step.status) {
+          @case ('done') {
+            <span class="icon done">&#10003;</span>
+          }
+          @case ('current') {
+            <span class="icon current"></span>
+          }
+          @default {
+            <span class="icon pending"></span>
+          }
+        }
+      </div>
+      <div class="step-content">
+        <div class="step-label">{{ step.label }}</div>
+        <div class="step-description">{{ step.description }}</div>
+        @if (step.status === 'current') {
+          <div class="current-badge">Current</div>
+          @if (showActions) {
+            <div class="action-buttons">
+              <app-configurable-button
+                [configuration]="{ label: 'Approve', icon: 'pi pi-check', severity: 'success', raised: true, style: { fontSize: '0.875rem', padding: '0.4rem 0.8rem', borderRadius: '5px' } }"
+                (onClick)="approve.emit()">
+              </app-configurable-button>
+              <app-configurable-button
+                [configuration]="{ label: 'Reject', icon: 'pi pi-times', severity: 'danger', raised: true, style: { fontSize: '0.875rem', padding: '0.4rem 0.8rem', borderRadius: '5px' } }"
+                (onClick)="reject.emit()">
+              </app-configurable-button>
+            </div>
+          }
+        }
+      </div>
+      @if (i < steps.length - 1) {
+        <div class="step-connector"></div>
+      }
+    </div>
+  }
+</div> 

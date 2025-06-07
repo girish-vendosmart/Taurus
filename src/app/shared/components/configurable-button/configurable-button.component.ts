@@ -18,7 +18,11 @@ export class ConfigurableButtonComponent {
     disabled: false,
     loading: false,
     iconPos: 'left',
-    style: {},
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.4rem 0.8rem',
+      borderRadius: '5px'
+    },
     styleClass: '',
     badge: '',
     badgeClass: '',
