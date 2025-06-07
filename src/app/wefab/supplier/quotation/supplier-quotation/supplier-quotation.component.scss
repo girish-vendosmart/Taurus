@@ -1,6 +1,21 @@
 // Import WE-FAB style guide variables
 @import '../../../../../assets/scss/variables.scss';
 
+// WE-FAB Style Guide Variables
+$blueprint-blue: #1A3A5F;   // Primary brand color
+$technical-white: #f5f6fa;  // Background color
+$precision-black: #1A1D21;  // Text color
+$machine-gray: #545A64;     // Secondary elements
+$material-silver: #D1D5DB;  // Borders, backgrounds
+$safety-orange: #FF5722;    // CTAs, highlights
+$process-green: #12856E;    // Success states, progress
+$warning-yellow: #F59E0B;   // Warning color
+$info-blue: #206ac4;       // Info color
+$danger-red: #EF4444;       // Danger/error color
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
 // Main page container
 .quotation-page {
   background-color: $technical-white;
@@ -195,11 +210,13 @@
   .quotationid-column {
     .company-cell {
       .company-name {
-        color: $blueprint-blue;
-        font-weight: $font-weight-semibold;
-        
+        color: $info-blue;
+        cursor: pointer;
+        text-decoration: none;
+
         &:hover {
-          color: darken($blueprint-blue, 10%);
+          color: darken($info-blue, 10%);
+          text-decoration: underline;
         }
       }
     }

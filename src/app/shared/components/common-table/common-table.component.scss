@@ -423,13 +423,20 @@ $font-weight-bold: 700;
 }
 
 .linkable-column {
-  color: $info-blue;
+  color: $info-blue !important;
   cursor: pointer;
+  text-decoration: none !important;
   
   &:hover {
     color: darken($info-blue, 10%);
-    text-decoration: underline;
+    text-decoration: underline !important;
   }
+}
+
+.sub-info {
+  font-size: 0.8rem;
+  color: $machine-gray;
+  margin-top: 0.25rem;
 }
 
 .non-linkable-column {
