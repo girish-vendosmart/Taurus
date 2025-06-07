@@ -69,9 +69,7 @@
               <ng-container [ngSwitch]="true">
                 <!-- Company Cell -->
                 <div class="company-cell" *ngSwitchCase="col.isLink">
-                  <a class="linkable-column" (click)="onLinkClick($event, rowData, col)">
-                    {{ rowData[col.field] }}
-                  </a>
+                  <a class="linkable-column" (click)="onLinkClick($event, rowData, col)" [innerHTML]="rowData[col.field]"></a>
                   <div class="sub-info" *ngIf="rowData.companySubInfo">
                     {{ rowData.companySubInfo }}
                   </div>

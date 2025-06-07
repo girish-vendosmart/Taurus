@@ -201,6 +201,14 @@ h4, .h4 {
     text-transform: capitalize;
   }
 
+  &.status-approved {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    font-size: 12px !important;
+    text-transform: capitalize;
+  }
+
   &.status-rejected {
     background-color: rgba(239, 68, 68, 0.15);
     color: #dc2626;

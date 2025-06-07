@@ -97,6 +97,7 @@ export class SupplierRfqComponent implements OnInit {
         filterable: true,
         filterType: 'text',
         isHtml: true,
+        isLink: true,
       },
       {
         field: 'creationDate',
@@ -201,7 +202,8 @@ export class SupplierRfqComponent implements OnInit {
     return apiData.map(item => ({
       // Map API fields to match the table configuration
       name: item.rfq_name || '',
-      rfqName: `${item.rfq_name || ''}<br><span class="rfq-id-link">${item.rfq_id || ''}</span>`,
+      rfqName: item.rfq_name || '',
+      companySubInfo: item.rfq_id || '',
       rfqId: item.rfq_id || '', // Add rfq_id for easier access in click handler
       creationDate: this.formatApiDate(item.creation),
       status: item.status[0].toUpperCase() + item.status.slice(1).toLowerCase(),
@@ -325,22 +327,11 @@ export class SupplierRfqComponent implements OnInit {
   onLinkClick(event: any) {
     console.log('Link clicked:', event.rowData);
     
-    // Handle click on RFQ ID link
-    const target = event.event.target as HTMLElement;
-    if (target?.classList?.contains('rfq-id-link')) {
-      console.log('RFQ ID link clicked:', event.rowData);
-      event.event.preventDefault();
-      event.event.stopPropagation();
-      
-      // Call the onRfqIdLinkClick function with the RFQ ID
-      const rfqId = event.rowData.rfqId || event.rowData.name || '';
-      if (rfqId) {
-        localStorage.setItem('supplier_rfq_id', event.rowData.suppler_rfq_id);
-        this.onRfqIdLinkClick(rfqId, event.rowData.status);
-      }
-    } else {
-      // Handle other link clicks (if any)
-      console.log('Other link clicked');
+    // Get the RFQ ID from the row data
+    const rfqId = event.rowData.rfqId || event.rowData.name || '';
+    if (rfqId) {
+      localStorage.setItem('supplier_rfq_id', event.rowData.suppler_rfq_id);
+      this.onRfqIdLinkClick(rfqId, event.rowData.status);
     }
   }
 

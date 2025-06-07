@@ -311,11 +311,11 @@ export class CommonTableComponent implements OnInit {
     
     switch (status) {
       case 'invited':
-        return 'status-under-review';
+        return 'status-open';
       case 'not-started':
-        return 'status-not-started';
+        return 'status-draft';
       case 'under-review':
-        return 'status-under-review';
+        return 'status-review';
       case 'approved':
         return 'status-approved';
       case 'rejected':
@@ -346,6 +346,8 @@ export class CommonTableComponent implements OnInit {
         return 'status-pending';
       case 'review':
         return 'status-review';
+      case 'not-started':
+        return 'status-draft';
       default:
         return 'status-default';
     }
