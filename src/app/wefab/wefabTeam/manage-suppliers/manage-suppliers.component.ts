@@ -164,10 +164,75 @@ interface Supplier {
       border-radius: 10px !important;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
       overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      position: relative;
+      width: 100%;
     }
+
+    /* Ensure proper table scrolling */
+    ::ng-deep .p-datatable {
+      overflow-x: auto !important;
+      display: block;
+    }
+
+    ::ng-deep .p-datatable-wrapper {
+      overflow-x: auto !important;
+      min-width: 100%;
+      width: max-content;
+    }
+
+    ::ng-deep .p-datatable-table {
+      min-width: 1500px !important;
+      width: 100%;
+    }
+
+    /* Column widths */
+    ::ng-deep .p-datatable .p-datatable-thead > tr > th:first-child,
+    ::ng-deep .p-datatable .p-datatable-tbody > tr > td:first-child {
+      min-width: 400px;
+    }
+
+    ::ng-deep .p-datatable .p-datatable-thead > tr > th:nth-child(2),
+    ::ng-deep .p-datatable .p-datatable-tbody > tr > td:nth-child(2) {
+      min-width: 300px;
+    }
+
+    ::ng-deep .p-datatable .p-datatable-thead > tr > th:last-child,
+    ::ng-deep .p-datatable .p-datatable-tbody > tr > td:last-child {
+      min-width: 150px;
+    }
+
+    /* Cell content handling */
+    ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Tab panel container */
+    ::ng-deep .p-tabview .p-tabview-panels {
+      padding: 0 !important;
+    }
+
+    ::ng-deep .p-tabview-panel {
+      overflow: hidden;
+    }
+
     .suppliers-container {
       padding: 1.2rem;
       font-family: 'Inter', sans-serif;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    @media (max-width: 768px) {
+      .suppliers-container {
+        padding: 0.8rem;
+      }
+
+      ::ng-deep .p-tabview-panel {
+        padding: 1rem 0;
+      }
     }
 
     .header {

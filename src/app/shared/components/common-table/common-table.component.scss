@@ -288,52 +288,21 @@ $font-weight-bold: 700;
       align-items: center;
       justify-content: space-between;
 
+      @media screen and (max-width: 576px) {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1rem;
+      }
+
+      .p-paginator-left {
+        display: none;
+      }
+
       .p-paginator-current {
         color: $machine-gray;
         font-size: 0.875rem;
-      }
-
-      .custom-pagination {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-
-        .pagination-btn {
-          width: 32px;
-          height: 32px;
-          padding: 0;
-          border: 1px solid #dee2e6;
-          background: white;
-          color: $machine-gray;
-          border-radius: 4px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.15s ease;
-
-          &:hover:not(:disabled) {
-            background: #f8f9fa;
-            border-color: $blueprint-blue;
-            color: $blueprint-blue;
-          }
-
-          &:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background: #f8f9fa;
-          }
-
-          i {
-            font-size: 0.75rem;
-          }
-        }
-
-        .page-info {
-          color: $machine-gray;
-          font-size: 0.875rem;
-          margin: 0 0.5rem;
-        }
+        white-space: nowrap;
       }
 
       .p-dropdown {
@@ -342,6 +311,8 @@ $font-weight-bold: 700;
         border: 1px solid #dee2e6;
         border-radius: 4px;
         background: white;
+        display: flex !important;
+        align-items: center;
 
         .p-dropdown-label {
           padding: 0.375rem 0.75rem;
@@ -355,6 +326,9 @@ $font-weight-bold: 700;
         .p-dropdown-trigger {
           width: 2rem;
           color: $machine-gray;
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
           .p-dropdown-trigger-icon {
             font-size: 0.75rem;
@@ -491,6 +465,18 @@ $font-weight-bold: 700;
   * {
     cursor: col-resize !important;
     user-select: none !important;
+  }
+}
+
+
+:host ::ng-deep p-ripple p-element p-paginator-prev p-paginator-element {
+  display: none;
+}
+
+// Override PrimeNG's default hiding behavior
+:host ::ng-deep {
+  .p-paginator-rpp-options {
+    display: flex !important;
   }
 }
 

@@ -36,8 +36,7 @@
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         [alwaysShowPaginator]="true"
         [showFirstLastIcon]="false"
-        [showPageLinks]="false"
-        [rowsPerPageOptions]="[5, 10, 20, 50]">
+        [showPageLinks]="false">
 
         <!-- Table Header -->
         <ng-template pTemplate="header">
@@ -125,21 +124,23 @@
 
         <!-- Paginator -->
         <ng-template pTemplate="paginatorright">
-          <div class="custom-pagination">
+          <!-- <div class="custom-pagination nav-arrows">
             <button class="pagination-btn" 
                     [disabled]="isFirstPage()"
                     (click)="goToPreviousPage()">
               <i class="pi pi-chevron-left"></i>
             </button>
-            <span class="page-info">
-              Page {{ getCurrentPage() }} of {{ getTotalPages() }}
-            </span>
             <button class="pagination-btn" 
                     [disabled]="isLastPage()"
                     (click)="goToNextPage()">
               <i class="pi pi-chevron-right"></i>
             </button>
           </div>
+          <div class="custom-pagination page-controls">
+            <span class="page-info">
+              Page {{ getCurrentPage() }} of {{ getTotalPages() }}
+            </span>
+          </div> -->
         </ng-template>
       </p-table>
     </div>
