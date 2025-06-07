@@ -30,26 +30,6 @@ $process-green: #12856E;
     align-items: flex-start;
     gap: 0.875rem;
     
-    .profile-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: $blueprint-blue;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 0.25rem;
-      
-      .avatar-text {
-        color: white;
-        font-weight: 600;
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-    }
-    
     .message-bubble {
       flex: 1;
       background: white;
@@ -58,12 +38,40 @@ $process-green: #12856E;
       padding: 1rem;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
       min-width: 0;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-left: 56px;
+      
+      .profile-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: $blueprint-blue;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        position: absolute;
+        left: 8px;
+        top: 1rem;
+        box-shadow: 0 1px 4px rgba(26,58,95,0.08);
+        
+        .avatar-text {
+          color: white;
+          font-weight: 600;
+          font-size: 0.875rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
       
       .message-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 0.75rem;
+        margin-left: 0;
         
         .sender-info {
           display: flex;
@@ -93,6 +101,8 @@ $process-green: #12856E;
       }
       
       .message-content {
+        margin-left: 0;
+        
         .message-text {
           font-size: 0.875rem;
           line-height: 1.5;

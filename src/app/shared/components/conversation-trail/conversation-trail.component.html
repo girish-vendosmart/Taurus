@@ -75,10 +75,10 @@
 
     <!-- Messages -->
     <div class="message" *ngFor="let msg of messages">
-      <div class="profile-avatar">
-        <span class="avatar-text">{{ getInitials(msg.sender) }}</span>
-      </div>
       <div class="message-bubble">
+        <div class="profile-avatar">
+          <span class="avatar-text">{{ getInitials(msg.sender) }}</span>
+        </div>
         <div class="message-header">
           <div class="sender-info">
             <span class="sender-name">{{ msg.sender }}</span>
