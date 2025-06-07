@@ -40,6 +40,7 @@
 
         <!-- Table Header -->
         <ng-template pTemplate="header">
+          <!-- Column Headers -->
           <tr>
             <th *ngFor="let col of getVisibleColumns()" 
                 [pSortableColumn]="col.sortable ? col.field : ''"
@@ -51,26 +52,53 @@
               <div class="resize-handle" *ngIf="config.enableColumnResize"></div>
             </th>
           </tr>
-          <!-- Search Row -->
-          <tr>
-            <th *ngFor="let col of getVisibleColumns()">
-              <!-- Status Column Dropdown Filter -->
-              <p-dropdown *ngIf="col.isStatus && col.filterable"
-                [options]="getFilterOptions(col)"
-                [(ngModel)]="dropdownFilters[col.field]"
-                (onChange)="onDropdownChange(col.field, $event.value)"
-                [placeholder]="'Filter ' + col.header"
-                [showClear]="true"
-                appendTo="body"
-                [style]="{'width': '100%'}"
-                styleClass="p-column-filter">
-              </p-dropdown>
 
-              <!-- Default Text Filter -->
-              <input pInputText type="text" 
-                     *ngIf="!col.isStatus && col.filterable"
-                     (input)="dt.filter($any($event.target).value, col.field, 'contains')"
-                     [placeholder]="'Search ' + col.header">
+          <!-- Filter Row -->
+          <tr *ngIf="config.enableFilter">
+            <th *ngFor="let col of getVisibleColumns()">
+              <div class="filter-container" [ngSwitch]="col.filterType">
+                <!-- Date Range Filter -->
+                <div *ngSwitchCase="'dateRange'" class="date-range-filter">
+                  <p-calendar 
+                      [(ngModel)]="dateRangeFilters[col.field]"
+                      (ngModelChange)="onDateRangeChange(col.field, $event)"
+                      selectionMode="range"
+                      [showIcon]="true"
+                      [readonlyInput]="true"
+                      appendTo="body"
+                      [showButtonBar]="true"
+                      [placeholder]="'Select ' + col.header + ' range'"
+                      dateFormat="dd M yy"
+                      [style]="{'width': 'calc(100% - 30px)'}">
+                  </p-calendar>
+                  <button *ngIf="dateRangeFilters[col.field]?.length > 0" 
+                          type="button" 
+                          class="p-button-text p-button-sm clear-filter-btn"
+                          (click)="clearDateRangeFilter(col.field)"
+                          title="Clear filter">
+                    <i class="pi pi-times"></i>
+                  </button>
+                </div>
+
+                <!-- Dropdown Filter -->
+                <p-dropdown *ngSwitchCase="'dropdown'"
+                           [options]="getFilterOptions(col)"
+                           [(ngModel)]="dropdownFilters[col.field]"
+                           (onChange)="onDropdownChange(col.field, $event.value)"
+                           [placeholder]="'Filter ' + col.header"
+                           [showClear]="true"
+                           appendTo="body"
+                           [style]="{'width': '100%'}"
+                           styleClass="p-column-filter">
+                </p-dropdown>
+
+                <!-- Text Filter -->
+                <input pInputText type="text" 
+                       *ngSwitchDefault
+                       (input)="dt.filter($any($event.target).value, col.field, 'contains')"
+                       [placeholder]="'Search ' + col.header"
+                       class="w-100">
+              </div>
             </th>
           </tr>
         </ng-template>

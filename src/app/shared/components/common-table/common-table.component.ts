@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, SimpleChanges, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -82,12 +82,12 @@ const DEFAULT_STATUS_OPTIONS: FilterOption[] = [
     DropdownModule,
     MultiSelectModule,
     OverlayPanelModule,
-    CalendarModule
+    CalendarModule,
   ],
   templateUrl: './common-table.component.html',
   styleUrl: './common-table.component.scss'
 })
-export class CommonTableComponent implements OnInit {
+export class CommonTableComponent implements OnInit, AfterViewInit {
   @ViewChild('dt') table!: Table;
   
   // Make Math available in template
@@ -189,7 +189,7 @@ export class CommonTableComponent implements OnInit {
   startWidth = 0;
 
   // Filter states
-  dateRangeFilters: { [key: string]: Date[] } = {};
+  dateRangeFilters: any = {};
   dropdownFilters: { [key: string]: any } = {};
 
   // Sample data for demonstration
@@ -201,6 +201,7 @@ export class CommonTableComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Initialize filter fields
     this.globalFilterFields = this.config.columns
       .filter(col => col.filterable)
       .map(col => col.field);
@@ -208,16 +209,64 @@ export class CommonTableComponent implements OnInit {
     // Initialize column visibility
     this.initializeColumnVisibility();
     
-    // Initialize filter states
+    // Initialize filters
     this.initializeFilters();
 
     // Set default filter options for status columns
     this.config.columns.forEach(col => {
-      if (col.isStatus) {
+      if (col.isStatus && !col.filterType) {
         col.filterType = 'dropdown';
         col.filterOptions = DEFAULT_STATUS_OPTIONS;
       }
     });
+
+    // Initialize date range filters
+    this.config.columns.forEach(col => {
+      if (col.filterable && col.filterType === 'dateRange') {
+        this.dateRangeFilters[col.field] = [];
+      }
+    });
+  }
+
+  ngAfterViewInit() {
+    // Register custom filter match mode for date ranges
+    if (this.table && this.table.filterService) {
+      this.table.filterService.register('dateRange', (value: any, filter: any): boolean => {
+        if (!filter || (!filter.startDate && !filter.dates)) {
+          return true;
+        }
+
+        if (!value) {
+          return false;
+        }
+
+        // Parse the date value from various formats
+        const dateValue = this.parseDateFromString(value);
+        if (!dateValue) {
+          return false;
+        }
+
+        // Set time to start of day for comparison
+        dateValue.setHours(0, 0, 0, 0);
+
+        let startDate: Date, endDate: Date;
+        
+        if (filter.dates && Array.isArray(filter.dates)) {
+          // Handle array of dates from calendar
+          startDate = new Date(filter.dates[0]);
+          endDate = filter.dates[1] ? new Date(filter.dates[1]) : startDate;
+        } else {
+          // Handle single date or date range object
+          startDate = new Date(filter.startDate);
+          endDate = filter.endDate ? new Date(filter.endDate) : startDate;
+        }
+
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+
+        return dateValue >= startDate && dateValue <= endDate;
+      });
+    }
   }
 
   initializeColumnVisibility() {
@@ -513,122 +562,101 @@ export class CommonTableComponent implements OnInit {
     });
   }
 
-  onDateRangeChange(field: string, dates: Date[] | Date) {
-    console.log('Date range changed:', field, dates);
-    // Handle both array and single date events from PrimeNG calendar
-    let dateArray: Date[];
-    if (Array.isArray(dates)) {
-      dateArray = dates;
-    } else if (dates) {
-      dateArray = [dates];
-    } else {
-      dateArray = [];
-    }
-    
-    this.dateRangeFilters[field] = dateArray;
-    console.log('Updated date filters:', this.dateRangeFilters);
-    this.applyDateRangeFilter(field, dateArray);
-  }
-
-  private parseDateFromString(dateStr: string): Date | null {
+  private parseDateFromString(dateStr: string | Date): Date | null {
     if (!dateStr) return null;
     
     try {
+      // If already a Date object, return it
+      if (dateStr instanceof Date) {
+        return dateStr;
+      }
+      
       // Handle different date formats
       if (typeof dateStr === 'string') {
-        // Format: "28 May 2025, 11:26 PM" or "28 May 2025"
-        if (dateStr.includes(',')) {
-          const datePart = dateStr.split(',')[0].trim();
-          return new Date(datePart);
+        // Remove extra whitespace and normalize
+        const cleanDateStr = dateStr.trim();
+        
+        // Try parsing with different formats
+        let date: Date | null = null;
+        
+        // Format: "DD MMM YYYY, HH:mm" or "DD MMM YYYY"
+        if (cleanDateStr.includes(',')) {
+          const [datePart] = cleanDateStr.split(',');
+          date = new Date(datePart.trim());
+        } else {
+          // Try standard date parsing
+          date = new Date(cleanDateStr);
         }
-        // Standard date string
-        return new Date(dateStr);
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+          // Try alternative parsing for formats like "DD-MM-YYYY" or "DD/MM/YYYY"
+          const datePatterns = [
+            /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/,  // DD/MM/YYYY or DD-MM-YYYY
+            /^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/   // YYYY/MM/DD or YYYY-MM-DD
+          ];
+          
+          for (const pattern of datePatterns) {
+            const match = cleanDateStr.match(pattern);
+            if (match) {
+              // Assume first pattern is DD/MM/YYYY, second is YYYY/MM/DD
+              if (pattern === datePatterns[0]) {
+                date = new Date(parseInt(match[3]), parseInt(match[2]) - 1, parseInt(match[1]));
+              } else {
+                date = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+              }
+              break;
+            }
+          }
+        }
+        
+        return (date && !isNaN(date.getTime())) ? date : null;
       }
-      return new Date(dateStr);
+      return null;
     } catch (error) {
       console.error('Error parsing date:', dateStr, error);
       return null;
     }
   }
 
-  applyDateRangeFilter(field: string, dates: Date[]) {
-    if (!this.table) return;
+  onDateRangeChange(field: string, dates: Date[] | Date | null) {
+    console.log('Date range changed for field:', field, 'dates:', dates);
+    
+    let dateArray: Date[] = [];
+    
+    if (Array.isArray(dates)) {
+      // Filter out null/undefined values and ensure we have valid dates
+      dateArray = dates.filter(date => date != null && date instanceof Date);
+    } else if (dates instanceof Date) {
+      dateArray = [dates];
+    } else if (dates === null || dates === undefined) {
+      // Handle clear case
+      dateArray = [];
+    }
+    
+    // Update the filter state
+    this.dateRangeFilters[field] = dateArray;
+    
+    // Apply the filter
+    this.applyDateRangeFilter(field, dateArray);
+  }
 
-    if (!dates || dates.length === 0) {
-      // Clear date range filter
-      this.table.filteredValue = null;
-      this.applyAllFilters();
+  applyDateRangeFilter(field: string, dates: Date[]) {
+    console.log('Applying date range filter for field:', field, 'dates:', dates);
+    
+    if (!this.table) {
+      console.error('Table reference not available');
       return;
     }
 
-    const startDate = dates[0];
-    const endDate = dates[1] || dates[0]; // If only one date selected, use it as both start and end
+    if (!dates || dates.length === 0) {
+      // Clear filter if no dates
+      this.table.filter(null, field, 'equals');
+      return;
+    }
 
-    // Apply all active filters
-    this.applyAllFilters();
-  }
-
-  applyAllFilters() {
-    if (!this.table) return;
-    
-    console.log('Applying all filters. Data length:', this.data.length);
-    console.log('Date filters:', this.dateRangeFilters);
-    console.log('Dropdown filters:', this.dropdownFilters);
-
-    let filteredData = [...this.data];
-
-    // Apply date range filters
-    Object.keys(this.dateRangeFilters).forEach(field => {
-      const dates = this.dateRangeFilters[field];
-      if (dates && dates.length > 0) {
-        console.log(`Applying date filter for ${field}:`, dates);
-        const startDate = dates[0];
-        const endDate = dates[1] || dates[0];
-
-        filteredData = filteredData.filter(item => {
-          const itemDateStr = item[field];
-          if (!itemDateStr) return false;
-          
-          const itemDate = this.parseDateFromString(itemDateStr);
-          
-          // Check if date is valid
-          if (!itemDate || isNaN(itemDate.getTime())) {
-            return false;
-          }
-          
-          const start = new Date(startDate);
-          const end = new Date(endDate);
-          
-          // Set time to start/end of day for proper comparison
-          start.setHours(0, 0, 0, 0);
-          end.setHours(23, 59, 59, 999);
-          itemDate.setHours(0, 0, 0, 0);
-          
-          const isInRange = itemDate >= start && itemDate <= end;
-          console.log(`Date check: ${itemDateStr} (${itemDate}) between ${start} and ${end}: ${isInRange}`);
-          return isInRange;
-        });
-        
-        console.log(`After date filter for ${field}: ${filteredData.length} items`);
-      }
-    });
-
-    // Apply dropdown filters
-    Object.keys(this.dropdownFilters).forEach(field => {
-      const value = this.dropdownFilters[field];
-      if (value !== null && value !== undefined && value !== '') {
-        console.log(`Applying dropdown filter for ${field}:`, value);
-        const beforeLength = filteredData.length;
-        filteredData = filteredData.filter(item => item[field] === value);
-        console.log(`After dropdown filter for ${field}: ${filteredData.length} items (was ${beforeLength})`);
-      }
-    });
-
-    // Update table with filtered data
-    this.table.filteredValue = filteredData.length === this.data.length ? null : filteredData;
-    this.table._filter();
-    
-    console.log('Final filtered data length:', filteredData.length);
+    // Filter by date range using custom filter
+    this.table.filter({ dates }, field, 'dateRange');
   }
 
   onDropdownChange(field: string, value: any) {
@@ -642,14 +670,19 @@ export class CommonTableComponent implements OnInit {
   }
 
   clearDateRangeFilter(field: string) {
+    console.log('Clearing date range filter for field:', field);
     this.dateRangeFilters[field] = [];
-    this.applyAllFilters();
+    if (this.table) {
+      this.table.filter(null, field, 'equals');
+    }
   }
 
   clearDropdownFilter(field: string) {
     console.log('Clearing dropdown filter:', field);
     this.dropdownFilters[field] = null;
-    this.applyAllFilters();
+    if (this.table) {
+      this.table.filter(null, field, 'equals');
+    }
   }
 
   getFilterOptions(column: TableColumn): FilterOption[] {
