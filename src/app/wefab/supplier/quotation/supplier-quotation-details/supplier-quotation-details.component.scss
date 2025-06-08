@@ -110,38 +110,6 @@ $danger-red: #EF4444;
         width: 100%;
         justify-content: flex-start;
       }
-
-      ::ng-deep p-button {
-        .p-button {
-          padding: 0.625rem 1.5rem;
-          font-size: 0.875rem;
-          font-weight: $font-weight-semibold;
-          border-radius: 6px;
-          transition: all 0.2s ease;
-
-          &.p-button-outlined {
-            background: white;
-            border-color: $blueprint-blue;
-            color: $blueprint-blue;
-
-            &:hover {
-              background: $blueprint-blue;
-              color: white;
-            }
-          }
-
-          &:not(.p-button-outlined) {
-            background: $blueprint-blue;
-            border-color: $blueprint-blue;
-            color: white;
-
-            &:hover {
-              background: darken($blueprint-blue, 10%);
-              border-color: darken($blueprint-blue, 10%);
-            }
-          }
-        }
-      }
     }
   }
 }

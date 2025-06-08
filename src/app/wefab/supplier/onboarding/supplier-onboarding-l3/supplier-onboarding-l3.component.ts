@@ -320,7 +320,7 @@ export class SupplierOnboardingL3Component implements OnInit {
       // Header
       {
         template: `
-          <h3 class="text-blueprint-blue mb-2">Financial Information</h3>
+          <h3 class=" mb-2">Financial Information</h3>
           <p class="text-machine-gray mb-3">Share your financial details to improve matching with potential clients</p>
         `
       },

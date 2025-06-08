@@ -304,7 +304,6 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   printButtonConfig = {
     label: 'Print',
     icon: 'pi pi-print',
-    severity: 'secondary',
     size: 'normal',
     disabled: false,
     loading: false,

@@ -17,15 +17,24 @@
 
       
       <div class="header-right" *ngIf="!supplierQuotationId">
-        <button class="btn btn-primary" (click)="createQuotation()" [disabled]="loading">
-          Create Quotation
-        </button>
+        <app-configurable-button
+          [configuration]="{
+            label: 'Create Quotation',
+            disabled: loading,
+            style: {
+              marginRight: '0.5rem',
+              padding: '0.4rem 0.8rem',
+              fontSize: '0.875rem',
+              borderRadius: '5px'
+            }
+          }"
+          (onClick)="createQuotation()">
+        </app-configurable-button>
       </div>
       <div class="header-right" *ngIf="supplierQuotationId">
         <app-configurable-button
           [configuration]="{
             label: 'View Quotation',
-            severity: 'primary',
             disabled: loading,
             style: {
               marginRight: '0.5rem',

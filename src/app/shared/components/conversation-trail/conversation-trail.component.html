@@ -43,7 +43,7 @@
 
     <!-- Action Buttons -->
     <div class="action-section">
-      <label class="attach-file-btn" for="file-input">
+      <label class="attach-file-btn" for="file-input" style="height: 38px !important;">
         <i class="pi pi-paperclip"></i>
         <span>Attach File</span>
         <input 
@@ -54,12 +54,19 @@
           hidden>
       </label>
       
-      <button 
-        class="send-message-btn" 
-        (click)="sendMessage()">
-        <i class="pi pi-send"></i>
-        <span>Send</span>
-      </button>
+      <app-configurable-button
+        [configuration]="{
+          label: 'Send',
+          icon: 'pi pi-send',
+          style: {
+            marginRight: '0.5rem',
+            padding: '0.4rem 0.8rem',
+            fontSize: '0.875rem',
+            borderRadius: '5px'
+          }
+        }"
+        (onClick)="sendMessage()">
+      </app-configurable-button>
     </div>
   </div>
   <!-- Messages Section -->

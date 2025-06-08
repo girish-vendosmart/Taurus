@@ -8,7 +8,7 @@ export class SweetAlertService {
   
   // WE-FAB brand colors from style guide
   private brandColors = {
-    blueprintBlue: '#1A3A5F',  // Primary brand color
+    blueprintBlue: '#2f59eb',  // Primary brand color
     technicalWhite: '#F6F7F9', // Background color
     precisionBlack: '#1A1D21', // Text color
     machineGray: '#545A64',    // Secondary elements
