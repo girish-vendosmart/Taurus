@@ -485,7 +485,7 @@ export class SupplierOnboardingL2Component implements OnInit {
           {
             template: `
               <div class="section-header mb-2">
-                <h4 class="text-blueprint-blue">Machine Details</h4>
+                <h4 class="">Machine Details</h4>
                 <p class="text-machine-gray">Add details about your manufacturing machines.</p>
               </div>
             `
@@ -597,7 +597,7 @@ export class SupplierOnboardingL2Component implements OnInit {
           {
             template: `
               <div class="section-header mb-2">
-                <h4 class="text-blueprint-blue">Certifications</h4>
+                <h4 class="">Certifications</h4>
                 <p class="text-machine-gray">Add details about your certifications.</p>
               </div>
             `
@@ -692,7 +692,7 @@ export class SupplierOnboardingL2Component implements OnInit {
           {
             template: `
               <div class="section-header mb-2">
-                <h4 class="text-blueprint-blue">Production & Industries</h4>
+                <h4 class="">Production & Industries</h4>
                 <p class="text-machine-gray">Provide details about your production capacity and industries served.</p>
               </div>
             `
@@ -763,7 +763,7 @@ export class SupplierOnboardingL2Component implements OnInit {
       {
         template: `
           <div class="section-header mb-2">
-            <h4 class="text-blueprint-blue">Facility Verification</h4>
+            <h4 class="">Facility Verification</h4>
             <p class="text-machine-gray mb-2">Upload geotagged photos of your manufacturing facility.</p>
           </div>
         `

@@ -122,7 +122,6 @@
       padding-top: 0.5rem;
       
       .step-title {
-        color: $machine-gray;
         font-weight: $font-weight-medium;
         transition: all 0.3s ease;
         font-size: 1.05rem;
@@ -141,7 +140,6 @@
       
       .step-content {
         .step-title {
-          color: $blueprint-blue;
           font-weight: $font-weight-semibold;
           transform: translateX(3px);
         }
