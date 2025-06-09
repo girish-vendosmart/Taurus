@@ -64,7 +64,6 @@ $transition: all 0.3s ease;
   display: flex;
   min-height: 100vh;
   background-color: $technical-white;
-  font-family: 'Inter', sans-serif;
   position: relative;
 }
 

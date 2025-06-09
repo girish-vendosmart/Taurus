@@ -7,21 +7,16 @@
 @import 'bootstrap/scss/bootstrap';
 
 /* Import Inter font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @import "../node_modules/quill/dist/quill.core.css";
 @import "../node_modules/quill/dist/quill.snow.css";
 
-// Font Awesome
-/* styles.scss */
-@import '@fontsource/inter/300.css'; // Inter Light (weight 300)
-@import '@fontsource/inter/400.css'; // Inter Regular
-@import '@fontsource/inter/500.css'; // Inter Medium
-@import '@fontsource/inter/700.css'; // Inter Bold
-
-body {
-  font-family: 'Inter', sans-serif;
-}
+// // Font Awesome
+// /* styles.scss */
+// @import '@fontsource/inter/300.css'; // Inter Light (weight 300)
+// @import '@fontsource/inter/400.css'; // Inter Regular
+// @import '@fontsource/inter/500.css'; // Inter Medium
+// @import '@fontsource/inter/700.css'; // Inter Bold
 
 
 // WE-FAB Style Guide Variables
@@ -41,7 +36,7 @@ $font-weight-bold: 700;
 
 /* Global typography styles */
 body {
-  font-family: $font-family-sans-serif;
+  font-family: 'Inter', sans-serif !important;
   font-size: $font-size-base;
   line-height: $line-height-base;
   color: $precision-black;

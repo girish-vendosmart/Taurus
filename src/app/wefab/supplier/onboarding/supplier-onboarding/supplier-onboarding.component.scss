@@ -969,7 +969,6 @@
 
 .has-validation-icon .invalid-feedback::before {
   content: "\e97c"; /* PrimeIcons exclamation triangle */
-  font-family: $font-family-sans-serif;
   margin-right: 0.5rem;
   color: #dc3545;
 }

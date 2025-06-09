@@ -249,6 +249,7 @@ $font-weight-bold: 700;
           white-space: nowrap;
           text-overflow: ellipsis;
           overflow: hidden;
+          font-family: "Inter", sans-serif !important;
 
           &:first-child {
             border-left: none;

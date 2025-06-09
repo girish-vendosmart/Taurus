@@ -774,7 +774,6 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         <title>Quotation - ${this.quotationDetails.quotationId}</title>
         <style>
           body {
-            font-family: Inter, sans-serif;
             margin: 20px;
             font-size: 12px;
             color: #333;

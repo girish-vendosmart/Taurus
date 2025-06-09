@@ -220,7 +220,6 @@ interface Supplier {
 
     .suppliers-container {
       padding: 1.2rem;
-      font-family: 'Inter', sans-serif;
       width: 100%;
       overflow: hidden;
     }

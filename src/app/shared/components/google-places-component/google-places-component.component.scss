@@ -1,7 +1,6 @@
 @import '../../../../assets/scss/variables.scss';
 
 .google-places-container {
-  font-family: $font-family-sans-serif;
   margin-bottom: 1.25rem;
   
   .location-container {
@@ -27,7 +26,6 @@
       transition: all 0.2s ease-in-out;
       resize: vertical;
       line-height: 1.5;
-      font-family: $font-family-sans-serif;
       
       &::placeholder {
         color: lighten($machine-gray, 20%);
@@ -107,7 +105,6 @@
 
 // Custom Google Places Autocomplete dropdown styles
 :host ::ng-deep .pac-container {
-  font-family: $font-family-sans-serif;
   border-radius: 0.25rem;
   border: 1px solid $material-finish-silver;
   box-shadow: 0 4px 10px rgba($precision-black, 0.1);

@@ -21,7 +21,6 @@ $font-weight-bold: 700;
   border: 1px solid $material-finish-silver;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  font-family: $font-family-sans-serif;
 
   .activity-trail-header {
     display: flex;
@@ -42,7 +41,6 @@ $font-weight-bold: 700;
 
       &::before {
         content: '\e91a';
-        font-family: $font-family-sans-serif;
         font-size: 1rem;
         color: $blueprint-blue;
       }

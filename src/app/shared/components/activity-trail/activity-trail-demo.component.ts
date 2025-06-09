@@ -12,7 +12,7 @@ import { ButtonModule } from 'primeng/button';
     ButtonModule
   ],
   template: `
-    <div style="padding: 2rem; max-width: 800px; margin: 0 auto; font-family: 'Inter', sans-serif;">
+    <div style="padding: 2rem; max-width: 800px; margin: 0 auto;">
       <h1 style="color: #1A3A5F; margin-bottom: 2rem;">Activity Trail Component Demo</h1>
       
       <div style="margin-bottom: 1rem;">
