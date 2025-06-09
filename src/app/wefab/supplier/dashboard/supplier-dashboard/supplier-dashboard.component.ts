@@ -58,6 +58,7 @@ interface RecentQuotation {
   statusClass: string;
   supplier_id?: string;
   timeAgo: string;
+  formattedDate: string;
   urgencyClass: string;
 }
 
@@ -71,6 +72,7 @@ interface RecentRFQ {
   supplier_id: string;
   supplier_company_name: string | null;
   timeAgo: string;
+  formattedDate: string;
   urgencyClass: string;
 }
 
@@ -246,6 +248,7 @@ export class SupplierDashboardComponent {
             statusClass: this.getQuotationStatusClass(quotation.status || quotation.workflow_state),
             supplier_id: quotation.supplier_id,
             timeAgo: this.getTimeAgo(timeDiff),
+            formattedDate: this.getFormattedDate(creationDate),
             urgencyClass: this.getUrgencyClass(quotation.status || quotation.workflow_state, timeDiff)
           };
         });
@@ -307,6 +310,7 @@ export class SupplierDashboardComponent {
             supplier_id: rfq.supplier_id,
             supplier_company_name: rfq.supplier_company_name,
             timeAgo: this.getTimeAgo(timeDiff),
+            formattedDate: this.getFormattedDate(creationDate),
             urgencyClass: this.getUrgencyClass(rfq.status, timeDiff)
           };
         });
@@ -377,6 +381,25 @@ export class SupplierDashboardComponent {
     } else {
       return 'critical';
     }
+  }
+
+  private getFormattedDate(date: Date): string {
+    const dateOptions: Intl.DateTimeFormatOptions = {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    };
+    
+    const timeOptions: Intl.DateTimeFormatOptions = {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    };
+    
+    const formattedDate = date.toLocaleDateString('en-GB', dateOptions);
+    const formattedTime = date.toLocaleTimeString('en-US', timeOptions);
+    
+    return `${formattedDate}, ${formattedTime}`;
   }
 
   dashboardCards: DashboardCard[] = [

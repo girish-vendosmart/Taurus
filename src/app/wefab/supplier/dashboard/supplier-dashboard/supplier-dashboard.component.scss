@@ -883,3 +883,13 @@ $transition: all 0.3s ease;
     }
   }
 } 
+
+.rfq-main-card, .quotation-main-card {
+  background-color: white;
+  border: 1px solid #eaebec;
+}
+
+.rfq-sub-cards, .quotation-sub-cards {
+  border: 1px solid #eaebec !important;
+  cursor: pointer;
+}
