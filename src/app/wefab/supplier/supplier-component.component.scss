@@ -18,9 +18,17 @@ $transition: all 0.3s ease;
 
 .supplier-layout {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background-color: $technical-white;
   position: relative;
+}
+
+// Layout body containing sidebar and main content
+.layout-body {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - #{$header-height});
 }
 
 // Main content area
@@ -28,12 +36,11 @@ $transition: all 0.3s ease;
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
   width: 100%;
   transition: $transition;
 
   &.with-sidebar {
-    margin-left: $sidebar-width;
     width: calc(100% - #{$sidebar-width});
   }
 }
@@ -44,10 +51,7 @@ $transition: all 0.3s ease;
   padding: 0;
   background-color: $technical-white;
   overflow-x: hidden;
-
-  &.with-header {
-    // No padding needed as header is positioned within main-content
-  }
+  overflow-y: auto;
 }
 
 // Override common-header positioning when used in this layout
@@ -56,29 +60,34 @@ $transition: all 0.3s ease;
     .common-header {
       position: sticky;
       top: 0;
-      z-index: 999;
+      z-index: 1000;
       border-bottom: 1px solid rgba($material-silver, 0.3);
       width: 100%;
+      height: $header-height;
     }
   }
   
-  // Ensure sidebar has proper z-index and positioning
+  // Ensure sidebar has proper positioning within layout-body
   app-common-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1001;
+    position: relative;
+    z-index: 999;
     
     .sidebar-container {
       width: $sidebar-width;
+      height: 100%;
+      position: sticky;
+      top: 0;
     }
   }
 }
 
 // Responsive design
 @media (max-width: 768px) {
+  .layout-body {
+    flex-direction: column;
+  }
+
   .main-content.with-sidebar {
-    margin-left: 0;
     width: 100%;
   }
   
@@ -88,12 +97,18 @@ $transition: all 0.3s ease;
   
   :host ::ng-deep {
     app-common-sidebar {
+      position: relative;
+      
       .sidebar-container {
-        transform: translateX(-100%);
+        width: 100%;
+        height: auto;
+        transform: translateY(-100%);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: absolute;
+        z-index: 1001;
         
         &.mobile-open {
-          transform: translateX(0);
+          transform: translateY(0);
         }
       }
     }

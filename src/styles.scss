@@ -34,6 +34,12 @@ $font-weight-medium: 500;
 $font-weight-semibold: 600;
 $font-weight-bold: 700;
 
+// Root level font family
+:root {
+  font-family: 'Inter', sans-serif !important;
+  --font-family: 'Inter', sans-serif !important;
+}
+
 /* Global typography styles */
 body {
   font-family: 'Inter', sans-serif !important;

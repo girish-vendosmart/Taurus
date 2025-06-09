@@ -285,11 +285,10 @@
     // Active menu item styles
     .active-menu-item {
       .p-panelmenu-header-content {
-        background: rgba(255, 255, 255, 0.2) !important;
+        background-color: #2f59eb !important;
         color: $technical-white !important;
         transform: translateX(8px) !important;
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25) !important;
-        border-left: 4px solid $technical-white !important;
         
         .p-panelmenu-header-action {
           .p-menuitem-icon {
@@ -307,7 +306,6 @@
       .p-menuitem-content {
         background: rgba(255, 255, 255, 0.18) !important;
         transform: translateX(8px) !important;
-        border-left: 4px solid $technical-white !important;
         
         &::before {
           height: 100% !important;
