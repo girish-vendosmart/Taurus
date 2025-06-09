@@ -240,6 +240,7 @@ export class SupplierDashboardComponent {
           return {
             name: quotation.name || quotation.quotation_id || `Quotation ${quotation.idx || ''}`,
             quotation_id: quotation.quotation_id,
+            quotation_name: quotation.quotation_name,
             amount: quotation.total_amount || quotation.grand_total || 0,
             creation: quotation.creation,
             currencyCode: quotation.currency_code || 'INR',
@@ -319,38 +320,6 @@ export class SupplierDashboardComponent {
     }, (error) => {
       console.error('Error fetching RFQs:', error);
     });
-  }
-
-  private getStatusClass(status: string): string {
-    console.log('Dashboard Status:', status);
-    switch (status?.toUpperCase()) {
-      case 'DRAFT':
-        return 'status-draft';
-      case 'OPENED':
-        return 'status-open';
-      case 'IN PROGRESS':
-      case 'IN_PROGRESS':
-        return 'status-progress';
-      case 'CLOSED':
-        return 'status-closed';
-      case 'AWARDED':
-        return 'status-awarded';
-      case 'REJECTED':
-        return 'status-rejected';
-      case 'PENDING':
-        return 'status-pending';
-      case 'UNDER REVIEW':
-      case 'UNDER_REVIEW':
-        return 'status-review';
-      case 'CANCELLED':
-        return 'status-rejected';
-      case 'QUOTED':
-        return 'status-awarded';
-      case 'NOT OPENED':
-        return 'status-open';
-      default:
-        return 'status-draft';
-    }
   }
 
   private getTimeAgo(timeDiff: number): string {
@@ -539,4 +508,62 @@ export class SupplierDashboardComponent {
   navigateToQuotation(): void {
     this.router.navigate(['/wefab/supplier/quotation']);
   }
+
+  getStatusClass(status: string): string {
+    if (!status) return 'status-default';
+    
+    // Convert to lowercase and replace spaces with hyphens
+    status = status.toLowerCase().replace(/\s+/g, '-');
+    console.log('Table status', status);
+    
+    switch (status) {
+      case 'not-opened':
+        return 'status-draft';
+      case 'published':
+        return 'status-approved';
+      case 'deactivated':
+        return 'status-paused'; 
+      case 'invited':
+        return 'status-open';
+      case 'not-started':
+        return 'status-draft';
+      case 'under-review':
+        return 'status-review';
+      case 'approved':
+        return 'status-approved';
+      case 'rejected':
+        return 'status-rejected';
+      case 'draft':
+        return 'status-draft';
+      case 'open':
+        return 'status-open';
+      case 'in-progress':
+        return 'status-progress';
+      case 'closed':
+        return 'status-closed';
+      case 'awarded':
+        return 'status-awarded';
+      case 'quoted':
+        return 'status-awarded';
+      case 'opened':
+        return 'status-open';
+      case 'cancelled':
+        return 'status-rejected';
+      case 'deactivate':
+        return 'status-deactivate';
+      case 'paused':
+        return 'status-paused';
+      case 'submitted':
+        return 'status-awarded';
+      case 'pending':
+        return 'status-pending';
+      case 'review':
+        return 'status-review';
+      case 'not-started':
+        return 'status-draft';
+      default:
+        return 'status-default';
+    }
+  }
+
 } 

@@ -31,16 +31,22 @@
   <div class="row g-3">
     <!-- Recent RFQs -->
     <div class="col-lg-6 col-md-12">
-      <div class="card h-100 rfq-main-card">
+      <div class="card rfq-main-card">
         <div class="card-body">
           <h4>Recent RFQs</h4>
           <div class="rfqs-list" *ngIf="recentRFQs.length > 0">
             <div *ngFor="let rfq of recentRFQs" class="rfq-item rfq-sub-cards">
               <div class="rfq-content" (click)="viewRFQ(rfq)">
-                <h6>{{ rfq.name }}</h6>
+                <div class="d-flex justify-content-between">
+                  <h6 style="font-size: 14px !important; font-weight: 100;">{{ rfq.name }}</h6>
+                  <div class="d-flex flex-column">
+                    <span class="time-ago">Recieved: {{ rfq.formattedDate }}</span>
+                    <span [class]="'status-badge ' + getStatusClass(rfq.status)" style="margin-left: auto" class="mt-1">{{
+                      rfq.status }}</span>
+                  </div>
+                </div>
                 <div class="rfq-meta">
                   <span class="amount linkable-column">{{ rfq.rfq_id }}</span>
-                  <span class="time-ago">{{ rfq.formattedDate }}</span>
                 </div>
               </div>
             </div>
@@ -67,11 +73,12 @@
           <h4>Recent Quotations</h4>
           <div class="rfqs-list" *ngIf="recentQuotations.length > 0">
             <div *ngFor="let quotation of recentQuotations" class="rfq-item quotation-sub-cards">
+              {{quotation | json}}
               <div class="rfq-content" (click)="viewQuotation(quotation.name)">
                 <h6 class="linkable-column">{{ quotation.name }}</h6>
                 <div class="rfq-meta" *ngIf="quotation.amount">
                   <span class="amount">{{quotation.currencyCode}} {{ quotation.amount | number:'1.2-2' }}</span>
-                  <span class="time-ago">{{ quotation.formattedDate }}</span>
+                  <span class="time-ago">Recieved: {{ quotation.formattedDate }}</span>
                 </div>
                 <!-- <div class="rfq-actions">
                   <span class="status-badge" [ngClass]="quotation.statusClass">{{ quotation.status }}</span>
