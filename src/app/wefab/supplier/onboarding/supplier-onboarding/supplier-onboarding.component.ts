@@ -1198,6 +1198,7 @@ export class SupplierOnboardingComponent implements OnInit {
               filterPlaceholder: 'Search manufacturing processes...',
               multiselect: true, // Enable multiselect mode
               maxSelectedLabels: 8, // Allow up to 8 individual labels before showing summary
+              showDebugInfo: false, // Enable debugging temporarily
               options:
               [
                 {
@@ -1330,7 +1331,7 @@ export class SupplierOnboardingComponent implements OnInit {
             templateOptions: {
               label: 'Company Website URL',
               placeholder: 'https://yourcompany.com',
-              required: true
+              required: false
             },
             validation: {
               messages: {
