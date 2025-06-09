@@ -26,6 +26,7 @@ import { MessageService } from 'primeng/api';
         [isVerified]="props['isVerified'] ?? false"
         (verified)="onGstVerified($event)"
         (companyNameChanged)="onCompanyNameChanged($event)"
+        (addressDetailsAccepted)="onAddressDetailsAccepted($event)"
         [class.is-invalid]="showError">
       </app-gst-verify-field>
     </div>
@@ -41,6 +42,12 @@ export class FormlyFieldGstVerifyComponent extends FieldType<FieldTypeConfig> {
   onCompanyNameChanged(companyName: string) {
     if (this.props['parentComponent'] && this.props['parentComponent'].onCompanyNameChanged) {
       this.props['parentComponent'].onCompanyNameChanged(companyName);
+    }
+  }
+
+  onAddressDetailsAccepted(addressData: any) {
+    if (this.props['parentComponent'] && this.props['parentComponent'].onAddressDetailsAccepted) {
+      this.props['parentComponent'].onAddressDetailsAccepted(addressData);
     }
   }
 } 

@@ -415,6 +415,7 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
   @Output() verifiedDetails = new EventEmitter<any>();
   @Output() companyDetailsVerified = new EventEmitter<any>();
   @Output() companyNameChanged = new EventEmitter<string>();
+  @Output() addressDetailsAccepted = new EventEmitter<any>();
   
   gstControl = new FormControl('');
   _isVerified = false;
@@ -623,6 +624,13 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
       this.companyNameChanged.emit(this.companyDetails.legalName);
     }
     
+    // NEW: Emit complete address data for prefilling
+    if (this.companyGstDetials && this.companyGstDetials.pradr) {
+      const addressData = this.parseAddressFromGstResponse();
+      console.log('Emitting address data:', addressData);
+      this.addressDetailsAccepted.emit(addressData);
+    }
+    
     // Disable the control after verification
     this.gstControl.disable({ emitEvent: false });
     
@@ -695,5 +703,80 @@ export class GstVerifyFieldComponent implements ControlValueAccessor, OnInit {
     if (this.onTouched) {
       this.onTouched();
     }
+  }
+
+  // NEW: Method to parse address components from GST response
+  private parseAddressFromGstResponse(): any {
+    if (!this.companyGstDetials || !this.companyGstDetials.pradr || !this.companyGstDetials.pradr.addr) {
+      return null;
+    }
+    
+    const addr = this.companyGstDetials.pradr.addr;
+    
+    // Extract address components
+    const addressComponents = {
+      fullAddress: this.getFormattedAddress(),
+      streetNumber: addr.bno || '',
+      street: addr.st || '',
+      locality: addr.loc || '',
+      city: addr.dst || '', // District is typically the city in GST data
+      state: this.getStateName(addr.stcd) || '', // State code to state name
+      stateCode: addr.stcd || '',
+      postalCode: addr.pncd || '',
+      country: 'India', // GST is India-specific
+      countryCode: 'IN',
+      placeId: '',
+      location: {
+        lat: 0, // GST API doesn't provide coordinates
+        lng: 0
+      }
+    };
+    
+    return addressComponents;
+  }
+
+  // NEW: Helper method to convert state code to state name
+  private getStateName(stateCode: string): string {
+    const stateMapping: { [key: string]: string } = {
+      '01': 'Jammu and Kashmir',
+      '02': 'Himachal Pradesh',
+      '03': 'Punjab',
+      '04': 'Chandigarh',
+      '05': 'Uttarakhand',
+      '06': 'Haryana',
+      '07': 'Delhi',
+      '08': 'Rajasthan',
+      '09': 'Uttar Pradesh',
+      '10': 'Bihar',
+      '11': 'Sikkim',
+      '12': 'Arunachal Pradesh',
+      '13': 'Nagaland',
+      '14': 'Manipur',
+      '15': 'Mizoram',
+      '16': 'Tripura',
+      '17': 'Meghalaya',
+      '18': 'Assam',
+      '19': 'West Bengal',
+      '20': 'Jharkhand',
+      '21': 'Odisha',
+      '22': 'Chhattisgarh',
+      '23': 'Madhya Pradesh',
+      '24': 'Gujarat',
+      '25': 'Daman and Diu',
+      '26': 'Dadra and Nagar Haveli',
+      '27': 'Maharashtra',
+      '28': 'Andhra Pradesh',
+      '29': 'Karnataka',
+      '30': 'Goa',
+      '31': 'Lakshadweep',
+      '32': 'Kerala',
+      '33': 'Tamil Nadu',
+      '34': 'Puducherry',
+      '35': 'Andaman and Nicobar Islands',
+      '36': 'Telangana',
+      '37': 'Andhra Pradesh'
+    };
+    
+    return stateMapping[stateCode] || stateCode;
   }
 } 

@@ -1821,6 +1821,62 @@ export class SupplierOnboardingComponent implements OnInit {
     console.log('GST verification status:', verified);
   }
 
+  // Add new method to handle address details from GST verification
+  onAddressDetailsAccepted(addressData: any): void {
+    console.log('GST Address details accepted:', addressData);
+    
+    if (addressData) {
+      // Update the model with address data
+      this.model.registeredAddress = addressData;
+      
+      // Update individual address fields
+      if (addressData.country) {
+        this.model.country = addressData.country;
+        this.selectedCountry = addressData.country;
+        
+        // Load states for the country
+        this.getStates(addressData.country);
+      }
+      
+      if (addressData.state) {
+        this.model.state = addressData.state;
+        this.selectedState = addressData.state;
+      }
+      
+      if (addressData.city) {
+        this.model.city = addressData.city;
+      }
+      
+      // Update form controls
+      setTimeout(() => {
+        // Patch the form with the new values
+        this.form.patchValue({
+          registeredAddress: addressData,
+          country: addressData.country,
+          state: addressData.state,
+          city: addressData.city
+        });
+        
+        // Force update the Google Places field
+        this.patchGooglePlacesField(0);
+        
+        // Update state dropdown options after states are loaded
+        setTimeout(() => {
+          this.updateStateDropdownOptions(true);
+          
+          // Force change detection
+          this.cdr.detectChanges();
+          
+          // Mark form as dirty to indicate changes
+          this.form.markAsDirty();
+        }, 1000);
+        
+      }, 500);
+      
+      console.log('Address fields updated from GST data');
+    }
+  }
+
   onCompanyNameChanged(companyName: string) {
     console.log('onCompanyNameChanged called with:', companyName);
     this.companyName = companyName;
@@ -1849,18 +1905,54 @@ export class SupplierOnboardingComponent implements OnInit {
     }
   }
 
-  // ... existing verifyGST method but make it call a GST verification service or API
-  verifyGST(gstNumber: string) {
-    if (!gstNumber) {
-      this.sweetAlertService.error('Please enter a GST number first');
-      return;
-    }
-
-    // Add your GST verification logic here
-    console.log('Verifying GST number:', gstNumber);
+  // Method to manually update field visibility when expression properties don't trigger properly
+  private updateFieldVisibility(noGstValue: boolean) {
+    // Find the GSTIN and PAN fields in the current step fields
+    const currentFields = this.stepFields[0]; // Basic details step
     
-    // For now, just show a success message
-    this.sweetAlertService.info('GST verification in progress...');
+    const findAndUpdateFields = (fields: FormlyFieldConfig[]): void => {
+      for (const field of fields) {
+        if (field.fieldGroup) {
+          findAndUpdateFields(field.fieldGroup);
+        } else if (field.key === 'gstinNumber') {
+          // Update GSTIN field - should be hidden when noGst is true
+          if (field.templateOptions) {
+            field.templateOptions.required = !noGstValue;
+          }
+          
+          // Update the hide property
+          field.hide = noGstValue;
+          
+          // Force field to update
+          if (field.formControl) {
+            field.formControl.updateValueAndValidity();
+          }
+          
+          console.log('GSTIN field updated:', { hide: field.hide, required: field.templateOptions?.required });
+        } else if (field.key === 'panNumber') {
+          // Update PAN field - should be visible when noGst is true
+          if (field.templateOptions) {
+            field.templateOptions.required = noGstValue;
+            field.templateOptions.disabled = !noGstValue;
+          }
+          
+          // Update the hide property
+          field.hide = !noGstValue;
+          
+          // Force field to update
+          if (field.formControl) {
+            field.formControl.updateValueAndValidity();
+          }
+          
+          console.log('PAN field updated:', { hide: field.hide, required: field.templateOptions?.required });
+        }
+      }
+    };
+    
+    findAndUpdateFields(currentFields);
+    
+    // Force change detection
+    this.cdr.detectChanges();
   }
 
   // Method to update GST field verification status
@@ -1912,56 +2004,6 @@ export class SupplierOnboardingComponent implements OnInit {
       cityControl.updateValueAndValidity();
       console.log('City control updated with:', cityValue);
     }
-    
-    // Force change detection
-    this.cdr.detectChanges();
-  }
-
-  // Method to manually update field visibility when expression properties don't trigger properly
-  private updateFieldVisibility(noGstValue: boolean) {
-    // Find the GSTIN and PAN fields in the current step fields
-    const currentFields = this.stepFields[0]; // Basic details step
-    
-    const findAndUpdateFields = (fields: FormlyFieldConfig[]): void => {
-      for (const field of fields) {
-        if (field.fieldGroup) {
-          findAndUpdateFields(field.fieldGroup);
-        } else if (field.key === 'gstinNumber') {
-          // Update GSTIN field - should be hidden when noGst is true
-          if (field.templateOptions) {
-            field.templateOptions.required = !noGstValue;
-          }
-          
-          // Update the hide property
-          field.hide = noGstValue;
-          
-          // Force field to update
-          if (field.formControl) {
-            field.formControl.updateValueAndValidity();
-          }
-          
-          console.log('GSTIN field updated:', { hide: field.hide, required: field.templateOptions?.required });
-        } else if (field.key === 'panNumber') {
-          // Update PAN field - should be visible when noGst is true
-          if (field.templateOptions) {
-            field.templateOptions.required = noGstValue;
-            field.templateOptions.disabled = !noGstValue;
-          }
-          
-          // Update the hide property
-          field.hide = !noGstValue;
-          
-          // Force field to update
-          if (field.formControl) {
-            field.formControl.updateValueAndValidity();
-          }
-          
-          console.log('PAN field updated:', { hide: field.hide, required: field.templateOptions?.required });
-        }
-      }
-    };
-    
-    findAndUpdateFields(currentFields);
     
     // Force change detection
     this.cdr.detectChanges();
