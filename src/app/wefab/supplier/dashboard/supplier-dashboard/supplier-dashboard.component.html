@@ -73,17 +73,25 @@
           <h4>Recent Quotations</h4>
           <div class="rfqs-list" *ngIf="recentQuotations.length > 0">
             <div *ngFor="let quotation of recentQuotations" class="rfq-item quotation-sub-cards">
-              {{quotation | json}}
-              <div class="rfq-content" (click)="viewQuotation(quotation.name)">
+              <!-- <div class="rfq-content" (click)="viewQuotation(quotation.name)">
                 <h6 class="linkable-column">{{ quotation.name }}</h6>
                 <div class="rfq-meta" *ngIf="quotation.amount">
                   <span class="amount">{{quotation.currencyCode}} {{ quotation.amount | number:'1.2-2' }}</span>
                   <span class="time-ago">Recieved: {{ quotation.formattedDate }}</span>
                 </div>
-                <!-- <div class="rfq-actions">
-                  <span class="status-badge" [ngClass]="quotation.statusClass">{{ quotation.status }}</span>
-                  <button class="action-btn view-btn" (click)="viewQuotation(quotation.name)">View</button>
-                </div> -->
+              </div> -->
+              <div class="rfq-content" (click)="viewQuotation(quotation.name)">
+                <div class="d-flex justify-content-between">
+                  <h6 style="font-size: 14px !important; font-weight: 100;">{{ quotation.quotation_name }}</h6>
+                  <div class="d-flex flex-column">
+                    <span class="time-ago">Submitted: {{ quotation.formattedDate }}</span>
+                    <span [class]="'status-badge ' + getStatusClass(quotation.status)" style="margin-left: auto" class="mt-1">{{
+                      quotation.status }}</span>
+                  </div>
+                </div>
+                <div class="rfq-meta">
+                  <span class="amount linkable-column">{{ quotation.name }}</span>
+                </div>
               </div>
             </div>
           </div>

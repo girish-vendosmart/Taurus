@@ -60,6 +60,7 @@ interface RecentQuotation {
   timeAgo: string;
   formattedDate: string;
   urgencyClass: string;
+  quotation_name: string;
 }
 
 interface RecentRFQ {
