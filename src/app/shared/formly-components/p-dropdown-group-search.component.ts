@@ -142,6 +142,7 @@ export interface DropdownGroup {
                 inputId="selectAll"
                 [disabled]="disabled">
               </p-checkbox>
+              <label for="selectAll" class="select-all-label">Select All</label>
             </div>
             
             <!-- Search Input -->
@@ -168,9 +169,21 @@ export interface DropdownGroup {
         </ng-template>
         
         <ng-template pTemplate="group" let-group>
-          <div class="dropdown-group-header">
-            <span [innerHTML]="highlightSearchTerm(group.label, currentFilter)"></span>
-            <small class="text-muted">({{ getVisibleItemsCount(group) }} items)</small>
+          <div class="dropdown-group-header-with-checkbox">
+            <div class="group-checkbox-container">
+              <p-checkbox 
+                [binary]="false"
+                [ngModel]="getGroupCheckboxModel(group)"
+                (onChange)="onGroupCheckboxChange($event, group)"
+                [inputId]="getGroupInputId(group)"
+                [disabled]="disabled"
+                [ngClass]="{ 'partial-selection': isGroupPartiallySelected(group) }">
+              </p-checkbox>
+            </div>
+            <div class="group-label-container">
+              <span [innerHTML]="highlightSearchTerm(group.label, currentFilter)"></span>
+              <small class="text-muted">({{ getVisibleItemsCount(group) }} items)</small>
+            </div>
           </div>
         </ng-template>
         
@@ -590,6 +603,87 @@ export interface DropdownGroup {
     ::ng-deep .p-multiselect-item-group {
       padding: 0px !important;
     }
+    
+    .dropdown-group-header-with-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+      color: #495057;
+      background-color: #f8f9fa;
+      padding: 0.75rem;
+      border-bottom: 1px solid #dee2e6;
+      font-size: 0.875rem;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      cursor: pointer;
+    }
+    
+    .group-checkbox-container {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    
+    .group-label-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      flex-grow: 1;
+    }
+    
+    .dropdown-group-header-with-checkbox:hover {
+      background-color: #e9ecef;
+    }
+    
+    /* Show group checkboxes in multiselect mode */
+    :host ::ng-deep .group-checkbox-container .p-checkbox {
+      display: flex !important;
+      visibility: visible !important;
+      margin-right: 0.5rem;
+    }
+    
+    :host ::ng-deep .group-checkbox-container .p-checkbox .p-checkbox-box {
+      display: inline-block !important;
+      visibility: visible !important;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 0.25rem;
+      border: 1px solid #ced4da;
+      background: #fff;
+      position: relative;
+    }
+    
+    :host ::ng-deep .group-checkbox-container .p-checkbox .p-checkbox-box.p-highlight {
+      background: #0d6efd;
+      border-color: #0d6efd;
+    }
+    
+    /* Custom indeterminate state styling */
+    :host ::ng-deep .group-checkbox-container .p-checkbox.partial-selection .p-checkbox-box {
+      background: #6c757d;
+      border-color: #6c757d;
+    }
+    
+    :host ::ng-deep .group-checkbox-container .p-checkbox.partial-selection .p-checkbox-box::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      height: 2px;
+      background: white;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    :host ::ng-deep .group-checkbox-container .p-checkbox .p-checkbox-box .p-checkbox-icon {
+      display: block !important;
+      visibility: visible !important;
+      color: #fff;
+      font-size: 0.75rem;
+    }
   `]
 })
 export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccessor {
@@ -629,6 +723,9 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   currentFilter: string = '';
   selectAllChecked: boolean = false;
   
+  // Add new property to track group selection states
+  groupSelectionStates: { [groupLabel: string]: 'none' | 'partial' | 'all' } = {};
+  
   // ControlValueAccessor implementation
   private onChange = (value: any) => {};
   private onTouched = () => {};
@@ -667,6 +764,9 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     if (this.multiselect) {
       this.updateSelectAllState();
     }
+    
+    // Initialize group selection states
+    this.updateAllGroupSelectionStates();
   }
 
   // ControlValueAccessor methods
@@ -695,6 +795,11 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   // Event handlers
   onSelectionChange(event: any): void {
     this.onTouched();
+    
+    // Update group selection states when individual items are selected/deselected
+    if (this.multiselect) {
+      this.updateAllGroupSelectionStates();
+    }
   }
 
   onDropdownShow(): void {
@@ -702,8 +807,9 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     this.currentFilter = '';
     this.displayOptions = [...this.originalOptions];
     
-    // Update select all state for multiselect
+    // Update group selection states for multiselect
     if (this.multiselect) {
+      this.updateAllGroupSelectionStates();
       this.updateSelectAllState();
     }
   }
@@ -872,5 +978,72 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     });
     
     this.selectAllChecked = allItems.length > 0 && selectedValues.length === allItems.length;
+  }
+
+  // Add new methods for group checkbox functionality
+  getGroupCheckboxModel(group: DropdownGroup): boolean {
+    return this.groupSelectionStates[group.label] === 'all';
+  }
+
+  isGroupPartiallySelected(group: DropdownGroup): boolean {
+    return this.groupSelectionStates[group.label] === 'partial';
+  }
+
+  onGroupCheckboxChange(event: any, group: DropdownGroup): void {
+    if (!this.multiselect) return;
+    
+    const selectedValues = this.dropdownControl.value || [];
+    const groupItemValues = group.items.map(item => item.value);
+    
+    if (event.checked) {
+      // Select all items in this group
+      const newSelectedValues = [...selectedValues];
+      
+      groupItemValues.forEach(itemValue => {
+        if (!newSelectedValues.includes(itemValue)) {
+          newSelectedValues.push(itemValue);
+        }
+      });
+      
+      this.dropdownControl.setValue(newSelectedValues);
+    } else {
+      // Deselect all items in this group
+      const newSelectedValues = selectedValues.filter((value: any) => 
+        !groupItemValues.includes(value)
+      );
+      
+      this.dropdownControl.setValue(newSelectedValues);
+    }
+    
+    // Update group selection states
+    this.updateAllGroupSelectionStates();
+    this.updateSelectAllState();
+  }
+
+  private updateGroupSelectionState(group: DropdownGroup): void {
+    const selectedValues = this.dropdownControl.value || [];
+    const groupItemValues = group.items.map(item => item.value);
+    
+    const selectedInGroup = groupItemValues.filter(value => 
+      selectedValues.includes(value)
+    ).length;
+    
+    if (selectedInGroup === 0) {
+      this.groupSelectionStates[group.label] = 'none';
+    } else if (selectedInGroup === groupItemValues.length) {
+      this.groupSelectionStates[group.label] = 'all';
+    } else {
+      this.groupSelectionStates[group.label] = 'partial';
+    }
+  }
+
+  private updateAllGroupSelectionStates(): void {
+    this.displayOptions.forEach(group => {
+      this.updateGroupSelectionState(group);
+    });
+  }
+
+  getGroupInputId(group: DropdownGroup): string {
+    return `group_${group.label.replace(/[^a-zA-Z0-9]/g, '_')}`;
   }
 } 

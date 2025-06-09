@@ -22,7 +22,7 @@ import { CommonHeaderComponent } from '../../../core/components/common-header/co
           [menuItems]="sidebarMenuItems"
           [visible]="true"
           [showHeader]="true"
-          headerTitle="WE-FAB Team Portal"
+          headerTitle="Wefab Team Portal"
           width="260px">
         </app-common-sidebar>
 
