@@ -169,12 +169,12 @@ export interface DropdownGroup {
         </ng-template>
         
         <ng-template pTemplate="group" let-group>
-          <div class="dropdown-group-header-with-checkbox" (click)="onGroupHeaderClick($event, group)">
+          <div class="dropdown-group-header-with-checkbox">
             <div class="group-checkbox-container" (click)="$event.stopPropagation()">
               <p-checkbox 
                 [binary]="true"
-                [value]="getGroupCheckboxValue(group)"
-                (onChange)="onGroupCheckboxChange($event, group)"
+                [ngModel]="groupCheckboxValues[group.label]"
+                (ngModelChange)="onGroupCheckboxModelChange($event, group)"
                 [inputId]="getGroupInputId(group)"
                 [disabled]="disabled"
                 [ngClass]="{ 'partial-selection': isGroupPartiallySelected(group) }">
@@ -735,6 +735,12 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   // Add new property to track group selection states
   groupSelectionStates: { [groupLabel: string]: 'none' | 'partial' | 'all' } = {};
   
+  // Add new property to store checkbox values for reactive binding
+  groupCheckboxValues: { [groupLabel: string]: boolean } = {};
+  
+  // Add flag to prevent recursive calls during Select All operations
+  private isSelectAllChanging: boolean = false;
+  
   // ControlValueAccessor implementation
   private onChange = (value: any) => {};
   private onTouched = () => {};
@@ -744,6 +750,9 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   ngOnInit() {
     this.originalOptions = [...this.options];
     this.displayOptions = [...this.options];
+    
+    // Initialize group selection states properly
+    this.initializeGroupSelectionStates();
     
     // Use external formControl if provided, otherwise use internal one
     const controlToUse = this.formControl || this.dropdownControl;
@@ -781,6 +790,21 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     
     // Initialize group selection states
     this.updateAllGroupSelectionStates();
+  }
+
+  // Add method to properly initialize group states
+  private initializeGroupSelectionStates(): void {
+    this.groupSelectionStates = {};
+    this.groupCheckboxValues = {};
+    
+    // Initialize all groups to 'none' state
+    this.originalOptions.forEach(group => {
+      this.groupSelectionStates[group.label] = 'none';
+      this.groupCheckboxValues[group.label] = false;
+    });
+    
+    console.log('Initialized group selection states:', this.groupSelectionStates);
+    console.log('Initialized group checkbox values:', this.groupCheckboxValues);
   }
 
   // ControlValueAccessor methods
@@ -972,6 +996,11 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   onSelectAllChange(event: any): void {
     if (!this.multiselect) return;
     
+    console.log('Select All change:', event.checked);
+    
+    // Set flag to prevent recursive calls
+    this.isSelectAllChanging = true;
+    
     const allItems: any[] = [];
     this.displayOptions.forEach(group => {
       group.items.forEach(item => {
@@ -981,19 +1010,94 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     
     if (event.checked) {
       // Select all items
+      console.log('Selecting all items:', allItems);
       this.dropdownControl.setValue(allItems);
+      
+      // Set all group checkboxes to checked
+      this.originalOptions.forEach(group => {
+        this.groupCheckboxValues[group.label] = true;
+        this.groupSelectionStates[group.label] = 'all';
+      });
     } else {
       // Deselect all items
+      console.log('Deselecting all items');
       this.dropdownControl.setValue([]);
+      
+      // Set all group checkboxes to unchecked
+      this.originalOptions.forEach(group => {
+        this.groupCheckboxValues[group.label] = false;
+        this.groupSelectionStates[group.label] = 'none';
+      });
     }
     
-    // Update group selection states after selecting/deselecting all
-    this.updateAllGroupSelectionStates();
+    // Force immediate state updates
     this.updateSelectAllState();
+    
     // Force change detection
     this.cdr.detectChanges();
+    
+    // Reset flag after a brief delay to allow all change events to process
+    setTimeout(() => {
+      this.isSelectAllChanging = false;
+    }, 100);
+    
+    console.log('After Select All - Group checkbox values:', this.groupCheckboxValues);
+    console.log('After Select All - Group states:', this.groupSelectionStates);
   }
-  
+
+  onGroupCheckboxModelChange(checked: boolean, group: DropdownGroup): void {
+    console.log('Group checkbox model change triggered:', checked, 'for group:', group.label);
+    
+    if (!this.multiselect) return;
+    
+    // If this change is part of a Select All operation, don't process individual logic
+    if (this.isSelectAllChanging) {
+      console.log('Ignoring group checkbox change because Select All is changing');
+      return;
+    }
+    
+    // Update the checkbox value immediately
+    this.groupCheckboxValues[group.label] = checked;
+    
+    const selectedValues = this.dropdownControl.value || [];
+    const groupItemValues = group.items.map(item => item.value);
+    
+    console.log('Current selected values:', selectedValues);
+    console.log('Group item values:', groupItemValues);
+    
+    if (checked) {
+      // Select all items in this group
+      const newSelectedValues = [...selectedValues];
+      
+      groupItemValues.forEach(itemValue => {
+        if (!newSelectedValues.includes(itemValue)) {
+          newSelectedValues.push(itemValue);
+        }
+      });
+      
+      console.log('Selecting all items in group. New values:', newSelectedValues);
+      this.dropdownControl.setValue(newSelectedValues);
+      this.groupSelectionStates[group.label] = 'all';
+    } else {
+      // Deselect all items in this group
+      const newSelectedValues = selectedValues.filter((value: any) => 
+        !groupItemValues.includes(value)
+      );
+      
+      console.log('Deselecting all items in group. New values:', newSelectedValues);
+      this.dropdownControl.setValue(newSelectedValues);
+      this.groupSelectionStates[group.label] = 'none';
+    }
+    
+    // Update other groups and select all state
+    this.updateAllGroupSelectionStates();
+    this.updateSelectAllState();
+    this.cdr.detectChanges();
+    
+    console.log('After individual group change - Group checkbox values:', this.groupCheckboxValues);
+    console.log('After individual group change - Group states:', this.groupSelectionStates);
+  }
+
   private updateSelectAllState(): void {
     if (!this.multiselect) return;
     
@@ -1006,13 +1110,29 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       });
     });
     
+    const wasChecked = this.selectAllChecked;
     this.selectAllChecked = allItems.length > 0 && selectedValues.length === allItems.length;
+    
+    if (wasChecked !== this.selectAllChecked) {
+      console.log('Select All state changed from', wasChecked, 'to', this.selectAllChecked);
+    }
   }
 
-  // Updated group checkbox methods
+  // Updated group checkbox methods with better debugging
   getGroupCheckboxValue(group: DropdownGroup): boolean {
-    const state = this.groupSelectionStates[group.label] === 'all';
-    return state;
+    // Ensure the group state exists
+    if (!(group.label in this.groupCheckboxValues)) {
+      this.groupCheckboxValues[group.label] = false;
+    }
+    
+    const isChecked = this.groupCheckboxValues[group.label];
+    
+    // Debug output for problematic groups
+    if (group.label === 'Precision Machining') {
+      console.log(`Precision Machining checkbox value: ${isChecked}`);
+    }
+    
+    return isChecked;
   }
 
   // Keep the old method for backward compatibility but log deprecation
@@ -1022,76 +1142,13 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   }
 
   isGroupPartiallySelected(group: DropdownGroup): boolean {
-    return this.groupSelectionStates[group.label] === 'partial';
-  }
-
-  onGroupCheckboxChange(event: any, group: DropdownGroup): void {
-    console.log('Group checkbox change triggered:', event, 'for group:', group.label);
-    
-    if (!this.multiselect) return;
-    
-    const selectedValues = this.dropdownControl.value || [];
-    const groupItemValues = group.items.map(item => item.value);
-    
-    console.log('Current selected values:', selectedValues);
-    console.log('Group item values:', groupItemValues);
-    
-    if (event.checked) {
-      // Select all items in this group
-      const newSelectedValues = [...selectedValues];
-      
-      groupItemValues.forEach(itemValue => {
-        if (!newSelectedValues.includes(itemValue)) {
-          newSelectedValues.push(itemValue);
-        }
-      });
-      
-      console.log('Selecting all items in group. New values:', newSelectedValues);
-      this.dropdownControl.setValue(newSelectedValues);
-    } else {
-      // Deselect all items in this group
-      const newSelectedValues = selectedValues.filter((value: any) => 
-        !groupItemValues.includes(value)
-      );
-      
-      console.log('Deselecting all items in group. New values:', newSelectedValues);
-      this.dropdownControl.setValue(newSelectedValues);
-    }
-    
-    // Update group selection states and force change detection
-    setTimeout(() => {
-      this.updateAllGroupSelectionStates();
-      this.updateSelectAllState();
-      this.cdr.detectChanges();
-      console.log('Updated group selection states:', this.groupSelectionStates);
-    }, 0);
-  }
-
-  private updateGroupSelectionState(group: DropdownGroup): void {
-    const selectedValues = this.dropdownControl.value || [];
-    const groupItemValues = group.items.map(item => item.value);
-    
-    const selectedInGroup = groupItemValues.filter(value => 
-      selectedValues.includes(value)
-    ).length;
-    
-    if (selectedInGroup === 0) {
+    // Ensure the group state exists
+    if (!(group.label in this.groupSelectionStates)) {
       this.groupSelectionStates[group.label] = 'none';
-    } else if (selectedInGroup === groupItemValues.length) {
-      this.groupSelectionStates[group.label] = 'all';
-    } else {
-      this.groupSelectionStates[group.label] = 'partial';
     }
-  }
-
-  private updateAllGroupSelectionStates(): void {
-    this.displayOptions.forEach(group => {
-      this.updateGroupSelectionState(group);
-    });
-  }
-
-  getGroupInputId(group: DropdownGroup): string {
-    return `group_${group.label.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    
+    const state = this.groupSelectionStates[group.label];
+    return state === 'partial';
   }
 
   onGroupHeaderClick(event: any, group: DropdownGroup): void {
@@ -1144,5 +1201,66 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       this.cdr.detectChanges();
       console.log('Updated group selection states:', this.groupSelectionStates);
     }, 0);
+  }
+
+  private updateGroupSelectionState(group: DropdownGroup): void {
+    const selectedValues = this.dropdownControl.value || [];
+    const groupItemValues = group.items.map(item => item.value);
+    
+    const selectedInGroup = groupItemValues.filter(value => 
+      selectedValues.includes(value)
+    ).length;
+    
+    const previousState = this.groupSelectionStates[group.label];
+    const previousCheckboxValue = this.groupCheckboxValues[group.label];
+    
+    if (selectedInGroup === 0) {
+      this.groupSelectionStates[group.label] = 'none';
+      this.groupCheckboxValues[group.label] = false;
+    } else if (selectedInGroup === groupItemValues.length) {
+      this.groupSelectionStates[group.label] = 'all';
+      this.groupCheckboxValues[group.label] = true;
+    } else {
+      this.groupSelectionStates[group.label] = 'partial';
+      this.groupCheckboxValues[group.label] = false; // Partial state shows as unchecked but with special styling
+    }
+    
+    // Enhanced logging for debugging
+    if (previousState !== this.groupSelectionStates[group.label] || 
+        previousCheckboxValue !== this.groupCheckboxValues[group.label] || 
+        group.label === 'Precision Machining') {
+      console.log(`Group ${group.label}: ${selectedInGroup}/${groupItemValues.length} selected, state changed from ${previousState} to ${this.groupSelectionStates[group.label]}, checkbox: ${this.groupCheckboxValues[group.label]}`);
+    }
+  }
+
+  private updateAllGroupSelectionStates(): void {
+    console.log('Updating all group selection states...');
+    
+    // Ensure all groups are initialized in the state objects
+    this.originalOptions.forEach(group => {
+      if (!(group.label in this.groupSelectionStates)) {
+        this.groupSelectionStates[group.label] = 'none';
+      }
+      if (!(group.label in this.groupCheckboxValues)) {
+        this.groupCheckboxValues[group.label] = false;
+      }
+    });
+    
+    // Update display options
+    this.displayOptions.forEach(group => {
+      this.updateGroupSelectionState(group);
+    });
+    
+    // Also update original options to ensure consistency
+    this.originalOptions.forEach(group => {
+      this.updateGroupSelectionState(group);
+    });
+    
+    console.log('Final group states:', this.groupSelectionStates);
+    console.log('Final group checkbox values:', this.groupCheckboxValues);
+  }
+
+  getGroupInputId(group: DropdownGroup): string {
+    return `group_${group.label.replace(/[^a-zA-Z0-9]/g, '_')}`;
   }
 } 
