@@ -351,7 +351,7 @@ export class SupplierOnboardingL3Component implements OnInit {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-6',
+            className: 'col-md-4',
             key: 'bankDetails.bankName',
             type: 'input',
             templateOptions: {
@@ -366,64 +366,22 @@ export class SupplierOnboardingL3Component implements OnInit {
             }
           },
           {
-            className: 'col-md-6',
-            key: 'bankDetails.accountHolderName',
+            className: 'col-md-4',
+            key: 'bankDetails.branchName',
             type: 'input',
             templateOptions: {
-              label: 'Account Holder Name',
+              label: 'Branch Name',
               required: true,
-              placeholder: 'Enter account holder name'
+              placeholder: 'Enter branch name'
             },
             validation: {
               messages: {
-                required: 'Account holder name is required'
-              }
-            }
-          }
-        ]
-      },
-      // Account Number and IFSC Code in one row
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
-          {
-            className: 'col-md-6',
-            key: 'bankDetails.accountNumber',
-            type: 'input',
-            templateOptions: {
-              label: 'Account Number',
-              required: true,
-              placeholder: 'Enter account number'
-            },
-            validation: {
-              messages: {
-                required: 'Account number is required'
+                required: 'Branch name is required'
               }
             }
           },
           {
-            className: 'col-md-6',
-            key: 'bankDetails.ifscCode',
-            type: 'input',
-            templateOptions: {
-              label: 'IFSC Code',
-              required: true,
-              placeholder: 'Enter IFSC code'
-            },
-            validation: {
-              messages: {
-                required: 'IFSC code is required'
-              }
-            }
-          }
-        ]
-      },
-      // Account Type and Branch Name in one row
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
-          {
-            className: 'col-md-6',
+            className: 'col-md-4',
             key: 'bankDetails.accountType',
             type: 'select',
             templateOptions: {
@@ -442,24 +400,92 @@ export class SupplierOnboardingL3Component implements OnInit {
               }
             }
           },
+        ]
+      },
+      // Account Number and IFSC Code in one row
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
           {
-            className: 'col-md-6',
-            key: 'bankDetails.branchName',
+            className: 'col-md-4',
+            key: 'bankDetails.accountHolderName',
             type: 'input',
             templateOptions: {
-              label: 'Branch Name',
+              label: 'Account Holder Name',
               required: true,
-              placeholder: 'Enter branch name'
+              placeholder: 'Enter account holder name'
             },
             validation: {
               messages: {
-                required: 'Branch name is required'
+                required: 'Account holder name is required'
               }
             }
-          }
+          },
+          {
+            className: 'col-md-4',
+            key: 'bankDetails.accountNumber',
+            type: 'input',
+            templateOptions: {
+              label: 'Account Number',
+              required: true,
+              placeholder: 'Enter account number',
+              pattern: '^[0-9]{9,18}$',
+              minLength: 9,
+              maxLength: 18
+            },
+            validators: {
+              accountNumber: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true; // Allow empty for required validation to handle
+                  const value = c.value.toString();
+                  return /^[0-9]{9,18}$/.test(value);
+                },
+                message: 'Account number must be between 9-18 digits and contain only numbers'
+              }
+            },
+            validation: {
+              messages: {
+                required: 'Account number is required',
+                pattern: 'Account number must contain only numbers and be 9-18 digits long',
+                minlength: 'Account number must be at least 9 digits',
+                maxlength: 'Account number cannot exceed 18 digits'
+              }
+            }
+          },
+          {
+            className: 'col-md-4',
+            key: 'bankDetails.ifscCode',
+            type: 'input',
+            templateOptions: {
+              label: 'IFSC Code',
+              required: true,
+              placeholder: 'Enter IFSC code (e.g., SBIN0000123)',
+              pattern: '^[A-Z]{4}0[A-Z0-9]{6}$',
+              minLength: 11,
+              maxLength: 11,
+              transform: (value: string) => value ? value.toUpperCase() : value
+            },
+            validators: {
+              ifscCode: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true; // Allow empty for required validation to handle
+                  const value = c.value.toString().toUpperCase();
+                  return /^[A-Z]{4}0[A-Z0-9]{6}$/.test(value);
+                },
+                message: 'IFSC code must be in format: 4 letters + 0 + 6 alphanumeric characters (e.g., SBIN0000123)'
+              }
+            },
+            validation: {
+              messages: {
+                required: 'IFSC code is required',
+                pattern: 'IFSC code must be in format: 4 letters + 0 + 6 alphanumeric characters',
+                minlength: 'IFSC code must be exactly 11 characters',
+                maxlength: 'IFSC code must be exactly 11 characters'
+              }
+            }
+          },
         ]
       },
-      
       // Financial Overview Section
       {
         template: '<h4 class="financial-overview-title mb-2 mt-4">Financial Overview</h4>'
