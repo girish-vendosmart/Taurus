@@ -426,8 +426,8 @@ export class SupplierOnboardingComponent implements OnInit {
       console.log('Stored selected state:', this.selectedState);
     }
 
-    // Store the city for later use
-    let selectedCity = this.getCompanyProfile.city;
+    // Store the city for direct use
+    const cityValue = this.getCompanyProfile.city;
 
     // Properly format registeredAddress according to AddressData interface
     this.formatGooglePlacesAddress();
@@ -461,8 +461,11 @@ export class SupplierOnboardingComponent implements OnInit {
       
       // Patch form values with a longer delay to ensure states are loaded first
       setTimeout(() => {
-        // First patch all other fields except state (it will be handled by getStates)
-        const formData = { ...this.model };
+        // First patch all other fields including city directly
+        const formData = { 
+          ...this.model,
+          city: cityValue // Ensure city is included in the patch
+        };
         
         // Patch the form with all data
         this.form.patchValue(formData);
@@ -480,6 +483,19 @@ export class SupplierOnboardingComponent implements OnInit {
           }, 100);
         }
         
+        // Ensure city is properly set after form patch
+        if (cityValue) {
+          setTimeout(() => {
+            const cityControl = this.form.get('city');
+            if (cityControl) {
+              cityControl.setValue(cityValue);
+              cityControl.markAsDirty();
+              cityControl.updateValueAndValidity();
+              console.log('City control set after form patch:', cityValue);
+            }
+          }, 200);
+        }
+        
         // Update GST field verification status after form is patched
         this.updateGstFieldVerificationStatus();
         
@@ -493,8 +509,26 @@ export class SupplierOnboardingComponent implements OnInit {
     } else {
       // If no country, patch form normally with shorter delay
       setTimeout(() => {
-        // First patch all other fields
-        this.form.patchValue(this.model);
+        // First patch all other fields including city directly
+        const formData = { 
+          ...this.model,
+          city: cityValue // Ensure city is included in the patch
+        };
+        
+        this.form.patchValue(formData);
+        
+        // Ensure city is properly set
+        if (cityValue) {
+          setTimeout(() => {
+            const cityControl = this.form.get('city');
+            if (cityControl) {
+              cityControl.setValue(cityValue);
+              cityControl.markAsDirty();
+              cityControl.updateValueAndValidity();
+              console.log('City control set (no country case):', cityValue);
+            }
+          }, 100);
+        }
         
         // Update GST field verification status after form is patched
         this.updateGstFieldVerificationStatus();
@@ -972,8 +1006,11 @@ export class SupplierOnboardingComponent implements OnInit {
                       this.selectedState = value.state;
                     }
                     
-                    if (value.city && field.form?.get('city')) {
-                      field.form.get('city')!.setValue(value.city);
+                    // Set city using our helper method for better reliability
+                    if (value.city) {
+                      setTimeout(() => {
+                        this.setCityValue(value.city);
+                      }, 100);
                     }
                   }
                 });
@@ -1204,8 +1241,8 @@ export class SupplierOnboardingComponent implements OnInit {
               required: true,
               filterPlaceholder: 'Search manufacturing processes...',
               multiselect: true, // Enable multiselect mode
-              maxSelectedLabels: 8, // Allow up to 8 individual labels before showing summary
-              showDebugInfo: true, // Enable debugging temporarily
+              maxSelectedLabels: 100, // Allow up to 8 individual labels before showing summary
+              showDebugInfo: false, // Enable debugging temporarily
               options:
               [
                 {
@@ -1737,34 +1774,39 @@ export class SupplierOnboardingComponent implements OnInit {
         
         console.log('City list updated:', cityList);
         
-        // Extract city value from the form or address
+        // Check if we need to set a city value from the address or stored data
+        let cityToSet: string | null = null;
+        
+        // First, try to get city from the registered address
         const addressValue = this.form.get('registeredAddress')?.value;
         const addressCity = addressValue && typeof addressValue === 'object' ? addressValue.city : null;
         
-        // Check if we have city value from address
-        if (addressCity) {
+        // Then check if we have city from getCompanyProfile
+        const profileCity = this.getCompanyProfile?.city;
+        
+        // Use address city if available, otherwise use profile city
+        cityToSet = addressCity || profileCity;
+        
+        if (cityToSet) {
           setTimeout(() => {
-            // Find if our address city exists in the loaded city list
+            // Check if the city exists in the loaded city list (for validation)
             const cityExists = cityList.some(
-              (option: any) => option.value.toLowerCase() === addressCity.toLowerCase()
+              (option: any) => option.value.toLowerCase() === cityToSet!.toLowerCase()
             );
             
             if (cityExists) {
-              // Set city value in form
-              const cityControl = this.form.get('city');
-              if (cityControl) {
-                cityControl.setValue(addressCity);
-                cityControl.markAsDirty();
-                cityControl.updateValueAndValidity();
-                console.log('City control updated with address city:', addressCity);
-              }
+              console.log('Setting valid city from list:', cityToSet);
             } else {
-              console.log('Address city not found in loaded city list:', addressCity);
+              console.log('Setting city not in API list (user input):', cityToSet);
             }
+            
+            // Set city value directly using our helper method
+            this.setCityValue(cityToSet!);
+            
           }, 200);
         }
         
-        // Update the city dropdown options
+        // Update the city options for reference (though city is an input field)
         this.updateCityDropdownOptions(cityList);
       }
     }, error => {
@@ -1774,43 +1816,22 @@ export class SupplierOnboardingComponent implements OnInit {
   
   // Method to update city dropdown options
   updateCityDropdownOptions(cityList: any[]) {
-    // Find the city field in the form
-    if (this.stepFields && this.stepFields.length > 0) {
-      const basicDetailsFields = this.stepFields[0];
-      
-      // Find the row containing country, state, city fields
-      const addressRow = basicDetailsFields.find((fieldGroup: any) => 
-        fieldGroup.fieldGroup && 
-        fieldGroup.fieldGroup.some((field: any) => field.key === 'country')
+    // Since city is an input field (not dropdown), we don't need to update options
+    // Just log the available cities for reference and validation
+    console.log('City list loaded for reference:', cityList.length, 'cities');
+    
+    // Optional: Validate if the current city value exists in the loaded city list
+    const cityControl = this.form.get('city');
+    if (cityControl && cityControl.value) {
+      const cityExists = cityList.some(
+        (option: any) => option.value && option.value.toLowerCase() === cityControl.value.toLowerCase()
       );
       
-      if (addressRow && addressRow.fieldGroup) {
-        // Find the city field
-        const cityField = addressRow.fieldGroup.find((field: any) => field.key === 'city');
-        
-        if (cityField && cityField.templateOptions) {
-          // Update the options
-          cityField.templateOptions.options = cityList;
-          
-          // Reset the city value if it's not in the new options
-          const cityControl = this.form.get('city');
-          if (cityControl && cityControl.value) {
-            const cityExists = cityList.some(
-              (option: any) => option.value === cityControl.value
-            );
-            
-            if (!cityExists) {
-              cityControl.setValue('');
-            }
-          }
-          
-          // Force update the UI
-          setTimeout(() => {
-            if (cityField.formControl) {
-              cityField.formControl.updateValueAndValidity();
-            }
-          });
-        }
+      if (cityExists) {
+        console.log('Current city value is valid:', cityControl.value);
+      } else {
+        console.warn('Current city value not found in city list:', cityControl.value);
+        // Optionally, you could keep the user's input even if it's not in the API list
       }
     }
   }
@@ -1865,9 +1886,13 @@ export class SupplierOnboardingComponent implements OnInit {
         this.form.patchValue({
           registeredAddress: addressData,
           country: addressData.country,
-          state: addressData.state,
-          city: addressData.city
+          state: addressData.state
         });
+        
+        // Set city using our helper method for consistency
+        if (addressData.city) {
+          this.setCityValue(addressData.city);
+        }
         
         // Force update the Google Places field
         this.patchGooglePlacesField(0);
@@ -2005,16 +2030,18 @@ export class SupplierOnboardingComponent implements OnInit {
     
     console.log('Setting city value to:', cityValue);
     
-    // Update the model
+    // Update the model first
     this.model.city = cityValue;
     
-    // Update the form control
+    // Update the form control directly
     const cityControl = this.form.get('city');
     if (cityControl) {
       cityControl.setValue(cityValue);
       cityControl.markAsDirty();
       cityControl.updateValueAndValidity();
-      console.log('City control updated with:', cityValue);
+      console.log('City control updated successfully with:', cityValue);
+    } else {
+      console.warn('City form control not found');
     }
     
     // Force change detection
