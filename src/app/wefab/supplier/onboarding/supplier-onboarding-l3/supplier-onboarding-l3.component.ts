@@ -143,21 +143,61 @@ export class SupplierOnboardingL3Component implements OnInit {
     this.isMobile = window.innerWidth < 768;
   }
 
-  // Number formatting function for currency inputs
+  // Number formatting function for currency inputs - Indian format
   formatNumber(value: string): string {
     if (!value) return '';
     // Remove all non-numeric characters except decimal point
     const numericValue = value.replace(/[^\d.]/g, '');
-    // Convert to number and format with commas
+    // Convert to number and format with Indian comma system
     const number = parseFloat(numericValue);
     if (isNaN(number)) return '';
-    return number.toLocaleString('en-IN');
+    return this.formatIndianCurrency(number);
+  }
+
+  // Indian currency formatting function
+  formatIndianCurrency(num: number): string {
+    const numStr = num.toString();
+    const [integerPart, decimalPart] = numStr.split('.');
+    
+    if (integerPart.length <= 3) {
+      return decimalPart ? `${integerPart}.${decimalPart}` : integerPart;
+    }
+    
+    // Indian number system: last 3 digits, then groups of 2
+    const lastThree = integerPart.slice(-3);
+    const remaining = integerPart.slice(0, -3);
+    
+    // Add commas every 2 digits from right to left for the remaining part
+    const formattedRemaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+    
+    const result = formattedRemaining + ',' + lastThree;
+    return decimalPart ? `${result}.${decimalPart}` : result;
   }
 
   // Parse formatted number back to numeric string
   parseFormattedNumber(value: string): string {
     if (!value) return '';
     return value.replace(/,/g, '');
+  }
+
+  // Number input validation function
+  validateNumberInput(event: any): boolean {
+    const charCode = event.which ? event.which : event.keyCode;
+    // Allow: backspace, delete, tab, escape, enter, decimal point
+    if ([8, 9, 27, 13, 46].indexOf(charCode) !== -1 ||
+        // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        (charCode === 65 && event.ctrlKey) ||
+        (charCode === 67 && event.ctrlKey) ||
+        (charCode === 86 && event.ctrlKey) ||
+        (charCode === 88 && event.ctrlKey)) {
+      return true;
+    }
+    // Ensure that it is a number and stop the keypress
+    if ((charCode < 48 || charCode > 57)) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
   }
 
   ngOnInit(): void {
@@ -257,22 +297,22 @@ export class SupplierOnboardingL3Component implements OnInit {
     // Format numbers for display when loading existing data
     if (this.model.companyFinancials) {
       if (this.model.companyFinancials.annualRevenue2024) {
-        this.model.companyFinancials.annualRevenue2024 = this.formatNumber(this.model.companyFinancials.annualRevenue2024);
+        this.model.companyFinancials.annualRevenue2024 = this.formatIndianCurrency(Number(this.model.companyFinancials.annualRevenue2024));
       }
       if (this.model.companyFinancials.annualRevenue2023) {
-        this.model.companyFinancials.annualRevenue2023 = this.formatNumber(this.model.companyFinancials.annualRevenue2023);
+        this.model.companyFinancials.annualRevenue2023 = this.formatIndianCurrency(Number(this.model.companyFinancials.annualRevenue2023));
       }
       if (this.model.companyFinancials.annualRevenue2022) {
-        this.model.companyFinancials.annualRevenue2022 = this.formatNumber(this.model.companyFinancials.annualRevenue2022);
+        this.model.companyFinancials.annualRevenue2022 = this.formatIndianCurrency(Number(this.model.companyFinancials.annualRevenue2022));
       }
     }
     
     if (this.model.insuranceCoverage) {
       if (this.model.insuranceCoverage.generalLiabilityInsurance) {
-        this.model.insuranceCoverage.generalLiabilityInsurance = this.formatNumber(this.model.insuranceCoverage.generalLiabilityInsurance);
+        this.model.insuranceCoverage.generalLiabilityInsurance = this.formatIndianCurrency(Number(this.model.insuranceCoverage.generalLiabilityInsurance));
       }
       if (this.model.insuranceCoverage.productLiabilityInsurance) {
-        this.model.insuranceCoverage.productLiabilityInsurance = this.formatNumber(this.model.insuranceCoverage.productLiabilityInsurance);
+        this.model.insuranceCoverage.productLiabilityInsurance = this.formatIndianCurrency(Number(this.model.insuranceCoverage.productLiabilityInsurance));
       }
     }
     
@@ -324,21 +364,6 @@ export class SupplierOnboardingL3Component implements OnInit {
           <p class="text-machine-gray mb-3">Share your financial details to improve matching with potential clients</p>
         `
       },
-      // Info section
-      {
-        template: `
-          <div class="info-container mb-6">
-            <div class="info-icon">
-              <i class="pi pi-info-circle"></i>
-            </div>
-            <div class="info-content">
-              <h5 class="info-title">Why provide financial information?</h5>
-              <p class="info-text">Sharing your financial information helps us match you with appropriate clients and projects. This information is securely stored and only shared with verified clients when necessary. Suppliers who complete this section receive priority in our matching algorithm.</p>
-            </div>
-          </div>
-        `
-      },
-      
       // Bank Details Section
       {
         template: '<h4 class="bank-details-title mb-2 mt-4">Bank Details</h4>'
@@ -488,116 +513,158 @@ export class SupplierOnboardingL3Component implements OnInit {
       },
       // Financial Overview Section
       {
-        template: '<h4 class="financial-overview-title mb-2 mt-4">Financial Overview</h4>'
-      },
-      {
-        template: '<h6 class="annual-revenue-title mb-1">Annual Revenue (Last 3 Years)</h6>'
+        template: '<h4 class="financial-overview-title mb-2 mt-4">Financial Overview (Last 3 Years)</h4>'
       },
       // Annual Revenue 2024 and 2023 in one row with number formatting
       {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-6',
+            className: 'col-md-4',
             key: 'companyFinancials.annualRevenue2024',
             type: 'input',
             templateOptions: {
               label: 'Annual Revenue (This Year) (INR)',
               required: true,
               type: 'text',
-              placeholder: 'Enter current year revenue amount'
+              placeholder: 'Enter current year revenue amount (e.g., 1,00,000)',
+              pattern: '^[0-9,]+$'
             },
             hooks: {
               onInit: (field: any) => {
                 if (field.formControl) {
+                  // Format on value changes
                   field.formControl.valueChanges.subscribe((value: string) => {
-                    if (value && !value.includes(',')) {
-                      const formatted = value;
-                      if (formatted !== value) {
-                        field.formControl.setValue(formatted, { emitEvent: false });
+                    if (value && value.length > 0) {
+                      const numericValue = value.replace(/[^\d]/g, '');
+                      if (numericValue && !isNaN(Number(numericValue))) {
+                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        if (formatted !== value) {
+                          field.formControl.setValue(formatted, { emitEvent: false });
+                        }
                       }
                     }
                   });
                 }
               }
             },
+            validators: {
+              numberOnly: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true;
+                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
+                  return /^\d+$/.test(numericValue);
+                },
+                message: 'Please enter only numbers'
+              }
+            },
             validation: {
               messages: {
-                required: 'Annual revenue is required'
+                required: 'Annual revenue is required',
+                pattern: 'Please enter a valid amount'
               }
             }
           },
           {
-            className: 'col-md-6',
+            className: 'col-md-4',
             key: 'companyFinancials.annualRevenue2023',
             type: 'input',
             templateOptions: {
               label: 'Annual Revenue (Last Year) (INR)',
               required: true,
               type: 'text',
-              placeholder: 'Enter last year revenue amount'
+              placeholder: 'Enter last year revenue amount (e.g., 1,00,000)',
+              pattern: '^[0-9,]+$'
             },
             hooks: {
               onInit: (field: any) => {
                 if (field.formControl) {
+                  // Format on value changes
                   field.formControl.valueChanges.subscribe((value: string) => {
-                    if (value && !value.includes(',')) {
-                      const formatted = value
-                      if (formatted !== value) {
-                        field.formControl.setValue(formatted, { emitEvent: false });
+                    if (value && value.length > 0) {
+                      const numericValue = value.replace(/[^\d]/g, '');
+                      if (numericValue && !isNaN(Number(numericValue))) {
+                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        if (formatted !== value) {
+                          field.formControl.setValue(formatted, { emitEvent: false });
+                        }
                       }
                     }
                   });
                 }
               }
             },
+            validators: {
+              numberOnly: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true;
+                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
+                  return /^\d+$/.test(numericValue);
+                },
+                message: 'Please enter only numbers'
+              }
+            },
             validation: {
               messages: {
-                required: 'Annual revenue is required'
+                required: 'Annual revenue is required',
+                pattern: 'Please enter a valid amount'
               }
             }
-          }
-        ]
-      },
-      {
-        template: '<small class="text-muted d-block mb-2">Enter the exact amount in your local currency</small>'
-      },
-      // Annual Revenue 2022 and Credit Rating Provider in one row
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
+          },
           {
-            className: 'col-md-6',
+            className: 'col-md-4',
             key: 'companyFinancials.annualRevenue2022',
             type: 'input',
             templateOptions: {
               label: 'Annual Revenue (Two Years Ago) (INR)',
               required: true,
               type: 'text',
-              placeholder: 'Enter two years ago revenue amount'
+              placeholder: 'Enter two years ago revenue amount (e.g., 1,00,000)',
+              pattern: '^[0-9,]+$'
             },
             hooks: {
               onInit: (field: any) => {
                 if (field.formControl) {
+                  // Format on value changes
                   field.formControl.valueChanges.subscribe((value: string) => {
-                    if (value && !value.includes(',')) {
-                      const formatted = value;
-                      if (formatted !== value) {
-                        field.formControl.setValue(formatted, { emitEvent: false });
+                    if (value && value.length > 0) {
+                      const numericValue = value.replace(/[^\d]/g, '');
+                      if (numericValue && !isNaN(Number(numericValue))) {
+                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        if (formatted !== value) {
+                          field.formControl.setValue(formatted, { emitEvent: false });
+                        }
                       }
                     }
                   });
                 }
               }
             },
+            validators: {
+              numberOnly: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true;
+                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
+                  return /^\d+$/.test(numericValue);
+                },
+                message: 'Please enter only numbers'
+              }
+            },
             validation: {
               messages: {
-                required: 'Annual revenue is required'
+                required: 'Annual revenue is required',
+                pattern: 'Please enter a valid amount'
               }
             }
           },
+        ]
+      },
+      // Annual Revenue 2022 and Credit Rating Provider in one row
+      {
+        fieldGroupClassName: 'row',
+        fieldGroup: [
           {
-            className: 'col-md-6',
+            className: 'col-md-4',
             key: 'companyFinancials.creditRatingProvider',
             type: 'select',
             templateOptions: {
@@ -645,27 +712,42 @@ export class SupplierOnboardingL3Component implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'General Liability Insurance (INR)',
-              placeholder: 'Enter General Liability Insurance Amount',
-              required: true,
-              type: 'text'
+              placeholder: 'Enter General Liability Insurance Amount (e.g., 1,00,000)',
+              required: false,
+              type: 'text',
+              pattern: '^[0-9,]+$'
             },
             hooks: {
               onInit: (field: any) => {
                 if (field.formControl) {
+                  // Format on value changes
                   field.formControl.valueChanges.subscribe((value: string) => {
-                    if (value && !value.includes(',')) {
-                      const formatted = value;
-                      if (formatted !== value) {
-                        field.formControl.setValue(formatted, { emitEvent: false });
+                    if (value && value.length > 0) {
+                      const numericValue = value.replace(/[^\d]/g, '');
+                      if (numericValue && !isNaN(Number(numericValue))) {
+                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        if (formatted !== value) {
+                          field.formControl.setValue(formatted, { emitEvent: false });
+                        }
                       }
                     }
                   });
                 }
               }
             },
+            validators: {
+              numberOnly: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true;
+                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
+                  return /^\d+$/.test(numericValue);
+                },
+                message: 'Please enter only numbers'
+              }
+            },
             validation: {
               messages: {
-                required: 'General liability insurance coverage is required'
+                pattern: 'Please enter a valid amount'
               }
             }
           },
@@ -675,27 +757,42 @@ export class SupplierOnboardingL3Component implements OnInit {
             type: 'input',
             templateOptions: {
               label: 'Product Liability Insurance (INR)',
-              placeholder: 'Enter Product Liability Insurance Amount',
-              required: true,
-              type: 'text'
+              placeholder: 'Enter Product Liability Insurance Amount (e.g., 1,00,000)',
+              required: false,
+              type: 'text',
+              pattern: '^[0-9,]+$'
             },
             hooks: {
               onInit: (field: any) => {
                 if (field.formControl) {
+                  // Format on value changes
                   field.formControl.valueChanges.subscribe((value: string) => {
-                    if (value && !value.includes(',')) {
-                      const formatted = value
-                      if (formatted !== value) {
-                        field.formControl.setValue(formatted, { emitEvent: false });
+                    if (value && value.length > 0) {
+                      const numericValue = value.replace(/[^\d]/g, '');
+                      if (numericValue && !isNaN(Number(numericValue))) {
+                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        if (formatted !== value) {
+                          field.formControl.setValue(formatted, { emitEvent: false });
+                        }
                       }
                     }
                   });
                 }
               }
             },
+            validators: {
+              numberOnly: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true;
+                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
+                  return /^\d+$/.test(numericValue);
+                },
+                message: 'Please enter only numbers'
+              }
+            },
             validation: {
               messages: {
-                required: 'Product liability insurance coverage is required'
+                pattern: 'Please enter a valid amount'
               }
             }
           }
@@ -712,54 +809,6 @@ export class SupplierOnboardingL3Component implements OnInit {
       {
         key: 'additionalInformation',
         fieldGroup: [
-          // Business Terms Section
-          {
-            template: `
-              <div class="mt-3 mb-2">
-                <h4 class="section-title">Operational Metrics</h4>
-              </div>
-            `
-          },
-          {
-            fieldGroupClassName: 'row',
-            fieldGroup: [
-              {
-                className: 'col-md-6',
-                key: 'leadTime',
-                type: 'input',
-                templateOptions: {
-                  type: 'number',
-                  label: 'Average Lead Time (Days)',
-                  placeholder: 'Enter average production lead time in days',
-                  min: 1,
-                  required: true
-                },
-                validation: {
-                  messages: {
-                    required: 'Average lead time is required'
-                  }
-                }
-              },
-              {
-                className: 'col-md-6',
-                key: 'minimumOrderQuantity',
-                type: 'input',
-                templateOptions: {
-                  type: 'number',
-                  label: 'Minimum Order Quantity',
-                  placeholder: 'Enter minimum order quantity',
-                  min: 0,
-                  required: true
-                },
-                validation: {
-                  messages: {
-                    required: 'Minimum order quantity is required'
-                  }
-                }
-              }
-            ]
-          },
-          
           // References Section
           {
             template: `
