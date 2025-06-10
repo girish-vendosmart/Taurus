@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, forwardRef } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, forwardRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
@@ -137,7 +137,7 @@ export interface DropdownGroup {
             <div class="select-all-container">
               <p-checkbox 
                 [binary]="true"
-                [(ngModel)]="selectAllChecked"
+                [ngModel]="selectAllChecked"
                 (onChange)="onSelectAllChange($event)"
                 inputId="selectAll"
                 [disabled]="disabled">
@@ -173,9 +173,8 @@ export interface DropdownGroup {
             <div class="group-checkbox-container" (click)="$event.stopPropagation()">
               <p-checkbox 
                 [binary]="true"
-                [ngModel]="getGroupCheckboxModel(group)"
+                [value]="getGroupCheckboxValue(group)"
                 (onChange)="onGroupCheckboxChange($event, group)"
-                (click)="onGroupCheckboxClick($event, group)"
                 [inputId]="getGroupInputId(group)"
                 [disabled]="disabled"
                 [ngClass]="{ 'partial-selection': isGroupPartiallySelected(group) }">
@@ -212,7 +211,8 @@ export interface DropdownGroup {
           Total Groups: {{ originalOptions.length }}<br>
           Display Groups: {{ displayOptions.length }}<br>
           Total Items: {{ getTotalItemsCount() }}<br>
-          Filtered Items: {{ getFilteredItemsCount() }} items
+          Filtered Items: {{ getFilteredItemsCount() }} items<br>
+          Group States: {{ groupSelectionStates | json }}
         </small>
       </div>
     </div>
@@ -738,6 +738,8 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   // ControlValueAccessor implementation
   private onChange = (value: any) => {};
   private onTouched = () => {};
+  
+  constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.originalOptions = [...this.options];
@@ -762,6 +764,8 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       if (this.multiselect) {
         this.updateSelectAllState();
         this.updateAllGroupSelectionStates();
+        // Force change detection after state updates
+        this.cdr.detectChanges();
       }
     });
     
@@ -809,6 +813,9 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     // Update group selection states when individual items are selected/deselected
     if (this.multiselect) {
       this.updateAllGroupSelectionStates();
+      this.updateSelectAllState();
+      // Force change detection
+      this.cdr.detectChanges();
     }
   }
 
@@ -821,6 +828,8 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     if (this.multiselect) {
       this.updateAllGroupSelectionStates();
       this.updateSelectAllState();
+      // Force change detection
+      this.cdr.detectChanges();
     }
   }
 
@@ -918,6 +927,8 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     if (this.multiselect) {
       this.updateSelectAllState();
       this.updateAllGroupSelectionStates();
+      // Force change detection
+      this.cdr.detectChanges();
     }
   }
 
@@ -929,6 +940,8 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     if (this.multiselect) {
       this.updateSelectAllState();
       this.updateAllGroupSelectionStates();
+      // Force change detection
+      this.cdr.detectChanges();
     }
   }
 
@@ -977,6 +990,8 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     // Update group selection states after selecting/deselecting all
     this.updateAllGroupSelectionStates();
     this.updateSelectAllState();
+    // Force change detection
+    this.cdr.detectChanges();
   }
   
   private updateSelectAllState(): void {
@@ -994,14 +1009,16 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     this.selectAllChecked = allItems.length > 0 && selectedValues.length === allItems.length;
   }
 
-  // Add new methods for group checkbox functionality
-  getGroupCheckboxModel(group: DropdownGroup): boolean {
+  // Updated group checkbox methods
+  getGroupCheckboxValue(group: DropdownGroup): boolean {
     const state = this.groupSelectionStates[group.label] === 'all';
-    // Only log if state changes or for debugging specific groups
-    if (group.label === 'Precision Machining') {
-      console.log(`Group ${group.label} checkbox model:`, state, 'State:', this.groupSelectionStates[group.label]);
-    }
     return state;
+  }
+
+  // Keep the old method for backward compatibility but log deprecation
+  getGroupCheckboxModel(group: DropdownGroup): boolean {
+    console.warn('getGroupCheckboxModel is deprecated, use getGroupCheckboxValue instead');
+    return this.getGroupCheckboxValue(group);
   }
 
   isGroupPartiallySelected(group: DropdownGroup): boolean {
@@ -1041,11 +1058,13 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       this.dropdownControl.setValue(newSelectedValues);
     }
     
-    // Update group selection states
-    this.updateAllGroupSelectionStates();
-    this.updateSelectAllState();
-    
-    console.log('Updated group selection states:', this.groupSelectionStates);
+    // Update group selection states and force change detection
+    setTimeout(() => {
+      this.updateAllGroupSelectionStates();
+      this.updateSelectAllState();
+      this.cdr.detectChanges();
+      console.log('Updated group selection states:', this.groupSelectionStates);
+    }, 0);
   }
 
   private updateGroupSelectionState(group: DropdownGroup): void {
@@ -1077,14 +1096,10 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
 
   onGroupHeaderClick(event: any, group: DropdownGroup): void {
     console.log('Group header clicked:', group.label);
+    event.preventDefault();
+    event.stopPropagation();
     // Toggle the group selection when header is clicked
     this.toggleGroupSelection(group);
-  }
-
-  onGroupCheckboxClick(event: any, group: DropdownGroup): void {
-    console.log('Group checkbox clicked:', event, group.label);
-    event.stopPropagation();
-    // The checkbox click will trigger onChange, so we don't need to do anything here
   }
 
   private toggleGroupSelection(group: DropdownGroup): void {
@@ -1122,10 +1137,12 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       this.dropdownControl.setValue(newSelectedValues);
     }
     
-    // Update group selection states
-    this.updateAllGroupSelectionStates();
-    this.updateSelectAllState();
-    
-    console.log('Updated group selection states:', this.groupSelectionStates);
+    // Update group selection states with proper timing
+    setTimeout(() => {
+      this.updateAllGroupSelectionStates();
+      this.updateSelectAllState();
+      this.cdr.detectChanges();
+      console.log('Updated group selection states:', this.groupSelectionStates);
+    }, 0);
   }
 } 
