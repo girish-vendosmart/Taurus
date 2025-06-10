@@ -221,9 +221,13 @@
                   <div class="info-label">Legal Business Name</div>
                   <div class="info-value">{{ getCompanyProfile.company_name }}</div>
                 </div>
-                <div class="info-card">
+                <div class="info-card" *ngIf="getCompanyProfile.gstinNumber">
                   <div class="info-label">GSTIN</div>
-                  <div class="info-value">{{ getCompanyProfile.gstinNumber }}</div>
+                  <div class="info-value" *ngIf="getCompanyProfile.gstinNumber">{{ getCompanyProfile.gstinNumber }}</div>
+                </div>
+                <div class="info-card" *ngIf="getCompanyProfile.panNumber">
+                  <div class="info-label">Pan Number</div>
+                  <div class="info-value" *ngIf="getCompanyProfile.panNumber">{{ getCompanyProfile.panNumber }}</div>
                 </div>
                 <div class="info-card">
                   <div class="info-label">Country</div>
