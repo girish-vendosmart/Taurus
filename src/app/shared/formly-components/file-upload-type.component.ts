@@ -68,8 +68,8 @@ import { HttpEventType, HttpResponse } from '@angular/common/http';
                  [src]="file.url" 
                  alt="Thumbnail" 
                  class="file-thumbnail">
-            <!-- Show icon only during uploading for non-image files -->
-            <i *ngIf="isFileUploading(file) && !isImageFile(file.type || getFileTypeFromUrl(file.url))" 
+            <!-- Show icon only for non-image files OR when image thumbnail is not available -->
+            <i *ngIf="!isImageFile(file.type || getFileTypeFromUrl(file.url)) || (!file.url && isImageFile(file.type || getFileTypeFromUrl(file.url)))" 
                [class]="getFileIconClass(file.type || getFileTypeFromUrl(file.url))"></i>
           </div>
           
@@ -621,7 +621,7 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
       'pdf': 'application/pdf',
       'jpg': 'image/jpeg',
       'jpeg': 'image/jpeg', 
-      'png': 'image/png',
+      '': 'image/png',
       'gif': 'image/gif',
       'doc': 'application/msword',
       'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
