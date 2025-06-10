@@ -49,8 +49,8 @@
           <div class="timeline-line timeline-line-top" *ngIf="!isFirst" aria-hidden="true"></div>
           
           <!-- Timeline Dot -->
-          <div class="timeline-dot" [ngClass]="getTimelineDotClass(activity.action)" aria-hidden="true">
-            <i [class]="getActivityIcon(activity.action)"></i>
+          <div class="timeline-dot" aria-hidden="true">
+            <i class="pi pi-stop-circle"></i>
           </div>
           
           <!-- Timeline Line Below Dot (only show if not last item) -->
@@ -60,9 +60,6 @@
         <!-- Activity Content Box (Right Side) -->
         <div class="activity-content-box">
           <!-- Activity Badge -->
-          <div class="activity-badge" [ngClass]="getActivityBadgeClass(activity.action)">
-            {{ getActivityBadgeText(activity.action) }}
-          </div>
           
           <!-- Timestamp (top right) -->
           <!-- <div class="activity-timestamp">
