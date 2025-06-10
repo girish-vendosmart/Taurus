@@ -226,18 +226,18 @@
     padding: 0.8rem 1.2rem; 
     font-size: 1rem;
     transition: all 0.3s ease;
-    background-color: rgba($technical-white, 0.8);
+    background-color: #ffffff;
     width: 100%;
     
     &:hover {
       border-color: lighten($blueprint-blue, 20%);
-      background-color: rgba($technical-white, 1);
+      background-color: #ffffff;
     }
     
     &:focus {
       border-color: $blueprint-blue;
       box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
-      background-color: #fff;
+      background-color: #ffffff;
       outline: none;
     }
     
@@ -558,19 +558,19 @@
   .p-multiselect {
     width: 100%;
     border-radius: 8px;
-    background-color: rgba($technical-white, 0.8);
+    background-color: #ffffff;
     border: 1px solid $material-finish-silver;
     transition: all 0.3s ease;
     
     &:hover {
       border-color: lighten($blueprint-blue, 20%);
-      background-color: rgba($technical-white, 1);
+      background-color: #ffffff;
     }
     
     &.p-focus {
       border-color: $blueprint-blue;
       box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
-      background-color: #fff;
+      background-color: #ffffff;
     }
     
     .p-multiselect-label-container {

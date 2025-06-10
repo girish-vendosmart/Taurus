@@ -59,16 +59,17 @@ import { HttpEventType, HttpResponse } from '@angular/common/http';
           <!-- File type icon or thumbnail for images -->
           <div class="file-icon" 
                [ngClass]="[
-                 getFileIconClass(file.type || getFileTypeFromUrl(file.url)),
+                 isFileUploading(file) ? getFileIconClass(file.type || getFileTypeFromUrl(file.url)) : '',
                  isFileUploading(file) ? 'uploading' : '',
-                 isFileUploaded(file) ? 'uploaded' : '',
                  isFileUploadFailed(file) ? 'error' : ''
                ]">
+            <!-- Show thumbnail for images when available -->
             <img *ngIf="isImageFile(file.type || getFileTypeFromUrl(file.url)) && file.url" 
                  [src]="file.url" 
                  alt="Thumbnail" 
                  class="file-thumbnail">
-            <i *ngIf="!isImageFile(file.type || getFileTypeFromUrl(file.url)) || !file.url" 
+            <!-- Show icon only during uploading for non-image files -->
+            <i *ngIf="isFileUploading(file) && !isImageFile(file.type || getFileTypeFromUrl(file.url))" 
                [class]="getFileIconClass(file.type || getFileTypeFromUrl(file.url))"></i>
           </div>
           
@@ -632,36 +633,6 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     return mimeTypes[extension] || 'application/octet-stream';
   }
   
-  // Get appropriate icon class based on file type
-  getFileIconClass(mimeType: string): string {
-    if (!mimeType) return 'pi pi-file file-icon-default';
-    
-    // Image files
-    if (mimeType.startsWith('image/')) {
-      return 'pi pi-image file-icon-image';
-    }
-    
-    // PDF files
-    if (mimeType === 'application/pdf') {
-      return 'pi pi-file-pdf file-icon-pdf';
-    }
-    
-    // Word documents
-    if (mimeType === 'application/msword' || 
-        mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      return 'pi pi-file-word file-icon-doc';
-    }
-    
-    // Excel files
-    if (mimeType === 'application/vnd.ms-excel' || 
-        mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-      return 'pi pi-file-excel file-icon-xls';
-    }
-    
-    // Default file icon
-    return 'pi pi-file file-icon-default';
-  }
-  
   triggerFileInput(): void {
     this.fileInputRef.nativeElement.click();
   }
@@ -1149,5 +1120,32 @@ export class FormlyFieldFileUploadComponent extends FieldType<FieldTypeConfig> i
     return mimeType.startsWith('image/');
   }
 
-  
+  getFileIconClass(mimeType: string): string {
+    if (!mimeType) return 'pi pi-file file-icon-default';
+    
+    // Image files
+    if (mimeType.startsWith('image/')) {
+      return 'pi pi-image file-icon-image';
+    }
+    
+    // PDF files
+    if (mimeType === 'application/pdf') {
+      return 'pi pi-file-pdf file-icon-pdf';
+    }
+    
+    // Word documents
+    if (mimeType === 'application/msword' || 
+        mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      return 'pi pi-file-word file-icon-doc';
+    }
+    
+    // Excel files
+    if (mimeType === 'application/vnd.ms-excel' || 
+        mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      return 'pi pi-file-excel file-icon-xls';
+    }
+    
+    // Default file icon
+    return 'pi pi-file file-icon-default';
+  }
 }

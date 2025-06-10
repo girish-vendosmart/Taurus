@@ -1494,7 +1494,7 @@ export class SupplierOnboardingComponent implements OnInit {
     } else {
       const errorMessages: { [key: number]: string } = {
         0: 'Please fill in all required basic details correctly before proceeding.',
-        1: 'Please complete all required manufacturing capabilities and document details.'
+        1: 'Please complete all required fields in Contact & Capabilities.'
       };
       
       this.sweetAlertService.error(errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.');

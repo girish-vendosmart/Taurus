@@ -829,12 +829,16 @@ export class SupplierOnboardingL2Component implements OnInit {
         this.submit();
       }
     } else {
-      const errorMessages: { [key: number]: string } = {
-        0: 'Please fill in all required manufacturing capability details correctly before proceeding.',
-        1: 'Please complete all required facility verification details.'
-      };
-      
-      this.sweetAlertService.error(errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.');
+      // Show generic error message for all validation failures
+      if (this.activeStepIndex === 0) {
+        this.sweetAlertService.error('Please fill all required fields correctly');
+      } else {
+        const errorMessages: { [key: number]: string } = {
+          1: 'Please complete all required facility verification details.'
+        };
+        
+        this.sweetAlertService.error(errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.');
+      }
     }
   }
 
@@ -854,6 +858,7 @@ export class SupplierOnboardingL2Component implements OnInit {
   isStepValid(fields: FormlyFieldConfig[]): boolean {
     let isValid = true;
     
+    // First check standard field validation
     fields.forEach(field => {
       if (field.fieldGroup) {
         if (!this.isStepValid(field.fieldGroup)) {
@@ -867,7 +872,101 @@ export class SupplierOnboardingL2Component implements OnInit {
       }
     });
     
+    // Additional custom validation for Manufacturing Capabilities step (step 0)
+    if (this.activeStepIndex === 0) {
+      // Check if at least one complete machine is filled
+      if (!this.isAtLeastOneMachineComplete()) {
+        isValid = false;
+      }
+      
+      // Check if production capacity is filled
+      if (!this.isProductionCapacityFilled()) {
+        isValid = false;
+      }
+    }
+    
     return isValid;
+  }
+  
+  /**
+   * Check if at least one machine has all required fields filled
+   */
+  private isAtLeastOneMachineComplete(): boolean {
+    // Check both model and form values to ensure we have the latest data
+    const modelMachines = this.model.machines || [];
+    const formMachines = this.form.get('machines')?.value || [];
+    
+    console.log('=== Machine Validation Debug ===');
+    console.log('Model machines:', modelMachines);
+    console.log('Form machines:', formMachines);
+    
+    // Use form values if available, otherwise fall back to model
+    const machines = formMachines.length > 0 ? formMachines : modelMachines;
+    
+    const isComplete = machines.some((machine: any, index: number) => {
+      const hasRequired = machine.make && 
+                         machine.model && 
+                         machine.specifications && 
+                         machine.quantity && 
+                         machine.machinePhotos && 
+                         (Array.isArray(machine.machinePhotos) ? machine.machinePhotos.length > 0 : machine.machinePhotos);
+      
+      console.log(`Machine ${index}:`, {
+        make: machine.make,
+        model: machine.model,
+        specifications: machine.specifications,
+        quantity: machine.quantity,
+        machinePhotos: machine.machinePhotos,
+        hasRequired: hasRequired
+      });
+      
+      return hasRequired;
+    });
+    
+    console.log('At least one machine complete:', isComplete);
+    console.log('=== End Machine Validation Debug ===');
+    
+    return isComplete;
+  }
+  
+  /**
+   * Check if at least one certificate has all required fields filled
+   */
+  private isAtLeastOneCertificateComplete(): boolean {
+    const certifications = this.model.certifications || [];
+    
+    return certifications.some((cert: any) => {
+      return cert.certificationName && 
+             cert.certifyingBody && 
+             cert.expirationDate && 
+             cert.certificateDocument && 
+             cert.certificateDocument.length > 0;
+    });
+  }
+  
+  /**
+   * Check if production capacity is filled
+   */
+  private isProductionCapacityFilled(): boolean {
+    // Check both model and form values
+    const modelCapacity = this.model.productionCapacity;
+    const formCapacity = this.form.get('productionCapacity')?.value;
+    
+    console.log('=== Production Capacity Validation Debug ===');
+    console.log('Model production capacity:', modelCapacity);
+    console.log('Form production capacity:', formCapacity);
+    
+    // Use form value if available, otherwise use model value
+    const capacity = formCapacity !== null && formCapacity !== undefined ? formCapacity : modelCapacity;
+    
+    const isFilled = capacity !== null && 
+                    capacity !== undefined && 
+                    capacity >= 0;
+    
+    console.log('Production capacity filled:', isFilled);
+    console.log('=== End Production Capacity Validation Debug ===');
+    
+    return isFilled;
   }
 
   updateData(data:any) {
@@ -946,10 +1045,23 @@ export class SupplierOnboardingL2Component implements OnInit {
     // Mark all fields as touched
     this.markFieldsAsTouched(this.currentFields);
     
-    if (this.form.valid) {
+    // Check if all steps are valid
+    let allStepsValid = true;
+    for (let i = 0; i < this.stepFields.length; i++) {
+      const originalStepIndex = this.activeStepIndex;
+      this.activeStepIndex = i;
+      if (!this.isStepValid(this.stepFields[i])) {
+        allStepsValid = false;
+        break;
+      }
+      this.activeStepIndex = originalStepIndex;
+    }
+    
+    if (allStepsValid && this.form.valid) {
       console.log('L2 Form submitted successfully', this.model);
       this.postSupplierOnboardingL2();
     } else {
+      // Show generic error message for all validation failures
       this.sweetAlertService.error('Please fill all required fields correctly before submitting the form.');
     }
   }
