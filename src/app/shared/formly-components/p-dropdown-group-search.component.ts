@@ -1010,16 +1010,28 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     
     if (event.checked) {
       // Select all items
-      console.log('Selecting all items:', allItems);
+      console.log('Selecting all items:', allItems, this.groupCheckboxValues, this.originalOptions);
+
+      for(let key in this.groupCheckboxValues){
+        this.groupCheckboxValues[key] = true;
+      }
+
+
       this.dropdownControl.setValue(allItems);
       
       // Set all group checkboxes to checked
       this.originalOptions.forEach(group => {
         this.groupCheckboxValues[group.label] = true;
-        this.groupSelectionStates[group.label] = 'all';
+        // this.groupSelectionStates[group.label] = 'all';
       });
+
+      console.log('Group checkbox model change triggered:', 'for group:', this.groupCheckboxValues);
     } else {
+
       // Deselect all items
+      for(let key in this.groupCheckboxValues){
+        this.groupCheckboxValues[key] = false;
+      }
       console.log('Deselecting all items');
       this.dropdownControl.setValue([]);
       
@@ -1046,7 +1058,6 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   }
 
   onGroupCheckboxModelChange(checked: boolean, group: DropdownGroup): void {
-    console.log('Group checkbox model change triggered:', checked, 'for group:', group.label);
     
     if (!this.multiselect) return;
     
@@ -1058,6 +1069,8 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     
     // Update the checkbox value immediately
     this.groupCheckboxValues[group.label] = checked;
+
+    console.log('Group checkbox model change triggered:', checked, 'for group:', this.groupCheckboxValues, this.dropdownControl);
     
     const selectedValues = this.dropdownControl.value || [];
     const groupItemValues = group.items.map(item => item.value);

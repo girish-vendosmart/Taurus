@@ -711,7 +711,6 @@ export class SupplierOnboardingComponent implements OnInit {
   // Getter to make accessing the current step's fields easy in template
   get currentFields(): FormlyFieldConfig[] {
     const fields = this.stepFields[this.activeStepIndex] || [];
-    console.log(`Getting current fields for step ${this.activeStepIndex}:`, fields.length, 'fields');
     
     // If we're on step 0 and have address data, ensure it's properly set
     if (this.activeStepIndex === 0 && this.model.registeredAddress) {
