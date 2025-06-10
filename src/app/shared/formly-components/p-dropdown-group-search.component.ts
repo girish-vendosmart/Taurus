@@ -757,30 +757,48 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     // Use external formControl if provided, otherwise use internal one
     const controlToUse = this.formControl || this.dropdownControl;
     
+    // If using external formControl, sync the internal control
+    if (this.formControl) {
+      this.dropdownControl = this.formControl;
+    }
+    
     // Initialize with proper default value based on mode
     if (!controlToUse.value) {
       const defaultValue = this.multiselect ? [] : null;
       controlToUse.setValue(defaultValue, { emitEvent: false });
     }
     
-    // Subscribe to control changes
-    controlToUse.valueChanges.subscribe(value => {
-      this.selectedValue = value;
-      this.onChange(value);
-      this.selectionChange.emit(value);
-      
-      // Update select all state and group states for multiselect
-      if (this.multiselect) {
-        this.updateSelectAllState();
-        this.updateAllGroupSelectionStates();
-        // Force change detection after state updates
-        this.cdr.detectChanges();
-      }
-    });
-    
-    // If using external formControl, sync the internal control
-    if (this.formControl) {
-      this.dropdownControl = this.formControl;
+    // Subscribe to control changes ONLY if we're using the internal control
+    // If using external formControl (from Formly), the onChange callback will be called directly
+    if (!this.formControl) {
+      controlToUse.valueChanges.subscribe(value => {
+        console.log('Internal dropdown control value changed:', value);
+        this.selectedValue = value;
+        this.onChange(value);
+        this.selectionChange.emit(value);
+        
+        // Update select all state and group states for multiselect
+        if (this.multiselect) {
+          this.updateSelectAllState();
+          this.updateAllGroupSelectionStates();
+          // Force change detection after state updates
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      // For external form controls, just subscribe to update internal state
+      controlToUse.valueChanges.subscribe(value => {
+        console.log('External form control value changed:', value);
+        this.selectedValue = value;
+        
+        // Update select all state and group states for multiselect
+        if (this.multiselect) {
+          this.updateSelectAllState();
+          this.updateAllGroupSelectionStates();
+          // Force change detection after state updates
+          this.cdr.detectChanges();
+        }
+      });
     }
     
     // Initialize select all state
@@ -833,6 +851,19 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   // Event handlers
   onSelectionChange(event: any): void {
     this.onTouched();
+    
+    // Explicitly get the current value from the dropdown control and notify parent
+    const currentValue = this.dropdownControl.value;
+    console.log('Selection changed:', currentValue);
+    
+    // Update our local selectedValue
+    this.selectedValue = currentValue;
+    
+    // Notify parent form control about the change
+    this.onChange(currentValue);
+    
+    // Emit the selection change event
+    this.selectionChange.emit(currentValue);
     
     // Update group selection states when individual items are selected/deselected
     if (this.multiselect) {
@@ -1008,9 +1039,12 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       });
     });
     
+    let newValue: any[];
+    
     if (event.checked) {
       // Select all items
       console.log('Selecting all items:', allItems);
+      newValue = allItems;
       this.dropdownControl.setValue(allItems);
       
       // Set all group checkboxes to checked
@@ -1021,6 +1055,7 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     } else {
       // Deselect all items
       console.log('Deselecting all items');
+      newValue = [];
       this.dropdownControl.setValue([]);
       
       // Set all group checkboxes to unchecked
@@ -1029,6 +1064,11 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
         this.groupSelectionStates[group.label] = 'none';
       });
     }
+    
+    // Update local selectedValue and notify parent
+    this.selectedValue = newValue;
+    this.onChange(newValue);
+    this.selectionChange.emit(newValue);
     
     // Force immediate state updates
     this.updateSelectAllState();
@@ -1065,9 +1105,11 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     console.log('Current selected values:', selectedValues);
     console.log('Group item values:', groupItemValues);
     
+    let newSelectedValues: any[];
+    
     if (checked) {
       // Select all items in this group
-      const newSelectedValues = [...selectedValues];
+      newSelectedValues = [...selectedValues];
       
       groupItemValues.forEach(itemValue => {
         if (!newSelectedValues.includes(itemValue)) {
@@ -1080,7 +1122,7 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       this.groupSelectionStates[group.label] = 'all';
     } else {
       // Deselect all items in this group
-      const newSelectedValues = selectedValues.filter((value: any) => 
+      newSelectedValues = selectedValues.filter((value: any) => 
         !groupItemValues.includes(value)
       );
       
@@ -1088,6 +1130,11 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       this.dropdownControl.setValue(newSelectedValues);
       this.groupSelectionStates[group.label] = 'none';
     }
+    
+    // Update local selectedValue and notify parent
+    this.selectedValue = newSelectedValues;
+    this.onChange(newSelectedValues);
+    this.selectionChange.emit(newSelectedValues);
     
     // Update other groups and select all state
     this.updateAllGroupSelectionStates();
@@ -1173,16 +1220,18 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     // Check how many items in this group are currently selected
     const selectedInGroup = groupItemValues.filter(value => selectedValues.includes(value)).length;
     
+    let newSelectedValues: any[];
+    
     if (selectedInGroup === groupItemValues.length) {
       // All items are selected, so deselect all
-      const newSelectedValues = selectedValues.filter((value: any) => 
+      newSelectedValues = selectedValues.filter((value: any) => 
         !groupItemValues.includes(value)
       );
       console.log('Deselecting all items in group. New values:', newSelectedValues);
       this.dropdownControl.setValue(newSelectedValues);
     } else {
       // Some or no items are selected, so select all
-      const newSelectedValues = [...selectedValues];
+      newSelectedValues = [...selectedValues];
       
       groupItemValues.forEach(itemValue => {
         if (!newSelectedValues.includes(itemValue)) {
@@ -1193,6 +1242,11 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       console.log('Selecting all items in group. New values:', newSelectedValues);
       this.dropdownControl.setValue(newSelectedValues);
     }
+    
+    // Update local selectedValue and notify parent
+    this.selectedValue = newSelectedValues;
+    this.onChange(newSelectedValues);
+    this.selectionChange.emit(newSelectedValues);
     
     // Update group selection states with proper timing
     setTimeout(() => {

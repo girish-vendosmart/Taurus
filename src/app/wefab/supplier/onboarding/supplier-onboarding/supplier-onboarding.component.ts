@@ -1205,7 +1205,7 @@ export class SupplierOnboardingComponent implements OnInit {
               filterPlaceholder: 'Search manufacturing processes...',
               multiselect: true, // Enable multiselect mode
               maxSelectedLabels: 8, // Allow up to 8 individual labels before showing summary
-              showDebugInfo: false, // Enable debugging temporarily
+              showDebugInfo: true, // Enable debugging temporarily
               options:
               [
                 {
@@ -1445,8 +1445,10 @@ export class SupplierOnboardingComponent implements OnInit {
   private synchronizeModelWithForm() {
     if (this.form && this.form.value) {
       console.log('Synchronizing model with form values:', this.form.value);
+      console.log('Current primaryManufacturingProcess from form:', this.form.get('primaryManufacturingProcess')?.value);
       this.model = { ...this.model, ...this.form.value };
       console.log('Model synchronized:', this.model);
+      console.log('Final primaryManufacturingProcess in model:', this.model.primaryManufacturingProcess);
     }
   }
 
@@ -1648,8 +1650,10 @@ export class SupplierOnboardingComponent implements OnInit {
   
   submit() {
     if (this.form.valid) {
-      
-      console.log('Form submitted successfully', this.model);
+      console.log('Form submitted successfully');
+      console.log('Final form values:', this.form.value);
+      console.log('Final model values:', this.model);
+      console.log('primaryManufacturingProcess in submission:', this.model.primaryManufacturingProcess);
       this.postSupplierOnboardingL1();
     } else {
       this.form.markAllAsTouched();
