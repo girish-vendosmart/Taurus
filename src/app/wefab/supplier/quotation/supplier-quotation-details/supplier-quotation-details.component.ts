@@ -295,6 +295,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     enablePagination: true,
     pageSize: 7,
     showActions: false,
+    enableColumnResize: true,
   };
   quotationId: any;
 

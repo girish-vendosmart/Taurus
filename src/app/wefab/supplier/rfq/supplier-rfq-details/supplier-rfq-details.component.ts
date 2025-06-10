@@ -165,7 +165,8 @@ export class SupplierRfqDetailsComponent implements OnInit {
     enableFilter: true,
     enablePagination: true,
     pageSize: 10,
-    showActions: false
+    showActions: false,
+    enableColumnResize: true,
   };
   supplierRfqId: string = '';
   supplierRfqDetails: any;
