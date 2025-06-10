@@ -18,6 +18,7 @@ import { PMultiSelectGroupComponent } from './shared/formly-components/p-multiSe
 import { FormlyFieldGooglePlacesComponent } from './shared/formly-components/google-places-type.component';
 import { FormlyFieldGstVerifyComponent } from './shared/formly-components/gst-verify-type.component';
 import { FormlyFieldPanVerifyComponent } from './shared/formly-components/pan-verify-type.component';
+import { FormlyFieldBankVerifyComponent } from './shared/formly-components/bank-verify-type.component';
 import { FormlyFieldPDropdownGroupSearchComponent } from './shared/formly-components/p-dropdown-group-search-type.component';
 import { loaderInterceptor } from './core/interceptors/loader.interceptor';
 
@@ -63,6 +64,7 @@ export const appConfig: ApplicationConfig = {
           { name: 'google-places', component: FormlyFieldGooglePlacesComponent },
           { name: 'gst-verify', component: FormlyFieldGstVerifyComponent },
           { name: 'pan-verify', component: FormlyFieldPanVerifyComponent },
+          { name: 'bank-verify', component: FormlyFieldBankVerifyComponent },
           { name: 'p-dropdown-group-search', component: FormlyFieldPDropdownGroupSearchComponent }
         ],
         wrappers: [

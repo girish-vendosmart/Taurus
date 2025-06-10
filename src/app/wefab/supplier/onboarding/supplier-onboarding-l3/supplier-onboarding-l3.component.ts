@@ -6,6 +6,7 @@ import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import { Router } from '@angular/router';
 import { CommonService } from '../../../../shared/services/common.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 // PrimeNG imports
 import { CardModule } from 'primeng/card';
@@ -32,6 +33,8 @@ import { SweetAlertService } from '../../../../shared/services/sweet-alert.servi
 
 // Import Components
 import { FileUploadComponent } from '../supplier-onboarding/file-upload.component';
+import { BankVerifyFieldComponent } from './bank-verify-field.component';
+import { FormlyFieldBankVerifyComponent } from '../../../../shared/formly-components/bank-verify-type.component';
 import { FormlyRepeatTypeComponent } from '../../../../shared/formly-components/formly-repeat-type.component';
 import { FormlyFieldFileUploadComponent } from '../../../../shared/formly-components/file-upload-type.component';
 import { FormlyFieldRangeSliderComponent } from '../../../../shared/formly-components/range-slider-type.component';
@@ -67,7 +70,9 @@ import { FormlyFieldDropdownComponent } from '../../../../shared/formly-componen
     FormlyRepeatTypeComponent,
     FormlyFieldFileUploadComponent,
     FormlyFieldRangeSliderComponent,
-    FormlyFieldDropdownComponent
+    FormlyFieldDropdownComponent,
+    BankVerifyFieldComponent,
+    FormlyFieldBankVerifyComponent
   ],
   providers: [MessageService],
   templateUrl: './supplier-onboarding-l3.component.html',
@@ -122,13 +127,17 @@ export class SupplierOnboardingL3Component implements OnInit {
   isMobile: boolean = false;
   getFinancialData: any;
   
+  // Bank verification state
+  bankVerified = false;
+  
   constructor(
     private fb: FormBuilder, 
     private messageService: MessageService,
     private router: Router,
     private commonService: CommonService,
     private sweetAlert: SweetAlertService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({});
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -285,6 +294,12 @@ export class SupplierOnboardingL3Component implements OnInit {
       this.commonService.getData(endPoint).subscribe((res: any) => {
         
         this.getFinancialData = JSON.parse(res.data.company_profile)
+        
+        // Load bank verification status from the API response
+        this.bankVerified = res.data.bank_verified || false;
+        
+        console.log('L3 Data response:', res);
+        console.log('Bank verified status:', this.bankVerified);
         console.log(this.getFinancialData)
         this.patchValueForm()
       })
@@ -299,6 +314,14 @@ export class SupplierOnboardingL3Component implements OnInit {
     this.model = {
       ...this.getFinancialData
     };
+    
+    // Ensure bank verification field is properly initialized
+    if (this.model.bankDetails && !this.model.bankDetails.verification) {
+      this.model.bankDetails.verification = {
+        accountNumber: this.model.bankDetails.accountNumber || '',
+        ifscCode: this.model.bankDetails.ifscCode || ''
+      };
+    }
     
     // Format numbers for display when loading existing data
     if (this.model.companyFinancials) {
@@ -333,11 +356,42 @@ export class SupplierOnboardingL3Component implements OnInit {
       }];
     }
     
+    // Force change detection
+    this.cdr.detectChanges();
+    
+    // Update bank verification status after patching
+    this.updateBankFieldVerificationStatus();
+    
     // Mark form as pristine after patching values
     setTimeout(() => {
       this.form.markAsPristine();
       console.log('Form patched with stored data:', this.model);
     });
+  }
+
+  // Method to update bank field verification status
+  updateBankFieldVerificationStatus() {
+    if (this.stepFields && this.stepFields.length > 0) {
+      const financialFields = this.stepFields[0];
+      
+      // Find the bank verification field
+      const bankField = financialFields.find((field: any) => field.key === 'bankDetails.verification');
+      
+      if (bankField && bankField.templateOptions) {
+        // Update the isVerified status
+        bankField.templateOptions['isVerified'] = this.bankVerified;
+        console.log('Updated bank field verification status to:', this.bankVerified);
+        
+        // Force update the UI
+        setTimeout(() => {
+          if (bankField.formControl) {
+            bankField.formControl.updateValueAndValidity();
+          }
+          // Force change detection
+          this.cdr.detectChanges();
+        });
+      }
+    }
   }
 
   // Added method to update sticky navigation based on screen size
@@ -377,7 +431,7 @@ export class SupplierOnboardingL3Component implements OnInit {
       {
         template: '<p class="text-muted small mb-3">Provide your primary business bank account details for payment processing</p>'
       },
-      // Bank Name and Account Holder Name in one row
+      // Bank Name, Branch Name, and Account Type in one row
       {
         fieldGroupClassName: 'row',
         fieldGroup: [
@@ -433,12 +487,12 @@ export class SupplierOnboardingL3Component implements OnInit {
           },
         ]
       },
-      // Account Number and IFSC Code in one row
+      // Account Holder Name
       {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-4',
+            className: 'col-md-6',
             key: 'bankDetails.accountHolderName',
             type: 'input',
             templateOptions: {
@@ -452,70 +506,25 @@ export class SupplierOnboardingL3Component implements OnInit {
               }
             }
           },
-          {
-            className: 'col-md-4',
-            key: 'bankDetails.accountNumber',
-            type: 'input',
-            templateOptions: {
-              label: 'Account Number',
-              required: true,
-              placeholder: 'Enter account number',
-              pattern: '^[0-9]{9,18}$',
-              minLength: 9,
-              maxLength: 18
-            },
-            validators: {
-              accountNumber: {
-                expression: (c: AbstractControl) => {
-                  if (!c.value) return true; // Allow empty for required validation to handle
-                  const value = c.value.toString();
-                  return /^[0-9]{9,18}$/.test(value);
-                },
-                message: 'Account number must be between 9-18 digits and contain only numbers'
-              }
-            },
-            validation: {
-              messages: {
-                required: 'Account number is required',
-                pattern: 'Account number must contain only numbers and be 9-18 digits long',
-                minlength: 'Account number must be at least 9 digits',
-                maxlength: 'Account number cannot exceed 18 digits'
-              }
-            }
-          },
-          {
-            className: 'col-md-4',
-            key: 'bankDetails.ifscCode',
-            type: 'input',
-            templateOptions: {
-              label: 'IFSC Code',
-              required: true,
-              placeholder: 'Enter IFSC code (e.g., SBIN0000123)',
-              pattern: '^[A-Z]{4}0[A-Z0-9]{6}$',
-              minLength: 11,
-              maxLength: 11,
-              transform: (value: string) => value ? value.toUpperCase() : value
-            },
-            validators: {
-              ifscCode: {
-                expression: (c: AbstractControl) => {
-                  if (!c.value) return true; // Allow empty for required validation to handle
-                  const value = c.value.toString().toUpperCase();
-                  return /^[A-Z]{4}0[A-Z0-9]{6}$/.test(value);
-                },
-                message: 'IFSC code must be in format: 4 letters + 0 + 6 alphanumeric characters (e.g., SBIN0000123)'
-              }
-            },
-            validation: {
-              messages: {
-                required: 'IFSC code is required',
-                pattern: 'IFSC code must be in format: 4 letters + 0 + 6 alphanumeric characters',
-                minlength: 'IFSC code must be exactly 11 characters',
-                maxlength: 'IFSC code must be exactly 11 characters'
-              }
-            }
-          },
         ]
+      },
+      // Bank Verification Section
+      {
+        template: '<h5 class="bank-verification-title mb-2 mt-3">Account Verification</h5>'
+      },
+      {
+        template: '<p class="text-muted small mb-3">Verify your bank account details to enable secure payments</p>'
+      },
+      {
+        key: 'bankDetails.verification',
+        type: 'bank-verify',
+        templateOptions: {
+          parentComponent: this,
+          isVerified: this.bankVerified
+        },
+        expressionProperties: {
+          'templateOptions.isVerified': () => this.bankVerified
+        }
       },
       // Financial Overview Section
       {
@@ -1035,6 +1044,7 @@ export class SupplierOnboardingL3Component implements OnInit {
     let body = {
       supplier_company_id: localStorage.getItem('supplier_id'),
       onboarding_status: 'Under Review',
+      bank_verified: this.bankVerified === true ? true : false,
       company_profile: JSON.stringify(formData)
     }
     
@@ -1126,5 +1136,17 @@ export class SupplierOnboardingL3Component implements OnInit {
       this.markFieldsAsTouched(this.stepFields.flat());
       this.sweetAlert.error('Please fill in all required fields correctly.');
     }
+  }
+
+  // Handle bank verification event
+  onBankVerified(verified: boolean): void {
+    this.bankVerified = verified;
+    console.log('Bank verification status:', verified);
+  }
+
+  // Handle bank details verification event
+  onBankDetailsVerified(bankDetails: any): void {
+    console.log('Bank details verified:', bankDetails);
+    // You can store additional bank details if needed
   }
 }

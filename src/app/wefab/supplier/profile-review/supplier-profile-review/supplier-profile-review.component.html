@@ -684,17 +684,17 @@
                 <div class="info-card">
                   <div class="info-label">Account Number</div>
                   <div class="info-value">
-                    <span *ngIf="newFinancialData.bankDetails.accountNumber" class="masked-account">
-                      {{ maskAccountNumber(newFinancialData.bankDetails.accountNumber) }}
+                    <span *ngIf="newFinancialData.bankDetails.verification.accountNumber" class="masked-account">
+                      {{ maskAccountNumber(newFinancialData.bankDetails.verification.accountNumber) }}
                     </span>
-                    <span *ngIf="!newFinancialData.bankDetails.accountNumber" class="no-data-text">
+                    <span *ngIf="!newFinancialData.bankDetails.verification.accountNumber" class="no-data-text">
                       Not provided
                     </span>
                   </div>
                 </div>
                 <div class="info-card">
                   <div class="info-label">IFSC Code</div>
-                  <div class="info-value">{{ newFinancialData.bankDetails.ifscCode || 'Not provided' }}</div>
+                  <div class="info-value">{{ newFinancialData.bankDetails.verification.ifscCode || 'Not provided' }}</div>
                 </div>
                 <div class="info-card">
                   <div class="info-label">Account Type</div>

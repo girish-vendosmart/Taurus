@@ -706,6 +706,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     if (result.data) {
       try {
         this.newFinancialData = JSON.parse(result.data.company_profile);
+        debugger;
         this.requestToResubmitCommentL3 = result.data.comment || '';
       } catch (error) {
         console.error('Error parsing L3 data:', error);
