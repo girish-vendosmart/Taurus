@@ -654,156 +654,156 @@
           </div>
         </div>
 
-        <!-- Financial content only shown when newFinancialData exists -->
-        <div *ngIf="newFinancialData && !loadingState.l3Data">
-          <!-- Financial & Additional Sub-tabs Navigation -->
-          <div class="financial-tabs">
-            <a href="javascript:void(0)" class="financial-tab" [class.active]="financialTab === 'financial'"
-              (click)="changeFinancialTab('financial')">Financial Overview</a>
-            <a href="javascript:void(0)" class="financial-tab" [class.active]="financialTab === 'additional'"
-              (click)="changeFinancialTab('additional')">Additional Information</a>
-          </div>
-          <!-- Financial Overview Tab Content -->
-          <div class="financial-tab-content" *ngIf="financialTab === 'financial'">
-            <div class="financial-overview-section">
+        <!-- Combined Financial & Additional Information Content -->
+        <div class="consolidated-info" *ngIf="newFinancialData && !loadingState.l3Data">
+          <!-- Confidentiality Notice -->
+          <div class="info-section">
+            <div class="info-section-content">
               <div class="note-text">
                 <span class="note-label">Note:</span> Financial information is confidential and is only shared with
                 verified clients when necessary for business purposes.
               </div>
+            </div>
+          </div>
 
-              <!-- Bank Details Section -->
-              <div class="review-info-container bank-details-section" *ngIf="newFinancialData.bankDetails">
-                <h3>Bank Details</h3>
-                <div class="review-row">
-                  <div class="review-col">
-                    <div class="field-label">Bank Name</div>
-                    <div class="field-value">{{ newFinancialData.bankDetails.bankName || 'Not provided' }}</div>
-                  </div>
-                  <div class="review-col">
-                    <div class="field-label">Account Holder Name</div>
-                    <div class="field-value">{{ newFinancialData.bankDetails.accountHolderName || 'Not provided' }}</div>
+          <!-- Bank Details Section -->
+          <div class="info-section">
+            <div class="info-section-header">
+              <h4 style="color: #1A3A5F !important"><i class="pi pi-university"></i> Bank Details</h4>
+            </div>
+            <div class="info-section-content">
+              <div class="info-grid" *ngIf="newFinancialData.bankDetails">
+                <div class="info-card">
+                  <div class="info-label">Bank Name</div>
+                  <div class="info-value">{{ newFinancialData.bankDetails.bankName || 'Not provided' }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Account Holder Name</div>
+                  <div class="info-value">{{ newFinancialData.bankDetails.accountHolderName || 'Not provided' }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Account Number</div>
+                  <div class="info-value">
+                    <span *ngIf="newFinancialData.bankDetails.accountNumber" class="masked-account">
+                      {{ maskAccountNumber(newFinancialData.bankDetails.accountNumber) }}
+                    </span>
+                    <span *ngIf="!newFinancialData.bankDetails.accountNumber" class="no-data-text">
+                      Not provided
+                    </span>
                   </div>
                 </div>
-
-                <div class="review-row">
-                  <div class="review-col">
-                    <div class="field-label">Account Number</div>
-                    <div class="field-value">
-                      <span *ngIf="newFinancialData.bankDetails.accountNumber" class="masked-account">
-                        {{ maskAccountNumber(newFinancialData.bankDetails.accountNumber) }}
-                      </span>
-                      <span *ngIf="!newFinancialData.bankDetails.accountNumber" class="no-data-text">
-                        Not provided
-                      </span>
-                    </div>
-                  </div>
-                  <div class="review-col">
-                    <div class="field-label">IFSC Code</div>
-                    <div class="field-value">{{ newFinancialData.bankDetails.ifscCode || 'Not provided' }}</div>
-                  </div>
+                <div class="info-card">
+                  <div class="info-label">IFSC Code</div>
+                  <div class="info-value">{{ newFinancialData.bankDetails.ifscCode || 'Not provided' }}</div>
                 </div>
-
-                <div class="review-row">
-                  <div class="review-col">
-                    <div class="field-label">Account Type</div>
-                    <div class="field-value">{{ newFinancialData.bankDetails.accountType || 'Not provided' }}</div>
-                  </div>
-                  <div class="review-col">
-                    <div class="field-label">Branch Name</div>
-                    <div class="field-value">{{ newFinancialData.bankDetails.branchName || 'Not provided' }}</div>
-                  </div>
+                <div class="info-card">
+                  <div class="info-label">Account Type</div>
+                  <div class="info-value">{{ newFinancialData.bankDetails.accountType || 'Not provided' }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Branch Name</div>
+                  <div class="info-value">{{ newFinancialData.bankDetails.branchName || 'Not provided' }}</div>
                 </div>
               </div>
-
               <!-- Show message if no bank details -->
-              <div class="review-info-container bank-details-section" *ngIf="!newFinancialData.bankDetails">
-                <h3>Bank Details</h3>
-                <div class="review-row">
-                  <div class="review-col">
-                    <div class="field-value no-data-text">No bank details provided yet.</div>
-                  </div>
+              <div *ngIf="!newFinancialData.bankDetails" class="info-grid">
+                <div class="info-card info-card-large">
+                  <div class="info-value no-data-text">No bank details provided yet.</div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div class="review-info-container">
-                <h3>Annual Revenue (Last 3 Years)</h3>
-                <div class="review-row">
-                  <div class="review-col">
-                    <div class="field-label">Annual Revenue (This Year)</div>
-                    <div class="field-value">{{ formatCurrency(newFinancialData.companyFinancials.annualRevenue2024) }}</div>
-                  </div>
-                  <div class="review-col">
-                    <div class="field-label">Annual Revenue (Last Year)</div>
-                    <div class="field-value">{{ formatCurrency(newFinancialData.companyFinancials.annualRevenue2023) }}</div>
-                  </div>
+          <!-- Annual Revenue Section -->
+          <div class="info-section">
+            <div class="info-section-header">
+              <h4 style="color: #1A3A5F !important"><i class="pi pi-chart-line"></i> Annual Revenue (Last 3 Years)</h4>
+            </div>
+            <div class="info-section-content">
+              <div class="info-grid">
+                <div class="info-card">
+                  <div class="info-label">Annual Revenue (This Year)</div>
+                  <div class="info-value">{{ formatCurrency(newFinancialData.companyFinancials.annualRevenue2024) }}</div>
                 </div>
-
-                <div class="review-row">
-                  <div class="review-col">
-                    <div class="field-label">Annual Revenue (Two Years Ago)</div>
-                    <div class="field-value">{{ formatCurrency(newFinancialData.companyFinancials.annualRevenue2022) }}</div>
-                  </div>
+                <div class="info-card">
+                  <div class="info-label">Annual Revenue (Last Year)</div>
+                  <div class="info-value">{{ formatCurrency(newFinancialData.companyFinancials.annualRevenue2023) }}</div>
                 </div>
-              </div>
-
-              <div class="review-info-container">
-                <h3>Credit Information</h3>
-                <div class="review-row">
-                  <div class="review-col">
-                    <div class="field-label">Credit Rating Provider</div>
-                    <div class="field-value">{{ newFinancialData.companyFinancials.creditRatingProvider }}</div>
-                  </div>
-                  <div class="review-col">
-                    <div class="field-label">Tax Compliance</div>
-                    <div class="field-value"><i class="pi pi-check-circle verified-icon"></i>{{
-                      newFinancialData.companyFinancials.taxCompliant }}</div>
-                  </div>
+                <div class="info-card">
+                  <div class="info-label">Annual Revenue (Two Years Ago)</div>
+                  <div class="info-value">{{ formatCurrency(newFinancialData.companyFinancials.annualRevenue2022) }}</div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div class="review-info-container">
-                <h3>Insurance Coverage</h3>
-                <div class="review-row">
-                  <div class="review-col">
-                    <div class="field-label">General Liability</div>
-                    <div class="field-value">{{ formatCurrency(newFinancialData.insuranceCoverage.generalLiabilityInsurance) }}</div>
-                  </div>
-                  <div class="review-col">
-                    <div class="field-label">Product Liability</div>
-                    <div class="field-value">{{ formatCurrency(newFinancialData.insuranceCoverage.productLiabilityInsurance) }}</div>
+          <!-- Credit Information Section -->
+          <div class="info-section">
+            <div class="info-section-header">
+              <h4 style="color: #1A3A5F !important"><i class="pi pi-verified"></i> Credit Information</h4>
+            </div>
+            <div class="info-section-content">
+              <div class="info-grid">
+                <div class="info-card">
+                  <div class="info-label">Credit Rating Provider</div>
+                  <div class="info-value">{{ newFinancialData.companyFinancials.creditRatingProvider || 'Not provided' }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Tax Compliance</div>
+                  <div class="info-value">
+                    <i class="pi pi-check-circle verified-icon" *ngIf="newFinancialData.companyFinancials.taxCompliant"></i>
+                    {{ newFinancialData.companyFinancials.taxCompliant || 'Not provided' }}
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Additional Information Tab Content -->
-          <div class="financial-tab-content" *ngIf="financialTab === 'additional'">
-            <div class="financial-overview-section">
-              <!-- Business References -->
-              <div class="review-info-container">
-                <h3>Business References</h3>
-                <div *ngIf="newFinancialData.additionalInformation.references && newFinancialData.additionalInformation.references.length > 0">
-                  <div class="review-row" *ngFor="let reference of newFinancialData.additionalInformation.references">
-                    <div class="review-col">
-                      <div class="field-label">Company Name</div>
-                      <div class="field-value">{{ reference.companyName }}</div>
-                    </div>
-                    <div class="review-col">
-                      <div class="field-label">Contact Name</div>
-                      <div class="field-value">{{ reference.contactName }}</div>
-                    </div>
-                    <div class="review-col">
-                      <div class="field-label">Email</div>
-                      <div class="field-value">{{ reference.email }}</div>
-                    </div>
+          <!-- Insurance Coverage Section -->
+          <div class="info-section">
+            <div class="info-section-header">
+              <h4 style="color: #1A3A5F !important"><i class="pi pi-shield"></i> Insurance Coverage</h4>
+            </div>
+            <div class="info-section-content">
+              <div class="info-grid">
+                <div class="info-card">
+                  <div class="info-label">General Liability Insurance</div>
+                  <div class="info-value">{{ formatCurrency(newFinancialData.insuranceCoverage.generalLiabilityInsurance) }}</div>
+                </div>
+                <div class="info-card">
+                  <div class="info-label">Product Liability Insurance</div>
+                  <div class="info-value">{{ formatCurrency(newFinancialData.insuranceCoverage.productLiabilityInsurance) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Business References Section -->
+          <div class="info-section">
+            <div class="info-section-header">
+              <h4 style="color: #1A3A5F !important"><i class="pi pi-users"></i> Business References</h4>
+            </div>
+            <div class="info-section-content">
+              <div *ngIf="newFinancialData.additionalInformation.references && newFinancialData.additionalInformation.references.length > 0">
+                <div class="info-grid" *ngFor="let reference of newFinancialData.additionalInformation.references; let i = index">
+                  <div class="info-card">
+                    <div class="info-label">Reference {{ i + 1 }} - Company Name</div>
+                    <div class="info-value">{{ reference.companyName }}</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Contact Name</div>
+                    <div class="info-value">{{ reference.contactName }}</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">{{ reference.email }}</div>
                   </div>
                 </div>
-                <div *ngIf="!newFinancialData.additionalInformation.references || newFinancialData.additionalInformation.references.length === 0">
-                  <div class="review-row">
-                    <div class="review-col">
-                      <div class="field-value empty-state-text">No business references added yet.</div>
-                    </div>
+              </div>
+              <div *ngIf="!newFinancialData.additionalInformation.references || newFinancialData.additionalInformation.references.length === 0">
+                <div class="info-grid">
+                  <div class="info-card info-card-large">
+                    <div class="info-value no-data-text">No business references added yet.</div>
                   </div>
                 </div>
               </div>

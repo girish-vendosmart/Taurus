@@ -152,8 +152,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   basicInfoTab: string = 'company'; // Only 'company' and 'contact' now
   manufacturingTab: string = 'machines'; // 'machines', 'facility', 'certifications', 'capacity'
 
-  // Financial Tab
-  financialTab: string = 'financial'; // 'financial', 'additional'
+  // Financial Tab - No longer needed since we removed sub-tabs
+  // financialTab: string = 'financial'; // 'financial', 'additional'
 
   // Completion Status
   completionStatus: CompletionStatus = {
@@ -1744,10 +1744,6 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     localStorage.setItem('show_supplier_dashboard', 'true');
     localStorage.setItem('supplier_onboarding_complete', 'true');
     this.router.navigate(['/wefab/supplier/dashboard']);
-  }
-
-  changeFinancialTab(tab: string): void {
-    this.financialTab = tab;
   }
 
   // New method to get only L2 status (lightweight)
