@@ -44,12 +44,15 @@
           <tr>
             <th *ngFor="let col of getVisibleColumns()" 
                 [pSortableColumn]="col.sortable ? col.field : ''"
-                [style.width]="col.width">
+                [style.width]="col.width"
+                class="header-cell">
               <div class="header-content">
                 {{ col.header }}
                 <p-sortIcon *ngIf="col.sortable" [field]="col.field"></p-sortIcon>
               </div>
-              <div class="resize-handle" *ngIf="config.enableColumnResize"></div>
+              <div class="resize-handle" 
+                   *ngIf="config.enableColumnResize"
+                   (mousedown)="onResizeStart($event, col.field)"></div>
             </th>
           </tr>
 

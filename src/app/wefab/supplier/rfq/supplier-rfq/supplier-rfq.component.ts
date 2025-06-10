@@ -142,7 +142,7 @@ export class SupplierRfqComponent implements OnInit {
       next: (res: any) => {
         console.log('RFQ Summary Stats:', res.message);
         if (res.message) {
-          this.updateDashboardCardsFromAPI(res.message);
+          this.updateDashboardCardsFromAPI(res.message.data);
         }
       },
       error: (error) => {
@@ -155,16 +155,16 @@ export class SupplierRfqComponent implements OnInit {
   updateDashboardCardsFromAPI(apiData: any) {
     // Map API response to dashboard cards
     // Draft RFQs -> Not Opened
-    this.dashboardCards[0].value = (apiData['total_rfqs'] || 0).toString();
+    this.dashboardCards[0].value = (apiData['overview']['total_rfqs_all_time'] || 0).toString();
     
     // Open RFQs -> Opened  
-    this.dashboardCards[1].value = (apiData['Opened'] || 0).toString();
+    this.dashboardCards[1].value = (apiData['status_breakdown']['Opened'] || 0).toString();
     
     // Under Review -> Quoted
-    this.dashboardCards[2].value = (apiData['Quoted'] || 0).toString();
+    this.dashboardCards[2].value = (apiData['status_breakdown']['Quoted'] || 0).toString();
     
     // Closed RFQs -> Expired + Cancelled
-    this.dashboardCards[3].value = (apiData['Expired'] || 0).toString();
+    this.dashboardCards[3].value = (apiData['status_breakdown']['Expired'] || 0).toString();
 
     console.log('Updated dashboard cards:', this.dashboardCards);
   }

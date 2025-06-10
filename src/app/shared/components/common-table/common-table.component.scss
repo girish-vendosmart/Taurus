@@ -832,3 +832,50 @@ $font-weight-bold: 700;
   margin: 0 !important;
 }
 
+// Global styles for column resizing
+:host ::ng-deep {
+  // Prevent text selection during resize
+  body.resizing {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    cursor: col-resize !important;
+  }
+
+  // Additional resize handle styling for better visibility
+  .p-datatable-thead th {
+    position: relative;
+    
+    .resize-handle {
+      position: absolute;
+      right: -4px;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      cursor: col-resize;
+      background: transparent;
+      z-index: 10;
+      user-select: none;
+
+      &:hover {
+        background: rgba($blueprint-blue, 0.2);
+        opacity: 0.8;
+      }
+
+      &:active {
+        background: rgba($blueprint-blue, 0.4);
+      }
+    }
+  }
+
+  // Ensure columns can be resized properly
+  .p-datatable-resizable-column {
+    position: relative;
+    
+    &:not(:last-child) {
+      border-right: 1px solid #dee2e6;
+    }
+  }
+}
+
