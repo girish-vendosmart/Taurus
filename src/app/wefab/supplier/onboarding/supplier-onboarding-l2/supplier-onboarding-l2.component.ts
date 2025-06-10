@@ -131,6 +131,13 @@ export class SupplierOnboardingL2Component implements OnInit {
         this.sweetAlertService.error('Supplier ID not found. Please try again.');
         this.router.navigate(['/wefab/supplier/supplier-verification']);
       }
+    } else {
+      const supplierId = localStorage.getItem('supplier_id');
+      if (supplierId) {
+        this.getL2Data(supplierId);
+      } else {
+        this.sweetAlertService.error('Supplier ID not found. Please try again.');
+      }
     }
   }
 

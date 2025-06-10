@@ -265,11 +265,17 @@ export class SupplierOnboardingL3Component implements OnInit {
     if (route.includes('mode=edit')) {
       const supplierId = localStorage.getItem('supplier_id');
       if (supplierId) {
-        
         this.getL3Data(supplierId);
       } else {
         this.sweetAlert.error('Supplier ID not found. Please try again.');
         this.router.navigate(['/wefab/supplier/supplier-verification']);
+      }
+    } else {
+      const supplierId = localStorage.getItem('supplier_id');
+      if (supplierId) {
+        this.getL3Data(supplierId);
+      } else {
+        this.sweetAlert.error('Supplier ID not found. Please try again.');
       }
     }
   }

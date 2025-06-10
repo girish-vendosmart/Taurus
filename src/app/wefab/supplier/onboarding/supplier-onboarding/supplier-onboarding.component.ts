@@ -363,6 +363,13 @@ export class SupplierOnboardingComponent implements OnInit {
           this.sweetAlertService.error('Supplier ID not found. Please try again.');
           this.router.navigate(['/wefab/supplier/supplier-verification']);
         }
+      } else {
+        const supplierId = localStorage.getItem('supplier_id');
+        if (supplierId) {
+          this.getL1Data(supplierId);
+        } else {
+          this.sweetAlertService.error('Supplier ID not found. Please try again.');
+        }
       }
       this.patchEmailId();
     }
