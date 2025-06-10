@@ -1711,6 +1711,12 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
            this.getCurrentL3DataStatus === 'Approved';
   }
 
+  hasValidCertifications(): boolean {
+    return this.manufacturingData?.certifications && 
+           this.manufacturingData.certifications.length > 0 && 
+           this.manufacturingData.certifications.every((cert: any) => cert && Object.keys(cert).length > 0);
+  }
+
   // Helper methods for template to safely access machine properties
   getMachineStatus(machinePhotos: any): boolean {
     if (Array.isArray(machinePhotos)) {

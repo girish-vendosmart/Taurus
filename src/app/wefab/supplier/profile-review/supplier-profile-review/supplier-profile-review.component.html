@@ -448,9 +448,12 @@
               (click)="changeManufacturingTab('facility')">
               Facility Verification
             </a>
-            <a href="javascript:void(0)" class="manufacturing-tab"
-              [class.active]="manufacturingTab === 'certifications'"
-              (click)="changeManufacturingTab('certifications')">Certifications</a>
+            <a *ngIf="hasValidCertifications()" 
+               class="manufacturing-tab"
+               [class.active]="manufacturingTab === 'certifications'"
+               (click)="changeManufacturingTab('certifications')"
+               role="button"
+               tabindex="0">Certifications</a>
             <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'capacity'"
               (click)="changeManufacturingTab('capacity')">Production Capacity</a>
           </div>
@@ -578,10 +581,6 @@
                   <div class="manufacturing-details">
                     <h3 class="manufacturing-title">{{ certification.certificationName }}</h3>
 
-                    <div class="verification-badge verified">
-                      <i class="pi pi-check-circle"></i>
-                      <span>Verified Certificate</span>
-                    </div>
 
                     <div class="manufacturing-info">
                       <p>
