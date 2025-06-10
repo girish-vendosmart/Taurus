@@ -617,7 +617,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       templateOptions: {
                         label: 'Certification Name',
                         placeholder: 'e.g. ISO 9001',
-                        required: true
+                        required: false
                       },
                       validation: {
                         messages: {
@@ -632,7 +632,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       templateOptions: {
                         label: 'Certifying Body',
                         placeholder: 'e.g. Bureau Veritas',
-                        required: true
+                        required: false
                       },
                       validation: {
                         messages: {
@@ -652,7 +652,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       templateOptions: {
                         label: 'Expiration Date',
                         type: 'date',
-                        required: true
+                        required: false
                       },
                       validation: {
                         messages: {
@@ -667,7 +667,7 @@ export class SupplierOnboardingL2Component implements OnInit {
                       templateOptions: {
                         label: 'Certificate Document',
                         description: 'Upload certificate document (PNG and JPEG only)',
-                        required: true,
+                        required: false,
                         acceptedTypes: '.png,.jpg,.jpeg',
                         fileTypeErrorMessage: 'Only PNG and JPEG files are accepted'
                       },
