@@ -30,6 +30,10 @@ import { PMultiSelectGroupComponent } from '../../../../shared/formly-components
 import { GstVerifyFieldComponent } from './gst-verify-field.component';
 // Import the FormlyFieldGstVerifyComponent
 import { FormlyFieldGstVerifyComponent } from '../../../../shared/formly-components/gst-verify-type.component';
+// Import PanVerifyFieldComponent
+import { PanVerifyFieldComponent } from './pan-verify-field.component';
+// Import the FormlyFieldPanVerifyComponent
+import { FormlyFieldPanVerifyComponent } from '../../../../shared/formly-components/pan-verify-type.component';
 // Import PDropdownGroupSearchComponent and its Formly wrapper
 import { PDropdownGroupSearchComponent } from '../../../../shared/formly-components/p-dropdown-group-search.component';
 import { FormlyFieldPDropdownGroupSearchComponent } from '../../../../shared/formly-components/p-dropdown-group-search-type.component';
@@ -88,6 +92,8 @@ export function panValidator(control: AbstractControl): ValidationErrors | null 
     PMultiSelectGroupComponent,
     GstVerifyFieldComponent,
     FormlyFieldGstVerifyComponent,
+    PanVerifyFieldComponent,
+    FormlyFieldPanVerifyComponent,
     PDropdownGroupSearchComponent,
     FormlyFieldPDropdownGroupSearchComponent,
     ConfigurableButtonComponent
@@ -111,6 +117,8 @@ export class SupplierOnboardingComponent implements OnInit {
   phoneVerified = false;
   // GST verification state
   gstVerified = false;
+  // PAN verification state
+  panVerified = false;
   // Add this property for configurable file types
   acceptedDocumentTypes: string = '.zip'; 
   @ViewChild('verifyOtpButton') verifyOtpButtonTemplate!: TemplateRef<any>;
@@ -395,9 +403,13 @@ export class SupplierOnboardingComponent implements OnInit {
           // Load GST verification status from the API response
           this.gstVerified = this.getCompanyProfile.gstVerified || res.data.gst_verified || false;
           
+          // Load PAN verification status from the API response
+          this.panVerified = this.getCompanyProfile.panVerified || res.data.pan_verified || false;
+          
           console.log('Company profile loaded:', this.getCompanyProfile);
           console.log('Phone verified status:', this.phoneVerified);
           console.log('GST verified status:', this.gstVerified);
+          console.log('PAN verified status:', this.panVerified);
           
           // Wait for the form to be initialized before patching values
           setTimeout(() => {
@@ -499,6 +511,9 @@ export class SupplierOnboardingComponent implements OnInit {
         // Update GST field verification status after form is patched
         this.updateGstFieldVerificationStatus();
         
+        // Update PAN field verification status after form is patched
+        this.updatePanFieldVerificationStatus();
+        
         // Then handle Google Places separately with specialized approach
         this.patchGooglePlacesField(0);
 
@@ -532,6 +547,9 @@ export class SupplierOnboardingComponent implements OnInit {
         
         // Update GST field verification status after form is patched
         this.updateGstFieldVerificationStatus();
+        
+        // Update PAN field verification status after form is patched
+        this.updatePanFieldVerificationStatus();
         
         // Then handle Google Places separately with specialized approach
         this.patchGooglePlacesField(0);
@@ -797,14 +815,15 @@ export class SupplierOnboardingComponent implements OnInit {
               },
               {
                 key: 'panNumber',
-                type: 'input',
+                type: 'pan-verify',
                 className: 'mb-2',
                 templateOptions: {
                   label: 'PAN',
                   placeholder: 'ABCDE1234F',
                   required: false,
-                  maxLength: 10,
-                  description: 'Enter 10-character PAN (e.g., ABCDE1234F)'
+                  description: 'Enter 10-character PAN (e.g., ABCDE1234F)',
+                  parentComponent: this,
+                  isVerified: this.panVerified
                 },
                 expressionProperties: {
                   'hide': (model: any) => {
@@ -815,6 +834,7 @@ export class SupplierOnboardingComponent implements OnInit {
                     console.log('PAN field required expression evaluated, model.noGst:', model.noGst);
                     return model.noGst;
                   },
+                  'templateOptions.isVerified': () => this.panVerified,
                   'templateOptions.disabled': (model: any) => {
                     console.log('PAN field disabled expression evaluated, model.noGst:', model.noGst);
                     return !model.noGst;
@@ -1589,6 +1609,7 @@ export class SupplierOnboardingComponent implements OnInit {
       registered_lng: data.registeredAddress.location.lng, 
       phone_verified: this.phoneVerified,
       gst_verified: this.gstVerified,
+      pan_verified: this.panVerified,
       company_profile: JSON.stringify(data)
     };
     return body;
@@ -1648,6 +1669,7 @@ export class SupplierOnboardingComponent implements OnInit {
     // Ensure phone verification status is included
     companyProfile.phone_verified = this.phoneVerified;
     companyProfile.gstVerified = this.gstVerified;
+    companyProfile.panVerified = this.panVerified;
     
     // Create the body for the API
     let body = {
@@ -1664,6 +1686,7 @@ export class SupplierOnboardingComponent implements OnInit {
     this.model.registered_lat = this.model.registeredAddress.location.lat;
     this.model.registered_lng = this.model.registeredAddress.location.lng;
     this.model.gstVerified = this.gstVerified;
+    this.model.panVerified = this.panVerified;
     body = this.updateData(this.model);
     
     console.log('body', body);
@@ -1681,6 +1704,7 @@ export class SupplierOnboardingComponent implements OnInit {
     this.model.registered_lat = this.model.registeredAddress.location.lat;
     this.model.registered_lng = this.model.registeredAddress.location.lng;
     this.model.gstVerified = this.gstVerified;
+    this.model.panVerified = this.panVerified;
     console.log('Updating existing form data:', this.model);
     let body = this.updateData(this.model);
   }
@@ -1854,6 +1878,12 @@ export class SupplierOnboardingComponent implements OnInit {
     console.log('GST verification status:', verified);
   }
 
+  // Handle PAN verification event
+  onPanVerified(verified: boolean): void {
+    this.panVerified = verified;
+    console.log('PAN verification status:', verified);
+  }
+
   // Add new method to handle address details from GST verification
   onAddressDetailsAccepted(addressData: any): void {
     console.log('GST Address details accepted:', addressData);
@@ -1918,7 +1948,8 @@ export class SupplierOnboardingComponent implements OnInit {
     console.log('onCompanyNameChanged called with:', companyName);
     this.companyName = companyName;
     
-    if (companyName && this.gstVerified) {
+    // Updated condition to handle both GST and PAN verification
+    if (companyName && (this.gstVerified || this.panVerified)) {
       this.model.company_name = companyName;
       
       // If using reactive forms:
@@ -1930,6 +1961,7 @@ export class SupplierOnboardingComponent implements OnInit {
        this.form.get('company_name')?.disable({ emitEvent: false });
       
       console.log('Company name updated to:', this.model.company_name);
+      console.log('Updated via:', this.gstVerified ? 'GST verification' : 'PAN verification');
       
       // Force change detection if needed
       this.cdr.detectChanges();
@@ -1938,7 +1970,8 @@ export class SupplierOnboardingComponent implements OnInit {
         this.form.markAsPristine();
       }, 1000);
     } else {
-      console.error('Received empty company name');
+      console.error('Received empty company name or no verification completed');
+      console.log('GST verified:', this.gstVerified, 'PAN verified:', this.panVerified);
     }
   }
 
@@ -1971,6 +2004,8 @@ export class SupplierOnboardingComponent implements OnInit {
           if (field.templateOptions) {
             field.templateOptions.required = noGstValue;
             field.templateOptions.disabled = !noGstValue;
+            // Update PAN verification status
+            field.templateOptions['isVerified'] = this.panVerified;
           }
           
           // Update the hide property
@@ -1981,7 +2016,7 @@ export class SupplierOnboardingComponent implements OnInit {
             field.formControl.updateValueAndValidity();
           }
           
-          console.log('PAN field updated:', { hide: field.hide, required: field.templateOptions?.required });
+          console.log('PAN field updated:', { hide: field.hide, required: field.templateOptions?.required, isVerified: this.panVerified });
         }
       }
     };
@@ -2016,6 +2051,38 @@ export class SupplierOnboardingComponent implements OnInit {
           setTimeout(() => {
             if (gstField.formControl) {
               gstField.formControl.updateValueAndValidity();
+            }
+            this.cdr.detectChanges();
+          });
+        }
+      }
+    }
+  }
+
+  // Method to update PAN field verification status
+  updatePanFieldVerificationStatus() {
+    if (this.stepFields && this.stepFields.length > 0) {
+      const basicDetailsFields = this.stepFields[0];
+      
+      // Find the row containing PAN field
+      const panRow = basicDetailsFields.find((fieldGroup: any) => 
+        fieldGroup.fieldGroup && 
+        fieldGroup.fieldGroup.some((field: any) => field.key === 'panNumber')
+      );
+      
+      if (panRow && panRow.fieldGroup) {
+        // Find the PAN field
+        const panField = panRow.fieldGroup.find((field: any) => field.key === 'panNumber');
+        
+        if (panField && panField.templateOptions) {
+          // Update the isVerified status
+          panField.templateOptions['isVerified'] = this.panVerified;
+          console.log('Updated PAN field verification status to:', this.panVerified);
+          
+          // Force update the UI
+          setTimeout(() => {
+            if (panField.formControl) {
+              panField.formControl.updateValueAndValidity();
             }
             this.cdr.detectChanges();
           });

@@ -249,6 +249,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   // Observables for reactive data loading
   private dataLoadingSubject = new BehaviorSubject<boolean>(false);
   public dataLoading$ = this.dataLoadingSubject.asObservable();
+  panVerified: any;
 
   // Overall completion percentage
   get completionPercentage(): number {
@@ -653,6 +654,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       try {
         this.getCompanyProfile = JSON.parse(result.data.company_profile);
         this.gstVerified = this.getCompanyProfile?.gstVerified || false;
+        this.panVerified = this.getCompanyProfile?.panVerified || false;
         this.phoneVerified = this.getCompanyProfile?.phone_verified || false;
         this.requestToResubmitCommentL1 = result.data.comment || '';
         
