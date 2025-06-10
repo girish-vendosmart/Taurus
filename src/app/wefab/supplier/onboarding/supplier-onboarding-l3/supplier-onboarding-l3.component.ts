@@ -294,9 +294,11 @@ export class SupplierOnboardingL3Component implements OnInit {
       this.commonService.getData(endPoint).subscribe((res: any) => {
         
         this.getFinancialData = JSON.parse(res.data.company_profile)
+        debugger
+        console.log(this.getFinancialData)
         
         // Load bank verification status from the API response
-        this.bankVerified = res.data.bank_verified || false;
+        this.bankVerified = this.getFinancialData.bank_verified || false;
         
         console.log('L3 Data response:', res);
         console.log('Bank verified status:', this.bankVerified);
@@ -1039,6 +1041,12 @@ export class SupplierOnboardingL3Component implements OnInit {
         formData.insuranceCoverage.productLiabilityInsurance = this.parseFormattedNumber(formData.insuranceCoverage.productLiabilityInsurance);
       }
     }
+
+    formData['bank_verified'] = this.bankVerified === true ? true : false;
+
+
+    debugger
+    console.log(formData)
     
     // Create final body to send
     let body = {

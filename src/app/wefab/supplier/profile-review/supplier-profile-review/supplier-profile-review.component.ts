@@ -250,6 +250,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   private dataLoadingSubject = new BehaviorSubject<boolean>(false);
   public dataLoading$ = this.dataLoadingSubject.asObservable();
   panVerified: any;
+  bankVerified: any = false;
 
   // Overall completion percentage
   get completionPercentage(): number {
@@ -309,6 +310,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     if (!this.isBrowser) return;
 
     this.initializeComponent();
+    this.getL3DataObservable(this.supplierId).subscribe((res: any) => {
+      let bankVerifiedStatus = JSON.parse(res.data.company_profile)
+      this.bankVerified = bankVerifiedStatus.bank_verified
+    })
   }
 
   ngOnDestroy(): void {

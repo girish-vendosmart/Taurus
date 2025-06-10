@@ -943,6 +943,13 @@
             <span  *ngIf="!gstVerified">GSTIN Verification
               Pending</span>
           </li>
+          <li class="verification-item">
+            <i class="pi pi-check-circle verified-icon" *ngIf="bankVerified"></i>
+            <i class="pi pi-times-circle not-verified-icon" *ngIf="!bankVerified"></i>
+            <span *ngIf="bankVerified">Bank Verified</span>
+            <span *ngIf="!bankVerified">Bank Verification
+              Pending</span>
+          </li>
           <!-- Machine Photos Verification -->
           <li class="verification-item">
             <i class="pi pi-check-circle verified-icon" *ngIf="facilityVerified"></i>
