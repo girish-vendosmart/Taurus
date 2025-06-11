@@ -4,11 +4,8 @@
       
       <!-- Header Section -->
       <div class="text-center mb-4">
-        <h2 class="mb-2">Supplier Complete Onboarding</h2>
-        <p class="text-muted">Complete all onboarding steps to become a verified supplier on WeFab platform.</p>
-        <span class="badge bg-primary text-white px-3 py-2 rounded-pill fs-6">
-          <i class="pi pi-check-circle me-1"></i>All Steps Combined
-        </span>
+        <h2 class="mb-2">Supplier Onboarding: {{ getCurrentMainStepTitle() }}</h2>
+        <p class="text-muted">Complete the following form to begin the supplier onboarding process. Fill in all required fields and provide accurate information to ensure quick approval.</p>
       </div>
       
       <div class="row align-items-start">
@@ -24,7 +21,6 @@
                   <div class="step-number">1</div>
                   <div class="step-content">
                     <span class="step-title">Basic Details</span>
-                    <span class="step-description">Company information & verification</span>
                   </div>
                 </div>
                 
@@ -33,7 +29,6 @@
                   <div class="step-number">2</div>
                   <div class="step-content">
                     <span class="step-title">Contact & Capabilities</span>
-                    <span class="step-description">Contact details & manufacturing</span>
                   </div>
                 </div>
                 
@@ -42,7 +37,6 @@
                   <div class="step-number">3</div>
                   <div class="step-content">
                     <span class="step-title">Machine Capabilities</span>
-                    <span class="step-description">Manufacturing equipment details</span>
                   </div>
                 </div>
                 
@@ -51,7 +45,6 @@
                   <div class="step-number">4</div>
                   <div class="step-content">
                     <span class="step-title">Facility Verification</span>
-                    <span class="step-description">Facility photos & verification</span>
                   </div>
                 </div>
                 
@@ -60,7 +53,6 @@
                   <div class="step-number">5</div>
                   <div class="step-content">
                     <span class="step-title">Financial Information</span>
-                    <span class="step-description">Banking & financial details</span>
                   </div>
                 </div>
                 
@@ -69,7 +61,6 @@
                   <div class="step-number">6</div>
                   <div class="step-content">
                     <span class="step-title">Additional Information</span>
-                    <span class="step-description">Business references</span>
                   </div>
                 </div>
               </div>
@@ -90,14 +81,14 @@
                   </div>
                 </div>
                 <div class="progress-text">
-                  <span>Step {{ activeStepIndex + 1 }} of {{ totalSteps }}</span>
+                  <span>Step {{ getDisplayStepNumber() }} of {{ getDisplayTotalSteps() }}</span>
                 </div>
               </div>
               
               <!-- Step Title -->
               <div class="mb-4">
                 <h3 class="step-main-title">{{ getCurrentStepTitle() }}</h3>
-                <p class="text-muted">{{ getCurrentStepDescription() }}</p>
+                <p class="text-muted step-description">{{ getCurrentStepDescription() }}</p>
               </div>
               
               <!-- Form -->

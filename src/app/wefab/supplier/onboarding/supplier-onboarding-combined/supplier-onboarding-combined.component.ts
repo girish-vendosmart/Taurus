@@ -547,6 +547,25 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     return this.stepInfo[this.activeStepIndex]?.description || '';
   }
 
+  getCurrentMainStepTitle(): string {
+    // Group steps into main sections like original design
+    if (this.activeStepIndex <= 1) {
+      return 'Basic Information';
+    } else if (this.activeStepIndex <= 3) {
+      return 'Manufacturing Capabilities';
+    } else {
+      return 'Financial & Additional Details';
+    }
+  }
+
+  getDisplayStepNumber(): number {
+    return this.activeStepIndex + 1;
+  }
+
+  getDisplayTotalSteps(): number {
+    return this.totalSteps;
+  }
+
   goToStep(stepIndex: number) {
     if (stepIndex >= 0 && stepIndex < this.totalSteps) {
       this.activeStepIndex = stepIndex;

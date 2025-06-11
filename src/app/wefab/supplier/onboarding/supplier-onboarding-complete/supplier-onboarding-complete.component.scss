@@ -489,9 +489,9 @@ $review-color: #f39c12; // Orange/amber for under review status
     
     .step-title {
       font-size: 18px;
-      font-weight: 500;
-      color: $text-color;
+      font-weight: 600 !important;
       margin-bottom: 5px;
+      color: black !important;
     }
     
     .step-description {
