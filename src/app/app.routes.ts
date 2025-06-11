@@ -5,6 +5,7 @@ import { CommonHeaderComponent } from './core/components/common-header/common-he
 import { CommonTableComponent } from './shared/components/common-table/common-table.component';
 import { ConfigurableButtonDemoComponent } from './shared/components/configurable-button/configurable-button.demo.component';
 import { CommonCardComponent } from './shared/components/common-card/common-card.component';
+import { SupplierOnboardingCombinedComponent } from './wefab/supplier/onboarding/supplier-onboarding-combined/supplier-onboarding-combined.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'wefab', pathMatch: 'full' },
@@ -19,7 +20,12 @@ export const routes: Routes = [
     loadChildren: () => import('./wefab/wefab-component.routes').then(m => m.WEFAB_ROUTES)
   },
   {
+    path: 'supplier-onboarding-combined',
+    component: SupplierOnboardingCombinedComponent
+  },
+  {
     path: '**',
-    redirectTo: 'wefab'  // Fallback for any undefined routes
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
   }
 ];

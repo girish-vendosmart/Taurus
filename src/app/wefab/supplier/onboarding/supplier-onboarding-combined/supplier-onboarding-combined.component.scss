@@ -1,0 +1,373 @@
+// Combined Supplier Onboarding Component Styles
+
+.container-fluid {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.supplier-onboarding-content {
+  min-height: 80vh;
+  
+  .col-md-3 {
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+  }
+}
+
+/* Card styling */
+.card {
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  border: 1px solid #e5e7eb;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+/* Header styling */
+h2 {
+  color: #1f2937;
+  font-weight: 600;
+  font-size: 1.75rem;
+}
+
+.text-muted {
+  color: #6b7280 !important;
+}
+
+/* Progress bar styling */
+.progress-container {
+  .progress-bar-wrapper {
+    .progress {
+      height: 8px;
+      border-radius: 4px;
+      background-color: #e5e7eb;
+      
+      .progress-bar {
+        border-radius: 4px;
+        background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+        transition: width 0.3s ease;
+      }
+    }
+  }
+  
+  .progress-text {
+    margin-top: 0.5rem;
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+}
+
+/* Step navigation styling */
+.steps-container {
+  .step {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    
+    &:hover {
+      background-color: #f9fafb;
+      border-color: #e5e7eb;
+    }
+    
+    &.active {
+      background-color: #eff6ff;
+      border-color: #3b82f6;
+      
+      .step-number {
+        background-color: #3b82f6;
+        color: white;
+      }
+      
+      .step-title {
+        color: #1d4ed8;
+        font-weight: 600;
+      }
+    }
+    
+    &.completed {
+      .step-number {
+        background-color: #10b981;
+        color: white;
+        
+        &::after {
+          content: '✓';
+          font-size: 0.75rem;
+        }
+      }
+      
+      .step-title {
+        color: #059669;
+      }
+    }
+    
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #e5e7eb;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-right: 1rem;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    
+    .step-content {
+      flex: 1;
+      
+      .step-title {
+        display: block;
+        font-weight: 500;
+        color: #374151;
+        line-height: 1.25;
+        margin-bottom: 0.25rem;
+      }
+      
+      .step-description {
+        display: block;
+        font-size: 0.75rem;
+        color: #9ca3af;
+        line-height: 1.25;
+      }
+    }
+  }
+}
+
+/* Main content styling */
+.step-main-title {
+  color: #1f2937;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Section headers */
+.section-header {
+  h4 {
+    color: #1f2937;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Form styling */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+  }
+  
+  &.is-invalid {
+    border-color: #ef4444;
+  }
+}
+
+/* Button styling */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s ease;
+  
+  &.btn-primary {
+    background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+    border: none;
+    
+    &:hover {
+      background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+  }
+  
+  &.btn-outline-secondary {
+    border-color: #d1d5db;
+    color: #6b7280;
+    
+    &:hover {
+      background-color: #f9fafb;
+      border-color: #9ca3af;
+      color: #374151;
+    }
+  }
+}
+
+/* File upload styling */
+.file-upload-area {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  background-color: #fafafa;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: #3b82f6;
+    background-color: #f8faff;
+  }
+  
+  &.dragover {
+    border-color: #1d4ed8;
+    background-color: #eff6ff;
+  }
+}
+
+/* Badge styling */
+.badge {
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+/* Verification styling */
+.verification-status {
+  &.verified {
+    color: #059669;
+    background-color: #d1fae5;
+    border-color: #a7f3d0;
+  }
+  
+  &.pending {
+    color: #d97706;
+    background-color: #fef3c7;
+    border-color: #fde68a;
+  }
+}
+
+/* Custom input styling */
+input.form-control,
+select.form-control,
+textarea.form-control {
+  &::placeholder {
+    color: #9ca3af;
+  }
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Range slider styling */
+.range-slider-container {
+  .slider-value {
+    font-weight: 600;
+    color: #3b82f6;
+  }
+}
+
+/* Multi-select styling */
+.p-multiselect {
+  width: 100%;
+}
+
+/* Alert styling */
+.alert {
+  border-radius: 8px;
+  
+  &.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+  }
+}
+
+/* Animation for step transitions */
+.step-content-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.step-content-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Fade in animation */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .steps-container {
+    .step {
+      padding: 0.75rem;
+      
+      .step-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+        margin-right: 0.75rem;
+      }
+      
+      .step-content {
+        .step-title {
+          font-size: 0.875rem;
+        }
+        
+        .step-description {
+          font-size: 0.6875rem;
+        }
+      }
+    }
+  }
+  
+  .btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+  
+  .supplier-onboarding-content {
+    .col-md-3 {
+      position: relative;
+      top: auto;
+    }
+  }
+} 

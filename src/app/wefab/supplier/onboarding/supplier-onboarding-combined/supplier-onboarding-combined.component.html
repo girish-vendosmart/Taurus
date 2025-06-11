@@ -1,0 +1,144 @@
+<div class="container-fluid py-3">
+  <div class="row justify-content-center">
+    <div class="col-lg-11">
+      
+      <!-- Header Section -->
+      <div class="text-center mb-4">
+        <h2 class="mb-2">Supplier Complete Onboarding</h2>
+        <p class="text-muted">Complete all onboarding steps to become a verified supplier on WeFab platform.</p>
+        <span class="badge bg-primary text-white px-3 py-2 rounded-pill fs-6">
+          <i class="pi pi-check-circle me-1"></i>All Steps Combined
+        </span>
+      </div>
+      
+      <div class="row align-items-start">
+        <!-- Left Navigation Panel -->
+        <div class="col-md-3 mb-3 mb-md-0">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title mb-3">ONBOARDING STEPS</h5>
+              
+              <div class="steps-container">
+                <!-- Step 1: Basic Details -->
+                <div class="step" [ngClass]="{'active': activeStepIndex === 0, 'completed': activeStepIndex > 0}" (click)="goToStep(0)">
+                  <div class="step-number">1</div>
+                  <div class="step-content">
+                    <span class="step-title">Basic Details</span>
+                    <span class="step-description">Company information & verification</span>
+                  </div>
+                </div>
+                
+                <!-- Step 2: Contact & Capabilities -->
+                <div class="step" [ngClass]="{'active': activeStepIndex === 1, 'completed': activeStepIndex > 1}" (click)="goToStep(1)">
+                  <div class="step-number">2</div>
+                  <div class="step-content">
+                    <span class="step-title">Contact & Capabilities</span>
+                    <span class="step-description">Contact details & manufacturing</span>
+                  </div>
+                </div>
+                
+                <!-- Step 3: Machine Capabilities -->
+                <div class="step" [ngClass]="{'active': activeStepIndex === 2, 'completed': activeStepIndex > 2}" (click)="goToStep(2)">
+                  <div class="step-number">3</div>
+                  <div class="step-content">
+                    <span class="step-title">Machine Capabilities</span>
+                    <span class="step-description">Manufacturing equipment details</span>
+                  </div>
+                </div>
+                
+                <!-- Step 4: Facility Verification -->
+                <div class="step" [ngClass]="{'active': activeStepIndex === 3, 'completed': activeStepIndex > 3}" (click)="goToStep(3)">
+                  <div class="step-number">4</div>
+                  <div class="step-content">
+                    <span class="step-title">Facility Verification</span>
+                    <span class="step-description">Facility photos & verification</span>
+                  </div>
+                </div>
+                
+                <!-- Step 5: Financial Information -->
+                <div class="step" [ngClass]="{'active': activeStepIndex === 4, 'completed': activeStepIndex > 4}" (click)="goToStep(4)">
+                  <div class="step-number">5</div>
+                  <div class="step-content">
+                    <span class="step-title">Financial Information</span>
+                    <span class="step-description">Banking & financial details</span>
+                  </div>
+                </div>
+                
+                <!-- Step 6: Additional Information -->
+                <div class="step" [ngClass]="{'active': activeStepIndex === 5, 'completed': activeStepIndex > 5}" (click)="goToStep(5)">
+                  <div class="step-number">6</div>
+                  <div class="step-content">
+                    <span class="step-title">Additional Information</span>
+                    <span class="step-description">Business references</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Form Area -->
+        <div class="col-md-9">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <!-- Progress Bar -->
+              <div class="progress-container mb-4">
+                <div class="progress-bar-wrapper">
+                  <div class="progress">
+                    <div class="progress-bar bg-primary" role="progressbar" 
+                         [style.width]="(activeStepIndex + 1) * 100 / totalSteps + '%'"></div>
+                  </div>
+                </div>
+                <div class="progress-text">
+                  <span>Step {{ activeStepIndex + 1 }} of {{ totalSteps }}</span>
+                </div>
+              </div>
+              
+              <!-- Step Title -->
+              <div class="mb-4">
+                <h3 class="step-main-title">{{ getCurrentStepTitle() }}</h3>
+                <p class="text-muted">{{ getCurrentStepDescription() }}</p>
+              </div>
+              
+              <!-- Form -->
+              <form [formGroup]="form">
+                <formly-form
+                  [form]="form"
+                  [fields]="currentFields"
+                  [model]="model"
+                  [options]="options">
+                </formly-form>
+                
+                <!-- Navigation buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-secondary" 
+                    (click)="prevStep()" 
+                    [disabled]="activeStepIndex === 0">
+                    <i class="pi pi-arrow-left me-2"></i>Back
+                  </button>
+                  
+                  <ng-container *ngIf="activeStepIndex < totalSteps - 1; else completeButton">
+                    <button type="button" class="btn btn-primary" (click)="nextStep()">
+                      Next <i class="pi pi-arrow-right ms-2"></i>
+                    </button>
+                  </ng-container>
+                  
+                  <ng-template #completeButton>
+                    <button type="button" class="btn btn-primary btn-complete" (click)="submit()">
+                      <i class="pi pi-check me-2"></i>Submit Onboarding
+                    </button>
+                  </ng-template>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast for notifications -->
+<p-toast position="top-right"></p-toast> 
