@@ -145,12 +145,12 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     
     // L3 Data Structure
     bankDetails: {
-      bankName: '',
-      accountNumber: '',
-      ifscCode: '',
-      accountHolderName: '',
+      bankName: 'State Bank of India',
+      accountNumber: '1234567890123456',
+      ifscCode: 'SBIN0001234',
+      accountHolderName: 'Example Company Private Limited',
       accountType: 'Current',
-      branchName: ''
+      branchName: 'Commercial Street Branch'
     },
     companyFinancials: {
       annualRevenue2024: '',
@@ -173,6 +173,14 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     }
   };
   
+  // Step-specific data objects
+  basicDetails = {};
+  contactCapabilities = {};
+  machineCapabilities = {};
+  facilityVerification = {};
+  financialInformation = {};
+  additionalInformation = {};
+  
   options: FormlyFormOptions = {};
   activeStepIndex = 0;
   totalSteps = 6;
@@ -182,7 +190,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   
   isBrowser: boolean;
   isMobile: boolean = false;
-  bankVerified = false;
+  bankVerified = true;
   
   // L1 verification states
   phoneVerified = false;
@@ -267,6 +275,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       }
       this.patchEmailId();
     }
+    
+    // Set static bank verification data
+    this.setStaticBankData();
   }
 
   // New method to load countries then initialize form
@@ -568,18 +579,33 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
 
   goToStep(stepIndex: number) {
     if (stepIndex >= 0 && stepIndex < this.totalSteps) {
+      // Update current step object before changing step
+      this.updateCurrentStepObject();
+      
       this.activeStepIndex = stepIndex;
+      
+      // Console log the step object after changing step
+      this.logCurrentStepObject();
     }
   }
 
   prevStep() {
     if (this.activeStepIndex > 0) {
+      // Update current step object before going back
+      this.updateCurrentStepObject();
+      
       this.activeStepIndex--;
+      
+      // Console log the step object after changing step
+      this.logCurrentStepObject();
     }
   }
 
   nextStep() {
     if (this.isStepValid(this.currentFields)) {
+      // Update current step object before proceeding
+      this.updateCurrentStepObject();
+      
       // Additional validations for specific steps
       if (this.activeStepIndex === 0 && !this.model.noGst && !this.gstVerified) {
         this.sweetAlert.error('Please verify your GSTIN before proceeding.');
@@ -604,6 +630,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       } else if (this.activeStepIndex < this.totalSteps - 1) {
         // Regular step progression without API call
         this.activeStepIndex++;
+        
+        // Console log the step object after changing step
+        this.logCurrentStepObject();
       } else {
         // Final step - Save L3 data and complete onboarding
         this.saveL3DataAndComplete();
@@ -714,6 +743,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
 
   submit() {
     if (this.form.valid && this.isAllStepsValid()) {
+      // Update current step object before submitting
+      this.updateCurrentStepObject();
+      
       // At final step, save L3 data and complete onboarding
       this.saveL3DataAndComplete();
     } else {
@@ -735,7 +767,31 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   onBankVerified(verified: boolean): void {
-    this.bankVerified = verified;
+    // Override with static verification - always set to true
+    this.bankVerified = true;
+    
+    // Set static bank details if not already set
+    if (!this.model.bankDetails.bankName) {
+      this.model.bankDetails = {
+        bankName: 'State Bank of India',
+        accountNumber: '1234567890123456',
+        ifscCode: 'SBIN0001234',
+        accountHolderName: 'Example Company Private Limited',
+        accountType: 'Current',
+        branchName: 'Commercial Street Branch'
+      };
+    }
+    
+    console.log('🏦 Bank Verified with Static Data:', this.bankVerified);
+    console.log('📋 Bank Details:', this.model.bankDetails);
+    
+    // Update form with static data
+    setTimeout(() => {
+      this.form.patchValue({
+        bankDetails: this.model.bankDetails
+      });
+      this.form.markAsDirty();
+    }, 100);
   }
 
   // L1 Methods - Country and State handling
@@ -938,6 +994,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       this.sweetAlert.success('Basic information saved successfully. Proceeding to manufacturing capabilities.');
       // Move to next step after successful save
       this.activeStepIndex++;
+      // Log the next step object
+      this.logCurrentStepObject();
     }, (err) => {
       console.error('Error saving L1 data:', err);
       this.sweetAlert.error('Error saving basic information. Please try again.');
@@ -949,6 +1007,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       this.sweetAlert.success('Basic information updated successfully. Proceeding to manufacturing capabilities.');
       // Move to next step after successful update
       this.activeStepIndex++;
+      // Log the next step object
+      this.logCurrentStepObject();
     }, (err) => {
       console.error('Error updating L1 data:', err);
       this.sweetAlert.error('Error updating basic information. Please try again.');
@@ -956,6 +1016,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   saveL1Data() {
+    // Update step objects before saving
+    this.updateCurrentStepObject();
+    
     // Get current form values and merge with model
     const formValues = this.form.getRawValue();
     const l1Data = { ...this.model, ...formValues };
@@ -975,8 +1038,27 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       }
     }
     
-    console.log('Saving L1 data:', l1Data);
+    console.log('💾 Saving L1 data:', l1Data);
+    console.log('📋 Basic Details Object at Save:', this.basicDetails);
+    console.log('📞 Contact & Capabilities Object at Save:', this.contactCapabilities);
     
+    // Instead of calling API, just console log all step objects and move to next step
+    console.log('🔍 All Step Objects Overview:', {
+      basicDetails: this.basicDetails,
+      contactCapabilities: this.contactCapabilities,
+      machineCapabilities: this.machineCapabilities,
+      facilityVerification: this.facilityVerification,
+      financialInformation: this.financialInformation,
+      additionalInformation: this.additionalInformation
+    });
+    
+    // Show success message and move to next step
+    this.sweetAlert.success('Basic information processed successfully. Proceeding to manufacturing capabilities.');
+    this.activeStepIndex++;
+    this.logCurrentStepObject();
+    
+    // Original API code commented out
+    /*
     let endPoint = '/api/resource/Supplier Onboarding L1';
     let supplier_id = localStorage.getItem('supplier_id');
     let body = this.updateL1Data(l1Data);
@@ -987,6 +1069,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     } else {
       this.postL1DataFunction(endPoint, body);
     }
+    */
   }
 
   // L2 API Methods (extracted from supplier-onboarding-l2.component.ts)
@@ -1012,6 +1095,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       this.sweetAlert.success('Manufacturing capabilities saved successfully. Proceeding to financial information.');
       // Move to next step after successful save
       this.activeStepIndex++;
+      // Log the next step object
+      this.logCurrentStepObject();
     }, (err) => {
       console.error('Error saving L2 data:', err);
       this.sweetAlert.error('Error saving manufacturing capabilities. Please try again.');
@@ -1023,6 +1108,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       this.sweetAlert.success('Manufacturing capabilities updated successfully. Proceeding to financial information.');
       // Move to next step after successful update
       this.activeStepIndex++;
+      // Log the next step object
+      this.logCurrentStepObject();
     }, (err) => {
       console.error('Error updating L2 data:', err);
       this.sweetAlert.error('Error updating manufacturing capabilities. Please try again.');
@@ -1030,12 +1117,34 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   saveL2Data() {
+    // Update step objects before saving
+    this.updateCurrentStepObject();
+    
     // Get current form values and merge with model
     const formValues = this.form.getRawValue();
     const l2Data = { ...this.model, ...formValues };
     
-    console.log('Saving L2 data:', l2Data);
+    console.log('💾 Saving L2 data:', l2Data);
+    console.log('⚙️ Machine Capabilities Object at Save:', this.machineCapabilities);
+    console.log('🏭 Facility Verification Object at Save:', this.facilityVerification);
     
+    // Instead of calling API, just console log all step objects and move to next step
+    console.log('🔍 All Step Objects Overview:', {
+      basicDetails: this.basicDetails,
+      contactCapabilities: this.contactCapabilities,
+      machineCapabilities: this.machineCapabilities,
+      facilityVerification: this.facilityVerification,
+      financialInformation: this.financialInformation,
+      additionalInformation: this.additionalInformation
+    });
+    
+    // Show success message and move to next step
+    this.sweetAlert.success('Manufacturing capabilities processed successfully. Proceeding to financial information.');
+    this.activeStepIndex++;
+    this.logCurrentStepObject();
+    
+    // Original API code commented out
+    /*
     let endPoint = '/api/resource/Supplier Onboarding L2';
     let supplier_id = localStorage.getItem('supplier_id');
     let body = this.updateL2Data(l2Data);
@@ -1048,6 +1157,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       // If no supplier_id, then post the L2 Data
       this.postL2DataFunction(endPoint, body);
     }
+    */
   }
 
   // L3 API Methods (extracted from supplier-onboarding-l3.component.ts)
@@ -1115,12 +1225,37 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   saveL3DataAndComplete() {
+    // Update step objects before saving
+    this.updateCurrentStepObject();
+    
     // Get current form values and merge with model
     const formValues = this.form.getRawValue();
     const l3Data = { ...this.model, ...formValues };
     
-    console.log('Saving L3 data and completing onboarding:', l3Data);
+    console.log('💾 Saving L3 data and completing onboarding:', l3Data);
+    console.log('💰 Financial Information Object at Save:', this.financialInformation);
+    console.log('ℹ️ Additional Information Object at Save:', this.additionalInformation);
     
+    // Instead of calling API, just console log all step objects
+    console.log('🔍 All Step Objects Overview:', {
+      basicDetails: this.basicDetails,
+      contactCapabilities: this.contactCapabilities,
+      machineCapabilities: this.machineCapabilities,
+      facilityVerification: this.facilityVerification,
+      financialInformation: this.financialInformation,
+      additionalInformation: this.additionalInformation
+    });
+    
+    // Show completion message
+    this.sweetAlert.success('Congratulations! Your supplier onboarding data has been processed successfully. All step objects have been logged to console.');
+    
+    // Optional: Navigate to completion page after a delay
+    // setTimeout(() => {
+    //   this.router.navigate(['/wefab/supplier/supplier-onboarding-complete']);
+    // }, 3000);
+    
+    // Original API code commented out
+    /*
     let endPoint = '/api/resource/Supplier Onboarding L3';
     let supplier_id = localStorage.getItem('supplier_id');
     let body = this.updateL3Data(l3Data);
@@ -1133,6 +1268,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       // If no supplier_id, this shouldn't happen at L3 stage
       this.postL3DataFunction(endPoint, body);
     }
+    */
   }
 
   // Field configuration methods (from L2 and L3 components)
@@ -1444,7 +1580,16 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         type: 'bank-verify',
         templateOptions: {
           parentComponent: this,
-          isVerified: this.bankVerified
+          isVerified: true, // Always show as verified for static data
+          staticMode: true, // Add flag to indicate static mode
+          staticBankDetails: {
+            bankName: 'State Bank of India',
+            accountNumber: '1234567890123456',
+            ifscCode: 'SBIN0001234',
+            accountHolderName: 'Example Company Private Limited',
+            accountType: 'Current',
+            branchName: 'Commercial Street Branch'
+          }
         }
       },
       
@@ -2062,5 +2207,126 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         }
       }
     ];
+  }
+
+  // New method to update current step object with form data
+  updateCurrentStepObject() {
+    const formValues = this.form.getRawValue();
+    const combinedData = { ...this.model, ...formValues };
+    
+    switch (this.activeStepIndex) {
+      case 0: // Basic Details
+        this.basicDetails = {
+          gstinNumber: combinedData.gstinNumber,
+          panNumber: combinedData.panNumber,
+          noGst: combinedData.noGst,
+          company_name: combinedData.company_name,
+          primary_email_id: combinedData.primary_email_id,
+          registeredAddress: combinedData.registeredAddress,
+          country: combinedData.country,
+          state: combinedData.state,
+          city: combinedData.city,
+          gstVerified: this.gstVerified,
+          panVerified: this.panVerified
+        };
+        break;
+        
+      case 1: // Contact & Capabilities
+        this.contactCapabilities = {
+          primaryContactName: combinedData.primaryContactName,
+          phoneNumber: combinedData.phoneNumber,
+          primaryManufacturingProcess: combinedData.primaryManufacturingProcess,
+          websiteURL: combinedData.websiteURL,
+          linkedinURL: combinedData.linkedinURL,
+          totalEmployees: combinedData.totalEmployees,
+          foundedYear: combinedData.foundedYear,
+          companyDocuments: combinedData.companyDocuments,
+          phoneVerified: this.phoneVerified
+        };
+        break;
+        
+      case 2: // Machine Capabilities
+        this.machineCapabilities = {
+          machines: combinedData.machines,
+          certifications: combinedData.certifications,
+          industries: combinedData.industries,
+          productionCapacity: combinedData.productionCapacity
+        };
+        break;
+        
+      case 3: // Facility Verification
+        this.facilityVerification = {
+          facilityPhotos: combinedData.facilityPhotos
+        };
+        break;
+        
+      case 4: // Financial Information
+        this.financialInformation = {
+          bankDetails: combinedData.bankDetails,
+          companyFinancials: combinedData.companyFinancials,
+          insuranceCoverage: combinedData.insuranceCoverage,
+          bankVerified: this.bankVerified
+        };
+        break;
+        
+      case 5: // Additional Information
+        this.additionalInformation = {
+          references: combinedData.additionalInformation?.references || []
+        };
+        break;
+    }
+  }
+
+  // New method to log current step object
+  logCurrentStepObject() {
+    switch (this.activeStepIndex) {
+      case 0:
+        console.log('📋 Basic Details Step Object:', this.basicDetails);
+        break;
+      case 1:
+        console.log('📞 Contact & Capabilities Step Object:', this.contactCapabilities);
+        break;
+      case 2:
+        console.log('⚙️ Machine Capabilities Step Object:', this.machineCapabilities);
+        break;
+      case 3:
+        console.log('🏭 Facility Verification Step Object:', this.facilityVerification);
+        break;
+      case 4:
+        console.log('💰 Financial Information Step Object:', this.financialInformation);
+        break;
+      case 5:
+        console.log('ℹ️ Additional Information Step Object:', this.additionalInformation);
+        break;
+    }
+    
+    // Also log all step objects for complete overview
+    console.log('🔍 All Step Objects Overview:', {
+      basicDetails: this.basicDetails,
+      contactCapabilities: this.contactCapabilities,
+      machineCapabilities: this.machineCapabilities,
+      facilityVerification: this.facilityVerification,
+      financialInformation: this.financialInformation,
+      additionalInformation: this.additionalInformation
+    });
+  }
+
+  // New method to set static bank verification data
+  setStaticBankData() {
+    // Set static verified bank details
+    this.model.bankDetails = {
+      bankName: 'State Bank of India',
+      accountNumber: '1234567890123456',
+      ifscCode: 'SBIN0001234',
+      accountHolderName: 'Example Company Private Limited',
+      accountType: 'Current',
+      branchName: 'Commercial Street Branch'
+    };
+    
+    // Set bank as verified
+    this.bankVerified = true;
+    
+    console.log('🏦 Static Bank Data Set:', this.model.bankDetails);
+    console.log('✅ Bank Verification Status:', this.bankVerified);
   }
 } 
