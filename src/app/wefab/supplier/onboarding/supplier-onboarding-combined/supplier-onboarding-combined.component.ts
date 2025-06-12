@@ -308,6 +308,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       } else if (this.isBrowser) {
         // Fallback to localStorage check
         const supplierId = localStorage.getItem('supplier_id');
+        this.supplier_id = supplierId;
         if (supplierId) {
           this.hasExistingSupplier = true;
           this.loadExistingData(supplierId);
@@ -1064,7 +1065,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     
     // Redirect to supplier profile review page
     setTimeout(() => {
-      this.router.navigate(['/wefab/supplier/profile-review/ ' + this.supplier_id]);
+      this.router.navigate(['/wefab/supplier/profile-review', this.supplier_id]);
     }, 2000);
   }
 

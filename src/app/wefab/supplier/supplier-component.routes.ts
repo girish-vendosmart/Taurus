@@ -87,7 +87,7 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
                 canActivate: [AuthGuard]
              },
              {
-                path: 'supplier-onboarding-form/:id',
+                path: 'supplier-onboarding-form',
                 component: SupplierOnboardingCombinedComponent,
                 canActivate: [AuthGuard]
              },

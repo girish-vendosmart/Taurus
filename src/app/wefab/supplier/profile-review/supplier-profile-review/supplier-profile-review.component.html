@@ -223,27 +223,27 @@
                 </div>
                 <div class="info-card" *ngIf="getCompanyProfile.gstinNumber">
                   <div class="info-label">GSTIN</div>
-                  <div class="info-value" *ngIf="getCompanyProfile.gstinNumber">{{ getCompanyProfile.gstinNumber }}</div>
+                  <div class="info-value">{{ getCompanyProfile.gstinNumber }}</div>
                 </div>
                 <div class="info-card" *ngIf="getCompanyProfile.panNumber">
-                  <div class="info-label">Pan Number</div>
-                  <div class="info-value" *ngIf="getCompanyProfile.panNumber">{{ getCompanyProfile.panNumber }}</div>
+                  <div class="info-label">PAN Number</div>
+                  <div class="info-value">{{ getCompanyProfile.panNumber }}</div>
                 </div>
                 <div class="info-card">
                   <div class="info-label">Country</div>
-                  <div class="info-value">{{ getCompanyProfile.country }}</div>
+                  <div class="info-value">{{ getCompanyProfile.country || 'Not provided' }}</div>
                 </div>
                 <div class="info-card">
                   <div class="info-label">State</div>
-                  <div class="info-value">{{ getCompanyProfile.state }}</div>
+                  <div class="info-value">{{ getCompanyProfile.state || 'Not provided' }}</div>
                 </div>
                 <div class="info-card">
                   <div class="info-label">City</div>
-                  <div class="info-value">{{ getCompanyProfile.city }}</div>
+                  <div class="info-value">{{ getCompanyProfile.city || 'Not provided' }}</div>
                 </div>
                 <div class="info-card info-card-large">
                   <div class="info-label">Registered Address</div>
-                  <div class="info-value">{{ getCompanyProfile.registeredAddress.fullAddress }}</div>
+                  <div class="info-value">{{ getCompanyProfile.registeredAddress?.fullAddress || 'Not provided' }}</div>
                 </div>
               </div>
             </div>
@@ -258,15 +258,15 @@
               <div class="info-grid">
                 <div class="info-card">
                   <div class="info-label">Primary Contact Name</div>
-                  <div class="info-value">{{ getCompanyProfile.primaryContactName }}</div>
+                  <div class="info-value">{{ getCompanyProfile.primaryContactName || 'Not provided' }}</div>
                 </div>
                 <div class="info-card">
                   <div class="info-label">Phone Number</div>
-                  <div class="info-value">{{ getCompanyProfile.phoneNumber }}</div>
+                  <div class="info-value">{{ getCompanyProfile.phoneNumber || 'Not provided' }}</div>
                 </div>
                 <div class="info-card">
                   <div class="info-label">Email</div>
-                  <div class="info-value">{{ getCompanyProfile.primary_email_id }}</div>
+                  <div class="info-value">{{ getCompanyProfile.primary_email_id || 'Not provided' }}</div>
                 </div>
                 <div class="info-card">
                   <div class="info-label">Website URL</div>
@@ -423,7 +423,7 @@
         </div>
 
         <!-- Zero State for Manufacturing Section -->
-        <div *ngIf="!manufacturingData && !loadingState.l2Data" class="zero-state-container">
+        <div *ngIf="!manufacturingData && !loadingState.l1Data" class="zero-state-container">
           <div class="zero-state-content">
             <i class="pi pi-cog zero-state-icon"></i>
             <h3>No Manufacturing Data Available</h3>
@@ -441,7 +441,7 @@
         </div>
 
         <!-- Manufacturing content only shown when manufacturingData exists -->
-        <div *ngIf="manufacturingData && !loadingState.l2Data">
+        <div *ngIf="manufacturingData && !loadingState.l1Data">
           <!-- Manufacturing Tabs Navigation -->
           <div class="manufacturing-tabs">
             <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'machines'"
@@ -641,7 +641,7 @@
         </div>
 
         <!-- Zero State for Financial Section -->
-        <div *ngIf="!newFinancialData && !loadingState.l3Data" class="zero-state-container">
+        <div *ngIf="!newFinancialData && !loadingState.l1Data" class="zero-state-container">
           <div class="zero-state-content">
             <i class="pi pi-chart-bar zero-state-icon"></i>
             <h3>No Financial Data Available</h3>
@@ -659,7 +659,7 @@
         </div>
 
         <!-- Combined Financial & Additional Information Content -->
-        <div class="consolidated-info" *ngIf="newFinancialData && !loadingState.l3Data">
+        <div class="consolidated-info" *ngIf="newFinancialData && !loadingState.l1Data">
           <!-- Confidentiality Notice -->
           <div class="info-section">
             <div class="info-section-content">

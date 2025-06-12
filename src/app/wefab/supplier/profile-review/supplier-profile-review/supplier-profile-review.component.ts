@@ -310,10 +310,18 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     if (!this.isBrowser) return;
 
     this.initializeComponent();
-    this.getL3DataObservable(this.supplierId).subscribe((res: any) => {
-      let bankVerifiedStatus = JSON.parse(res.data.company_profile)
-      this.bankVerified = bankVerifiedStatus.bank_verified
-    })
+    // Since all data including bank verification is now in L1 API, get it from there
+    this.subscription.add(
+      this.getL1DataObservable(this.supplierId).subscribe((res: any) => {
+        try {
+          const financialInformation = res.data?.financial_information ? JSON.parse(res.data.financial_information) : {};
+          this.bankVerified = financialInformation.bankVerified || false;
+        } catch (error) {
+          console.error('Error parsing financial information for bank verification:', error);
+          this.bankVerified = false;
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {
@@ -364,13 +372,12 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Load basic data, verification status, ALL status data, and document summary for one-shot calculation
+    // Load all data from L1 API since it now contains everything, plus verification status and stage statuses
     const essentialRequests = [
       this.getVerificationStatusObservable(this.supplierId),
-      this.getL1DataObservable(this.supplierId),
-      this.getL2StatusObservable(this.supplierId), // Only status, not full data
-      this.getL3StatusObservable(this.supplierId), // Only status, not full data
-      this.getDocumentSummaryObservable(this.supplierId) // New: Document summary in one shot
+      this.getL1DataObservable(this.supplierId), // This now contains all L1, L2, L3 data
+      this.getL2StatusObservable(this.supplierId), // Only status, not data
+      this.getL3StatusObservable(this.supplierId)  // Only status, not data
     ];
 
     this.subscription.add(
@@ -381,23 +388,27 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         })
       ).subscribe({
-        next: ([verificationData, l1Data, l2Status, l3Status, docSummary]) => {
-          // Process essential data
+        next: ([verificationData, l1Data, l2Status, l3Status]) => {
+          // Process verification data
           this.verificationStatus = verificationData;
+          
+          // Process all data from L1 API (includes L1, L2, L3 data)
           this.processL1Data(l1Data);
           
-          // Store status data for profile completeness
+          // Store status data for the different stages
           this.getCurrentL2DataStatus = l2Status?.approval_status;
           this.getCurrentL3DataStatus = l3Status?.approval_status;
-          
-          // Process document summary in one shot
-          this.processDocumentSummary(docSummary);
           
           // Calculate profile completeness with ALL status data at once
           this.calculateProfileCompleteness();
           
-          // Load additional data based on active tab (content only, not status or counts)
-          this.loadDataForActiveTab();
+          // Since all data is now loaded from L1, trigger analysis if on manufacturing tab
+          if (this.activeLevelTab === 'manufacturing') {
+            console.log('🔄 Manufacturing tab active with all data loaded, triggering analysis...');
+            setTimeout(() => {
+              this.triggerMachineAnalysisForManufacturingTab();
+            }, 100);
+          }
         },
         error: (error) => {
           console.error('Error loading essential data:', error);
@@ -408,12 +419,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private loadDataForActiveTab(): void {
-    // Load data lazily based on the active tab
+    // Since all data is now loaded from L1 API, we only need to trigger analysis for manufacturing tab
     switch (this.activeLevelTab) {
       case 'manufacturing':
-        this.loadManufacturingData();
-        
-        // If manufacturing data is already available, trigger analysis immediately
+        // If manufacturing data is already available (which it should be), trigger analysis immediately
         if (this.manufacturingData) {
           console.log('🔄 Manufacturing tab active with existing data, triggering analysis...');
           setTimeout(() => {
@@ -421,114 +430,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           }, 100);
         }
         break;
-      case 'financial':
-        this.loadFinancialData();
-        break;
-      // Basic data is already loaded
+      // Basic and financial data are already loaded from L1 API
     }
-  }
-
-  private loadManufacturingData(): void {
-    if (this.manufacturingData) return; // Already loaded
-
-    this.loadingState.l2Data = true;
-    this.subscription.add(
-      this.getL2DataObservable(this.supplierId).pipe(
-        finalize(() => {
-          this.loadingState.l2Data = false;
-          this.cdr.detectChanges();
-        })
-      ).subscribe({
-        next: (l2Data) => {
-          this.processL2Data(l2Data);
-          // Don't recalculate profile completeness here - it's already calculated
-          
-          // If user is currently on manufacturing tab, auto-trigger analysis
-          if (this.activeLevelTab === 'manufacturing') {
-            console.log('📊 Manufacturing data loaded, auto-triggering analysis...');
-            // Small delay to ensure data is fully processed
-            setTimeout(() => {
-              this.triggerMachineAnalysisForManufacturingTab();
-            }, 100);
-          }
-        },
-        error: (error) => {
-          console.error('Error loading manufacturing data:', error);
-          this.showError('Failed to load manufacturing data');
-        }
-      })
-    );
-  }
-
-  private loadFinancialData(): void {
-    if (this.newFinancialData) return; // Already loaded
-
-    this.loadingState.l3Data = true;
-    this.subscription.add(
-      this.getL3DataObservable(this.supplierId).pipe(
-        finalize(() => {
-          this.loadingState.l3Data = false;
-          this.cdr.detectChanges();
-        })
-      ).subscribe({
-        next: (l3Data) => {
-          this.processL3Data(l3Data);
-          // Don't recalculate profile completeness here - it's already calculated
-        },
-        error: (error) => {
-          console.error('Error loading financial data:', error);
-          this.showError('Failed to load financial data');
-        }
-      })
-    );
-  }
-
-  private getL2DataObservable(supplierId: string): Observable<any> {
-    const cacheKey = `l2_data_${supplierId}`;
-    const cached = this.getFromCache(cacheKey);
-    
-    if (cached) {
-      return of(cached);
-    }
-
-    return forkJoin([
-      this.commonservice.getData(`/api/resource/Supplier Onboarding L2/${supplierId}`),
-      this.commonservice.getData(`/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L2&supplier_company_id=${supplierId}`)
-    ]).pipe(
-      map(([dataRes, statusRes]: [any, any]) => ({
-        data: dataRes?.data || null,
-        status: statusRes?.data || null
-      })),
-      tap(result => this.setCache(cacheKey, result)),
-      catchError(error => {
-        console.error('Error fetching L2 data:', error);
-        return of({ data: null, status: null });
-      })
-    );
-  }
-
-  private getL3DataObservable(supplierId: string): Observable<any> {
-    const cacheKey = `l3_data_${supplierId}`;
-    const cached = this.getFromCache(cacheKey);
-    
-    if (cached) {
-      return of(cached);
-    }
-
-    return forkJoin([
-      this.commonservice.getData(`/api/resource/Supplier Onboarding L3/${supplierId}`),
-      this.commonservice.getData(`/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${supplierId}`)
-    ]).pipe(
-      map(([dataRes, statusRes]: [any, any]) => ({
-        data: dataRes?.data || null,
-        status: statusRes?.data || null
-      })),
-      tap(result => this.setCache(cacheKey, result)),
-      catchError(error => {
-        console.error('Error fetching L3 data:', error);
-        return of({ data: null, status: null });
-      })
-    );
   }
 
   private calculateProfileCompleteness(): void {
@@ -657,16 +560,89 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     
     if (result.data) {
       try {
-        this.getCompanyProfile = JSON.parse(result.data.company_profile);
+        // Parse the new data structure with separate fields
+        const basicDetails = result.data.basic_details ? JSON.parse(result.data.basic_details) : {};
+        const contactCapabilities = result.data.contact_capabilities ? JSON.parse(result.data.contact_capabilities) : {};
+        const machineCapabilities = result.data.machine_capabilities ? JSON.parse(result.data.machine_capabilities) : {};
+        const facilityVerification = result.data.facility_verification ? JSON.parse(result.data.facility_verification) : {};
+        const financialInformation = result.data.financial_information ? JSON.parse(result.data.financial_information) : {};
+        
+        // Set basic information for L1 tab (Basic Information)
+        this.getCompanyProfile = {
+          // Basic company details from basic_details
+          company_name: basicDetails.company_name || result.data.company_name,
+          gstinNumber: basicDetails.gstinNumber,
+          panNumber: basicDetails.panNumber,
+          noGst: basicDetails.noGst || false,
+          country: basicDetails.country,
+          state: basicDetails.state,
+          city: basicDetails.city,
+          registeredAddress: basicDetails.registeredAddress || {},
+          gstVerified: basicDetails.gstVerified || false,
+          panVerified: basicDetails.panVerified || false,
+          
+          // Contact information from contact_capabilities
+          primaryContactName: contactCapabilities.primaryContactName,
+          phoneNumber: contactCapabilities.phoneNumber,
+          primary_email_id: result.data.primary_email_id,
+          websiteURL: contactCapabilities.websiteURL,
+          linkedinURL: contactCapabilities.linkedinURL,
+          totalEmployees: contactCapabilities.totalEmployees,
+          foundedYear: contactCapabilities.foundedYear,
+          primaryManufacturingProcess: contactCapabilities.primaryManufacturingProcess,
+          
+          // Documents from contact_capabilities
+          companyDocuments: contactCapabilities.companyDocuments || [],
+          
+          // Phone verification from contact_capabilities
+          phone_verified: contactCapabilities.phoneVerified || false,
+          
+          // Get lat/lng from registered address if available
+          registered_lat: basicDetails.registeredAddress?.location?.lat || 0,
+          registered_lng: basicDetails.registeredAddress?.location?.lng || 0
+        };
+        
+        // Set manufacturing data for L2 tab (Manufacturing Capabilities)
+        this.manufacturingData = {
+          machines: machineCapabilities.machines || [],
+          certifications: machineCapabilities.certifications?.filter((cert: any) => cert && Object.keys(cert).length > 0) || [],
+          industries: machineCapabilities.industries || [],
+          productionCapacity: machineCapabilities.productionCapacity || 0,
+          facilityPhotos: facilityVerification.facilityPhotos || []
+        };
+        
+        // Set financial data for L3 tab (Financial & Additional)
+        this.newFinancialData = {
+          bankDetails: financialInformation.bankDetails || {},
+          companyFinancials: financialInformation.companyFinancials || {},
+          insuranceCoverage: financialInformation.insuranceCoverage || {},
+          additionalInformation: {
+            references: financialInformation.references || []
+          }
+        };
+        
+        // Set verification statuses
         this.gstVerified = this.getCompanyProfile?.gstVerified || false;
         this.panVerified = this.getCompanyProfile?.panVerified || false;
         this.phoneVerified = this.getCompanyProfile?.phone_verified || false;
+        this.bankVerified = financialInformation.bankVerified || false;
+        
+        // Set request to resubmit comment
         this.requestToResubmitCommentL1 = result.data.comment || '';
         
-        console.log('✅ L1 data processed, document count already handled in summary');
+        console.log('✅ All data processed successfully from L1 API:');
+        console.log('📋 Company Profile (L1):', this.getCompanyProfile);
+        console.log('🏭 Manufacturing Data (L2):', this.manufacturingData);
+        console.log('💰 Financial Data (L3):', this.newFinancialData);
+        
+        // Update document counts immediately since all data is now available
+        this.updateDocumentCounts();
+        
       } catch (error) {
         console.error('Error parsing L1 data:', error);
         this.getCompanyProfile = null;
+        this.manufacturingData = null;
+        this.newFinancialData = null;
       }
     }
 
@@ -674,6 +650,36 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       this.getCurrentL1DataStatus = result.status.approval_status;
       console.log('📊 L1 Status set to:', this.getCurrentL1DataStatus);
     }
+  }
+
+  // Add new method to update document counts from all the parsed data
+  private updateDocumentCounts(): void {
+    // Count company documents from contact capabilities
+    this.numberOfCompanyDocuments = this.getCompanyProfile?.companyDocuments?.length || 0;
+    
+    // Count machine photos from machine capabilities
+    this.numberOfMachinePhoto = this.manufacturingData?.machines?.length || 0;
+    
+    // Count facility photos from facility verification
+    this.numberOfFacilityPhoto = this.manufacturingData?.facilityPhotos?.length || 0;
+    
+    // Count valid certifications from machine capabilities
+    this.numberOfCertificationPhoto = this.manufacturingData?.certifications?.length || 0;
+    
+    // Update the documentSummary object for consistency
+    this.documentSummary = {
+      companyDocuments: this.numberOfCompanyDocuments,
+      machinePhotos: this.numberOfMachinePhoto,
+      facilityPhotos: this.numberOfFacilityPhoto,
+      certifications: this.numberOfCertificationPhoto
+    };
+    
+    console.log('✅ Document counts updated:', {
+      companyDocuments: this.numberOfCompanyDocuments,
+      machinePhotos: this.numberOfMachinePhoto,
+      facilityPhotos: this.numberOfFacilityPhoto,
+      certifications: this.numberOfCertificationPhoto
+    });
   }
 
   private processL2Data(result: any): void {
@@ -1557,16 +1563,12 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   // New method to reload L1 data and recalculate completeness
   private reloadL1DataAndStatus(): void {
     this.subscription.add(
-      forkJoin([
-        this.getL1DataObservable(this.supplierId),
-        this.getDocumentSummaryObservable(this.supplierId) // Reload document summary too
-      ]).subscribe({
-        next: ([l1Data, docSummary]) => {
+      this.getL1DataObservable(this.supplierId).subscribe({
+        next: (l1Data) => {
           this.processL1Data(l1Data);
-          this.processDocumentSummary(docSummary); // Update document counts
           // Recalculate completeness since L1 status changed
           this.calculateProfileCompleteness();
-          console.log('🔄 L1 data and document summary reloaded');
+          console.log('🔄 L1 data reloaded with all information');
 
           this.cdr.detectChanges();
         },
@@ -1580,21 +1582,12 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   // New method to reload only L2 status and recalculate completeness
   private reloadL2Status(): void {
     this.subscription.add(
-      forkJoin([
-        this.getL2StatusObservable(this.supplierId),
-        this.getDocumentSummaryObservable(this.supplierId) // Reload document summary too
-      ]).subscribe({
-        next: ([l2Status, docSummary]) => {
+      this.getL2StatusObservable(this.supplierId).subscribe({
+        next: (l2Status) => {
           this.getCurrentL2DataStatus = l2Status?.approval_status;
-          this.processDocumentSummary(docSummary); // Update document counts
           // Recalculate completeness since L2 status changed
           this.calculateProfileCompleteness();
-          
-          // If manufacturing data is currently loaded and displayed, reload it too
-          if (this.manufacturingData && this.activeLevelTab === 'manufacturing') {
-            this.loadManufacturingData();
-          }
-          console.log('🔄 L2 status and document summary reloaded');
+          console.log('🔄 L2 status reloaded');
 
           this.cdr.detectChanges();
         },
@@ -1613,11 +1606,6 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           this.getCurrentL3DataStatus = l3Status?.approval_status;
           // Recalculate completeness since L3 status changed
           this.calculateProfileCompleteness();
-          
-          // If financial data is currently loaded and displayed, reload it too
-          if (this.newFinancialData && this.activeLevelTab === 'financial') {
-            this.loadFinancialData();
-          }
 
           this.cdr.detectChanges();
         },
@@ -1794,88 +1782,5 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         return of(null);
       })
     );
-  }
-
-  // New method to get document summary without loading full data
-  private getDocumentSummaryObservable(supplierId: string): Observable<any> {
-    const cacheKey = `doc_summary_${supplierId}`;
-    const cached = this.getFromCache(cacheKey);
-    
-    if (cached) {
-      return of(cached);
-    }
-
-    // Use lightweight API calls to get document counts
-    const summaryRequests = [
-      // Get L1 data for company documents count (we need this data anyway)
-      this.commonservice.getData(`/api/resource/Supplier Onboarding L1/${supplierId}`).pipe(
-        map((res: any) => {
-          try {
-            const profile = JSON.parse(res?.data?.company_profile || '{}');
-            return {
-              companyDocuments: profile?.companyDocuments?.length || 0
-            };
-          } catch {
-            return { companyDocuments: 0 };
-          }
-        }),
-        catchError(() => of({ companyDocuments: 0 }))
-      ),
-      
-      // Get L2 data summary for manufacturing counts
-      this.commonservice.getData(`/api/resource/Supplier Onboarding L2/${supplierId}`).pipe(
-        map((res: any) => {
-          try {
-            const profile = JSON.parse(res?.data?.company_profile || '{}');
-            return {
-              machinePhotos: profile?.machines?.length || 0,
-              facilityPhotos: profile?.facilityPhotos?.length || 0,
-              certifications: profile?.certifications?.length || 0
-            };
-          } catch {
-            return { machinePhotos: 0, facilityPhotos: 0, certifications: 0 };
-          }
-        }),
-        catchError(() => of({ machinePhotos: 0, facilityPhotos: 0, certifications: 0 }))
-      )
-    ];
-
-    return forkJoin(summaryRequests).pipe(
-      map(([l1Summary, l2Summary]) => ({
-        ...l1Summary,
-        ...l2Summary
-      })),
-      tap(result => this.setCache(cacheKey, result)),
-      catchError(error => {
-        console.error('Error fetching document summary:', error);
-        return of({ companyDocuments: 0, machinePhotos: 0, facilityPhotos: 0, certifications: 0 });
-      })
-    );
-  }
-
-  // New method to process document summary
-  private processDocumentSummary(summary: any): void {
-    console.log('📊 Processing document summary in one shot:', summary);
-    
-    // Set all document counts at once
-    this.numberOfCompanyDocuments = summary?.companyDocuments || 0;
-    this.numberOfMachinePhoto = summary?.machinePhotos || 0;
-    this.numberOfFacilityPhoto = summary?.facilityPhotos || 0;
-    this.numberOfCertificationPhoto = summary?.certifications || 0;
-    
-    // Update the documentSummary object for consistency
-    this.documentSummary = {
-      companyDocuments: this.numberOfCompanyDocuments,
-      machinePhotos: this.numberOfMachinePhoto,
-      facilityPhotos: this.numberOfFacilityPhoto,
-      certifications: this.numberOfCertificationPhoto
-    };
-    
-    console.log('✅ Document summary calculated:', {
-      companyDocuments: this.numberOfCompanyDocuments,
-      machinePhotos: this.numberOfMachinePhoto,
-      facilityPhotos: this.numberOfFacilityPhoto,
-      certifications: this.numberOfCertificationPhoto
-    });
   }
 }
