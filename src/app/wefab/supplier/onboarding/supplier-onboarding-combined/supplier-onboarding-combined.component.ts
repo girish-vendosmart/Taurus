@@ -234,6 +234,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       description: ''
     }
   ];
+  onboardingbody:any;
+  supplier_id: any;
   
   constructor(
     private fb: FormBuilder,
@@ -620,22 +622,18 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         return;
       }
       
-      // Call appropriate API based on current step before moving to next step
-      if (this.activeStepIndex === 1) {
-        // Moving from Contact & Capabilities to Machine Capabilities - Save L1 data
-        this.saveL1Data();
+      if(this.activeStepIndex === 0){
+        this.postL1Data()
+      } else if(this.activeStepIndex === 1){
+        this.putData(this.contactCapabilities)
+      } else if (this.activeStepIndex === 2) {
+        this.putData(this.machineCapabilities)
       } else if (this.activeStepIndex === 3) {
-        // Moving from Facility Verification to Financial Information - Save L2 data
-        this.saveL2Data();
-      } else if (this.activeStepIndex < this.totalSteps - 1) {
-        // Regular step progression without API call
-        this.activeStepIndex++;
-        
-        // Console log the step object after changing step
-        this.logCurrentStepObject();
-      } else {
-        // Final step - Save L3 data and complete onboarding
-        this.saveL3DataAndComplete();
+        this.putData(this.facilityVerification)
+      } else if (this.activeStepIndex === 4) {
+        this.putData(this.financialInformation)
+      } else if (this.activeStepIndex === 5) {
+        this.putData(this.additionalInformation)
       }
     } else {
       this.markFieldsAsTouched(this.currentFields);
@@ -650,6 +648,70 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       
       this.sweetAlert.error(errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.');
     }
+  }
+
+  postL1Data() {
+    let endPoint = '/api/resource/Supplier Onboarding L1';
+
+    this.onboardingbody = {
+      company_name: this.model.company_name,
+      primary_email_id: this.model.primary_email_id,
+      onboarding_form_status: 'L1 Under Review',
+      registered_lat: this.model.registeredAddress?.location?.lat || 0,
+      registered_lng: this.model.registeredAddress?.location?.lng || 0,
+      phone_verified: this.phoneVerified,
+      gst_verified: this.gstVerified,
+      pan_verified: this.panVerified,
+      basic_details: JSON.stringify(this.basicDetails)
+    }
+
+    this.commonService.postData(endPoint, this.onboardingbody).subscribe((res: any) => {
+      if(res.data) {
+         this.supplier_id = res.data.name;
+         localStorage.setItem('supplier_id', this.supplier_id);
+         this.sweetAlert.success('Basic information processed successfully. Proceeding to manufacturing capabilities.');
+         this.activeStepIndex++;
+      }
+    })
+  }
+
+  putData(body: any) {
+    let endPoint = '/api/resource/Supplier Onboarding L1/' + this.supplier_id;
+
+    // Dynamic key based on activeStepIndex
+    const stepKeys: { [key: number]: string } = {
+      1: 'contact_capabilities',
+      2: 'machine_capabilities',
+      3: 'facility_verification', 
+      4: 'financial_information',
+      5: 'additional_information'
+    };
+    
+    const currentStepKey = stepKeys[this.activeStepIndex];
+
+    this.onboardingbody = {
+      ...this.onboardingbody,
+      [currentStepKey]: JSON.stringify(body)
+    }
+
+    this.commonService.putData(endPoint, this.onboardingbody).subscribe((res: any) => {
+      if(res.data) {
+         const successMessages: { [key: number]: string } = {
+           1: 'Contact & Capabilities processed successfully. Proceeding to manufacturing capabilities.',
+           2: 'Manufacturing capabilities processed successfully. Proceeding to facility verification.',
+           3: 'Facility verification processed successfully. Proceeding to financial information.',
+           4: 'Financial information processed successfully. Proceeding to additional information.',
+           5: 'Onboarding completed successfully.'
+         };
+         
+         this.sweetAlert.success(successMessages[this.activeStepIndex]);
+         
+         // Only increment if not on the last step
+         if (this.activeStepIndex < this.totalSteps - 1) {
+           this.activeStepIndex++;
+         }
+      }
+    })
   }
 
   isStepValid(fields: FormlyFieldConfig[]): boolean {
@@ -1051,11 +1113,6 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       financialInformation: this.financialInformation,
       additionalInformation: this.additionalInformation
     });
-    
-    // Show success message and move to next step
-    this.sweetAlert.success('Basic information processed successfully. Proceeding to manufacturing capabilities.');
-    this.activeStepIndex++;
-    this.logCurrentStepObject();
     
     // Original API code commented out
     /*
