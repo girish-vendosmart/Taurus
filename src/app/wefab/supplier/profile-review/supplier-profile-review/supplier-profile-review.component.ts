@@ -263,6 +263,9 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   basicDetailsUnderReview: boolean = false;
   manufacturingUnderReview: boolean = false;
   financialUnderReview: boolean = false;
+  basicDetailsRejected: boolean = false;
+  manufacturingRejected: boolean = false;
+  financialRejected: boolean = false
   // Overall completion percentage
   get completionPercentage(): number {
     const total = this.completionStatus.basicInformation + 
@@ -570,6 +573,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         this.contactCapabilities = contactCapabilities;
         if(this.basicDetails && this.contactCapabilities && this.currentOnboardingStage === 'L1 Under Review'){
            this.basicDetailsUnderReview = true;
+           this.basicDetailsRejected = false;
+        } else if (this.basicDetails && this.contactCapabilities && this.currentOnboardingStage === 'L1 Rejected') {
+          this.basicDetailsRejected = true;
+          this.basicDetailsUnderReview = false;
         } else {
           this.basicDetailsUnderReview = false;
         }
@@ -579,15 +586,25 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         this.facilityVerification = facilityVerification;
         if(this.machineCapabilities && this.facilityVerification && (this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review')){
           this.manufacturingUnderReview = true;
+          this.manufacturingRejected = false;
+        } else if (this.machineCapabilities && this.facilityVerification && this.currentOnboardingStage === 'L2 Rejected') {
+          this.manufacturingRejected = true;
+          this.manufacturingUnderReview = false;
         } else {
           this.manufacturingUnderReview = false;
+          this.manufacturingRejected = false;
         }
         const financialInformation = result.data.financial_information ? JSON.parse(result.data.financial_information) : {};
         this.financialInformation = financialInformation;
         if(this.financialInformation && (this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review' || this.currentOnboardingStage === 'L3 Under Review')){
           this.financialUnderReview = true;
+          this.financialRejected = false;
+        } else if (this.financialInformation && this.currentOnboardingStage === 'L3 Rejected') {
+          this.financialRejected = true;
+          this.financialUnderReview = false;
         } else {
           this.financialUnderReview = false;
+          this.financialRejected = false;
         }
         
         // Set basic information for L1 tab (Basic Information)
@@ -1444,10 +1461,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processRejection(level: string): void {
-    let currentLevel = level === 'L1' ? 'Supplier Onboarding L1': level === 'L2' ? 'Supplier Onboarding L2' : 'Supplier Onboarding L3';
-    const endpoint = `/api/resource/${currentLevel}/${this.supplierId}`
+    let currentLevel = level === 'L1' ? 'L1 Rejected': level === 'L2' ? 'L2 Rejected' : 'L3 Rejected';
+    const endpoint = `/api/resource/Supplier Onboarding L1/${this.supplierId}`
     const data = {
-      onboarding_status: 'Rejected'
+      onboarding_form_status: currentLevel
     };
 
     this.commonservice.putData(endpoint, data).subscribe({

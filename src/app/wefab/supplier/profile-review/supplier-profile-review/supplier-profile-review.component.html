@@ -41,10 +41,10 @@
       <div class="levels-tabs">
         <button class="level-tab" [class.active]="activeLevelTab === 'basic'" (click)="changeLevelTab('basic')">
           <div class="level-badge">
-            <i class="pi pi-times-circle status-icon rejected" *ngIf="getCurrentL1DataStatus === 'Rejected'"></i>
-            <i class="pi pi-check-circle status-icon approved" *ngIf="!basicDetailsUnderReview"></i>
+            <i class="pi pi-times-circle status-icon rejected" *ngIf="basicDetailsRejected"></i>
+            <i class="pi pi-check-circle status-icon approved" *ngIf="!basicDetailsUnderReview && !basicDetailsRejected"></i>
             <i class="pi pi-exclamation-triangle status-icon under-review"
-              *ngIf="basicDetailsUnderReview"></i>
+              *ngIf="basicDetailsUnderReview && !basicDetailsRejected"></i>
             <i class="pi pi-sync status-icon request-resubmit"
               *ngIf="getCurrentL1DataStatus === 'Request to Resubmit'"></i>
             <span class="p-font-size">Stage 1: Basic Information</span>
@@ -66,18 +66,18 @@
           </div>
         </button>
         <button class="level-tab" [class.active]="activeLevelTab === 'manufacturing'"
-          (click)="changeLevelTab('manufacturing')" [disabled]="getCurrentL1DataStatus === 'Rejected'">
+          (click)="changeLevelTab('manufacturing')" [disabled]="basicDetailsRejected">
           <div class="level-badge">
-            <i class="pi pi-times-circle status-icon rejected" *ngIf="getCurrentL2DataStatus === 'Rejected'"></i>
-            <i class="pi pi-check-circle status-icon approved" *ngIf="!manufacturingUnderReview"></i>
+            <i class="pi pi-times-circle status-icon rejected" *ngIf="manufacturingRejected"></i>
+            <i class="pi pi-check-circle status-icon approved" *ngIf="!manufacturingUnderReview && !manufacturingRejected"></i>
             <i class="pi pi-exclamation-triangle status-icon under-review"
-              *ngIf="manufacturingUnderReview"></i>
+              *ngIf="manufacturingUnderReview && !manufacturingRejected"></i>
             <i class="pi pi-sync status-icon request-resubmit"
               *ngIf="getCurrentL2DataStatus === 'Request to Resubmit'"></i>
             <span class="p-font-size">Stage 2: Manufacturing</span>
           </div>
           <!-- Three dot menu for Stage 2 -->
-          <div class="tab-actions" *ngIf="userType === 'wefab_team' && !basicDetailsUnderReview && manufacturingUnderReview">
+          <div class="tab-actions" *ngIf="userType === 'wefab_team' && !basicDetailsUnderReview && manufacturingUnderReview && !basicDetailsRejected">
             <i class="pi pi-ellipsis-v dropdown-trigger" (click)="toggleDropdown('L2', $event)"></i>
             <div class="tab-dropdown" [class.visible]="dropdownVisible['L2']">
               <div class="dropdown-item" (click)="$event.stopPropagation(); approve('L2')">
@@ -94,18 +94,18 @@
         </button>
 
         <button class="level-tab" [class.active]="activeLevelTab === 'financial'" (click)="changeLevelTab('financial')"
-          [disabled]="getCurrentL1DataStatus === 'Rejected' || getCurrentL2DataStatus === 'Rejected'">
+          [disabled]="basicDetailsRejected || manufacturingRejected">
           <div class="level-badge">
-            <i class="pi pi-times-circle status-icon rejected" *ngIf="getCurrentL3DataStatus === 'Rejected'"></i>
-            <i class="pi pi-check-circle status-icon approved" *ngIf="!financialUnderReview"></i>
+            <i class="pi pi-times-circle status-icon rejected" *ngIf="financialRejected"></i>
+            <i class="pi pi-check-circle status-icon approved" *ngIf="!financialUnderReview && !financialRejected"></i>
             <i class="pi pi-exclamation-triangle status-icon under-review"
-              *ngIf="financialUnderReview"></i>
+              *ngIf="financialUnderReview && !financialRejected"></i>
             <i class="pi pi-sync status-icon request-resubmit"
               *ngIf="getCurrentL3DataStatus === 'Request to Resubmit'"></i>
             <span class="p-font-size">Stage 3: Financial & Additional</span>
           </div>
           <!-- Three dot menu for Stage 3 -->
-          <div class="tab-actions" *ngIf="userType === 'wefab_team' && !basicDetailsUnderReview && !manufacturingUnderReview && financialUnderReview">
+          <div class="tab-actions" *ngIf="userType === 'wefab_team' && !basicDetailsUnderReview && !manufacturingUnderReview && financialUnderReview && !manufacturingRejected">
             <i class="pi pi-ellipsis-v dropdown-trigger" (click)="toggleDropdown('L3', $event)"></i>
             <div class="tab-dropdown" [class.visible]="dropdownVisible['L3']">
               <div class="dropdown-item" (click)="$event.stopPropagation(); approve('L3')">
