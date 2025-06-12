@@ -266,6 +266,9 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   basicDetailsRejected: boolean = false;
   manufacturingRejected: boolean = false;
   financialRejected: boolean = false
+  basicDetailsRequestForUpdate: boolean = false;
+  manufacturingRequestForUpdate: boolean = false;
+  financialRequestForUpdate: boolean = false;
   // Overall completion percentage
   get completionPercentage(): number {
     const total = this.completionStatus.basicInformation + 
@@ -556,6 +559,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       this.mainCurrentDataStatusTrack = 'Approved';
     } else if(this.currentOnboardingStage === 'L1 Rejected' || this.currentOnboardingStage === 'L2 Rejected' || this.currentOnboardingStage === 'L3 Rejected'){
       this.mainCurrentDataStatusTrack = 'Rejected';
+    } else if(this.currentOnboardingStage === 'L1 Request for Update' || this.currentOnboardingStage === 'L2 Request for Update' || this.currentOnboardingStage === 'L3 Request for Update'){
+      this.mainCurrentDataStatusTrack = 'Request for Update';
     }
   }
 
@@ -577,8 +582,14 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         } else if (this.basicDetails && this.contactCapabilities && this.currentOnboardingStage === 'L1 Rejected') {
           this.basicDetailsRejected = true;
           this.basicDetailsUnderReview = false;
+        } else if (this.basicDetails && this.contactCapabilities && this.currentOnboardingStage === 'L1 Request for Update') {
+          this.basicDetailsUnderReview = false;
+          this.basicDetailsRejected = false;
+          this.basicDetailsRequestForUpdate = true;
         } else {
           this.basicDetailsUnderReview = false;
+          this.basicDetailsRejected = false;
+          this.basicDetailsRequestForUpdate = false;
         }
         const machineCapabilities = result.data.machine_capabilities ? JSON.parse(result.data.machine_capabilities) : {};
         this.machineCapabilities = machineCapabilities;
@@ -590,9 +601,14 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         } else if (this.machineCapabilities && this.facilityVerification && this.currentOnboardingStage === 'L2 Rejected') {
           this.manufacturingRejected = true;
           this.manufacturingUnderReview = false;
+        } else if (this.machineCapabilities && this.facilityVerification && this.currentOnboardingStage === 'L2 Request for Update') {
+          this.manufacturingUnderReview = false;
+          this.manufacturingRejected = false;
+          this.manufacturingRequestForUpdate = true;
         } else {
           this.manufacturingUnderReview = false;
           this.manufacturingRejected = false;
+          this.manufacturingRequestForUpdate = false;
         }
         const financialInformation = result.data.financial_information ? JSON.parse(result.data.financial_information) : {};
         this.financialInformation = financialInformation;
@@ -602,9 +618,14 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         } else if (this.financialInformation && this.currentOnboardingStage === 'L3 Rejected') {
           this.financialRejected = true;
           this.financialUnderReview = false;
+        } else if (this.financialInformation && this.currentOnboardingStage === 'L3 Request for Update') {
+          this.financialUnderReview = false;
+          this.financialRejected = false;
+          this.financialRequestForUpdate = true;
         } else {
           this.financialUnderReview = false;
           this.financialRejected = false;
+          this.financialRequestForUpdate = false;
         }
         
         // Set basic information for L1 tab (Basic Information)
@@ -1504,11 +1525,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   sendUpdateRequest(): void {
     if (!this.updateRequestComment.trim()) return;
 
-    let currentLevel = this.updateRequestLevel === 'L1' ? 'Supplier Onboarding L1': this.updateRequestLevel === 'L2' ? 'Supplier Onboarding L2' : 'Supplier Onboarding L3';
+    let currentLevel = this.updateRequestLevel === 'L1' ? 'L1 Request for Update': this.updateRequestLevel === 'L2' ? 'L2 Request for Update' : 'L3 Request for Update';
 
-    const endpoint = `/api/resource/${currentLevel}/${this.supplierId}`
+    const endpoint = `/api/resource/Supplier Onboarding L1/${this.supplierId}`
     const data = {
-      onboarding_status: 'Request to Resubmit',
+      onboarding_form_status: currentLevel,
       comment: this.updateRequestComment
     };
 
