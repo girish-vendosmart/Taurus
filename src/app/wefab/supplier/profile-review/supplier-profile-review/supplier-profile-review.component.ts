@@ -546,6 +546,16 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     );
   }
 
+  findOutMainStatus() {
+    if(this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review' || this.currentOnboardingStage === 'L3 Under Review'){
+      this.mainCurrentDataStatusTrack = 'Under Review';
+    } else if(this.currentOnboardingStage === 'L1 Approved' && this.currentOnboardingStage === 'L2 Approved' && this.currentOnboardingStage === 'L3 Approved'){
+      this.mainCurrentDataStatusTrack = 'Approved';
+    } else if(this.currentOnboardingStage === 'L1 Rejected' || this.currentOnboardingStage === 'L2 Rejected' || this.currentOnboardingStage === 'L3 Rejected'){
+      this.mainCurrentDataStatusTrack = 'Rejected';
+    }
+  }
+
   private processL1Data(result: any): void {
     console.log('🔍 processL1Data called with result:', result);
     
@@ -554,6 +564,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         // Parse the new data structure with separate fields
         const basicDetails = result.data.basic_details ? JSON.parse(result.data.basic_details) : {};
         this.currentOnboardingStage = result.data.onboarding_form_status;
+        this.findOutMainStatus()
         this.basicDetails = basicDetails;
         const contactCapabilities = result.data.contact_capabilities ? JSON.parse(result.data.contact_capabilities) : {};
         this.contactCapabilities = contactCapabilities;
