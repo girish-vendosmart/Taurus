@@ -210,20 +210,20 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       description: 'Contact details and manufacturing capabilities.'
     },
     {
-      title: 'Machine Capabilities',
-      description: 'Add details about your manufacturing machines and certifications.'
+      title: '',
+      description: ''
     },
     {
-      title: 'Facility Verification',
-      description: 'Upload geotagged photos of your manufacturing facility.'
+      title: '',
+      description: ''
     },
     {
       title: 'Financial Information',
       description: 'Share your financial details and banking information.'
     },
     {
-      title: 'Additional Information',
-      description: 'Provide business references to complete your profile.'
+      title: '',
+      description: ''
     }
   ];
   
