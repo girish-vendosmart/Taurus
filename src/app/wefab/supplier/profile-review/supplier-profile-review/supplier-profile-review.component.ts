@@ -251,7 +251,15 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   public dataLoading$ = this.dataLoadingSubject.asObservable();
   panVerified: any;
   bankVerified: any = false;
-
+  basicDetails: any;
+  contactCapabilities: any;
+  machineCapabilities: any;
+  facilityVerification: any;
+  financialInformation: any;
+  basicDetailsEdit: any = false;
+  manufacturingEdit: any = false;
+  financialEdit: any = false;
+  
   // Overall completion percentage
   get completionPercentage(): number {
     const total = this.completionStatus.basicInformation + 
@@ -446,37 +454,17 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     console.log('L1 Status:', this.getCurrentL1DataStatus);
     console.log('L2 Status:', this.getCurrentL2DataStatus);
     console.log('L3 Status:', this.getCurrentL3DataStatus);
-    
-    // Calculate based on current approval status for all levels
-    // For Stage 1: Basic Information
-    if (this.getCurrentL1DataStatus) {
-      if (this.getCurrentL1DataStatus === 'Approved' || 
-          this.getCurrentL1DataStatus === 'Under Review' || this.getCurrentL1DataStatus === 'Rejected' ||
-          this.getCurrentL1DataStatus === 'Request to Resubmit') {
-        this.completionStatus.basicInformation = 100;
-      }
-    }
-    
-    // For Stage 2: Manufacturing Capabilities
-    if (this.getCurrentL2DataStatus) {
-      if (this.getCurrentL2DataStatus === 'Approved' || 
-          this.getCurrentL2DataStatus === 'Under Review' || this.getCurrentL2DataStatus === 'Rejected' ||
-          this.getCurrentL2DataStatus === 'Request to Resubmit') {
-        this.completionStatus.manufacturingCapabilities = 100;
-      }
-    }
-    
-    // For Stage 3: Financial & Additional
-    if (this.getCurrentL3DataStatus) {
-      if (this.getCurrentL3DataStatus === 'Approved' || 
-          this.getCurrentL3DataStatus === 'Under Review' || this.getCurrentL3DataStatus === 'Rejected' ||
-          this.getCurrentL3DataStatus === 'Request to Resubmit') {
-        this.completionStatus.financialAdditional = 100;
-      }
+
+    if(this.basicDetails && this.contactCapabilities){
+       this.completionStatus.basicInformation = 100;
+    } if(this.machineCapabilities && this.facilityVerification){
+      this.completionStatus.manufacturingCapabilities = 100;
+    } if(this.financialInformation){
+      this.completionStatus.financialAdditional = 100;
     }
 
     // Update main status after calculating completeness
-    this.updateMainStatus();
+    // this.updateMainStatus();
     
     console.log('✅ Profile completeness calculated ONCE:', this.completionStatus);
     console.log('📊 Overall completion percentage:', this.completionPercentage);
@@ -562,10 +550,24 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       try {
         // Parse the new data structure with separate fields
         const basicDetails = result.data.basic_details ? JSON.parse(result.data.basic_details) : {};
+        this.basicDetails = basicDetails;
         const contactCapabilities = result.data.contact_capabilities ? JSON.parse(result.data.contact_capabilities) : {};
+        this.contactCapabilities = contactCapabilities;
+        if(this.basicDetails && this.contactCapabilities){
+           this.basicDetailsEdit = true;
+        }
         const machineCapabilities = result.data.machine_capabilities ? JSON.parse(result.data.machine_capabilities) : {};
+        this.machineCapabilities = machineCapabilities;
         const facilityVerification = result.data.facility_verification ? JSON.parse(result.data.facility_verification) : {};
+        this.facilityVerification = facilityVerification;
+        if(this.machineCapabilities && this.facilityVerification){
+          this.manufacturingEdit = true;
+        }
         const financialInformation = result.data.financial_information ? JSON.parse(result.data.financial_information) : {};
+        this.financialInformation = financialInformation;
+        if(this.financialInformation){
+          this.financialEdit = true;
+        }
         
         // Set basic information for L1 tab (Basic Information)
         this.getCompanyProfile = {

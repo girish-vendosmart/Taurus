@@ -186,7 +186,7 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'basic'">
         <div class="section-header">
           <h3>Basic Information</h3>
-          <button class="edit-section-btn" *ngIf="(getCurrentL1DataStatus === 'Under Review' || getCurrentL1DataStatus === 'Request to Resubmit') && userType === 'supplier'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="basicDetailsEdit && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
         </div>
@@ -417,7 +417,7 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'manufacturing'">
         <div class="section-header">
           <h3>Manufacturing Capabilities</h3>
-          <button class="edit-section-btn" *ngIf="(getCurrentL2DataStatus === 'Under Review' || getCurrentL2DataStatus === 'Request to Resubmit') && userType === 'supplier'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="manufacturingEdit && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
         </div>
@@ -634,7 +634,7 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'financial'">
         <div class="section-header">
           <h3>Financial & Additional Information</h3>
-          <button class="edit-section-btn" *ngIf="(getCurrentL3DataStatus === 'Under Review' || getCurrentL3DataStatus === 'Request to Resubmit') && userType === 'supplier'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="financialEdit && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
           
