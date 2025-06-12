@@ -33,41 +33,6 @@
     </div>
   </div>
 
-  <!-- Feedback Summary Section -->
-  <!-- <div *ngIf="hasFeedback" class="feedback-summary-container">
-    <div class="feedback-summary-header" (click)="toggleFeedbackSummary()">
-      <i class="pi pi-comments"></i>
-      <span>Feedback Summary</span>
-      <i class="pi" [ngClass]="showFeedbackSummary ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
-    </div>
-    
-    <div *ngIf="showFeedbackSummary" class="feedback-summary-content">
-      <div *ngIf="requestToResubmitCommentL1" class="feedback-item">
-        <div class="feedback-level">Basic Information</div>
-        <div class="feedback-status" [ngClass]="{'status-resubmit': getCurrentL1DataStatus === 'Request to Resubmit'}">
-          {{ getCurrentL1DataStatus }}
-        </div>
-        <div class="feedback-comment">{{ requestToResubmitCommentL1 }}</div>
-      </div>
-      
-      <div *ngIf="requestToResubmitCommentL2" class="feedback-item">
-        <div class="feedback-level">Manufacturing Capabilities</div>
-        <div class="feedback-status" [ngClass]="{'status-resubmit': getCurrentL2DataStatus === 'Request to Resubmit'}">
-          {{ getCurrentL2DataStatus }}
-        </div>
-        <div class="feedback-comment">{{ requestToResubmitCommentL2 }}</div>
-      </div>
-      
-      <div *ngIf="requestToResubmitCommentL3" class="feedback-item">
-        <div class="feedback-level">Financial & Additional</div>
-        <div class="feedback-status" [ngClass]="{'status-resubmit': getCurrentL3DataStatus === 'Request to Resubmit'}">
-          {{ getCurrentL3DataStatus }}
-        </div>
-        <div class="feedback-comment">{{ requestToResubmitCommentL3 }}</div>
-      </div>
-    </div>
-  </div> -->
-
   <!-- Main Profile Review Content -->
   <div class="review-content" *ngIf="!showActivityTrail">
     <!-- Left Column -->
@@ -79,7 +44,7 @@
             <i class="pi pi-times-circle status-icon rejected" *ngIf="getCurrentL1DataStatus === 'Rejected'"></i>
             <i class="pi pi-check-circle status-icon approved" *ngIf="getCurrentL1DataStatus === 'Approved'"></i>
             <i class="pi pi-exclamation-triangle status-icon under-review"
-              *ngIf="getCurrentL1DataStatus === 'Under Review'"></i>
+              *ngIf="basicDetailsUnderReview"></i>
             <i class="pi pi-sync status-icon request-resubmit"
               *ngIf="getCurrentL1DataStatus === 'Request to Resubmit'"></i>
             <span class="p-font-size">Stage 1: Basic Information</span>
@@ -106,7 +71,7 @@
             <i class="pi pi-times-circle status-icon rejected" *ngIf="getCurrentL2DataStatus === 'Rejected'"></i>
             <i class="pi pi-check-circle status-icon approved" *ngIf="getCurrentL2DataStatus === 'Approved'"></i>
             <i class="pi pi-exclamation-triangle status-icon under-review"
-              *ngIf="getCurrentL2DataStatus === 'Under Review'"></i>
+              *ngIf="manufacturingUnderReview"></i>
             <i class="pi pi-sync status-icon request-resubmit"
               *ngIf="getCurrentL2DataStatus === 'Request to Resubmit'"></i>
             <span class="p-font-size">Stage 2: Manufacturing</span>
@@ -134,7 +99,7 @@
             <i class="pi pi-times-circle status-icon rejected" *ngIf="getCurrentL3DataStatus === 'Rejected'"></i>
             <i class="pi pi-check-circle status-icon approved" *ngIf="getCurrentL3DataStatus === 'Approved'"></i>
             <i class="pi pi-exclamation-triangle status-icon under-review"
-              *ngIf="getCurrentL3DataStatus === 'Under Review'"></i>
+              *ngIf="financialUnderReview"></i>
             <i class="pi pi-sync status-icon request-resubmit"
               *ngIf="getCurrentL3DataStatus === 'Request to Resubmit'"></i>
             <span class="p-font-size">Stage 3: Financial & Additional</span>
@@ -186,7 +151,7 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'basic'">
         <div class="section-header">
           <h3>Basic Information</h3>
-          <button class="edit-section-btn" *ngIf="basicDetailsEdit && userType === 'supplier'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="basicDetailsUnderReview && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil" (click)="navigateToEdit()"></i>
           </button>
         </div>
@@ -417,7 +382,7 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'manufacturing'">
         <div class="section-header">
           <h3>Manufacturing Capabilities</h3>
-          <button class="edit-section-btn" *ngIf="manufacturingEdit && userType === 'supplier'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="manufacturingUnderReview && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
         </div>
@@ -634,7 +599,7 @@
       <div class="tab-content" *ngIf="activeLevelTab === 'financial'">
         <div class="section-header">
           <h3>Financial & Additional Information</h3>
-          <button class="edit-section-btn" *ngIf="financialEdit && userType === 'supplier'" (click)="navigateToEdit()">
+          <button class="edit-section-btn" *ngIf="financialUnderReview && userType === 'supplier'" (click)="navigateToEdit()">
             <i class="pi pi-pencil"></i>
           </button>
           
