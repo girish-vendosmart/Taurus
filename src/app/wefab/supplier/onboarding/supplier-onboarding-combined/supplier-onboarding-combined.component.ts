@@ -623,7 +623,12 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       }
       
       if(this.activeStepIndex === 0){
-        this.postL1Data()
+        let supplier_id = localStorage.getItem('supplier_id');
+        if(supplier_id){
+          this.putData(this.basicDetails)
+        } else {
+          this.postL1Data()
+        }
       } else if(this.activeStepIndex === 1){
         this.putData(this.contactCapabilities)
       } else if (this.activeStepIndex === 2) {
@@ -654,14 +659,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     let endPoint = '/api/resource/Supplier Onboarding L1';
 
     this.onboardingbody = {
-      company_name: this.model.company_name,
-      primary_email_id: this.model.primary_email_id,
       onboarding_form_status: 'L1 Under Review',
-      registered_lat: this.model.registeredAddress?.location?.lat || 0,
-      registered_lng: this.model.registeredAddress?.location?.lng || 0,
-      phone_verified: this.phoneVerified,
-      gst_verified: this.gstVerified,
-      pan_verified: this.panVerified,
       basic_details: JSON.stringify(this.basicDetails)
     }
 
