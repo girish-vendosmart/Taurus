@@ -594,10 +594,19 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         return;
       }
       
-      if (this.activeStepIndex < this.totalSteps - 1) {
+      // Call appropriate API based on current step before moving to next step
+      if (this.activeStepIndex === 1) {
+        // Moving from Contact & Capabilities to Machine Capabilities - Save L1 data
+        this.saveL1Data();
+      } else if (this.activeStepIndex === 3) {
+        // Moving from Facility Verification to Financial Information - Save L2 data
+        this.saveL2Data();
+      } else if (this.activeStepIndex < this.totalSteps - 1) {
+        // Regular step progression without API call
         this.activeStepIndex++;
       } else {
-        this.submit();
+        // Final step - Save L3 data and complete onboarding
+        this.saveL3DataAndComplete();
       }
     } else {
       this.markFieldsAsTouched(this.currentFields);
@@ -705,8 +714,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
 
   submit() {
     if (this.form.valid && this.isAllStepsValid()) {
-      const formData = this.prepareFormData();
-      this.saveAllData(formData);
+      // At final step, save L3 data and complete onboarding
+      this.saveL3DataAndComplete();
     } else {
       this.sweetAlert.error('Please complete all required fields in all steps before submitting.');
     }
@@ -725,177 +734,405 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     return true;
   }
 
-  prepareFormData() {
-    const formValues = this.form.getRawValue();
-    const mergedData = { ...this.model, ...formValues };
-    
-    // Parse formatted currency values back to numbers
-    if (mergedData.companyFinancials) {
-      ['annualRevenue2024', 'annualRevenue2023', 'annualRevenue2022'].forEach(field => {
-        if (mergedData.companyFinancials[field]) {
-          mergedData.companyFinancials[field] = this.parseFormattedNumber(mergedData.companyFinancials[field]);
-        }
-      });
-    }
-
-    if (mergedData.insuranceCoverage) {
-      ['generalLiabilityInsurance', 'productLiabilityInsurance'].forEach(field => {
-        if (mergedData.insuranceCoverage[field]) {
-          mergedData.insuranceCoverage[field] = this.parseFormattedNumber(mergedData.insuranceCoverage[field]);
-        }
-      });
-    }
-
-    mergedData['bank_verified'] = this.bankVerified;
-    
-    return mergedData;
+  onBankVerified(verified: boolean): void {
+    this.bankVerified = verified;
   }
 
-  saveAllData(formData: any) {
-    const supplierId = localStorage.getItem('supplier_id');
+  // L1 Methods - Country and State handling
+  getStates(country: any) {
+    if (!country) return;
     
-    // Prepare L1 data
-    const l1Data = {
-      company_name: formData.company_name,
-      primary_email_id: formData.primary_email_id,
+    let endPoint = `/api/resource/City?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"]]`;
+    console.log('Fetching states for country:', country);
+    
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      console.log('States API response:', res);
+      if (res && res.data) {
+        // Extract unique states from the response
+        const states = [...new Set(res.data.map((item: any) => item.state_title))];
+        
+        this.stateList = states.map((state: any) => ({
+          label: state,
+          value: state
+        }));
+        
+        console.log('State list updated:', this.stateList);
+        
+        // After state list is loaded, set the selected state if we have one
+        if (this.selectedState) {
+          setTimeout(() => {
+            this.updateStateDropdownOptions(true);
+          }, 200);
+        }
+        
+        this.updateStateDropdownOptions(false);
+      } else {
+        this.stateList = [];
+      }
+    }, error => {
+      console.error('Error fetching states:', error);
+      this.stateList = [];
+    });
+  }
+
+  updateStateDropdownOptions(forceSelection: boolean = false) {
+    // Find the state field in the form and update options
+    if (this.stepFields && this.stepFields.length > 0) {
+      const basicDetailsFields = this.stepFields[0];
+      
+      // Find the row containing country, state, city fields
+      const addressRow = basicDetailsFields.find((fieldGroup: any) => 
+        fieldGroup.fieldGroup && 
+        fieldGroup.fieldGroup.some((field: any) => field.key === 'country')
+      );
+      
+      if (addressRow && addressRow.fieldGroup) {
+        const stateField = addressRow.fieldGroup.find((field: any) => field.key === 'state');
+        
+        if (stateField && stateField.templateOptions) {
+          stateField.templateOptions.options = this.stateList;
+          
+          if (forceSelection && this.selectedState && stateField.formControl) {
+            stateField.formControl.setValue(this.selectedState);
+            stateField.formControl.markAsDirty();
+            stateField.formControl.updateValueAndValidity();
+          }
+          
+          setTimeout(() => {
+            if (stateField.formControl) {
+              stateField.formControl.updateValueAndValidity();
+            }
+            this.cdr.detectChanges();
+          }, 50);
+        }
+      }
+    }
+  }
+
+  // L1 Event Handlers
+  onPhoneVerified(verified: boolean): void {
+    this.phoneVerified = verified;
+    console.log('Phone verification status:', verified);
+  }
+
+  onGstVerified(verified: boolean): void {
+    this.gstVerified = verified;
+    console.log('GST verification status:', verified);
+  }
+
+  onPanVerified(verified: boolean): void {
+    this.panVerified = verified;
+    console.log('PAN verification status:', verified);
+  }
+
+  onAddressDetailsAccepted(addressData: any): void {
+    console.log('GST Address details accepted:', addressData);
+    
+    if (addressData) {
+      this.model.registeredAddress = addressData;
+      
+      if (addressData.country) {
+        this.model.country = addressData.country;
+        this.selectedCountry = addressData.country;
+        this.getStates(addressData.country);
+      }
+      
+      if (addressData.state) {
+        this.model.state = addressData.state;
+        this.selectedState = addressData.state;
+      }
+      
+      if (addressData.city) {
+        this.model.city = addressData.city;
+      }
+      
+      setTimeout(() => {
+        this.form.patchValue({
+          registeredAddress: addressData,
+          country: addressData.country,
+          state: addressData.state,
+          city: addressData.city
+        });
+        
+        setTimeout(() => {
+          this.updateStateDropdownOptions(true);
+          this.cdr.detectChanges();
+          this.form.markAsDirty();
+        }, 1000);
+      }, 500);
+    }
+  }
+
+  onCompanyNameChanged(companyName: string) {
+    console.log('onCompanyNameChanged called with:', companyName);
+    this.companyName = companyName;
+    
+    if (companyName && (this.gstVerified || this.panVerified)) {
+      this.model.company_name = companyName;
+      
+      this.form.patchValue({
+        company_name: companyName
+      });
+
+      this.form.get('company_name')?.disable({ emitEvent: false });
+      
+      console.log('Company name updated to:', this.model.company_name);
+      this.cdr.detectChanges();
+
+      setTimeout(() => {
+        this.form.markAsPristine();
+      }, 1000);
+    }
+  }
+
+  updateGstFieldVerificationStatus() {
+    // Implementation to update GST verification status
+  }
+
+  updatePanFieldVerificationStatus() {
+    // Implementation to update PAN verification status
+  }
+
+  // L1 API Methods (extracted from supplier-onboarding.component.ts)
+  updateL1Data(data: any) {
+    console.log('Preparing L1 data for submission:', data);
+    let body = {
+      company_name: data.company_name,
+      primary_email_id: data.primary_email_id,
       onboarding_status: 'Under Review',
-      registered_lat: formData.registeredAddress?.location?.lat || 0,
-      registered_lng: formData.registeredAddress?.location?.lng || 0,
+      registered_lat: data.registeredAddress?.location?.lat || 0,
+      registered_lng: data.registeredAddress?.location?.lng || 0,
       phone_verified: this.phoneVerified,
       gst_verified: this.gstVerified,
       pan_verified: this.panVerified,
       company_profile: JSON.stringify({
-        gstinNumber: formData.gstinNumber,
-        panNumber: formData.panNumber,
-        noGst: formData.noGst,
-        company_name: formData.company_name,
-        primary_email_id: formData.primary_email_id,
-        registeredAddress: formData.registeredAddress,
-        country: formData.country,
-        state: formData.state,
-        city: formData.city,
-        primaryContactName: formData.primaryContactName,
-        phoneNumber: formData.phoneNumber,
-        primaryManufacturingProcess: formData.primaryManufacturingProcess,
-        websiteURL: formData.websiteURL,
-        linkedinURL: formData.linkedinURL,
-        totalEmployees: formData.totalEmployees,
-        foundedYear: formData.foundedYear,
-        companyDocuments: formData.companyDocuments,
+        gstinNumber: data.gstinNumber,
+        panNumber: data.panNumber,
+        noGst: data.noGst,
+        company_name: data.company_name,
+        primary_email_id: data.primary_email_id,
+        registeredAddress: data.registeredAddress,
+        country: data.country,
+        state: data.state,
+        city: data.city,
+        primaryContactName: data.primaryContactName,
+        phoneNumber: data.phoneNumber,
+        primaryManufacturingProcess: data.primaryManufacturingProcess,
+        websiteURL: data.websiteURL,
+        linkedinURL: data.linkedinURL,
+        totalEmployees: data.totalEmployees,
+        foundedYear: data.foundedYear,
+        companyDocuments: data.companyDocuments,
         phone_verified: this.phoneVerified,
         gstVerified: this.gstVerified,
         panVerified: this.panVerified
       })
     };
+    return body;
+  }
 
-    // Prepare L2 data
-    const l2Data = {
-      supplier_company_id: supplierId,
+  postL1DataFunction(endPoint: any, body: any) {
+    this.commonService.postData(endPoint, body).subscribe((res: any) => {
+      localStorage.setItem('supplier_id', res.data.name);
+      this.hasExistingSupplier = true;
+      this.sweetAlert.success('Basic information saved successfully. Proceeding to manufacturing capabilities.');
+      // Move to next step after successful save
+      this.activeStepIndex++;
+    }, (err) => {
+      console.error('Error saving L1 data:', err);
+      this.sweetAlert.error('Error saving basic information. Please try again.');
+    });
+  }
+
+  putL1DataFunction(endPoint: any, body: any) {
+    this.commonService.putData(endPoint, body).subscribe((res: any) => {
+      this.sweetAlert.success('Basic information updated successfully. Proceeding to manufacturing capabilities.');
+      // Move to next step after successful update
+      this.activeStepIndex++;
+    }, (err) => {
+      console.error('Error updating L1 data:', err);
+      this.sweetAlert.error('Error updating basic information. Please try again.');
+    });
+  }
+
+  saveL1Data() {
+    // Get current form values and merge with model
+    const formValues = this.form.getRawValue();
+    const l1Data = { ...this.model, ...formValues };
+    
+    // Extract city, state, and country from the registeredAddress if it has the new format
+    if (l1Data.registeredAddress && typeof l1Data.registeredAddress === 'object') {
+      const addressData = l1Data.registeredAddress;
+      
+      if (!l1Data.city && addressData.city) {
+        l1Data.city = addressData.city;
+      }
+      if (!l1Data.state && addressData.state) {
+        l1Data.state = addressData.state;
+      }
+      if (!l1Data.country && addressData.country) {
+        l1Data.country = addressData.country;
+      }
+    }
+    
+    console.log('Saving L1 data:', l1Data);
+    
+    let endPoint = '/api/resource/Supplier Onboarding L1';
+    let supplier_id = localStorage.getItem('supplier_id');
+    let body = this.updateL1Data(l1Data);
+    
+    if (supplier_id) {
+      endPoint = '/api/resource/Supplier Onboarding L1/' + supplier_id;
+      this.putL1DataFunction(endPoint, body);
+    } else {
+      this.postL1DataFunction(endPoint, body);
+    }
+  }
+
+  // L2 API Methods (extracted from supplier-onboarding-l2.component.ts)
+  updateL2Data(data: any) {
+    console.log('Preparing L2 data for submission:', data);
+    let supplier_id = localStorage.getItem('supplier_id');
+    let body = {
+      supplier_company_id: supplier_id,
       onboarding_status: 'Under Review',
       company_profile: JSON.stringify({
-        machines: formData.machines,
-        certifications: formData.certifications,
-        industries: formData.industries,
-        productionCapacity: formData.productionCapacity,
-        facilityPhotos: formData.facilityPhotos
+        machines: data.machines,
+        certifications: data.certifications,
+        industries: data.industries,
+        productionCapacity: data.productionCapacity,
+        facilityPhotos: data.facilityPhotos
       })
     };
+    return body;
+  }
 
-    // Prepare L3 data
-    const l3Data = {
-      supplier_company_id: supplierId,
+  postL2DataFunction(endPoint: string, body: any) {
+    this.commonService.postData(endPoint, body).subscribe((res: any) => {
+      this.sweetAlert.success('Manufacturing capabilities saved successfully. Proceeding to financial information.');
+      // Move to next step after successful save
+      this.activeStepIndex++;
+    }, (err) => {
+      console.error('Error saving L2 data:', err);
+      this.sweetAlert.error('Error saving manufacturing capabilities. Please try again.');
+    });
+  }
+
+  putL2DataFunction(endPoint: string, body: any) {
+    this.commonService.putData(endPoint, body).subscribe((res: any) => {
+      this.sweetAlert.success('Manufacturing capabilities updated successfully. Proceeding to financial information.');
+      // Move to next step after successful update
+      this.activeStepIndex++;
+    }, (err) => {
+      console.error('Error updating L2 data:', err);
+      this.sweetAlert.error('Error updating manufacturing capabilities. Please try again.');
+    });
+  }
+
+  saveL2Data() {
+    // Get current form values and merge with model
+    const formValues = this.form.getRawValue();
+    const l2Data = { ...this.model, ...formValues };
+    
+    console.log('Saving L2 data:', l2Data);
+    
+    let endPoint = '/api/resource/Supplier Onboarding L2';
+    let supplier_id = localStorage.getItem('supplier_id');
+    let body = this.updateL2Data(l2Data);
+    
+    if (supplier_id) {
+      // Try to update existing L2 record
+      endPoint = '/api/resource/Supplier Onboarding L2/' + supplier_id;
+      this.putL2DataFunction(endPoint, body);
+    } else {
+      // If no supplier_id, then post the L2 Data
+      this.postL2DataFunction(endPoint, body);
+    }
+  }
+
+  // L3 API Methods (extracted from supplier-onboarding-l3.component.ts)
+  updateL3Data(data: any) {
+    console.log('Preparing L3 data for submission:', data);
+    let supplier_id = localStorage.getItem('supplier_id');
+    
+    // Parse formatted currency values back to numbers
+    const financialData = { ...data.companyFinancials };
+    if (financialData.annualRevenue2024) {
+      financialData.annualRevenue2024 = this.parseFormattedNumber(financialData.annualRevenue2024);
+    }
+    if (financialData.annualRevenue2023) {
+      financialData.annualRevenue2023 = this.parseFormattedNumber(financialData.annualRevenue2023);
+    }
+    if (financialData.annualRevenue2022) {
+      financialData.annualRevenue2022 = this.parseFormattedNumber(financialData.annualRevenue2022);
+    }
+
+    const insuranceData = { ...data.insuranceCoverage };
+    if (insuranceData.generalLiabilityInsurance) {
+      insuranceData.generalLiabilityInsurance = this.parseFormattedNumber(insuranceData.generalLiabilityInsurance);
+    }
+    if (insuranceData.productLiabilityInsurance) {
+      insuranceData.productLiabilityInsurance = this.parseFormattedNumber(insuranceData.productLiabilityInsurance);
+    }
+    
+    let body = {
+      supplier_company_id: supplier_id,
       onboarding_status: 'Under Review',
       bank_verified: this.bankVerified,
       company_profile: JSON.stringify({
-        bankDetails: formData.bankDetails,
-        companyFinancials: formData.companyFinancials,
-        insuranceCoverage: formData.insuranceCoverage,
-        additionalInformation: formData.additionalInformation,
+        bankDetails: data.bankDetails,
+        companyFinancials: financialData,
+        insuranceCoverage: insuranceData,
+        additionalInformation: data.additionalInformation,
         bank_verified: this.bankVerified
       })
     };
-
-    // Save L1 data first
-    const l1Endpoint = supplierId ? `/api/resource/Supplier Onboarding L1/${supplierId}` : '/api/resource/Supplier Onboarding L1';
-    const l1Method = supplierId ? 'putData' : 'postData';
-    
-    this.commonService[l1Method](l1Endpoint, l1Data).subscribe(
-      (l1Response: any) => {
-        // Store supplier ID if it's a new registration
-        if (!supplierId && l1Response?.data?.name) {
-          localStorage.setItem('supplier_id', l1Response.data.name);
-          l2Data.supplier_company_id = l1Response.data.name;
-          l3Data.supplier_company_id = l1Response.data.name;
-        }
-        
-        // Save L2 data
-        const l2Endpoint = supplierId ? `/api/resource/Supplier Onboarding L2/${supplierId}` : '/api/resource/Supplier Onboarding L2';
-        this.commonService.postData(l2Endpoint, l2Data).subscribe(
-          (l2Response: any) => {
-            // Save L3 data
-            const l3Endpoint = supplierId ? `/api/resource/Supplier Onboarding L3/${supplierId}` : '/api/resource/Supplier Onboarding L3';
-            this.commonService.postData(l3Endpoint, l3Data).subscribe(
-              (l3Response: any) => {
-                this.sweetAlert.success('Congratulations! Your supplier onboarding has been completed successfully. We will review your information and contact you shortly.');
-                setTimeout(() => {
-                  this.router.navigate(['/wefab/supplier/supplier-onboarding-complete']);
-                }, 3000);
-              },
-              (l3Error: any) => {
-                // Try PUT if POST fails for L3
-                this.commonService.putData(`/api/resource/Supplier Onboarding L3/${supplierId || l1Response.data.name}`, l3Data).subscribe(
-                  (l3UpdateResponse: any) => {
-                    this.sweetAlert.success('Your supplier information has been updated successfully.');
-                    setTimeout(() => {
-                      this.router.navigate(['/wefab/supplier/supplier-onboarding-complete']);
-                    }, 3000);
-                  },
-                  (updateError: any) => {
-                    this.sweetAlert.error('An error occurred while saving your information. Please try again.');
-                  }
-                );
-              }
-            );
-          },
-          (l2Error: any) => {
-            // Try PUT if POST fails for L2
-            const currentSupplierId = supplierId || l1Response.data.name;
-            this.commonService.putData(`/api/resource/Supplier Onboarding L2/${currentSupplierId}`, l2Data).subscribe(
-              (l2UpdateResponse: any) => {
-                // Continue with L3 after L2 update
-                const l3Endpoint = `/api/resource/Supplier Onboarding L3/${currentSupplierId}`;
-                this.commonService.postData(l3Endpoint, l3Data).subscribe(
-                  (l3Response: any) => {
-                    this.sweetAlert.success('Your supplier information has been updated successfully.');
-                    setTimeout(() => {
-                      this.router.navigate(['/wefab/supplier/supplier-onboarding-complete']);
-                    }, 3000);
-                  },
-                  (l3Error: any) => {
-                    this.commonService.putData(`/api/resource/Supplier Onboarding L3/${currentSupplierId}`, l3Data).subscribe(
-                      (l3UpdateResponse: any) => {
-                        this.sweetAlert.success('Your supplier information has been updated successfully.');
-                        setTimeout(() => {
-                          this.router.navigate(['/wefab/supplier/supplier-onboarding-complete']);
-                        }, 3000);
-                      }
-                    );
-                  }
-                );
-              }
-            );
-          }
-        );
-      },
-      (l1Error: any) => {
-        this.sweetAlert.error('An error occurred while saving your basic information. Please try again.');
-        console.error('L1 save error:', l1Error);
-      }
-    );
+    return body;
   }
 
-  onBankVerified(verified: boolean): void {
-    this.bankVerified = verified;
+  postL3DataFunction(endPoint: string, body: any) {
+    this.commonService.postData(endPoint, body).subscribe((res: any) => {
+      this.sweetAlert.success('Congratulations! Your supplier onboarding has been completed successfully. We will review your information and contact you shortly.');
+      setTimeout(() => {
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-complete']);
+      }, 3000);
+    }, (err) => {
+      console.error('Error saving L3 data:', err);
+      this.sweetAlert.error('Error completing onboarding. Please try again.');
+    });
+  }
+
+  putL3DataFunction(endPoint: string, body: any) {
+    this.commonService.putData(endPoint, body).subscribe((res: any) => {
+      this.sweetAlert.success('Congratulations! Your supplier onboarding has been completed successfully. We will review your information and contact you shortly.');
+      setTimeout(() => {
+        this.router.navigate(['/wefab/supplier/supplier-onboarding-complete']);
+      }, 3000);
+    }, (err) => {
+      console.error('Error updating L3 data:', err);
+      this.sweetAlert.error('Error completing onboarding. Please try again.');
+    });
+  }
+
+  saveL3DataAndComplete() {
+    // Get current form values and merge with model
+    const formValues = this.form.getRawValue();
+    const l3Data = { ...this.model, ...formValues };
+    
+    console.log('Saving L3 data and completing onboarding:', l3Data);
+    
+    let endPoint = '/api/resource/Supplier Onboarding L3';
+    let supplier_id = localStorage.getItem('supplier_id');
+    let body = this.updateL3Data(l3Data);
+    
+    if (supplier_id) {
+      // Try to update existing L3 record
+      endPoint = '/api/resource/Supplier Onboarding L3/' + supplier_id;
+      this.putL3DataFunction(endPoint, body);
+    } else {
+      // If no supplier_id, this shouldn't happen at L3 stage
+      this.postL3DataFunction(endPoint, body);
+    }
   }
 
   // Field configuration methods (from L2 and L3 components)
@@ -1825,160 +2062,5 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         }
       }
     ];
-  }
-
-  // L1 Methods - Country and State handling
-  getStates(country: any) {
-    if (!country) return;
-    
-    let endPoint = `/api/resource/City?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"]]`;
-    console.log('Fetching states for country:', country);
-    
-    this.commonService.getData(endPoint).subscribe((res: any) => {
-      console.log('States API response:', res);
-      if (res && res.data) {
-        // Extract unique states from the response
-        const states = [...new Set(res.data.map((item: any) => item.state_title))];
-        
-        this.stateList = states.map((state: any) => ({
-          label: state,
-          value: state
-        }));
-        
-        console.log('State list updated:', this.stateList);
-        
-        // After state list is loaded, set the selected state if we have one
-        if (this.selectedState) {
-          setTimeout(() => {
-            this.updateStateDropdownOptions(true);
-          }, 200);
-        }
-        
-        this.updateStateDropdownOptions(false);
-      } else {
-        this.stateList = [];
-      }
-    }, error => {
-      console.error('Error fetching states:', error);
-      this.stateList = [];
-    });
-  }
-
-  updateStateDropdownOptions(forceSelection: boolean = false) {
-    // Find the state field in the form and update options
-    if (this.stepFields && this.stepFields.length > 0) {
-      const basicDetailsFields = this.stepFields[0];
-      
-      // Find the row containing country, state, city fields
-      const addressRow = basicDetailsFields.find((fieldGroup: any) => 
-        fieldGroup.fieldGroup && 
-        fieldGroup.fieldGroup.some((field: any) => field.key === 'country')
-      );
-      
-      if (addressRow && addressRow.fieldGroup) {
-        const stateField = addressRow.fieldGroup.find((field: any) => field.key === 'state');
-        
-        if (stateField && stateField.templateOptions) {
-          stateField.templateOptions.options = this.stateList;
-          
-          if (forceSelection && this.selectedState && stateField.formControl) {
-            stateField.formControl.setValue(this.selectedState);
-            stateField.formControl.markAsDirty();
-            stateField.formControl.updateValueAndValidity();
-          }
-          
-          setTimeout(() => {
-            if (stateField.formControl) {
-              stateField.formControl.updateValueAndValidity();
-            }
-            this.cdr.detectChanges();
-          }, 50);
-        }
-      }
-    }
-  }
-
-  // L1 Event Handlers
-  onPhoneVerified(verified: boolean): void {
-    this.phoneVerified = verified;
-    console.log('Phone verification status:', verified);
-  }
-
-  onGstVerified(verified: boolean): void {
-    this.gstVerified = verified;
-    console.log('GST verification status:', verified);
-  }
-
-  onPanVerified(verified: boolean): void {
-    this.panVerified = verified;
-    console.log('PAN verification status:', verified);
-  }
-
-  onAddressDetailsAccepted(addressData: any): void {
-    console.log('GST Address details accepted:', addressData);
-    
-    if (addressData) {
-      this.model.registeredAddress = addressData;
-      
-      if (addressData.country) {
-        this.model.country = addressData.country;
-        this.selectedCountry = addressData.country;
-        this.getStates(addressData.country);
-      }
-      
-      if (addressData.state) {
-        this.model.state = addressData.state;
-        this.selectedState = addressData.state;
-      }
-      
-      if (addressData.city) {
-        this.model.city = addressData.city;
-      }
-      
-      setTimeout(() => {
-        this.form.patchValue({
-          registeredAddress: addressData,
-          country: addressData.country,
-          state: addressData.state,
-          city: addressData.city
-        });
-        
-        setTimeout(() => {
-          this.updateStateDropdownOptions(true);
-          this.cdr.detectChanges();
-          this.form.markAsDirty();
-        }, 1000);
-      }, 500);
-    }
-  }
-
-  onCompanyNameChanged(companyName: string) {
-    console.log('onCompanyNameChanged called with:', companyName);
-    this.companyName = companyName;
-    
-    if (companyName && (this.gstVerified || this.panVerified)) {
-      this.model.company_name = companyName;
-      
-      this.form.patchValue({
-        company_name: companyName
-      });
-
-      this.form.get('company_name')?.disable({ emitEvent: false });
-      
-      console.log('Company name updated to:', this.model.company_name);
-      this.cdr.detectChanges();
-
-      setTimeout(() => {
-        this.form.markAsPristine();
-      }, 1000);
-    }
-  }
-
-  updateGstFieldVerificationStatus() {
-    // Implementation to update GST verification status
-  }
-
-  updatePanFieldVerificationStatus() {
-    // Implementation to update PAN verification status
   }
 } 

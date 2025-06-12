@@ -21,7 +21,7 @@ export class SupplierOnboardingWelcomeComponentComponent {
   startOnboarding(): void {
     // Navigate to the first onboarding step
     console.log('Starting onboarding process');
-    this.router.navigate(['/wefab/supplier/supplier-onboarding']);
+    this.router.navigate(['/wefab/supplier/supplier-onboarding-form']);
     // You would typically use Router to navigate
     // this.router.navigate(['/supplier/onboarding/step1']);
   }
