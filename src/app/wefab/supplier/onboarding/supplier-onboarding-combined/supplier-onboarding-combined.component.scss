@@ -892,4 +892,34 @@ h2 {
   .step-main-title {
     font-size: 1.125rem;
   }
+}
+
+/* Edit mode styles */
+:host.edit-mode {
+  .card {
+    border-left: 4px solid #059669;
+    
+    .card-title {
+      color: #059669;
+    }
+  }
+  
+  .progress-bar {
+    background: linear-gradient(90deg, #059669, lighten(#059669, 10%)) !important;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #059669, darken(#059669, 8%));
+    border-color: #059669;
+    
+    &:hover, &:focus {
+      background: linear-gradient(135deg, darken(#059669, 5%), darken(#059669, 15%));
+      border-color: darken(#059669, 10%);
+    }
+  }
+  
+  .step.active .step-number {
+    background-color: #059669;
+    box-shadow: 0 4px 12px rgba(#059669, 0.4);
+  }
 } 

@@ -1,11 +1,22 @@
-<div class="container-fluid py-3">
+<div class="container-fluid py-3" [ngClass]="{'edit-mode': isEditMode}">
   <div class="row justify-content-center">
     <div class="col-lg-11">
       
       <!-- Header Section -->
       <div class="text-center mb-4">
-        <h2 class="mb-2">Supplier Onboarding: {{ getCurrentMainStepTitle() }}</h2>
-        <p class="text-muted">Complete the following form to begin the supplier onboarding process. Fill in all required fields and provide accurate information to ensure quick approval.</p>
+        <h2 class="mb-2">
+          <ng-container>
+            Supplier Onboarding: {{ getCurrentMainStepTitle() }}
+          </ng-container>
+        </h2>
+        <p class="text-muted">
+          <ng-container *ngIf="!isEditMode">
+            Complete the following form to begin the supplier onboarding process. Fill in all required fields and provide accurate information to ensure quick approval.
+          </ng-container>
+          <ng-container *ngIf="isEditMode">
+            Update your supplier information. Make necessary changes and save to update your profile.
+          </ng-container>
+        </p>
       </div>
       
       <div class="row align-items-start">
@@ -118,7 +129,9 @@
                   
                   <ng-template #completeButton>
                     <button type="button" class="btn btn-primary btn-complete" (click)="submit()">
-                      <i class="pi pi-check me-2"></i>Submit Onboarding
+                      <i class="pi pi-check me-2"></i>
+                      <ng-container *ngIf="!isEditMode">Submit Onboarding</ng-container>
+                      <ng-container *ngIf="isEditMode">Save Changes</ng-container>
                     </button>
                   </ng-template>
                 </div>

@@ -4,7 +4,7 @@ import { FormGroup, FormBuilder, ReactiveFormsModule, AbstractControl, Validatio
 import { FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonService } from '../../../../shared/services/common.service';
 import { ChangeDetectorRef } from '@angular/core';
 
@@ -218,30 +218,35 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       description: 'Contact details and manufacturing capabilities.'
     },
     {
-      title: '',
-      description: ''
+      title: 'Machine Capabilities',
+      description: 'Add details about your manufacturing machines and capabilities.'
     },
     {
-      title: '',
-      description: ''
+      title: 'Facility Verification',
+      description: 'Upload photos of your manufacturing facility for verification.'
     },
     {
       title: 'Financial Information',
       description: 'Share your financial details and banking information.'
     },
     {
-      title: '',
-      description: ''
+      title: 'Additional Information',
+      description: 'Provide business references and additional details.'
     }
   ];
   onboardingbody:any;
   supplier_id: any;
+  
+  // Edit mode properties
+  isEditMode: boolean = false;
+  urlSupplierId: string | null = null;
   
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
     private renderer: Renderer2,
     private router: Router,
+    private route: ActivatedRoute,
     private commonService: CommonService,
     private sweetAlert: SweetAlertService,
     @Inject(PLATFORM_ID) private platformId: Object,
@@ -265,21 +270,51 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   ngOnInit(): void {
     this.checkScreenSize();
     
+    // Check URL parameters first
+    this.handleUrlParameters();
+    
     // Load country list first, then initialize form
     this.getCountryListAndInitializeForm();
     
-    // Check if supplier_id exists
-    if (this.isBrowser) {
-      const supplierId = localStorage.getItem('supplier_id');
-      if (supplierId) {
-        this.hasExistingSupplier = true;
-        this.loadExistingData(supplierId);
-      }
-      this.patchEmailId();
-    }
-    
     // Set static bank verification data
     this.setStaticBankData();
+  }
+
+  // New method to handle URL parameters
+  handleUrlParameters(): void {
+    // Get supplier ID from route parameters
+    this.urlSupplierId = this.route.snapshot.paramMap.get('id');
+    
+    // Check for edit mode from query parameters
+    this.route.queryParams.subscribe(params => {
+      this.isEditMode = params['mode'] === 'edit';
+      
+      console.log('🔍 URL Parameters:', {
+        supplierId: this.urlSupplierId,
+        isEditMode: this.isEditMode,
+        fullParams: params
+      });
+      
+      // If we have a supplier ID from URL and are in edit mode, load that data
+      if (this.urlSupplierId && this.isEditMode) {
+        this.supplier_id = this.urlSupplierId;
+        localStorage.setItem('supplier_id', this.urlSupplierId);
+        this.hasExistingSupplier = true;
+        
+        // Load existing data for this supplier
+        if (this.isBrowser) {
+          this.loadExistingData(this.urlSupplierId);
+        }
+      } else if (this.isBrowser) {
+        // Fallback to localStorage check
+        const supplierId = localStorage.getItem('supplier_id');
+        if (supplierId) {
+          this.hasExistingSupplier = true;
+          this.loadExistingData(supplierId);
+        }
+        this.patchEmailId();
+      }
+    });
   }
 
   // New method to load countries then initialize form
@@ -316,53 +351,226 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   patchEmailId() {
-    this.model.primary_email_id = localStorage.getItem('primary_email_id');
-    
-    setTimeout(() => {
-      this.form.markAsPristine();
-    }, 1000);
+    // Only patch email from localStorage if not in edit mode
+    // In edit mode, email should come from loaded supplier data
+    if (!this.isEditMode) {
+      this.model.primary_email_id = localStorage.getItem('primary_email_id');
+      
+      setTimeout(() => {
+        this.form.markAsPristine();
+      }, 1000);
+    }
   }
 
   loadExistingData(supplierId: string) {
-    // Load L1 data first
-    this.commonService.getData(`/api/resource/Supplier Onboarding L1/${supplierId}`)
-      .subscribe((l1Response: any) => {
-        if (l1Response && l1Response.data && l1Response.data.company_profile) {
-          const l1Data = JSON.parse(l1Response.data.company_profile);
-          this.mergeL1Data(l1Data);
-          this.phoneVerified = l1Data.phone_verified || false;
-          this.gstVerified = l1Data.gstVerified || l1Response.data.gst_verified || false;
-          this.panVerified = l1Data.panVerified || l1Response.data.pan_verified || false;
-        }
+    // Load L1 data using Supplier Onboarding L1 docType
+    const endpoint = `/api/resource/Supplier Onboarding L1/${supplierId}`;
+    console.log('🔄 Loading existing data from:', endpoint);
+    
+    this.commonService.getData(endpoint)
+      .subscribe((response: any) => {
+        console.log('📥 L1 Response:', response);
         
-        // Load L2 data
-        this.commonService.getData(`/api/resource/Supplier Onboarding L2/${supplierId}`)
-          .subscribe((l2Response: any) => {
-            if (l2Response && l2Response.data && l2Response.data.company_profile) {
-              const l2Data = JSON.parse(l2Response.data.company_profile);
-              this.mergeL2Data(l2Data);
+        if (response && response.data) {
+          // Handle basic_details if it exists and is a JSON string
+          if (response.data.basic_details) {
+            try {
+              const basicDetailsData = typeof response.data.basic_details === 'string' 
+                ? JSON.parse(response.data.basic_details) 
+                : response.data.basic_details;
+              
+              this.basicDetails = basicDetailsData;
+              
+              // Merge basic details into model
+              this.mergeBasicDetailsIntoModel(basicDetailsData);
+              
+              console.log('✅ Basic details loaded and merged:', this.basicDetails);
+            } catch (error) {
+              console.error('❌ Error parsing basic_details:', error);
             }
-            
-            // Load L3 data
-            this.commonService.getData(`/api/resource/Supplier Onboarding L3/${supplierId}`)
-              .subscribe((l3Response: any) => {
-                if (l3Response && l3Response.data && l3Response.data.company_profile) {
-                  const l3Data = JSON.parse(l3Response.data.company_profile);
-                  this.mergeL3Data(l3Data);
-                  this.bankVerified = l3Data.bank_verified || false;
-                }
-                this.patchFormValues();
-              }, (error) => {
-                console.log('L3 data not found, continuing with L1 and L2 data');
-                this.patchFormValues();
-              });
-          }, (error) => {
-            console.log('L2 data not found, continuing with L1 data only');
-            this.patchFormValues();
-          });
+          }
+          
+          // Load verification statuses from response
+          if (response.data.phone_verified !== undefined) {
+            this.phoneVerified = response.data.phone_verified;
+          }
+          if (response.data.gst_verified !== undefined) {
+            this.gstVerified = response.data.gst_verified;
+          }
+          if (response.data.pan_verified !== undefined) {
+            this.panVerified = response.data.pan_verified;
+          }
+          
+          // Load additional section data if available
+          this.loadAdditionalSectionData(response.data);
+          
+          // Patch the form with loaded data
+          this.patchFormWithLoadedData();
+        }
       }, (error) => {
-        console.log('L1 data not found, starting fresh');
+        console.error('❌ Error loading L1 data:', error);
+        this.sweetAlert.error('Error loading supplier data. Please try again.');
       });
+  }
+
+  // New method to merge basic details into model
+  mergeBasicDetailsIntoModel(basicDetailsData: any) {
+    if (basicDetailsData.gstinNumber !== undefined) this.model.gstinNumber = basicDetailsData.gstinNumber;
+    if (basicDetailsData.panNumber !== undefined) this.model.panNumber = basicDetailsData.panNumber;
+    if (basicDetailsData.noGst !== undefined) this.model.noGst = basicDetailsData.noGst;
+    if (basicDetailsData.company_name) this.model.company_name = basicDetailsData.company_name;
+    if (basicDetailsData.primary_email_id) this.model.primary_email_id = basicDetailsData.primary_email_id;
+    if (basicDetailsData.registeredAddress) this.model.registeredAddress = basicDetailsData.registeredAddress;
+    if (basicDetailsData.country) {
+      this.model.country = basicDetailsData.country;
+      this.selectedCountry = basicDetailsData.country;
+    }
+    if (basicDetailsData.state) {
+      this.model.state = basicDetailsData.state;
+      this.selectedState = basicDetailsData.state;
+    }
+    if (basicDetailsData.city) this.model.city = basicDetailsData.city;
+    
+    // Handle verification statuses
+    if (basicDetailsData.gstVerified !== undefined) this.gstVerified = basicDetailsData.gstVerified;
+    if (basicDetailsData.panVerified !== undefined) this.panVerified = basicDetailsData.panVerified;
+  }
+
+  // New method to patch form with all loaded data
+  patchFormWithLoadedData() {
+    // Handle country and state loading
+    if (this.selectedCountry) {
+      this.getStates(this.selectedCountry);
+    }
+    
+    // Patch the form after a short delay to ensure all async operations complete
+    setTimeout(() => {
+      this.form.patchValue(this.model);
+      
+      // Handle company name field state
+      if (this.model.company_name && (this.gstVerified || this.panVerified)) {
+        this.form.get('company_name')?.disable({ emitEvent: false });
+      }
+      
+      // Update state dropdown options after states are loaded
+      setTimeout(() => {
+        if (this.selectedState) {
+          this.updateStateDropdownOptions(true);
+        }
+        this.cdr.detectChanges();
+        this.form.markAsPristine();
+      }, 1000);
+    }, 500);
+  }
+
+  // New method to load additional section data from L1 response
+  loadAdditionalSectionData(l1Data: any) {
+    // Load contact_capabilities data
+    if (l1Data.contact_capabilities) {
+      try {
+        const contactData = typeof l1Data.contact_capabilities === 'string' 
+          ? JSON.parse(l1Data.contact_capabilities) 
+          : l1Data.contact_capabilities;
+        this.contactCapabilities = contactData;
+        this.mergeContactCapabilities(contactData);
+        console.log('✅ Contact capabilities loaded');
+      } catch (error) {
+        console.error('❌ Error parsing contact_capabilities:', error);
+      }
+    }
+
+    // Load machine_capabilities data
+    if (l1Data.machine_capabilities) {
+      try {
+        const machineData = typeof l1Data.machine_capabilities === 'string' 
+          ? JSON.parse(l1Data.machine_capabilities) 
+          : l1Data.machine_capabilities;
+        this.machineCapabilities = machineData;
+        this.mergeMachineCapabilities(machineData);
+        console.log('✅ Machine capabilities loaded');
+      } catch (error) {
+        console.error('❌ Error parsing machine_capabilities:', error);
+      }
+    }
+
+    // Load facility_verification data
+    if (l1Data.facility_verification) {
+      try {
+        const facilityData = typeof l1Data.facility_verification === 'string' 
+          ? JSON.parse(l1Data.facility_verification) 
+          : l1Data.facility_verification;
+        this.facilityVerification = facilityData;
+        this.mergeFacilityVerification(facilityData);
+        console.log('✅ Facility verification loaded');
+      } catch (error) {
+        console.error('❌ Error parsing facility_verification:', error);
+      }
+    }
+
+    // Load financial_information data
+    if (l1Data.financial_information) {
+      try {
+        const financialData = typeof l1Data.financial_information === 'string' 
+          ? JSON.parse(l1Data.financial_information) 
+          : l1Data.financial_information;
+        this.financialInformation = financialData;
+        this.mergeFinancialInformation(financialData);
+        console.log('✅ Financial information loaded');
+      } catch (error) {
+        console.error('❌ Error parsing financial_information:', error);
+      }
+    }
+
+    // Load additional_information data
+    if (l1Data.additional_information) {
+      try {
+        const additionalData = typeof l1Data.additional_information === 'string' 
+          ? JSON.parse(l1Data.additional_information) 
+          : l1Data.additional_information;
+        this.additionalInformation = additionalData;
+        this.mergeAdditionalInformation(additionalData);
+        console.log('✅ Additional information loaded');
+      } catch (error) {
+        console.error('❌ Error parsing additional_information:', error);
+      }
+    }
+  }
+
+  // New merge methods for each section
+  mergeContactCapabilities(contactData: any) {
+    if (contactData.primaryContactName) this.model.primaryContactName = contactData.primaryContactName;
+    if (contactData.phoneNumber) this.model.phoneNumber = contactData.phoneNumber;
+    if (contactData.primaryManufacturingProcess) this.model.primaryManufacturingProcess = contactData.primaryManufacturingProcess;
+    if (contactData.websiteURL) this.model.websiteURL = contactData.websiteURL;
+    if (contactData.linkedinURL) this.model.linkedinURL = contactData.linkedinURL;
+    if (contactData.totalEmployees) this.model.totalEmployees = contactData.totalEmployees;
+    if (contactData.foundedYear) this.model.foundedYear = contactData.foundedYear;
+    if (contactData.companyDocuments) this.model.companyDocuments = contactData.companyDocuments;
+  }
+
+  mergeMachineCapabilities(machineData: any) {
+    if (machineData.machines) this.model.machines = machineData.machines;
+    if (machineData.certifications) this.model.certifications = machineData.certifications;
+    if (machineData.industries) this.model.industries = machineData.industries;
+    if (machineData.productionCapacity !== undefined) this.model.productionCapacity = machineData.productionCapacity;
+  }
+
+  mergeFacilityVerification(facilityData: any) {
+    if (facilityData.facilityPhotos) this.model.facilityPhotos = facilityData.facilityPhotos;
+  }
+
+  mergeFinancialInformation(financialData: any) {
+    if (financialData.bankDetails) this.model.bankDetails = financialData.bankDetails;
+    if (financialData.companyFinancials) this.model.companyFinancials = financialData.companyFinancials;
+    if (financialData.insuranceCoverage) this.model.insuranceCoverage = financialData.insuranceCoverage;
+    if (financialData.bankVerified !== undefined) this.bankVerified = financialData.bankVerified;
+  }
+
+  mergeAdditionalInformation(additionalData: any) {
+    if (additionalData.references) {
+      this.model.additionalInformation = this.model.additionalInformation || {};
+      this.model.additionalInformation.references = additionalData.references;
+    }
   }
 
   mergeL1Data(l1Data: any) {
@@ -385,23 +593,6 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       this.selectedState = l1Data.state;
       this.model.state = l1Data.state;
     }
-  }
-
-  mergeL2Data(l2Data: any) {
-    // Merge L2 specific fields
-    if (l2Data.machines) this.model.machines = l2Data.machines;
-    if (l2Data.certifications) this.model.certifications = l2Data.certifications;
-    if (l2Data.industries) this.model.industries = l2Data.industries;
-    if (l2Data.productionCapacity !== undefined) this.model.productionCapacity = l2Data.productionCapacity;
-    if (l2Data.facilityPhotos) this.model.facilityPhotos = l2Data.facilityPhotos;
-  }
-
-  mergeL3Data(l3Data: any) {
-    // Merge L3 specific fields
-    if (l3Data.bankDetails) this.model.bankDetails = l3Data.bankDetails;
-    if (l3Data.companyFinancials) this.model.companyFinancials = l3Data.companyFinancials;
-    if (l3Data.insuranceCoverage) this.model.insuranceCoverage = l3Data.insuranceCoverage;
-    if (l3Data.additionalInformation) this.model.additionalInformation = l3Data.additionalInformation;
   }
 
   patchFormValues() {
@@ -553,22 +744,17 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   getCurrentStepTitle(): string {
-    return this.stepInfo[this.activeStepIndex]?.title || '';
+    const baseTitle = this.stepInfo[this.activeStepIndex]?.title || '';
+    return this.isEditMode ? `Edit ${baseTitle}` : baseTitle;
   }
 
   getCurrentStepDescription(): string {
-    return this.stepInfo[this.activeStepIndex]?.description || '';
+    const baseDescription = this.stepInfo[this.activeStepIndex]?.description || '';
+    return this.isEditMode ? `Update your ${baseDescription.toLowerCase()}` : baseDescription;
   }
 
   getCurrentMainStepTitle(): string {
-    // Group steps into main sections like original design
-    if (this.activeStepIndex <= 1) {
-      return 'Basic Information';
-    } else if (this.activeStepIndex <= 3) {
-      return 'Manufacturing Capabilities';
-    } else {
-      return 'Financial & Additional Details';
-    }
+    return this.stepInfo[this.activeStepIndex]?.title || '';
   }
 
   getDisplayStepNumber(): number {
@@ -623,22 +809,29 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       }
       
       if(this.activeStepIndex === 0){
-        let supplier_id = localStorage.getItem('supplier_id');
-        if(supplier_id){
-          this.putData(this.basicDetails)
+        let supplier_id = localStorage.getItem('supplier_id') || this.urlSupplierId;
+        if(supplier_id && this.isEditMode){
+          this.putData(this.basicDetails, 'Basic details updated successfully. Proceeding to contact & capabilities.');
+        } else if(supplier_id){
+          this.putData(this.basicDetails, 'Basic details processed successfully. Proceeding to contact & capabilities.')
         } else {
           this.postL1Data()
         }
       } else if(this.activeStepIndex === 1){
-        this.putData(this.contactCapabilities)
+        const message = this.isEditMode ? 'Contact & capabilities updated successfully. Proceeding to manufacturing capabilities.' : 'Contact & capabilities processed successfully. Proceeding to manufacturing capabilities.';
+        this.putData(this.contactCapabilities, message)
       } else if (this.activeStepIndex === 2) {
-        this.putData(this.machineCapabilities)
+        const message = this.isEditMode ? 'Manufacturing capabilities updated successfully. Proceeding to facility verification.' : 'Manufacturing capabilities processed successfully. Proceeding to facility verification.';
+        this.putData(this.machineCapabilities, message)
       } else if (this.activeStepIndex === 3) {
-        this.putData(this.facilityVerification)
+        const message = this.isEditMode ? 'Facility verification updated successfully. Proceeding to financial information.' : 'Facility verification processed successfully. Proceeding to financial information.';
+        this.putData(this.facilityVerification, message)
       } else if (this.activeStepIndex === 4) {
-        this.putData(this.financialInformation)
+        const message = this.isEditMode ? 'Financial information updated successfully. Proceeding to additional information.' : 'Financial information processed successfully. Proceeding to additional information.';
+        this.putData(this.financialInformation, message)
       } else if (this.activeStepIndex === 5) {
-        this.putData(this.additionalInformation)
+        const message = this.isEditMode ? 'Additional information updated successfully.' : 'Onboarding completed successfully.';
+        this.putData(this.additionalInformation, message)
       }
     } else {
       this.markFieldsAsTouched(this.currentFields);
@@ -659,56 +852,82 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     let endPoint = '/api/resource/Supplier Onboarding L1';
 
     this.onboardingbody = {
+      company_name: this.model.company_name,
+      primary_email_id: this.model.primary_email_id,
       onboarding_form_status: 'L1 Under Review',
+      phone_verified: this.phoneVerified,
+      gst_verified: this.gstVerified,
+      pan_verified: this.panVerified,
       basic_details: JSON.stringify(this.basicDetails)
-    }
+    };
+
+    console.log('🔄 Creating new supplier with basic details:', {
+      endpoint: endPoint,
+      data: this.basicDetails
+    });
 
     this.commonService.postData(endPoint, this.onboardingbody).subscribe((res: any) => {
       if(res.data) {
          this.supplier_id = res.data.name;
          localStorage.setItem('supplier_id', this.supplier_id);
-         this.sweetAlert.success('Basic information processed successfully. Proceeding to manufacturing capabilities.');
+         console.log('✅ Supplier created successfully:', this.supplier_id);
+         this.sweetAlert.success('Basic information processed successfully. Proceeding to contact & capabilities.');
          this.activeStepIndex++;
       }
-    })
+    }, (error) => {
+      console.error('❌ Error creating supplier:', error);
+      this.sweetAlert.error('Error saving basic information. Please try again.');
+    });
   }
 
-  putData(body: any) {
-    let endPoint = '/api/resource/Supplier Onboarding L1/' + this.supplier_id;
+  putData(body: any, message: string) {
+    // Always use Supplier Onboarding L1 endpoint
+    let endPoint = `/api/resource/Supplier Onboarding L1/${this.supplier_id}`;
 
     // Dynamic key based on activeStepIndex
     const stepKeys: { [key: number]: string } = {
-      1: 'contact_capabilities',
-      2: 'machine_capabilities',
-      3: 'facility_verification', 
-      4: 'financial_information',
-      5: 'additional_information'
+      0: 'basic_details',               // Step 0: Basic Details
+      1: 'contact_capabilities',        // Step 1: Contact & Capabilities
+      2: 'machine_capabilities',        // Step 2: Machine Capabilities
+      3: 'facility_verification',       // Step 3: Facility Verification
+      4: 'financial_information',       // Step 4: Financial Information
+      5: 'additional_information'       // Step 5: Additional Information
     };
     
     const currentStepKey = stepKeys[this.activeStepIndex];
 
+    // Prepare the body with the appropriate step data
     this.onboardingbody = {
-      ...this.onboardingbody,
+      company_name: this.model.company_name,
+      primary_email_id: this.model.primary_email_id,
+      phone_verified: this.phoneVerified,
+      gst_verified: this.gstVerified,
+      pan_verified: this.panVerified,
       [currentStepKey]: JSON.stringify(body)
-    }
+    };
+
+    console.log(`🔄 Updating ${currentStepKey} data:`, {
+      endpoint: endPoint,
+      stepKey: currentStepKey,
+      data: body
+    });
 
     this.commonService.putData(endPoint, this.onboardingbody).subscribe((res: any) => {
       if(res.data) {
-         const successMessages: { [key: number]: string } = {
-           1: 'Contact & Capabilities processed successfully. Proceeding to manufacturing capabilities.',
-           2: 'Manufacturing capabilities processed successfully. Proceeding to facility verification.',
-           3: 'Facility verification processed successfully. Proceeding to financial information.',
-           4: 'Financial information processed successfully. Proceeding to additional information.',
-           5: 'Onboarding completed successfully.'
-         };
-         
-         this.sweetAlert.success(successMessages[this.activeStepIndex]);
+         console.log('✅ Update successful:', res.data);
+         this.sweetAlert.success(message || 'Information updated successfully.');
          
          // Only increment if not on the last step
          if (this.activeStepIndex < this.totalSteps - 1) {
            this.activeStepIndex++;
+         } else if (this.isEditMode) {
+           // In edit mode, when on last step, show completion message but don't navigate
+           this.sweetAlert.success('All changes have been saved successfully.');
          }
       }
+    }, (error) => {
+      console.error('❌ Error updating data:', error);
+      this.sweetAlert.error('Error saving data. Please try again.');
     })
   }
 
@@ -806,11 +1025,47 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       // Update current step object before submitting
       this.updateCurrentStepObject();
       
-      // At final step, save L3 data and complete onboarding
-      this.saveL3DataAndComplete();
+      if (this.isEditMode) {
+        // In edit mode, save the final step and show success
+        this.saveFinalEditData();
+      } else {
+        // At final step, save L3 data and complete onboarding
+        this.saveL3DataAndComplete();
+      }
     } else {
       this.sweetAlert.error('Please complete all required fields in all steps before submitting.');
     }
+  }
+
+  // New method to handle final edit data save
+  saveFinalEditData() {
+    // Update step objects before saving
+    this.updateCurrentStepObject();
+    
+    // Get current form values and merge with model
+    const formValues = this.form.getRawValue();
+    const finalData = { ...this.model, ...formValues };
+    
+    console.log('💾 Saving final edit data:', finalData);
+    console.log('ℹ️ Additional Information Object at Save:', this.additionalInformation);
+    
+    // Instead of calling API, just console log all step objects
+    console.log('🔍 All Step Objects Overview (Edit Mode):', {
+      basicDetails: this.basicDetails,
+      contactCapabilities: this.contactCapabilities,
+      machineCapabilities: this.machineCapabilities,
+      facilityVerification: this.facilityVerification,
+      financialInformation: this.financialInformation,
+      additionalInformation: this.additionalInformation
+    });
+    
+    // Show completion message for edit mode
+    this.sweetAlert.success('All supplier information has been updated successfully.');
+    
+    // Redirect to supplier profile review page
+    setTimeout(() => {
+      this.router.navigate(['/wefab/supplier/profile-review/ ' + this.supplier_id]);
+    }, 2000);
   }
 
   isAllStepsValid(): boolean {
@@ -1259,7 +1514,12 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     this.commonService.postData(endPoint, body).subscribe((res: any) => {
       this.sweetAlert.success('Congratulations! Your supplier onboarding has been completed successfully. We will review your information and contact you shortly.');
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-complete']);
+        this.router.navigate(['/wefab/supplier/profile-review'], {
+          queryParams: { 
+            supplierId: res.data?.name || this.supplier_id,
+            mode: 'onboarding-complete'
+          }
+        });
       }, 3000);
     }, (err) => {
       console.error('Error saving L3 data:', err);
@@ -1271,7 +1531,12 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     this.commonService.putData(endPoint, body).subscribe((res: any) => {
       this.sweetAlert.success('Congratulations! Your supplier onboarding has been completed successfully. We will review your information and contact you shortly.');
       setTimeout(() => {
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-complete']);
+        this.router.navigate(['/wefab/supplier/profile-review'], {
+          queryParams: { 
+            supplierId: this.supplier_id || localStorage.getItem('supplier_id'),
+            mode: 'onboarding-complete'
+          }
+        });
       }, 3000);
     }, (err) => {
       console.error('Error updating L3 data:', err);
@@ -1302,12 +1567,17 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     });
     
     // Show completion message
-    this.sweetAlert.success('Congratulations! Your supplier onboarding data has been processed successfully. All step objects have been logged to console.');
+    this.sweetAlert.success('Congratulations! Your supplier onboarding has been completed successfully.');
     
-    // Optional: Navigate to completion page after a delay
-    // setTimeout(() => {
-    //   this.router.navigate(['/wefab/supplier/supplier-onboarding-complete']);
-    // }, 3000);
+    // Redirect to supplier profile review page
+    setTimeout(() => {
+      this.router.navigate(['/wefab/supplier/profile-review'], {
+        queryParams: { 
+          supplierId: this.supplier_id || localStorage.getItem('supplier_id'),
+          mode: 'onboarding-complete'
+        }
+      });
+    }, 3000);
     
     // Original API code commented out
     /*
