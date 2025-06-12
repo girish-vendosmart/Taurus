@@ -549,7 +549,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   findOutMainStatus() {
     if(this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review' || this.currentOnboardingStage === 'L3 Under Review'){
       this.mainCurrentDataStatusTrack = 'Under Review';
-    } else if(this.currentOnboardingStage === 'L1 Approved' && this.currentOnboardingStage === 'L2 Approved' && this.currentOnboardingStage === 'L3 Approved'){
+    } else if(this.currentOnboardingStage === 'L3 Approved'){
       this.mainCurrentDataStatusTrack = 'Approved';
     } else if(this.currentOnboardingStage === 'L1 Rejected' || this.currentOnboardingStage === 'L2 Rejected' || this.currentOnboardingStage === 'L3 Rejected'){
       this.mainCurrentDataStatusTrack = 'Rejected';
@@ -570,6 +570,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         this.contactCapabilities = contactCapabilities;
         if(this.basicDetails && this.contactCapabilities && this.currentOnboardingStage === 'L1 Under Review'){
            this.basicDetailsUnderReview = true;
+        } else {
+          this.basicDetailsUnderReview = false;
         }
         const machineCapabilities = result.data.machine_capabilities ? JSON.parse(result.data.machine_capabilities) : {};
         this.machineCapabilities = machineCapabilities;
@@ -577,11 +579,15 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         this.facilityVerification = facilityVerification;
         if(this.machineCapabilities && this.facilityVerification && (this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review')){
           this.manufacturingUnderReview = true;
+        } else {
+          this.manufacturingUnderReview = false;
         }
         const financialInformation = result.data.financial_information ? JSON.parse(result.data.financial_information) : {};
         this.financialInformation = financialInformation;
         if(this.financialInformation && (this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review' || this.currentOnboardingStage === 'L3 Under Review')){
           this.financialUnderReview = true;
+        } else {
+          this.financialUnderReview = false;
         }
         
         // Set basic information for L1 tab (Basic Information)
@@ -1405,10 +1411,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processApproval(level: string): void {
-    let currentLevel = level === 'L1' ? 'Supplier Onboarding L1': level === 'L2' ? 'Supplier Onboarding L2' : 'Supplier Onboarding L3';
-    const endpoint = `/api/resource/${currentLevel}/${this.supplierId}`
+    let currentLevel = level === 'L1' ? 'L2 Under Review': level === 'L2' ? 'L3 Under Review' : 'L3 Approved';
+    const endpoint = `/api/resource/Supplier Onboarding L1/${this.supplierId}`
     const data = {
-      onboarding_status: 'Approved'
+      onboarding_form_status: currentLevel
     };
 
     this.commonservice.putData(endpoint, data).subscribe({
@@ -1458,10 +1464,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   private refreshStatusData(level: string): void {
     // Clear both data and status caches
-    this.clearSpecificCache(`Supplier Onboarding ${level}`);
+    this.clearSpecificCache(`Supplier Onboarding L${level}`);
     
     // Trigger Firebase and reload data
-    this.accessFirebaseTrigger(`Supplier Onboarding ${level}`, this.supplierId);
+    this.accessFirebaseTrigger(`Supplier Onboarding L${level}`, this.supplierId);
   }
 
   // Update request methods
