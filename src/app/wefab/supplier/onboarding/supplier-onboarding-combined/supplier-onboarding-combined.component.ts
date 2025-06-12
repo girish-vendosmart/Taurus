@@ -1516,61 +1516,6 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       {
         template: '<h4 class="bank-details-title mb-2 mt-4">Bank Details</h4>'
       },
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
-          {
-            className: 'col-md-4',
-            key: 'bankDetails.bankName',
-            type: 'input',
-            templateOptions: {
-              label: 'Bank Name',
-              required: true,
-              placeholder: 'Enter your bank name'
-            }
-          },
-          {
-            className: 'col-md-4',
-            key: 'bankDetails.branchName',
-            type: 'input',
-            templateOptions: {
-              label: 'Branch Name',
-              required: true,
-              placeholder: 'Enter branch name'
-            }
-          },
-          {
-            className: 'col-md-4',
-            key: 'bankDetails.accountType',
-            type: 'select',
-            templateOptions: {
-              label: 'Account Type',
-              required: true,
-              options: [
-                { label: 'Current Account', value: 'Current' },
-                { label: 'Savings Account', value: 'Savings' },
-                { label: 'Business Account', value: 'Business' }
-              ]
-            }
-          }
-        ]
-      },
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
-          {
-            className: 'col-md-6',
-            key: 'bankDetails.accountHolderName',
-            type: 'input',
-            templateOptions: {
-              label: 'Account Holder Name',
-              required: true,
-              placeholder: 'Enter account holder name'
-            }
-          }
-        ]
-      },
-      
       // Bank Verification Section
       {
         template: '<h5 class="bank-verification-title mb-2 mt-3">Account Verification</h5>'

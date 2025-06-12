@@ -33,7 +33,7 @@ import { CommonService } from '../../../../shared/services/common.service';
       <div class="bank-details-container">
         <!-- Bank Details Fields -->
         <div class="row">
-          <div class="col-md-6 mb-3">
+          <div class="col-md-4 mb-3">
             <label class="form-label">
               Account Number <span class="text-danger">*</span>
             </label>
@@ -44,7 +44,25 @@ import { CommonService } from '../../../../shared/services/common.service';
               placeholder="Enter account number"
               [readonly]="_isVerified">
           </div>
-          <div class="col-md-6 mb-3">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              ReVerify Account Number <span class="text-danger">*</span>
+            </label>
+            <input 
+              type="text" 
+              [formControl]="reverifyAccountNumberControl"
+              class="form-control" 
+              placeholder="Re-enter account number"
+              [readonly]="_isVerified"
+              onpaste="return false;"
+              oncopy="return false;"
+              oncut="return false;">
+            <div class="invalid-feedback d-block" *ngIf="reverifyAccountNumberControl.touched && reverifyAccountNumberControl.errors?.['accountMismatch']">
+              <i class="pi pi-exclamation-triangle" style="margin-right: 0.4rem;"></i>
+              Account numbers do not match
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
             <label class="form-label">
               IFSC Code <span class="text-danger">*</span>
             </label>
@@ -401,6 +419,7 @@ import { CommonService } from '../../../../shared/services/common.service';
 export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
   @Input() accountNumber: string = '';
   @Input() ifscCode: string = '';
+  @Input() reverifyAccountNumber: string = '';
   
   @Input() set isVerified(value: boolean) {
     if (value === true) {
@@ -410,6 +429,9 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
       // Disable the controls after verification
       if (this.accountNumberControl && !this.accountNumberControl.disabled) {
         this.accountNumberControl.disable({ emitEvent: false });
+      }
+      if (this.reverifyAccountNumberControl && !this.reverifyAccountNumberControl.disabled) {
+        this.reverifyAccountNumberControl.disable({ emitEvent: false });
       }
       if (this.ifscCodeControl && !this.ifscCodeControl.disabled) {
         this.ifscCodeControl.disable({ emitEvent: false });
@@ -421,6 +443,7 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
   @Output() bankDetailsVerified = new EventEmitter<any>();
   
   accountNumberControl = new FormControl('');
+  reverifyAccountNumberControl = new FormControl({ value: '', disabled: true });
   ifscCodeControl = new FormControl('');
   _isVerified = false;
   verificationError = false;
@@ -464,19 +487,62 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
     // Watch for changes in account number and IFSC code
     this.accountNumberControl.valueChanges.subscribe(value => {
       this.accountNumber = value || '';
-      this.onChange({ accountNumber: value || '', ifscCode: this.ifscCode });
+      this.onChange({ 
+        accountNumber: value || '', 
+        reverifyAccountNumber: this.reverifyAccountNumber,
+        ifscCode: this.ifscCode 
+      });
       this.resetVerification();
+      
+      // Enable/disable reverify field based on account number
+      if (value && value.length >= 9) {
+        this.reverifyAccountNumberControl.enable({ emitEvent: false });
+      } else {
+        this.reverifyAccountNumberControl.disable({ emitEvent: false });
+        this.reverifyAccountNumberControl.setValue('', { emitEvent: false });
+        this.reverifyAccountNumber = '';
+      }
+    });
+    
+    this.reverifyAccountNumberControl.valueChanges.subscribe(value => {
+      this.reverifyAccountNumber = value || '';
+      this.onChange({ 
+        accountNumber: this.accountNumber, 
+        reverifyAccountNumber: value || '',
+        ifscCode: this.ifscCode 
+      });
+      this.resetVerification();
+      
+      // Validate that account numbers match
+      if (value && this.accountNumber && value !== this.accountNumber) {
+        this.reverifyAccountNumberControl.setErrors({ accountMismatch: true });
+      } else {
+        // Remove accountMismatch error if they match (but keep other errors)
+        if (this.reverifyAccountNumberControl.errors) {
+          delete this.reverifyAccountNumberControl.errors['accountMismatch'];
+          if (Object.keys(this.reverifyAccountNumberControl.errors).length === 0) {
+            this.reverifyAccountNumberControl.setErrors(null);
+          }
+        }
+      }
     });
     
     this.ifscCodeControl.valueChanges.subscribe(value => {
       this.ifscCode = value || '';
-      this.onChange({ accountNumber: this.accountNumber, ifscCode: value || '' });
+      this.onChange({ 
+        accountNumber: this.accountNumber, 
+        reverifyAccountNumber: this.reverifyAccountNumber,
+        ifscCode: value || '' 
+      });
       this.resetVerification();
     });
     
     // Set initial values if provided
     if (this.accountNumber) {
       this.accountNumberControl.setValue(this.accountNumber, { emitEvent: false });
+    }
+    if (this.reverifyAccountNumber) {
+      this.reverifyAccountNumberControl.setValue(this.reverifyAccountNumber, { emitEvent: false });
     }
     if (this.ifscCode) {
       this.ifscCodeControl.setValue(this.ifscCode, { emitEvent: false });
@@ -493,13 +559,16 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
   
   canVerify(): boolean {
     return !!(this.accountNumberControl.value && 
+              this.reverifyAccountNumberControl.value &&
               this.ifscCodeControl.value &&
               this.accountNumberControl.value.length >= 9 &&
+              this.reverifyAccountNumberControl.value === this.accountNumberControl.value &&
               this.ifscCodeControl.value.length === 11);
   }
   
   hasErrors(): boolean {
     return (this.accountNumberControl.touched && this.accountNumberControl.invalid) ||
+           (this.reverifyAccountNumberControl.touched && this.reverifyAccountNumberControl.invalid) ||
            (this.ifscCodeControl.touched && this.ifscCodeControl.invalid);
   }
   
@@ -676,6 +745,10 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
         this.accountNumber = value.accountNumber;
         this.accountNumberControl.setValue(value.accountNumber, { emitEvent: false });
       }
+      if (value.reverifyAccountNumber !== undefined) {
+        this.reverifyAccountNumber = value.reverifyAccountNumber;
+        this.reverifyAccountNumberControl.setValue(value.reverifyAccountNumber, { emitEvent: false });
+      }
       if (value.ifscCode !== undefined) {
         this.ifscCode = value.ifscCode;
         this.ifscCodeControl.setValue(value.ifscCode, { emitEvent: false });
@@ -694,15 +767,18 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
   setDisabledState(isDisabled: boolean): void {
     if (isDisabled) {
       this.accountNumberControl.disable();
+      this.reverifyAccountNumberControl.disable();
       this.ifscCodeControl.disable();
     } else if (!this._isVerified) {
       this.accountNumberControl.enable();
+      // reverifyAccountNumberControl will be enabled based on account number validation
       this.ifscCodeControl.enable();
     }
   }
   
   markAsTouched(): void {
     this.accountNumberControl.markAsTouched();
+    this.reverifyAccountNumberControl.markAsTouched();
     this.ifscCodeControl.markAsTouched();
     if (this.onTouched) {
       this.onTouched();
