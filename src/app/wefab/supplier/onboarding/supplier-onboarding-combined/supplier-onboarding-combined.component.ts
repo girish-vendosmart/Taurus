@@ -914,17 +914,45 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       }
     } else {
       this.markFieldsAsTouched(this.currentFields);
+      
+      // Enhanced error messages for each step
       const errorMessages: { [key: number]: string } = {
         0: 'Please fill in all required basic details and complete verification.',
         1: 'Please complete all required contact details and verify your phone.',
         2: 'Please add at least one complete machine with all required details.',
         3: 'Please upload at least 3 facility photos.',
-        4: 'Please complete all required financial information.',
+        4: 'Please complete all required financial information. Ensure bank details are verified, annual revenue for all 3 years is filled, and tax compliance is checked.',
         5: 'Please provide at least one complete business reference.'
       };
       
+      // Additional debug information for financial step
+      if (this.activeStepIndex === 4) {
+        const formValues = this.form.getRawValue();
+        console.log('🚨 Financial Step Validation Failed:', {
+          bankVerified: this.bankVerified,
+          annualRevenue2024: formValues.companyFinancials?.annualRevenue2024,
+          annualRevenue2023: formValues.companyFinancials?.annualRevenue2023,
+          annualRevenue2022: formValues.companyFinancials?.annualRevenue2022,
+          taxCompliant: formValues.companyFinancials?.taxCompliant,
+          formValid: this.form.valid,
+          formErrors: this.getFormErrors()
+        });
+      }
+      
       this.sweetAlert.error(errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.');
     }
+  }
+
+  // Helper method to get form errors for debugging
+  getFormErrors(): any {
+    let formErrors: any = {};
+    Object.keys(this.form.controls).forEach(key => {
+      const controlErrors = this.form.get(key)?.errors;
+      if (controlErrors) {
+        formErrors[key] = controlErrors;
+      }
+    });
+    return formErrors;
   }
 
   // New method to update URL parameters when step changes
@@ -1080,9 +1108,39 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         }
         break;
       case 4: // Financial Information
-        if (!this.model.bankDetails.bankName || !this.model.companyFinancials.annualRevenue2024) {
+        // Debug logging for financial information validation
+        console.log('🔍 Financial Information Validation Debug:', {
+          bankVerified: this.bankVerified,
+          bankDetails: this.model.bankDetails,
+          companyFinancials: this.model.companyFinancials,
+          formValues: this.form.getRawValue()
+        });
+        
+        // Updated validation logic for Financial Information
+        // Check if bank is verified AND we have required financial data
+        const formValues = this.form.getRawValue();
+        
+        // Check if bank verification is complete
+        if (!this.bankVerified) {
+          console.log('❌ Bank not verified');
           isValid = false;
         }
+        
+        // Check if annual revenue fields are filled
+        if (!formValues.companyFinancials?.annualRevenue2024 || 
+            !formValues.companyFinancials?.annualRevenue2023 || 
+            !formValues.companyFinancials?.annualRevenue2022) {
+          console.log('❌ Missing annual revenue data');
+          isValid = false;
+        }
+        
+        // Check if tax compliance is checked
+        if (!formValues.companyFinancials?.taxCompliant) {
+          console.log('❌ Tax compliance not checked');
+          isValid = false;
+        }
+        
+        console.log('💰 Financial Information Valid:', isValid);
         break;
       case 5: // Additional Information
         if (!this.isAtLeastOneReferenceComplete()) {
@@ -1212,6 +1270,32 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         bankDetails: this.model.bankDetails
       });
       this.form.markAsDirty();
+      
+      // Ensure companyFinancials object exists
+      if (!this.model.companyFinancials) {
+        this.model.companyFinancials = {
+          annualRevenue2024: '',
+          annualRevenue2023: '',
+          annualRevenue2022: '',
+          creditRatingProvider: 'CRISIL',
+          taxCompliant: true,
+          currency: 'USD'
+        };
+      }
+      
+      // Ensure insuranceCoverage object exists
+      if (!this.model.insuranceCoverage) {
+        this.model.insuranceCoverage = {
+          generalLiabilityInsurance: '',
+          productLiabilityInsurance: ''
+        };
+      }
+      
+      console.log('✅ Model structure verified:', {
+        bankDetails: this.model.bankDetails,
+        companyFinancials: this.model.companyFinancials,
+        insuranceCoverage: this.model.insuranceCoverage
+      });
     }, 100);
   }
 
