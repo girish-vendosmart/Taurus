@@ -1337,13 +1337,30 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   // Navigation methods
   navigateToEdit(): void {
     const routes = {
-      basic: '/wefab/supplier/supplier-onboarding',
-      manufacturing: '/wefab/supplier/supplier-onboarding-l2',
-      financial: '/wefab/supplier/supplier-onboarding-l3'
+      basic: '/wefab/supplier/supplier-onboarding-form',
+      manufacturing: '/wefab/supplier/supplier-onboarding-form',
+      financial: '/wefab/supplier/supplier-onboarding-form'
     };
 
     const route = routes[this.activeLevelTab as keyof typeof routes] || routes.basic;
-    this.router.navigate([route], { queryParams: { mode: 'edit' } });
+    
+    // Add specific query parameters based on the active tab
+    let queryParams: any = { mode: 'edit' };
+    
+    // For basic information, add step parameter to show stepper 1
+    if (this.activeLevelTab === 'basic') {
+      queryParams.step = '1';
+    }
+    // For manufacturing capabilities, add step parameter to show stepper 3
+    else if (this.activeLevelTab === 'manufacturing') {
+      queryParams.step = '3';
+    }
+    // For financial & additional information, add step parameter to show stepper 5
+    else if (this.activeLevelTab === 'financial') {
+      queryParams.step = '5';
+    }
+    
+    this.router.navigate([route], { queryParams });
   }
 
   goBack(): void {
