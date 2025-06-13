@@ -1050,14 +1050,14 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
          this.sweetAlert.success(message || 'Information updated successfully.');
          
          // Only increment if not on the last step
-         if (this.activeStepIndex < this.totalSteps - 1) {
-           this.activeStepIndex++;
-           // Update URL parameters after step increment
-           this.updateUrlParameters();
-         } else if (this.isEditMode) {
+         if (this.isEditMode) {
            // In edit mode, when on last step, show completion message but don't navigate
-           this.sweetAlert.success('All changes have been saved successfully.');
-         }
+           this.sweetAlert.success(message);
+         } else if (this.activeStepIndex < this.totalSteps - 1) {
+          this.activeStepIndex++;
+          // Update URL parameters after step increment
+          this.updateUrlParameters();
+        }
       }
     }, (error) => {
       console.error('❌ Error updating data:', error);
@@ -1185,17 +1185,14 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   submit() {
-    if (this.form.valid && this.isAllStepsValid()) {
+    console.log('🔍 Form Valid:', this.form);
+    if (this.form.valid) {
       // Update current step object before submitting
       this.updateCurrentStepObject();
       
-      if (this.isEditMode) {
-        // In edit mode, save the final step and show success
-        this.saveFinalEditData();
-      } else {
-        // At final step, save L3 data and complete onboarding
-        this.saveL3DataAndComplete();
-      }
+      const message = this.isEditMode ? 'Additional information updated successfully.' : 'Onboarding completed successfully.';
+      this.putData(this.additionalInformation, message)
+      this.router.navigate(['/wefab/supplier/profile-review', this.supplier_id]);
     } else {
       this.sweetAlert.error('Please complete all required fields in all steps before submitting.');
     }
@@ -1236,6 +1233,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     for (let i = 0; i < this.totalSteps; i++) {
       const originalStepIndex = this.activeStepIndex;
       this.activeStepIndex = i;
+      debugger
+      console.log('🔍 Step Valid:', this.isStepValid(this.stepFields[i]));
       if (!this.isStepValid(this.stepFields[i])) {
         this.activeStepIndex = originalStepIndex;
         return false;
