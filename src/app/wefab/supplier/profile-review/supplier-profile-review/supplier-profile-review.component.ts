@@ -1783,6 +1783,82 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     return !!this.newFinancialData;
   }
 
+  // Enhanced zero state getters
+  get shouldShowBasicZeroState(): boolean {
+    return !this.loadingState.l1Data && !this.dataLoading && !this.hasBasicData;
+  }
+
+  get shouldShowManufacturingZeroState(): boolean {
+    return !this.loadingState.l1Data && !this.dataLoading && !this.hasManufacturingData;
+  }
+
+  get shouldShowFinancialZeroState(): boolean {
+    return !this.loadingState.l1Data && !this.dataLoading && !this.hasFinancialData;
+  }
+
+  // Manufacturing sub-section zero states
+  get shouldShowMachinesZeroState(): boolean {
+    return this.hasManufacturingData && (!this.manufacturingData.machines || this.manufacturingData.machines.length === 0);
+  }
+
+  get shouldShowFacilityZeroState(): boolean {
+    return this.hasManufacturingData && (!this.manufacturingData.facilityPhotos || this.manufacturingData.facilityPhotos.length === 0);
+  }
+
+  get shouldShowCertificationsZeroState(): boolean {
+    return this.hasManufacturingData && (!this.manufacturingData.certifications || this.manufacturingData.certifications.length === 0 || !this.hasValidCertifications());
+  }
+
+  get shouldShowProductionCapacityZeroState(): boolean {
+    return this.hasManufacturingData && (!this.manufacturingData.productionCapacity || this.manufacturingData.productionCapacity === 0);
+  }
+
+  // Financial sub-section zero states
+  get shouldShowBankDetailsZeroState(): boolean {
+    return this.hasFinancialData && (!this.newFinancialData.bankDetails || Object.keys(this.newFinancialData.bankDetails).length === 0);
+  }
+
+  get shouldShowBusinessReferencesZeroState(): boolean {
+    return this.hasFinancialData && (!this.newFinancialData.additionalInformation?.references || this.newFinancialData.additionalInformation.references.length === 0);
+  }
+
+  get shouldShowCompanyDocumentsZeroState(): boolean {
+    return this.hasBasicData && (!this.getCompanyProfile.companyDocuments || this.getCompanyProfile.companyDocuments.length === 0);
+  }
+
+  // Overall data availability checks
+  get hasAnyData(): boolean {
+    return this.hasBasicData || this.hasManufacturingData || this.hasFinancialData;
+  }
+
+  get isCompletelyEmpty(): boolean {
+    return !this.dataLoading && !this.isLoading && !this.hasAnyData;
+  }
+
+  // Enhanced manufacturing data checks
+  get hasManufacturingContent(): boolean {
+    if (!this.hasManufacturingData) return false;
+    
+    const hasMachines = this.manufacturingData.machines && this.manufacturingData.machines.length > 0;
+    const hasFacilities = this.manufacturingData.facilityPhotos && this.manufacturingData.facilityPhotos.length > 0;
+    const hasCertifications = this.hasValidCertifications();
+    const hasCapacity = this.manufacturingData.productionCapacity && this.manufacturingData.productionCapacity > 0;
+    
+    return hasMachines || hasFacilities || hasCertifications || hasCapacity;
+  }
+
+  // Enhanced financial data checks
+  get hasFinancialContent(): boolean {
+    if (!this.hasFinancialData) return false;
+    
+    const hasBankDetails = this.newFinancialData.bankDetails && Object.keys(this.newFinancialData.bankDetails).length > 0;
+    const hasFinancials = this.newFinancialData.companyFinancials && Object.keys(this.newFinancialData.companyFinancials).length > 0;
+    const hasInsurance = this.newFinancialData.insuranceCoverage && Object.keys(this.newFinancialData.insuranceCoverage).length > 0;
+    const hasReferences = this.newFinancialData.additionalInformation?.references && this.newFinancialData.additionalInformation.references.length > 0;
+    
+    return hasBankDetails || hasFinancials || hasInsurance || hasReferences;
+  }
+
   // Check if all three stages are approved
   get areAllStagesApproved(): boolean {
     return this.getCurrentL1DataStatus === 'Approved' && 
@@ -1865,5 +1941,17 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         return of(null);
       })
     );
+  }
+
+  navigateToEditstep2() {
+    this.router.navigate(['/wefab/supplier/supplier-onboarding-form'], {
+      queryParams: { step: '3' }
+    });
+  }
+
+  navigateToEditstep4() {
+    this.router.navigate(['/wefab/supplier/supplier-onboarding-form'], {
+      queryParams: { step: '4' }
+    });
   }
 }

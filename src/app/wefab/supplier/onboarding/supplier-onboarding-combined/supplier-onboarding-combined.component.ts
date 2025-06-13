@@ -2032,12 +2032,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   getFacilityVerificationFields(): FormlyFieldConfig[] {
     return [
       {
-        template: `
-          <div class="section-header mb-2">
-            <h4 class="">Facility Verification</h4>
-            <p class="text-muted mb-2">Upload geotagged photos of your manufacturing facility.</p>
-          </div>
-        `
+        template: ` `
       },
       {
         key: 'facilityPhotos',

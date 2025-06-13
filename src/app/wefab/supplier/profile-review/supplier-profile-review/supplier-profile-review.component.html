@@ -1,4 +1,113 @@
 <div class="profile-review-container">
+  <!-- Add custom styles for enhanced zero states -->
+  <style>
+    .zero-state-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+      padding: 2rem;
+      text-align: center;
+      border: 2px dashed #e0e0e0;
+      border-radius: 12px;
+      margin: 1rem 0;
+      background-color: #fafafa;
+    }
+
+    .global-zero-state {
+      min-height: 400px;
+      border-color: #d1d5db;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .zero-state-content {
+      max-width: 500px;
+    }
+
+    .zero-state-icon {
+      font-size: 3rem;
+      color: #6b7280;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .zero-state-content h3 {
+      color: #374151;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .zero-state-content p {
+      color: #6b7280;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .help-text {
+      font-size: 0.875rem;
+      color: #9ca3af !important;
+      margin-top: 0.5rem;
+    }
+
+    .add-data-btn {
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .add-data-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .loading-state {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+      text-align: center;
+    }
+
+    .loading-content {
+      color: #6b7280;
+    }
+
+    .loading-content i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .no-docs-icon {
+      font-size: 2rem;
+      color: #6b7280;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Enhanced info cards for zero states */
+    .info-card .zero-state-content {
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .info-card .zero-state-content .zero-state-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-card .zero-state-content h3 {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-card .zero-state-content p {
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+
   <!-- Header Section -->
   <div class="review-header">
     <div class="header-left">
@@ -37,8 +146,35 @@
   <div class="review-content" *ngIf="!showActivityTrail">
     <!-- Left Column -->
     <div class="review-main-content">
+      <!-- Global Zero State for Completely Empty Profile -->
+      <div *ngIf="isCompletelyEmpty" class="zero-state-container global-zero-state">
+        <div class="zero-state-content">
+          <i class="pi pi-file-o zero-state-icon"></i>
+          <h3>Profile Not Started</h3>
+          <div *ngIf="userType === 'supplier'">
+            <p>Welcome to your supplier profile! Get started by completing your basic information.</p>
+            <p class="help-text">A complete profile helps buyers understand your capabilities and increases your chances of getting orders.</p>
+            <button class="btn btn-primary add-data-btn" (click)="navigateToEdit()">
+              <i class="pi pi-plus"></i> Start Profile Setup
+            </button>
+          </div>
+          <div *ngIf="userType === 'wefab_team'">
+            <p>This supplier has not started their profile setup yet.</p>
+            <p class="help-text">They will need to complete their onboarding process before you can review their information.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="dataLoading && !isCompletelyEmpty" class="loading-state">
+        <div class="loading-content">
+          <i class="pi pi-spin pi-spinner"></i>
+          <p>Loading supplier profile...</p>
+        </div>
+      </div>
+
       <!-- Level Indicators as Tabs -->
-      <div class="levels-tabs">
+      <div class="levels-tabs" *ngIf="!isCompletelyEmpty && !dataLoading">
         <button class="level-tab" [class.active]="activeLevelTab === 'basic'" (click)="changeLevelTab('basic')">
           <div class="level-badge">
             <i class="pi pi-times-circle status-icon rejected" *ngIf="basicDetailsRejected"></i>
@@ -157,7 +293,7 @@
         </div>
 
         <!-- Zero State for Basic Information -->
-        <div *ngIf="!getCompanyProfile" class="zero-state-container">
+        <div *ngIf="shouldShowBasicZeroState" class="zero-state-container">
           <div class="zero-state-content">
             <i class="pi pi-info-circle zero-state-icon"></i>
             <h3>No Basic Information Available</h3>
@@ -174,7 +310,7 @@
         </div>
 
         <!-- Combined Basic Information Content -->
-        <div class="consolidated-info" *ngIf="getCompanyProfile">
+        <div class="consolidated-info" *ngIf="!shouldShowBasicZeroState && getCompanyProfile">
           <!-- Company Profile Section -->
           <div class="info-section">
             <div class="info-section-header">
@@ -367,10 +503,16 @@
                   </div>
                 </div>
                 
-                <!-- No documents message -->
-                <div class="no-documents-message" *ngIf="!getCompanyProfile.companyDocuments || getCompanyProfile.companyDocuments.length === 0">
+                <!-- Enhanced no documents message -->
+                <div class="no-documents-message" *ngIf="shouldShowCompanyDocumentsZeroState">
                   <i class="pi pi-file-excel no-docs-icon"></i>
-                  <p>No company documents uploaded yet.</p>
+                  <div *ngIf="userType === 'supplier'">
+                    <p>No company documents uploaded yet.</p>
+                    <p class="help-text">Upload your company registration, tax documents, and other relevant certificates to build trust with potential buyers.</p>
+                  </div>
+                  <div *ngIf="userType === 'wefab_team'">
+                    <p>The supplier has not uploaded any company documents yet.</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -387,7 +529,7 @@
         </div>
 
         <!-- Zero State for Manufacturing Section -->
-        <div *ngIf="!manufacturingData && !loadingState.l1Data" class="zero-state-container">
+        <div *ngIf="shouldShowManufacturingZeroState" class="zero-state-container">
           <div class="zero-state-content">
             <i class="pi pi-cog zero-state-icon"></i>
             <h3>No Manufacturing Data Available</h3>
@@ -405,7 +547,7 @@
         </div>
 
         <!-- Manufacturing content only shown when manufacturingData exists -->
-        <div *ngIf="manufacturingData && !loadingState.l1Data">
+        <div *ngIf="!shouldShowManufacturingZeroState && manufacturingData">
           <!-- Manufacturing Tabs Navigation -->
           <div class="manufacturing-tabs">
             <a href="javascript:void(0)" class="manufacturing-tab" [class.active]="manufacturingTab === 'machines'"
@@ -429,7 +571,24 @@
           <!-- Machine Details Tab -->
           <div class="machines-container">
             <ng-container *ngIf="manufacturingTab === 'machines'">
-              <div class="manufacturing-grid">
+              <!-- Zero State for Machines -->
+              <div *ngIf="shouldShowMachinesZeroState" class="zero-state-container">
+                <div class="zero-state-content">
+                  <i class="pi pi-cog zero-state-icon"></i>
+                  <h3>No Machine Details Available</h3>
+                  <div *ngIf="userType === 'supplier'">
+                    <p>Add details about your manufacturing machinery and equipment to showcase your capabilities.</p>
+                    <button class="btn btn-primary add-data-btn" (click)="navigateToEditstep2()">
+                      <i class="pi pi-plus"></i> Add Machine Details
+                    </button>
+                  </div>
+                  <div *ngIf="userType === 'wefab_team'">
+                    <p>The supplier has not provided any machine details yet.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="manufacturing-grid" *ngIf="!shouldShowMachinesZeroState">
                 <div class="manufacturing-card" *ngFor="let machine of manufacturingData.machines">
                   <div class="manufacturing-image-container">
                     <img [src]="getMachineUrl(machine.machinePhotos)"
@@ -487,7 +646,24 @@
 
             <!-- Facility Verification Tab -->
             <ng-container *ngIf="manufacturingTab === 'facility'">
-              <div class="manufacturing-grid">
+              <!-- Zero State for Facility -->
+              <div *ngIf="shouldShowFacilityZeroState" class="zero-state-container">
+                <div class="zero-state-content">
+                  <i class="pi pi-building zero-state-icon"></i>
+                  <h3>No Facility Photos Available</h3>
+                  <div *ngIf="userType === 'supplier'">
+                    <p>Upload photos of your manufacturing facility to help buyers verify your operations.</p>
+                    <button class="btn btn-primary add-data-btn" (click)="navigateToEditstep4()">
+                      <i class="pi pi-plus"></i> Add Facility Photos
+                    </button>
+                  </div>
+                  <div *ngIf="userType === 'wefab_team'">
+                    <p>The supplier has not uploaded any facility photos yet.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="manufacturing-grid" *ngIf="!shouldShowFacilityZeroState">
                 <div class="manufacturing-card" *ngFor="let facility of manufacturingData.facilityPhotos">
                   <div class="manufacturing-image-container">
                     <img [src]="facility.url" 
@@ -530,7 +706,24 @@
 
             <!--certifications tab -->
             <ng-container *ngIf="manufacturingTab === 'certifications'">
-              <div class="manufacturing-grid">
+              <!-- Zero State for Certifications -->
+              <div *ngIf="shouldShowCertificationsZeroState" class="zero-state-container">
+                <div class="zero-state-content">
+                  <i class="pi pi-verified zero-state-icon"></i>
+                  <h3>No Certifications Available</h3>
+                  <div *ngIf="userType === 'supplier'">
+                    <p>Add your quality certifications and industry standards to increase buyer confidence.</p>
+                    <button class="btn btn-primary add-data-btn" (click)="navigateToEdit()">
+                      <i class="pi pi-plus"></i> Add Certifications
+                    </button>
+                  </div>
+                  <div *ngIf="userType === 'wefab_team'">
+                    <p>The supplier has not provided any certifications yet.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="manufacturing-grid" *ngIf="!shouldShowCertificationsZeroState">
                 <div class="manufacturing-card" *ngFor="let certification of manufacturingData.certifications">
                   <div class="manufacturing-image-container">
                     <img [src]="isArray(certification.certificateDocument) ? certification.certificateDocument[0].url : certification.certificateDocument.url"
@@ -568,7 +761,24 @@
 
             <!-- Production Capacity Tab -->
             <div class="manufacturing-tab-content" *ngIf="manufacturingTab === 'capacity'">
-              <div class="capacity-content">
+              <!-- Zero State for Production Capacity -->
+              <div *ngIf="shouldShowProductionCapacityZeroState" class="zero-state-container">
+                <div class="zero-state-content">
+                  <i class="pi pi-chart-line zero-state-icon"></i>
+                  <h3>No Production Capacity Data Available</h3>
+                  <div *ngIf="userType === 'supplier'">
+                    <p>Provide information about your production capacity and industries served to attract relevant buyers.</p>
+                    <button class="btn btn-primary add-data-btn" (click)="navigateToEdit()">
+                      <i class="pi pi-plus"></i> Add Production Capacity
+                    </button>
+                  </div>
+                  <div *ngIf="userType === 'wefab_team'">
+                    <p>The supplier has not provided production capacity information yet.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="capacity-content" *ngIf="!shouldShowProductionCapacityZeroState">
                 <div class="capacity-section">
                   <h3 class="section-title">Production Capacity</h3>
                   <div class="capacity-info">
@@ -605,7 +815,7 @@
         </div>
 
         <!-- Zero State for Financial Section -->
-        <div *ngIf="!newFinancialData && !loadingState.l1Data" class="zero-state-container">
+        <div *ngIf="shouldShowFinancialZeroState" class="zero-state-container">
           <div class="zero-state-content">
             <i class="pi pi-chart-bar zero-state-icon"></i>
             <h3>No Financial Data Available</h3>
@@ -623,7 +833,7 @@
         </div>
 
         <!-- Combined Financial & Additional Information Content -->
-        <div class="consolidated-info" *ngIf="newFinancialData && !loadingState.l1Data">
+        <div class="consolidated-info" *ngIf="!shouldShowFinancialZeroState && newFinancialData">
           <!-- Confidentiality Notice -->
           <div class="info-section">
             <div class="info-section-content">
@@ -657,10 +867,19 @@
                   <div class="info-value">{{ newFinancialData.bankDetails.verification.ifscCode || 'Not provided' }}</div>
                 </div>
               </div>
-              <!-- Show message if no bank details -->
-              <div *ngIf="!newFinancialData.bankDetails" class="info-grid">
+              <!-- Enhanced bank details zero state -->
+              <div *ngIf="shouldShowBankDetailsZeroState" class="info-grid">
                 <div class="info-card info-card-large">
-                  <div class="info-value no-data-text">No bank details provided yet.</div>
+                  <div class="zero-state-content">
+                    <i class="pi pi-university zero-state-icon"></i>
+                    <div *ngIf="userType === 'supplier'">
+                      <div class="info-value no-data-text">No bank details provided yet.</div>
+                      <p class="help-text">Add your bank account details for secure payment processing.</p>
+                    </div>
+                    <div *ngIf="userType === 'wefab_team'">
+                      <div class="info-value no-data-text">The supplier has not provided bank details yet.</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -752,10 +971,20 @@
                   </div>
                 </div>
               </div>
-              <div *ngIf="!newFinancialData.additionalInformation.references || newFinancialData.additionalInformation.references.length === 0">
+              <!-- Enhanced business references zero state -->
+              <div *ngIf="shouldShowBusinessReferencesZeroState">
                 <div class="info-grid">
                   <div class="info-card info-card-large">
-                    <div class="info-value no-data-text">No business references added yet.</div>
+                    <div class="zero-state-content">
+                      <i class="pi pi-users zero-state-icon"></i>
+                      <div *ngIf="userType === 'supplier'">
+                        <div class="info-value no-data-text">No business references added yet.</div>
+                        <p class="help-text">Add references from your existing clients or business partners to build credibility.</p>
+                      </div>
+                      <div *ngIf="userType === 'wefab_team'">
+                        <div class="info-value no-data-text">The supplier has not provided any business references yet.</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
