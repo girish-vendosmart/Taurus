@@ -462,14 +462,28 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   @Input() countryCode: any = '91';
   @Input() errorMessage: any = 'Please enter a valid phone number';
   @Input() set isVerified(value: boolean) {
-    if (value === true) {
-      this._isVerified = true;
-      this.verified.emit(true);
+    if (value !== this._isVerified) {
+      this._isVerified = value;
       
-      // If we have a FormControl and it's not already disabled, disable it
-      if (this.phoneControl && !this.phoneControl.disabled) {
-        this.phoneControl.disable({ emitEvent: false });
+      if (value === true) {
+        this.verified.emit(true);
+        
+        // If we have a FormControl and it's not already disabled, disable it
+        if (this.phoneControl && !this.phoneControl.disabled) {
+          this.phoneControl.disable({ emitEvent: false });
+        }
+        
+        // Close OTP dialog if it's open
+        this.showOtpDialog = false;
+      } else {
+        // If verification is being revoked, re-enable the control
+        if (this.phoneControl && this.phoneControl.disabled) {
+          this.phoneControl.enable({ emitEvent: false });
+        }
       }
+      
+      // Trigger change detection to update the UI
+      this.cdr.detectChanges();
     }
   }
   get isVerified(): boolean {

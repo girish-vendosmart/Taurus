@@ -275,6 +275,26 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     
     // Load country list first, then initialize form
     this.getCountryListAndInitializeForm();
+    
+    // Set initial URL parameters if not already set
+    setTimeout(() => {
+      if (!this.route.snapshot.queryParams['step']) {
+        this.updateUrlParameters();
+      }
+    }, 100);
+  }
+
+  // New method to validate if user can access a specific step
+  canAccessStep(stepIndex: number): boolean {
+    // In edit mode, users can access any step directly
+    if (this.isEditMode) {
+      return true;
+    }
+    
+    // In onboarding mode, users can only access completed steps or the next step
+    // For now, allowing access to any step for flexibility
+    // This can be modified based on business requirements
+    return true;
   }
 
   // New method to handle URL parameters
@@ -282,13 +302,24 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     // Get supplier ID from route parameters
     this.urlSupplierId = this.route.snapshot.paramMap.get('id');
     
-    // Check for edit mode from query parameters
+    // Check for edit mode and step from query parameters
     this.route.queryParams.subscribe(params => {
       this.isEditMode = params['mode'] === 'edit';
+      
+      // Handle step parameter
+      const urlStep = params['step'];
+      if (urlStep) {
+        const stepIndex = this.mapUrlStepToIndex(parseInt(urlStep));
+        if (stepIndex !== -1 && this.canAccessStep(stepIndex)) {
+          this.activeStepIndex = stepIndex;
+        }
+      }
       
       console.log('🔍 URL Parameters:', {
         supplierId: this.urlSupplierId,
         isEditMode: this.isEditMode,
+        urlStep: urlStep,
+        activeStepIndex: this.activeStepIndex,
         fullParams: params
       });
       
@@ -313,6 +344,34 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         this.patchEmailId();
       }
     });
+  }
+
+  // New method to map URL step numbers to internal step indices
+  mapUrlStepToIndex(urlStep: number): number {
+    const stepMapping: { [key: number]: number } = {
+      1: 0, // Basic Details
+      2: 1, // Contact & Capabilities
+      3: 2, // Machine Capabilities
+      4: 3, // Facility Verification
+      5: 4, // Financial Information
+      6: 5  // Additional Information
+    };
+    
+    return stepMapping[urlStep] !== undefined ? stepMapping[urlStep] : -1;
+  }
+
+  // New method to map internal step index to URL step number
+  mapIndexToUrlStep(stepIndex: number): number {
+    const indexMapping: { [key: number]: number } = {
+      0: 1, // Basic Details
+      1: 2, // Contact & Capabilities
+      2: 3, // Machine Capabilities
+      3: 4, // Facility Verification
+      4: 5, // Financial Information
+      5: 6  // Additional Information
+    };
+    
+    return indexMapping[stepIndex] !== undefined ? indexMapping[stepIndex] : 1;
   }
 
   // New method to load countries then initialize form
@@ -388,6 +447,10 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             }
           }
           
+          debugger
+          let updatedBasicDetails = JSON.parse(response.data.basic_details);
+          debugger
+          console.log(updatedBasicDetails)
           // Load verification statuses from response
           if (response.data.phone_verified !== undefined) {
             this.phoneVerified = response.data.phone_verified;
@@ -450,6 +513,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         this.form.get('company_name')?.disable({ emitEvent: false });
       }
       
+      // Update phone field verification status
+      this.updatePhoneFieldVerificationStatus();
+      
       // Update state dropdown options after states are loaded
       setTimeout(() => {
         if (this.selectedState) {
@@ -469,6 +535,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         const contactData = typeof l1Data.contact_capabilities === 'string' 
           ? JSON.parse(l1Data.contact_capabilities) 
           : l1Data.contact_capabilities;
+        this.phoneVerified = contactData.phoneVerified;
         this.contactCapabilities = contactData;
         this.mergeContactCapabilities(contactData);
         console.log('✅ Contact capabilities loaded');
@@ -756,11 +823,16 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   getDisplayStepNumber(): number {
-    return this.activeStepIndex + 1;
+    return this.mapIndexToUrlStep(this.activeStepIndex);
   }
 
   getDisplayTotalSteps(): number {
     return this.totalSteps;
+  }
+
+  // New method to get current URL step
+  getCurrentUrlStep(): number {
+    return this.mapIndexToUrlStep(this.activeStepIndex);
   }
 
   goToStep(stepIndex: number) {
@@ -769,6 +841,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       this.updateCurrentStepObject();
       
       this.activeStepIndex = stepIndex;
+      
+      // Update URL parameters
+      this.updateUrlParameters();
       
       // Console log the step object after changing step
       this.logCurrentStepObject();
@@ -781,6 +856,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       this.updateCurrentStepObject();
       
       this.activeStepIndex--;
+      
+      // Update URL parameters
+      this.updateUrlParameters();
       
       // Console log the step object after changing step
       this.logCurrentStepObject();
@@ -846,6 +924,27 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     }
   }
 
+  // New method to update URL parameters when step changes
+  updateUrlParameters(): void {
+    const queryParams: any = {};
+    
+    // Preserve existing query parameters
+    this.route.snapshot.queryParams && Object.keys(this.route.snapshot.queryParams).forEach(key => {
+      queryParams[key] = this.route.snapshot.queryParams[key];
+    });
+    
+    // Update step parameter
+    queryParams['step'] = this.mapIndexToUrlStep(this.activeStepIndex);
+    
+    // Navigate with updated query parameters without refreshing the page
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: queryParams,
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
   postL1Data() {
     let endPoint = '/api/resource/Supplier Onboarding L1';
 
@@ -871,6 +970,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
          console.log('✅ Supplier created successfully:', this.supplier_id);
          this.sweetAlert.success('Basic information processed successfully. Proceeding to contact & capabilities.');
          this.activeStepIndex++;
+         // Update URL parameters after step increment
+         this.updateUrlParameters();
       }
     }, (error) => {
       console.error('❌ Error creating supplier:', error);
@@ -879,6 +980,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   putData(body: any, message: string) {
+    debugger;
+    console.log('🔄 Updating data:', body);
     // Always use Supplier Onboarding L1 endpoint
     let endPoint = `/api/resource/Supplier Onboarding L1/${this.supplier_id}`;
 
@@ -918,6 +1021,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
          // Only increment if not on the last step
          if (this.activeStepIndex < this.totalSteps - 1) {
            this.activeStepIndex++;
+           // Update URL parameters after step increment
+           this.updateUrlParameters();
          } else if (this.isEditMode) {
            // In edit mode, when on last step, show completion message but don't navigate
            this.sweetAlert.success('All changes have been saved successfully.');
@@ -1182,6 +1287,12 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   onPhoneVerified(verified: boolean): void {
     this.phoneVerified = verified;
     console.log('Phone verification status:', verified);
+    
+    // Update the phone field verification status dynamically
+    this.updatePhoneFieldVerificationStatus();
+    
+    // Trigger change detection to update the UI
+    this.cdr.detectChanges();
   }
 
   onGstVerified(verified: boolean): void {
@@ -1262,6 +1373,34 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     // Implementation to update PAN verification status
   }
 
+  updatePhoneFieldVerificationStatus() {
+    // Find the phone field in the current step fields and update its verification status
+    if (this.stepFields && this.stepFields.length > 1) {
+      const contactCapabilitiesFields = this.stepFields[1]; // Step 2: Contact & Capabilities
+      
+      // Find the row containing the phone field
+      const phoneRow = contactCapabilitiesFields.find((fieldGroup: any) => 
+        fieldGroup.fieldGroup && 
+        fieldGroup.fieldGroup.some((field: any) => field.key === 'phoneNumber')
+      );
+      
+      if (phoneRow && phoneRow.fieldGroup) {
+        const phoneField = phoneRow.fieldGroup.find((field: any) => field.key === 'phoneNumber');
+        
+        if (phoneField && phoneField.templateOptions) {
+          phoneField.templateOptions['isVerified'] = this.phoneVerified;
+          
+          // If the field has a form control, trigger validation update
+          if (phoneField.formControl) {
+            phoneField.formControl.updateValueAndValidity();
+          }
+          
+          console.log('📱 Phone field verification status updated:', this.phoneVerified);
+        }
+      }
+    }
+  }
+
   // L1 API Methods (extracted from supplier-onboarding.component.ts)
   updateL1Data(data: any) {
     console.log('Preparing L1 data for submission:', data);
@@ -1294,7 +1433,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         companyDocuments: data.companyDocuments,
         phone_verified: this.phoneVerified,
         gstVerified: this.gstVerified,
-        panVerified: this.panVerified
+        panVerified: this.panVerified,
+        phoneVerified: this.phoneVerified
       })
     };
     return body;
@@ -2289,11 +2429,35 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
               parentComponent: this,
               isVerified: this.phoneVerified
             },
+            expressionProperties: {
+              'templateOptions.isVerified': () => this.phoneVerified
+            },
             hooks: {
               onInit: (field) => {
-                if (this.phoneVerified) {
-                  field.templateOptions!['isVerified'] = true;
-                }
+                // Update the isVerified property when the field initializes
+                field.templateOptions!['isVerified'] = this.phoneVerified;
+                
+                // Watch for changes in phoneVerified and update the field
+                const updateVerificationStatus = () => {
+                  if (field.templateOptions) {
+                    field.templateOptions['isVerified'] = this.phoneVerified;
+                  }
+                };
+                
+                // Set up interval to check for verification status changes
+                const checkInterval = setInterval(() => {
+                  if (field.templateOptions && field.templateOptions['isVerified'] !== this.phoneVerified) {
+                    updateVerificationStatus();
+                  }
+                }, 500);
+                
+                // Clean up interval when field is destroyed
+                field.hooks = field.hooks || {};
+                field.hooks.onDestroy = () => {
+                  if (checkInterval) {
+                    clearInterval(checkInterval);
+                  }
+                };
               }
             },
             validation: {
