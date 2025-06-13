@@ -516,6 +516,27 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       // Update phone field verification status
       this.updatePhoneFieldVerificationStatus();
       
+      // Update bank verification field with loaded data
+      if (this.bankVerified && this.model.bankDetails) {
+        console.log('🏦 Setting up bank verification with loaded data:', this.model.bankDetails);
+        
+        // Directly update the form control values for bank verification
+        setTimeout(() => {
+          const bankVerificationControl = this.form.get('bankDetails.verification');
+          if (bankVerificationControl) {
+            bankVerificationControl.patchValue({
+              accountNumber: this.model.bankDetails.accountNumber,
+              reverifyAccountNumber: this.model.bankDetails.accountNumber,
+              ifscCode: this.model.bankDetails.ifscCode
+            });
+            console.log('📋 Updated bank verification form control:', bankVerificationControl.value);
+          }
+          
+          // Also trigger the field component update by updating options
+          this.updateBankVerificationFieldOptions();
+        }, 200);
+      }
+      
       // Update state dropdown options after states are loaded
       setTimeout(() => {
         if (this.selectedState) {
@@ -525,6 +546,28 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         this.form.markAsPristine();
       }, 1000);
     }, 500);
+  }
+
+  // New method to update bank verification field options
+  private updateBankVerificationFieldOptions() {
+    if (this.stepFields && this.stepFields[4]) { // Financial Information step
+      const bankVerificationField = this.stepFields[4].find((field: any) => 
+        field.key === 'bankDetails.verification'
+      );
+      
+      if (bankVerificationField && bankVerificationField.templateOptions) {
+        // Force update the template options
+        bankVerificationField.templateOptions['isVerified'] = this.bankVerified;
+        bankVerificationField.templateOptions['accountNumber'] = this.model.bankDetails?.accountNumber || '';
+        bankVerificationField.templateOptions['reverifyAccountNumber'] = this.model.bankDetails?.accountNumber || '';
+        bankVerificationField.templateOptions['ifscCode'] = this.model.bankDetails?.ifscCode || '';
+        
+        console.log('🔄 Forced update of bank verification field options:', bankVerificationField.templateOptions);
+        
+        // Trigger change detection
+        this.cdr.detectChanges();
+      }
+    }
   }
 
   // New method to load additional section data from L1 response
@@ -628,10 +671,81 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   mergeFinancialInformation(financialData: any) {
-    if (financialData.bankDetails) this.model.bankDetails = financialData.bankDetails;
+    console.log('🔄 Merging financial information:', financialData);
+    
+    if (financialData.bankDetails) {
+      // Ensure verification object exists with proper structure
+      const verification = {
+        accountNumber: financialData.bankDetails.accountNumber || '',
+        reverifyAccountNumber: financialData.bankDetails.accountNumber || '', // Set same as account number
+        ifscCode: financialData.bankDetails.ifscCode || ''
+      };
+      
+      this.model.bankDetails = {
+        ...financialData.bankDetails,
+        verification: verification
+      };
+      
+      console.log('🏦 Merged financial information with verification object:', this.model.bankDetails);
+    }
     if (financialData.companyFinancials) this.model.companyFinancials = financialData.companyFinancials;
     if (financialData.insuranceCoverage) this.model.insuranceCoverage = financialData.insuranceCoverage;
     if (financialData.bankVerified !== undefined) this.bankVerified = financialData.bankVerified;
+    
+    // After merging financial data, ensure bank verification is properly set up
+    if (this.bankVerified && this.model.bankDetails?.accountNumber) {
+      console.log('💰 Bank is verified and we have bank details, setting up verification');
+      
+      // Update the field configuration immediately
+      this.updateBankVerificationFieldOptions();
+      
+      // Set up bank verification with a delay to ensure component is ready
+      setTimeout(() => {
+        this.setupBankVerificationWithExistingData();
+      }, 300);
+    }
+  }
+
+  // New method to specifically handle bank verification setup
+  private setupBankVerificationWithExistingData() {
+    console.log('🔄 Setting up bank verification with existing data');
+    console.log('📋 Current bank details:', this.model.bankDetails);
+    
+    if (!this.model.bankDetails?.accountNumber) {
+      console.log('❌ No bank details available for setup');
+      return;
+    }
+    
+    // Prepare the verification data
+    const verificationData = {
+      accountNumber: this.model.bankDetails.accountNumber,
+      reverifyAccountNumber: this.model.bankDetails.accountNumber,
+      ifscCode: this.model.bankDetails.ifscCode || ''
+    };
+    
+    console.log('📝 Setting up verification data:', verificationData);
+    
+    // Update the model first
+    this.model.bankDetails.verification = verificationData;
+    
+    // Use form patchValue to update the bank verification field
+    setTimeout(() => {
+      this.form.patchValue({
+        bankDetails: {
+          verification: verificationData
+        }
+      }, { emitEvent: true }); // Enable events to trigger component updates
+      
+      console.log('✅ Form patched with bank verification data');
+      
+      // Force update the field options and trigger change detection
+      this.updateBankVerificationFieldOptions();
+      
+      // Mark the form as dirty to ensure changes are recognized
+      this.form.markAsDirty();
+      
+      console.log('✅ Bank verification setup completed');
+    }, 200); // Give more time for the component to be ready
   }
 
   mergeAdditionalInformation(additionalData: any) {
@@ -813,7 +927,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
 
   getCurrentStepTitle(): string {
     const baseTitle = this.stepInfo[this.activeStepIndex]?.title || '';
-    return this.isEditMode ? `Edit ${baseTitle}` : baseTitle;
+    return this.isEditMode ? `${baseTitle}` : baseTitle;
   }
 
   getCurrentStepDescription(): string {
@@ -847,6 +961,14 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       
       // Update URL parameters
       this.updateUrlParameters();
+      
+      // If navigating to financial step (step 4) and we have bank verification data in edit mode, set it up
+      if (stepIndex === 4 && this.isEditMode && this.bankVerified && this.model.bankDetails) {
+        console.log('💰 Navigating to financial step in edit mode with existing bank data');
+        setTimeout(() => {
+          this.setupBankVerificationWithExistingData();
+        }, 500); // Give time for the component to initialize
+      }
       
       // Console log the step object after changing step
       this.logCurrentStepObject();
@@ -1274,8 +1396,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     if (!this.model.bankDetails.bankName) {
       this.model.bankDetails = {
         bankName: 'State Bank of India',
-        accountNumber: '1234567890123456',
-        ifscCode: 'SBIN0001234',
+        accountNumber: '369505000642',
+        ifscCode: 'ICIC0007202',
         accountHolderName: 'Example Company Private Limited',
         accountType: 'Current',
         branchName: 'Commercial Street Branch'
@@ -1285,10 +1407,17 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     console.log('🏦 Bank Verified with Static Data:', this.bankVerified);
     console.log('📋 Bank Details:', this.model.bankDetails);
     
-    // Update form with static data
+    // Update form with static data and ensure reverify field is populated
     setTimeout(() => {
       this.form.patchValue({
-        bankDetails: this.model.bankDetails
+        bankDetails: {
+          ...this.model.bankDetails,
+          verification: {
+            accountNumber: this.model.bankDetails.accountNumber,
+            reverifyAccountNumber: this.model.bankDetails.accountNumber, // Populate reverify field
+            ifscCode: this.model.bankDetails.ifscCode
+          }
+        }
       });
       this.form.markAsDirty();
       
@@ -2084,9 +2213,73 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       {
         key: 'bankDetails.verification',
         type: 'bank-verify',
+        defaultValue: {
+          accountNumber: this.model.bankDetails?.accountNumber || '',
+          reverifyAccountNumber: this.model.bankDetails?.accountNumber || '',
+          ifscCode: this.model.bankDetails?.ifscCode || ''
+        },
         templateOptions: {
           parentComponent: this,
-          isVerified: this.bankVerified
+          isVerified: this.bankVerified,
+          // Pass initial values to the bank verification component
+          accountNumber: this.model.bankDetails?.accountNumber || '',
+          reverifyAccountNumber: this.model.bankDetails?.accountNumber || '',
+          ifscCode: this.model.bankDetails?.ifscCode || ''
+        },
+        // Update templateOptions when bankVerified changes
+        expressionProperties: {
+          'templateOptions.isVerified': () => this.bankVerified,
+          'templateOptions.accountNumber': () => this.model.bankDetails?.accountNumber || '',
+          'templateOptions.reverifyAccountNumber': () => this.model.bankDetails?.accountNumber || '',
+          'templateOptions.ifscCode': () => this.model.bankDetails?.ifscCode || ''
+        },
+        hooks: {
+          onInit: (field) => {
+            // Ensure the field gets the initial values when it's created
+            console.log('🔧 Bank verification field onInit hook called');
+            console.log('📋 Initial bank details:', this.model.bankDetails);
+            
+            // Set initial value if we have bank details
+            if (this.model.bankDetails?.accountNumber || this.model.bankDetails?.ifscCode) {
+              const initialValue = {
+                accountNumber: this.model.bankDetails.accountNumber || '',
+                reverifyAccountNumber: this.model.bankDetails.accountNumber || '',
+                ifscCode: this.model.bankDetails.ifscCode || ''
+              };
+              
+              console.log('📝 Setting initial value:', initialValue);
+              field.formControl?.setValue(initialValue, { emitEvent: false });
+              
+              // Also update template options
+              if (field.templateOptions) {
+                field.templateOptions['accountNumber'] = initialValue.accountNumber;
+                field.templateOptions['reverifyAccountNumber'] = initialValue.reverifyAccountNumber;
+                field.templateOptions['ifscCode'] = initialValue.ifscCode;
+                field.templateOptions['isVerified'] = this.bankVerified;
+              }
+            }
+          },
+          afterViewInit: (field) => {
+            // Additional setup after view is initialized
+            console.log('🔧 Bank verification field afterViewInit hook called');
+            
+            // Force update the component with current data
+            if (this.model.bankDetails?.accountNumber || this.model.bankDetails?.ifscCode) {
+              setTimeout(() => {
+                const currentValue = {
+                  accountNumber: this.model.bankDetails?.accountNumber || '',
+                  reverifyAccountNumber: this.model.bankDetails?.accountNumber || '',
+                  ifscCode: this.model.bankDetails?.ifscCode || ''
+                };
+                
+                console.log('🔄 Forcing update with current value:', currentValue);
+                field.formControl?.setValue(currentValue, { emitEvent: false });
+                
+                // Trigger change detection
+                this.cdr.detectChanges();
+              }, 100);
+            }
+          }
         }
       },
       

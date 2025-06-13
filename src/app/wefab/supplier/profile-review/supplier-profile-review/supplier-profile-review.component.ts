@@ -458,17 +458,12 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       manufacturingCapabilities: 0,
       financialAdditional: 0
     };
-    
-    console.log('🧮 Calculating profile completeness with all status data:');
-    console.log('L1 Status:', this.getCurrentL1DataStatus);
-    console.log('L2 Status:', this.getCurrentL2DataStatus);
-    console.log('L3 Status:', this.getCurrentL3DataStatus);
 
-    if(this.basicDetails && this.contactCapabilities){
+    if(Object.keys(this.basicDetails).length > 0 && Object.keys(this.contactCapabilities).length > 0){
        this.completionStatus.basicInformation = 100;
-    } if(this.machineCapabilities && this.facilityVerification){
+    } if(Object.keys(this.machineCapabilities).length > 0 && Object.keys(this.facilityVerification).length > 0){
       this.completionStatus.manufacturingCapabilities = 100;
-    } if(this.financialInformation){
+    } if(Object.keys(this.financialInformation).length > 0 && this.newFinancialData.additionalInformation.references && this.newFinancialData.additionalInformation.references.length > 0){
       this.completionStatus.financialAdditional = 100;
     }
 
@@ -593,15 +588,17 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         }
         const machineCapabilities = result.data.machine_capabilities ? JSON.parse(result.data.machine_capabilities) : {};
         this.machineCapabilities = machineCapabilities;
+        debugger
+        console.log('🔍 Machine Capabilities:', this.machineCapabilities)
         const facilityVerification = result.data.facility_verification ? JSON.parse(result.data.facility_verification) : {};
         this.facilityVerification = facilityVerification;
-        if(this.machineCapabilities && this.facilityVerification && (this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review')){
+        if(Object.keys(this.machineCapabilities).length > 0 && Object.keys(this.facilityVerification).length > 0 && (this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review')){
           this.manufacturingUnderReview = true;
           this.manufacturingRejected = false;
-        } else if (this.machineCapabilities && this.facilityVerification && this.currentOnboardingStage === 'L2 Rejected') {
+        } else if (Object.keys(this.machineCapabilities).length > 0 && Object.keys(this.facilityVerification).length > 0 && this.currentOnboardingStage === 'L2 Rejected') {
           this.manufacturingRejected = true;
           this.manufacturingUnderReview = false;
-        } else if (this.machineCapabilities && this.facilityVerification && this.currentOnboardingStage === 'L2 Request for Update') {
+        } else if (Object.keys(this.machineCapabilities).length > 0 && Object.keys(this.facilityVerification).length > 0 && this.currentOnboardingStage === 'L2 Request for Update') {
           this.manufacturingUnderReview = false;
           this.manufacturingRejected = false;
           this.manufacturingRequestForUpdate = true;

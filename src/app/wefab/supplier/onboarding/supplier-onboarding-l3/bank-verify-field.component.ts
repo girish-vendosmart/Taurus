@@ -1,4 +1,4 @@
-import { Component, forwardRef, Input, Output, EventEmitter, Inject, PLATFORM_ID, OnInit, OnChanges, SimpleChanges, ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core';
+import { Component, forwardRef, Input, Output, EventEmitter, Inject, PLATFORM_ID, OnInit, OnChanges, SimpleChanges, ElementRef, Renderer2, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -504,7 +504,7 @@ import { CommonService } from '../../../../shared/services/common.service';
     }
   `]
 })
-export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, OnChanges {
+export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, OnChanges, AfterViewInit {
   @Input() accountNumber: string = '';
   @Input() ifscCode: string = '';
   @Input() reverifyAccountNumber: string = '';
@@ -554,17 +554,81 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
   ngOnInit() {
     this.showVerificationDialog = false;
     console.log('BankVerifyFieldComponent initialized with isVerified:', this.isVerified);
+    console.log('🔍 Initial input values:', {
+      accountNumber: this.accountNumber,
+      reverifyAccountNumber: this.reverifyAccountNumber,
+      ifscCode: this.ifscCode
+    });
     
-    // Initialize _isVerified based on input, but only if we have actual bank details
+    // Initialize _isVerified based on input
     this._isVerified = this.isVerified;
     
-    // Only set up verified state if we have actual bank details AND isVerified is true
-    if (this._isVerified && this.hasBankDetails()) {
+    // Check if we have values from templateOptions (from parent component)
+    const templateOptions = (this as any).to;
+    if (templateOptions) {
+      console.log('📋 Template options found:', {
+        accountNumber: templateOptions.accountNumber,
+        reverifyAccountNumber: templateOptions.reverifyAccountNumber,
+        ifscCode: templateOptions.ifscCode,
+        isVerified: templateOptions.isVerified
+      });
+      
+      // Use template options if available and input properties are empty
+      if (templateOptions.accountNumber && !this.accountNumber) {
+        this.accountNumber = templateOptions.accountNumber;
+      }
+      if (templateOptions.reverifyAccountNumber && !this.reverifyAccountNumber) {
+        this.reverifyAccountNumber = templateOptions.reverifyAccountNumber;
+      }
+      if (templateOptions.ifscCode && !this.ifscCode) {
+        this.ifscCode = templateOptions.ifscCode;
+      }
+      if (templateOptions.isVerified !== undefined) {
+        this._isVerified = templateOptions.isVerified;
+      }
+    }
+    
+    // Set initial form control values
+    if (this.accountNumber) {
+      this.accountNumberControl.setValue(this.accountNumber, { emitEvent: false });
+      console.log('📝 Set initial account number:', this.accountNumber);
+    }
+    
+    if (this.ifscCode) {
+      this.ifscCodeControl.setValue(this.ifscCode, { emitEvent: false });
+      console.log('📝 Set initial IFSC code:', this.ifscCode);
+    }
+    
+    if (this.reverifyAccountNumber) {
+      this.reverifyAccountNumberControl.setValue(this.reverifyAccountNumber, { emitEvent: false });
+      console.log('📝 Set initial reverify account number:', this.reverifyAccountNumber);
+    }
+    
+    // Enable reverify field if account number is valid
+    if (this.accountNumber && this.accountNumber.length >= 9) {
+      this.reverifyAccountNumberControl.enable({ emitEvent: false });
+      console.log('✅ Enabled reverify account number field on init');
+    }
+    
+    // Update bank details object with the initial values
+    if (this.accountNumber || this.ifscCode) {
+      this.bankDetails = {
+        ...this.bankDetails,
+        accountNumber: this.accountNumber || '',
+        ifscCode: this.ifscCode || '',
+        nameAtBank: this.bankDetails.nameAtBank || 'Example Company Private Limited'
+      };
+      console.log('🏦 Updated bank details object on init:', this.bankDetails);
+    }
+    
+    // Set up verified state if we have bank details AND isVerified is true
+    if (this._isVerified && (this.hasBankDetails() || (this.accountNumber && this.ifscCode))) {
+      console.log('🔄 Setting up verified state on init');
       this.setupVerifiedState();
-    } else {
-      // Reset verification state if no valid bank details
-      this._isVerified = false;
-      this.isVerified = false;
+    } else if (this._isVerified && this.accountNumber && this.ifscCode) {
+      // Even if hasBankDetails() returns false, if we have account and IFSC, set up as verified
+      console.log('🔄 Setting up verified state with basic details on init');
+      this.setupVerifiedStateWithBasicDetails();
     }
     
     // Watch for changes in account number and IFSC code
@@ -619,17 +683,6 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
       });
       this.resetVerification();
     });
-    
-    // Set initial values if provided
-    if (this.accountNumber) {
-      this.accountNumberControl.setValue(this.accountNumber, { emitEvent: false });
-    }
-    if (this.reverifyAccountNumber) {
-      this.reverifyAccountNumberControl.setValue(this.reverifyAccountNumber, { emitEvent: false });
-    }
-    if (this.ifscCode) {
-      this.ifscCodeControl.setValue(this.ifscCode, { emitEvent: false });
-    }
   }
   
   ngOnChanges(changes: SimpleChanges) {
@@ -637,8 +690,10 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
       console.log('isVerified changed to:', changes['isVerified'].currentValue);
       this._isVerified = changes['isVerified'].currentValue;
       
-      if (this._isVerified && this.hasBankDetails()) {
+      if (this._isVerified && (this.hasBankDetails() || (this.accountNumber && this.ifscCode))) {
         this.setupVerifiedState();
+      } else if (this._isVerified && this.accountNumber && this.ifscCode) {
+        this.setupVerifiedStateWithBasicDetails();
       } else {
         // Reset verification state if no valid bank details or not verified
         this._isVerified = false;
@@ -647,6 +702,111 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
       
       this.cdr.detectChanges();
     }
+    
+    // Handle template options changes (from parent component)
+    const templateOptions = (this as any).to;
+    if (templateOptions) {
+      let shouldUpdate = false;
+      
+      if (templateOptions.accountNumber && templateOptions.accountNumber !== this.accountNumber) {
+        this.accountNumber = templateOptions.accountNumber;
+        this.accountNumberControl.setValue(templateOptions.accountNumber, { emitEvent: false });
+        shouldUpdate = true;
+      }
+      
+      if (templateOptions.reverifyAccountNumber && templateOptions.reverifyAccountNumber !== this.reverifyAccountNumber) {
+        this.reverifyAccountNumber = templateOptions.reverifyAccountNumber;
+        this.reverifyAccountNumberControl.setValue(templateOptions.reverifyAccountNumber, { emitEvent: false });
+        shouldUpdate = true;
+      }
+      
+      if (templateOptions.ifscCode && templateOptions.ifscCode !== this.ifscCode) {
+        this.ifscCode = templateOptions.ifscCode;
+        this.ifscCodeControl.setValue(templateOptions.ifscCode, { emitEvent: false });
+        shouldUpdate = true;
+      }
+      
+      // Update bank details if any field changed
+      if (shouldUpdate) {
+        this.bankDetails = {
+          ...this.bankDetails,
+          accountNumber: this.accountNumber,
+          ifscCode: this.ifscCode,
+          nameAtBank: this.bankDetails.nameAtBank || 'Example Company Private Limited'
+        };
+        
+        // Re-setup verified state if verified and we have the data
+        if (this._isVerified && (this.accountNumber && this.ifscCode)) {
+          this.setupVerifiedStateWithBasicDetails();
+        }
+      }
+    }
+  }
+  
+  ngAfterViewInit() {
+    // Additional initialization after view is fully rendered
+    // This ensures all templateOptions are properly available
+    setTimeout(() => {
+      console.log('🔍 ngAfterViewInit - checking template options');
+      const templateOptions = (this as any).to;
+      
+      if (templateOptions && (templateOptions.accountNumber || templateOptions.ifscCode)) {
+        console.log('📋 Found template options in AfterViewInit:', {
+          accountNumber: templateOptions.accountNumber,
+          reverifyAccountNumber: templateOptions.reverifyAccountNumber,
+          ifscCode: templateOptions.ifscCode,
+          isVerified: templateOptions.isVerified
+        });
+        
+        // Update fields if we have data
+        let shouldUpdate = false;
+        
+        if (templateOptions.accountNumber && !this.accountNumberControl.value) {
+          this.accountNumber = templateOptions.accountNumber;
+          this.accountNumberControl.setValue(templateOptions.accountNumber, { emitEvent: false });
+          shouldUpdate = true;
+        }
+        
+        if (templateOptions.reverifyAccountNumber && !this.reverifyAccountNumberControl.value) {
+          this.reverifyAccountNumber = templateOptions.reverifyAccountNumber;
+          this.reverifyAccountNumberControl.setValue(templateOptions.reverifyAccountNumber, { emitEvent: false });
+          // Enable the field if we have a value
+          if (templateOptions.reverifyAccountNumber) {
+            this.reverifyAccountNumberControl.enable({ emitEvent: false });
+          }
+          shouldUpdate = true;
+        }
+        
+        if (templateOptions.ifscCode && !this.ifscCodeControl.value) {
+          this.ifscCode = templateOptions.ifscCode;
+          this.ifscCodeControl.setValue(templateOptions.ifscCode, { emitEvent: false });
+          shouldUpdate = true;
+        }
+        
+        // Update verification status
+        if (templateOptions.isVerified !== undefined) {
+          this._isVerified = templateOptions.isVerified;
+        }
+        
+        if (shouldUpdate) {
+          this.bankDetails = {
+            ...this.bankDetails,
+            accountNumber: this.accountNumber || '',
+            ifscCode: this.ifscCode || '',
+            nameAtBank: this.bankDetails.nameAtBank || 'Example Company Private Limited'
+          };
+          
+          // Set up verified state if verified and we have data
+          if (this._isVerified && this.accountNumber && this.ifscCode) {
+            console.log('🔄 Setting up verified state in AfterViewInit');
+            this.setupVerifiedStateWithBasicDetails();
+          }
+          
+          this.cdr.detectChanges();
+          console.log('✅ Bank verification fields updated in AfterViewInit');
+        }
+      }
+    }, 100);
   }
   
   private setupVerifiedState() {
@@ -685,6 +845,42 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
     this.verified.emit(true);
     this.bankDetailsVerified.emit({
       ...this.bankDetails,
+      verified: true
+    });
+  }
+  
+  private setupVerifiedStateWithBasicDetails() {
+    console.log('Setting up verified state with basic details');
+    
+    // Set form values if we have account number and IFSC
+    if (this.accountNumber) {
+      this.accountNumberControl.setValue(this.accountNumber, { emitEvent: false });
+    }
+    
+    if (this.ifscCode) {
+      this.ifscCodeControl.setValue(this.ifscCode, { emitEvent: false });
+    }
+    
+    if (this.accountNumber) {
+      this.reverifyAccountNumberControl.setValue(this.accountNumber, { emitEvent: false });
+      this.reverifyAccountNumber = this.accountNumber;
+    }
+    
+    // Enable reverify field since we have account number
+    if (this.accountNumber && this.accountNumber.length >= 9) {
+      this.reverifyAccountNumberControl.enable({ emitEvent: false });
+    }
+    
+    // Disable controls when verified
+    this.accountNumberControl.disable({ emitEvent: false });
+    this.reverifyAccountNumberControl.disable({ emitEvent: false });
+    this.ifscCodeControl.disable({ emitEvent: false });
+    
+    // Emit the verified state
+    this.verified.emit(true);
+    this.bankDetailsVerified.emit({
+      accountNumber: this.accountNumber,
+      ifscCode: this.ifscCode,
       verified: true
     });
   }
@@ -920,19 +1116,71 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
   }
   
   writeValue(value: any): void {
+    console.log('🔍 writeValue called with:', value);
+    
     if (value && typeof value === 'object') {
+      let shouldUpdate = false;
+      let shouldEnableReverify = false;
+      
       if (value.accountNumber !== undefined) {
         this.accountNumber = value.accountNumber;
         this.accountNumberControl.setValue(value.accountNumber, { emitEvent: false });
+        shouldUpdate = true;
+        shouldEnableReverify = value.accountNumber && value.accountNumber.length >= 9;
+        console.log('📝 Set account number:', value.accountNumber);
       }
+      
       if (value.reverifyAccountNumber !== undefined) {
         this.reverifyAccountNumber = value.reverifyAccountNumber;
         this.reverifyAccountNumberControl.setValue(value.reverifyAccountNumber, { emitEvent: false });
+        shouldUpdate = true;
+        console.log('📝 Set reverify account number:', value.reverifyAccountNumber);
       }
+      
       if (value.ifscCode !== undefined) {
         this.ifscCode = value.ifscCode;
         this.ifscCodeControl.setValue(value.ifscCode, { emitEvent: false });
+        shouldUpdate = true;
+        console.log('📝 Set IFSC code:', value.ifscCode);
       }
+      
+      // Enable reverify field if account number is valid
+      if (shouldEnableReverify) {
+        this.reverifyAccountNumberControl.enable({ emitEvent: false });
+        console.log('✅ Enabled reverify account number field');
+      }
+      
+      // Update bank details object if any field changed
+      if (shouldUpdate) {
+        this.bankDetails = {
+          ...this.bankDetails,
+          accountNumber: this.accountNumber || '',
+          ifscCode: this.ifscCode || '',
+          nameAtBank: this.bankDetails.nameAtBank || 'Example Company Private Limited'
+        };
+        
+        console.log('🏦 Updated bank details object:', this.bankDetails);
+        
+        // If we're verified and have the data, set up verified state
+        if (this._isVerified && this.accountNumber && this.ifscCode) {
+          console.log('🔄 Setting up verified state after writeValue');
+          this.setupVerifiedStateWithBasicDetails();
+        }
+        
+        // Trigger change detection
+        this.cdr.detectChanges();
+        console.log('✅ Bank verification fields updated via writeValue');
+      }
+    } else if (value === null || value === undefined) {
+      // Clear all fields if null/undefined is passed
+      this.accountNumber = '';
+      this.reverifyAccountNumber = '';
+      this.ifscCode = '';
+      this.accountNumberControl.setValue('', { emitEvent: false });
+      this.reverifyAccountNumberControl.setValue('', { emitEvent: false });
+      this.ifscCodeControl.setValue('', { emitEvent: false });
+      this.reverifyAccountNumberControl.disable({ emitEvent: false });
+      console.log('🧹 Cleared all bank verification fields');
     }
   }
   

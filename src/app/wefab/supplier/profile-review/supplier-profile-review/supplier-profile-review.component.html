@@ -205,7 +205,7 @@
           (click)="changeLevelTab('manufacturing')" [disabled]="basicDetailsRejected">
           <div class="level-badge">
             <i class="pi pi-times-circle status-icon rejected" *ngIf="manufacturingRejected"></i>
-            <i class="pi pi-check-circle status-icon approved" *ngIf="!manufacturingUnderReview && !manufacturingRejected && !manufacturingRequestForUpdate"></i>
+            <i class="pi pi-check-circle status-icon approved" *ngIf="!manufacturingUnderReview && !manufacturingRejected && !manufacturingRequestForUpdate && !basicDetailsUnderReview && !basicDetailsRejected"></i>
             <i class="pi pi-exclamation-triangle status-icon under-review"
               *ngIf="manufacturingUnderReview && !manufacturingRejected && !manufacturingRequestForUpdate"></i>
             <i class="pi pi-sync status-icon request-resubmit"
@@ -233,7 +233,7 @@
           [disabled]="basicDetailsRejected || manufacturingRejected">
           <div class="level-badge">
             <i class="pi pi-times-circle status-icon rejected" *ngIf="financialRejected"></i>
-            <i class="pi pi-check-circle status-icon approved" *ngIf="!financialUnderReview && !financialRejected && !financialRequestForUpdate"></i>
+            <i class="pi pi-check-circle status-icon approved" *ngIf="!financialUnderReview && !financialRejected && !financialRequestForUpdate && !basicDetailsUnderReview && !manufacturingUnderReview && !manufacturingRejected"></i>
             <i class="pi pi-exclamation-triangle status-icon under-review"
               *ngIf="financialUnderReview && !financialRejected && !financialRequestForUpdate"></i>
             <i class="pi pi-sync status-icon request-resubmit"
@@ -588,17 +588,6 @@
             </div>
 
             <div class="manufacturing-grid" *ngIf="!shouldShowMachinesZeroState">
-              <!-- Debug Button for Testing Machine Analysis -->
-              <div style="margin-bottom: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 5px;" *ngIf="userType === 'wefab_team'">
-                <button class="btn btn-warning" (click)="forceAnalyzeAllMachines()" style="margin-right: 10px;">
-                  <i class="pi pi-refresh"></i> Force Analyze All Machines
-                </button>
-                <button class="btn btn-info" (click)="debugManufacturingData()" style="margin-right: 10px;">
-                  <i class="pi pi-search"></i> Debug Manufacturing Data
-                </button>
-                <small style="color: #666;">Debug: Force trigger machine analysis to check if machine_status_comment is set</small>
-              </div>
-
               <!-- Machine Cards -->
               <div class="manufacturing-card" *ngFor="let machine of manufacturingData.machines">
                 <div class="manufacturing-image-container">
@@ -643,13 +632,6 @@
                       <span class="info-label">Specifications:</span>
                       <span class="info-value">{{ machine.specifications }}</span>
                     </p>
-                    <!-- Debug Info -->
-                    <div style="background: #f9f9f9; padding: 0.5rem; margin-top: 0.5rem; border-radius: 3px; font-size: 0.8rem;" *ngIf="userType === 'wefab_team'">
-                      <strong>Debug Info:</strong><br>
-                      Status: {{ machine.machinePhotos.machine_status || 'undefined' }}<br>
-                      Comment: {{ machine.machinePhotos.machine_status_comment || 'undefined' }}<br>
-                      FileID: {{ machine.machinePhotos.fileId || machine.machinePhotos.file_id || 'undefined' }}
-                    </div>
                   </div>
                   
                   <!-- Admin comment section -->
