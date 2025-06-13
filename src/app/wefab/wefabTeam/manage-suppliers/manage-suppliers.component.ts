@@ -565,9 +565,49 @@ export class ManageSuppliersComponent implements OnInit {
           this.loadSuppliers();
         },
         error: (error) => {
+          this.sendInvitationButtonConfig = {
+            ...this.sendInvitationButtonConfig,
+            loading: false,
+            disabled: false
+          };
           console.error('Error inviting supplier:', error);
           this.hideInviteDialog();
-          this.sweetAlert.error('error.error?.message');
+          
+          // Extract proper error message from server response
+          let errorMessage = 'Failed to send supplier invitation. Please try again.';
+          
+          if (error?.error?._server_messages) {
+            try {
+              // Parse the server messages which come as JSON string
+              const serverMessages = JSON.parse(error.error._server_messages);
+              if (serverMessages && serverMessages.length > 0) {
+                const firstMessage = JSON.parse(serverMessages[0]);
+                errorMessage = firstMessage.message || errorMessage;
+              }
+            } catch (parseError) {
+              console.error('Error parsing server messages:', parseError);
+            }
+          } else if (error?.error?.exception) {
+            // Handle specific exception types
+            if (error.error.exc_type === 'DuplicateEntryError') {
+              errorMessage = 'This supplier has already been invited. Please check the invited suppliers list.';
+            } else {
+              errorMessage = 'An error occurred while processing your request.';
+            }
+          } else if (error?.message) {
+            errorMessage = error.message;
+          }
+          
+          // Handle specific HTTP status codes
+          if (error?.status === 409) {
+            errorMessage = errorMessage || 'This supplier has already been invited.';
+          } else if (error?.status === 400) {
+            errorMessage = 'Invalid data provided. Please check your input.';
+          } else if (error?.status === 500) {
+            errorMessage = 'Server error occurred. Please try again later.';
+          }
+          
+          this.sweetAlert.error(errorMessage);
         },
         complete: () => {
           this.sendInvitationButtonConfig = {
@@ -577,7 +617,18 @@ export class ManageSuppliersComponent implements OnInit {
           };
         }
       });
+    } else {
+      // Handle form validation errors
+      this.markFormGroupTouched(this.inviteForm);
     }
+  }
+
+  // Helper method to mark all form controls as touched for validation display
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+    });
   }
 
   viewSupplierProfile(supplier: Supplier) {
