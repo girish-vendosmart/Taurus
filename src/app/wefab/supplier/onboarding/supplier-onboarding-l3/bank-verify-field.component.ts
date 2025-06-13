@@ -555,12 +555,16 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
     this.showVerificationDialog = false;
     console.log('BankVerifyFieldComponent initialized with isVerified:', this.isVerified);
     
-    // Initialize _isVerified based on input
+    // Initialize _isVerified based on input, but only if we have actual bank details
     this._isVerified = this.isVerified;
     
-    // If already verified, set up the static bank details and disable controls
-    if (this._isVerified) {
+    // Only set up verified state if we have actual bank details AND isVerified is true
+    if (this._isVerified && this.hasBankDetails()) {
       this.setupVerifiedState();
+    } else {
+      // Reset verification state if no valid bank details
+      this._isVerified = false;
+      this.isVerified = false;
     }
     
     // Watch for changes in account number and IFSC code
@@ -633,9 +637,11 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
       console.log('isVerified changed to:', changes['isVerified'].currentValue);
       this._isVerified = changes['isVerified'].currentValue;
       
-      if (this._isVerified) {
+      if (this._isVerified && this.hasBankDetails()) {
         this.setupVerifiedState();
       } else {
+        // Reset verification state if no valid bank details or not verified
+        this._isVerified = false;
         this.resetVerifiedState();
       }
       
@@ -646,30 +652,26 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
   private setupVerifiedState() {
     console.log('Setting up verified state');
     
-    // Set static bank details if not already set
-    if (!this.bankDetails.accountNumber) {
-      this.bankDetails = {
-        accountNumber: '1234567890123456',
-        ifscCode: 'SBIN0001234',
-        accountExists: true,
-        nameAtBank: 'Example Company Private Limited',
-        utr: '516126168903',
-        amountDeposited: 1
-      };
+    // Only set up verified state if we have actual bank details
+    // Remove the static test data that was causing the issue
+    if (!this.bankDetails.accountNumber || this.bankDetails.accountNumber === '') {
+      // Don't auto-populate with test data - let the verification process handle this
+      console.log('No bank details available for verified state');
+      return;
     }
     
-    // Set form values if not already set
-    if (!this.accountNumberControl.value) {
+    // Set form values only if we have actual verified data
+    if (this.bankDetails.accountNumber && this.accountNumberControl.value !== this.bankDetails.accountNumber) {
       this.accountNumberControl.setValue(this.bankDetails.accountNumber, { emitEvent: false });
       this.accountNumber = this.bankDetails.accountNumber;
     }
     
-    if (!this.ifscCodeControl.value) {
+    if (this.bankDetails.ifscCode && this.ifscCodeControl.value !== this.bankDetails.ifscCode) {
       this.ifscCodeControl.setValue(this.bankDetails.ifscCode, { emitEvent: false });
       this.ifscCode = this.bankDetails.ifscCode;
     }
     
-    if (!this.reverifyAccountNumberControl.value) {
+    if (this.bankDetails.accountNumber && this.reverifyAccountNumberControl.value !== this.bankDetails.accountNumber) {
       this.reverifyAccountNumberControl.setValue(this.bankDetails.accountNumber, { emitEvent: false });
       this.reverifyAccountNumber = this.bankDetails.accountNumber;
     }
@@ -700,6 +702,18 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
     }
     
     this.verificationError = false;
+  }
+  
+  private hasBankDetails(): boolean {
+    // Check if we have actual bank details (not empty or default values)
+    return !!(
+      this.bankDetails.accountNumber && 
+      this.bankDetails.accountNumber !== '' &&
+      this.bankDetails.ifscCode && 
+      this.bankDetails.ifscCode !== '' &&
+      this.bankDetails.nameAtBank && 
+      this.bankDetails.nameAtBank !== ''
+    );
   }
   
   onIfscInput(event: any) {
@@ -750,63 +764,43 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
     
     const accountNumber = this.accountNumberControl.value;
     const ifscCode = this.ifscCodeControl.value;
-    this.isLoading = false;
-    this.companyBankDetails = {
-        code: 200,
-        timestamp: 1749551045136,
-        transaction_id: "9389b737-46a0-4aa5-9996-351accf19be4",
-        data: {
-            message: "Bank Account details verified successfully.",
-            account_exists: true,
-            name_at_bank: "VENDOSMART TECHNOLOGIES PRIVATE LIMITED",
-            utr: "516126168903",
-            amount_deposited: 1,
-            name_information: {
-                "name_at_bank_cleaned": "Vendosmart Technologies Private Limited"
-            }
-        }
-    }
-    this.patchBankDetails();
-    this.showVerificationDialog = true;
-    this.cdr.detectChanges();
-    
-    // let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.bank_verify.bank_account_verification?account_number=${accountNumber}&ifsc=${ifscCode}`;
+    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.bank_verify.bank_account_verification?account_number=${accountNumber}&ifsc=${ifscCode}`;
 
-    // this.commonService.getData(endPoint).subscribe((res: any) => {
-    //   this.isLoading = false;
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      this.isLoading = false;
       
-    //   console.log('Bank API Response:', res);
+      console.log('Bank API Response:', res);
       
-    //   // Check if the data exists in the expected format
-    //   if (res && res.message && res.message.data) {
-    //     this.companyBankDetails = res.message.data;
-    //     this.patchBankDetails();
-    //     this.showVerificationDialog = true;
-    //     this.cdr.detectChanges();
-    //   } else {
-    //     console.error('Invalid API response format:', res);
-    //     this.messageService.add({
-    //       severity: 'error',
-    //       summary: 'Error',
-    //       detail: 'Invalid response format from server',
-    //       life: 3000
-    //     });
-    //   }
-    // }, (err) => {
-    //   this.isLoading = false;
-    //   console.error('Bank API Error:', err);
-    //   this.messageService.add({
-    //     severity: 'error',
-    //     summary: 'Error',
-    //     detail: 'Failed to verify bank details. Please try again.',
-    //     life: 3000
-    //   });
-    //   this.verificationError = true;
+      // Check if the data exists in the expected format
+      if (res && res.message && res.message.data) {
+        this.companyBankDetails = res.message.data;
+        this.patchBankDetails();
+        this.showVerificationDialog = true;
+        this.cdr.detectChanges();
+      } else {
+        console.error('Invalid API response format:', res);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Invalid response format from server',
+          life: 3000
+        });
+      }
+    }, (err) => {
+      this.isLoading = false;
+      console.error('Bank API Error:', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to verify bank details. Please try again.',
+        life: 3000
+      });
+      this.verificationError = true;
       
-    //   setTimeout(() => {
-    //     this.verificationError = false;
-    //   }, 3000);
-    // });
+      setTimeout(() => {
+        this.verificationError = false;
+      }, 3000);
+    });
   }
 
   patchBankDetails() {

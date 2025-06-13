@@ -130,7 +130,9 @@ export class LoginComponentComponent {
                     if(!response.data.supplier_info.supplier_company_id) {
                       this.router.navigate(['/wefab/supplier/supplier-onboarding-welcome']);
                     } else {
-                      this.getOnboardingL3Status(response.data.supplier_info.supplier_company_id);
+                      localStorage.setItem('supplier_onboarding_complete', 'true');
+                       localStorage.setItem('show_supplier_dashboard', 'true');
+                      this.router.navigate(['/wefab/supplier/dashboard']);
                     }
                   } else if (response.data.user_type === 'wefab_team') {
                     this.router.navigate(['/wefab/wefabTeam/manage-suppliers']);

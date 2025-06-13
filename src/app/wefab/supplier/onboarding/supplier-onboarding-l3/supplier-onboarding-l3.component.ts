@@ -297,12 +297,22 @@ export class SupplierOnboardingL3Component implements OnInit {
         debugger
         console.log(this.getFinancialData)
         
-        // Load bank verification status from the API response
-        this.bankVerified = this.getFinancialData.bank_verified || false;
+        // Only set bankVerified to true if we have actual bank details AND verification is true
+        // Check if we have actual bank account details before considering it verified
+        const hasActualBankDetails = this.getFinancialData.bankDetails && 
+                                    this.getFinancialData.bankDetails.accountNumber && 
+                                    this.getFinancialData.bankDetails.ifscCode &&
+                                    this.getFinancialData.bankDetails.accountNumber !== '' &&
+                                    this.getFinancialData.bankDetails.ifscCode !== '';
+        
+        // Only set as verified if we have both the verification flag AND actual bank details
+        this.bankVerified = (this.getFinancialData.bank_verified && hasActualBankDetails) || false;
         
         console.log('L3 Data response:', res);
-        console.log('Bank verified status:', this.bankVerified);
-        console.log(this.getFinancialData)
+        console.log('Has actual bank details:', hasActualBankDetails);
+        console.log('API bank_verified flag:', this.getFinancialData.bank_verified);
+        console.log('Final bankVerified status:', this.bankVerified);
+        console.log('Bank details from API:', this.getFinancialData.bankDetails);
         this.patchValueForm()
       })
   }
