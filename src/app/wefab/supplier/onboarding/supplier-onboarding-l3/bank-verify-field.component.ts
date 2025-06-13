@@ -97,7 +97,6 @@ import { CommonService } from '../../../../shared/services/common.service';
                 VERIFY BANK DETAILS
             </span>
             <span *ngIf="!isLoading && _isVerified">
-                <i class="pi pi-check" style="margin-right: 0.5rem"></i>
                 VERIFIED
             </span>
             <span *ngIf="!isLoading && verificationError">
@@ -217,11 +216,11 @@ import { CommonService } from '../../../../shared/services/common.service';
         border-radius: 6px;
         white-space: nowrap;
         border: none;
-        font-weight: 600;
+        font-weight: 500;
         padding: 0.75rem 1.5rem;
         font-size: 0.875rem;
-        min-width: 200px;
-        height: 48px;
+        min-width: 120px;
+        height: 40px;
         display: inline-flex;
         align-items: center;
         justify-content: center;

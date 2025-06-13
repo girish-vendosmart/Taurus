@@ -291,7 +291,8 @@ interface Country {
         }
         
         &.verified {
-          background-color: #28a745;
+          background-color: #28a745 !important;
+          color: white !important;
         }
         
         &.error {
