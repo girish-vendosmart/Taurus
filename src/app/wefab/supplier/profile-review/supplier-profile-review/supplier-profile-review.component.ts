@@ -867,7 +867,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processMachineVerificationAsync(): void {
-    console.log('🔄 processMachineVerificationAsync called');
+    console.log('processMachineVerificationAsync called');
     
     if (!this.manufacturingData?.machines?.length) {
       console.log('❌ No machines to analyze');
@@ -884,33 +884,45 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     const machineRequests: Observable<any>[] = [];
     
     const machinesToAnalyze = this.manufacturingData.machines.filter((machine: any) => {
-      const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.[0]?.file_id;
-      if (!fileId) return false;
+      const fileId = machine.machinePhotos?.fileId || machine.machinePhotos?.file_id;
+      if (!fileId) {
+        console.log('❌ No fileId found for machine:', machine);
+        return false;
+      }
       
       const cacheKey = `machine_analysis_${fileId}`;
       const cached = this.getFromCache<MachineAnalysisResult>(cacheKey);
       
       if (cached) {
+        console.log(`💾 Applying cached results for machine ${fileId}:`, cached);
         // Apply cached results
-        if (Array.isArray(machine.machinePhotos)) {
-          machine.machinePhotos[0].machine_status = cached.machine_status;
-          machine.machinePhotos[0].machine_status_comment = cached.machine_status_comment;
-        } else {
-          machine.machinePhotos.machine_status = cached.machine_status;
-          machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
-        }
+        machine.machinePhotos.machine_status = cached.machine_status;
+        machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
         return false;
       }
       
-      return machine.machinePhotos.machine_status === undefined;
+      // Check if machine already has analysis results
+      const hasAnalysisResults = machine.machinePhotos.machine_status !== undefined;
+      console.log(`🔍 Machine ${fileId} has analysis results:`, hasAnalysisResults);
+      return !hasAnalysisResults;
     });
 
     if (machinesToAnalyze.length === 0) {
       console.log('✅ All machines already analyzed, skipping API calls');
+      console.log('📊 Current machine states:', this.manufacturingData.machines.map((m: any) => ({
+        fileId: m.machinePhotos?.fileId || m.machinePhotos?.file_id,
+        status: m.machinePhotos?.machine_status,
+        comment: m.machinePhotos?.machine_status_comment
+      })));
       return;
     }
 
     console.log(`🚀 Starting analysis for ${machinesToAnalyze.length} machines`);
+    console.log('🔍 Machines to analyze:', machinesToAnalyze.map((m: any) => ({
+      make: m.make,
+      fileId: m.machinePhotos?.fileId || m.machinePhotos?.file_id
+    })));
+    
     this.loadingState.machineAnalysis = true;
     machineRequests.push(...machinesToAnalyze.map((machine: any) => this.analyzeMachine(machine)));
 
@@ -928,8 +940,16 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (results) => {
         console.log(`✅ Machine analysis completed. Processed ${results.length} machines.`);
+        console.log('📊 Final machine states:', this.manufacturingData.machines.map((m: any) => ({
+          make: m.make,
+          fileId: m.machinePhotos?.fileId || m.machinePhotos?.file_id,
+          status: m.machinePhotos?.machine_status,
+          comment: m.machinePhotos?.machine_status_comment
+        })));
       }
     });
+
+    console.log("Machine Photos after analysis", this.manufacturingData.machines);
   }
 
   private analyzeMachine(machine: any): Observable<any> {
@@ -940,20 +960,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       return of(null);
     }
 
-    // Handle both array and object structures
-    let machinePhoto: any;
-    let fileId: string;
+    // Handle the object structure consistently - the data shows it's always an object, not an array
+    const machinePhoto = machine.machinePhotos;
+    const fileId = machinePhoto.fileId || machinePhoto.file_id;
     
-    if (Array.isArray(machine.machinePhotos)) {
-      machinePhoto = machine.machinePhotos[0];
-      fileId = machinePhoto?.file_id || machinePhoto?.fileId;
-      console.log('📦 Array structure - machinePhoto:', machinePhoto);
-    } else {
-      machinePhoto = machine.machinePhotos;
-      fileId = machinePhoto.fileId || machinePhoto.file_id;
-      console.log('📦 Object structure - machinePhoto:', machinePhoto);
-    }
-    
+    console.log('📦 Machine photo structure:', machinePhoto);
     console.log('🆔 Extracted fileId:', fileId);
     
     if (!fileId) {
@@ -967,14 +978,9 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     
     if (cached) {
       console.log(`💾 Using cached analysis for machine ${fileId}:`, cached);
-      // Apply to the correct object structure
-      if (Array.isArray(machine.machinePhotos)) {
-        machine.machinePhotos[0].machine_status = cached.machine_status;
-        machine.machinePhotos[0].machine_status_comment = cached.machine_status_comment;
-      } else {
-        machine.machinePhotos.machine_status = cached.machine_status;
-        machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
-      }
+      // Apply to the machine photos object
+      machine.machinePhotos.machine_status = cached.machine_status;
+      machine.machinePhotos.machine_status_comment = cached.machine_status_comment;
       this.cdr.detectChanges();
       return of(cached);
     }
@@ -996,37 +1002,28 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
     return this.commonservice.getData(apiUrl).pipe(
       tap((res: any) => {
-        console.log('📥 Raw API response:', res);
+        console.log('📥 Raw API response for machine', fileId, ':', res);
         
         if (res?.data) {
           const { machine_image, within_facility, verification_comment } = res.data;
-          console.log("🔍 Machine Verification Result:");
+          console.log("🔍 Machine Verification Result for", fileId, ":");
           console.log("  - machine_image:", machine_image);
           console.log("  - within_facility:", within_facility);
           console.log("  - verification_comment:", verification_comment);
           
           const analysisResult = {
             machine_status: machine_image && within_facility,
-            machine_status_comment: verification_comment
+            machine_status_comment: verification_comment || 'Analysis completed'
           };
           
-          console.log("📋 Final analysisResult:", analysisResult);
+          console.log("📋 Final analysisResult for", fileId, ":", analysisResult);
           
-          // Apply results to the correct structure and trigger change detection
-          if (Array.isArray(machine.machinePhotos)) {
-            console.log('📝 Applying to array structure');
-            machine.machinePhotos[0].machine_status = analysisResult.machine_status;
-            machine.machinePhotos[0].machine_status_comment = analysisResult.machine_status_comment;
-            console.log('✅ Updated array machine:', machine.machinePhotos[0]);
-          } else {
-            console.log('📝 Applying to object structure');
-            machine.machinePhotos.machine_status = analysisResult.machine_status;
-            machine.machinePhotos.machine_status_comment = analysisResult.machine_status_comment;
-            console.log('✅ Updated object machine:', machine.machinePhotos);
-          }
-
+          // Apply results to the machine photos object
+          machine.machinePhotos.machine_status = analysisResult.machine_status;
+          machine.machinePhotos.machine_status_comment = analysisResult.machine_status_comment;
+          
+          console.log("✅ Updated machine photos object for", fileId, ":", machine.machinePhotos);
           console.log("🔄 Updated Machine Object:", machine);
-          console.log(`✅ Machine analysis completed for ${fileId}`);
           
           // Cache the results for future use
           this.setCache(cacheKey, analysisResult);
@@ -1036,26 +1033,25 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
           console.log('✅ Change detection triggered');
         } else {
-          console.log('❌ No data in API response');
+          console.log('❌ No data in API response for machine', fileId);
+          // Set default values when no API data is returned
+          machine.machinePhotos.machine_status = false;
+          machine.machinePhotos.machine_status_comment = 'No analysis data available';
+          this.cdr.detectChanges();
         }
       }),
       catchError(error => {
-        console.error('💥 Error analyzing machine:', error);
+        console.error('💥 Error analyzing machine', fileId, ':', error);
         const errorResult = {
           machine_status: false,
           machine_status_comment: 'Error during verification'
         };
         
-        console.log('📝 Applying error result:', errorResult);
+        console.log('📝 Applying error result for', fileId, ':', errorResult);
         
-        // Apply error results to the correct structure
-        if (Array.isArray(machine.machinePhotos)) {
-          machine.machinePhotos[0].machine_status = errorResult.machine_status;
-          machine.machinePhotos[0].machine_status_comment = errorResult.machine_status_comment;
-        } else {
-          machine.machinePhotos.machine_status = errorResult.machine_status;
-          machine.machinePhotos.machine_status_comment = errorResult.machine_status_comment;
-        }
+        // Apply error results to machine photos object
+        machine.machinePhotos.machine_status = errorResult.machine_status;
+        machine.machinePhotos.machine_status_comment = errorResult.machine_status_comment;
         
         // Cache the error result to avoid retrying immediately
         this.setCache(cacheKey, errorResult);
@@ -1192,6 +1188,18 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     console.log('📊 Manufacturing data available:', this.manufacturingData);
     console.log('🏭 Machines count:', this.manufacturingData?.machines?.length || 0);
     console.log('🏭 Facilities count:', this.manufacturingData?.facilityPhotos?.length || 0);
+    
+    // Log current machine status before analysis
+    if (this.manufacturingData?.machines?.length) {
+      console.log('📊 Current machine status before analysis:', this.manufacturingData.machines.map((m: any) => ({
+        make: m.make,
+        fileId: m.machinePhotos?.fileId || m.machinePhotos?.file_id,
+        hasStatus: m.machinePhotos?.machine_status !== undefined,
+        hasComment: m.machinePhotos?.machine_status_comment !== undefined,
+        status: m.machinePhotos?.machine_status,
+        comment: m.machinePhotos?.machine_status_comment
+      })));
+    }
     
     // Trigger machine analysis if there are machines and not already loaded
     if (!this.hasLoadedMachineAnalysis && this.manufacturingData?.machines?.length) {
@@ -1965,10 +1973,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   getMachineComment(machinePhotos: any): string {
-    if (Array.isArray(machinePhotos)) {
-      return machinePhotos[0]?.machine_status_comment || '';
-    }
-    return machinePhotos?.machine_status_comment || '';
+    const comment = machinePhotos?.machine_status_comment || '';
+    return comment;
   }
 
   getMachineUrl(machinePhotos: any): string {
@@ -2057,5 +2063,40 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       console.log('References:', this.newFinancialData.additionalInformation?.references);
     }
     console.log('=== END FINANCIAL DEBUG ===');
+  }
+
+  // Debug method to log manufacturing data state and machine analysis
+  debugManufacturingData(): void {
+    console.log('🔍 === MANUFACTURING DATA DEBUG ===');
+    console.log('manufacturingData exists:', !!this.manufacturingData);
+    console.log('hasLoadedMachineAnalysis:', this.hasLoadedMachineAnalysis);
+    console.log('hasLoadedFacilityAnalysis:', this.hasLoadedFacilityAnalysis);
+    console.log('loadingState.machineAnalysis:', this.loadingState.machineAnalysis);
+    console.log('activeLevelTab:', this.activeLevelTab);
+    console.log('manufacturingTab:', this.manufacturingTab);
+    
+    if (this.manufacturingData) {
+      console.log('Raw manufacturingData:', this.manufacturingData);
+      console.log('Machines count:', this.manufacturingData.machines?.length || 0);
+      
+      if (this.manufacturingData.machines?.length) {
+        console.log('=== MACHINE DETAILS ===');
+        this.manufacturingData.machines.forEach((machine: any, index: number) => {
+          console.log(`Machine ${index + 1}:`, {
+            make: machine.make,
+            model: machine.model,
+            fileId: machine.machinePhotos?.fileId || machine.machinePhotos?.file_id,
+            hasPhotos: !!machine.machinePhotos,
+            machinePhotosType: typeof machine.machinePhotos,
+            hasStatus: machine.machinePhotos?.machine_status !== undefined,
+            hasComment: machine.machinePhotos?.machine_status_comment !== undefined,
+            status: machine.machinePhotos?.machine_status,
+            comment: machine.machinePhotos?.machine_status_comment,
+            machinePhotos: machine.machinePhotos
+          });
+        });
+      }
+    }
+    console.log('=== END MANUFACTURING DEBUG ===');
   }
 }
