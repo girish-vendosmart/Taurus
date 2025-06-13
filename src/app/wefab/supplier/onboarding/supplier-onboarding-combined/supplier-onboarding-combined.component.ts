@@ -579,6 +579,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
           ? JSON.parse(l1Data.financial_information) 
           : l1Data.financial_information;
         this.financialInformation = financialData;
+        debugger
+        console.log('🔄 Financial information loaded:', financialData);
+        this.bankVerified = financialData.bankVerified;
         this.mergeFinancialInformation(financialData);
         console.log('✅ Financial information loaded');
       } catch (error) {
@@ -1186,7 +1189,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
 
   onBankVerified(verified: boolean): void {
     // Override with static verification - always set to true
-    this.bankVerified = true;
+    this.bankVerified = verified;
     
     // Set static bank details if not already set
     if (!this.model.bankDetails.bankName) {

@@ -204,7 +204,8 @@ import { CommonService } from '../../../../shared/services/common.service';
         }
         
         &.verified {
-          background-color: #28a745;
+          background-color: #28a745 !important;
+          color: white !important;
         }
         
         &.error {

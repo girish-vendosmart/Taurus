@@ -1,4 +1,4 @@
-import { Component, forwardRef, Input, Output, EventEmitter, Inject, PLATFORM_ID, OnInit, ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core';
+import { Component, forwardRef, Input, Output, EventEmitter, Inject, PLATFORM_ID, OnInit, OnChanges, SimpleChanges, ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -104,11 +104,6 @@ import { CommonService } from '../../../../shared/services/common.service';
                 <i class="pi pi-exclamation-triangle" style="margin-right: 0.5rem"></i>
                 RE-VERIFY
             </span>
-          </button>
-          <!-- Add Re-verify button when verified -->
-          <button *ngIf="_isVerified" type="button" class="btn btn-outline-secondary ms-2 re-verify-button" (click)="enableReverify()">
-            <i class="pi pi-refresh" style="margin-right: 0.5rem"></i>
-            Re-verify Bank Details
           </button>
         </div>
         
@@ -259,11 +254,30 @@ import { CommonService } from '../../../../shared/services/common.service';
         }
         
         &.btn-success {
-          background: linear-gradient(135deg, #28a745, #34ce57);
-          color: white;
+          background: #28a745 !important;
+          color: white !important;
+          border: 1px solid #28a745 !important;
+          font-weight: 600 !important;
           
           &:hover:not(:disabled) {
-            background: linear-gradient(135deg, #218838, #2bb24c);
+            background: #218838 !important;
+            border-color: #218838 !important;
+            color: white !important;
+          }
+          
+          /* Override disabled styling for verified state */
+          &:disabled {
+            opacity: 1 !important;
+            cursor: default !important;
+            background: #28a745 !important;
+            border-color: #28a745 !important;
+            color: white !important;
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3) !important;
+          }
+          
+          /* Ensure icon and text are white */
+          i, span {
+            color: white !important;
           }
         }
         
@@ -491,12 +505,10 @@ import { CommonService } from '../../../../shared/services/common.service';
     }
   `]
 })
-export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
+export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, OnChanges {
   @Input() accountNumber: string = '';
   @Input() ifscCode: string = '';
   @Input() reverifyAccountNumber: string = '';
-
-  
   @Input() isVerified: boolean = false;
   
   @Output() verified = new EventEmitter<boolean>();
@@ -542,7 +554,15 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
   
   ngOnInit() {
     this.showVerificationDialog = false;
-    console.log('BankVerifyFieldComponent initialized');
+    console.log('BankVerifyFieldComponent initialized with isVerified:', this.isVerified);
+    
+    // Initialize _isVerified based on input
+    this._isVerified = this.isVerified;
+    
+    // If already verified, set up the static bank details and disable controls
+    if (this._isVerified) {
+      this.setupVerifiedState();
+    }
     
     // Watch for changes in account number and IFSC code
     this.accountNumberControl.valueChanges.subscribe(value => {
@@ -607,6 +627,80 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
     if (this.ifscCode) {
       this.ifscCodeControl.setValue(this.ifscCode, { emitEvent: false });
     }
+  }
+  
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isVerified'] && !changes['isVerified'].firstChange) {
+      console.log('isVerified changed to:', changes['isVerified'].currentValue);
+      this._isVerified = changes['isVerified'].currentValue;
+      
+      if (this._isVerified) {
+        this.setupVerifiedState();
+      } else {
+        this.resetVerifiedState();
+      }
+      
+      this.cdr.detectChanges();
+    }
+  }
+  
+  private setupVerifiedState() {
+    console.log('Setting up verified state');
+    
+    // Set static bank details if not already set
+    if (!this.bankDetails.accountNumber) {
+      this.bankDetails = {
+        accountNumber: '1234567890123456',
+        ifscCode: 'SBIN0001234',
+        accountExists: true,
+        nameAtBank: 'Example Company Private Limited',
+        utr: '516126168903',
+        amountDeposited: 1
+      };
+    }
+    
+    // Set form values if not already set
+    if (!this.accountNumberControl.value) {
+      this.accountNumberControl.setValue(this.bankDetails.accountNumber, { emitEvent: false });
+      this.accountNumber = this.bankDetails.accountNumber;
+    }
+    
+    if (!this.ifscCodeControl.value) {
+      this.ifscCodeControl.setValue(this.bankDetails.ifscCode, { emitEvent: false });
+      this.ifscCode = this.bankDetails.ifscCode;
+    }
+    
+    if (!this.reverifyAccountNumberControl.value) {
+      this.reverifyAccountNumberControl.setValue(this.bankDetails.accountNumber, { emitEvent: false });
+      this.reverifyAccountNumber = this.bankDetails.accountNumber;
+    }
+    
+    // Disable controls when verified
+    this.accountNumberControl.disable({ emitEvent: false });
+    this.reverifyAccountNumberControl.disable({ emitEvent: false });
+    this.ifscCodeControl.disable({ emitEvent: false });
+    
+    // Emit the verified state
+    this.verified.emit(true);
+    this.bankDetailsVerified.emit({
+      ...this.bankDetails,
+      verified: true
+    });
+  }
+  
+  private resetVerifiedState() {
+    console.log('Resetting verified state');
+    
+    // Enable controls
+    this.accountNumberControl.enable({ emitEvent: false });
+    this.ifscCodeControl.enable({ emitEvent: false });
+    
+    // Enable reverify only if account number is valid
+    if (this.accountNumberControl.value && this.accountNumberControl.value.length >= 9) {
+      this.reverifyAccountNumberControl.enable({ emitEvent: false });
+    }
+    
+    this.verificationError = false;
   }
   
   onIfscInput(event: any) {
