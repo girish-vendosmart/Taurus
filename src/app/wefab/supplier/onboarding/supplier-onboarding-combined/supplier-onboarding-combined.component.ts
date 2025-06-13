@@ -1569,12 +1569,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     
     // Redirect to supplier profile review page
     setTimeout(() => {
-      this.router.navigate(['/wefab/supplier/profile-review'], {
-        queryParams: { 
-          supplierId: this.supplier_id || localStorage.getItem('supplier_id'),
-          mode: 'onboarding-complete'
-        }
-      });
+      this.router.navigate(['/wefab/supplier/profile-review/'+this.supplier_id]);
     }, 3000);
     
     // Original API code commented out
