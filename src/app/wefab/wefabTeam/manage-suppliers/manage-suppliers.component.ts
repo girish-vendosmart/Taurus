@@ -566,6 +566,7 @@ export class ManageSuppliersComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error inviting supplier:', error);
+          this.hideInviteDialog();
           this.sweetAlert.error('error.error?.message');
         },
         complete: () => {

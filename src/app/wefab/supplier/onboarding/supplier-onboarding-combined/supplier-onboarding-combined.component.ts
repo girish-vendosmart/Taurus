@@ -929,7 +929,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       const errorMessages: { [key: number]: string } = {
         0: 'Please fill in all required basic details and complete verification.',
         1: 'Please complete all required contact details and verify your phone.',
-        2: 'Please add at least one complete machine with all required details.',
+        2: 'Please complete all required details.',
         3: 'Please upload at least 3 facility photos.',
         4: 'Please complete all required financial information. Ensure bank details are verified, annual revenue for all 3 years is filled, and tax compliance is checked.',
         5: 'Please provide at least one complete business reference.'

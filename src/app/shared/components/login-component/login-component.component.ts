@@ -131,7 +131,7 @@ export class LoginComponentComponent {
                       this.router.navigate(['/wefab/supplier/supplier-onboarding-welcome']);
                     } else {
                       localStorage.setItem('supplier_onboarding_complete', 'true');
-                       localStorage.setItem('show_supplier_dashboard', 'true');
+                      localStorage.setItem('show_supplier_dashboard', 'true');
                       this.router.navigate(['/wefab/supplier/dashboard']);
                     }
                   } else if (response.data.user_type === 'wefab_team') {
