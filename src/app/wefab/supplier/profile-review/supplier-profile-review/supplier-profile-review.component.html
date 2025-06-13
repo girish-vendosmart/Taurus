@@ -642,14 +642,6 @@
             <div class="info-section-content">
               <div class="info-grid" *ngIf="newFinancialData.bankDetails">
                 <div class="info-card">
-                  <div class="info-label">Bank Name</div>
-                  <div class="info-value">{{ newFinancialData.bankDetails.bankName || 'Not provided' }}</div>
-                </div>
-                <div class="info-card">
-                  <div class="info-label">Account Holder Name</div>
-                  <div class="info-value">{{ newFinancialData.bankDetails.accountHolderName || 'Not provided' }}</div>
-                </div>
-                <div class="info-card">
                   <div class="info-label">Account Number</div>
                   <div class="info-value">
                     <span *ngIf="newFinancialData.bankDetails.verification.accountNumber" class="masked-account">
@@ -663,14 +655,6 @@
                 <div class="info-card">
                   <div class="info-label">IFSC Code</div>
                   <div class="info-value">{{ newFinancialData.bankDetails.verification.ifscCode || 'Not provided' }}</div>
-                </div>
-                <div class="info-card">
-                  <div class="info-label">Account Type</div>
-                  <div class="info-value">{{ newFinancialData.bankDetails.accountType || 'Not provided' }}</div>
-                </div>
-                <div class="info-card">
-                  <div class="info-label">Branch Name</div>
-                  <div class="info-value">{{ newFinancialData.bankDetails.branchName || 'Not provided' }}</div>
                 </div>
               </div>
               <!-- Show message if no bank details -->

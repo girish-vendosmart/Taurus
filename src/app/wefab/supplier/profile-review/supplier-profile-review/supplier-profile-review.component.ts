@@ -612,6 +612,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         }
         const financialInformation = result.data.financial_information ? JSON.parse(result.data.financial_information) : {};
         this.financialInformation = financialInformation;
+        
+        // Parse additional information that contains business references
+        const additionalInformation = result.data.additional_information ? JSON.parse(result.data.additional_information) : {};
+        
         if(this.financialInformation && (this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review' || this.currentOnboardingStage === 'L3 Under Review')){
           this.financialUnderReview = true;
           this.financialRejected = false;
@@ -678,7 +682,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           companyFinancials: financialInformation.companyFinancials || {},
           insuranceCoverage: financialInformation.insuranceCoverage || {},
           additionalInformation: {
-            references: financialInformation.references || []
+            references: additionalInformation.references || []
           }
         };
         
@@ -695,6 +699,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         console.log('📋 Company Profile (L1):', this.getCompanyProfile);
         console.log('🏭 Manufacturing Data (L2):', this.manufacturingData);
         console.log('💰 Financial Data (L3):', this.newFinancialData);
+        console.log('🏢 Business References:', additionalInformation.references);
         
         // Update document counts immediately since all data is now available
         this.updateDocumentCounts();
