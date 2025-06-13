@@ -145,12 +145,12 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     
     // L3 Data Structure
     bankDetails: {
-      bankName: 'State Bank of India',
-      accountNumber: '1234567890123456',
-      ifscCode: 'SBIN0001234',
-      accountHolderName: 'Example Company Private Limited',
-      accountType: 'Current',
-      branchName: 'Commercial Street Branch'
+      bankName: '',
+      accountNumber: '',
+      ifscCode: '',
+      accountHolderName: '',
+      accountType: '',
+      branchName: ''
     },
     companyFinancials: {
       annualRevenue2024: '',
@@ -275,9 +275,6 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     
     // Load country list first, then initialize form
     this.getCountryListAndInitializeForm();
-    
-    // Set static bank verification data
-    this.setStaticBankData();
   }
 
   // New method to handle URL parameters
@@ -1851,16 +1848,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         type: 'bank-verify',
         templateOptions: {
           parentComponent: this,
-          isVerified: true, // Always show as verified for static data
-          staticMode: true, // Add flag to indicate static mode
-          staticBankDetails: {
-            bankName: 'State Bank of India',
-            accountNumber: '1234567890123456',
-            ifscCode: 'SBIN0001234',
-            accountHolderName: 'Example Company Private Limited',
-            accountType: 'Current',
-            branchName: 'Commercial Street Branch'
-          }
+          isVerified: this.bankVerified
         }
       },
       
@@ -2580,24 +2568,5 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       financialInformation: this.financialInformation,
       additionalInformation: this.additionalInformation
     });
-  }
-
-  // New method to set static bank verification data
-  setStaticBankData() {
-    // Set static verified bank details
-    this.model.bankDetails = {
-      bankName: 'State Bank of India',
-      accountNumber: '1234567890123456',
-      ifscCode: 'SBIN0001234',
-      accountHolderName: 'Example Company Private Limited',
-      accountType: 'Current',
-      branchName: 'Commercial Street Branch'
-    };
-    
-    // Set bank as verified
-    this.bankVerified = true;
-    
-    console.log('🏦 Static Bank Data Set:', this.model.bankDetails);
-    console.log('✅ Bank Verification Status:', this.bankVerified);
   }
 } 

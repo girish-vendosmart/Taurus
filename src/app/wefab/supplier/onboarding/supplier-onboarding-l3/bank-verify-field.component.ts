@@ -81,17 +81,34 @@ import { CommonService } from '../../../../shared/services/common.service';
           <button 
             type="button" 
             class="btn verify-bank-button"
-            [ngClass]="{'verified': _isVerified, 'error': verificationError}" 
+            [ngClass]="{
+              'btn-success': _isVerified, 
+              'btn-warning': verificationError,
+              'btn-primary': !_isVerified && !verificationError
+            }" 
             [disabled]="!canVerify() || _isVerified || isLoading"
-            [style.backgroundColor]="_isVerified ? '#28a745' : (verificationError ? '#f59e0b' : '#1a3a60')"
             (click)="verifyBank()">
             <span *ngIf="isLoading">
                 <i class="pi pi-spin pi-spinner" style="margin-right: 0.5rem"></i>
                 Verifying...
             </span>
-            <span *ngIf="!isLoading">
-                {{ _isVerified ? 'Verified' : (verificationError ? 'Re-verify' : 'Verify Bank Details') }}
+            <span *ngIf="!isLoading && !_isVerified && !verificationError">
+                <i class="pi pi-check-circle" style="margin-right: 0.5rem"></i>
+                VERIFY BANK DETAILS
             </span>
+            <span *ngIf="!isLoading && _isVerified">
+                <i class="pi pi-check" style="margin-right: 0.5rem"></i>
+                VERIFIED
+            </span>
+            <span *ngIf="!isLoading && verificationError">
+                <i class="pi pi-exclamation-triangle" style="margin-right: 0.5rem"></i>
+                RE-VERIFY
+            </span>
+          </button>
+          <!-- Add Re-verify button when verified -->
+          <button *ngIf="_isVerified" type="button" class="btn btn-outline-secondary ms-2 re-verify-button" (click)="enableReverify()">
+            <i class="pi pi-refresh" style="margin-right: 0.5rem"></i>
+            Re-verify Bank Details
           </button>
         </div>
         
@@ -202,31 +219,90 @@ import { CommonService } from '../../../../shared/services/common.service';
       }
       
       .verify-bank-button {
-        border-radius: 4px;
+        border-radius: 6px;
         white-space: nowrap;
-        background-color: #1a3a60;
-        color: white;
         border: none;
-        font-weight: 500;
-        padding: 0.75rem 2rem;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
         font-size: 0.875rem;
-        min-width: 180px;
-        height: 45px;
+        min-width: 200px;
+        height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         
         &:hover:not(:disabled) {
-          background-color: #15304f;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
         
         &:disabled {
-          opacity: 0.7;
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
-        &.verified {
-          background-color: #28a745;
+        &.btn-primary {
+          background: #1a45df;
+          color: white;
+          border: 1px solid #1a45df;
+          
+          &:hover:not(:disabled) {
+            background: #1539c7;
+            border-color: #1539c7;
+          }
         }
         
-        &.error {
-          background-color: #f59e0b;
+        &.btn-success {
+          background: linear-gradient(135deg, #28a745, #34ce57);
+          color: white;
+          
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, #218838, #2bb24c);
+          }
+        }
+        
+        &.btn-warning {
+          background: linear-gradient(135deg, #f59e0b, #fbbf24);
+          color: white;
+          
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+          }
+        }
+      }
+      
+      .re-verify-button {
+        border-radius: 6px;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+      }
+      
+      .verify-button-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
         }
       }
       
@@ -404,14 +480,13 @@ import { CommonService } from '../../../../shared/services/common.service';
     }
     
     .btn-primary {
-      background: linear-gradient(135deg, #1a3a60, #0d2b4d);
+      background: #1a45df;
       color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
+      border: 1px solid #1a45df;
       
-      &:hover {
-        background: linear-gradient(135deg, #0d2b4d, #051e3a);
+      &:hover:not(:disabled) {
+        background: #1539c7;
+        border-color: #1539c7;
       }
     }
   `]
@@ -420,24 +495,9 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
   @Input() accountNumber: string = '';
   @Input() ifscCode: string = '';
   @Input() reverifyAccountNumber: string = '';
+
   
-  @Input() set isVerified(value: boolean) {
-    if (value === true) {
-      this._isVerified = true;
-      this.verified.emit(true);
-      
-      // Disable the controls after verification
-      if (this.accountNumberControl && !this.accountNumberControl.disabled) {
-        this.accountNumberControl.disable({ emitEvent: false });
-      }
-      if (this.reverifyAccountNumberControl && !this.reverifyAccountNumberControl.disabled) {
-        this.reverifyAccountNumberControl.disable({ emitEvent: false });
-      }
-      if (this.ifscCodeControl && !this.ifscCodeControl.disabled) {
-        this.ifscCodeControl.disable({ emitEvent: false });
-      }
-    }
-  }
+  @Input() isVerified: boolean = false;
   
   @Output() verified = new EventEmitter<boolean>();
   @Output() bankDetailsVerified = new EventEmitter<any>();
@@ -597,44 +657,63 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
     
     const accountNumber = this.accountNumberControl.value;
     const ifscCode = this.ifscCodeControl.value;
+    this.isLoading = false;
+    this.companyBankDetails = {
+        code: 200,
+        timestamp: 1749551045136,
+        transaction_id: "9389b737-46a0-4aa5-9996-351accf19be4",
+        data: {
+            message: "Bank Account details verified successfully.",
+            account_exists: true,
+            name_at_bank: "VENDOSMART TECHNOLOGIES PRIVATE LIMITED",
+            utr: "516126168903",
+            amount_deposited: 1,
+            name_information: {
+                "name_at_bank_cleaned": "Vendosmart Technologies Private Limited"
+            }
+        }
+    }
+    this.patchBankDetails();
+    this.showVerificationDialog = true;
+    this.cdr.detectChanges();
     
-    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.bank_verify.bank_account_verification?account_number=${accountNumber}&ifsc=${ifscCode}`;
+    // let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.bank_verify.bank_account_verification?account_number=${accountNumber}&ifsc=${ifscCode}`;
 
-    this.commonService.getData(endPoint).subscribe((res: any) => {
-      this.isLoading = false;
+    // this.commonService.getData(endPoint).subscribe((res: any) => {
+    //   this.isLoading = false;
       
-      console.log('Bank API Response:', res);
+    //   console.log('Bank API Response:', res);
       
-      // Check if the data exists in the expected format
-      if (res && res.message && res.message.data) {
-        this.companyBankDetails = res.message.data;
-        this.patchBankDetails();
-        this.showVerificationDialog = true;
-        this.cdr.detectChanges();
-      } else {
-        console.error('Invalid API response format:', res);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Invalid response format from server',
-          life: 3000
-        });
-      }
-    }, (err) => {
-      this.isLoading = false;
-      console.error('Bank API Error:', err);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to verify bank details. Please try again.',
-        life: 3000
-      });
-      this.verificationError = true;
+    //   // Check if the data exists in the expected format
+    //   if (res && res.message && res.message.data) {
+    //     this.companyBankDetails = res.message.data;
+    //     this.patchBankDetails();
+    //     this.showVerificationDialog = true;
+    //     this.cdr.detectChanges();
+    //   } else {
+    //     console.error('Invalid API response format:', res);
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: 'Error',
+    //       detail: 'Invalid response format from server',
+    //       life: 3000
+    //     });
+    //   }
+    // }, (err) => {
+    //   this.isLoading = false;
+    //   console.error('Bank API Error:', err);
+    //   this.messageService.add({
+    //     severity: 'error',
+    //     summary: 'Error',
+    //     detail: 'Failed to verify bank details. Please try again.',
+    //     life: 3000
+    //   });
+    //   this.verificationError = true;
       
-      setTimeout(() => {
-        this.verificationError = false;
-      }, 3000);
-    });
+    //   setTimeout(() => {
+    //     this.verificationError = false;
+    //   }, 3000);
+    // });
   }
 
   patchBankDetails() {
@@ -737,6 +816,20 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit {
     this.verificationError = true;
     
     // Don't reset error state automatically - keep the "ReVerify" button visible
+  }
+  
+  // Add enableReverify method
+  enableReverify() {
+    this._isVerified = false;
+    this.verificationError = false;
+    this.accountNumberControl.enable({ emitEvent: false });
+    this.ifscCodeControl.enable({ emitEvent: false });
+    // Enable reverify only if account number is valid
+    if (this.accountNumberControl.value && this.accountNumberControl.value.length >= 9) {
+      this.reverifyAccountNumberControl.enable({ emitEvent: false });
+    } else {
+      this.reverifyAccountNumberControl.disable({ emitEvent: false });
+    }
   }
   
   writeValue(value: any): void {
