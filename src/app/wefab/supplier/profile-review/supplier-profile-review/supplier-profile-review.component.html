@@ -831,7 +831,7 @@
         </div>
 
         <!-- Dashboard Button when all stages approved -->
-        <div class="action-buttons" *ngIf="areAllStagesApproved && userType === 'supplier'">
+        <div class="action-buttons" *ngIf="mainCurrentDataStatusTrack === 'Approved' && userType === 'supplier'">
           <button class="btn btn-success dashboard-btn" (click)="goToDashboard()">
             <i class="pi pi-home"></i> Go to Dashboard
           </button>

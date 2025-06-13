@@ -9,7 +9,7 @@
           <div class="avatar">{{ userInitials }}</div>
         </button>
         <div class="dropdown-menu" [ngClass]="{'show': isDropdownOpen}">
-          <button type="button" class="dropdown-item" (click)="onProfile()">
+          <button type="button" class="dropdown-item" (click)="onProfile()" *ngIf="shouldShowProfile">
             <i class="pi pi-user"></i>
             Profile
           </button>

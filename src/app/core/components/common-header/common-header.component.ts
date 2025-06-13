@@ -19,16 +19,33 @@ export class CommonHeaderComponent {
   // Dummy user data
   dummyUserEmail: string = 'michael.doe@mailinator.com';
   supplierEmailId: any = '';
-  supplierId: string | null;
 
   constructor(
     private router: Router,
     public authService: AuthService,
   ) {
+    this.initializeUserData();
+  }
+
+  // Getter to dynamically check supplier_id from localStorage
+  get supplierId(): string | null {
+    const supplierId = localStorage.getItem('supplier_id');
+    console.log('🔍 supplierId getter called - Current value:', supplierId);
+    return supplierId;
+  }
+
+  // Getter to check if supplier profile should be shown
+  get shouldShowProfile(): boolean {
+    const supplierId = this.supplierId;
+    const shouldShow = supplierId !== null && supplierId !== undefined && supplierId.trim() !== '';
+    console.log('👁️ shouldShowProfile getter called - Should show:', shouldShow);
+    return shouldShow;
+  }
+
+  private initializeUserData(): void {
     // Supplier email id
-    this.supplierEmailId = localStorage.getItem('primary_email_id');
-    this.supplierId = localStorage.getItem('supplier_id');
-    // Set initials using dummy data
+    this.supplierEmailId = localStorage.getItem('primary_email_id') || this.dummyUserEmail;
+    // Set initials using email data
     this.userInitials = this.getInitials(this.supplierEmailId);
   }
 
@@ -46,6 +63,9 @@ export class CommonHeaderComponent {
   }
 
   getInitials(email: string): string {
+    if (!email) {
+      return 'U'; // Default for 'User'
+    }
     const parts = email.split('@')[0].split('.');
     if (parts.length >= 2) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -55,10 +75,15 @@ export class CommonHeaderComponent {
 
   onProfile(): void {
     this.isDropdownOpen = false;
-    console.log('Profile clicked for user:', this.dummyUserEmail);
-    this.router.navigate(['/wefab/supplier/profile-review/', this.supplierId]);
-    // For demo purposes, just log instead of navigation
-    // this.router.navigate(['/profile']);
+    const currentSupplierId = this.supplierId;
+    
+    if (!currentSupplierId) {
+      console.error('Supplier ID not found in localStorage');
+      return;
+    }
+    
+    console.log('Profile clicked for supplier ID:', currentSupplierId);
+    this.router.navigate(['/wefab/supplier/profile-review/', currentSupplierId]);
   }
 
   onLogout(): void {
@@ -67,6 +92,27 @@ export class CommonHeaderComponent {
     this.logoutEvent.emit();
     this.performLogout();
     localStorage.clear();
+  }
+
+  // Test method to demonstrate automatic getter calls
+  testSupplierIdChanges(): void {
+    console.log('🧪 Testing automatic getter calls...');
+    
+    // Test 1: Remove supplier_id
+    console.log('📤 Removing supplier_id from localStorage...');
+    localStorage.removeItem('supplier_id');
+    
+    // Test 2: Add supplier_id
+    setTimeout(() => {
+      console.log('📥 Adding supplier_id to localStorage...');
+      localStorage.setItem('supplier_id', 'test-supplier-123');
+    }, 2000);
+    
+    // Test 3: Clear supplier_id again
+    setTimeout(() => {
+      console.log('🗑️ Clearing supplier_id from localStorage...');
+      localStorage.removeItem('supplier_id');
+    }, 4000);
   }
 
   private performLogout(): void {
