@@ -610,19 +610,49 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           this.manufacturingRejected = false;
           this.manufacturingRequestForUpdate = false;
         }
-        const financialInformation = result.data.financial_information ? JSON.parse(result.data.financial_information) : {};
+        
+        // Enhanced financial information parsing with better error handling
+        let financialInformation: any = {};
+        let additionalInformation: any = {};
+        
+        try {
+          console.log('🏦 Raw financial_information field:', result.data.financial_information);
+          console.log('➕ Raw additional_information field:', result.data.additional_information);
+          
+          if (result.data.financial_information) {
+            if (typeof result.data.financial_information === 'string') {
+              financialInformation = JSON.parse(result.data.financial_information);
+            } else if (typeof result.data.financial_information === 'object') {
+              financialInformation = result.data.financial_information;
+            }
+          }
+          
+          if (result.data.additional_information) {
+            if (typeof result.data.additional_information === 'string') {
+              additionalInformation = JSON.parse(result.data.additional_information);
+            } else if (typeof result.data.additional_information === 'object') {
+              additionalInformation = result.data.additional_information;
+            }
+          }
+          
+          console.log('💰 Parsed financialInformation:', financialInformation);
+          console.log('📋 Parsed additionalInformation:', additionalInformation);
+          
+        } catch (parseError) {
+          console.error('❌ Error parsing financial/additional information:', parseError);
+          console.log('🔍 Financial data type:', typeof result.data.financial_information);
+          console.log('🔍 Additional data type:', typeof result.data.additional_information);
+        }
+        
         this.financialInformation = financialInformation;
         
-        // Parse additional information that contains business references
-        const additionalInformation = result.data.additional_information ? JSON.parse(result.data.additional_information) : {};
-        
-        if(this.financialInformation && (this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review' || this.currentOnboardingStage === 'L3 Under Review')){
+        if(this.financialInformation && Object.keys(this.financialInformation).length > 0 && (this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review' || this.currentOnboardingStage === 'L3 Under Review')){
           this.financialUnderReview = true;
           this.financialRejected = false;
-        } else if (this.financialInformation && this.currentOnboardingStage === 'L3 Rejected') {
+        } else if (this.financialInformation && Object.keys(this.financialInformation).length > 0 && this.currentOnboardingStage === 'L3 Rejected') {
           this.financialRejected = true;
           this.financialUnderReview = false;
-        } else if (this.financialInformation && this.currentOnboardingStage === 'L3 Request for Update') {
+        } else if (this.financialInformation && Object.keys(this.financialInformation).length > 0 && this.currentOnboardingStage === 'L3 Request for Update') {
           this.financialUnderReview = false;
           this.financialRejected = false;
           this.financialRequestForUpdate = true;
@@ -676,15 +706,55 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           facilityPhotos: facilityVerification.facilityPhotos || []
         };
         
-        // Set financial data for L3 tab (Financial & Additional)
+        // Enhanced financial data setup with better structure handling
         this.newFinancialData = {
-          bankDetails: financialInformation.bankDetails || {},
-          companyFinancials: financialInformation.companyFinancials || {},
-          insuranceCoverage: financialInformation.insuranceCoverage || {},
+          bankDetails: {
+            verification: {
+              accountNumber: financialInformation.bankDetails?.verification?.accountNumber || 
+                           financialInformation.bankDetails?.accountNumber || 
+                           financialInformation.accountNumber || '',
+              ifscCode: financialInformation.bankDetails?.verification?.ifscCode || 
+                       financialInformation.bankDetails?.ifscCode || 
+                       financialInformation.ifscCode || ''
+            }
+          },
+          companyFinancials: {
+            annualRevenue2024: financialInformation.companyFinancials?.annualRevenue2024 || 
+                              financialInformation.annualRevenue2024 || 
+                              'Not provided',
+            annualRevenue2023: financialInformation.companyFinancials?.annualRevenue2023 || 
+                              financialInformation.annualRevenue2023 || 
+                              'Not provided',
+            annualRevenue2022: financialInformation.companyFinancials?.annualRevenue2022 || 
+                              financialInformation.annualRevenue2022 || 
+                              'Not provided',
+            creditRatingProvider: financialInformation.companyFinancials?.creditRatingProvider || 
+                                 financialInformation.creditRatingProvider || 
+                                 'Not provided',
+            taxCompliant: financialInformation.companyFinancials?.taxCompliant || 
+                         financialInformation.taxCompliant || 
+                         'Not provided'
+          },
+          insuranceCoverage: {
+            generalLiabilityInsurance: financialInformation.insuranceCoverage?.generalLiabilityInsurance || 
+                                      financialInformation.generalLiabilityInsurance || 
+                                      'Not provided',
+            productLiabilityInsurance: financialInformation.insuranceCoverage?.productLiabilityInsurance || 
+                                      financialInformation.productLiabilityInsurance || 
+                                      'Not provided'
+          },
           additionalInformation: {
-            references: additionalInformation.references || []
+            references: additionalInformation.references || 
+                       financialInformation.references || 
+                       []
           }
         };
+        
+        console.log('💰 Final newFinancialData structure:', this.newFinancialData);
+        console.log('🏦 Bank Details:', this.newFinancialData.bankDetails);
+        console.log('📊 Company Financials:', this.newFinancialData.companyFinancials);
+        console.log('🛡️ Insurance Coverage:', this.newFinancialData.insuranceCoverage);
+        console.log('👥 Business References:', this.newFinancialData.additionalInformation.references);
         
         // Set verification statuses
         this.gstVerified = this.getCompanyProfile?.gstVerified || false;
@@ -1780,7 +1850,21 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   get hasFinancialData(): boolean {
-    return !!this.newFinancialData;
+    if (!this.newFinancialData) return false;
+    
+    // Check if any of the financial data sections have actual data
+    const hasBankDetails = this.newFinancialData.bankDetails?.verification?.accountNumber || 
+                          this.newFinancialData.bankDetails?.verification?.ifscCode;
+    const hasFinancials = this.newFinancialData.companyFinancials?.annualRevenue2024 !== 'Not provided' ||
+                         this.newFinancialData.companyFinancials?.annualRevenue2023 !== 'Not provided' ||
+                         this.newFinancialData.companyFinancials?.annualRevenue2022 !== 'Not provided' ||
+                         this.newFinancialData.companyFinancials?.creditRatingProvider !== 'Not provided' ||
+                         this.newFinancialData.companyFinancials?.taxCompliant !== 'Not provided';
+    const hasInsurance = this.newFinancialData.insuranceCoverage?.generalLiabilityInsurance !== 'Not provided' ||
+                        this.newFinancialData.insuranceCoverage?.productLiabilityInsurance !== 'Not provided';
+    const hasReferences = this.newFinancialData.additionalInformation?.references?.length > 0;
+    
+    return hasBankDetails || hasFinancials || hasInsurance || hasReferences;
   }
 
   // Enhanced zero state getters
@@ -1953,5 +2037,25 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     this.router.navigate(['/wefab/supplier/supplier-onboarding-form'], {
       queryParams: { step: '4' }
     });
+  }
+
+  // Debug method to log financial data state
+  debugFinancialData(): void {
+    console.log('🔍 === FINANCIAL DATA DEBUG ===');
+    console.log('newFinancialData exists:', !!this.newFinancialData);
+    console.log('newFinancialData:', this.newFinancialData);
+    console.log('hasFinancialData:', this.hasFinancialData);
+    console.log('shouldShowFinancialZeroState:', this.shouldShowFinancialZeroState);
+    console.log('loadingState.l1Data:', this.loadingState.l1Data);
+    console.log('dataLoading:', this.dataLoading);
+    console.log('activeLevelTab:', this.activeLevelTab);
+    
+    if (this.newFinancialData) {
+      console.log('Bank Details:', this.newFinancialData.bankDetails);
+      console.log('Company Financials:', this.newFinancialData.companyFinancials);
+      console.log('Insurance Coverage:', this.newFinancialData.insuranceCoverage);
+      console.log('References:', this.newFinancialData.additionalInformation?.references);
+    }
+    console.log('=== END FINANCIAL DEBUG ===');
   }
 }

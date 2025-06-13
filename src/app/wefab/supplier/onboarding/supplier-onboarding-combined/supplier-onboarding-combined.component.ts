@@ -869,6 +869,16 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   nextStep() {
+    console.log('🔄 Next Step called:', {
+      activeStepIndex: this.activeStepIndex,
+      isEditMode: this.isEditMode,
+      isStepValid: this.isStepValid(this.currentFields),
+      phoneVerified: this.phoneVerified,
+      gstVerified: this.gstVerified,
+      panVerified: this.panVerified,
+      bankVerified: this.bankVerified
+    });
+
     if (this.isStepValid(this.currentFields)) {
       // Update current step object before proceeding
       this.updateCurrentStepObject();
@@ -938,6 +948,14 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
           formErrors: this.getFormErrors()
         });
       }
+
+      // Debug information for all steps
+      console.log('🚨 Step Validation Failed:', {
+        activeStepIndex: this.activeStepIndex,
+        formValid: this.form.valid,
+        formErrors: this.getFormErrors(),
+        currentFieldsValid: this.isStepValid(this.currentFields)
+      });
       
       this.sweetAlert.error(errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.');
     }
@@ -1049,15 +1067,19 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
          console.log('✅ Update successful:', res.data);
          this.sweetAlert.success(message || 'Information updated successfully.');
          
-         // Only increment if not on the last step
-         if (this.isEditMode) {
-           // In edit mode, when on last step, show completion message but don't navigate
-           this.sweetAlert.success(message);
-         } else if (this.activeStepIndex < this.totalSteps - 1) {
-          this.activeStepIndex++;
-          // Update URL parameters after step increment
-          this.updateUrlParameters();
-        }
+         // In both edit and non-edit mode, allow progression to next step except on the last step
+         if (this.activeStepIndex < this.totalSteps - 1) {
+           this.activeStepIndex++;
+           // Update URL parameters after step increment
+           this.updateUrlParameters();
+         } else {
+           // On the last step, show appropriate completion message based on mode
+           if (this.isEditMode) {
+             console.log('🏁 Edit mode - Last step completed');
+           } else {
+             console.log('🏁 Onboarding mode - Last step completed');
+           }
+         }
       }
     }, (error) => {
       console.error('❌ Error updating data:', error);
