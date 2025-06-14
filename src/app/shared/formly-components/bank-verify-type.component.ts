@@ -37,6 +37,7 @@ export class FormlyFieldBankVerifyComponent extends FieldType<FieldTypeConfig> {
   }
 
   onBankDetailsVerified(bankDetails: any) {
+    debugger
     if (this.props['parentComponent'] && this.props['parentComponent'].onBankDetailsVerified) {
       this.props['parentComponent'].onBankDetailsVerified(bankDetails);
     }
