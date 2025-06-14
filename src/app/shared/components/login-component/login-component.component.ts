@@ -130,9 +130,7 @@ export class LoginComponentComponent {
                     if(!response.data.supplier_info.supplier_company_id) {
                       this.router.navigate(['/wefab/supplier/supplier-onboarding-welcome']);
                     } else {
-                      localStorage.setItem('supplier_onboarding_complete', 'true');
-                      localStorage.setItem('show_supplier_dashboard', 'true');
-                      this.router.navigate(['/wefab/supplier/dashboard']);
+                      this.getOnboardingL3Status(response.data.supplier_info.supplier_company_id);
                     }
                   } else if (response.data.user_type === 'wefab_team') {
                     this.router.navigate(['/wefab/wefabTeam/manage-suppliers']);
@@ -211,16 +209,15 @@ export class LoginComponentComponent {
     return params;
   }
 
-  getOnboardingL3Status(supplierCompanyId: string) {
-    console.log('Getting L3 status');
-    let endPoint = `/api/method/wefab.wefab.api.supplier.onboarding.onboarding.get_onboarding_stage_status?onboarding_stage=L3&supplier_company_id=${supplierCompanyId}`;
+  getOnboardingL3Status(supplierId: string) {
+    let endPoint = `/api/resource/Supplier Onboarding L1/${supplierId}`;
     this.commonService.getData(endPoint).subscribe((res: any) => {
-      if(res?.data?.approval_status === 'Approved') {
+      if(res.data.onboarding_form_status === 'L3 Approved') {
         localStorage.setItem('supplier_onboarding_complete', 'true');
         localStorage.setItem('show_supplier_dashboard', 'true');
         this.router.navigate(['/wefab/supplier/dashboard']);
       } else {
-        this.router.navigate(['/wefab/supplier/supplier-onboarding-status']);
+        this.router.navigate([`/wefab/supplier/profile-review/${supplierId}`]);
       }
     })
   }
