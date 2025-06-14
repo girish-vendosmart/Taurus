@@ -969,58 +969,58 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
 
     console.log('🔄 Starting bank verification for:', { accountNumber, ifscCode });
 
-    this.isLoading = false;
+    // this.isLoading = false;
 
-    this.companyBankDetails = {
-      message: "Bank Account details verified successfully.",
-      account_exists: true,
-      name_at_bank: "VENDOSMART TECHNOLOGIES PRIVATE LIMITED",
-      utr: "516126168903",
-      amount_deposited: 1,
-      name_information: {
-        name_at_bank_cleaned: "Vendosmart Technologies Private Limited"
-      }
-    }
-
-    this.patchBankDetails();
-    this.showVerificationDialog = true;
-    this.cdr.detectChanges();
-
-    // this.commonService.getData(endPoint).subscribe((res: any) => {
-    //   this.isLoading = false;
-      
-    //   console.log('Bank API Response:', res);
-      
-    //   // Check if the data exists in the expected format
-    //   if (res && res.message && res.message.data) {
-    //     this.companyBankDetails = res.message.data;
-    //     this.patchBankDetails();
-    //     this.showVerificationDialog = true;
-    //     this.cdr.detectChanges();
-    //   } else {
-    //     console.error('Invalid API response format:', res);
-    //     this.messageService.add({
-    //       severity: 'error',
-    //       summary: 'Error',
-    //       detail: 'Invalid response format from server',
-    //       life: 3000
-    //     });
+    // this.companyBankDetails = {
+    //   message: "Bank Account details verified successfully.",
+    //   account_exists: true,
+    //   name_at_bank: "VENDOSMART TECHNOLOGIES PRIVATE LIMITED",
+    //   utr: "516126168903",
+    //   amount_deposited: 1,
+    //   name_information: {
+    //     name_at_bank_cleaned: "Vendosmart Technologies Private Limited"
     //   }
-    // }, (err) => {
-    //   this.isLoading = false;
-    //   console.error('Bank API Error:', err);
-    //   this.messageService.add({
-    //     severity: 'error',
-    //     summary: 'Error',
-    //     detail: 'Failed to verify bank details. Please try again.',
-    //     life: 3000
-    //   });
-    //   this.verificationError = true;
+    // }
+
+    // this.patchBankDetails();
+    // this.showVerificationDialog = true;
+    // this.cdr.detectChanges();
+
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      this.isLoading = false;
       
-    //   setTimeout(() => {
-    //     this.verificationError = false;
-    //   }, 3000);
-    // });
+      console.log('Bank API Response:', res);
+      
+      // Check if the data exists in the expected format
+      if (res && res.message && res.message.data) {
+        this.companyBankDetails = res.message.data;
+        this.patchBankDetails();
+        this.showVerificationDialog = true;
+        this.cdr.detectChanges();
+      } else {
+        console.error('Invalid API response format:', res);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Invalid response format from server',
+          life: 3000
+        });
+      }
+    }, (err) => {
+      this.isLoading = false;
+      console.error('Bank API Error:', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to verify bank details. Please try again.',
+        life: 3000
+      });
+      this.verificationError = true;
+      
+      setTimeout(() => {
+        this.verificationError = false;
+      }, 3000);
+    });
   }
 
   patchBankDetails() {
