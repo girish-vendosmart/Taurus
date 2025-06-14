@@ -282,6 +282,80 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         this.updateUrlParameters();
       }
     }, 100);
+    
+    // Add monitoring for manufacturing process field
+    setTimeout(() => {
+      this.setupManufacturingProcessMonitoring();
+    }, 1000);
+  }
+
+  // Add this method to monitor the primaryManufacturingProcess field changes
+  private setupManufacturingProcessMonitoring(): void {
+    console.log('🔧 Setting up manufacturing process monitoring...');
+    
+    // Monitor form value changes for primaryManufacturingProcess
+    const manufacturingProcessControl = this.form.get('primaryManufacturingProcess');
+    
+    if (manufacturingProcessControl) {
+      console.log('✅ Found primaryManufacturingProcess form control');
+      
+      // Subscribe to value changes
+      manufacturingProcessControl.valueChanges.subscribe(value => {
+        console.log('🏭 Manufacturing Process field changed via form control:', value);
+        console.log('🏭 Previous model primaryManufacturingProcess:', this.model.primaryManufacturingProcess);
+        
+        // Update the model to ensure consistency
+        this.model.primaryManufacturingProcess = value || [];
+        
+        // Force update the contact capabilities object for API consistency
+        if (this.contactCapabilities && typeof this.contactCapabilities === 'object') {
+          (this.contactCapabilities as any).primaryManufacturingProcess = this.model.primaryManufacturingProcess;
+          console.log('🔄 Updated contactCapabilities with new manufacturing processes');
+        }
+        
+        // Log comprehensive change information
+        console.log('🏭 Manufacturing process monitoring - Updated values:', {
+          formControlValue: value,
+          modelValue: this.model.primaryManufacturingProcess,
+          contactCapabilitiesValue: (this.contactCapabilities as any)?.primaryManufacturingProcess,
+          isArray: Array.isArray(value),
+          arrayLength: Array.isArray(value) ? value.length : 'N/A'
+        });
+        
+        // Ensure the form reflects the changes for validation
+        if (value && Array.isArray(value) && value.length > 0) {
+          manufacturingProcessControl.markAsDirty();
+          manufacturingProcessControl.markAsTouched();
+          console.log('✅ Form control marked as dirty and touched');
+        }
+        
+        // Force change detection to update UI
+        this.cdr.detectChanges();
+      });
+      
+      // Also monitor the form's root value changes as a backup
+      this.form.valueChanges.subscribe(formValue => {
+        if (formValue.primaryManufacturingProcess !== this.model.primaryManufacturingProcess) {
+          console.log('🔄 Root form value change detected for manufacturing processes:', formValue.primaryManufacturingProcess);
+          this.model.primaryManufacturingProcess = formValue.primaryManufacturingProcess || [];
+          
+          // Update contact capabilities for API
+          if (this.contactCapabilities && typeof this.contactCapabilities === 'object') {
+            (this.contactCapabilities as any).primaryManufacturingProcess = this.model.primaryManufacturingProcess;
+          }
+        }
+      });
+      
+      console.log('✅ Manufacturing process monitoring setup complete');
+    } else {
+      console.warn('❌ primaryManufacturingProcess form control not found during setup');
+      
+      // Retry after a delay if the form control isn't ready yet
+      setTimeout(() => {
+        console.log('🔄 Retrying manufacturing process monitoring setup...');
+        this.setupManufacturingProcessMonitoring();
+      }, 2000);
+    }
   }
 
   // New method to validate if user can access a specific step
@@ -2913,7 +2987,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
               filterPlaceholder: 'Search manufacturing processes...',
               multiselect: true,
               maxSelectedLabels: 100,
-              showDebugInfo: false,
+              showDebugInfo: true, // Enable debug info temporarily for troubleshooting
               options: [
                 {
                   label: 'Precision Machining',
@@ -3067,6 +3141,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     const formValues = this.form.getRawValue();
     const combinedData = { ...this.model, ...formValues };
     
+    console.log('📋 Updating step object with form values:', formValues);
+    console.log('📋 Combined data:', combinedData);
+    
     switch (this.activeStepIndex) {
       case 0: // Basic Details
         this.basicDetails = {
@@ -3085,10 +3162,21 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         break;
         
       case 1: // Contact & Capabilities
+        // Get the latest form values to ensure we have the most up-to-date manufacturing processes
+        const latestFormValues = this.form.getRawValue();
+        const manufacturingProcesses = latestFormValues.primaryManufacturingProcess || combinedData.primaryManufacturingProcess || [];
+        
+        console.log('🔍 Contact & Capabilities - Manufacturing Process Sources:', {
+          fromLatestForm: latestFormValues.primaryManufacturingProcess,
+          fromCombinedData: combinedData.primaryManufacturingProcess,
+          fromModel: this.model.primaryManufacturingProcess,
+          finalValue: manufacturingProcesses
+        });
+        
         this.contactCapabilities = {
           primaryContactName: combinedData.primaryContactName,
           phoneNumber: combinedData.phoneNumber,
-          primaryManufacturingProcess: combinedData.primaryManufacturingProcess,
+          primaryManufacturingProcess: manufacturingProcesses, // Use the most reliable source
           websiteURL: combinedData.websiteURL,
           linkedinURL: combinedData.linkedinURL,
           totalEmployees: combinedData.totalEmployees,
@@ -3096,6 +3184,16 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
           companyDocuments: combinedData.companyDocuments,
           phoneVerified: this.phoneVerified
         };
+        
+        // Also update the model to ensure consistency
+        this.model.primaryManufacturingProcess = manufacturingProcesses;
+        
+        console.log('🏭 Contact capabilities updated with manufacturing processes:', (this.contactCapabilities as any).primaryManufacturingProcess);
+        console.log('📊 Manufacturing processes array details:', {
+          isArray: Array.isArray(manufacturingProcesses),
+          length: Array.isArray(manufacturingProcesses) ? manufacturingProcesses.length : 'N/A',
+          values: manufacturingProcesses
+        });
         break;
         
       case 2: // Machine Capabilities

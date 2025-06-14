@@ -24,13 +24,6 @@ import { ButtonModule } from 'primeng/button';
                 class="p-button-outlined" style="margin-left: 0.5rem;"></button>
       </div>
 
-      <!-- Debug info -->
-      <div style="background: #f0f0f0; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
-        <strong>Debug Info:</strong><br>
-        Sample data loaded: {{ sampleData.length > 0 ? 'Yes (' + sampleData.length + ' items)' : 'No' }}<br>
-        Loading state: {{ isLoading ? 'Yes' : 'No' }}
-      </div>
-
       <app-activity-trail 
         [activityData]="sampleData"
         [loading]="isLoading"

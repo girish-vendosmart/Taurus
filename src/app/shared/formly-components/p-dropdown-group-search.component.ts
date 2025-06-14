@@ -132,19 +132,7 @@ export interface DropdownGroup {
         (onHide)="onDropdownHide()"
       >
         <ng-template pTemplate="header">
-          <div class="multiselect-header-container">
-            <!-- Select All Checkbox -->
-            <div class="select-all-container">
-              <p-checkbox 
-                [binary]="true"
-                [ngModel]="selectAllChecked"
-                (onChange)="onSelectAllChange($event)"
-                inputId="selectAll"
-                [disabled]="disabled">
-              </p-checkbox>
-              <label for="selectAll" class="select-all-label">Select All</label>
-            </div>
-            
+          <div class="multiselect-header-container">    
             <!-- Search Input -->
             <div class="custom-filter-container">
               <input 
@@ -201,20 +189,6 @@ export interface DropdownGroup {
       
       <small *ngIf="description" class="form-text text-muted">{{ description }}</small>
       
-      <!-- Debug info (remove in production) -->
-      <div *ngIf="showDebugInfo" class="debug-info mt-2 p-2 border rounded bg-light">
-        <small>
-          <strong>Debug Info:</strong><br>
-          Mode: {{ multiselect ? 'Multi-select' : 'Single-select' }}<br>
-          Selected Value: {{ selectedValue | json }}<br>
-          Current Filter: "{{ currentFilter }}"<br>
-          Total Groups: {{ originalOptions.length }}<br>
-          Display Groups: {{ displayOptions.length }}<br>
-          Total Items: {{ getTotalItemsCount() }}<br>
-          Filtered Items: {{ getFilteredItemsCount() }} items<br>
-          Group States: {{ groupSelectionStates | json }}
-        </small>
-      </div>
     </div>
   `,
   styles: [`
@@ -854,15 +828,21 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     
     // Explicitly get the current value from the dropdown control and notify parent
     const currentValue = this.dropdownControl.value;
-    console.log('Selection changed:', currentValue);
+    console.log('🔄 Selection changed:', currentValue);
     
     // Update our local selectedValue
     this.selectedValue = currentValue;
     
-    // Notify parent form control about the change
+    // Mark the control as dirty and touched for proper form state management
+    this.dropdownControl.markAsDirty();
+    this.dropdownControl.markAsTouched();
+    
+    console.log('🔄 About to notify parent component via ControlValueAccessor with:', currentValue);
+    
+    // Notify parent form control about the change - CRITICAL for Formly
     this.onChange(currentValue);
     
-    // Emit the selection change event
+    // Emit the selection change event for any additional listeners
     this.selectionChange.emit(currentValue);
     
     // Update group selection states when individual items are selected/deselected
@@ -872,6 +852,14 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
       // Force change detection
       this.cdr.detectChanges();
     }
+    
+    console.log('📤 Selection change - Final values sent to parent:', currentValue);
+    
+    // Add debugging for form integration after a brief delay
+    setTimeout(() => {
+      console.log('🔍 Post-selection form integration check:');
+      this.logFormIntegration();
+    }, 100);
   }
 
   onDropdownShow(): void {
@@ -1086,13 +1074,13 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
   }
 
   onGroupCheckboxModelChange(checked: boolean, group: DropdownGroup): void {
-    console.log('Group checkbox model change triggered:', checked, 'for group:', group.label);
+    console.log('🔄 Group checkbox model change triggered:', checked, 'for group:', group.label);
     
     if (!this.multiselect) return;
     
     // If this change is part of a Select All operation, don't process individual logic
     if (this.isSelectAllChanging) {
-      console.log('Ignoring group checkbox change because Select All is changing');
+      console.log('⏭️ Ignoring group checkbox change because Select All is changing');
       return;
     }
     
@@ -1102,8 +1090,8 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
     const selectedValues = this.dropdownControl.value || [];
     const groupItemValues = group.items.map(item => item.value);
     
-    console.log('Current selected values:', selectedValues);
-    console.log('Group item values:', groupItemValues);
+    console.log('📋 Current selected values:', selectedValues);
+    console.log('🏷️ Group item values for', group.label, ':', groupItemValues);
     
     let newSelectedValues: any[];
     
@@ -1117,8 +1105,7 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
         }
       });
       
-      console.log('Selecting all items in group. New values:', newSelectedValues);
-      this.dropdownControl.setValue(newSelectedValues);
+      console.log('✅ Selecting all items in group. New values:', newSelectedValues);
       this.groupSelectionStates[group.label] = 'all';
     } else {
       // Deselect all items in this group
@@ -1126,23 +1113,55 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
         !groupItemValues.includes(value)
       );
       
-      console.log('Deselecting all items in group. New values:', newSelectedValues);
-      this.dropdownControl.setValue(newSelectedValues);
+      console.log('❌ Deselecting all items in group. New values:', newSelectedValues);
       this.groupSelectionStates[group.label] = 'none';
     }
     
-    // Update local selectedValue and notify parent
+    // Update the form control value with emitEvent: false first to avoid recursion
+    this.dropdownControl.setValue(newSelectedValues, { emitEvent: false });
+    
+    // Then manually trigger the change detection and form updates
     this.selectedValue = newSelectedValues;
+    
+    // Mark the control as dirty and touched for proper form state management
+    this.dropdownControl.markAsDirty();
+    this.dropdownControl.markAsTouched();
+    
+    console.log('🔄 About to notify parent with values:', newSelectedValues);
+    
+    // Notify parent component through ControlValueAccessor - CRITICAL for Formly integration
     this.onChange(newSelectedValues);
+    this.onTouched();
+    
+    // ALSO emit the selection change event - this ensures all listeners are notified
     this.selectionChange.emit(newSelectedValues);
     
-    // Update other groups and select all state
+    // Force update the form control with emitEvent: true to ensure Formly gets the change
+    setTimeout(() => {
+      console.log('🔄 Force updating form control with emitEvent: true');
+      this.dropdownControl.setValue(newSelectedValues, { emitEvent: true });
+      
+      // Double-check: call onChange again after the setValue to ensure propagation
+      this.onChange(newSelectedValues);
+      
+      console.log('✅ Form control value after force update:', this.dropdownControl.value);
+    }, 10);
+    
+    // Update all group selection states immediately
     this.updateAllGroupSelectionStates();
     this.updateSelectAllState();
+    
+    // Force change detection to update the UI
     this.cdr.detectChanges();
     
-    console.log('After individual group change - Group checkbox values:', this.groupCheckboxValues);
-    console.log('After individual group change - Group states:', this.groupSelectionStates);
+    // Log form integration details
+    setTimeout(() => {
+      this.logFormIntegration();
+    }, 50);
+    
+    console.log('🔄 After individual group change - Group checkbox values:', this.groupCheckboxValues);
+    console.log('🔄 After individual group change - Group states:', this.groupSelectionStates);
+    console.log('📤 Final selected values sent to parent:', newSelectedValues);
   }
 
   private updateSelectAllState(): void {
@@ -1316,5 +1335,18 @@ export class PDropdownGroupSearchComponent implements OnInit, ControlValueAccess
 
   getGroupInputId(group: DropdownGroup): string {
     return `group_${group.label.replace(/[^a-zA-Z0-9]/g, '_')}`;
+  }
+
+  private logFormIntegration(): void {
+    console.log('🔧 Form Integration Debug:', {
+      selectedValue: this.selectedValue,
+      dropdownControlValue: this.dropdownControl.value,
+      groupCheckboxValues: this.groupCheckboxValues,
+      groupSelectionStates: this.groupSelectionStates,
+      formControlValid: this.dropdownControl.valid,
+      formControlDirty: this.dropdownControl.dirty,
+      formControlTouched: this.dropdownControl.touched,
+      formControlErrors: this.dropdownControl.errors
+    });
   }
 } 
