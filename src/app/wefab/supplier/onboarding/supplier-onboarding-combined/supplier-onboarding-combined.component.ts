@@ -240,6 +240,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   // Edit mode properties
   isEditMode: boolean = false;
   urlSupplierId: string | null = null;
+  currentOnboardingFormStatus: any;
   
   constructor(
     private fb: FormBuilder,
@@ -501,6 +502,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     this.commonService.getData(endpoint)
       .subscribe((response: any) => {
         console.log('📥 L1 Response:', response);
+
+        this.currentOnboardingFormStatus = response.data.onboarding_form_status;
         
         if (response && response.data) {
           // Handle basic_details if it exists and is a JSON string
@@ -1328,6 +1331,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       phone_verified: this.phoneVerified,
       gst_verified: this.gstVerified,
       pan_verified: this.panVerified,
+      onboarding_form_status: this.currentOnboardingFormStatus === 'L1 Request for Update' ? 'L1 Under Review' : this.currentOnboardingFormStatus === 'L2 Request for Update' ? 'L2 Under Review' : this.currentOnboardingFormStatus === 'L3 Request for Update' ? 'L3 Under Review' : this.currentOnboardingFormStatus,
       [currentStepKey]: JSON.stringify(body)
     };
 

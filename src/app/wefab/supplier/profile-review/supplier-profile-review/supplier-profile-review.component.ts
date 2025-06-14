@@ -574,9 +574,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         if(this.basicDetails && this.contactCapabilities && this.currentOnboardingStage === 'L1 Under Review'){
            this.basicDetailsUnderReview = true;
            this.basicDetailsRejected = false;
+           this.basicDetailsRequestForUpdate = false;
         } else if (this.basicDetails && this.contactCapabilities && this.currentOnboardingStage === 'L1 Rejected') {
           this.basicDetailsRejected = true;
           this.basicDetailsUnderReview = false;
+          this.basicDetailsRequestForUpdate = false;
         } else if (this.basicDetails && this.contactCapabilities && this.currentOnboardingStage === 'L1 Request for Update') {
           this.basicDetailsUnderReview = false;
           this.basicDetailsRejected = false;

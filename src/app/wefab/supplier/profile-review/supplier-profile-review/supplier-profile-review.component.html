@@ -205,9 +205,9 @@
           (click)="changeLevelTab('manufacturing')" [disabled]="basicDetailsRejected">
           <div class="level-badge">
             <i class="pi pi-times-circle status-icon rejected" *ngIf="manufacturingRejected"></i>
-            <i class="pi pi-check-circle status-icon approved" *ngIf="!manufacturingUnderReview && !manufacturingRejected && !manufacturingRequestForUpdate && !basicDetailsUnderReview && !basicDetailsRejected"></i>
+            <i class="pi pi-check-circle status-icon approved" *ngIf="!manufacturingUnderReview && !manufacturingRejected && !manufacturingRequestForUpdate && !basicDetailsUnderReview && !basicDetailsRejected && !basicDetailsRequestForUpdate"></i>
             <i class="pi pi-exclamation-triangle status-icon under-review"
-              *ngIf="manufacturingUnderReview && !manufacturingRejected && !manufacturingRequestForUpdate"></i>
+              *ngIf="manufacturingUnderReview && !manufacturingRejected && !manufacturingRequestForUpdate || basicDetailsRequestForUpdate"></i>
             <i class="pi pi-sync status-icon request-resubmit"
               *ngIf="manufacturingRequestForUpdate"></i>
             <span class="p-font-size">Stage 2: Manufacturing</span>
@@ -233,9 +233,9 @@
           [disabled]="basicDetailsRejected || manufacturingRejected">
           <div class="level-badge">
             <i class="pi pi-times-circle status-icon rejected" *ngIf="financialRejected"></i>
-            <i class="pi pi-check-circle status-icon approved" *ngIf="!financialUnderReview && !financialRejected && !financialRequestForUpdate && !basicDetailsUnderReview && !manufacturingUnderReview && !manufacturingRejected"></i>
+            <i class="pi pi-check-circle status-icon approved" *ngIf="!financialUnderReview && !financialRejected && !financialRequestForUpdate && !basicDetailsUnderReview && !manufacturingUnderReview && !manufacturingRejected && !basicDetailsRequestForUpdate && !manufacturingRequestForUpdate"></i>
             <i class="pi pi-exclamation-triangle status-icon under-review"
-              *ngIf="financialUnderReview && !financialRejected && !financialRequestForUpdate"></i>
+              *ngIf="financialUnderReview && !financialRejected && !financialRequestForUpdate || basicDetailsRequestForUpdate || manufacturingRequestForUpdate"></i>
             <i class="pi pi-sync status-icon request-resubmit"
               *ngIf="financialRequestForUpdate"></i>
             <span class="p-font-size">Stage 3: Financial & Additional</span>
@@ -257,34 +257,19 @@
           </div>
         </button>
       </div>
-      <!-- Resubmit Comment Alert Box -->
-      <div *ngIf="(activeLevelTab === 'basic' && requestToResubmitCommentL1 && getCurrentL1DataStatus === 'Request to Resubmit') || 
-                 (activeLevelTab === 'manufacturing' && requestToResubmitCommentL2 && getCurrentL2DataStatus === 'Request to Resubmit') ||
-                 (activeLevelTab === 'financial' && requestToResubmitCommentL3 && getCurrentL3DataStatus === 'Request to Resubmit')" 
-           class="resubmit-comment-box">
-        <div class="resubmit-header">
-          <i class="pi pi-exclamation-triangle"></i>
-          <span>Resubmission Requested</span>
-        </div>
-        <div class="resubmit-message">
-          <p *ngIf="activeLevelTab === 'basic' && requestToResubmitCommentL1">{{ requestToResubmitCommentL1 }}</p>
-          <p *ngIf="activeLevelTab === 'manufacturing' && requestToResubmitCommentL2">{{ requestToResubmitCommentL2 }}</p>
-          <p *ngIf="activeLevelTab === 'financial' && requestToResubmitCommentL3">{{ requestToResubmitCommentL3 }}</p>
-        </div>
-        <!-- <div class="resubmit-actions">
-          <button 
-            type="button" 
-            class="btn btn-primary" 
-            *ngIf="userType === 'supplier'"
-            (click)="navigateToEdit()">
-            <i class="pi pi-pencil prime-ng-font-icon-font-size"></i>
-            Edit & Resubmit
-          </button>
-        </div> -->
-      </div>
 
       <!-- Basic Information Tab Content - Consolidated View -->
       <div class="tab-content" *ngIf="activeLevelTab === 'basic'">
+        <div *ngIf="basicDetailsRequestForUpdate" 
+           class="resubmit-comment-box">
+          <div class="resubmit-header">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>Resubmission Requested</span>
+          </div>
+          <div class="resubmit-message">
+            <p>{{ requestToResubmitCommentL1 }}</p>
+          </div>
+        </div>
         <div class="section-header">
           <h3>Basic Information</h3>
           <button class="edit-section-btn" *ngIf="(basicDetailsUnderReview || basicDetailsRequestForUpdate) && userType === 'supplier'" (click)="navigateToEdit()">
@@ -521,6 +506,16 @@
       </div>
       <!-- Manufacturing Tab Content -->
       <div class="tab-content" *ngIf="activeLevelTab === 'manufacturing'">
+        <div *ngIf="manufacturingRequestForUpdate" 
+           class="resubmit-comment-box">
+          <div class="resubmit-header">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>Resubmission Requested</span>
+          </div>
+          <div class="resubmit-message">
+            <p>{{ requestToResubmitCommentL1 }}</p>
+          </div>
+        </div>
         <div class="section-header">
           <h3>Manufacturing Capabilities</h3>
           <button class="edit-section-btn" *ngIf="(manufacturingUnderReview || manufacturingRequestForUpdate) && userType === 'supplier'" (click)="navigateToEdit()">
@@ -805,6 +800,16 @@
 
       <!-- Financial Tab Content -->
       <div class="tab-content" *ngIf="activeLevelTab === 'financial'">
+        <div *ngIf="financialRequestForUpdate" 
+           class="resubmit-comment-box">
+          <div class="resubmit-header">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>Resubmission Requested</span>
+          </div>
+          <div class="resubmit-message">
+            <p>{{ requestToResubmitCommentL1 }}</p>
+          </div>
+        </div>
         <div class="section-header">
           <h3>Financial & Additional Information</h3>
           <button class="edit-section-btn" *ngIf="(financialUnderReview || financialRequestForUpdate) && userType === 'supplier'" (click)="navigateToEdit()">
