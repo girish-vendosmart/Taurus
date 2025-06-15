@@ -1740,35 +1740,82 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     console.log('GST Address details accepted:', addressData);
     
     if (addressData) {
-      this.model.registeredAddress = addressData;
+      // Ensure the address data includes coordinates in the proper format
+      const processedAddressData = {
+        fullAddress: addressData.fullAddress || addressData.address || '',
+        placeId: addressData.placeId || '',
+        streetNumber: addressData.streetNumber || '',
+        street: addressData.street || '',
+        city: addressData.city || '',
+        state: addressData.state || '',
+        stateCode: addressData.stateCode || '',
+        postalCode: addressData.postalCode || '',
+        country: addressData.country || '',
+        countryCode: addressData.countryCode || '',
+        location: {
+          lat: 0,
+          lng: 0
+        }
+      };
+
+      // Handle various coordinate formats from GST data
+      if (addressData.location) {
+        if (typeof addressData.location.lat === 'number' && typeof addressData.location.lng === 'number') {
+          processedAddressData.location = {
+            lat: addressData.location.lat,
+            lng: addressData.location.lng
+          };
+        }
+      } else if (addressData.lat && addressData.lng) {
+        // Handle flat coordinate structure
+        processedAddressData.location = {
+          lat: typeof addressData.lat === 'number' ? addressData.lat : parseFloat(addressData.lat) || 0,
+          lng: typeof addressData.lng === 'number' ? addressData.lng : parseFloat(addressData.lng) || 0
+        };
+      } else if (addressData.latitude && addressData.longitude) {
+        // Handle alternative coordinate naming
+        processedAddressData.location = {
+          lat: typeof addressData.latitude === 'number' ? addressData.latitude : parseFloat(addressData.latitude) || 0,
+          lng: typeof addressData.longitude === 'number' ? addressData.longitude : parseFloat(addressData.longitude) || 0
+        };
+      }
+
+      console.log('📍 Processed address data with coordinates:', processedAddressData);
       
-      if (addressData.country) {
-        this.model.country = addressData.country;
-        this.selectedCountry = addressData.country;
-        this.getStates(addressData.country);
+      this.model.registeredAddress = processedAddressData;
+      
+      if (processedAddressData.country) {
+        this.model.country = processedAddressData.country;
+        this.selectedCountry = processedAddressData.country;
+        this.getStates(processedAddressData.country);
       }
       
-      if (addressData.state) {
-        this.model.state = addressData.state;
-        this.selectedState = addressData.state;
+      if (processedAddressData.state) {
+        this.model.state = processedAddressData.state;
+        this.selectedState = processedAddressData.state;
       }
       
-      if (addressData.city) {
-        this.model.city = addressData.city;
+      if (processedAddressData.city) {
+        this.model.city = processedAddressData.city;
       }
       
       setTimeout(() => {
         this.form.patchValue({
-          registeredAddress: addressData,
-          country: addressData.country,
-          state: addressData.state,
-          city: addressData.city
+          registeredAddress: processedAddressData,
+          country: processedAddressData.country,
+          state: processedAddressData.state,
+          city: processedAddressData.city
         });
         
         setTimeout(() => {
           this.updateStateDropdownOptions(true);
           this.cdr.detectChanges();
           this.form.markAsDirty();
+          
+          console.log('✅ Address form patched with coordinates:', {
+            hasCoordinates: !!(processedAddressData.location && processedAddressData.location.lat && processedAddressData.location.lng),
+            coordinates: processedAddressData.location
+          });
         }, 1000);
       }, 500);
     }

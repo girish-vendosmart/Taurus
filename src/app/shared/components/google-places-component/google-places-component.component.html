@@ -23,16 +23,19 @@
   </div>
   
   <!-- Selected Address Display -->
-  <div *ngIf="selectedAddress" class="selected-address-card">
+  <div *ngIf="selectedAddress && selectedAddress.fullAddress" class="selected-address-card">
     <div class="address-title">
       {{ selectedAddress.fullAddress }}
     </div>
-    <div class="address-details">
-      <div>{{ selectedAddress.city || '' }}, {{ selectedAddress.stateCode || '' }} {{ selectedAddress.postalCode || '' }}</div>
-      <div>{{ selectedAddress.country }}</div>
+    <div class="address-details" *ngIf="selectedAddress.city || selectedAddress.state || selectedAddress.country">
+      <div *ngIf="selectedAddress.city || selectedAddress.stateCode || selectedAddress.postalCode">
+        {{ selectedAddress.city || '' }}<span *ngIf="selectedAddress.city && (selectedAddress.stateCode || selectedAddress.postalCode)">, </span>{{ selectedAddress.stateCode || '' }}<span *ngIf="selectedAddress.stateCode && selectedAddress.postalCode"> </span>{{ selectedAddress.postalCode || '' }}
+      </div>
+      <div *ngIf="selectedAddress.country">{{ selectedAddress.country }}</div>
     </div>
-    <div class="address-coordinates" *ngIf="selectedAddress.location">
-      <i class="pi pi-map-marker"></i> {{ selectedAddress.location.lat }}, {{ selectedAddress.location.lng }}
+    <div class="address-coordinates" *ngIf="selectedAddress.location && selectedAddress.location.lat && selectedAddress.location.lng">
+      <i class="pi pi-map-marker"></i> 
+      <span class="coordinates-text">{{ selectedAddress.location.lat | number:'1.6-6' }}, {{ selectedAddress.location.lng | number:'1.6-6' }}</span>
     </div>
   </div>
 </div>

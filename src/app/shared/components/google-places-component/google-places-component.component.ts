@@ -115,21 +115,105 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
 
     console.log('Prefilling address data:', addressDetails);
     
+    // Ensure the address object has all required properties
+    const processedAddress = this.ensureAddressStructure(addressDetails);
+    
     // Set the address text directly
-    this.addressText = addressDetails.fullAddress || '';
+    this.addressText = processedAddress.fullAddress || '';
     
     // Set the selected address object
-    this.selectedAddress = addressDetails;
+    this.selectedAddress = processedAddress;
     
     // Update the search control with the address text
     this.searchControl.setValue(this.addressText, { emitEvent: false });
     
     // Call the ControlValueAccessor onChange to notify parent form
-    this.onChange(addressDetails);
+    this.onChange(processedAddress);
     
     console.log('Address prefilled successfully:', {
       addressText: this.addressText,
-      selectedAddress: this.selectedAddress
+      selectedAddress: this.selectedAddress,
+      hasCoordinates: !!(processedAddress.location && processedAddress.location.lat && processedAddress.location.lng)
+    });
+  }
+
+  // Helper method to ensure address structure includes coordinates
+  private ensureAddressStructure(addressData: any): AddressData {
+    const processedAddress: AddressData = {
+      fullAddress: addressData.fullAddress || addressData.address || '',
+      placeId: addressData.placeId || '',
+      streetNumber: addressData.streetNumber || '',
+      street: addressData.street || '',
+      city: addressData.city || '',
+      state: addressData.state || '',
+      stateCode: addressData.stateCode || '',
+      postalCode: addressData.postalCode || '',
+      country: addressData.country || '',
+      countryCode: addressData.countryCode || '',
+      location: {
+        lat: 0,
+        lng: 0
+      }
+    };
+
+    // Handle various coordinate formats
+    if (addressData.location) {
+      if (typeof addressData.location.lat === 'number' && typeof addressData.location.lng === 'number') {
+        processedAddress.location = {
+          lat: addressData.location.lat,
+          lng: addressData.location.lng
+        };
+      }
+    } else if (addressData.lat && addressData.lng) {
+      // Handle flat coordinate structure
+      processedAddress.location = {
+        lat: typeof addressData.lat === 'number' ? addressData.lat : parseFloat(addressData.lat) || 0,
+        lng: typeof addressData.lng === 'number' ? addressData.lng : parseFloat(addressData.lng) || 0
+      };
+    } else if (addressData.latitude && addressData.longitude) {
+      // Handle alternative coordinate naming
+      processedAddress.location = {
+        lat: typeof addressData.latitude === 'number' ? addressData.latitude : parseFloat(addressData.latitude) || 0,
+        lng: typeof addressData.longitude === 'number' ? addressData.longitude : parseFloat(addressData.longitude) || 0
+      };
+    }
+
+    // If we still don't have coordinates but have an address, try to geocode it
+    if ((!processedAddress.location.lat || !processedAddress.location.lng) && processedAddress.fullAddress) {
+      this.geocodeAddress(processedAddress.fullAddress).then(coordinates => {
+        if (coordinates) {
+          processedAddress.location = coordinates;
+          this.selectedAddress = processedAddress;
+          console.log('Geocoded coordinates for address:', coordinates);
+        }
+      });
+    }
+
+    return processedAddress;
+  }
+
+  // Method to geocode an address to get coordinates
+  private async geocodeAddress(address: string): Promise<{lat: number, lng: number} | null> {
+    return new Promise((resolve) => {
+      if (!google || !google.maps || !google.maps.Geocoder) {
+        console.log('Google Maps Geocoder not available');
+        resolve(null);
+        return;
+      }
+
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ address: address }, (results: any, status: any) => {
+        if (status === 'OK' && results && results.length > 0) {
+          const location = results[0].geometry.location;
+          resolve({
+            lat: location.lat(),
+            lng: location.lng()
+          });
+        } else {
+          console.log('Geocoding failed:', status);
+          resolve(null);
+        }
+      });
     });
   }
   
@@ -219,6 +303,7 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
             const place = this.autocompleteInstance.getPlace();
             
             if (!place.geometry) {
+              console.log('Place selected but no geometry available');
               return;
             }
             
@@ -263,6 +348,11 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
               });
             }
             
+            console.log('New address selected with coordinates:', {
+              address: addressData.fullAddress,
+              coordinates: addressData.location
+            });
+            
             this.selectedAddress = addressData;
             
             // Call the ControlValueAccessor callbacks
@@ -287,12 +377,17 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
   writeValue(value: AddressData | null): void {
     console.log('Google Places writeValue called with:', value);
     if (value) {
-      this.selectedAddress = value;
-      this.addressText = value.fullAddress || '';
-      this.searchControl.setValue(value.fullAddress, { emitEvent: false });
+      // Process the incoming value to ensure proper structure
+      const processedValue = this.ensureAddressStructure(value);
+      
+      this.selectedAddress = processedValue;
+      this.addressText = processedValue.fullAddress || '';
+      this.searchControl.setValue(processedValue.fullAddress, { emitEvent: false });
+      
       console.log('Address value written successfully:', {
         addressText: this.addressText,
-        selectedAddress: this.selectedAddress
+        selectedAddress: this.selectedAddress,
+        hasCoordinates: !!(processedValue.location && processedValue.location.lat && processedValue.location.lng)
       });
     } else {
       this.selectedAddress = null;
