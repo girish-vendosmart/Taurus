@@ -95,19 +95,29 @@ interface Country {
         
         <!-- Verify OTP Button -->
         <div class="verify-button-container">
+          <!-- Show badge when verified -->
+          <span *ngIf="_isVerified" class="verified-badge">
+            <i class="pi pi-check" style="margin-right: 0.4rem"></i>
+            VERIFIED
+          </span>
+          
+          <!-- Show button when not verified -->
           <button 
+            *ngIf="!_isVerified"
             type="button" 
             class="btn verify-otp-button"
-            [ngClass]="{'verified': _isVerified, 'error': verificationError}" 
-            [disabled]="!phoneControl.value || phoneControl.invalid || _isVerified || isLoading"
-            [style.backgroundColor]="_isVerified ? '#28a745' : (verificationError ? '#dc3545' : '#1a3a60')"
+            [ngClass]="{'error': verificationError}" 
+            [disabled]="!phoneControl.value || phoneControl.invalid || isLoading"
+            [style.backgroundColor]="verificationError ? '#dc3545' : '#1a3a60'"
             (click)="sendOTP()">
             <span *ngIf="isLoading">
                 <i class="pi pi-spin pi-spinner" style="margin-right: 0.5rem"></i>
                 Sending...
             </span>
             <span *ngIf="!isLoading">
-                {{ _isVerified ? 'Verified' : (verificationError ? 'Failed' : 'VERIFY NUMBER') }}
+                <i *ngIf="verificationError" class="pi pi-times" style="margin-right: 0.4rem"></i>
+                <i *ngIf="!verificationError" class="pi pi-shield" style="margin-right: 0.4rem"></i>
+                {{ verificationError ? 'FAILED' : 'VERIFY NUMBER' }}
             </span>
           </button>
         </div>
@@ -232,6 +242,26 @@ interface Country {
       
       .verify-button-container {
         flex-shrink: 0;
+        
+        .verified-badge {
+          display: inline-flex;
+          align-items: center;
+          background: #28a745;
+          color: white;
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+          border: none;
+          
+          i {
+            font-size: 0.9rem;
+            color: white;
+          }
+        }
       }
       
       .flag-emoji {

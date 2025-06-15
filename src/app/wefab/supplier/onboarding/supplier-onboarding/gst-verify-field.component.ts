@@ -47,19 +47,29 @@ import { CommonService } from '../../../../shared/services/common.service';
         
         <!-- Verify GST Button -->
         <div class="verify-button-container">
+          <!-- Show badge when verified -->
+          <span *ngIf="_isVerified" class="verified-badge">
+            <i class="pi pi-check" style="margin-right: 0.4rem"></i>
+            VERIFIED
+          </span>
+          
+          <!-- Show button when not verified -->
           <button 
+            *ngIf="!_isVerified"
             type="button" 
             class="btn verify-gst-button"
-            [ngClass]="{'verified': _isVerified, 'error': verificationError}" 
-            [disabled]="!gstControl.value || gstControl.invalid || _isVerified || isLoading"
-            [style.backgroundColor]="_isVerified ? '#28a745' : (verificationError ? '#f59e0b' : '#1a3a60')"
+            [ngClass]="{'error': verificationError}" 
+            [disabled]="!gstControl.value || gstControl.invalid || isLoading"
+            [style.backgroundColor]="verificationError ? '#f59e0b' : '#1a3a60'"
             (click)="verifyGST()">
             <span *ngIf="isLoading">
                 <i class="pi pi-spin pi-spinner" style="margin-right: 0.5rem"></i>
                 Verifying...
             </span>
             <span *ngIf="!isLoading">
-                {{ _isVerified ? 'Verified' : (verificationError ? 'Re-verify' : 'VERIFY') }}
+                <i *ngIf="verificationError" class="pi pi-exclamation-triangle" style="margin-right: 0.4rem"></i>
+                <i *ngIf="!verificationError" class="pi pi-shield" style="margin-right: 0.4rem"></i>
+                {{ verificationError ? 'RE-VERIFY' : 'VERIFY' }}
             </span>
           </button>
         </div>
@@ -163,6 +173,26 @@ import { CommonService } from '../../../../shared/services/common.service';
       
       .verify-button-container {
         flex-shrink: 0;
+        
+        .verified-badge {
+          display: inline-flex;
+          align-items: center;
+          background: #28a745;
+          color: white;
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+          border: none;
+          
+          i {
+            font-size: 0.9rem;
+            color: white;
+          }
+        }
       }
       
       .gst-input {
