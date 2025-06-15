@@ -20,12 +20,15 @@ import {
   signInWithPhoneNumber
 } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
+import { createClient, SupabaseClient, User, AuthError } from '@supabase/supabase-js';
+import { SweetAlertService } from '../../../shared/services/sweet-alert.service';
 import { environment } from '../../../../enviornments/enviornment';
 
 interface Country {
   name: string;
   code: string;
   emoji: string;  // Using emoji flags instead of image assets
+  phoneLength: number; // Expected phone number length (without country code)
 }
 
 @Component({
@@ -62,7 +65,8 @@ interface Country {
             [(ngModel)]="selectedCountry" 
             optionLabel="name"
             [disabled]="_isVerified"
-            styleClass="country-dropdown">
+            styleClass="country-dropdown"
+            (onChange)="onCountryChange()">
             <ng-template pTemplate="selectedItem">
               <div class="country-item selected-country">
                 <span class="flag-emoji">{{ selectedCountry.emoji }}</span>
@@ -103,7 +107,7 @@ interface Country {
                 Sending...
             </span>
             <span *ngIf="!isLoading">
-                {{ _isVerified ? 'Verified' : (verificationError ? 'Failed' : 'VERIFY OTP') }}
+                {{ _isVerified ? 'Verified' : (verificationError ? 'Failed' : 'VERIFY NUMBER') }}
             </span>
           </button>
         </div>
@@ -111,7 +115,7 @@ interface Country {
       
       <div class="invalid-feedback d-block phone-otp-error" *ngIf="phoneControl.invalid && phoneControl.touched">
         <i class="pi pi-exclamation-triangle" style="margin-right: 0.4rem;"></i>
-        {{ errorMessage }}
+        {{ getPhoneErrorMessage() }}
       </div>
       
       <!-- Inline OTP Verification Section (Replaces Dialog) -->
@@ -457,11 +461,12 @@ interface Country {
   `]
 })
 export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccessor {
+  private supabase: SupabaseClient | any;
   @Input() label: any = 'Phone Number';
   @Input() placeholder: any = 'Phone number';
   @Input() required: any = false;
   @Input() countryCode: any = '91';
-  @Input() errorMessage: any = 'Please enter a valid phone number';
+  @Input() errorMessage: any = 'Please enter a valid mobile number';
   @Input() set isVerified(value: boolean) {
     if (value !== this._isVerified) {
       this._isVerified = value;
@@ -506,18 +511,18 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   private resendTimerInterval: any;
   
   countries: Country[] = [
-    { name: 'India', code: '91', emoji: '🇮🇳' },
-    { name: 'United States', code: '1', emoji: '🇺🇸' },
-    { name: 'United Kingdom', code: '44', emoji: '🇬🇧' },
-    { name: 'Australia', code: '61', emoji: '🇦🇺' },
-    { name: 'Canada', code: '1', emoji: '🇨🇦' },
-    { name: 'China', code: '86', emoji: '🇨🇳' },
-    { name: 'Germany', code: '49', emoji: '🇩🇪' },
-    { name: 'France', code: '33', emoji: '🇫🇷' },
-    { name: 'Japan', code: '81', emoji: '🇯🇵' },
-    { name: 'UAE', code: '971', emoji: '🇦🇪' },
-    { name: 'Singapore', code: '65', emoji: '🇸🇬' },
-    { name: 'Malaysia', code: '60', emoji: '🇲🇾' },
+    { name: 'India', code: '91', emoji: '🇮🇳', phoneLength: 10 },
+    { name: 'United States', code: '1', emoji: '🇺🇸', phoneLength: 10 },
+    { name: 'United Kingdom', code: '44', emoji: '🇬🇧', phoneLength: 10 },
+    { name: 'Australia', code: '61', emoji: '🇦🇺', phoneLength: 10 },
+    { name: 'Canada', code: '1', emoji: '🇨🇦', phoneLength: 10 },
+    { name: 'China', code: '86', emoji: '🇨🇳', phoneLength: 11 },
+    { name: 'Germany', code: '49', emoji: '🇩🇪', phoneLength: 11 },
+    { name: 'France', code: '33', emoji: '🇫🇷', phoneLength: 10 },
+    { name: 'Japan', code: '81', emoji: '🇯🇵', phoneLength: 10 },
+    { name: 'UAE', code: '971', emoji: '🇦🇪', phoneLength: 9 },
+    { name: 'Singapore', code: '65', emoji: '🇸🇬', phoneLength: 8 },
+    { name: 'Malaysia', code: '60', emoji: '🇲🇾', phoneLength: 9 },
   ];
   
   selectedCountry: Country;
@@ -532,7 +537,7 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   isVerifying = false;
   verificationId: string = '';
   
-  constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService, private cdr: ChangeDetectorRef) {
+  constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService, private cdr: ChangeDetectorRef, private sweetalert: SweetAlertService) {
     // Set default country to India or use the provided countryCode
     this.selectedCountry = this.countries.find(c => c.code === this.countryCode) || this.countries[0];
     
@@ -545,6 +550,12 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
 
     const app = initializeApp(environment.firebaseConfig);
     this.auth = getAuth(app);
+
+    // Initialize Supabase client
+    this.supabase = createClient(
+      'https://vlflwrdsuuegdjdyonyq.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsZmx3cmRzdXVlZ2RqZHlvbnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5NjYwMjksImV4cCI6MjA2NTU0MjAyOX0.LUkLIYkA-JpbooM-r-qbEKtDknUfSGqtN5AXoij2740'
+    );
   }
   
   ngOnInit(): void {
@@ -561,6 +572,9 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
         this._isVerified = false;
         this.verified.emit(false);
       }
+      
+      // Validate phone number length based on selected country
+      this.validatePhoneLength(value);
     });
     
     // Set the default country based on the input
@@ -602,37 +616,68 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     // Reset OTP error state
     this.otpError = false;
     this.otpErrorMessage = '';
-    
-    this.firebaseService.sendPhoneVerificationCode(
-      '+' + this.selectedCountry.code + this.phoneControl.value,
-      'recaptcha-container'
-    ).then((res:any) => {
-      console.log(res);
-      if(res.verificationId) {
-        this.verificationId = res.verificationId;
-        this.isLoading = false;
-        this.showOtpDialog = true;
-        // Start the resend timer
-        this.startResendTimer();
-        this.cdr.detectChanges();
+
+    this.supabase.auth.signInWithOtp({
+      phone: `+${this.selectedCountry.code}${this.phoneControl.value}`,
+      options: {
+        data: {
+          phone_number: `+${this.selectedCountry.code}${this.phoneControl.value}`
+        }
       }
-    }, (err:any) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error', 
-          detail: err.message || 'Failed to send verification code',
-          life: 5000
-        });
-        this.isLoading = false;
-        this.verificationError = true;
-        this.cdr.detectChanges();
-        
-        // Reset verification error after 3 seconds
-        setTimeout(() => {
-          this.verificationError = false;
+    }).then((res:any) => {
+      this.showOtpDialog = true;
+      this.isLoading = false;
+      this.verificationId = res.data.id;
+      this.startResendTimer();
+      this.cdr.detectChanges();
+    }).catch((err:any) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error', 
+            detail: err.message || 'Failed to send verification code',
+            life: 5000
+          });
+          this.isLoading = false;
+          this.verificationError = true;
           this.cdr.detectChanges();
-        }, 3000);
+          
+          // Reset verification error after 3 seconds
+          setTimeout(() => {
+            this.verificationError = false;
+            this.cdr.detectChanges();
+          }, 3000);
     });
+    
+    // this.firebaseService.sendPhoneVerificationCode(
+    //   '+' + this.selectedCountry.code + this.phoneControl.value,
+    //   'recaptcha-container'
+    // ).then((res:any) => {
+    //   console.log(res);
+    //   if(res.verificationId) {
+    //     this.verificationId = res.verificationId;
+    //     this.isLoading = false;
+    //     this.showOtpDialog = true;
+    //     // Start the resend timer
+    //     this.startResendTimer();
+    //     this.cdr.detectChanges();
+    //   }
+    // }, (err:any) => {
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: 'Error', 
+    //       detail: err.message || 'Failed to send verification code',
+    //       life: 5000
+    //     });
+    //     this.isLoading = false;
+    //     this.verificationError = true;
+    //     this.cdr.detectChanges();
+        
+    //     // Reset verification error after 3 seconds
+    //     setTimeout(() => {
+    //       this.verificationError = false;
+    //       this.cdr.detectChanges();
+    //     }, 3000);
+    // });
   }
   
   verifyOTP(): void {
@@ -641,29 +686,17 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
       this.otpErrorMessage = 'Please enter a valid 6-digit OTP code.';
       return;
     }
-    
-    this.isVerifying = true;
-    // Reset OTP error state
-    this.otpError = false;
-    
-    // Use the confirmation result directly since the FirebaseService's sendPhoneVerificationCode method returns it
-    if (!this.verificationId) {
-      this.otpError = true;
-      this.otpErrorMessage = 'Verification ID not found. Please try again.';
-      this.isVerifying = false;
-      return;
-    }
 
-    const credential = PhoneAuthProvider.credential(this.verificationId, this.otpValue);
-    signInWithCredential(this.auth, credential)
-      .then(() => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Verified',
-          detail: 'Your phone number has been successfully verified.',
-          life: 3000
-        });
-        
+    this.supabase.auth.verifyOtp({
+      phone: `+${this.selectedCountry.code}${this.phoneControl.value}`,
+      token: this.otpValue,
+      type: 'sms'
+    }).then((res:any) => {
+      debugger
+      if(res.data.session && res.data.session.access_token){
+
+        this.sweetalert.success('Your phone number has been successfully verified.');
+
         this.showOtpDialog = false;
         this._isVerified = true;
         this.verified.emit(true);
@@ -678,22 +711,72 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
         }
         
         this.cdr.detectChanges();
-      })
-      .catch((error: any) => {
-        // Handle OTP verification failure
+        
+      } else {
         this.isVerifying = false;
         this.otpError = true;
-        this.otpErrorMessage = this.getReadableErrorMessage(error.message) || 'Invalid verification code. Please try again.';
+        this.otpErrorMessage = 'Invalid verification code. Please try again.';
         
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Verification Failed',
-          detail: this.otpErrorMessage,
-          life: 3000
-        });
+        this.sweetalert.error(this.otpErrorMessage);
         
         this.cdr.detectChanges();
-      });
+
+        // this.showOtpDialog = false;
+        // this._isVerified = true;
+        // this.verified.emit(true);
+      }
+    }).catch((err:any) => {
+          this.isVerifying = false;
+          this.otpError = true;
+          this.otpErrorMessage = this.getReadableErrorMessage(err.message) || 'Invalid verification code. Please try again.';
+          
+          this.sweetalert.error(this.otpErrorMessage);
+          
+          this.cdr.detectChanges();
+    });
+
+    // const credential = PhoneAuthProvider.credential(this.verificationId, this.otpValue);
+    // signInWithCredential(this.auth, credential)
+    //   .then(() => {
+    //     this.messageService.add({
+    //       severity: 'success',
+    //       summary: 'Verified',
+    //       detail: 'Your phone number has been successfully verified.',
+    //       life: 3000
+    //     });
+        
+    //     this.showOtpDialog = false;
+    //     this._isVerified = true;
+    //     this.verified.emit(true);
+        
+    //     // Disable the phone control to prevent further changes
+    //     this.phoneControl.disable({ emitEvent: false });
+    //     this.isVerifying = false;
+        
+    //     // Clear the resend timer
+    //     if (this.resendTimerInterval) {
+    //       clearInterval(this.resendTimerInterval);
+    //     }
+        
+    //     this.cdr.detectChanges();
+    //   })
+    //   .catch((error: any) => {
+    //     debugger;
+    //     console.log(error);
+    //     // Handle OTP verification failure
+    //     this.isVerifying = false;
+    //     this.otpError = true;
+    //     this.otpErrorMessage = this.getReadableErrorMessage(error.message) || 'Invalid verification code. Please try again.';
+        
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: 'Verification Failed',
+    //       detail: this.otpErrorMessage,
+    //       life: 3000
+    //     });
+        
+    //     this.cdr.detectChanges();
+    //   });
   }
   
   // Get user-friendly error messages
@@ -782,6 +865,60 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
       this.phoneControl.disable();
     } else if (!this._isVerified) { // Only enable if not verified
       this.phoneControl.enable();
+    }
+  }
+
+  // Add phone length validation method
+  private validatePhoneLength(phoneNumber: string | null): void {
+    if (!phoneNumber) {
+      this.phoneControl.setErrors(null);
+      return;
+    }
+    
+    // Remove any non-numeric characters for validation
+    const cleanPhoneNumber = phoneNumber.replace(/\D/g, '');
+    const expectedLength = this.selectedCountry.phoneLength;
+    
+    if (cleanPhoneNumber.length !== expectedLength) {
+      this.phoneControl.setErrors({
+        invalidLength: {
+          actualLength: cleanPhoneNumber.length,
+          expectedLength: expectedLength,
+          countryName: this.selectedCountry.name
+        }
+      });
+    } else {
+      // Check if there are other errors, if not, clear all errors
+      if (this.phoneControl.errors && this.phoneControl.errors['invalidLength']) {
+        delete this.phoneControl.errors['invalidLength'];
+        if (Object.keys(this.phoneControl.errors).length === 0) {
+          this.phoneControl.setErrors(null);
+        }
+      }
+    }
+  }
+
+  // Add method to get dynamic error message
+  getPhoneErrorMessage(): string {
+    const errors = this.phoneControl.errors;
+    if (errors && errors['invalidLength']) {
+      return 'Please enter a valid phone number';
+    }
+    return this.errorMessage;
+  }
+
+  // Add method to handle country change
+  onCountryChange(): void {
+    // Re-validate phone number when country changes
+    if (this.phoneControl.value) {
+      this.validatePhoneLength(this.phoneControl.value);
+    }
+    
+    // Reset verification status if country changes
+    if (this._isVerified) {
+      this._isVerified = false;
+      this.verified.emit(false);
+      this.phoneControl.enable({ emitEvent: false });
     }
   }
 }

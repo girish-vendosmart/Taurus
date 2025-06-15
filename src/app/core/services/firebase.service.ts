@@ -12,16 +12,24 @@ import {
   signInWithPhoneNumber
 } from 'firebase/auth';
 import { Observable, from } from 'rxjs';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FirebaseService {
+  private supabase: SupabaseClient | any;
+
   private app = initializeApp(environment.firebaseConfig);
   private auth = getAuth(this.app);
   private recaptchaVerifier: RecaptchaVerifier | null = null;
 
-  constructor() {}
+  constructor() {
+    this.supabase = createClient(
+      'https://vlflwrdsuuegdjdyonyq.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsZmx3cmRzdXVlZ2RqZHlvbnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5NjYwMjksImV4cCI6MjA2NTU0MjAyOX0.LUkLIYkA-JpbooM-r-qbEKtDknUfSGqtN5AXoij2740'
+    );
+  }
 
   // Auth methods
   signIn(email: string, password: string): Observable<UserCredential> {
