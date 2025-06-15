@@ -41,6 +41,47 @@
 .header-right {
   display: flex;
   align-items: center;
+  gap: 1rem;
+}
+
+.profile-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: $technical-white;
+  padding: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  
+  .pi {
+    font-size: 0.9rem;
+    color: $technical-white;
+  }
+  
+  span {
+    color: $technical-white;
+  }
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: none;
+    box-shadow: none;
+  }
+  
+  &:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  &:active {
+    background: rgba(255, 255, 255, 0.15);
+    transform: none;
+  }
 }
 
 .avatar-dropdown {
@@ -184,6 +225,19 @@
     font-size: 1.2rem;
   }
   
+  .header-right {
+    gap: 0.75rem;
+  }
+  
+  .profile-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    
+    .pi {
+      font-size: 0.9rem;
+    }
+  }
+  
   .btn-logout {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
@@ -197,6 +251,19 @@
   
   .header-title {
     font-size: 1.1rem;
+  }
+  
+  .header-right {
+    gap: 0.5rem;
+  }
+  
+  .profile-button {
+    padding: 0.4rem;
+    font-size: 0.85rem;
+    
+    .pi {
+      font-size: 0.95rem;
+    }
   }
   
   .btn-logout {
