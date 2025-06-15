@@ -296,6 +296,52 @@ h2 {
       transform: none;
     }
   }
+
+  /* DISABLED BUTTON STYLES */
+  &:disabled {
+    background-color: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+    color: #6c757d !important;
+    cursor: not-allowed !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+    
+    &:hover {
+      background-color: #f8f9fa !important;
+      border-color: #dee2e6 !important;
+      transform: none !important;
+    }
+  }
+
+  /* Enhanced disabled button styling for better UX */
+  &.btn-primary:disabled {
+    background: #e9ecef !important;
+    border-color: #ced4da !important;
+    color: #6c757d !important;
+    
+    &:hover {
+      background: #e9ecef !important;
+      border-color: #ced4da !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+  }
+
+  /* Disabled button tooltip styling */
+  &:disabled[title]:hover::before {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 1000;
+  }
 }
 
 /* File upload styling */

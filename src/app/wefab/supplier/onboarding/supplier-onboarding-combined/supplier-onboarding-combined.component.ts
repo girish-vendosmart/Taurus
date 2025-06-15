@@ -288,6 +288,51 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     setTimeout(() => {
       this.setupManufacturingProcessMonitoring();
     }, 1000);
+
+    // Set up form value change monitoring for real-time validation
+    setTimeout(() => {
+      this.setupFormValidationMonitoring();
+    }, 1500);
+  }
+
+  // New method to set up form validation monitoring
+  private setupFormValidationMonitoring(): void {
+    console.log('🔧 Setting up form validation monitoring...');
+    
+    // Monitor form value changes for real-time validation
+    this.form.valueChanges.subscribe(() => {
+      // Trigger change detection to update button state
+      this.cdr.detectChanges();
+    });
+
+    // Monitor form status changes
+    this.form.statusChanges.subscribe(() => {
+      // Trigger change detection to update button state
+      this.cdr.detectChanges();
+    });
+
+    // Monitor specific verification status changes
+    const checkVerificationChanges = () => {
+      this.cdr.detectChanges();
+    };
+
+    // Set up intervals to monitor verification statuses
+    setInterval(() => {
+      const prevPhoneVerified = this.phoneVerified;
+      const prevGstVerified = this.gstVerified;
+      const prevPanVerified = this.panVerified;
+      const prevBankVerified = this.bankVerified;
+
+      // Check if any verification status changed
+      if (prevPhoneVerified !== this.phoneVerified || 
+          prevGstVerified !== this.gstVerified || 
+          prevPanVerified !== this.panVerified || 
+          prevBankVerified !== this.bankVerified) {
+        checkVerificationChanges();
+      }
+    }, 500);
+
+    console.log('✅ Form validation monitoring setup complete');
   }
 
   // Add this method to monitor the primaryManufacturingProcess field changes
@@ -1596,6 +1641,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         });
       }, 100);
     }
+    
+    // Trigger change detection to update button state
+    this.cdr.detectChanges();
   }
 
   onBankDetailsVerified(bankDetails: any): void {
@@ -1722,18 +1770,24 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     // Update the phone field verification status dynamically
     this.updatePhoneFieldVerificationStatus();
     
-    // Trigger change detection to update the UI
+    // Trigger change detection to update the UI and button state
     this.cdr.detectChanges();
   }
 
   onGstVerified(verified: boolean): void {
     this.gstVerified = verified;
     console.log('GST verification status:', verified);
+    
+    // Trigger change detection to update button state
+    this.cdr.detectChanges();
   }
 
   onPanVerified(verified: boolean): void {
     this.panVerified = verified;
     console.log('PAN verification status:', verified);
+    
+    // Trigger change detection to update button state
+    this.cdr.detectChanges();
   }
 
   onAddressDetailsAccepted(addressData: any): void {
@@ -3311,5 +3365,210 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       financialInformation: this.financialInformation,
       additionalInformation: this.additionalInformation
     });
+  }
+
+  // New method to check if current step is valid for real-time validation
+  isCurrentStepValid(): boolean {
+    // Always allow navigation in edit mode for better UX
+    if (this.isEditMode) {
+      return true;
+    }
+    
+    // Get current step validation status
+    const isFormValid = this.isStepValid(this.currentFields);
+    
+    // Additional step-specific validations
+    switch (this.activeStepIndex) {
+      case 0: // Basic Details
+        // Check GST/PAN verification
+        if (!this.model.noGst && !this.gstVerified) {
+          return false;
+        }
+        if (this.model.noGst && !this.panVerified) {
+          return false;
+        }
+        break;
+        
+      case 1: // Contact & Capabilities
+        if (!this.phoneVerified) {
+          return false;
+        }
+        break;
+        
+      case 2: // Machine Capabilities
+        if (!this.isAtLeastOneMachineComplete()) {
+          return false;
+        }
+        break;
+        
+      case 3: // Facility Verification
+        if (!this.model.facilityPhotos || (Array.isArray(this.model.facilityPhotos) && this.model.facilityPhotos.length < 3)) {
+          return false;
+        }
+        break;
+        
+      case 4: // Financial Information
+        // Check if bank is verified
+        if (!this.bankVerified) {
+          return false;
+        }
+        
+        // Check if annual revenue fields are filled
+        const formValues = this.form.getRawValue();
+        if (!formValues.companyFinancials?.annualRevenue2024 || 
+            !formValues.companyFinancials?.annualRevenue2023 || 
+            !formValues.companyFinancials?.annualRevenue2022) {
+          return false;
+        }
+        
+        // Check if tax compliance is checked
+        if (!formValues.companyFinancials?.taxCompliant) {
+          return false;
+        }
+        break;
+        
+      case 5: // Additional Information
+        if (!this.isAtLeastOneReferenceComplete()) {
+          return false;
+        }
+        break;
+    }
+    
+    return isFormValid;
+  }
+
+  // New method to validate specific step fields in real-time
+  private validateStepFields(): boolean {
+    const currentFields = this.currentFields;
+    let isValid = true;
+    
+    // Check each field in the current step
+    currentFields.forEach(field => {
+      if (field.fieldGroup) {
+        // Handle field groups recursively
+        if (!this.validateFieldGroup(field.fieldGroup)) {
+          isValid = false;
+        }
+      } else if (field.key) {
+        const control = this.form.get(field.key as string);
+        if (control && this.isFieldRequired(field) && this.isFieldInvalid(control)) {
+          isValid = false;
+        }
+      }
+    });
+    
+    return isValid;
+  }
+
+  // Helper method to validate field groups
+  private validateFieldGroup(fieldGroup: any[]): boolean {
+    let isValid = true;
+    
+    fieldGroup.forEach(field => {
+      if (field.fieldGroup) {
+        if (!this.validateFieldGroup(field.fieldGroup)) {
+          isValid = false;
+        }
+      } else if (field.key) {
+        const control = this.form.get(field.key as string);
+        if (control && this.isFieldRequired(field) && this.isFieldInvalid(control)) {
+          isValid = false;
+        }
+      }
+    });
+    
+    return isValid;
+  }
+
+  // Helper method to check if field is required
+  private isFieldRequired(field: any): boolean {
+    if (field.templateOptions && field.templateOptions.required) {
+      return true;
+    }
+    
+    // Check for conditional requirements
+    if (field.expressionProperties && field.expressionProperties['templateOptions.required']) {
+      try {
+        const requiredExpr = field.expressionProperties['templateOptions.required'];
+        if (typeof requiredExpr === 'function') {
+          return requiredExpr(this.model);
+        } else if (typeof requiredExpr === 'string') {
+          // Handle string expressions if needed
+          return true; // Default to required for now
+        }
+      } catch (error) {
+        console.error('Error evaluating required expression:', error);
+      }
+    }
+    
+    return false;
+  }
+
+  // Helper method to check if field is invalid
+  private isFieldInvalid(control: any): boolean {
+    if (!control) return false;
+    
+    // Field is invalid if it has errors and is either touched or dirty
+    return control.invalid && (control.touched || control.dirty || control.value === '' || control.value === null);
+  }
+
+  // Method to get validation message for disabled buttons
+  getStepValidationMessage(): string {
+    if (this.isEditMode) {
+      return '';
+    }
+    
+    switch (this.activeStepIndex) {
+      case 0: // Basic Details
+        if (!this.model.noGst && !this.gstVerified) {
+          return 'Please verify your GSTIN before proceeding';
+        }
+        if (this.model.noGst && !this.panVerified) {
+          return 'Please verify your PAN before proceeding';
+        }
+        return 'Please fill in all required basic details';
+        
+      case 1: // Contact & Capabilities
+        if (!this.phoneVerified) {
+          return 'Please verify your phone number before proceeding';
+        }
+        return 'Please complete all required contact details and capabilities';
+        
+      case 2: // Machine Capabilities
+        if (!this.isAtLeastOneMachineComplete()) {
+          return 'Please add at least one complete machine with details and photos';
+        }
+        return 'Please complete all required machine details';
+        
+      case 3: // Facility Verification
+        if (!this.model.facilityPhotos || (Array.isArray(this.model.facilityPhotos) && this.model.facilityPhotos.length < 3)) {
+          return 'Please upload at least 3 facility photos';
+        }
+        return 'Please complete facility verification';
+        
+      case 4: // Financial Information
+        if (!this.bankVerified) {
+          return 'Please verify your bank account details';
+        }
+        const formValues = this.form.getRawValue();
+        if (!formValues.companyFinancials?.annualRevenue2024 || 
+            !formValues.companyFinancials?.annualRevenue2023 || 
+            !formValues.companyFinancials?.annualRevenue2022) {
+          return 'Please fill in annual revenue for all 3 years';
+        }
+        if (!formValues.companyFinancials?.taxCompliant) {
+          return 'Please confirm tax compliance';
+        }
+        return 'Please complete all required financial information';
+        
+      case 5: // Additional Information
+        if (!this.isAtLeastOneReferenceComplete()) {
+          return 'Please provide at least one complete business reference';
+        }
+        return 'Please complete all required additional information';
+        
+      default:
+        return 'Please complete all required fields';
+    }
   }
 } 
