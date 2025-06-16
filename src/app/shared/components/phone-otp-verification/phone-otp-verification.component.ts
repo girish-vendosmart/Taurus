@@ -531,7 +531,7 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   isLoading = false;
   isVerifying = false;
   verificationId: string = '';
-  
+
   constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService, private cdr: ChangeDetectorRef) {
     // Set default country to India or use the provided countryCode
     this.selectedCountry = this.countries.find(c => c.code === this.countryCode) || this.countries[0];

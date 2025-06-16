@@ -60,22 +60,50 @@ interface ManufacturingCategory {
             class="col-12 col-md-6">
             
             <div class="category-item h-100">
-              <!-- Category Header -->
+              <!-- Category Header with Checkbox -->
               <div 
-                class="category-header d-flex justify-content-between align-items-center p-2 border rounded"
+                class="category-header d-flex align-items-center p-2 border rounded"
                 [class.expanded]="category.expanded"
-                (click)="toggleCategory(category, $event)"
                 [attr.data-category-id]="category.id">
                 
-                <div class="category-info d-flex align-items-center flex-wrap">
-                  <i class="pi" [class.pi-chevron-right]="!category.expanded" [class.pi-chevron-down]="category.expanded" style="font-size: 0.8rem;"></i>
-                  <span class="category-title ms-2 fw-bold">{{ category.label }}</span>
-                  <span class="options-count ms-2 text-muted small">{{ getVisibleItemsCount(category) }} options</span>
-                  <span 
-                    *ngIf="getSelectedCount(category) > 0" 
-                    class="selected-count badge bg-primary ms-2 mt-1">
-                    {{ getSelectedCount(category) }} selected
-                  </span>
+                <div class="category-info d-flex align-items-center w-100">
+                  <!-- Category Checkbox -->
+                  <div class="category-checkbox-wrapper me-3">
+                    <p-checkbox
+                      [binary]="true"
+                      [ngModel]="getCategoryCheckboxState(category)"
+                      (ngModelChange)="onCategoryToggle(category, $event)"
+                      [inputId]="'category-' + category.id">
+                    </p-checkbox>
+                  </div>
+                  
+                  <!-- Category Content -->
+                  <div class="category-content d-flex align-items-center justify-content-between w-100" 
+                       (click)="toggleCategory(category, $event)" 
+                       style="cursor: pointer;">
+                    
+                    <div class="category-main-info d-flex align-items-center">
+                      <!-- Expand/Collapse Icon -->
+                      <i 
+                        class="pi me-2" 
+                        [class.pi-chevron-right]="!category.expanded" 
+                        [class.pi-chevron-down]="category.expanded" 
+                        style="font-size: 0.8rem;"></i>
+                      
+                      <!-- Category Title and Info -->
+                      <div class="category-text-info">
+                        <span class="category-title fw-medium">{{ category.label }}</span>
+                        <span class="options-count ms-2 text-muted small">{{ getVisibleItemsCount(category) }} options</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Selected Count Badge -->
+                    <div class="category-badges" *ngIf="getSelectedCount(category) > 0">
+                      <span class="selected-count badge bg-primary">
+                        {{ getSelectedCount(category) }} selected
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -149,14 +177,15 @@ interface ManufacturingCategory {
   styles: [`
     .manufacturing-process-selector {
       .category-header {
-        cursor: pointer;
         background-color: #f8f9fa;
         transition: all 0.2s ease;
-        min-height: 50px;
+        min-height: 60px;
+        border: 1px solid #dee2e6 !important;
       }
       
       .category-header:hover {
         background-color: #e9ecef;
+        border-color: #6c757d !important;
       }
       
       .category-header.expanded {
@@ -164,24 +193,59 @@ interface ManufacturingCategory {
         border-color: #2196f3 !important;
       }
       
-      .category-title {
-        color: #333;
-        font-size: 0.9rem;
-        line-height: 1.2;
+      /* Category checkbox wrapper styles */
+      .category-checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 24px;
       }
       
-      .category-info {
-        width: 100%;
+      .category-checkbox-wrapper p-checkbox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      /* Category content styles */
+      .category-content {
+        flex: 1;
+      }
+      
+      .category-main-info {
+        flex: 1;
+      }
+      
+      .category-text-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .category-badges {
+        flex-shrink: 0;
+        margin-left: auto;
+      }
+      
+      .category-title {
+        color: #333;
+        font-size: 0.95rem;
+        line-height: 1.3;
+        margin-bottom: 2px;
       }
       
       .options-count {
         font-size: 0.75rem;
+        line-height: 1;
         white-space: nowrap;
+        color: #6c757d;
       }
       
       .selected-count {
         font-size: 0.7rem;
         white-space: nowrap;
+        padding: 0.25rem 0.5rem;
       }
       
       .category-item {
@@ -189,6 +253,7 @@ interface ManufacturingCategory {
         border-radius: 0.375rem;
         background-color: #fff;
         transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
       }
       
       .category-item:hover {
@@ -219,10 +284,21 @@ interface ManufacturingCategory {
         cursor: pointer;
       }
       
+      /* Hide scrollbar while maintaining functionality */
       .categories-container {
         max-height: 600px;
         overflow-y: auto;
+        overflow-x: hidden;
         padding: 0.5rem;
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        &::-webkit-scrollbar {
+          display: none;
+        }
+        
+        /* Hide scrollbar for IE, Edge and Firefox */
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
       }
       
       .search-bar input {
@@ -246,10 +322,8 @@ interface ManufacturingCategory {
           font-size: 0.85rem;
         }
         
-        .category-info {
-          flex-direction: column;
-          align-items: flex-start !important;
-          gap: 0.25rem;
+        .category-text-info {
+          align-items: flex-start;
         }
         
         .options-count {
@@ -258,6 +332,11 @@ interface ManufacturingCategory {
         
         .selected-count {
           font-size: 0.65rem;
+          padding: 0.2rem 0.4rem;
+        }
+        
+        .category-header {
+          min-height: 55px;
         }
       }
       
@@ -275,6 +354,31 @@ interface ManufacturingCategory {
       
       .category-items {
         flex-grow: 1;
+      }
+      
+      /* Better checkbox alignment */
+      p-checkbox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      /* Prevent text selection on category header interactions */
+      .category-header {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+      }
+      
+      /* Improve visual hierarchy */
+      .category-info {
+        align-items: center;
+      }
+      
+      /* Better spacing for category elements */
+      .category-content {
+        padding-left: 0.5rem;
       }
     }
   `]
@@ -613,10 +717,13 @@ export class ManufacturingProcessSelectorComponent extends FieldType implements 
     this.formControl.updateValueAndValidity();
     
     // Also update the model directly (important for Formly)
-    if (this.field && this.field.model && this.field.key) {
+    if (this.field && this.field.key) {
       this.field.model[this.field.key as string] = newValue;
       console.log('📝 Updated field model:', this.field.model[this.field.key as string]);
     }
+    
+    // Update checked states to keep all items and categories in sync
+    this.updateCheckedStates();
     
     // Notify parent form
     this.notifyParentForm();
@@ -688,5 +795,98 @@ export class ManufacturingProcessSelectorComponent extends FieldType implements 
 
   trackByItem(index: number, item: ManufacturingOption): string {
     return item.value;
+  }
+
+  getCategoryCheckboxState(category: ManufacturingCategory): boolean {
+    // Check if all items in the category are selected
+    const categoryItems = category.items;
+    if (categoryItems.length === 0) return false;
+    
+    return categoryItems.every(item => this.selectedValues.includes(item.value));
+  }
+
+  onCategoryToggle(category: ManufacturingCategory, checked: boolean) {
+    console.log('🔄 Category toggle triggered:', category.label, 'checked:', checked);
+    
+    // Get all item values from this category
+    const categoryItemValues = category.items.map(item => item.value);
+    
+    if (checked) {
+      // Add all category items to selected values if not already present
+      categoryItemValues.forEach(value => {
+        if (!this.selectedValues.includes(value)) {
+          this.selectedValues.push(value);
+        }
+      });
+      
+      // Update checked state for all items in this category
+      category.items.forEach(item => {
+        item.checked = true;
+      });
+      
+      console.log('✅ All items in category selected:', categoryItemValues);
+    } else {
+      // Remove all category items from selected values
+      this.selectedValues = this.selectedValues.filter(value => 
+        !categoryItemValues.includes(value)
+      );
+      
+      // Update checked state for all items in this category
+      category.items.forEach(item => {
+        item.checked = false;
+      });
+      
+      console.log('❌ All items in category deselected:', categoryItemValues);
+    }
+    
+    console.log('📋 Updated selectedValues:', this.selectedValues);
+    console.log('📊 Selected count:', this.selectedValues.length);
+    
+    // Create a copy of the array to ensure change detection
+    const newValue = [...this.selectedValues];
+    
+    // Update form control with the new values
+    this.formControl.setValue(newValue);
+    this.formControl.markAsDirty();
+    this.formControl.markAsTouched();
+    
+    // Trigger validation
+    this.formControl.updateValueAndValidity();
+    
+    // Also update the model directly (important for Formly)
+    if (this.field && this.field.model && this.field.key) {
+      this.field.model[this.field.key as string] = newValue;
+      console.log('📝 Updated field model:', this.field.model[this.field.key as string]);
+    }
+    
+    // Update checked states for all categories to keep them in sync
+    this.updateCheckedStates();
+    
+    // Notify parent form
+    this.notifyParentForm();
+    
+    // Trigger onChange callback if it exists (for ControlValueAccessor compatibility)
+    if (this.onChange) {
+      this.onChange(newValue);
+    }
+    
+    // Trigger onTouched callback if it exists
+    if (this.onTouched) {
+      this.onTouched();
+    }
+    
+    console.log('✅ Category selection updated:', {
+      category: category.label,
+      checked: checked,
+      value: this.formControl.value,
+      valid: this.formControl.valid,
+      dirty: this.formControl.dirty,
+      touched: this.formControl.touched,
+      errors: this.formControl.errors,
+      modelValue: this.field?.model ? this.field.model[this.field.key as string] : 'N/A'
+    });
+    
+    // Force change detection
+    this.cdr.detectChanges();
   }
 } 
