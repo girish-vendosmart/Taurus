@@ -2587,7 +2587,35 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
               required: true,
               type: 'text',
               placeholder: 'Enter current year revenue'
-            }
+            },
+            hooks: {
+              onInit: (field: any) => {
+                if (field.formControl) {
+                  // Format on value changes
+                  field.formControl.valueChanges.subscribe((value: string) => {
+                    if (value && value.length > 0) {
+                      const numericValue = value.replace(/[^\d]/g, '');
+                      if (numericValue && !isNaN(Number(numericValue))) {
+                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        if (formatted !== value) {
+                          field.formControl.setValue(formatted, { emitEvent: false });
+                        }
+                      }
+                    }
+                  });
+                }
+              }
+            },
+            validators: {
+              numberOnly: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true;
+                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
+                  return /^\d+$/.test(numericValue);
+                },
+                message: 'Please enter only numbers'
+              }
+            },
           },
           {
             className: 'col-md-4',
@@ -2598,7 +2626,35 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
               required: true,
               type: 'text',
               placeholder: 'Enter last year revenue'
-            }
+            },
+            hooks: {
+              onInit: (field: any) => {
+                if (field.formControl) {
+                  // Format on value changes
+                  field.formControl.valueChanges.subscribe((value: string) => {
+                    if (value && value.length > 0) {
+                      const numericValue = value.replace(/[^\d]/g, '');
+                      if (numericValue && !isNaN(Number(numericValue))) {
+                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        if (formatted !== value) {
+                          field.formControl.setValue(formatted, { emitEvent: false });
+                        }
+                      }
+                    }
+                  });
+                }
+              }
+            },
+            validators: {
+              numberOnly: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true;
+                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
+                  return /^\d+$/.test(numericValue);
+                },
+                message: 'Please enter only numbers'
+              }
+            },
           },
           {
             className: 'col-md-4',
@@ -2609,7 +2665,35 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
               required: true,
               type: 'text',
               placeholder: 'Enter two years ago revenue'
-            }
+            },
+            hooks: {
+              onInit: (field: any) => {
+                if (field.formControl) {
+                  // Format on value changes
+                  field.formControl.valueChanges.subscribe((value: string) => {
+                    if (value && value.length > 0) {
+                      const numericValue = value.replace(/[^\d]/g, '');
+                      if (numericValue && !isNaN(Number(numericValue))) {
+                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        if (formatted !== value) {
+                          field.formControl.setValue(formatted, { emitEvent: false });
+                        }
+                      }
+                    }
+                  });
+                }
+              }
+            },
+            validators: {
+              numberOnly: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true;
+                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
+                  return /^\d+$/.test(numericValue);
+                },
+                message: 'Please enter only numbers'
+              }
+            },
           }
         ]
       },
@@ -2640,7 +2724,35 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
               label: 'General Liability Insurance (INR)',
               placeholder: 'Enter General Liability Insurance Amount',
               type: 'text'
-            }
+            },
+            hooks: {
+              onInit: (field: any) => {
+                if (field.formControl) {
+                  // Format on value changes
+                  field.formControl.valueChanges.subscribe((value: string) => {
+                    if (value && value.length > 0) {
+                      const numericValue = value.replace(/[^\d]/g, '');
+                      if (numericValue && !isNaN(Number(numericValue))) {
+                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        if (formatted !== value) {
+                          field.formControl.setValue(formatted, { emitEvent: false });
+                        }
+                      }
+                    }
+                  });
+                }
+              }
+            },
+            validators: {
+              numberOnly: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true;
+                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
+                  return /^\d+$/.test(numericValue);
+                },
+                message: 'Please enter only numbers'
+              }
+            },
           },
           {
             className: 'col-md-6',
@@ -2650,7 +2762,35 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
               label: 'Product Liability Insurance (INR)',
               placeholder: 'Enter Product Liability Insurance Amount',
               type: 'text'
-            }
+            },
+            hooks: {
+              onInit: (field: any) => {
+                if (field.formControl) {
+                  // Format on value changes
+                  field.formControl.valueChanges.subscribe((value: string) => {
+                    if (value && value.length > 0) {
+                      const numericValue = value.replace(/[^\d]/g, '');
+                      if (numericValue && !isNaN(Number(numericValue))) {
+                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        if (formatted !== value) {
+                          field.formControl.setValue(formatted, { emitEvent: false });
+                        }
+                      }
+                    }
+                  });
+                }
+              }
+            },
+            validators: {
+              numberOnly: {
+                expression: (c: AbstractControl) => {
+                  if (!c.value) return true;
+                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
+                  return /^\d+$/.test(numericValue);
+                },
+                message: 'Please enter only numbers'
+              }
+            },
           }
         ]
       }
@@ -3267,7 +3407,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             },
             validation: {
               messages: {
-                required: 'Year founded is required'
+                required: 'Year founded is required',
+                min: 'Year founded cannot be before 1900',
+                max: `Year founded cannot be in the future (max: ${new Date().getFullYear()})`
               }
             }
           }
