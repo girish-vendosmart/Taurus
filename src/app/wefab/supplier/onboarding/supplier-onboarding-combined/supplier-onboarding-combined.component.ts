@@ -242,6 +242,10 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   urlSupplierId: string | null = null;
   currentOnboardingFormStatus: any;
   
+  // Add new properties for save button functionality
+  stepCompletionStatus: boolean[] = [false, false, false, false, false, false];
+  isSaving: boolean = false;
+  
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
@@ -288,6 +292,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     setTimeout(() => {
       this.setupManufacturingProcessMonitoring();
     }, 1000);
+
+    // Initialize step completion status
+    this.initializeStepCompletionStatus();
   }
 
   // Add this method to monitor the primaryManufacturingProcess field changes
@@ -3263,6 +3270,267 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       facilityVerification: this.facilityVerification,
       financialInformation: this.financialInformation,
       additionalInformation: this.additionalInformation
+    });
+  }
+
+  // Add method to initialize step completion status
+  initializeStepCompletionStatus(): void {
+    // Check if all steps are completed based on existing data
+    if (this.isEditMode && this.hasExistingSupplier) {
+      // In edit mode, check if we have data for each step
+      setTimeout(() => {
+        this.stepCompletionStatus[0] = this.isBasicDetailsComplete();
+        this.stepCompletionStatus[1] = this.isContactCapabilitiesComplete();
+        this.stepCompletionStatus[2] = this.isMachineCapabilitiesComplete();
+        this.stepCompletionStatus[3] = this.isFacilityVerificationComplete();
+        this.stepCompletionStatus[4] = this.isFinancialInformationComplete();
+        this.stepCompletionStatus[5] = this.isAdditionalInformationComplete();
+        
+        console.log('📊 Step completion status initialized:', this.stepCompletionStatus);
+      }, 2000);
+    }
+  }
+
+  // Add methods to check if each step is complete
+  isBasicDetailsComplete(): boolean {
+    return !!(this.model.company_name && 
+              this.model.primary_email_id && 
+              this.model.registeredAddress && 
+              this.model.country && 
+              this.model.state && 
+              this.model.city &&
+              (this.gstVerified || (this.model.noGst && this.panVerified)));
+  }
+
+  isContactCapabilitiesComplete(): boolean {
+    return !!(this.model.primaryContactName && 
+              this.model.phoneNumber && 
+              this.phoneVerified &&
+              this.model.primaryManufacturingProcess && 
+              this.model.primaryManufacturingProcess.length > 0 &&
+              this.model.totalEmployees && 
+              this.model.foundedYear &&
+              this.model.companyDocuments);
+  }
+
+  isMachineCapabilitiesComplete(): boolean {
+    return !!(this.model.machines && 
+              this.model.machines.length > 0 && 
+              this.isAtLeastOneMachineComplete() &&
+              this.model.industries && 
+              this.model.industries.length > 0 &&
+              this.model.productionCapacity !== undefined);
+  }
+
+  isFacilityVerificationComplete(): boolean {
+    return !!(this.model.facilityPhotos && 
+              Array.isArray(this.model.facilityPhotos) && 
+              this.model.facilityPhotos.length >= 3);
+  }
+
+  isFinancialInformationComplete(): boolean {
+    return !!(this.bankVerified && 
+              this.model.companyFinancials?.annualRevenue2024 &&
+              this.model.companyFinancials?.annualRevenue2023 &&
+              this.model.companyFinancials?.annualRevenue2022 &&
+              this.model.companyFinancials?.taxCompliant);
+  }
+
+  isAdditionalInformationComplete(): boolean {
+    return !!(this.model.additionalInformation?.references && 
+              this.isAtLeastOneReferenceComplete());
+  }
+
+  // Add method to check if all steps are completed
+  areAllStepsCompleted(): boolean {
+    return this.stepCompletionStatus.every(status => status === true);
+  }
+
+  // Add method to check if current step should show save button
+  shouldShowSaveButton(): boolean {
+    // Don't show save button if all steps are completed
+    if (this.areAllStepsCompleted()) {
+      return false;
+    }
+    
+    // Don't show save button if currently saving
+    if (this.isSaving) {
+      return false;
+    }
+    
+    // Show save button for all steps
+    return true;
+  }
+
+  // Add save method without navigation
+  saveCurrentStep(): void {
+    console.log('💾 Save current step called:', {
+      activeStepIndex: this.activeStepIndex,
+      isEditMode: this.isEditMode,
+      supplierId: this.supplier_id,
+      hasExistingSupplier: this.hasExistingSupplier
+    });
+
+    if (!this.isStepValid(this.currentFields)) {
+      this.markFieldsAsTouched(this.currentFields);
+      
+      // Enhanced error messages for each step
+      const errorMessages: { [key: number]: string } = {
+        0: 'Please fill in all required basic details and complete verification.',
+        1: 'Please complete all required contact details and verify your phone.',
+        2: 'Please complete all required manufacturing details.',
+        3: 'Please upload at least 3 facility photos.',
+        4: 'Please complete all required financial information.',
+        5: 'Please provide at least one complete business reference.'
+      };
+      
+      this.sweetAlert.error(errorMessages[this.activeStepIndex] || 'Please fill all required fields correctly.');
+      return;
+    }
+
+    // Update current step object before saving
+    this.updateCurrentStepObject();
+    
+    this.isSaving = true;
+
+    // Handle save logic based on step and supplier existence
+    if (this.activeStepIndex === 0) {
+      // First step - check if supplier exists
+      if (!this.supplier_id && !this.hasExistingSupplier) {
+        // POST call for new supplier
+        this.postL1DataForSave();
+      } else {
+        // PUT call for existing supplier
+        this.putDataForSave(this.basicDetails, 'Basic details saved successfully.');
+      }
+    } else {
+      // All other steps - PUT calls
+      let stepData: any;
+      let message: string;
+      
+      switch (this.activeStepIndex) {
+        case 1:
+          stepData = this.contactCapabilities;
+          message = 'Contact & capabilities saved successfully.';
+          break;
+        case 2:
+          stepData = this.machineCapabilities;
+          message = 'Manufacturing capabilities saved successfully.';
+          break;
+        case 3:
+          stepData = this.facilityVerification;
+          message = 'Facility verification saved successfully.';
+          break;
+        case 4:
+          stepData = this.financialInformation;
+          message = 'Financial information saved successfully.';
+          break;
+        case 5:
+          stepData = this.additionalInformation;
+          message = 'Additional information saved successfully.';
+          break;
+        default:
+          stepData = {};
+          message = 'Data saved successfully.';
+      }
+      
+      this.putDataForSave(stepData, message);
+    }
+  }
+
+  // Add POST method for saving first step
+  postL1DataForSave(): void {
+    let endPoint = '/api/resource/Supplier Onboarding L1';
+
+    this.onboardingbody = {
+      company_name: this.model.company_name,
+      primary_email_id: this.model.primary_email_id,
+      onboarding_form_status: 'L1 Under Review',
+      phone_verified: this.phoneVerified,
+      gst_verified: this.gstVerified,
+      pan_verified: this.panVerified,
+      basic_details: JSON.stringify(this.basicDetails)
+    };
+
+    console.log('💾 Saving new supplier basic details:', {
+      endpoint: endPoint,
+      data: this.basicDetails
+    });
+
+    this.commonService.postData(endPoint, this.onboardingbody).subscribe((res: any) => {
+      if (res.data) {
+        this.supplier_id = res.data.name;
+        localStorage.setItem('supplier_id', this.supplier_id);
+        this.hasExistingSupplier = true;
+        
+        // Update step completion status
+        this.stepCompletionStatus[0] = true;
+        
+        console.log('✅ Supplier created and saved successfully:', this.supplier_id);
+        this.sweetAlert.success('Basic details saved successfully.');
+        this.isSaving = false;
+      }
+    }, (error) => {
+      console.error('❌ Error saving basic details:', error);
+      this.sweetAlert.error('Error saving basic details. Please try again.');
+      this.isSaving = false;
+    });
+  }
+
+  // Add PUT method for saving without navigation
+  putDataForSave(body: any, message: string): void {
+    if (!this.supplier_id) {
+      this.sweetAlert.error('Supplier ID not found. Please refresh and try again.');
+      this.isSaving = false;
+      return;
+    }
+
+    let endPoint = `/api/resource/Supplier Onboarding L1/${this.supplier_id}`;
+
+    // Dynamic key based on activeStepIndex
+    const stepKeys: { [key: number]: string } = {
+      0: 'basic_details',
+      1: 'contact_capabilities',
+      2: 'machine_capabilities',
+      3: 'facility_verification',
+      4: 'financial_information',
+      5: 'additional_information'
+    };
+    
+    const currentStepKey = stepKeys[this.activeStepIndex];
+
+    this.onboardingbody = {
+      company_name: this.model.company_name,
+      primary_email_id: this.model.primary_email_id,
+      phone_verified: this.phoneVerified,
+      gst_verified: this.gstVerified,
+      pan_verified: this.panVerified,
+      onboarding_form_status: this.currentOnboardingFormStatus || 'L1 Under Review',
+      [currentStepKey]: JSON.stringify(body)
+    };
+
+    console.log(`💾 Saving ${currentStepKey} data:`, {
+      endpoint: endPoint,
+      stepKey: currentStepKey,
+      data: body
+    });
+
+    this.commonService.putData(endPoint, this.onboardingbody).subscribe((res: any) => {
+      if (res.data) {
+        // Update step completion status
+        this.stepCompletionStatus[this.activeStepIndex] = true;
+        
+        console.log('✅ Save successful:', res.data);
+        this.sweetAlert.success(message || 'Information saved successfully.');
+        this.isSaving = false;
+        
+        // Force re-check of completion status
+        this.initializeStepCompletionStatus();
+      }
+    }, (error) => {
+      console.error('❌ Error saving data:', error);
+      this.sweetAlert.error('Error saving data. Please try again.');
+      this.isSaving = false;
     });
   }
 } 

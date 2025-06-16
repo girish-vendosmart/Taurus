@@ -260,40 +260,121 @@ h2 {
 
 /* Button styling */
 .btn {
-  font-weight: 500;
-  padding: 0.625rem 1.5rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: $font-weight-medium;
+  transition: all 0.3s ease;
+  border: none;
   
   &.btn-primary {
-    background-color: $blueprint-blue;
-    border-color: $blueprint-blue;
+    background: linear-gradient(135deg, $blueprint-blue, darken($blueprint-blue, 5%));
+    color: $technical-white;
+    box-shadow: 0 4px 12px rgba($blueprint-blue, 0.3);
     
     &:hover {
-      background-color: darken($blueprint-blue, 10%);
-      border-color: darken($blueprint-blue, 10%);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba($blueprint-blue, 0.4);
+      background: linear-gradient(135deg, darken($blueprint-blue, 5%), darken($blueprint-blue, 10%));
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+  
+  &.btn-outline-primary {
+    border: 2px solid $blueprint-blue;
+    color: $blueprint-blue;
+    background: transparent;
+    
+    &:hover {
+      background: $blueprint-blue;
+      color: $technical-white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba($blueprint-blue, 0.3);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
   }
   
   &.btn-outline-secondary {
-    color: #6b7280;
-    border-color: #d1d5db;
+    border: 2px solid $machine-gray;
+    color: $machine-gray;
+    background: transparent;
     
     &:hover {
-      background-color: #f9fafb;
-      border-color: #9ca3af;
-      color: #374151;
+      background: $machine-gray;
+      color: $technical-white;
+    }
+    
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      
+      &:hover {
+        background: transparent;
+        color: $machine-gray;
+      }
     }
   }
   
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  &.btn-complete {
+    background: linear-gradient(135deg, $process-green, darken($process-green, 5%));
+    color: $technical-white;
+    box-shadow: 0 4px 12px rgba($process-green, 0.3);
     
     &:hover {
-      transform: none;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba($process-green, 0.4);
+    }
+  }
+  
+  i {
+    font-size: 0.875rem;
+  }
+}
+
+// Save button specific styling
+.btn-outline-primary {
+  &:not(:disabled) {
+    .pi-save {
+      color: $blueprint-blue;
+      transition: color 0.3s ease;
+    }
+    
+    &:hover .pi-save {
+      color: $technical-white;
+    }
+  }
+  
+  .pi-spinner {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Button group styling
+.d-flex.gap-2 {
+  gap: 0.75rem !important;
+  
+  .btn {
+    min-width: 100px;
+    
+    &.btn-outline-primary {
+      min-width: 80px;
     }
   }
 }

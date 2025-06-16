@@ -120,20 +120,35 @@
                     <i class="pi pi-arrow-left me-2"></i>Back
                   </button>
 
-                  
-                  <ng-container *ngIf="activeStepIndex < totalSteps - 1; else completeButton">
-                    <button type="button" class="btn btn-primary" (click)="nextStep()">
-                      Next <i class="pi pi-arrow-right ms-2"></i>
+                  <div class="d-flex gap-2">
+                    <!-- Save Button (visible when step is not completed) -->
+                    <button 
+                      *ngIf="shouldShowSaveButton()"
+                      type="button" 
+                      class="btn btn-outline-primary" 
+                      (click)="saveCurrentStep()"
+                      [disabled]="isSaving">
+                      <i class="pi pi-save me-2"></i>
+                      <span *ngIf="!isSaving">Save</span>
+                      <span *ngIf="isSaving">
+                        <i class="pi pi-spin pi-spinner me-1"></i>Saving...
+                      </span>
                     </button>
-                  </ng-container>
-                  
-                  <ng-template #completeButton>
-                    <button type="button" class="btn btn-primary btn-complete" (click)="submit()">
-                      <i class="pi pi-check me-2"></i>
-                      <ng-container *ngIf="!isEditMode">Submit Onboarding</ng-container>
-                      <ng-container *ngIf="isEditMode">Save Changes</ng-container>
-                    </button>
-                  </ng-template>
+                    
+                    <ng-container *ngIf="activeStepIndex < totalSteps - 1; else completeButton">
+                      <button type="button" class="btn btn-primary" (click)="nextStep()">
+                        Next <i class="pi pi-arrow-right ms-2"></i>
+                      </button>
+                    </ng-container>
+                    
+                    <ng-template #completeButton>
+                      <button type="button" class="btn btn-primary btn-complete" (click)="submit()">
+                        <i class="pi pi-check me-2"></i>
+                        <ng-container *ngIf="!isEditMode">Submit Onboarding</ng-container>
+                        <ng-container *ngIf="isEditMode">Save Changes</ng-container>
+                      </button>
+                    </ng-template>
+                  </div>
                 </div>
               </form>
             </div>
