@@ -605,7 +605,18 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     if (basicDetailsData.noGst !== undefined) this.model.noGst = basicDetailsData.noGst;
     if (basicDetailsData.company_name) this.model.company_name = basicDetailsData.company_name;
     if (basicDetailsData.primary_email_id) this.model.primary_email_id = basicDetailsData.primary_email_id;
-    if (basicDetailsData.registeredAddress) this.model.registeredAddress = basicDetailsData.registeredAddress;
+    
+    // Enhanced address handling
+    if (basicDetailsData.registeredAddress) {
+      this.model.registeredAddress = basicDetailsData.registeredAddress;
+      console.log('🏠 Merged registered address:', this.model.registeredAddress);
+      
+      // Extract coordinates if they exist
+      if (basicDetailsData.registeredAddress.location) {
+        console.log('📍 Address coordinates:', basicDetailsData.registeredAddress.location);
+      }
+    }
+    
     if (basicDetailsData.country) {
       this.model.country = basicDetailsData.country;
       this.selectedCountry = basicDetailsData.country;
@@ -670,6 +681,23 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         this.form.markAsPristine();
       }, 1000);
     }, 500);
+    
+    // Special handling for registered address field
+    setTimeout(() => {
+      if (this.model.registeredAddress && typeof this.model.registeredAddress === 'object') {
+        const addressControl = this.form.get('registeredAddress');
+        if (addressControl) {
+          console.log('🏠 Patching registered address form control:', this.model.registeredAddress);
+          addressControl.setValue(this.model.registeredAddress, { emitEvent: false });
+          addressControl.markAsDirty();
+          
+          // Force trigger address select event to populate country/state/city
+          this.onAddressDetailsAccepted(this.model.registeredAddress);
+        }
+      }
+      
+      this.cdr.detectChanges();
+    }, 800); // Slightly later than the main form patch
   }
 
   // New method to update bank verification field options
@@ -3013,7 +3041,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             className: 'col-md-6 mb-3',
             key: 'registeredAddress',
             type: 'google-places',
-            defaultValue: this.getCompanyProfile?.registeredAddress || null,
+            // Fix: Use model's registeredAddress instead of undefined getCompanyProfile
+            defaultValue: this.model.registeredAddress || null,
             templateOptions: {
               label: 'Registered Address',
               placeholder: 'Search for your registered address',
@@ -3022,6 +3051,30 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                 'country': 'country',
                 'state': 'state', 
                 'city': 'city'
+              }
+            },
+            // Add expression property to dynamically update when model changes
+            expressionProperties: {
+              'defaultValue': () => this.model.registeredAddress
+            },
+            // Add hooks to ensure proper initialization
+            hooks: {
+              onInit: (field) => {
+                // Set initial value if we have registered address data
+                if (this.model.registeredAddress && typeof this.model.registeredAddress === 'object') {
+                  console.log('🏠 Setting initial registered address value:', this.model.registeredAddress);
+                  field.formControl?.setValue(this.model.registeredAddress, { emitEvent: false });
+                }
+              },
+              afterViewInit: (field) => {
+                // Force update the field with loaded data after view initialization
+                if (this.model.registeredAddress && typeof this.model.registeredAddress === 'object') {
+                  setTimeout(() => {
+                    console.log('🔄 Forcing address field update with loaded data:', this.model.registeredAddress);
+                    field.formControl?.setValue(this.model.registeredAddress, { emitEvent: false });
+                    this.cdr.detectChanges();
+                  }, 200);
+                }
               }
             },
             validation: {
@@ -3420,7 +3473,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         type: 'file-upload',
         className: 'col-12 mb-2',
         templateOptions: {
-          label: 'Company Documents',
+          label: 'Company Profile',
           description: 'Upload documents that will help us evaluate your profile more accurately and expedite decision-making',
           required: true,
           acceptedTypes: '.pdf',

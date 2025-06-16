@@ -322,4 +322,17 @@ export class GooglePlacesComponentComponent implements OnInit, ControlValueAcces
     this.onChange(null);
     this.addressSelect.emit(null);
   }
+
+  // Method to check if coordinates are valid and not default 0,0
+  hasValidCoordinates(): boolean {
+    if (!this.selectedAddress || !this.selectedAddress.location) {
+      return false;
+    }
+    
+    const lat = this.selectedAddress.location.lat;
+    const lng = this.selectedAddress.location.lng;
+    
+    // Check if coordinates exist and are not 0,0 (which indicates no valid coordinates)
+    return lat !== 0 || lng !== 0;
+  }
 }

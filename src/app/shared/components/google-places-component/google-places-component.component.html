@@ -31,7 +31,7 @@
       <div>{{ selectedAddress.city || '' }}, {{ selectedAddress.stateCode || '' }} {{ selectedAddress.postalCode || '' }}</div>
       <div>{{ selectedAddress.country }}</div>
     </div>
-    <div class="address-coordinates" *ngIf="selectedAddress.location">
+    <div class="address-coordinates" *ngIf="hasValidCoordinates()">
       <i class="pi pi-map-marker"></i> {{ selectedAddress.location.lat }}, {{ selectedAddress.location.lng }}
     </div>
   </div>

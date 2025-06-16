@@ -4,15 +4,15 @@
       <h1 class="header-title">{{ title }}</h1>
     </div>
     <div class="header-right">
+      <div class="profile-link" (click)="onProfile()" *ngIf="shouldShowProfile">
+        <i class="pi pi-user"></i>
+        <span>Profile</span>
+      </div>
       <div class="avatar-dropdown">
         <button type="button" class="avatar-button" (click)="toggleDropdown()">
           <div class="avatar">{{ userInitials }}</div>
         </button>
         <div class="dropdown-menu" [ngClass]="{'show': isDropdownOpen}">
-          <button type="button" class="dropdown-item" (click)="onProfile()" *ngIf="shouldShowProfile">
-            <i class="pi pi-user"></i>
-            Profile
-          </button>
           <button type="button" class="dropdown-item" (click)="onLogout()">
             <i class="pi pi-sign-out"></i>
             Logout
