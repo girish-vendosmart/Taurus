@@ -242,6 +242,10 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   urlSupplierId: string | null = null;
   currentOnboardingFormStatus: any;
   
+  // Add new properties for save button functionality
+  stepCompletionStatus: boolean[] = [false, false, false, false, false, false];
+  isSavingCurrentStep: boolean = false;
+  
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
@@ -3711,4 +3715,13 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         return 'Please complete all required fields';
     }
   }
+
+  // New method to check if save button should be shown
+  shouldShowSaveButton(): boolean {
+    return this.isCurrentStepValid() && !this.isEditMode;
+  }
+
+  saveCurrentStep() {
+    this.logCurrentStepObject();
+  }   
 } 

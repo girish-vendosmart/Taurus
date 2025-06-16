@@ -120,30 +120,44 @@
                     <i class="pi pi-arrow-left me-2"></i>Back
                   </button>
 
-                  
-                  <ng-container *ngIf="activeStepIndex < totalSteps - 1; else completeButton">
+                  <div class="d-flex gap-2">
+                    <!-- Save Current Step Button -->
                     <button 
                       type="button" 
-                      class="btn btn-primary" 
-                      (click)="nextStep()"
-                      [disabled]="!isCurrentStepValid()"
-                      [title]="!isCurrentStepValid() ? getStepValidationMessage() : ''">
-                      Next <i class="pi pi-arrow-right ms-2"></i>
+                      class="btn btn-outline-primary" 
+                      (click)="saveCurrentStep()"
+                      [disabled]="isSavingCurrentStep || !isCurrentStepValid()"
+                      [title]="!isCurrentStepValid() ? getStepValidationMessage() : 'Save current step without proceeding to next'">
+                      <i class="pi pi-save me-2" [ngClass]="{'pi-spin pi-spinner': isSavingCurrentStep}"></i>
+                      <span *ngIf="!isSavingCurrentStep">Save</span>
+                      <span *ngIf="isSavingCurrentStep">Saving...</span>
                     </button>
-                  </ng-container>
-                  
-                  <ng-template #completeButton>
-                    <button 
-                      type="button" 
-                      class="btn btn-primary btn-complete" 
-                      (click)="submit()"
-                      [disabled]="!isCurrentStepValid()"
-                      [title]="!isCurrentStepValid() ? getStepValidationMessage() : ''">
-                      <i class="pi pi-check me-2"></i>
-                      <ng-container *ngIf="!isEditMode">Submit Onboarding</ng-container>
-                      <ng-container *ngIf="isEditMode">Save Changes</ng-container>
-                    </button>
-                  </ng-template>
+
+                    <!-- Next/Complete Button -->
+                    <ng-container *ngIf="activeStepIndex < totalSteps - 1; else completeButton">
+                      <button 
+                        type="button" 
+                        class="btn btn-primary" 
+                        (click)="nextStep()"
+                        [disabled]="!isCurrentStepValid()"
+                        [title]="!isCurrentStepValid() ? getStepValidationMessage() : ''">
+                        Next <i class="pi pi-arrow-right ms-2"></i>
+                      </button>
+                    </ng-container>
+                    
+                    <ng-template #completeButton>
+                      <button 
+                        type="button" 
+                        class="btn btn-primary btn-complete" 
+                        (click)="submit()"
+                        [disabled]="!isCurrentStepValid()"
+                        [title]="!isCurrentStepValid() ? getStepValidationMessage() : ''">
+                        <i class="pi pi-check me-2"></i>
+                        <ng-container *ngIf="!isEditMode">Submit Onboarding</ng-container>
+                        <ng-container *ngIf="isEditMode">Save Changes</ng-container>
+                      </button>
+                    </ng-template>
+                  </div>
                 </div>
               </form>
             </div>
