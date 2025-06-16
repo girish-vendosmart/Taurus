@@ -246,6 +246,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   stepCompletionStatus: boolean[] = [false, false, false, false, false, false];
   isSaving: boolean = false;
   
+  // Add property to track current step validation status
+  currentStepValid: boolean = false;
+  
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
@@ -295,6 +298,31 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
 
     // Initialize step completion status
     this.initializeStepCompletionStatus();
+    
+    // Setup form monitoring for button state updates
+    setTimeout(() => {
+      this.setupFormValidationMonitoring();
+    }, 1500);
+  }
+
+  // Add method to check if current step is valid
+  isCurrentStepValid(): boolean {
+    return this.isStepValid(this.currentFields);
+  }
+
+  // Add method to setup form monitoring for validation updates
+  private setupFormValidationMonitoring(): void {
+    // Monitor form value changes to update button state
+    this.form.valueChanges.subscribe(() => {
+      this.currentStepValid = this.isCurrentStepValid();
+      this.cdr.detectChanges();
+    });
+
+    // Monitor form status changes
+    this.form.statusChanges.subscribe(() => {
+      this.currentStepValid = this.isCurrentStepValid();
+      this.cdr.detectChanges();
+    });
   }
 
   // Add this method to monitor the primaryManufacturingProcess field changes
@@ -1133,6 +1161,12 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       
       // Console log the step object after changing step
       this.logCurrentStepObject();
+      
+      // Update validation status for new step
+      setTimeout(() => {
+        this.currentStepValid = this.isCurrentStepValid();
+        this.cdr.detectChanges();
+      }, 200);
     }
   }
 
@@ -1558,6 +1592,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     
     console.log('🏦 Bank Verified Status:', this.bankVerified);
     
+    // Update validation status for button state
+    this.currentStepValid = this.isCurrentStepValid();
+    
     // Only update form if verification is successful
     if (verified && this.model.bankDetails) {
       console.log('📋 Bank Details:', this.model.bankDetails);
@@ -1603,6 +1640,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         });
       }, 100);
     }
+    
+    // Trigger change detection
+    this.cdr.detectChanges();
   }
 
   onBankDetailsVerified(bankDetails: any): void {
@@ -1729,6 +1769,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     // Update the phone field verification status dynamically
     this.updatePhoneFieldVerificationStatus();
     
+    // Update validation status for button state
+    this.currentStepValid = this.isCurrentStepValid();
+    
     // Trigger change detection to update the UI
     this.cdr.detectChanges();
   }
@@ -1736,11 +1779,19 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   onGstVerified(verified: boolean): void {
     this.gstVerified = verified;
     console.log('GST verification status:', verified);
+    
+    // Update validation status for button state
+    this.currentStepValid = this.isCurrentStepValid();
+    this.cdr.detectChanges();
   }
 
   onPanVerified(verified: boolean): void {
     this.panVerified = verified;
     console.log('PAN verification status:', verified);
+    
+    // Update validation status for button state
+    this.currentStepValid = this.isCurrentStepValid();
+    this.cdr.detectChanges();
   }
 
   onAddressDetailsAccepted(addressData: any): void {

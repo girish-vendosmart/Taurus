@@ -136,13 +136,23 @@
                     </button>
                     
                     <ng-container *ngIf="activeStepIndex < totalSteps - 1; else completeButton">
-                      <button type="button" class="btn btn-primary" (click)="nextStep()">
+                      <button 
+                        type="button" 
+                        class="btn btn-primary" 
+                        (click)="nextStep()"
+                        [disabled]="!isCurrentStepValid()"
+                        [ngClass]="{'btn-secondary': !isCurrentStepValid(), 'btn-primary': isCurrentStepValid()}">
                         Next <i class="pi pi-arrow-right ms-2"></i>
                       </button>
                     </ng-container>
                     
                     <ng-template #completeButton>
-                      <button type="button" class="btn btn-primary btn-complete" (click)="submit()">
+                      <button 
+                        type="button" 
+                        class="btn btn-primary btn-complete" 
+                        (click)="submit()"
+                        [disabled]="!isCurrentStepValid()"
+                        [ngClass]="{'btn-secondary': !isCurrentStepValid(), 'btn-primary': isCurrentStepValid()}">
                         <i class="pi pi-check me-2"></i>
                         <ng-container *ngIf="!isEditMode">Submit Onboarding</ng-container>
                         <ng-container *ngIf="isEditMode">Save Changes</ng-container>

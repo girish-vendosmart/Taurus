@@ -260,86 +260,90 @@ h2 {
 
 /* Button styling */
 .btn {
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
   font-weight: $font-weight-medium;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-transform: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
   transition: all 0.3s ease;
-  border: none;
   
   &.btn-primary {
-    background: linear-gradient(135deg, $blueprint-blue, darken($blueprint-blue, 5%));
-    color: $technical-white;
-    box-shadow: 0 4px 12px rgba($blueprint-blue, 0.3);
+    background: linear-gradient(135deg, $blueprint-blue, darken($blueprint-blue, 8%));
+    border: none;
+    box-shadow: 0 3px 12px rgba($blueprint-blue, 0.3);
     
-    &:hover {
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, darken($blueprint-blue, 5%), darken($blueprint-blue, 12%));
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba($blueprint-blue, 0.4);
-      background: linear-gradient(135deg, darken($blueprint-blue, 5%), darken($blueprint-blue, 10%));
+      box-shadow: 0 5px 16px rgba($blueprint-blue, 0.4);
     }
     
-    &:active {
-      transform: translateY(0);
+    &:disabled {
+      background: $material-finish-silver !important;
+      color: $machine-gray !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+      transform: none !important;
+      border: 1px solid rgba($machine-gray, 0.2) !important;
+      opacity: 0.6 !important;
+    }
+  }
+  
+  &.btn-secondary {
+    background-color: $material-finish-silver !important;
+    color: $machine-gray !important;
+    border: 1px solid rgba($machine-gray, 0.2) !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    opacity: 0.6 !important;
+    
+    &:hover {
+      background-color: $material-finish-silver !important;
+      color: $machine-gray !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  }
+  
+  &.btn-outline-secondary {
+    border: 2px solid $material-finish-silver;
+    color: $machine-gray;
+    background-color: transparent;
+    
+    &:hover:not(:disabled) {
+      background-color: $material-finish-silver;
+      border-color: $material-finish-silver;
+      color: $machine-gray;
+      transform: translateY(-1px);
+    }
+    
+    &:disabled {
+      border-color: rgba($machine-gray, 0.2) !important;
+      color: rgba($machine-gray, 0.5) !important;
+      cursor: not-allowed !important;
+      opacity: 0.5 !important;
     }
   }
   
   &.btn-outline-primary {
     border: 2px solid $blueprint-blue;
     color: $blueprint-blue;
-    background: transparent;
+    background-color: transparent;
     
-    &:hover {
-      background: $blueprint-blue;
+    &:hover:not(:disabled) {
+      background-color: $blueprint-blue;
+      border-color: $blueprint-blue;
       color: $technical-white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba($blueprint-blue, 0.3);
-    }
-    
-    &:active {
-      transform: translateY(0);
+      transform: translateY(-1px);
     }
     
     &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
+      border-color: rgba($machine-gray, 0.2) !important;
+      color: rgba($machine-gray, 0.5) !important;
+      cursor: not-allowed !important;
+      opacity: 0.5 !important;
     }
-  }
-  
-  &.btn-outline-secondary {
-    border: 2px solid $machine-gray;
-    color: $machine-gray;
-    background: transparent;
-    
-    &:hover {
-      background: $machine-gray;
-      color: $technical-white;
-    }
-    
-    &:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      
-      &:hover {
-        background: transparent;
-        color: $machine-gray;
-      }
-    }
-  }
-  
-  &.btn-complete {
-    background: linear-gradient(135deg, $process-green, darken($process-green, 5%));
-    color: $technical-white;
-    box-shadow: 0 4px 12px rgba($process-green, 0.3);
-    
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba($process-green, 0.4);
-    }
-  }
-  
-  i {
-    font-size: 0.875rem;
   }
 }
 
