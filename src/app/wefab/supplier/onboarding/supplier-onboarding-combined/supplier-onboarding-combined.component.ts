@@ -4,6 +4,7 @@ import { FormGroup, FormBuilder, ReactiveFormsModule, AbstractControl, Validatio
 import { FormsModule } from '@angular/forms';
 import { FormlyFieldConfig, FormlyModule, FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
+import { FormlyConfig } from '@ngx-formly/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonService } from '../../../../shared/services/common.service';
 import { ChangeDetectorRef } from '@angular/core';
@@ -44,6 +45,8 @@ import { FormlyRepeatTypeComponent } from '../../../../shared/formly-components/
 import { FormlyFieldFileUploadComponent } from '../../../../shared/formly-components/file-upload-type.component';
 import { FormlyFieldRangeSliderComponent } from '../../../../shared/formly-components/range-slider-type.component';
 import { FormlyFieldDropdownComponent } from '../../../../shared/formly-components/dropdown-type.component';
+import { ManufacturingProcessSelectorComponent } from './manufacturing-process-selector.component';
+// import { FormlyFieldManufacturingProcessComponent } from './formly-manufacturing-process-type.component';
 
 // GST Validator function
 export function gstValidator(control: AbstractControl): ValidationErrors | null {
@@ -108,7 +111,9 @@ export function panValidator(control: AbstractControl): ValidationErrors | null 
     FormlyFieldRangeSliderComponent,
     FormlyFieldDropdownComponent,
     BankVerifyFieldComponent,
-    FormlyFieldBankVerifyComponent
+    FormlyFieldBankVerifyComponent,
+    ManufacturingProcessSelectorComponent,
+    // FormlyFieldManufacturingProcessComponent
   ],
   providers: [MessageService],
   templateUrl: './supplier-onboarding-combined.component.html',
@@ -258,10 +263,17 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     private commonService: CommonService,
     private sweetAlert: SweetAlertService,
     @Inject(PLATFORM_ID) private platformId: Object,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private formlyConfig: FormlyConfig
   ) {
     this.form = this.fb.group({});
     this.isBrowser = isPlatformBrowser(this.platformId);
+    
+    // Register the new field type
+    this.formlyConfig.setType({
+      name: 'manufacturing-process',
+      component: ManufacturingProcessSelectorComponent,
+    });
   }
 
   @HostListener('window:resize', ['$event'])
@@ -1186,6 +1198,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   nextStep() {
+    console.log("Contact & Capabilities", this.contactCapabilities)
     console.log('🔄 Next Step called:', {
       activeStepIndex: this.activeStepIndex,
       isEditMode: this.isEditMode,
@@ -3038,46 +3051,118 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             }
           },
           {
-            className: 'col-md-6 mb-2',
+            className: 'col-12 mb-2',
             key: 'primaryManufacturingProcess',
-            type: 'p-dropdown-group-search',
+            type: 'manufacturing-process',
             defaultValue: [],
             templateOptions: {
               label: 'Primary Manufacturing Process',
               placeholder: 'Select your manufacturing processes',
               required: true,
-              filterPlaceholder: 'Search manufacturing processes...',
-              multiselect: true,
-              maxSelectedLabels: 100,
-              showDebugInfo: true, // Enable debug info temporarily for troubleshooting
+              filterPlaceholder: 'Search manufacturing processes and suboptions...',
+              showDebugInfo: false,
               options: [
                 {
                   label: 'Precision Machining',
                   items: [
-                    { value: "3axis", label: "3-axis Milling" },
-                    { value: "4axis", label: "4-axis Milling" },
-                    { value: "5axis", label: "5-axis Milling" },
-                    { value: "turning", label: "Turning/Lathe" },
+                    { value: "tight_tolerance_machining", label: "Tight Tolerance Machining" },
+                    { value: "micro_machining", label: "Micro Machining" },
+                    { value: "surface_finishing", label: "Surface Finishing" },
+                    { value: "complex_geometry", label: "Complex Geometry" },
+                    { value: "prototype_machining", label: "Prototype Machining" }
+                  ]
+                },
+                {
+                  label: '3-axis Milling',
+                  items: [
+                    { value: "face_milling", label: "Face Milling" },
+                    { value: "end_milling", label: "End Milling" },
+                    { value: "slot_milling", label: "Slot Milling" },
+                    { value: "profile_milling", label: "Profile Milling" },
+                    { value: "pocket_milling", label: "Pocket Milling" },
                     { value: "drilling", label: "Drilling" },
-                    { value: "boring", label: "Boring" },
-                    { value: "grinding", label: "Grinding" },
-                    { value: "wireedm", label: "Wire EDM" },
-                    { value: "sinkeredm", label: "Sinker/Ram EDM" },
-                    { value: "polishing", label: "Polishing" },
-                    { value: "lapping", label: "Lapping" },
-                    { value: "honing", label: "Honing" },
-                    { value: "ultrasonic", label: "Ultrasonic Machining" },
-                    { value: "electrochemical", label: "Electrochemical Machining" },
-                    { value: "waterjet", label: "Waterjet Cutting" }
+                    { value: "tapping", label: "Tapping" },
+                    { value: "boring", label: "Boring" }
+                  ]
+                },
+                {
+                  label: '4-axis Milling',
+                  items: [
+                    { value: "rotary_4axis", label: "Rotary 4-axis" },
+                    { value: "indexing_4axis", label: "Indexing 4-axis" },
+                    { value: "continuous_4axis", label: "Continuous 4-axis" },
+                    { value: "angular_features", label: "Angular Features" },
+                    { value: "cylindrical_parts", label: "Cylindrical Parts" },
+                    { value: "cam_profiles", label: "Cam Profiles" },
+                    { value: "helical_features", label: "Helical Features" },
+                    { value: "compound_angles", label: "Compound Angles" },
+                    { value: "rotational_symmetry", label: "Rotational Symmetry" },
+                    { value: "tube_cutting", label: "Tube Cutting" },
+                    { value: "pipe_cutting", label: "Pipe Cutting" },
+                    { value: "wrap_around_features", label: "Wrap-around Features" }
+                  ]
+                },
+                {
+                  label: '5-axis Milling',
+                  items: [
+                    { value: "simultaneous_5axis", label: "Simultaneous 5-axis" },
+                    { value: "positional_5axis", label: "Positional 5-axis" },
+                    { value: "complex_surfaces", label: "Complex Surfaces" },
+                    { value: "aerospace_parts", label: "Aerospace Parts" },
+                    { value: "turbine_blades", label: "Turbine Blades" },
+                    { value: "impellers", label: "Impellers" }
+                  ]
+                },
+                {
+                  label: 'CNC Turning',
+                  items: [
+                    { value: "external_turning", label: "External Turning" },
+                    { value: "internal_turning", label: "Internal Turning" },
+                    { value: "facing", label: "Facing" },
+                    { value: "grooving", label: "Grooving" },
+                    { value: "threading", label: "Threading" },
+                    { value: "knurling", label: "Knurling" },
+                    { value: "parting", label: "Parting" },
+                    { value: "live_tooling", label: "Live Tooling" },
+                    { value: "sub_spindle", label: "Sub-spindle" },
+                    { value: "swiss_turning", label: "Swiss Turning" }
+                  ]
+                },
+                {
+                  label: 'Wire EDM',
+                  items: [
+                    { value: "precision_cutting", label: "Precision Cutting" },
+                    { value: "complex_profiles", label: "Complex Profiles" },
+                    { value: "hardened_materials", label: "Hardened Materials" },
+                    { value: "small_features", label: "Small Features" }
+                  ]
+                },
+                {
+                  label: 'Sheet Metal Works',
+                  items: [
+                    { value: "laser_cutting", label: "Laser Cutting" },
+                    { value: "plasma_cutting", label: "Plasma Cutting" },
+                    { value: "waterjet_cutting", label: "Waterjet Cutting" },
+                    { value: "punching", label: "Punching" },
+                    { value: "blanking", label: "Blanking/Shearing" },
+                    { value: "bending", label: "Bending/Press Brake" },
+                    { value: "rolling", label: "Rolling" },
+                    { value: "stamping", label: "Stamping" },
+                    { value: "deep_drawing", label: "Deep Drawing" },
+                    { value: "spinning", label: "Spinning" },
+                    { value: "welding", label: "Welding" },
+                    { value: "assembly", label: "Assembly" }
                   ]
                 },
                 {
                   label: '3D Printing',
                   items: [
+                    { value: "metal_3d_printing", label: "Metal 3D Printing" },
+                    { value: "plastic_3d_printing", label: "Plastic 3D Printing" },
                     { value: "dmls", label: "DMLS" },
                     { value: "slm", label: "SLM" },
                     { value: "ebm", label: "EBM" },
-                    { value: "binderjet", label: "Binder Jetting" },
+                    { value: "binder_jetting", label: "Binder Jetting" },
                     { value: "ded", label: "DED" },
                     { value: "fdm", label: "FDM" },
                     { value: "sla", label: "SLA" },
@@ -3088,18 +3173,28 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                   ]
                 },
                 {
-                  label: 'Sheet Metal Works',
+                  label: 'Surface Treatment',
                   items: [
-                    { value: "lasercut", label: "Laser Cutting" },
-                    { value: "plasmacut", label: "Plasma Cutting" },
-                    { value: "waterjetcut", label: "Waterjet Cutting" },
-                    { value: "punching", label: "Punching" },
-                    { value: "blanking", label: "Blanking/Shearing" },
-                    { value: "bending", label: "Bending/Press Brake" },
-                    { value: "rolling", label: "Rolling" },
-                    { value: "stamping", label: "Stamping" },
-                    { value: "deepdraw", label: "Deep Drawing" },
-                    { value: "spinning", label: "Spinning" }
+                    { value: "grinding", label: "Grinding" },
+                    { value: "polishing", label: "Polishing" },
+                    { value: "lapping", label: "Lapping" },
+                    { value: "honing", label: "Honing" },
+                    { value: "sandblasting", label: "Sandblasting" },
+                    { value: "anodizing", label: "Anodizing" },
+                    { value: "plating", label: "Plating" },
+                    { value: "powder_coating", label: "Powder Coating" },
+                    { value: "heat_treatment", label: "Heat Treatment" }
+                  ]
+                },
+                {
+                  label: 'Special Processes',
+                  items: [
+                    { value: "ultrasonic_machining", label: "Ultrasonic Machining" },
+                    { value: "electrochemical_machining", label: "Electrochemical Machining" },
+                    { value: "electrical_discharge_machining", label: "Electrical Discharge Machining" },
+                    { value: "laser_machining", label: "Laser Machining" },
+                    { value: "abrasive_waterjet", label: "Abrasive Waterjet" },
+                    { value: "electron_beam_machining", label: "Electron Beam Machining" }
                   ]
                 }
               ],
