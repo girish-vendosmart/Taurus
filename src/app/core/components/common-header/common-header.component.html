@@ -4,6 +4,12 @@
       <h1 class="header-title">{{ title }}</h1>
     </div>
     <div class="header-right">
+      <!-- Help section -->
+      <div class="profile-link" (click)="onHelp()" *ngIf="shouldShowProfile" style="margin-right: -9px;"> 
+        <i class="pi pi-question-circle"></i>
+        <span>Help</span>
+      </div>
+      <!-- Profile section -->
       <div class="profile-link" (click)="onProfile()" *ngIf="shouldShowProfile">
         <i class="pi pi-user"></i>
         <span>Profile</span>

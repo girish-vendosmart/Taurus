@@ -15,6 +15,7 @@ import { SupplierQuotationComponent } from './quotation/supplier-quotation/suppl
 import { SupplierQuotationDetailsComponent } from './quotation/supplier-quotation-details/supplier-quotation-details.component';
 import { CreateQuotationComponent } from './quotation/create-quotation/create-quotation.component';
 import { SupplierOnboardingCombinedComponent }  from './onboarding/supplier-onboarding-combined/supplier-onboarding-combined.component';
+import { HelpSectionComponent } from './help-section/help-section.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
@@ -89,6 +90,11 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
              {
                 path: 'supplier-onboarding-form',
                 component: SupplierOnboardingCombinedComponent,
+                canActivate: [AuthGuard]
+             },
+             {
+                path: 'help',
+                component: HelpSectionComponent,
                 canActivate: [AuthGuard]
              },
              {

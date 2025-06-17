@@ -129,4 +129,8 @@ export class CommonHeaderComponent {
       window.location.href = '/login';
     });
   }
+
+  onHelp() {
+    this.router.navigate(['/wefab/supplier/help']);
+  }
 }
