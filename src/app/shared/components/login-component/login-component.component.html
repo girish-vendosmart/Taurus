@@ -11,9 +11,10 @@
   </div>
   <div class="login-panel right-panel">
     <div class="login-form">
-      <h2>Welcome Back</h2>
+      <h2>{{ showForgotPassword ? 'Reset Password' : 'Welcome' }}</h2>
       
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <!-- Login Form -->
+      <form *ngIf="!showForgotPassword" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <label for="email">EMAIL ADDRESS</label>
           <div class="input-container">
@@ -42,7 +43,7 @@
         <div class="form-group">
           <div class="password-header">
             <label for="password">PASSWORD</label>
-            <a href="#" class="forgot-link">Forgot password?</a>
+            <a href="javascript:void(0)" class="forgot-link" (click)="showForgotPasswordForm()">Forgot password?</a>
           </div>
           <div class="input-container">
             <span class="p-input-icon-left">
@@ -98,6 +99,84 @@
           By signing in, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
         </div>
       </form>
+
+      <!-- Forgot Password Form -->
+      <div *ngIf="showForgotPassword" class="forgot-password-container">
+        <div *ngIf="!resetEmailSent" class="reset-form">
+          <p class="reset-description">
+            Enter your email address and we'll send you a link to reset your password.
+          </p>
+          
+          <div class="form-group">
+            <label for="reset-email">EMAIL ADDRESS</label>
+            <div class="input-container">
+              <span class="p-input-icon-left">
+                <i class="pi pi-envelope"></i>
+                <input 
+                  type="email" 
+                  id="reset-email" 
+                  pInputText 
+                  [value]="loginForm.get('email')?.value"
+                  (input)="loginForm.get('email')?.setValue($any($event.target).value)"
+                  placeholder="your.email@company.com"
+                  aria-label="Email Address"
+                  style="color: #000 !important;"
+                >
+              </span>
+            </div>
+          </div>
+
+          <div *ngIf="resetError" class="p-message p-message-error">
+            <i class="pi pi-exclamation-circle"></i>
+            <span class="p-message-text">{{ resetError }}</span>
+          </div>
+
+          <button 
+            type="button" 
+            pButton 
+            label="SEND RESET LINK" 
+            icon="pi pi-send" 
+            iconPos="right"
+            [loading]="isLoading"
+            [disabled]="!loginForm.get('email')?.value || isLoading"
+            (click)="sendPasswordResetEmail()"
+          ></button>
+
+          <button 
+            type="button" 
+            pButton 
+            label="Back to Login" 
+            class="p-button-text back-button"
+            (click)="backToLogin()"
+          ></button>
+        </div>
+
+        <div *ngIf="resetEmailSent" class="reset-success">
+          <div class="success-icon">
+            <i class="pi pi-check-circle"></i>
+          </div>
+          <h3>Reset Password Invitation Link Sent!</h3>
+          <p class="success-message">
+            We've sent a password reset link to <strong>{{ loginForm.get('email')?.value }}</strong>
+          </p>
+          <p class="instruction-message">
+            Please check your email and click the link to reset your password. 
+            The link will expire in 1 hour for security reasons.
+          </p>
+          <p class="check-spam">
+            Don't see the email? Check your spam folder
+            <!-- <a href="javascript:void(0)" (click)="sendPasswordResetEmail()">resend the link</a>. -->
+          </p>
+
+          <button 
+            type="button" 
+            pButton 
+            label="Back to Login" 
+            class="p-button-outlined back-button"
+            (click)="backToLogin()"
+          ></button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

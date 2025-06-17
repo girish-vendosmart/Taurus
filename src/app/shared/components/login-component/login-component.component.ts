@@ -39,6 +39,9 @@ export class LoginComponentComponent {
   companyId: any;
   submitted = false;
   isLoading = false;
+  showForgotPassword = false;
+  resetEmailSent = false;
+  resetError = '';
   
   constructor(
     private fb: FormBuilder, 
@@ -220,5 +223,60 @@ export class LoginComponentComponent {
         this.router.navigate([`/wefab/supplier/profile-review/${supplierId}`]);
       }
     })
+  }
+
+  showForgotPasswordForm() {
+    this.showForgotPassword = true;
+    this.resetEmailSent = false;
+    this.resetError = '';
+    this.loginError = '';
+  }
+
+  backToLogin() {
+    this.showForgotPassword = false;
+    this.resetEmailSent = false;
+    this.resetError = '';
+    this.loginError = '';
+  }
+
+  sendPasswordResetEmail() {
+    const email = this.loginForm.get('email')?.value;
+    
+    if (!email) {
+      this.resetError = 'Please enter your email address';
+      return;
+    }
+
+    this.isLoading = true;
+    this.resetError = '';
+
+    this.firebaseService.sendPasswordResetEmail(email).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.resetEmailSent = true;
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.error('Password reset error:', error);
+        
+        let errorMessage = 'Failed to send reset email. Please try again.';
+        
+        if (error.code) {
+          switch (error.code) {
+            case 'auth/user-not-found':
+              errorMessage = 'No account found with this email address.';
+              break;
+            case 'auth/invalid-email':
+              errorMessage = 'Please enter a valid email address.';
+              break;
+            case 'auth/too-many-requests':
+              errorMessage = 'Too many requests. Please try again later.';
+              break;
+          }
+        }
+        
+        this.resetError = errorMessage;
+      }
+    });
   }
 }

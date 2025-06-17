@@ -1,0 +1,98 @@
+<div class="help-section-container">
+  <div class="help-header">
+    <!-- Back Button inside header -->
+    <div class="header-back-navigation">
+      <button class="back-btn" (click)="goBack()">
+        <i class="pi pi-arrow-left"></i>
+        <span>Back</span>
+      </button>
+    </div>
+
+    <div class="header-logo">
+      <i class="pi pi-shield"></i>
+    </div>
+    <h2>Help & Support</h2>
+    <p>For any queries or problems, please contact our admin team</p>
+  </div>
+
+  <div class="contact-section">
+    <h2>Contact Admin Team</h2>
+    
+    <div class="contact-cards">
+      <div class="contact-card">
+        <div class="card-content">
+          <div class="contact-icon">
+            <i class="pi pi-user"></i>
+          </div>
+          <h3>{{contacts[0].name}}</h3>
+          <p class="role">Admin Support</p>
+          
+          <div class="contact-info">
+            <div class="contact-item">
+              <div class="contact-icon-small">
+                <i class="pi pi-envelope"></i>
+              </div>
+              <div class="contact-details">
+                <div class="contact-label">Email</div>
+                <div class="contact-value">{{contacts[0].email}}</div>
+              </div>
+            </div>
+            
+            <div class="contact-item">
+              <div class="contact-icon-small">
+                <i class="pi pi-phone"></i>
+              </div>
+              <div class="contact-details">
+                <div class="contact-label">Phone</div>
+                <div class="contact-value">{{contacts[0].phone}}</div>
+              </div>
+            </div>
+          </div>
+          
+          <button class="contact-btn" (click)="contactAdmin(contacts[0])" style="background-color: #2f59eb !important;">
+            <i class="pi pi-send"></i>
+            Contact Now
+          </button>
+        </div>
+      </div>
+
+      <div class="contact-card">
+        <div class="card-content">
+          <div class="contact-icon">
+            <i class="pi pi-user"></i>
+          </div>
+          <h3>{{contacts[1].name}}</h3>
+          <p class="role">Admin Support</p>
+          
+          <div class="contact-info">
+            <div class="contact-item">
+              <div class="contact-icon-small">
+                <i class="pi pi-envelope"></i>
+              </div>
+              <div class="contact-details">
+                <div class="contact-label">Email</div>
+                <div class="contact-value">{{contacts[1].email}}</div>
+              </div>
+            </div>
+            
+            <div class="contact-item">
+              <div class="contact-icon-small">
+                <i class="pi pi-phone"></i>
+              </div>
+              <div class="contact-details">
+                <div class="contact-label">Phone</div>
+                <div class="contact-value">{{contacts[1].phone}}</div>
+              </div>
+            </div>
+          </div>
+          
+          <button class="contact-btn" (click)="contactAdmin(contacts[1])" style="background-color: #2f59eb !important;">
+            <i class="pi pi-send"></i>
+            Contact Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
