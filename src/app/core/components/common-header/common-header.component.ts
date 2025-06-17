@@ -13,6 +13,8 @@ import { AuthService } from '../../services/auth.service';
 export class CommonHeaderComponent {
   @Input() title: string = 'Supplier Onboarding Portal';
   @Output() logoutEvent = new EventEmitter<void>();
+
+  userType = localStorage.getItem('user_type');
   
   isDropdownOpen = false;
   userInitials: string = '';
@@ -37,7 +39,7 @@ export class CommonHeaderComponent {
   // Getter to check if supplier profile should be shown
   get shouldShowProfile(): boolean {
     const supplierId = this.supplierId;
-    const shouldShow = supplierId !== null && supplierId !== undefined && supplierId.trim() !== '';
+    const shouldShow = supplierId !== null && supplierId !== undefined && supplierId.trim() !== '' && this.userType === 'supplier';
     console.log('👁️ shouldShowProfile getter called - Should show:', shouldShow);
     return shouldShow;
   }
