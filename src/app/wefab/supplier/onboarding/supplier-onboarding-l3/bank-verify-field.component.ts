@@ -85,7 +85,7 @@ import { CommonService } from '../../../../shared/services/common.service';
             type="button" 
             class="btn verify-bank-button"
             [ngClass]="{
-              'btn-success': _isVerified, 
+              'btn-success verified': _isVerified, 
               'btn-warning': verificationError,
               'btn-primary': !_isVerified && !verificationError
             }" 
@@ -99,7 +99,8 @@ import { CommonService } from '../../../../shared/services/common.service';
                 <i class="pi pi-check-circle" style="margin-right: 0.5rem"></i>
                 VERIFY BANK DETAILS
             </span>
-            <span *ngIf="!isLoading && _isVerified">
+            <span *ngIf="!isLoading && _isVerified" class="verified-badge">
+                <i class="pi pi-check-circle"></i>
                 VERIFIED
             </span>
             <span *ngIf="!isLoading && verificationError">
@@ -256,29 +257,94 @@ import { CommonService } from '../../../../shared/services/common.service';
         }
         
         &.btn-success {
-          background: #28a745 !important;
+          background: linear-gradient(135deg, #28a745, #20c997) !important;
           color: white !important;
           border: 1px solid #28a745 !important;
+          border-radius: 20px !important;
+          padding: 0.4rem 1rem !important;
           font-weight: 600 !important;
+          font-size: 0.8rem !important;
+          min-width: 100px !important;
+          height: 32px !important;
+          box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3) !important;
           
           &:hover:not(:disabled) {
-            background: #218838 !important;
-            border-color: #218838 !important;
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            border-color: #28a745 !important;
             color: white !important;
+            transform: none !important;
           }
           
           /* Override disabled styling for verified state */
           &:disabled {
             opacity: 1 !important;
             cursor: default !important;
-            background: #28a745 !important;
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
             border-color: #28a745 !important;
             color: white !important;
-            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3) !important;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3) !important;
+          }
+          
+          .verified-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            
+            i {
+              font-size: 0.9rem;
+              color: white !important;
+            }
           }
           
           /* Ensure icon and text are white */
           i, span {
+            color: white !important;
+          }
+        }
+        
+        &.verified {
+          background: linear-gradient(135deg, #28a745, #20c997) !important;
+          color: white !important;
+          border: 1px solid #28a745 !important;
+          border-radius: 20px !important;
+          padding: 0.4rem 1rem !important;
+          font-weight: 600 !important;
+          font-size: 0.8rem !important;
+          min-width: 100px !important;
+          height: 32px !important;
+          box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3) !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.5px !important;
+          
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            border-color: #28a745 !important;
+            color: white !important;
+            transform: none !important;
+          }
+          
+          &:disabled {
+            opacity: 1 !important;
+            cursor: default !important;
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            border-color: #28a745 !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3) !important;
+          }
+          
+          .verified-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            
+            i {
+              font-size: 0.9rem;
+              color: white !important;
+            }
+          }
+          
+          /* Ensure all content is white */
+          i, span, .verified-badge {
             color: white !important;
           }
         }
@@ -739,7 +805,7 @@ export class BankVerifyFieldComponent implements ControlValueAccessor, OnInit, O
         };
         
         // Re-setup verified state if verified and we have the data
-        if (this._isVerified && (this.accountNumber && this.ifscCode)) {
+        if (this._isVerified && this.accountNumber && this.ifscCode) {
           this.setupVerifiedStateWithBasicDetails();
         }
       }

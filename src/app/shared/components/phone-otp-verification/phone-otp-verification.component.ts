@@ -21,6 +21,7 @@ import {
 } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { environment } from '../../../../enviornments/enviornment';
+import { SweetAlertService } from '../../services/sweet-alert.service';
 
 interface Country {
   name: string;
@@ -96,23 +97,29 @@ interface Country {
             class="btn verify-otp-button"
             [ngClass]="{'verified': _isVerified, 'error': verificationError}" 
             [disabled]="!phoneControl.value || phoneControl.invalid || _isVerified || isLoading"
-            [style.backgroundColor]="_isVerified ? '#28a745' : (verificationError ? '#dc3545' : '#1a3a60')"
             (click)="sendOTP()">
             <span *ngIf="isLoading">
                 <i class="pi pi-spin pi-spinner" style="margin-right: 0.5rem"></i>
                 Sending...
             </span>
-            <span *ngIf="!isLoading">
-                {{ _isVerified ? 'Verified' : (verificationError ? 'Failed' : 'VERIFY OTP') }}
+            <span *ngIf="!isLoading && !_isVerified && !verificationError">
+                VERIFY OTP
+            </span>
+            <span *ngIf="!isLoading && _isVerified" class="verified-badge">
+                <i class="pi pi-check-circle"></i>
+                VERIFIED
+            </span>
+            <span *ngIf="!isLoading && verificationError">
+                Failed
             </span>
           </button>
         </div>
       </div>
       
-      <div class="invalid-feedback d-block phone-otp-error" *ngIf="phoneControl.invalid && phoneControl.touched">
+      <!-- <div class="invalid-feedback d-block phone-otp-error" *ngIf="phoneControl.invalid && phoneControl.touched">
         <i class="pi pi-exclamation-triangle" style="margin-right: 0.4rem;"></i>
         {{ errorMessage }}
-      </div>
+      </div> -->
       
       <!-- Inline OTP Verification Section (Replaces Dialog) -->
       <div class="otp-verification-section" *ngIf="showOtpDialog" [ngClass]="{'has-error': otpError}">
@@ -125,10 +132,10 @@ interface Country {
           </div>
           
           <!-- OTP Error Message -->
-          <div class="otp-error-message" *ngIf="otpError">
+          <!-- <div class="otp-error-message" *ngIf="otpError">
             <i class="pi pi-exclamation-triangle"></i>
             <span>{{ otpErrorMessage }}</span>
-          </div>
+          </div> -->
           
           <div class="otp-input-wrapper">
             <input 
@@ -280,6 +287,7 @@ interface Country {
         font-size: 0.875rem;
         min-width: 120px;
         height: 40px;
+        transition: all 0.3s ease;
         
         &:hover:not(:disabled) {
           background-color: #2f59eb !important;
@@ -291,8 +299,40 @@ interface Country {
         }
         
         &.verified {
-          background-color: #28a745 !important;
+          background: linear-gradient(135deg, #28a745, #20c997) !important;
           color: white !important;
+          border: 1px solid #28a745 !important;
+          border-radius: 20px !important;
+          padding: 0.4rem 1rem !important;
+          font-weight: 600 !important;
+          font-size: 0.8rem !important;
+          min-width: 100px !important;
+          height: 32px !important;
+          box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3) !important;
+          
+          &:disabled {
+            opacity: 1 !important;
+            cursor: default !important;
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            color: white !important;
+          }
+          
+          .verified-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            
+            i {
+              font-size: 0.9rem;
+              color: white !important;
+            }
+          }
+          
+          &:hover {
+            transform: none !important;
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            color: white !important;
+          }
         }
         
         &.error {
@@ -532,7 +572,7 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   isVerifying = false;
   verificationId: string = '';
 
-  constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService, private cdr: ChangeDetectorRef) {
+  constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService, private cdr: ChangeDetectorRef, private sweetAlertService: SweetAlertService) {
     // Set default country to India or use the provided countryCode
     this.selectedCountry = this.countries.find(c => c.code === this.countryCode) || this.countries[0];
     
@@ -602,6 +642,35 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     // Reset OTP error state
     this.otpError = false;
     this.otpErrorMessage = '';
+
+    // let endPoint = `/api/method/wefab.wefab.api.common.core.authentication.mobile_otp_verification.send_otp`
+
+    // let body = {
+    //   phone_number: this.phoneControl.value,
+    //   country_code: this.selectedCountry.code,
+    // }
+
+    // this.commonService.postData(endPoint, body).subscribe((res:any) => {
+    //   this.isLoading = false;
+    //   this.verificationId = res.verification_id;
+    //   this.showOtpDialog = true;
+    //   this.startResendTimer();
+    //   this.cdr.detectChanges();
+    // }, (err:any) => {
+    //   this.isLoading = false;
+      
+    //   this.sweetAlertService.error(err.message || 'Failed to send verification code');
+
+    //   this.isLoading = false;
+    //     this.verificationError = true;
+    //     this.cdr.detectChanges();
+        
+    //     // Reset verification error after 3 seconds
+    //     setTimeout(() => {
+    //       this.verificationError = false;
+    //       this.cdr.detectChanges();
+    //     }, 3000);
+    // });
     
     this.firebaseService.sendPhoneVerificationCode(
       '+' + this.selectedCountry.code + this.phoneControl.value,
@@ -645,15 +714,8 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     this.isVerifying = true;
     // Reset OTP error state
     this.otpError = false;
-    
-    // Use the confirmation result directly since the FirebaseService's sendPhoneVerificationCode method returns it
-    if (!this.verificationId) {
-      this.otpError = true;
-      this.otpErrorMessage = 'Verification ID not found. Please try again.';
-      this.isVerifying = false;
-      return;
-    }
 
+    // Create credential and verify with Firebase
     const credential = PhoneAuthProvider.credential(this.verificationId, this.otpValue);
     signInWithCredential(this.auth, credential)
       .then(() => {
