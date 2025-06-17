@@ -111,7 +111,8 @@
   <!-- Header Section -->
   <div class="review-header">
     <div class="header-left">
-      <h3>Supplier Profile Review</h3>
+      <h3 *ngIf="userType === 'wefab_team'">Supplier Profile</h3>
+      <h3 *ngIf="userType === 'supplier'">My company profile</h3>
       <p class="review-subtitle">Status: 
         <span class="status-pending" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Under Review')">
           {{ mainCurrentDataStatusTrack }}
