@@ -385,3 +385,134 @@
   width: 1.2rem;
   height: 1.2rem;
 }
+
+// Forgot Password Styles
+.forgot-password-container {
+  .reset-form {
+    .reset-description {
+      color: #666;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .reset-button {
+      margin-bottom: 1rem;
+    }
+
+    .back-button {
+      width: 100%;
+      color: #666;
+      
+      &:hover {
+        color: #333;
+        background-color: transparent;
+      }
+    }
+  }
+
+  .reset-success {
+    text-align: center;
+    
+    .success-icon {
+      margin-bottom: 1.5rem;
+      
+      i {
+        font-size: 4rem;
+        color: #22c55e;
+      }
+    }
+    
+    h3 {
+      color: #22c55e;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    
+    .success-message {
+      color: #333;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      
+      strong {
+        color: #1a73e8;
+      }
+    }
+    
+    .instruction-message {
+      color: #666;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+    
+    .check-spam {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+      
+      a {
+        color: #1a73e8;
+        text-decoration: none;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+    
+    .back-button {
+      width: 100%;
+      color: #1a73e8;
+      border-color: #1a73e8;
+      
+      &:hover {
+        background-color: #f0f4f9;
+      }
+    }
+  }
+}
+
+:host ::ng-deep {
+  .forgot-password-container {
+    .p-button {
+      &.reset-button {
+        background-color: #FF5722;
+        border-color: #FF5722;
+        
+        &:hover {
+          background-color: #E64A19;
+          border-color: #E64A19;
+        }
+        
+        &:disabled {
+          background-color: #FFAB91;
+          border-color: #FFAB91;
+        }
+      }
+      
+      &.back-button {
+        margin-top: 0.5rem;
+        
+        &.p-button-text {
+          background-color: transparent;
+          border: none;
+          
+          &:hover {
+            background-color: rgba(0, 0, 0, 0.04);
+          }
+        }
+        
+        &.p-button-outlined {
+          background-color: transparent;
+          
+          &:hover {
+            background-color: rgba(26, 115, 232, 0.04);
+          }
+        }
+      }
+    }
+  }
+}
