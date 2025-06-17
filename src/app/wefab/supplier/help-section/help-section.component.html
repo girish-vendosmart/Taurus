@@ -34,7 +34,13 @@
               </div>
               <div class="contact-details">
                 <div class="contact-label">Email</div>
-                <div class="contact-value">{{contacts[0].email}}</div>
+                <div class="contact-value">
+                  <a href="{{getGmailUrl(contacts[0].email, contacts[0].name)}}" 
+                     target="_blank"
+                     class="contact-link email-link">
+                    {{contacts[0].email}}
+                  </a>
+                </div>
               </div>
             </div>
             
@@ -44,15 +50,19 @@
               </div>
               <div class="contact-details">
                 <div class="contact-label">Phone</div>
-                <div class="contact-value">{{contacts[0].phone}}</div>
+                <div class="contact-value">
+                  <a href="tel:{{contacts[0].phone}}" class="contact-link phone-link">
+                    {{contacts[0].phone}}
+                  </a>
+                </div>
               </div>
             </div>
           </div>
           
-          <button class="contact-btn" (click)="contactAdmin(contacts[0])" style="background-color: #2f59eb !important;">
+          <!-- <button class="contact-btn" (click)="contactAdmin(contacts[0])" style="background-color: #2f59eb !important;">
             <i class="pi pi-send"></i>
             Contact Now
-          </button>
+          </button> -->
         </div>
       </div>
 
@@ -71,7 +81,13 @@
               </div>
               <div class="contact-details">
                 <div class="contact-label">Email</div>
-                <div class="contact-value">{{contacts[1].email}}</div>
+                <div class="contact-value">
+                  <a href="{{getGmailUrl(contacts[1].email, contacts[1].name)}}" 
+                     target="_blank"
+                     class="contact-link email-link">
+                    {{contacts[1].email}}
+                  </a>
+                </div>
               </div>
             </div>
             
@@ -81,15 +97,19 @@
               </div>
               <div class="contact-details">
                 <div class="contact-label">Phone</div>
-                <div class="contact-value">{{contacts[1].phone}}</div>
+                <div class="contact-value">
+                  <a href="tel:{{contacts[1].phone}}" class="contact-link phone-link">
+                    {{contacts[1].phone}}
+                  </a>
+                </div>
               </div>
             </div>
           </div>
           
-          <button class="contact-btn" (click)="contactAdmin(contacts[1])" style="background-color: #2f59eb !important;">
+          <!-- <button class="contact-btn" (click)="contactAdmin(contacts[1])" style="background-color: #2f59eb !important;">
             <i class="pi pi-send"></i>
             Contact Now
-          </button>
+          </button> -->
         </div>
       </div>
     </div>

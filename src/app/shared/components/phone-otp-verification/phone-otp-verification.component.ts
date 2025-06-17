@@ -21,6 +21,7 @@ import {
 } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { environment } from '../../../../enviornments/enviornment';
+import { SweetAlertService } from '../../services/sweet-alert.service';
 
 interface Country {
   name: string;
@@ -109,10 +110,10 @@ interface Country {
         </div>
       </div>
       
-      <div class="invalid-feedback d-block phone-otp-error" *ngIf="phoneControl.invalid && phoneControl.touched">
+      <!-- <div class="invalid-feedback d-block phone-otp-error" *ngIf="phoneControl.invalid && phoneControl.touched">
         <i class="pi pi-exclamation-triangle" style="margin-right: 0.4rem;"></i>
         {{ errorMessage }}
-      </div>
+      </div> -->
       
       <!-- Inline OTP Verification Section (Replaces Dialog) -->
       <div class="otp-verification-section" *ngIf="showOtpDialog" [ngClass]="{'has-error': otpError}">
@@ -125,10 +126,10 @@ interface Country {
           </div>
           
           <!-- OTP Error Message -->
-          <div class="otp-error-message" *ngIf="otpError">
+          <!-- <div class="otp-error-message" *ngIf="otpError">
             <i class="pi pi-exclamation-triangle"></i>
             <span>{{ otpErrorMessage }}</span>
-          </div>
+          </div> -->
           
           <div class="otp-input-wrapper">
             <input 
@@ -532,7 +533,7 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   isVerifying = false;
   verificationId: string = '';
 
-  constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService, private cdr: ChangeDetectorRef) {
+  constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService, private cdr: ChangeDetectorRef, private sweetAlertService: SweetAlertService) {
     // Set default country to India or use the provided countryCode
     this.selectedCountry = this.countries.find(c => c.code === this.countryCode) || this.countries[0];
     
@@ -602,28 +603,26 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     // Reset OTP error state
     this.otpError = false;
     this.otpErrorMessage = '';
-    
-    this.firebaseService.sendPhoneVerificationCode(
-      '+' + this.selectedCountry.code + this.phoneControl.value,
-      'recaptcha-container'
-    ).then((res:any) => {
-      console.log(res);
-      if(res.verificationId) {
-        this.verificationId = res.verificationId;
-        this.isLoading = false;
-        this.showOtpDialog = true;
-        // Start the resend timer
-        this.startResendTimer();
-        this.cdr.detectChanges();
-      }
+
+    let endPoint = `/api/method/wefab.wefab.api.common.core.authentication.mobile_otp_verification.send_otp`
+
+    let body = {
+      phone_number: this.phoneControl.value,
+      country_code: this.selectedCountry.code,
+    }
+
+    this.commonService.postData(endPoint, body).subscribe((res:any) => {
+      this.isLoading = false;
+      this.verificationId = res.verification_id;
+      this.showOtpDialog = true;
+      this.startResendTimer();
+      this.cdr.detectChanges();
     }, (err:any) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error', 
-          detail: err.message || 'Failed to send verification code',
-          life: 5000
-        });
-        this.isLoading = false;
+      this.isLoading = false;
+      
+      this.sweetAlertService.error(err.message || 'Failed to send verification code');
+
+      this.isLoading = false;
         this.verificationError = true;
         this.cdr.detectChanges();
         
@@ -633,6 +632,37 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
           this.cdr.detectChanges();
         }, 3000);
     });
+    
+    // this.firebaseService.sendPhoneVerificationCode(
+    //   '+' + this.selectedCountry.code + this.phoneControl.value,
+    //   'recaptcha-container'
+    // ).then((res:any) => {
+    //   console.log(res);
+    //   if(res.verificationId) {
+    //     this.verificationId = res.verificationId;
+    //     this.isLoading = false;
+    //     this.showOtpDialog = true;
+    //     // Start the resend timer
+    //     this.startResendTimer();
+    //     this.cdr.detectChanges();
+    //   }
+    // }, (err:any) => {
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: 'Error', 
+    //       detail: err.message || 'Failed to send verification code',
+    //       life: 5000
+    //     });
+    //     this.isLoading = false;
+    //     this.verificationError = true;
+    //     this.cdr.detectChanges();
+        
+    //     // Reset verification error after 3 seconds
+    //     setTimeout(() => {
+    //       this.verificationError = false;
+    //       this.cdr.detectChanges();
+    //     }, 3000);
+    // });
   }
   
   verifyOTP(): void {
@@ -645,25 +675,19 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     this.isVerifying = true;
     // Reset OTP error state
     this.otpError = false;
-    
-    // Use the confirmation result directly since the FirebaseService's sendPhoneVerificationCode method returns it
-    if (!this.verificationId) {
-      this.otpError = true;
-      this.otpErrorMessage = 'Verification ID not found. Please try again.';
-      this.isVerifying = false;
-      return;
+
+    let endpoint = `/api/method/wefab.wefab.api.common.core.authentication.mobile_otp_verification.verify_otp`
+
+    let body:any = {
+      phone_number: this.phoneControl.value,
+      user_otp: this.otpValue,
     }
 
-    const credential = PhoneAuthProvider.credential(this.verificationId, this.otpValue);
-    signInWithCredential(this.auth, credential)
-      .then(() => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Verified',
-          detail: 'Your phone number has been successfully verified.',
-          life: 3000
-        });
-        
+    this.commonService.getData(endpoint, body).subscribe((res:any) => {
+
+      if(res.message.success) {
+        this.sweetAlertService.success('Phone number verified successfully');
+      
         this.showOtpDialog = false;
         this._isVerified = true;
         this.verified.emit(true);
@@ -678,22 +702,72 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
         }
         
         this.cdr.detectChanges();
-      })
-      .catch((error: any) => {
-        // Handle OTP verification failure
-        this.isVerifying = false;
-        this.otpError = true;
-        this.otpErrorMessage = this.getReadableErrorMessage(error.message) || 'Invalid verification code. Please try again.';
+      } else {
+        if(res.message.message.includes('Invalid OTP')) { 
+          this.sweetAlertService.error(res.message.message);
+          this.isVerifying = false;
+          this.otpError = true;
+          this.otpErrorMessage = 'Invalid verification code. Please try again.';
+          this.cdr.detectChanges();
+        } else {
+          this.sweetAlertService.error(res.message.message);
+          this.isVerifying = false;
+          this.otpError = true;
+          this.showOtpDialog = false;
+        }
+      }
+      
+    }, (err:any) => {
+      this.sweetAlertService.error(err.message || 'Failed to verify phone number');
+
+      this.isVerifying = false;
+      this.otpError = true;
+      this.otpErrorMessage = this.getReadableErrorMessage(err.message) || 'Invalid verification code. Please try again.';
+      
+      this.cdr.detectChanges();
+    });
+
+    // this.commonService.postDataFunction(endpoint, body).subscribe((res:any) => {
+    // const credential = PhoneAuthProvider.credential(this.verificationId, this.otpValue);
+    // signInWithCredential(this.auth, credential)
+    //   .then(() => {
+    //     this.messageService.add({
+    //       severity: 'success',
+    //       summary: 'Verified',
+    //       detail: 'Your phone number has been successfully verified.',
+    //       life: 3000
+    //     });
         
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Verification Failed',
-          detail: this.otpErrorMessage,
-          life: 3000
-        });
+    //     this.showOtpDialog = false;
+    //     this._isVerified = true;
+    //     this.verified.emit(true);
         
-        this.cdr.detectChanges();
-      });
+    //     // Disable the phone control to prevent further changes
+    //     this.phoneControl.disable({ emitEvent: false });
+    //     this.isVerifying = false;
+        
+    //     // Clear the resend timer
+    //     if (this.resendTimerInterval) {
+    //       clearInterval(this.resendTimerInterval);
+    //     }
+        
+    //     this.cdr.detectChanges();
+    //   })
+    //   .catch((error: any) => {
+    //     // Handle OTP verification failure
+    //     this.isVerifying = false;
+    //     this.otpError = true;
+    //     this.otpErrorMessage = this.getReadableErrorMessage(error.message) || 'Invalid verification code. Please try again.';
+        
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: 'Verification Failed',
+    //       detail: this.otpErrorMessage,
+    //       life: 3000
+    //     });
+        
+    //     this.cdr.detectChanges();
+    //   });
   }
   
   // Get user-friendly error messages

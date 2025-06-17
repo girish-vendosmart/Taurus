@@ -1,18 +1,21 @@
 <header class="common-header">
   <div class="header-container">
     <div class="header-left">
-      <h1 class="header-title">{{ title }}</h1>
+      <h1 class="header-title">
+        <span class="title-full">{{ title }}</span>
+        <span class="title-short">Supplier Portal</span>
+      </h1>
     </div>
     <div class="header-right">
       <!-- Help section -->
-      <div class="profile-link" (click)="onHelp()" *ngIf="shouldShowProfile" style="margin-right: -9px;"> 
+      <div class="profile-link" (click)="onHelp()" *ngIf="shouldShowProfile"> 
         <i class="pi pi-question-circle"></i>
-        <span>Help</span>
+        <span class="link-text">Help</span>
       </div>
       <!-- Profile section -->
       <div class="profile-link" (click)="onProfile()" *ngIf="shouldShowProfile">
         <i class="pi pi-user"></i>
-        <span>Profile</span>
+        <span class="link-text">Profile</span>
       </div>
       <div class="avatar-dropdown">
         <button type="button" class="avatar-button" (click)="toggleDropdown()">

@@ -213,6 +213,32 @@ $transition: all 0.3s ease;
         font-size: 0.875rem;
         color: $precision-black;
         font-weight: $font-weight-normal;
+        
+        // Styling for contact links (email and phone)
+        .contact-link {
+          color: $blueprint-blue;
+          text-decoration: none;
+          font-weight: $font-weight-medium;
+          transition: $transition;
+          cursor: pointer;
+          
+          &:hover {
+            color: darken($blueprint-blue, 10%);
+            text-decoration: underline;
+          }
+          
+          &.email-link {
+            &:hover {
+              color: $process-green; // Green for email
+            }
+          }
+          
+          &.phone-link {
+            &:hover {
+              color: $safety-orange; // Orange for phone
+            }
+          }
+        }
       }
     }
   }
@@ -428,7 +454,7 @@ $transition: all 0.3s ease;
     
     .header-back-navigation {
       top: 0.75rem;
-      left: 0.75rem;
+      right: 0.75rem;
       
       .back-btn {
         padding: 0.4rem 0.75rem;
@@ -470,7 +496,7 @@ $transition: all 0.3s ease;
     
     .header-back-navigation {
       top: 0.5rem;
-      left: 0.5rem;
+      right: 0.5rem;
       
       .back-btn {
         padding: 0.3rem 0.6rem;
