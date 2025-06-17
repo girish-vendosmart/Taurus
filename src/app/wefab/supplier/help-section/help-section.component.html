@@ -1,4 +1,68 @@
 <div class="help-section-container">
+  <!-- Copy to clipboard toast notification -->
+  <div class="copy-toast" [class.show]="showCopyToast">
+    <i class="pi pi-check-circle"></i>
+    Phone number copied to clipboard!
+  </div>
+
+  <!-- Dialing Options Modal -->
+  <div class="dialing-options-overlay" [class.show]="showDialingOptions" (click)="closeDialingOptions()">
+    <div class="dialing-options-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Call {{selectedPhoneNumber}}</h3>
+        <button class="close-btn" (click)="closeDialingOptions()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-content">
+        <p class="modal-description">Choose how you'd like to call this number:</p>
+        
+        <div class="dialing-options">
+          <button class="dialing-option" (click)="openGoogleVoice(selectedPhoneNumber)">
+            <div class="option-icon google-voice">
+              <i class="pi pi-phone"></i>
+            </div>
+            <div class="option-details">
+              <h4>Google Voice</h4>
+              <p>Make calls through Google Voice</p>
+            </div>
+          </button>
+          
+          <button class="dialing-option" (click)="openSkypeWeb(selectedPhoneNumber)">
+            <div class="option-icon skype">
+              <i class="pi pi-video"></i>
+            </div>
+            <div class="option-details">
+              <h4>Skype Web</h4>
+              <p>Call using Skype in browser</p>
+            </div>
+          </button>
+          
+          <button class="dialing-option" (click)="openWhatsAppWeb(selectedPhoneNumber)">
+            <div class="option-icon whatsapp">
+              <i class="pi pi-comment"></i>
+            </div>
+            <div class="option-details">
+              <h4>WhatsApp</h4>
+              <p>Message or call via WhatsApp</p>
+            </div>
+          </button>
+          
+          <button class="dialing-option copy-option" (click)="copyToClipboard(selectedPhoneNumber)">
+            <div class="option-icon copy">
+              <i class="pi pi-copy"></i>
+            </div>
+            <div class="option-details">
+              <h4>Copy Number</h4>
+              <p>Copy to clipboard</p>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="help-header">
     <!-- Back Button inside header -->
     <div class="header-back-navigation">
@@ -51,7 +115,10 @@
               <div class="contact-details">
                 <div class="contact-label">Phone</div>
                 <div class="contact-value">
-                  <a href="tel:{{contacts[0].phone}}" class="contact-link phone-link">
+                  <a href="tel:{{contacts[0].phone}}" 
+                     class="contact-link phone-link"
+                     (click)="handlePhoneClick(contacts[0].phone, $event)"
+                     title="Click to see calling options on desktop, tap to call on mobile">
                     {{contacts[0].phone}}
                   </a>
                 </div>
@@ -98,7 +165,10 @@
               <div class="contact-details">
                 <div class="contact-label">Phone</div>
                 <div class="contact-value">
-                  <a href="tel:{{contacts[1].phone}}" class="contact-link phone-link">
+                  <a href="tel:{{contacts[1].phone}}" 
+                     class="contact-link phone-link"
+                     (click)="handlePhoneClick(contacts[1].phone, $event)"
+                     title="Click to see calling options on desktop, tap to call on mobile">
                     {{contacts[1].phone}}
                   </a>
                 </div>

@@ -18,6 +18,218 @@ $transition: all 0.3s ease;
   padding: 1rem;
   background-color: $technical-white;
   min-height: 100vh;
+  position: relative;
+}
+
+// Toast notification for copy to clipboard
+.copy-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, $process-green 0%, darken($process-green, 10%) 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: $border-radius;
+  box-shadow: 0 4px 20px rgba($process-green, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+  font-weight: $font-weight-medium;
+  font-size: 0.875rem;
+  
+  &.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  i {
+    font-size: 1rem;
+    color: rgba(white, 0.9);
+  }
+}
+
+// Dialing Options Modal
+.dialing-options-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  
+  &.show {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .dialing-options-modal {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    max-width: 480px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.8) translateY(40px);
+    transition: all 0.3s ease;
+    
+    .dialing-options-overlay.show & {
+      transform: scale(1) translateY(0);
+    }
+    
+    .modal-header {
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid $material-silver;
+      display: flex;
+      align-items: center;
+      justify-content: between;
+      position: relative;
+      
+      h3 {
+        color: $precision-black;
+        font-size: $h4-font-size;
+        font-weight: $h4-font-weight;
+        margin: 0;
+        flex: 1;
+        text-align: center;
+      }
+      
+      .close-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba($machine-gray, 0.1);
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: $transition;
+        
+        &:hover {
+          background: rgba($machine-gray, 0.2);
+          transform: scale(1.1);
+        }
+        
+        i {
+          font-size: 0.875rem;
+          color: $machine-gray;
+        }
+      }
+    }
+    
+    .modal-content {
+      padding: 1.5rem;
+      
+      .modal-description {
+        color: $machine-gray;
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+      
+      .dialing-options {
+        display: grid;
+        gap: 0.75rem;
+        
+        .dialing-option {
+          background: white;
+          border: 2px solid rgba($blueprint-blue, 0.1);
+          border-radius: $border-radius;
+          padding: 1rem;
+          cursor: pointer;
+          transition: $transition;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          text-align: left;
+          
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba($blueprint-blue, 0.1);
+            border-color: rgba($blueprint-blue, 0.3);
+            
+            .option-icon {
+              transform: scale(1.1);
+            }
+          }
+          
+          .option-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: $transition;
+            
+            i {
+              font-size: 1.25rem;
+              color: white;
+            }
+            
+            &.google-voice {
+              background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+            }
+            
+            &.skype {
+              background: linear-gradient(135deg, #00aff0 0%, #0078d4 100%);
+            }
+            
+            &.whatsapp {
+              background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+            }
+            
+            &.copy {
+              background: linear-gradient(135deg, $machine-gray 0%, darken($machine-gray, 10%) 100%);
+            }
+          }
+          
+          .option-details {
+            flex: 1;
+            
+            h4 {
+              color: $precision-black;
+              font-size: 1rem;
+              font-weight: $font-weight-medium;
+              margin: 0 0 0.25rem 0;
+            }
+            
+            p {
+              color: $machine-gray;
+              font-size: 0.8rem;
+              margin: 0;
+              line-height: 1.3;
+            }
+          }
+          
+          &.copy-option {
+            border-color: rgba($machine-gray, 0.2);
+            
+            &:hover {
+              border-color: rgba($machine-gray, 0.4);
+              box-shadow: 0 4px 20px rgba($machine-gray, 0.1);
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 .help-header {
