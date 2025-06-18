@@ -39,12 +39,6 @@ interface DashboardCard {
   value: string | number;
   icon: string;
   color: string;
-  description: string;
-  trend?: {
-    value: string;
-    direction: 'up' | 'down';
-    period: string;
-  };
 }
 
 interface RecentQuotation {
@@ -216,8 +210,19 @@ export class SupplierDashboardComponent {
   }
 
   ngOnInit(): void {
+    this.getSupplierDashboardData();
     this.getRecentRFQs()
     this.getRecentQuotations()
+  }
+
+  getSupplierDashboardData() {
+    let endPoint = `/api/method/wefab.wefab.api.supplier.dashboard.overall_dashboard.get_supplier_dashboard_counts?supplier_company_id=${this.supplierId}`
+    this.commonService.getWefabData(endPoint).subscribe((res: any) => {
+      this.dashboardCards[0].value = res.message.rfqs_open_to_bid;
+      this.dashboardCards[1].value = res.message.sent_quotes;
+      this.dashboardCards[2].value = res.message.awarded_quotes;
+      this.dashboardCards[3].value = res.message.rejected_quotes;
+    });
   }
 
   getRecentQuotations() {
@@ -378,49 +383,25 @@ export class SupplierDashboardComponent {
       value: '12',
       icon: 'pi pi-file-o',
       color: 'info',
-      description: 'Awaiting your quotation',
-      trend: {
-        value: '+2',
-        direction: 'up',
-        period: 'from last week'
-      }
     },
     {
       title: 'Submitted Quotes',
       value: '24',
       icon: 'pi pi-send',
       color: 'warning',
-      description: 'Quotes under review',
-      trend: {
-        value: '+5',
-        direction: 'up',
-        period: 'from last week'
-      }
     },
     {
       title: 'Awarded Quotes',
-      value: '8',
+      value: '3',
       icon: 'pi pi-check-circle',
       color: 'success',
-      description: 'Quotes accepted by WeFab',
-      trend: {
-        value: '+1',
-        direction: 'up',
-        period: 'from last week'
-      }
     },
     {
       title: 'Rejected Quotes',
-      value: '3',
-      icon: 'pi pi-times-circle',
-      color: 'danger',
-      description: 'Quotes not accepted',
-      trend: {
-        value: '-2',
-        direction: 'down',
-        period: 'from last week'
-      }
-    }
+      value: '8',
+      icon: 'pi pi-check-circle',
+      color: 'success',
+    },
   ];
 
   recentQuotations: RecentQuotation[] = [];
