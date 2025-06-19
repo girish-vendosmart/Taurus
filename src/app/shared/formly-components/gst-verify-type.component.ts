@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FieldType, FieldTypeConfig, FormlyModule } from '@ngx-formly/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { GstVerifyFieldComponent } from '../../wefab/supplier/onboarding/supplier-onboarding/gst-verify-field.component';
+import { GstVerifyFieldComponent } from '../components/gst-verify-field.component';
 import { MessageService } from 'primeng/api';
 
 @Component({

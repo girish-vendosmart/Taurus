@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FieldType, FieldTypeConfig, FormlyModule } from '@ngx-formly/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { BankVerifyFieldComponent } from '../../wefab/supplier/onboarding/supplier-onboarding-l3/bank-verify-field.component';
+import { BankVerifyFieldComponent } from '../components/bank-verify-field.component';
 import { MessageService } from 'primeng/api';
 
 @Component({

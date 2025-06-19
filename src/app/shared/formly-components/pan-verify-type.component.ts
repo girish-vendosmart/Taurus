@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FieldType, FieldTypeConfig, FormlyModule } from '@ngx-formly/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { PanVerifyFieldComponent } from '../../wefab/supplier/onboarding/supplier-onboarding/pan-verify-field.component';
+import { PanVerifyFieldComponent } from '../components/pan-verify-field.component';
 import { MessageService } from 'primeng/api';
 
 @Component({

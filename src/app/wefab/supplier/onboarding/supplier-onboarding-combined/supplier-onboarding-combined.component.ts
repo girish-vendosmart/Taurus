@@ -29,17 +29,17 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
 
 // Import Components
-import { FileUploadComponent } from '../supplier-onboarding/file-upload.component';
-import { MultiFileUploadComponent } from '../supplier-onboarding/multi-file-upload.component';
+import { FileUploadComponent } from '../../../../shared/components/file-upload.component';
+import { MultiFileUploadComponent } from '../../../../shared/components/multi-file-upload.component';
 import { PhoneOtpVerificationComponent } from '../../../../shared/components/phone-otp-verification/phone-otp-verification.component';
 import { PMultiSelectGroupComponent } from '../../../../shared/formly-components/p-multiSelect-group.component';
-import { GstVerifyFieldComponent } from '../supplier-onboarding/gst-verify-field.component';
+import { GstVerifyFieldComponent } from '../../../../shared/components/gst-verify-field.component';
 import { FormlyFieldGstVerifyComponent } from '../../../../shared/formly-components/gst-verify-type.component';
-import { PanVerifyFieldComponent } from '../supplier-onboarding/pan-verify-field.component';
+import { PanVerifyFieldComponent } from '../../../../shared/components/pan-verify-field.component';
 import { FormlyFieldPanVerifyComponent } from '../../../../shared/formly-components/pan-verify-type.component';
 import { PDropdownGroupSearchComponent } from '../../../../shared/formly-components/p-dropdown-group-search.component';
 import { FormlyFieldPDropdownGroupSearchComponent } from '../../../../shared/formly-components/p-dropdown-group-search-type.component';
-import { BankVerifyFieldComponent } from '../supplier-onboarding-l3/bank-verify-field.component';
+import { BankVerifyFieldComponent } from '../../../../shared/components/bank-verify-field.component';
 import { FormlyFieldBankVerifyComponent } from '../../../../shared/formly-components/bank-verify-type.component';
 import { FormlyRepeatTypeComponent } from '../../../../shared/formly-components/formly-repeat-type.component';
 import { FormlyFieldFileUploadComponent } from '../../../../shared/formly-components/file-upload-type.component';

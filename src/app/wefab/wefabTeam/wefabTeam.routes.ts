@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { WefabTeamLayoutComponent } from './wefabTeam-layout/wefabTeam-layout.component';
 import { ManageSuppliersComponent } from './manage-suppliers/manage-suppliers.component';
-import { SupplierProfileReviewComponent } from '../supplier/profile-review/supplier-profile-review/supplier-profile-review.component';
+import { SupplierProfileReviewComponent } from '../supplier/onboarding/supplier-profile-review/supplier-profile-review.component';
 import { SupplierFinderComponent } from '../wefabTeam/supplier-finder/supplier-finder.component';
 import { AuthGuard } from '../../core/guards/auth.guard';
 
