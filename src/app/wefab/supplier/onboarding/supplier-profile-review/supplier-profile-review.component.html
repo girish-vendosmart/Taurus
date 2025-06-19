@@ -123,7 +123,7 @@
         <span class="status-rejected" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Rejected')">
           {{ mainCurrentDataStatusTrack }}
         </span>
-        <span class="status-update" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Request for Update')">
+        <span class="status-update" *ngIf="mainCurrentDataStatusTrack && mainCurrentDataStatusTrack.includes('Request for Change')">
           {{ mainCurrentDataStatusTrack }}
         </span>
         <span class="status-pending" *ngIf="!mainCurrentDataStatusTrack">Pending</span>
@@ -197,7 +197,7 @@
                 <i class="pi pi-times-circle"></i> Reject
               </div>
               <div class="dropdown-item" (click)="$event.stopPropagation(); showUpdateRequestDialog('L1')">
-                <i class="pi pi-sync"></i> Request for Update
+                <i class="pi pi-sync"></i> Request for Change
               </div>
             </div>
           </div>
@@ -224,7 +224,7 @@
                 <i class="pi pi-times-circle"></i> Reject
               </div>
               <div class="dropdown-item" (click)="$event.stopPropagation(); showUpdateRequestDialog('L2')">
-                <i class="pi pi-sync"></i> Request for Update
+                <i class="pi pi-sync"></i> Request for Change
               </div>
             </div>
           </div>
@@ -252,7 +252,7 @@
                 <i class="pi pi-times-circle"></i> Reject
               </div>
               <div class="dropdown-item" (click)="$event.stopPropagation(); showUpdateRequestDialog('L3')">
-                <i class="pi pi-sync"></i> Request for Update
+                <i class="pi pi-sync"></i> Request for Change
               </div>
             </div>
           </div>
@@ -1338,7 +1338,7 @@
   <div class="update-request-overlay" (click)="cancelUpdateRequest()"></div>
   <div class="update-request-content">
     <div class="update-request-header">
-      <h3>Request for Update</h3>
+      <h3>Request for Change</h3>
       <button class="close-dialog" (click)="cancelUpdateRequest()">
         <i class="pi pi-times"></i>
       </button>
