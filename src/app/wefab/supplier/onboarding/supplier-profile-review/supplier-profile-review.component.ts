@@ -550,7 +550,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   findOutMainStatus() {
     if(this.currentOnboardingStage === 'L1 Under Review' || this.currentOnboardingStage === 'L2 Under Review' || this.currentOnboardingStage === 'L3 Under Review'){
       this.mainCurrentDataStatusTrack = 'Under Review';
-    } else if(this.currentOnboardingStage === 'L3 Approved'){
+    } else if(this.currentOnboardingStage === 'Approved'){
       this.mainCurrentDataStatusTrack = 'Approved';
     } else if(this.currentOnboardingStage === 'L1 Rejected' || this.currentOnboardingStage === 'L2 Rejected' || this.currentOnboardingStage === 'L3 Rejected'){
       this.mainCurrentDataStatusTrack = 'Rejected';
@@ -566,7 +566,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       try {
         // Parse the new data structure with separate fields
         const basicDetails = result.data.basic_details ? JSON.parse(result.data.basic_details) : {};
-        this.currentOnboardingStage = result.data.onboarding_form_status;
+        this.currentOnboardingStage = result.data.onboarding_status;
         this.findOutMainStatus()
         this.basicDetails = basicDetails;
         const contactCapabilities = result.data.contact_capabilities ? JSON.parse(result.data.contact_capabilities) : {};
@@ -1548,10 +1548,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private processApproval(level: string): void {
-    let currentLevel = level === 'L1' ? 'L2 Under Review': level === 'L2' ? 'L3 Under Review' : 'L3 Approved';
+    let currentLevel = level === 'L1' ? 'L2 Under Review': level === 'L2' ? 'L3 Under Review' : 'Approved';
     const endpoint = `/api/resource/Supplier Onboarding L1/${this.supplierId}`
     const data = {
-      onboarding_form_status: currentLevel
+      onboarding_status: currentLevel
     };
 
     this.commonservice.putData(endpoint, data).subscribe({
@@ -1584,7 +1584,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     let currentLevel = level === 'L1' ? 'L1 Rejected': level === 'L2' ? 'L2 Rejected' : 'L3 Rejected';
     const endpoint = `/api/resource/Supplier Onboarding L1/${this.supplierId}`
     const data = {
-      onboarding_form_status: currentLevel
+      onboarding_status: currentLevel
     };
 
     this.commonservice.putData(endpoint, data).subscribe({
@@ -1628,7 +1628,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
     const endpoint = `/api/resource/Supplier Onboarding L1/${this.supplierId}`
     const data = {
-      onboarding_form_status: currentLevel,
+      onboarding_status: currentLevel,
       comment: this.updateRequestComment
     };
 
