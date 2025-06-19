@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Route } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { environment } from '../../../enviornments/enviornment';
+import { environment } from '../../../enviornments/environment.qa';
 import { Router } from '@angular/router';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { getAuth } from 'firebase/auth';
