@@ -215,7 +215,7 @@ export class LoginComponentComponent {
   getOnboardingL3Status(supplierId: string) {
     let endPoint = `/api/resource/Supplier Onboarding L1/${supplierId}`;
     this.commonService.getData(endPoint).subscribe((res: any) => {
-      if(res.data.onboarding_form_status === 'L3 Approved') {
+      if(res.data.onboarding_status === 'Approved') {
         localStorage.setItem('supplier_onboarding_complete', 'true');
         localStorage.setItem('show_supplier_dashboard', 'true');
         this.router.navigate(['/wefab/supplier/dashboard']);
