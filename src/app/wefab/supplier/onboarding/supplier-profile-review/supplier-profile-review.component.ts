@@ -554,8 +554,8 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
       this.mainCurrentDataStatusTrack = 'Approved';
     } else if(this.currentOnboardingStage === 'L1 Rejected' || this.currentOnboardingStage === 'L2 Rejected' || this.currentOnboardingStage === 'L3 Rejected'){
       this.mainCurrentDataStatusTrack = 'Rejected';
-    } else if(this.currentOnboardingStage === 'L1 Request for Update' || this.currentOnboardingStage === 'L2 Request for Update' || this.currentOnboardingStage === 'L3 Request for Update'){
-      this.mainCurrentDataStatusTrack = 'Request for Update';
+    } else if(this.currentOnboardingStage === 'L1 Request for Change' || this.currentOnboardingStage === 'L2 Request for Change' || this.currentOnboardingStage === 'L3 Request for Change'){
+      this.mainCurrentDataStatusTrack = 'Request for Change';
     }
   }
 
@@ -579,7 +579,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           this.basicDetailsRejected = true;
           this.basicDetailsUnderReview = false;
           this.basicDetailsRequestForUpdate = false;
-        } else if (this.basicDetails && this.contactCapabilities && this.currentOnboardingStage === 'L1 Request for Update') {
+        } else if (this.basicDetails && this.contactCapabilities && this.currentOnboardingStage === 'L1 Request for Change') {
           this.basicDetailsUnderReview = false;
           this.basicDetailsRejected = false;
           this.basicDetailsRequestForUpdate = true;
@@ -600,7 +600,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         } else if (Object.keys(this.machineCapabilities).length > 0 && Object.keys(this.facilityVerification).length > 0 && this.currentOnboardingStage === 'L2 Rejected') {
           this.manufacturingRejected = true;
           this.manufacturingUnderReview = false;
-        } else if (Object.keys(this.machineCapabilities).length > 0 && Object.keys(this.facilityVerification).length > 0 && this.currentOnboardingStage === 'L2 Request for Update') {
+        } else if (Object.keys(this.machineCapabilities).length > 0 && Object.keys(this.facilityVerification).length > 0 && this.currentOnboardingStage === 'L2 Request for Change') {
           this.manufacturingUnderReview = false;
           this.manufacturingRejected = false;
           this.manufacturingRequestForUpdate = true;
@@ -651,7 +651,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         } else if (this.financialInformation && Object.keys(this.financialInformation).length > 0 && this.currentOnboardingStage === 'L3 Rejected') {
           this.financialRejected = true;
           this.financialUnderReview = false;
-        } else if (this.financialInformation && Object.keys(this.financialInformation).length > 0 && this.currentOnboardingStage === 'L3 Request for Update') {
+        } else if (this.financialInformation && Object.keys(this.financialInformation).length > 0 && this.currentOnboardingStage === 'L3 Request for Change') {
           this.financialUnderReview = false;
           this.financialRejected = false;
           this.financialRequestForUpdate = true;
@@ -1624,7 +1624,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   sendUpdateRequest(): void {
     if (!this.updateRequestComment.trim()) return;
 
-    let currentLevel = this.updateRequestLevel === 'L1' ? 'L1 Request for Update': this.updateRequestLevel === 'L2' ? 'L2 Request for Update' : 'L3 Request for Update';
+    let currentLevel = this.updateRequestLevel === 'L1' ? 'L1 Request for Change': this.updateRequestLevel === 'L2' ? 'L2 Request for Change' : 'L3 Request for Change';
 
     const endpoint = `/api/resource/Supplier Onboarding L1/${this.supplierId}`
     const data = {

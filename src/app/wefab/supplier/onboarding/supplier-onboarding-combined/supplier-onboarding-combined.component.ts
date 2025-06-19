@@ -1413,7 +1413,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       phone_verified: this.phoneVerified,
       gst_verified: this.gstVerified,
       pan_verified: this.panVerified,
-      onboarding_status: this.currentOnboardingFormStatus === 'L1 Request for Update' ? 'L1 Under Review' : this.currentOnboardingFormStatus === 'L2 Request for Update' ? 'L2 Under Review' : this.currentOnboardingFormStatus === 'L3 Request for Update' ? 'L3 Under Review' : this.currentOnboardingFormStatus,
+      onboarding_status: this.currentOnboardingFormStatus === 'L1 Request for Change' ? 'L1 Under Review' : this.currentOnboardingFormStatus === 'L2 Request for Change' ? 'L2 Under Review' : this.currentOnboardingFormStatus === 'L3 Request for Change' ? 'L3 Under Review' : this.currentOnboardingFormStatus,
       [currentStepKey]: JSON.stringify(body)
     };
 
