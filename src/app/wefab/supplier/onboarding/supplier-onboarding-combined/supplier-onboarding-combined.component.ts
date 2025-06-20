@@ -1735,7 +1735,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   getStates(country: any) {
     if (!country) return;
     
-    let endPoint = `/api/resource/City?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"]]`;
+    let endPoint = `/api/resource/City?fields=["country_title", "state_title", "city_title"]&filters=[["country_title", "=", "${country}"]]&limit=0`;
     console.log('Fetching states for country:', country);
     
     this.commonService.getData(endPoint).subscribe((res: any) => {
