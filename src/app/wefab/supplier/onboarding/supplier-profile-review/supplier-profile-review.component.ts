@@ -246,6 +246,145 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   // Add isArray method for use in the template
   isArray = Array.isArray;
 
+  // Manufacturing process options for label mapping
+  private manufacturingProcessOptions = [
+    {
+      label: 'Precision Machining',
+      items: [
+        { value: "tight_tolerance_machining", label: "Tight Tolerance Machining" },
+        { value: "micro_machining", label: "Micro Machining" },
+        { value: "surface_finishing", label: "Surface Finishing" },
+        { value: "complex_geometry", label: "Complex Geometry" },
+        { value: "prototype_machining", label: "Prototype Machining" }
+      ]
+    },
+    {
+      label: '3-axis Milling',
+      items: [
+        { value: "face_milling", label: "Face Milling" },
+        { value: "end_milling", label: "End Milling" },
+        { value: "slot_milling", label: "Slot Milling" },
+        { value: "profile_milling", label: "Profile Milling" },
+        { value: "pocket_milling", label: "Pocket Milling" },
+        { value: "drilling", label: "Drilling" },
+        { value: "tapping", label: "Tapping" },
+        { value: "boring", label: "Boring" }
+      ]
+    },
+    {
+      label: '4-axis Milling',
+      items: [
+        { value: "rotary_4axis", label: "Rotary 4-axis" },
+        { value: "indexing_4axis", label: "Indexing 4-axis" },
+        { value: "continuous_4axis", label: "Continuous 4-axis" },
+        { value: "angular_features", label: "Angular Features" },
+        { value: "cylindrical_parts", label: "Cylindrical Parts" },
+        { value: "cam_profiles", label: "Cam Profiles" },
+        { value: "helical_features", label: "Helical Features" },
+        { value: "compound_angles", label: "Compound Angles" },
+        { value: "rotational_symmetry", label: "Rotational Symmetry" },
+        { value: "tube_cutting", label: "Tube Cutting" },
+        { value: "pipe_cutting", label: "Pipe Cutting" },
+        { value: "wrap_around_features", label: "Wrap-around Features" }
+      ]
+    },
+    {
+      label: '5-axis Milling',
+      items: [
+        { value: "simultaneous_5axis", label: "Simultaneous 5-axis" },
+        { value: "positional_5axis", label: "Positional 5-axis" },
+        { value: "complex_surfaces", label: "Complex Surfaces" },
+        { value: "aerospace_parts", label: "Aerospace Parts" },
+        { value: "turbine_blades", label: "Turbine Blades" },
+        { value: "impellers", label: "Impellers" }
+      ]
+    },
+    {
+      label: 'CNC Turning',
+      items: [
+        { value: "external_turning", label: "External Turning" },
+        { value: "internal_turning", label: "Internal Turning" },
+        { value: "facing", label: "Facing" },
+        { value: "grooving", label: "Grooving" },
+        { value: "threading", label: "Threading" },
+        { value: "knurling", label: "Knurling" },
+        { value: "parting", label: "Parting" },
+        { value: "live_tooling", label: "Live Tooling" },
+        { value: "sub_spindle", label: "Sub-spindle" },
+        { value: "swiss_turning", label: "Swiss Turning" }
+      ]
+    },
+    {
+      label: 'Wire EDM',
+      items: [
+        { value: "precision_cutting", label: "Precision Cutting" },
+        { value: "complex_profiles", label: "Complex Profiles" },
+        { value: "hardened_materials", label: "Hardened Materials" },
+        { value: "small_features", label: "Small Features" }
+      ]
+    },
+    {
+      label: 'Sheet Metal Works',
+      items: [
+        { value: "laser_cutting", label: "Laser Cutting" },
+        { value: "plasma_cutting", label: "Plasma Cutting" },
+        { value: "waterjet_cutting", label: "Waterjet Cutting" },
+        { value: "punching", label: "Punching" },
+        { value: "blanking", label: "Blanking/Shearing" },
+        { value: "bending", label: "Bending/Press Brake" },
+        { value: "rolling", label: "Rolling" },
+        { value: "stamping", label: "Stamping" },
+        { value: "deep_drawing", label: "Deep Drawing" },
+        { value: "spinning", label: "Spinning" },
+        { value: "welding", label: "Welding" },
+        { value: "assembly", label: "Assembly" }
+      ]
+    },
+    {
+      label: '3D Printing',
+      items: [
+        { value: "metal_3d_printing", label: "Metal 3D Printing" },
+        { value: "plastic_3d_printing", label: "Plastic 3D Printing" },
+        { value: "dmls", label: "DMLS" },
+        { value: "slm", label: "SLM" },
+        { value: "ebm", label: "EBM" },
+        { value: "binder_jetting", label: "Binder Jetting" },
+        { value: "ded", label: "DED" },
+        { value: "fdm", label: "FDM" },
+        { value: "sla", label: "SLA" },
+        { value: "sls", label: "SLS" },
+        { value: "polyjet", label: "Material Jetting/PolyJet" },
+        { value: "dlp", label: "DLP" },
+        { value: "clip", label: "CLIP" }
+      ]
+    },
+    {
+      label: 'Surface Treatment',
+      items: [
+        { value: "grinding", label: "Grinding" },
+        { value: "polishing", label: "Polishing" },
+        { value: "lapping", label: "Lapping" },
+        { value: "honing", label: "Honing" },
+        { value: "sandblasting", label: "Sandblasting" },
+        { value: "anodizing", label: "Anodizing" },
+        { value: "plating", label: "Plating" },
+        { value: "powder_coating", label: "Powder Coating" },
+        { value: "heat_treatment", label: "Heat Treatment" }
+      ]
+    },
+    {
+      label: 'Special Processes',
+      items: [
+        { value: "ultrasonic_machining", label: "Ultrasonic Machining" },
+        { value: "electrochemical_machining", label: "Electrochemical Machining" },
+        { value: "electrical_discharge_machining", label: "Electrical Discharge Machining" },
+        { value: "laser_machining", label: "Laser Machining" },
+        { value: "abrasive_waterjet", label: "Abrasive Waterjet" },
+        { value: "electron_beam_machining", label: "Electron Beam Machining" }
+      ]
+    }
+  ];
+
   // Observables for reactive data loading
   private dataLoadingSubject = new BehaviorSubject<boolean>(false);
   public dataLoading$ = this.dataLoadingSubject.asObservable();
@@ -1339,7 +1478,23 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   // Utility methods
   formatProcessName(process: string): string {
-    return process.replace(/([A-Z])/g, ' $1').trim();
+    return this.getManufacturingProcessLabel(process)
+  }
+
+  // Method to get manufacturing process label from value
+  getManufacturingProcessLabel(value: string): string {
+    if (!value) return 'Not specified';
+    
+    // Search through all categories and items to find the matching value
+    for (const category of this.manufacturingProcessOptions) {
+      const item = category.items.find(item => item.value === value);
+      if (item) {
+        return item.label;
+      }
+    }
+    
+    // If no match found, return the value with formatted display
+    return this.formatProcessName(value);
   }
 
   // Method to mask account number for security
