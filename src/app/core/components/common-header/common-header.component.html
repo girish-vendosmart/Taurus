@@ -1,6 +1,15 @@
 <header class="common-header">
   <div class="header-container">
     <div class="header-left">
+      <!-- Mobile Menu Toggle -->
+      <button 
+        type="button" 
+        class="mobile-menu-toggle" 
+        (click)="onMobileMenuToggle()"
+        [class.active]="showMobileMenu">
+        <i class="pi pi-bars"></i>
+      </button>
+      
       <h1 class="header-title">
         <span class="title-full">{{ title }}</span>
         <span class="title-short">Supplier Portal</span>

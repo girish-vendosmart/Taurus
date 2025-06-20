@@ -1,17 +1,15 @@
 # Common Sidebar Component
 
-A highly configurable, reusable sidebar component built with Angular and PrimeNG that follows the WE-FAB style guide.
+A flexible, responsive sidebar component with PrimeNG PanelMenu integration and mobile hamburger menu support.
 
 ## Features
 
-- ✅ **Fully Configurable**: Pass JSON configuration to define menu items
-- ✅ **PrimeNG Integration**: Built using PrimeNG components for consistency
-- ✅ **Nested Menu Support**: Support for multi-level menu hierarchies
-- ✅ **Routing Integration**: Built-in Angular Router support
-- ✅ **Responsive Design**: Mobile-friendly with responsive breakpoints
-- ✅ **Style Guide Compliant**: Follows WE-FAB brand colors and typography
-- ✅ **Smooth Animations**: Elegant hover effects and transitions
-- ✅ **Accessibility**: ARIA compliant and keyboard navigation support
+- 🎨 Modern, animated sidebar with custom styling
+- 📱 **Mobile responsive with hamburger menu toggle**
+- 🔄 Route-aware active states
+- 🌳 Hierarchical menu items with nested children
+- ⚡ Performance optimized with change detection strategies
+- 🎯 TypeScript interfaces for type safety
 
 ## Installation
 
@@ -23,68 +21,130 @@ npm install primeng @primeng/themes
 
 ## Basic Usage
 
-### 1. Import the Component
-
 ```typescript
-import { CommonSidebarComponent, SidebarMenuItem } from './common-core-component/common-sidebar/common-sidebar.component';
+import { CommonSidebarComponent, SidebarMenuItem } from './common-sidebar.component';
+import { CommonHeaderComponent } from '../common-header/common-header.component';
 
 @Component({
-  // ...
-  imports: [CommonSidebarComponent]
+  selector: 'app-layout',
+  template: `
+    <app-common-header 
+      [title]="'My Application'"
+      [showMobileMenu]="isMobileMenuOpen"
+      (mobileMenuToggle)="toggleMobileMenu()">
+    </app-common-header>
+    
+    <app-common-sidebar 
+      [menuItems]="sidebarMenuItems"
+      [mobileMenuOpen]="isMobileMenuOpen"
+      (mobileMenuClose)="closeMobileMenu()">
+    </app-common-sidebar>
+  `
 })
-```
-
-### 2. Define Menu Items
-
-```typescript
-export class YourComponent {
+export class LayoutComponent {
+  isMobileMenuOpen = false;
+  
   sidebarMenuItems: SidebarMenuItem[] = [
     {
+      icon: 'pi pi-home',
+      name: 'Dashboard',
+      route: '/dashboard'
+    },
+    {
       icon: 'pi pi-users',
-      name: 'Manage Suppliers',
-      route: '/suppliers'
-    },
-    {
-      icon: 'pi pi-search',
-      name: 'Supplier Finder',
-      route: '/supplier-finder'
-    },
-    {
-      icon: 'pi pi-chart-bar',
-      name: 'Analytics',
+      name: 'Users',
       children: [
-        {
-          icon: 'pi pi-chart-line',
-          name: 'Performance',
-          route: '/analytics/performance'
-        },
-        {
-          icon: 'pi pi-chart-pie',
-          name: 'Reports',
-          route: '/analytics/reports'
-        }
+        { icon: 'pi pi-user-plus', name: 'Add User', route: '/users/add' },
+        { icon: 'pi pi-list', name: 'List Users', route: '/users/list' }
       ]
     }
   ];
+  
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+  
+  closeMobileMenu() {
+    this.isMobileMenuOpen = false;
+  }
 }
 ```
 
-### 3. Use in Template
+## Mobile Hamburger Menu
 
-```html
-<app-common-sidebar 
-  [menuItems]="sidebarMenuItems"
-  [visible]="true"
-  [showHeader]="true"
-  headerTitle="WefabTeam Portal"
-  width="280px">
-</app-common-sidebar>
+The sidebar now includes mobile responsiveness with a hamburger menu:
 
-<!-- Your main content with margin to accommodate sidebar -->
-<div class="main-content" style="margin-left: 280px;">
-  <!-- Your content here -->
-</div>
+### Features:
+- 🍔 Hamburger icon in header (shows on mobile devices only)
+- 📱 Slide-in animation for mobile menu
+- 🌚 Dark backdrop overlay
+- 👆 Touch-friendly controls
+- 🔄 Auto-close on navigation
+
+### Implementation:
+1. Header emits `mobileMenuToggle` event when hamburger is clicked
+2. Parent component manages `isMobileMenuOpen` state
+3. Sidebar receives `mobileMenuOpen` input to show/hide on mobile
+4. Sidebar emits `mobileMenuClose` when backdrop is clicked
+
+## Input Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `menuItems` | `SidebarMenuItem[]` | `[]` | Array of menu items to display |
+| `visible` | `boolean` | `true` | Whether sidebar is visible |
+| `position` | `'left' \| 'right' \| 'top' \| 'bottom'` | `'left'` | Sidebar position |
+| `showHeader` | `boolean` | `true` | Whether to show sidebar header |
+| `headerTitle` | `string` | `'WefabTeam Portal'` | Header title text |
+| `width` | `string` | `'280px'` | Sidebar width |
+| `mobileMenuOpen` | `boolean` | `false` | **NEW:** Controls mobile menu visibility |
+
+## Output Events
+
+| Event | Type | Description |
+|-------|------|-------------|
+| `mobileMenuClose` | `void` | **NEW:** Emitted when mobile menu should close |
+
+## SidebarMenuItem Interface
+
+```typescript
+export interface SidebarMenuItem {
+  icon: string;        // PrimeNG icon class (e.g., 'pi pi-home')
+  name: string;        // Display name
+  route?: string;      // Optional route for navigation
+  children?: SidebarMenuItem[];  // Optional nested menu items
+  command?: () => void; // Optional custom command function
+}
 ```
+
+## Responsive Breakpoints
+
+- **Desktop**: Full sidebar always visible
+- **Tablet (≤768px)**: Hamburger menu appears, sidebar slides in/out
+- **Mobile (≤480px)**: Compact header with prominent hamburger menu
+- **Small Mobile (≤360px)**: Minimal layout with essential elements only
+
+## Styling
+
+The component includes comprehensive SCSS with:
+- CSS custom properties for theming
+- Smooth animations and transitions
+- Dark theme optimized for technical applications
+- Mobile-first responsive design
+- Accessibility-friendly focus states
+
+## Performance Notes
+
+- Menu items are cached to prevent unnecessary re-renders
+- Uses OnPush change detection strategy when possible
+- TrackBy functions for efficient list rendering
+- Automatic cleanup of subscriptions
+
+## Dependencies
+
+- PrimeNG (PanelMenuModule, ButtonModule, etc.)
+- Angular Router
+- Angular Common
 
 ## Configuration Options
 

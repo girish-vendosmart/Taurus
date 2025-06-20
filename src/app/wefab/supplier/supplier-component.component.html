@@ -2,7 +2,9 @@
   <!-- Common Header Component - moved to top level for full width -->
   <app-common-header 
     [title]="showDashboardLayout ? 'Wefab Supplier Portal' : 'Supplier Onboarding Portal'"
-    (logoutEvent)="onHeaderLogout()">
+    [showMobileMenu]="isMobileMenuOpen"
+    (logoutEvent)="onHeaderLogout()"
+    (mobileMenuToggle)="onMobileMenuToggle()">
   </app-common-header>
 
   <!-- Layout body containing sidebar and main content -->
@@ -14,11 +16,13 @@
       [visible]="true"
       [showHeader]="true"
       [headerTitle]="userType === 'wefab_team' ? 'WE-FAB Team Portal' : 'WE-FAB Supplier Portal'"
+      [mobileMenuOpen]="isMobileMenuOpen"
+      (mobileMenuClose)="onMobileMenuClose()"
       width="260px">
     </app-common-sidebar>
 
     <!-- Main content area -->
-    <div class="main-content" [class.with-sidebar]="showDashboardLayout">
+    <div class="main-content" [class.with-sidebar]="showDashboardLayout" [class.mobile-menu-open]="isMobileMenuOpen">
       <!-- Router outlet for all content -->
       <div class="content-area">
         <router-outlet></router-outlet>
