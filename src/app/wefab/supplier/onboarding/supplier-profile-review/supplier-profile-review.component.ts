@@ -363,23 +363,25 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
   }
 
   private handleUrlParameters(): void {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tab = urlParams.get('tab');
+    this.changeLevelTab('basic')
+    // try {
+    //   const urlParams = new URLSearchParams(window.location.search);
+    //   const tab = urlParams.get('tab');
       
-      if (tab && ['basic', 'manufacturing', 'financial'].includes(tab)) {
-        this.activeLevelTab = tab;
-      }
+    //   if (tab && ['basic', 'manufacturing', 'financial'].includes(tab)) {
+    //     this.activeLevelTab = tab;
+    //   }
 
-      if (this.activeLevelTab === 'manufacturing') {
-        const mtab = urlParams.get('mtab');
-        if (mtab && ['machines', 'facility', 'certifications', 'capacity'].includes(mtab)) {
-          this.manufacturingTab = mtab;
-        }
-      }
-    } catch (error) {
-      console.error('Error handling URL parameters:', error);
-    }
+    //   if (this.activeLevelTab === 'manufacturing') {
+    //     const mtab = urlParams.get('mtab');
+    //     if (mtab && ['machines', 'facility', 'certifications', 'capacity'].includes(mtab)) {
+    //       this.manufacturingTab = mtab;
+    //       this.changeManufacturingTab(mtab)
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.error('Error handling URL parameters:', error);
+    // }
   }
 
   private loadEssentialData(): void {
