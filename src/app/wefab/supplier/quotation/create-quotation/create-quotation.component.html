@@ -207,7 +207,7 @@
       (change)="onFileSelected($event)">
 
     <!-- Quotation Items Table -->
-    <div class="table-responsive mb-4" style="overflow: visible;">
+    <div class="table-responsive mb-4 quotation-table-wrapper">
       <table class="table table-bordered quotation-table">
         <thead class="table-light">
           <tr>
@@ -229,15 +229,21 @@
                  pTooltip="No bid are the items excluded from the quote"
                  tooltipPosition="top"></i>
             </th>
-            <th style="width: 200px;">Item Price <span class="text-danger">*</span></th>
-            <th style="width: 250px;">Total Price</th>
+            <th style="width: 200px;">Item Price ({{ model.currency_code }}) <span class="text-danger">*</span></th>
+            <th style="width: 250px;">Total Price ({{ model.currency_code }})</th>
             <th style="width: 120px;">Tax Type <span class="text-danger">*</span></th>
-            <th style="width: 120px;">Tax Amount</th>
+            <th style="width: 120px;">Tax Amount ({{ model.currency_code }})</th>
             <th style="width: 120px;">
-              Miscellaneous
+              Miscellaneous ({{ model.currency_code }})
+            </th>
+            <th style="width: 200px;">
+              Comments
+            </th>
+            <th style="width: 200px;">
+              Notes
             </th>
             <th style="width: 100px;">
-              Tooling <span class="text-danger">*</span>
+              Tooling ({{ model.currency_code }}) <span class="text-danger">*</span>
             </th>
           </tr>
         </thead>
@@ -245,78 +251,68 @@
           <tr *ngFor="let item of model.quotationItems; let i = index; trackBy: trackByItemIndex" class="quotation-row">
             <td class="text-center align-middle">{{ i + 1 }}</td>
             
-            <!-- Item Name - Editable -->
+            <!-- Item Name - Non-Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm table-input-field" 
-                [class.is-invalid]="hasValidationError('item_' + i)"
+                class="form-control form-control-sm non-editable-field" 
                 [(ngModel)]="item.actionItemName"
                 [ngModelOptions]="{standalone: true}"
-                (input)="clearFieldError('item_' + i)"
-                placeholder="Enter item name"
+                readonly
+                placeholder="Item name"
                 style="height: 32px; font-size: 14px;">
             </td>
             
-            <!-- Description - Editable -->
+            <!-- Description - Non-Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm table-input-field" 
+                class="form-control form-control-sm non-editable-field" 
                 [(ngModel)]="item.description"
                 [ngModelOptions]="{standalone: true}"
-                placeholder="Enter description"
-                [pTooltip]="item.description || 'Enter item description and specifications'"
+                readonly
+                placeholder="Description"
+                [pTooltip]="item.description || 'Item description'"
                 tooltipPosition="top"
                 style="height: 32px; font-size: 14px;">
             </td>
             
-            <!-- Material - Editable -->
+            <!-- Material - Non-Editable -->
             <td>
               <input 
                 type="text" 
-                class="form-control form-control-sm table-input-field" 
+                class="form-control form-control-sm non-editable-field" 
                 [(ngModel)]="item.material"
                 [ngModelOptions]="{standalone: true}"
-                placeholder="Enter material"
-                [pTooltip]="item.material || 'Enter material type and specifications'"
+                readonly
+                placeholder="Material"
+                [pTooltip]="item.material || 'Material type'"
                 tooltipPosition="top"
                 style="height: 32px; font-size: 14px;">
             </td>
             
-            <!-- Quantity - Editable -->
+            <!-- Quantity - Non-Editable -->
             <td>
-              <p-inputNumber
+              <input 
+                type="number" 
+                class="form-control form-control-sm non-editable-field" 
                 [(ngModel)]="item.qty"
-                [min]="0"
-                [max]="99999"
-                [style]="{ height: '32px' }"
-                styleClass="w-100 table-input-field"
-                [class.is-invalid]="hasValidationError('item_' + i)"
-                size="small"
-                (onInput)="onQuantityOrPriceChange(item); clearFieldError('item_' + i); updateTaxCalculations()"
                 [ngModelOptions]="{standalone: true}"
-                inputStyleClass="form-control-sm"
-                [inputStyle]="{ 'font-size': '14px', 'height': '32px' }">
-              </p-inputNumber>
+                readonly
+                placeholder="0"
+                style="height: 32px; font-size: 14px;">
             </td>
             
-            <!-- Unit - Editable -->
+            <!-- Unit - Non-Editable -->
             <td>
-              <p-dropdown 
+              <input 
+                type="text" 
+                class="form-control form-control-sm non-editable-field" 
                 [(ngModel)]="item.unit"
-                [options]="unitOptions"
                 [ngModelOptions]="{standalone: true}"
-                optionLabel="label"
-                optionValue="value"
-                [filter]="true"
+                readonly
                 placeholder="Unit"
-                [class.is-invalid]="hasValidationError('item_' + i)"
-                (onChange)="clearFieldError('item_' + i)"
-                styleClass="w-100 table-input-field"
-                [style]="{ 'height': '32px' }"
-                appendTo="body">
-              </p-dropdown>
+                style="height: 32px; font-size: 14px;">
             </td>
             
             <!-- No Bid Checkbox -->
@@ -334,7 +330,7 @@
             <td>
               <input
                 type="number"
-                class="form-control"
+                class="form-control form-control-sm editable-field"
                 [(ngModel)]="item.itemPrice"
                 [disabled]="item.no_bid === 1"
                 [placeholder]="item.no_bid === 1 ? 'No Bid' : 'Enter price'"
@@ -342,7 +338,8 @@
                 [ngModelOptions]="{standalone: true}"
                 (keypress)="onNumberKeyPress($event)"
                 (input)="onNumberInput($event)"
-                (paste)="onNumberPaste($event)">
+                (paste)="onNumberPaste($event)"
+                style="height: 32px; font-size: 14px;">
             </td>
             
             <!-- Total Price -->
@@ -364,7 +361,7 @@
                 placeholder="Tax Type"
                 [class.is-invalid]="hasValidationError('item_' + i)"
                 (onChange)="onItemTaxTypeChange(item); clearFieldError('item_' + i); updateTaxCalculations()"
-                styleClass="w-100 table-input-field"
+                styleClass="w-100 editable-field"
                 [style]="{ 'height': '32px' }"
                 appendTo="body">
               </p-dropdown>
@@ -380,12 +377,45 @@
             <!-- Miscellaneous - Editable -->
             <td>
               <input 
-                type="text" 
-                class="form-control form-control-sm table-input-field" 
+                type="number" 
+                class="form-control form-control-sm editable-field" 
                 [(ngModel)]="item.miscellaneous"
                 [ngModelOptions]="{standalone: true}"
-                placeholder="Misc"
-                [pTooltip]="item.miscellaneous || 'Enter additional notes and specifications'"
+                (input)="onQuantityOrPriceChange(item)"
+                (keypress)="onNumberKeyPress($event)"
+                (input)="onNumberInput($event)"
+                (paste)="onNumberPaste($event)"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                [pTooltip]="'Enter miscellaneous amount: ' + (model.currency_code) + ' ' + (item.miscellaneous || 0)"
+                tooltipPosition="top"
+                style="height: 32px; font-size: 14px;">
+            </td>
+            
+            <!-- Comments - Editable -->
+            <td>
+              <input 
+                type="text" 
+                class="form-control form-control-sm editable-field" 
+                [(ngModel)]="item.comments"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Enter comments"
+                [pTooltip]="item.comments || 'Enter additional comments'"
+                tooltipPosition="top"
+                style="height: 32px; font-size: 14px;">
+            </td>
+            
+            <!-- Notes - Non-Editable -->
+            <td>
+              <input 
+                type="text" 
+                class="form-control form-control-sm non-editable-field" 
+                [(ngModel)]="item.notes"
+                [ngModelOptions]="{standalone: true}"
+                readonly
+                placeholder="Notes"
+                [pTooltip]="item.notes || 'System notes'"
                 tooltipPosition="top"
                 style="height: 32px; font-size: 14px;">
             </td>
@@ -393,14 +423,19 @@
             <!-- Tooling - Editable -->
             <td>
               <input 
-                type="text" 
-                class="form-control form-control-sm table-input-field" 
+                type="number" 
+                class="form-control form-control-sm editable-field" 
                 [class.is-invalid]="hasValidationError('item_' + i)"
                 [(ngModel)]="item.tooling"
                 [ngModelOptions]="{standalone: true}"
-                (input)="clearFieldError('item_' + i)"
-                placeholder="Tooling"
-                [pTooltip]="item.tooling || 'Enter tooling requirements and specifications'"
+                (input)="onQuantityOrPriceChange(item); clearFieldError('item_' + i)"
+                (keypress)="onNumberKeyPress($event)"
+                (input)="onNumberInput($event)"
+                (paste)="onNumberPaste($event)"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                [pTooltip]="'Enter tooling amount: ' + (model.currency_code) + ' ' + (item.tooling || 0)"
                 tooltipPosition="top"
                 style="height: 32px; font-size: 14px;">
             </td>
@@ -516,6 +551,18 @@
             <span class="total-label small fw-medium">Discounted Amount:</span>
             <span class="total-value small text-muted">{{ model.currency_code }} {{ calculatedDiscountedAmount | number:'1.2-2' }}</span>
           </div> -->
+          
+          <!-- Total Miscellaneous -->
+          <div class="d-flex justify-content-between align-items-center mb-2 py-1">
+            <span class="total-label small fw-medium" style="font-size: 14px !important;">Total Miscellaneous:</span>
+            <span class="total-value small" style="font-size: 14px !important;">{{ model.currency_code }} {{ getTotalMiscellaneous() | number:'1.2-2' }}</span>
+          </div>
+          
+          <!-- Total Tooling -->
+          <div class="d-flex justify-content-between align-items-center mb-2 py-1">
+            <span class="total-label small fw-medium" style="font-size: 14px !important;">Total Tooling:</span>
+            <span class="total-value small" style="font-size: 14px !important;">{{ model.currency_code }} {{ getTotalTooling() | number:'1.2-2' }}</span>
+          </div>
           
           <!-- Total Taxable Amount -->
           <div class="d-flex justify-content-between align-items-center mb-2 py-1">

@@ -117,6 +117,105 @@ import { FormlyFieldDropdownComponent } from '../../../../shared/formly-componen
       height: 32px !important;
     }
 
+    /* Editable fields styling - white background */
+    .editable-field,
+    .table-input-field,
+    .form-control.editable-field,
+    .form-control.table-input-field,
+    input.form-control,
+    textarea.form-control,
+    select.form-control,
+    .p-inputtext,
+    .p-dropdown,
+    .p-inputnumber input {
+      background-color: #ffffff !important;
+      border: 1px solid #ced4da;
+    }
+
+    .editable-field:focus,
+    .table-input-field:focus,
+    .form-control:focus,
+    .p-inputtext:focus,
+    .p-dropdown:focus,
+    .p-inputnumber input:focus {
+      background-color: #ffffff !important;
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    /* Non-editable fields should have gray background */
+    .non-editable-field,
+    .form-control[readonly],
+    .form-control[disabled] {
+      background-color: #f8f9fa !important;
+      color: #6c757d !important;
+    }
+
+    /* Table scrolling styles */
+    .quotation-table-wrapper {
+      overflow-x: auto !important;
+      overflow-y: visible;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .quotation-table {
+      min-width: 2000px; /* Ensure minimum width for all columns including new Notes column */
+      white-space: nowrap;
+    }
+
+    .quotation-table th,
+    .quotation-table td {
+      min-width: fit-content;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    /* Ensure input fields in table don't shrink too much */
+    .quotation-table .table-input-field {
+      min-width: 100px;
+    }
+
+    .quotation-table .form-control {
+      min-width: 80px;
+    }
+
+    /* Specific column minimum widths */
+    .quotation-table th:nth-child(1) { min-width: 50px; }   /* S.No */
+    .quotation-table th:nth-child(2) { min-width: 150px; }  /* Item Name */
+    .quotation-table th:nth-child(3) { min-width: 200px; }  /* Description */
+    .quotation-table th:nth-child(4) { min-width: 150px; }  /* Material */
+    .quotation-table th:nth-child(5) { min-width: 80px; }   /* Qty */
+    .quotation-table th:nth-child(6) { min-width: 100px; }  /* Unit */
+    .quotation-table th:nth-child(7) { min-width: 80px; }   /* No Bid */
+    .quotation-table th:nth-child(8) { min-width: 150px; }  /* Item Price */
+    .quotation-table th:nth-child(9) { min-width: 150px; }  /* Total Price */
+    .quotation-table th:nth-child(10) { min-width: 120px; } /* Tax Type */
+    .quotation-table th:nth-child(11) { min-width: 120px; } /* Tax Amount */
+    .quotation-table th:nth-child(12) { min-width: 120px; } /* Miscellaneous */
+    .quotation-table th:nth-child(13) { min-width: 200px; } /* Comments */
+    .quotation-table th:nth-child(14) { min-width: 200px; } /* Notes */
+    .quotation-table th:nth-child(15) { min-width: 120px; } /* Tooling */
+
+    /* Scrollbar styling */
+    .quotation-table-wrapper::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .quotation-table-wrapper::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .quotation-table-wrapper::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+
+    .quotation-table-wrapper::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
     .upload-area {
       border: 2px dashed #dee2e6;
       border-radius: 8px;
@@ -261,8 +360,10 @@ export class CreateQuotationComponent implements OnInit {
         no_bid: 0,
         itemPrice: 0,
         tax_type: 'Non-Taxable',
-        miscellaneous: '',
-        tooling: ''
+        miscellaneous: 0,
+        tooling: 0,
+        comments: '',
+        notes: ''
       }
     ],
     subTotal: 0,
@@ -560,9 +661,11 @@ export class CreateQuotationComponent implements OnInit {
         unit: item.unit || 'Nos',
         itemPrice: itemPrice,
         tax_type: taxType,
-        miscellaneous: this.buildMiscellaneousFromComments(parsedComments),
-        tooling: parsedComments.processRequired || 'Standard',
-        no_bid: item.no_bid || 0
+        miscellaneous: 0, // Initialize as numeric value
+        tooling: 0, // Initialize as numeric value
+        no_bid: item.no_bid || 0,
+        comments: '',
+        notes: item.notes || parsedComments.notes || ''
       };
     });
   }
@@ -754,7 +857,11 @@ export class CreateQuotationComponent implements OnInit {
     // Calculate taxes from individual line items
     const totalTax = this.getTotalTaxAmount();
     
-    this.totalAmount = subtotalAfterDiscount + totalTax + this.shippingCharges;
+    // Calculate miscellaneous and tooling totals
+    const totalMiscellaneous = this.getTotalMiscellaneous();
+    const totalTooling = this.getTotalTooling();
+    
+    this.totalAmount = subtotalAfterDiscount + totalTax + this.shippingCharges + totalMiscellaneous + totalTooling;
     
     // Update model with current values
     this.model.subTotal = this.subTotal;
@@ -778,7 +885,11 @@ export class CreateQuotationComponent implements OnInit {
     // Calculate taxes from individual line items
     const totalTax = this.getTotalTaxAmount();
     
-    return subtotalAfterDiscount + totalTax + this.shippingCharges;
+    // Add miscellaneous and tooling amounts
+    const totalMiscellaneous = this.getTotalMiscellaneous();
+    const totalTooling = this.getTotalTooling();
+    
+    return subtotalAfterDiscount + totalTax + this.shippingCharges + totalMiscellaneous + totalTooling;
   }
 
   get calculatedDiscountedAmount(): number {
@@ -906,6 +1017,30 @@ export class CreateQuotationComponent implements OnInit {
     });
     
     return totalTax;
+  }
+
+  // Method to get total miscellaneous amount from all line items
+  getTotalMiscellaneous(): number {
+    if (!this.model.quotationItems || this.model.quotationItems.length === 0) {
+      return 0;
+    }
+    
+    return this.model.quotationItems.reduce((total: number, item: any) => {
+      const miscAmount = Number(item.miscellaneous) || 0;
+      return total + miscAmount;
+    }, 0);
+  }
+
+  // Method to get total tooling amount from all line items
+  getTotalTooling(): number {
+    if (!this.model.quotationItems || this.model.quotationItems.length === 0) {
+      return 0;
+    }
+    
+    return this.model.quotationItems.reduce((total: number, item: any) => {
+      const toolingAmount = Number(item.tooling) || 0;
+      return total + toolingAmount;
+    }, 0);
   }
 
   // Method to get tax amount for a specific line item
@@ -1311,9 +1446,11 @@ export class CreateQuotationComponent implements OnInit {
         unit: item.unit || 'Nos',
         itemPrice: item.unit_price || 0,
         tax_type: item.tax_type || 'Non-Taxable',
-        miscellaneous: this.buildMiscellaneousFromComments(parsedComments),
-        tooling: parsedComments.processRequired || 'Standard',
-        no_bid: item.no_bid || 0
+        miscellaneous: Number(item.miscellaneous) || 0,
+        tooling: Number(item.tooling) || 0,
+        no_bid: item.no_bid || 0,
+        comments: item.comments || '',
+        notes: item.notes || ''
       };
     });
   }
@@ -1483,9 +1620,11 @@ export class CreateQuotationComponent implements OnInit {
           unit: '',
           itemPrice: 0,
           tax_type: 'Non-Taxable',
-          miscellaneous: '',
-          tooling: '',
-          no_bid: 0
+          miscellaneous: 0,
+          tooling: 0,
+          no_bid: 0,
+          comments: '',
+          notes: ''
         }
       ];
     }
@@ -1953,8 +2092,9 @@ export class CreateQuotationComponent implements OnInit {
       item.material || 
       (item.qty && item.qty > 0) ||
       (item.itemPrice && item.itemPrice > 0) ||
-      item.miscellaneous ||
-      item.tooling
+      (item.miscellaneous && Number(item.miscellaneous) > 0) ||
+      (item.tooling && Number(item.tooling) > 0) ||
+      item.comments
     );
 
     return hasFormChanges || hasItemChanges;
@@ -2136,6 +2276,8 @@ export class CreateQuotationComponent implements OnInit {
       discount_percentage: this.discountType === 'percentage' ? this.discountValue : 0,
       discount_amount: this.discountValue || 0, // Always send the raw input value
       shipping_charges: this.shippingCharges || 0,
+      total_miscellaneous: this.getTotalMiscellaneous(),
+      total_tooling: this.getTotalTooling(),
       total_tax_amount: this.getTotalTaxAmount(),
       sub_total: this.calculatedSubTotal,
       grand_total: this.calculatedTotalAmount,
@@ -2168,7 +2310,10 @@ export class CreateQuotationComponent implements OnInit {
         comments: this.buildItemComments(item),
         no_bid: item.no_bid || 0,
         tax_type: item.tax_type || 'Non-Taxable',
-        tax_amount: this.getLineTaxAmount(item)
+        tax_amount: this.getLineTaxAmount(item),
+        miscellaneous: Number(item.miscellaneous) || 0,
+        tooling: Number(item.tooling) || 0,
+        notes: item.notes || ''
       };
     });
   }
@@ -2211,12 +2356,16 @@ export class CreateQuotationComponent implements OnInit {
       comments.push(`Material: ${item.material}`);
     }
     
-    if (item.miscellaneous) {
-      comments.push(`Misc: ${item.miscellaneous}`);
+    if (item.miscellaneous && Number(item.miscellaneous) > 0) {
+      comments.push(`Miscellaneous: ${this.model.currency_code} ${Number(item.miscellaneous).toFixed(2)}`);
     }
     
-    if (item.tooling) {
-      comments.push(`Tooling: ${item.tooling}`);
+    if (item.tooling && Number(item.tooling) > 0) {
+      comments.push(`Tooling: ${this.model.currency_code} ${Number(item.tooling).toFixed(2)}`);
+    }
+    
+    if (item.comments) {
+      comments.push(`Comments: ${item.comments}`);
     }
     
     return comments.join('; ') || 'Standard manufacturing specifications';
