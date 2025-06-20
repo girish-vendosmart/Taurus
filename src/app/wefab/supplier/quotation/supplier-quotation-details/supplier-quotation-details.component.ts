@@ -45,6 +45,8 @@ export interface SupplierQuotationApiResponse {
   payment_terms: string;
   shipping_terms: string;
   notes: string;
+  total_miscellaneous: number;
+  total_tooling: number;
   doctype: string;
   items: QuotationLineItem[];
   attachments: any[];
@@ -70,6 +72,8 @@ export interface QuotationLineItem {
   discount: number;
   tax_type: string;
   tax_amount: number;
+  miscellaneous: number;
+  tooling: number;
   parent: string;
   parentfield: string;
   parenttype: string;
@@ -110,6 +114,8 @@ export interface QuotationDetails {
   shippingTerms: string;
   notes: string;
   supplierId: string;
+  totalMiscellaneous: number;
+  totalTooling: number;
   quoteFrom: {
     company: string;
     email: string;
@@ -135,6 +141,8 @@ export interface QuotationItem {
   discountType: string;
   tax_type: string;
   tax_amount: number;
+  miscellaneous: number;
+  tooling: number;
 }
 
 export interface QuotationAttachment {
@@ -203,6 +211,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     shippingTerms: '',
     notes: '',
     supplierId: '',
+    totalMiscellaneous: 0,
+    totalTooling: 0,
     quoteFrom: {
       company: '',
       email: '',
@@ -261,6 +271,18 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       {
         field: 'unit_price_formatted',
         header: 'Unit Price',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'miscellaneous_formatted',
+        header: 'Miscellaneous',
+        sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'tooling_formatted',
+        header: 'Tooling',
         sortable: true,
         filterable: true,
       },
@@ -453,6 +475,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       shippingTerms: apiData.shipping_terms,
       notes: apiData.notes,
       supplierId: apiData.supplier_id,
+      totalMiscellaneous: apiData.total_miscellaneous,
+      totalTooling: apiData.total_tooling,
       quoteFrom: {
         company: apiData.quotation_from,
         email: '----', // Not available in new API structure
@@ -481,14 +505,18 @@ export class SupplierQuotationDetailsComponent implements OnInit {
       discount: item.discount,
       discountType: item.discount_type,
       tax_type: item.tax_type,
-      tax_amount: item.tax_amount
+      tax_amount: item.tax_amount,
+      miscellaneous: item.miscellaneous,
+      tooling: item.tooling
     }));
 
     this.rawQuotationItems = apiData.items.map(item => ({
       ...item,
       unit_price_formatted: this.getFormattedCurrencyAmount(item.unit_price, item.currency_code),
       total_price_formatted: this.getFormattedCurrencyAmount(item.total_price, item.currency_code),
-      tax_amount_formatted: this.getFormattedCurrencyAmount(item.tax_amount, item.currency_code)
+      tax_amount_formatted: this.getFormattedCurrencyAmount(item.tax_amount, item.currency_code),
+      miscellaneous_formatted: this.getFormattedCurrencyAmount(item.miscellaneous || 0, item.currency_code),
+      tooling_formatted: this.getFormattedCurrencyAmount(item.tooling || 0, item.currency_code)
     }));
     
     this.totalItems = this.quotationItems.length;
@@ -717,6 +745,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         <td>${item.unit}</td>
         <td>${item.currency}</td>
         <td>${this.getFormattedCurrencyAmount(item.unitPrice, item.currency)}</td>
+        <td>${this.getFormattedCurrencyAmount(item.miscellaneous || 0, item.currency)}</td>
+        <td>${this.getFormattedCurrencyAmount(item.tooling || 0, item.currency)}</td>
         <td>${item.tax_type}</td>
         <td>${this.getFormattedCurrencyAmount(item.tax_amount, item.currency)}</td>
         <td>${this.getFormattedCurrencyAmount(item.totalPrice, item.currency)}</td>
@@ -751,6 +781,27 @@ export class SupplierQuotationDetailsComponent implements OnInit {
         <div class="summary-row">
           <span class="summary-label">Total Tax:</span>
           <span class="summary-value">${this.getFormattedCurrencyAmount(this.getTotalTaxAmount())}</span>
+        </div>
+      `;
+    }
+
+    // Add miscellaneous and tooling rows if applicable
+    let miscellaneousRow = '';
+    if (this.quotationDetails.totalMiscellaneous > 0) {
+      miscellaneousRow = `
+        <div class="summary-row">
+          <span class="summary-label">Total Miscellaneous:</span>
+          <span class="summary-value">${this.getFormattedCurrencyAmount(this.quotationDetails.totalMiscellaneous)}</span>
+        </div>
+      `;
+    }
+
+    let toolingRow = '';
+    if (this.quotationDetails.totalTooling > 0) {
+      toolingRow = `
+        <div class="summary-row">
+          <span class="summary-label">Total Tooling:</span>
+          <span class="summary-value">${this.getFormattedCurrencyAmount(this.quotationDetails.totalTooling)}</span>
         </div>
       `;
     }
@@ -890,6 +941,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
                 <th>Unit</th>
                 <th>Currency</th>
                 <th>Unit Price</th>
+                <th>Miscellaneous</th>
+                <th>Tooling</th>
                 <th>Tax Type</th>
                 <th>Tax Amount</th>
                 <th>Total Price</th>
@@ -911,6 +964,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
             <span class="summary-label">${this.getDiscountDisplayText()}</span>
             <span class="summary-value">${this.getFormattedCurrencyAmount(this.quotationDetails.discountAmount)}</span>
           </div>
+          ${miscellaneousRow}
+          ${toolingRow}
           ${taxRows}
           ${shippingRow}
           <div class="summary-row total-row">

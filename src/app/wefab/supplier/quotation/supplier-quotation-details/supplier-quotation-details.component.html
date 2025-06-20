@@ -168,6 +168,18 @@
               <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.discountAmount) }}</span>
             </div>
             
+            <!-- Total Miscellaneous - Show if greater than 0 -->
+            <div class="summary-row" *ngIf="quotationDetails.totalMiscellaneous > 0">
+              <span class="summary-label">Total Miscellaneous:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.totalMiscellaneous) }}</span>
+            </div>
+            
+            <!-- Total Tooling - Show if greater than 0 -->
+            <div class="summary-row" *ngIf="quotationDetails.totalTooling > 0">
+              <span class="summary-label">Total Tooling:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.totalTooling) }}</span>
+            </div>
+            
             <!-- Total Tax Amount - Show if greater than 0 -->
             <div class="summary-row" *ngIf="quotationDetails.totalTaxAmount > 0">
               <span class="summary-label">Total Tax Amount:</span>

@@ -19,6 +19,9 @@ export class SupplierComponentComponent {
   loginError: string = '';
   showDashboardLayout: boolean = false;
   normalLayoutHeader: string = '';
+  
+  // Mobile menu state management
+  isMobileMenuOpen: boolean = false;
 
   // Sidebar menu items configuration
   sidebarMenuItems: SidebarMenuItem[] = [
@@ -53,6 +56,13 @@ export class SupplierComponentComponent {
     });
 
     this.supplierId = localStorage.getItem('supplier_id');
+    
+    // Handle screen resize to auto-close mobile menu on desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768 && this.isMobileMenuOpen) {
+        this.isMobileMenuOpen = false;
+      }
+    });
   }
 
   checkDashboardVisibility(): void {
@@ -158,5 +168,23 @@ export class SupplierComponentComponent {
         this.loginError = 'Network error. Please check your connection and try again.';
       }
     });
+  }
+
+  /**
+   * Handle mobile menu toggle from header component
+   */
+  onMobileMenuToggle(): void {
+    console.log('🍔 Mobile menu toggle received in supplier component');
+    console.log('📊 Before toggle:', this.isMobileMenuOpen);
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    console.log('📊 After toggle:', this.isMobileMenuOpen);
+  }
+
+  /**
+   * Handle mobile menu close from sidebar component
+   */
+  onMobileMenuClose(): void {
+    console.log('🌚 Mobile menu close received in supplier component');
+    this.isMobileMenuOpen = false;
   }
 }

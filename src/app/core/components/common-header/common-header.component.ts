@@ -12,7 +12,9 @@ import { AuthService } from '../../services/auth.service';
 })
 export class CommonHeaderComponent {
   @Input() title: string = 'Supplier Onboarding Portal';
+  @Input() showMobileMenu: boolean = false;
   @Output() logoutEvent = new EventEmitter<void>();
+  @Output() mobileMenuToggle = new EventEmitter<void>();
 
   userType = localStorage.getItem('user_type');
   
@@ -134,5 +136,9 @@ export class CommonHeaderComponent {
 
   onHelp() {
     this.router.navigate(['/wefab/supplier/help']);
+  }
+
+  onMobileMenuToggle(): void {
+    this.mobileMenuToggle.emit();
   }
 }

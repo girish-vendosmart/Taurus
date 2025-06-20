@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
@@ -38,6 +38,8 @@ export class CommonSidebarComponent implements OnInit, OnChanges, OnDestroy {
   @Input() showHeader: boolean = true;
   @Input() headerTitle: string = 'WefabTeam Portal';
   @Input() width: string = '280px';
+  @Input() mobileMenuOpen: boolean = false;
+  @Output() mobileMenuClose = new EventEmitter<void>();
 
   // Cache the converted menu items to avoid recreating them on every change detection
   convertedMenuItems: MenuItem[] = [];
@@ -131,5 +133,9 @@ export class CommonSidebarComponent implements OnInit, OnChanges, OnDestroy {
   // TrackBy function for better performance
   trackByMenuItem(index: number, item: MenuItem): any {
     return item.label || index;
+  }
+
+  onMobileMenuClose(): void {
+    this.mobileMenuClose.emit();
   }
 }

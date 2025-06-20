@@ -1,4 +1,11 @@
-<div class="sidebar-container" [style.width]="width">
+<!-- Mobile Backdrop -->
+<div 
+  class="mobile-backdrop" 
+  [class.show]="mobileMenuOpen"
+  (click)="onMobileMenuClose()">
+</div>
+
+<div class="sidebar-container" [style.width]="width" [class.mobile-open]="mobileMenuOpen">
   <!-- Sidebar Header -->
   <!-- <div class="sidebar-header" *ngIf="showHeader">
     <div class="header-content">
