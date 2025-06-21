@@ -2,6 +2,7 @@ import { Component, Output, EventEmitter, Input, HostListener } from '@angular/c
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { CommonService } from '../../../shared/services/common.service';
 
 // Interface for notification structure
 interface Notification {
@@ -25,6 +26,7 @@ export class CommonHeaderComponent {
   @Input() showMobileMenu: boolean = false;
   @Output() logoutEvent = new EventEmitter<void>();
   @Output() mobileMenuToggle = new EventEmitter<void>();
+  
 
   userType = localStorage.getItem('user_type');
   
@@ -82,8 +84,18 @@ export class CommonHeaderComponent {
   constructor(
     private router: Router,
     public authService: AuthService,
+    private commonService: CommonService
   ) {
     this.initializeUserData();
+    this.getNotifications();
+  }
+
+
+  getNotifications(): void {
+    let endPoint = `/api/resource/Notification Log`
+    this.commonService.getWefabData(endPoint).subscribe((res: any) => {
+      console.log('Notifications:', res);
+    });
   }
 
   // Getter to dynamically check supplier_id from localStorage
