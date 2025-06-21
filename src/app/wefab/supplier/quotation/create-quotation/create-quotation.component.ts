@@ -1057,6 +1057,27 @@ export class CreateQuotationComponent implements OnInit {
     return itemTotal * (taxPercentage / 100);
   }
 
+  // Method to get tax percentage from tax type
+  private getTaxPercentage(taxType: string): number {
+    switch (taxType) {
+      case 'Non-Taxable':
+      case 'GST0 [0%]':
+        return 0;
+      case 'GST5 [5%]':
+        return 5;
+      case 'GST12 [12%]':
+        return 12;
+      case 'GST18 [18%]':
+      case 'IGST [18%]':
+        return 18;
+      case 'GST28 [28%]':
+      case 'IGST [28%]':
+        return 28;
+      default:
+        return 0;
+    }
+  }
+
   // Method to get discount amount for display
   getDiscountAmount(): number {
     const subTotal = this.calculatedSubTotal;
@@ -1188,7 +1209,7 @@ export class CreateQuotationComponent implements OnInit {
       // Show detailed error message
       const errorCount = validation.errors.length;
       let errorMessage = `Please fix the following ${errorCount} error${errorCount > 1 ? 's' : ''}:\n\n`;
-      errorMessage += validation.errors.map((error, index) => `${index + 1}. ${error}`).join('\n');
+      errorMessage += validation.errors.map((error: string, index: number) => `${index + 1}. ${error}`).join('\n');
       
       this.sweetAlert.error(errorMessage);
       
@@ -1534,31 +1555,116 @@ export class CreateQuotationComponent implements OnInit {
 
   downloadCSVTemplate() {
     const headers = [
-      'S.No',
       'Item Name',
       'Description', 
       'Material',
-      'Qty',
+      'Quantity',
       'Unit',
+      'No Bid',
       'Item Price',
       'Total Price',
       'Tax Type',
       'Taxable Amount',
       'Miscellaneous',
       'Tooling',
-      'No Bid (0=Bid, 1=No Bid)'
+      'Comments',
+      'Notes'
     ];
 
-    // Add sample data rows
+    // Add comprehensive sample data rows with different scenarios
     const sampleRows = [
-      [1, 'Sample Item 1', 'Sample description', 'Steel', 10, 'Nos', 100, 1000, 'No Tax', '', 'Notes here', 'Standard', 0],
-      [2, 'Sample Item 2', 'Another description', 'Aluminum', 5, 'Kg', 250.50, 1252.50, 'SGCT & CGST', '', 'Additional info', 'Required', 0],
-      [3, 'Sample Item 3', 'Third item desc', 'Plastic', 20, 'Meter', 0, 0, '', '', 'No bid item', 'Not Required', 1]
+      [
+        'Bearing Assembly', 
+        'High precision ball bearing for industrial use', 
+        'Steel', 
+        10, 
+        'Nos', 
+        0, 
+        125.50, 
+        1250.00,
+        'GST18 [18%]', 
+        225.00,
+        10.00, 
+        50.00, 
+        'Standard industrial grade',
+        'This is a sample note'
+      ],
+      [
+        'Custom Machined Part', 
+        'CNC machined component as per specifications', 
+        'Aluminum', 
+        25, 
+        'Nos', 
+        0, 
+        89.75, 
+        2243.75,
+        'GST12 [12%]', 
+        269.25,
+        0, 
+        25.00, 
+        'Requires surface treatment',
+        'Special handling required'
+      ],
+      [
+        'Special Tool', 
+        'Custom cutting tool for manufacturing', 
+        'Carbide', 
+        5, 
+        'Set', 
+        1, 
+        0, 
+        0,
+        'Non-Taxable', 
+        0,
+        0, 
+        0, 
+        'Not available - No Bid item',
+        'Item not in stock'
+      ],
+      [
+        'Raw Material Sheet', 
+        '2mm thickness steel sheet', 
+        'Mild Steel', 
+        100, 
+        'Square Meter', 
+        0, 
+        45.25, 
+        4525.00,
+        'GST5 [5%]', 
+        226.25,
+        5.50, 
+        0, 
+        'Standard commercial grade',
+        'Bulk order discount applicable'
+      ],
+      [
+        'Fastener Kit', 
+        'Assorted bolts and nuts for assembly', 
+        'Stainless Steel', 
+        50, 
+        'Set', 
+        0, 
+        15.75, 
+        787.50,
+        'GST18 [18%]', 
+        141.75,
+        2.25, 
+        0, 
+        'Corrosion resistant coating',
+        'Standard packaging'
+      ]
     ];
 
+    // Create CSV content with proper formatting
     const csvContent = [
       headers.join(','),
-      ...sampleRows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ...sampleRows.map(row => row.map(cell => {
+        // Properly escape CSV values
+        if (typeof cell === 'string' && (cell.includes(',') || cell.includes('"') || cell.includes('\n'))) {
+          return `"${cell.replace(/"/g, '""')}"`;
+        }
+        return cell;
+      }).join(','))
     ].join('\n');
 
     try {
@@ -1566,15 +1672,20 @@ export class CreateQuotationComponent implements OnInit {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      const filename = `quotation-template-${timestamp}.csv`;
+      
       link.setAttribute('href', url);
-      link.setAttribute('download', 'quotation-template.csv');
+      link.setAttribute('download', filename);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      this.sweetAlert.success('CSV template downloaded successfully! You can use this as a reference for importing your data.');
+      this.sweetAlert.success('CSV template downloaded successfully! The template includes sample data and detailed instructions.');
+      
+      console.log('CSV template downloaded:', filename);
     } catch (error) {
       console.error('Error downloading CSV template:', error);
       this.sweetAlert.error('Failed to download CSV template. Please try again.');
@@ -1584,7 +1695,10 @@ export class CreateQuotationComponent implements OnInit {
   resetTableConfirmation() {
     const hasData = this.model.quotationItems.some((item: any) => 
       item.actionItemName || item.description || item.material || 
-      (item.qty && item.qty > 0) || (item.itemPrice && item.itemPrice > 0)
+      (item.qty && item.qty > 0) || (item.itemPrice && item.itemPrice > 0) ||
+      (item.miscellaneous && Number(item.miscellaneous) > 0) ||
+      (item.tooling && Number(item.tooling) > 0) ||
+      item.comments
     );
 
     if (!hasData) {
@@ -1639,7 +1753,7 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   importCSV() {
-    // Store current state before import for potential reset
+    // Store current state before import for potential rollback
     this.storeCurrentStateForReset();
     
     // Use the ViewChild reference to trigger file selection
@@ -1649,21 +1763,109 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   exportCSV() {
-    console.log('Exporting CSV...');
-    this.sweetAlert.info('CSV export functionality would be implemented here');
-  }
-
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file && file.type === 'text/csv') {
-      console.log('File selected:', file.name);
-      this.sweetAlert.info('CSV import functionality would be implemented here');
-    } else {
-      this.sweetAlert.error('Please select a valid CSV file.');
+    if (!this.model.quotationItems || this.model.quotationItems.length === 0) {
+      this.sweetAlert.warning('No quotation items to export. Please add some items first.');
+      return;
     }
-    
-    // Reset the input to allow selecting the same file again
-    event.target.value = '';
+
+    // Check if there's any meaningful data to export
+    const hasData = this.model.quotationItems.some((item: any) => 
+      item.actionItemName || item.description || item.material || 
+      (item.qty && item.qty > 0) || (item.itemPrice && item.itemPrice > 0)
+    );
+
+    if (!hasData) {
+      this.sweetAlert.warning('No quotation data to export. Please fill the quotation items first.');
+      return;
+    }
+
+    try {
+      const headers = [
+        'Item Name',
+        'Description', 
+        'Material',
+        'Quantity',
+        'Unit',
+        'No Bid (0=Bid, 1=No Bid)',
+        'Item Price',
+        'Total Price',
+        'Tax Type',
+        'Tax Amount',
+        'Miscellaneous',
+        'Tooling',
+        'Comments',
+        'Notes'
+      ];
+
+      // Add quotation metadata as comments
+      const timestamp = new Date().toISOString();
+      const csvContent = [
+        `# Quotation Export - ${timestamp}`,
+        `# RFQ ID: ${this.model.rfqId || 'N/A'}`,
+        `# Quotation Name: ${this.model.quotationName || 'N/A'}`,
+        `# Currency: ${this.model.currency_code || 'USD'}`,
+        `# Total Items: ${this.model.quotationItems.length}`,
+        `# Sub Total: ${this.calculatedSubTotal.toFixed(2)}`,
+        `# Total Amount: ${this.calculatedTotalAmount.toFixed(2)}`,
+        '',
+        headers.join(','),
+        ...this.model.quotationItems.map((item: any, index: number) => {
+          const row = [
+            item.actionItemName || '',
+            item.description || '',
+            item.material || '',
+            item.qty || 0,
+            item.unit || '',
+            item.no_bid || 0,
+            Number(item.itemPrice || 0).toFixed(2),
+            this.getLineTotalPrice(item).toFixed(2),
+            item.tax_type || 'Non-Taxable',
+            this.getLineTaxAmount(item).toFixed(2),
+            Number(item.miscellaneous || 0).toFixed(2),
+            Number(item.tooling || 0).toFixed(2),
+            item.comments || '',
+            item.notes || ''
+          ];
+          
+          return row.map(cell => {
+            // Properly escape CSV values
+            const cellStr = String(cell);
+            if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+              return `"${cellStr.replace(/"/g, '""')}"`;
+            }
+            return cellStr;
+          }).join(',');
+        })
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      const fileTimestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      const rfqPart = this.model.rfqId ? `-${this.model.rfqId}` : '';
+      const filename = `quotation-export${rfqPart}-${fileTimestamp}.csv`;
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      this.sweetAlert.success(`Quotation data exported successfully! Downloaded as: ${filename}`);
+      
+      console.log('CSV exported:', filename);
+      console.log('Export data:', {
+        itemCount: this.model.quotationItems.length,
+        subTotal: this.calculatedSubTotal,
+        totalAmount: this.calculatedTotalAmount
+      });
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      this.sweetAlert.error('Failed to export CSV. Please try again.');
+    }
   }
 
   // Number input validation methods
@@ -2068,7 +2270,7 @@ export class CreateQuotationComponent implements OnInit {
         'Continue Editing'
       ).then((result: any) => {
         if (result.isConfirmed) {
-          window.history.back();
+          this.navigateBack();
         }
       });
     } else {
@@ -2399,24 +2601,425 @@ export class CreateQuotationComponent implements OnInit {
     };
   }
 
-  // Add method to get tax percentage from tax type
-  private getTaxPercentage(taxType: string): number {
-    switch (taxType) {
-      case 'Non-Taxable':
-      case 'GST0 [0%]':
-        return 0;
-      case 'GST5 [5%]':
-        return 5;
-      case 'GST12 [12%]':
-        return 12;
-      case 'GST18 [18%]':
-      case 'IGST [18%]':
-        return 18;
-      case 'GST28 [28%]':
-      case 'IGST [28%]':
-        return 28;
-      default:
-        return 0;
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) {
+      return;
     }
+
+    if (file.type !== 'text/csv' && !file.name.toLowerCase().endsWith('.csv')) {
+      this.sweetAlert.error('Please select a valid CSV file.');
+      event.target.value = '';
+      return;
+    }
+
+    // Check file size (limit to 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      this.sweetAlert.error('File is too large. Maximum size allowed is 5MB.');
+      event.target.value = '';
+      return;
+    }
+
+    this.processCSVFile(file);
+    
+    // Reset the input to allow selecting the same file again
+    event.target.value = '';
   }
+
+  private processCSVFile(file: File) {
+    const reader = new FileReader();
+    
+    reader.onload = (e: any) => {
+      try {
+        const csvContent = e.target.result;
+        console.log('CSV file loaded, processing content...');
+        
+        const result = this.parseCSVContent(csvContent);
+        
+        if (result.success) {
+          this.handleSuccessfulCSVImport(result.items || [], result.warnings || []);
+        } else {
+          this.handleCSVImportErrors(result.errors || []);
+        }
+      } catch (error) {
+        console.error('Error reading CSV file:', error);
+        this.sweetAlert.error('Failed to read CSV file. Please ensure it\'s a valid CSV format.');
+      }
+    };
+
+    reader.onerror = () => {
+      console.error('Error reading file');
+      this.sweetAlert.error('Failed to read the selected file. Please try again.');
+    };
+
+    reader.readAsText(file);
+  }
+
+  private parseCSVContent(csvContent: string): { success: boolean; items?: any[]; warnings?: string[]; errors?: string[] } {
+    const lines = csvContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    const items: any[] = [];
+
+    console.log(`Processing ${lines.length} lines from CSV`);
+
+    // Find header row (skip comment lines starting with #)
+    let headerRowIndex = -1;
+    let headers: string[] = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.startsWith('#') && line.includes(',')) {
+        headers = this.parseCSVRow(line);
+        headerRowIndex = i;
+        break;
+      }
+    }
+
+    if (headerRowIndex === -1) {
+      return { success: false, errors: ['No valid header row found in CSV file.'] };
+    }
+
+    console.log('Headers found:', headers);
+
+    // Validate required headers
+    const requiredHeaders = ['Item Name', 'Quantity', 'Unit', 'Tax Type'];
+    const missingHeaders = requiredHeaders.filter(header => 
+      !headers.some(h => h.toLowerCase().includes(header.toLowerCase()))
+    );
+
+    if (missingHeaders.length > 0) {
+      return { 
+        success: false, 
+        errors: [`Missing required headers: ${missingHeaders.join(', ')}. Please use the CSV template for correct format.`] 
+      };
+    }
+
+    // Process data rows
+    for (let i = headerRowIndex + 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.startsWith('#') || line.trim() === '') {
+        continue; // Skip comment lines and empty lines
+      }
+
+      const rowData = this.parseCSVRow(line);
+      const rowNumber = i + 1;
+
+      console.log(`Processing row ${rowNumber}:`, rowData);
+
+      if (rowData.length === 0) {
+        continue; // Skip empty rows
+      }
+
+      const itemResult = this.parseCSVItem(rowData, headers, rowNumber);
+      
+      if (itemResult.success) {
+        items.push(itemResult.item);
+        if (itemResult.warnings) {
+          warnings.push(...itemResult.warnings);
+        }
+      } else {
+        errors.push(...itemResult.errors);
+      }
+    }
+
+    console.log(`CSV parsing completed. Items: ${items.length}, Errors: ${errors.length}, Warnings: ${warnings.length}`);
+
+    if (errors.length > 0) {
+      return { success: false, errors };
+    }
+
+    if (items.length === 0) {
+      return { success: false, errors: ['No valid items found in CSV file.'] };
+    }
+
+    return { success: true, items, warnings };
+  }
+
+  private parseCSVRow(row: string): string[] {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    let i = 0;
+
+    while (i < row.length) {
+      const char = row[i];
+
+      if (char === '"') {
+        if (inQuotes && row[i + 1] === '"') {
+          // Escaped quote
+          current += '"';
+          i += 2;
+          continue;
+        } else {
+          // Toggle quote state
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+      i++;
+    }
+
+    result.push(current.trim());
+    return result;
+  }
+
+  private parseCSVItem(rowData: string[], headers: string[], rowNumber: number): 
+    { success: boolean; item?: any; warnings?: string[]; errors: string[] } {
+    
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    // Create item object
+    const item: any = {
+      actionItemName: '',
+      description: '',
+      material: '',
+      qty: 0,
+      unit: '',
+      itemPrice: 0,
+      tax_type: 'Non-Taxable',
+      miscellaneous: 0,
+      tooling: 0,
+      no_bid: 0,
+      comments: '',
+      notes: ''
+    };
+
+    // Map CSV columns to item properties
+    const columnMapping: { [key: string]: string } = {
+      'item name': 'actionItemName',
+      'description': 'description',
+      'material': 'material',
+      'quantity': 'qty',
+      'qty': 'qty',
+      'unit': 'unit',
+      'item price': 'itemPrice',
+      'price': 'itemPrice',
+      'tax type': 'tax_type',
+      'miscellaneous': 'miscellaneous',
+      'tooling': 'tooling',
+      'comments': 'comments',
+      'notes': 'notes',
+      'no bid': 'no_bid'
+    };
+
+    // Process each column
+    headers.forEach((header, index) => {
+      if (index >= rowData.length) return;
+
+      const value = rowData[index]?.trim() || '';
+      const normalizedHeader = header.toLowerCase().trim();
+      
+      // Find matching property
+      let propertyName = '';
+      for (const [key, prop] of Object.entries(columnMapping)) {
+        if (normalizedHeader.includes(key)) {
+          propertyName = prop;
+          break;
+        }
+      }
+
+      if (!propertyName) {
+        if (value) {
+          warnings.push(`Row ${rowNumber}: Unknown column "${header}" with value "${value}" ignored`);
+        }
+        return;
+      }
+
+      // Parse and validate value based on property type
+      try {
+        switch (propertyName) {
+          case 'qty':
+            const qty = parseFloat(value);
+            if (isNaN(qty) || qty < 0) {
+              errors.push(`Row ${rowNumber}: Invalid quantity "${value}". Must be a positive number.`);
+            } else {
+              item.qty = qty;
+            }
+            break;
+
+          case 'itemPrice':
+            if (value) {
+              const price = parseFloat(value);
+              if (isNaN(price) || price < 0) {
+                errors.push(`Row ${rowNumber}: Invalid item price "${value}". Must be a positive number.`);
+              } else {
+                item.itemPrice = price;
+              }
+            }
+            break;
+
+          case 'miscellaneous':
+          case 'tooling':
+            if (value) {
+              const numValue = parseFloat(value);
+              if (isNaN(numValue) || numValue < 0) {
+                warnings.push(`Row ${rowNumber}: Invalid ${propertyName} "${value}". Using 0 instead.`);
+                item[propertyName] = 0;
+              } else {
+                item[propertyName] = numValue;
+              }
+            }
+            break;
+
+          case 'no_bid':
+            if (value) {
+              const noBidValue = parseInt(value);
+              if (noBidValue === 1 || value.toLowerCase() === 'true' || value.toLowerCase() === 'yes') {
+                item.no_bid = 1;
+              } else {
+                item.no_bid = 0;
+              }
+            }
+            break;
+
+          case 'unit':
+            if (value) {
+              // Validate against supported units
+              const supportedUnit = this.unitOptions.find(u => 
+                u.value.toLowerCase() === value.toLowerCase() || 
+                u.label.toLowerCase() === value.toLowerCase()
+              );
+              
+              if (supportedUnit) {
+                item.unit = supportedUnit.value;
+              } else {
+                warnings.push(`Row ${rowNumber}: Unit "${value}" not in supported list. Using as-is.`);
+                item.unit = value;
+              }
+            }
+            break;
+
+          case 'tax_type':
+            if (value) {
+              // Validate against supported tax types
+              const supportedTaxType = this.taxTypeOptions.find(t => 
+                t.value.toLowerCase() === value.toLowerCase() || 
+                t.label.toLowerCase() === value.toLowerCase()
+              );
+              
+              if (supportedTaxType) {
+                item.tax_type = supportedTaxType.value;
+              } else {
+                warnings.push(`Row ${rowNumber}: Tax type "${value}" not recognized. Using "Non-Taxable".`);
+                item.tax_type = 'Non-Taxable';
+              }
+            }
+            break;
+
+          default:
+            // String fields
+            item[propertyName] = value;
+            break;
+        }
+      } catch (parseError) {
+        errors.push(`Row ${rowNumber}: Error parsing ${header}: ${parseError}`);
+      }
+    });
+
+    // Validate required fields
+    if (!item.actionItemName) {
+      errors.push(`Row ${rowNumber}: Item Name is required.`);
+    }
+
+    if (!item.qty || item.qty <= 0) {
+      errors.push(`Row ${rowNumber}: Quantity is required and must be greater than 0.`);
+    }
+
+    if (!item.unit) {
+      errors.push(`Row ${rowNumber}: Unit is required.`);
+    }
+
+    if (!item.tax_type) {
+      errors.push(`Row ${rowNumber}: Tax Type is required.`);
+    }
+
+    // Validate business rules
+    if (item.no_bid === 0 && (!item.itemPrice || item.itemPrice <= 0)) {
+      errors.push(`Row ${rowNumber}: Item Price is required for bid items (No Bid = 0).`);
+    }
+
+    if (item.no_bid === 1 && item.itemPrice > 0) {
+      warnings.push(`Row ${rowNumber}: Item Price should be 0 for no-bid items. Setting price to 0.`);
+      item.itemPrice = 0;
+    }
+
+    return {
+      success: errors.length === 0,
+      item: errors.length === 0 ? item : undefined,
+      warnings: warnings.length > 0 ? warnings : undefined,
+      errors
+    };
+  }
+
+  private handleSuccessfulCSVImport(items: any[], warnings: string[]) {
+    console.log('CSV import successful:', { itemCount: items.length, warningCount: warnings.length });
+
+    // Show confirmation dialog
+    let message = `Successfully parsed ${items.length} item${items.length > 1 ? 's' : ''} from CSV.`;
+    
+    if (warnings.length > 0) {
+      message += `\n\n${warnings.length} warning${warnings.length > 1 ? 's' : ''}:\n`;
+      message += warnings.slice(0, 5).join('\n');
+      if (warnings.length > 5) {
+        message += `\n... and ${warnings.length - 5} more warnings.`;
+      }
+    }
+
+    message += '\n\nDo you want to replace current quotation items with imported data?';
+
+    this.sweetAlert.confirm(
+      message,
+      'CSV Import Successful',
+      'question',
+      'Import Items',
+      'Cancel'
+    ).then((result: any) => {
+      if (result.isConfirmed) {
+        // Replace current items with imported items
+        this.model.quotationItems = items;
+        
+        // Recalculate totals
+        this.calculateTotals();
+        
+        // Show success message
+        let successMsg = `${items.length} items imported successfully!`;
+        if (warnings.length > 0) {
+          successMsg += ` (${warnings.length} warnings - check console for details)`;
+          console.log('Import warnings:', warnings);
+        }
+        
+        this.sweetAlert.success(successMsg);
+        
+        // Clear validation errors
+        this.validationErrors = {};
+        this.showValidationErrors = false;
+      }
+    });
+  }
+
+  private handleCSVImportErrors(errors: string[]) {
+    console.error('CSV import failed:', errors);
+
+    let errorMessage = `CSV import failed with ${errors.length} error${errors.length > 1 ? 's' : ''}:\n\n`;
+    
+    // Show first few errors
+    errorMessage += errors.slice(0, 8).join('\n');
+    
+    if (errors.length > 8) {
+      errorMessage += `\n\n... and ${errors.length - 8} more errors.`;
+    }
+    
+    errorMessage += '\n\nPlease fix the errors and try again. Use the CSV template for correct format.';
+
+    this.sweetAlert.error(errorMessage);
+  }
+
+  // ... existing code ...
 }
