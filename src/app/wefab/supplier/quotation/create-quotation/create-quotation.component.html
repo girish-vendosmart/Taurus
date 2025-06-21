@@ -236,14 +236,14 @@
             <th style="width: 120px;">
               Miscellaneous ({{ model.currency_code }})
             </th>
+            <th style="width: 100px;">
+              Tooling ({{ model.currency_code }})
+            </th>
             <th style="width: 200px;">
               Comments
             </th>
             <th style="width: 200px;">
               Notes
-            </th>
-            <th style="width: 100px;">
-              Tooling ({{ model.currency_code }}) <span class="text-danger">*</span>
             </th>
           </tr>
         </thead>
@@ -393,6 +393,26 @@
                 style="height: 32px; font-size: 14px;">
             </td>
             
+            <!-- Tooling - Editable -->
+            <td>
+              <input 
+                type="number" 
+                class="form-control form-control-sm editable-field" 
+                [class.is-invalid]="hasValidationError('item_' + i)"
+                [(ngModel)]="item.tooling"
+                [ngModelOptions]="{standalone: true}"
+                (input)="onQuantityOrPriceChange(item); clearFieldError('item_' + i)"
+                (keypress)="onNumberKeyPress($event)"
+                (input)="onNumberInput($event)"
+                (paste)="onNumberPaste($event)"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                [pTooltip]="'Enter tooling amount: ' + (model.currency_code) + ' ' + (item.tooling || 0)"
+                tooltipPosition="top"
+                style="height: 32px; font-size: 14px;">
+            </td>
+
             <!-- Comments - Editable -->
             <td>
               <input 
@@ -416,26 +436,6 @@
                 readonly
                 placeholder="Notes"
                 [pTooltip]="item.notes || 'System notes'"
-                tooltipPosition="top"
-                style="height: 32px; font-size: 14px;">
-            </td>
-            
-            <!-- Tooling - Editable -->
-            <td>
-              <input 
-                type="number" 
-                class="form-control form-control-sm editable-field" 
-                [class.is-invalid]="hasValidationError('item_' + i)"
-                [(ngModel)]="item.tooling"
-                [ngModelOptions]="{standalone: true}"
-                (input)="onQuantityOrPriceChange(item); clearFieldError('item_' + i)"
-                (keypress)="onNumberKeyPress($event)"
-                (input)="onNumberInput($event)"
-                (paste)="onNumberPaste($event)"
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                [pTooltip]="'Enter tooling amount: ' + (model.currency_code) + ' ' + (item.tooling || 0)"
                 tooltipPosition="top"
                 style="height: 32px; font-size: 14px;">
             </td>

@@ -96,7 +96,6 @@ export class SupplierRfqComponent implements OnInit {
         sortable: true,
         filterable: true,
         filterType: 'text',
-        isHtml: true,
         isLink: true,
       },
       {
@@ -201,7 +200,7 @@ export class SupplierRfqComponent implements OnInit {
 
     return apiData.map(item => ({
       // Map API fields to match the table configuration
-      name: item.rfq_name || '',
+      // name: item.rfq_name || '',
       rfqName: item.rfq_name || '',
       companySubInfo: item.rfq_id || '',
       rfqId: item.rfq_id || '', // Add rfq_id for easier access in click handler
