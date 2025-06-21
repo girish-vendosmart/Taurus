@@ -1781,36 +1781,28 @@ export class CreateQuotationComponent implements OnInit {
 
     try {
       const headers = [
+        'S.No',
         'Item Name',
         'Description', 
         'Material',
         'Quantity',
         'Unit',
-        'No Bid (0=Bid, 1=No Bid)',
-        'Item Price',
-        'Total Price',
+        'No Bid',
+        `Item Price (${this.model.currency_code})`,
+        `Total Price (${this.model.currency_code})`,
         'Tax Type',
-        'Tax Amount',
-        'Miscellaneous',
-        'Tooling',
+        `Tax Amount (${this.model.currency_code})`,
+        `Miscellaneous (${this.model.currency_code})`,
+        `Tooling (${this.model.currency_code})`,
         'Comments',
         'Notes'
       ];
 
-      // Add quotation metadata as comments
-      const timestamp = new Date().toISOString();
       const csvContent = [
-        `# Quotation Export - ${timestamp}`,
-        `# RFQ ID: ${this.model.rfqId || 'N/A'}`,
-        `# Quotation Name: ${this.model.quotationName || 'N/A'}`,
-        `# Currency: ${this.model.currency_code || 'USD'}`,
-        `# Total Items: ${this.model.quotationItems.length}`,
-        `# Sub Total: ${this.calculatedSubTotal.toFixed(2)}`,
-        `# Total Amount: ${this.calculatedTotalAmount.toFixed(2)}`,
-        '',
         headers.join(','),
         ...this.model.quotationItems.map((item: any, index: number) => {
           const row = [
+            index + 1, // S.No
             item.actionItemName || '',
             item.description || '',
             item.material || '',
