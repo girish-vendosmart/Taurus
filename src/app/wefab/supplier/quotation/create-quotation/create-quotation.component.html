@@ -236,14 +236,14 @@
             <th style="width: 120px;">
               Miscellaneous ({{ model.currency_code }})
             </th>
+            <th style="width: 100px;">
+              Tooling ({{ model.currency_code }})
+            </th>
             <th style="width: 200px;">
               Comments
             </th>
             <th style="width: 200px;">
               Notes
-            </th>
-            <th style="width: 100px;">
-              Tooling ({{ model.currency_code }}) <span class="text-danger">*</span>
             </th>
           </tr>
         </thead>
@@ -256,8 +256,7 @@
               <input 
                 type="text" 
                 class="form-control form-control-sm non-editable-field" 
-                [(ngModel)]="item.actionItemName"
-                [ngModelOptions]="{standalone: true}"
+                [value]="item.actionItemName || '-----'"
                 readonly
                 placeholder="Item name"
                 style="height: 32px; font-size: 14px;">
@@ -268,8 +267,7 @@
               <input 
                 type="text" 
                 class="form-control form-control-sm non-editable-field" 
-                [(ngModel)]="item.description"
-                [ngModelOptions]="{standalone: true}"
+                [value]="item.description || '-----'"
                 readonly
                 placeholder="Description"
                 [pTooltip]="item.description || 'Item description'"
@@ -282,8 +280,7 @@
               <input 
                 type="text" 
                 class="form-control form-control-sm non-editable-field" 
-                [(ngModel)]="item.material"
-                [ngModelOptions]="{standalone: true}"
+                [value]="item.material || '-----'"
                 readonly
                 placeholder="Material"
                 [pTooltip]="item.material || 'Material type'"
@@ -294,10 +291,9 @@
             <!-- Quantity - Non-Editable -->
             <td>
               <input 
-                type="number" 
+                type="text" 
                 class="form-control form-control-sm non-editable-field" 
-                [(ngModel)]="item.qty"
-                [ngModelOptions]="{standalone: true}"
+                [value]="item.qty || '-----'"
                 readonly
                 placeholder="0"
                 style="height: 32px; font-size: 14px;">
@@ -308,8 +304,7 @@
               <input 
                 type="text" 
                 class="form-control form-control-sm non-editable-field" 
-                [(ngModel)]="item.unit"
-                [ngModelOptions]="{standalone: true}"
+                [value]="item.unit || '-----'"
                 readonly
                 placeholder="Unit"
                 style="height: 32px; font-size: 14px;">
@@ -345,7 +340,7 @@
             <!-- Total Price -->
             <td class="text-center align-middle">
               <span class="text-muted small fw-medium">
-                {{ model.currency_code }} {{ getLineTotalPrice(item) | number:'1.2-2' }}
+                {{ getLineTotalPrice(item) > 0 ? (model.currency_code + ' ' + (getLineTotalPrice(item) | number:'1.2-2')) : '-----' }}
               </span>
             </td>
             
@@ -370,7 +365,7 @@
             <!-- Tax Amount -->
             <td class="text-center align-middle">
               <span class="text-muted small">
-                {{ model.currency_code }} {{ getLineTaxAmount(item) | number:'1.2-2' }}
+                {{ getLineTaxAmount(item) > 0 ? (model.currency_code + ' ' + (getLineTaxAmount(item) | number:'1.2-2')) : '-----' }}
               </span>
             </td>
             
@@ -393,6 +388,26 @@
                 style="height: 32px; font-size: 14px;">
             </td>
             
+            <!-- Tooling - Editable -->
+            <td>
+              <input 
+                type="number" 
+                class="form-control form-control-sm editable-field" 
+                [class.is-invalid]="hasValidationError('item_' + i)"
+                [(ngModel)]="item.tooling"
+                [ngModelOptions]="{standalone: true}"
+                (input)="onQuantityOrPriceChange(item); clearFieldError('item_' + i)"
+                (keypress)="onNumberKeyPress($event)"
+                (input)="onNumberInput($event)"
+                (paste)="onNumberPaste($event)"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                [pTooltip]="'Enter tooling amount: ' + (model.currency_code) + ' ' + (item.tooling || 0)"
+                tooltipPosition="top"
+                style="height: 32px; font-size: 14px;">
+            </td>
+
             <!-- Comments - Editable -->
             <td>
               <input 
@@ -411,31 +426,10 @@
               <input 
                 type="text" 
                 class="form-control form-control-sm non-editable-field" 
-                [(ngModel)]="item.notes"
-                [ngModelOptions]="{standalone: true}"
+                [value]="item.notes || '-----'"
                 readonly
                 placeholder="Notes"
                 [pTooltip]="item.notes || 'System notes'"
-                tooltipPosition="top"
-                style="height: 32px; font-size: 14px;">
-            </td>
-            
-            <!-- Tooling - Editable -->
-            <td>
-              <input 
-                type="number" 
-                class="form-control form-control-sm editable-field" 
-                [class.is-invalid]="hasValidationError('item_' + i)"
-                [(ngModel)]="item.tooling"
-                [ngModelOptions]="{standalone: true}"
-                (input)="onQuantityOrPriceChange(item); clearFieldError('item_' + i)"
-                (keypress)="onNumberKeyPress($event)"
-                (input)="onNumberInput($event)"
-                (paste)="onNumberPaste($event)"
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                [pTooltip]="'Enter tooling amount: ' + (model.currency_code) + ' ' + (item.tooling || 0)"
                 tooltipPosition="top"
                 style="height: 32px; font-size: 14px;">
             </td>
