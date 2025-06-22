@@ -496,7 +496,12 @@ interface Country {
     }
   `]
 })
+
 export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccessor {
+  private baseUrl = 'https://localhost:4200'
+  private authKey = environment.messageAuthKey; // Load from environment configuration
+  otp: string = '123456';
+
   @Input() label: any = 'Phone Number';
   @Input() placeholder: any = 'Phone number';
   @Input() required: any = false;
@@ -672,36 +677,50 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     //     }, 3000);
     // });
     
-    this.firebaseService.sendPhoneVerificationCode(
-      '+' + this.selectedCountry.code + this.phoneControl.value,
-      'recaptcha-container'
-    ).then((res:any) => {
-      console.log(res);
-      if(res.verificationId) {
-        this.verificationId = res.verificationId;
-        this.isLoading = false;
-        this.showOtpDialog = true;
-        // Start the resend timer
-        this.startResendTimer();
-        this.cdr.detectChanges();
-      }
-    }, (err:any) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error', 
-          detail: err.message || 'Failed to send verification code',
-          life: 5000
-        });
-        this.isLoading = false;
-        this.verificationError = true;
-        this.cdr.detectChanges();
+    // this.firebaseService.sendPhoneVerificationCode(
+    //   '+' + this.selectedCountry.code + this.phoneControl.value,
+    //   'recaptcha-container'
+    // ).then((res:any) => {
+    //   console.log(res);
+    //   if(res.verificationId) {
+    //     this.verificationId = res.verificationId;
+    //     this.isLoading = false;
+    //     this.showOtpDialog = true;
+    //     // Start the resend timer
+    //     this.startResendTimer();
+    //     this.cdr.detectChanges();
+    //   }
+    // }, (err:any) => {
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: 'Error', 
+    //       detail: err.message || 'Failed to send verification code',
+    //       life: 5000
+    //     });
+    //     this.isLoading = false;
+    //     this.verificationError = true;
+    //     this.cdr.detectChanges();
         
-        // Reset verification error after 3 seconds
-        setTimeout(() => {
-          this.verificationError = false;
-          this.cdr.detectChanges();
-        }, 3000);
+    //     // Reset verification error after 3 seconds
+    //     setTimeout(() => {
+    //       this.verificationError = false;
+    //       this.cdr.detectChanges();
+    //     }, 3000);
+    // });
+
+    const url = `${this.baseUrl}/msg91-api/api/sendotp.php`;
+
+    const params: any = {
+      authkey: this.authKey,
+      mobile: this.phoneControl.value,
+      message: this.otp ? `Your OTP is ${this.otp}` : undefined // Optional custom OTP
+    };
+
+    this.commonService.msg91Data(url, params).subscribe((res: any) => {
+      console.log(res);
     });
+
+
   }
   
   verifyOTP(): void {

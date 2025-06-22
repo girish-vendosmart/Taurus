@@ -262,6 +262,10 @@ export class CommonService {
             { headers, params }
         );
     }
+
+    msg91Data(url: string, params?: HttpParams) {
+        return this.http.get(`${url}`, { params });
+    }
     
 
     

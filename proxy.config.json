@@ -1,0 +1,11 @@
+{
+    "/msg91-api": {
+      "target": "https://api.msg91.com",
+      "secure": false,
+      "changeOrigin": true,
+      "pathRewrite": {
+        "^/msg91-api": ""
+      } 
+    }
+  }
+  
