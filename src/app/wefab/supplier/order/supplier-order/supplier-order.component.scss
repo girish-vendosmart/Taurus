@@ -19,7 +19,8 @@ $transition: all 0.3s ease;
 
 // Main page container
 .order-page {
-  background-color: $technical-white;
+  padding: 1rem;
+  background-color: #f5f5f5;
   min-height: 100vh;
 }
 
@@ -27,11 +28,6 @@ $transition: all 0.3s ease;
 .content-section {
   max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
-  
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
 }
 
 // Status Cards Section
@@ -276,41 +272,11 @@ $transition: all 0.3s ease;
 
 // Table section styling
 .table-section {
+  margin-top: 1rem;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba($material-finish-silver, 0.2);
-  overflow: hidden;
-  
-  .table-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
-    
-    @media (max-width: 768px) {
-      padding: 1rem;
-    }
-    
-    .table-title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: $text-primary;
-      margin: 0;
-      
-      @media (max-width: 768px) {
-        font-size: 1rem;
-      }
-    }
-    
-    .table-subtitle {
-      font-size: 0.875rem;
-      color: $text-secondary;
-      margin: 0.25rem 0 0 0;
-      
-      @media (max-width: 768px) {
-        font-size: 0.8125rem;
-      }
-    }
-  }
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
 }
 
 // Loading state
@@ -389,4 +355,69 @@ $transition: all 0.3s ease;
       margin-top: 1rem;
     }
   }
+}
+
+// Change request icon styling
+:host ::ng-deep .change-request-icon {
+  color: #ff6b35;
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+  animation: pulse 2s infinite;
+  cursor: pointer !important;
+  position: relative;
+}
+
+:host ::ng-deep .change-request-icon:hover {
+  color: #e55a2b;
+  transform: scale(1.1);
+  transition: all 0.2s ease-in-out;
+}
+
+// Enhanced tooltip styling
+:host ::ng-deep .change-request-icon[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+:host ::ng-deep .change-request-icon[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #333;
+  z-index: 1001;
+}
+
+// Pulse animation for change request icon
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// Order name cell styling to accommodate icon
+:host ::ng-deep .orderName-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 } 

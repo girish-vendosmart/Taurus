@@ -13,6 +13,7 @@ export interface OrderItem {
   orderName: string;
   creationDate: string;
   status: 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft';
+  hasChangeRequest?: boolean;
   // Additional fields from API
   name?: string;
   owner?: string;
@@ -99,6 +100,7 @@ export class SupplierOrderComponent implements OnInit {
         filterable: true,
         filterType: 'text',
         isLink: true,
+        isHtml: true,
       },
       {
         field: 'creationDate',
@@ -204,7 +206,7 @@ export class SupplierOrderComponent implements OnInit {
     this.allOrders = [
       {
         orderId: 'ORD0000001',
-        orderName: 'Precision Components Order',
+        orderName: 'Precision Components Order <i class="pi pi-exclamation-triangle change-request-icon" title="This order has received a change request. Click to view details." style="cursor: pointer;"></i>',
         creationDate: '2025-01-15',
         deliveryDate: '2025-02-15',
         totalAmount: 15000.00,
@@ -213,7 +215,8 @@ export class SupplierOrderComponent implements OnInit {
         owner: 'supplier@example.com',
         modified: '2025-01-15 10:30:00',
         docstatus: 1,
-        routerLink: '/wefab/supplier/order/details/ORD0000001'
+        routerLink: '/wefab/supplier/order/details/ORD0000001',
+        hasChangeRequest: true
       },
       {
         orderId: 'ORD0000002',
@@ -226,11 +229,12 @@ export class SupplierOrderComponent implements OnInit {
         owner: 'supplier@example.com',
         modified: '2025-01-10 14:15:00',
         docstatus: 1,
-        routerLink: '/wefab/supplier/order/details/ORD0000002'
+        routerLink: '/wefab/supplier/order/details/ORD0000002',
+        hasChangeRequest: false
       },
       {
         orderId: 'ORD0000003',
-        orderName: 'Custom Machined Parts',
+        orderName: 'Custom Machined Parts <i class="pi pi-exclamation-triangle change-request-icon" title="This order has received a change request. Click to view details." style="cursor: pointer;"></i>',
         creationDate: '2025-01-05',
         deliveryDate: '2025-01-25',
         totalAmount: 8500.00,
@@ -239,7 +243,8 @@ export class SupplierOrderComponent implements OnInit {
         owner: 'supplier@example.com',
         modified: '2025-01-25 16:45:00',
         docstatus: 1,
-        routerLink: '/wefab/supplier/order/details/ORD0000003'
+        routerLink: '/wefab/supplier/order/details/ORD0000003',
+        hasChangeRequest: true
       }
     ];
 
@@ -258,20 +263,31 @@ export class SupplierOrderComponent implements OnInit {
       return [];
     }
 
-    return apiData.map(item => ({
-      orderId: item.name || item.order_id || '',
-      orderName: item.order_name || item.title || item.name || 'N/A',
-      creationDate: this.formatApiDate(item.creation || item.created_date || ''),
-      deliveryDate: this.formatApiDate(item.delivery_date || item.expected_delivery || ''),
-      totalAmount: item.total_amount || item.grand_total || 0,
-      status: this.mapApiStatusToOrderStatus(item.status || 'Draft'),
-      name: item.name || '',
-      owner: item.owner || '',
-      modified: item.modified || '',
-      docstatus: item.docstatus || 0,
-              routerLink: `/wefab/supplier/order/details/${item.name}`,
-      companySubInfo: item.company || ''
-    }));
+    return apiData.map(item => {
+      const hasChangeRequest = item.has_change_request === true;
+      const orderName = item.order_name || item.title || item.name || 'N/A';
+      
+      // Format order name with change request icon if applicable
+      const formattedOrderName = hasChangeRequest 
+        ? `${orderName} <i class="pi pi-exclamation-triangle change-request-icon" title="" style="cursor: pointer;"></i>`
+        : orderName;
+
+      return {
+        orderId: item.name || item.order_id || '',
+        orderName: formattedOrderName,
+        creationDate: this.formatApiDate(item.creation || item.created_date || ''),
+        deliveryDate: this.formatApiDate(item.delivery_date || item.expected_delivery || ''),
+        totalAmount: item.total_amount || item.grand_total || 0,
+        status: this.mapApiStatusToOrderStatus(item.status || 'Draft'),
+        name: item.name || '',
+        owner: item.owner || '',
+        modified: item.modified || '',
+        docstatus: item.docstatus || 0,
+        routerLink: `/wefab/supplier/order/details/${item.name}`,
+        companySubInfo: item.company || '',
+        hasChangeRequest: hasChangeRequest
+      };
+    });
   }
 
   onOrderIdLinkClick(orderId: string, status: string = '') {

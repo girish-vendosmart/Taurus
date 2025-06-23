@@ -634,6 +634,12 @@ export class SupplierDashboardComponent {
     this.router.navigate(['/wefab/supplier/orders/details', deadline.orderNumber]);
   }
 
+  viewOrderDetails(orderNumber: string): void {
+    // Navigate to order details page
+    console.log('Navigate to order details:', orderNumber);
+    this.router.navigate(['/wefab/supplier/order/details', orderNumber]);
+  }
+
   getPriorityClass(priority: string): string {
     if (!priority) return 'priority-default';
     

@@ -134,7 +134,7 @@
                         </div>
                       </div>
                       <div class="request-meta">
-                        <span class="amount linkable-column">{{ request.requestId }}</span>
+                        <span class="amount linkable-column" (click)="viewOrderDetails(request.orderNumber); $event.stopPropagation()">{{ request.requestId }}</span>
                       </div>
                     </div>
                   </div>
@@ -175,7 +175,7 @@
                         </div>
                       </div>
                       <div class="deadline-meta">
-                        <span class="amount linkable-column">{{ deadline.orderId }}</span>
+                        <span class="amount linkable-column" (click)="viewOrderDetails(deadline.orderNumber); $event.stopPropagation()">{{ deadline.orderId }}</span>
                       </div>
                     </div>
                   </div>

@@ -111,9 +111,17 @@
           <tr (click)="onRowClick($event, rowData)">
             <td *ngFor="let col of getVisibleColumns()" [style.width]="col.width">
               <ng-container [ngSwitch]="true">
-                <!-- Company Cell -->
-                <div class="company-cell" *ngSwitchCase="col.isLink">
+                <!-- Link with HTML Content (for order names with change request icons) -->
+                <div class="company-cell" *ngSwitchCase="col.isLink && col.isHtml">
                   <a class="linkable-column" (click)="onLinkClick($event, rowData, col)" [innerHTML]="rowData[col.field]"></a>
+                  <div class="sub-info" *ngIf="rowData.companySubInfo">
+                    {{ rowData.companySubInfo }}
+                  </div>
+                </div>
+
+                <!-- Regular Link Cell -->
+                <div class="company-cell" *ngSwitchCase="col.isLink && !col.isHtml">
+                  <a class="linkable-column" (click)="onLinkClick($event, rowData, col)">{{ rowData[col.field] }}</a>
                   <div class="sub-info" *ngIf="rowData.companySubInfo">
                     {{ rowData.companySubInfo }}
                   </div>
@@ -137,8 +145,8 @@
                   </button>
                 </div>
 
-                <!-- HTML Cell -->
-                <div class="html-cell" *ngSwitchCase="col.isHtml">
+                <!-- HTML Cell (without link) -->
+                <div class="html-cell" *ngSwitchCase="col.isHtml && !col.isLink">
                   <div [innerHTML]="rowData[col.field]"></div>
                 </div>
 
