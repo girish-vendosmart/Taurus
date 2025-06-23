@@ -105,4 +105,97 @@
       </div>
     </div>
   </div>
+
+  <!-- Change Requests and Upcoming Deadlines Section -->
+  <div class="row g-3">
+    <div class="col-12">
+      <div class="card change-deadline-main-card">
+        <div class="card-body">
+          <div class="row g-3">
+            <!-- Urgent Change Requests -->
+            <div class="col-lg-6 col-md-12">
+              <div class="change-requests-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4>
+                    <i class="pi pi-exclamation-triangle text-warning me-2"></i>
+                    Urgent Change Requests
+                  </h4>
+                  <span class="badge bg-warning text-dark">{{ urgentChangeRequests.length }}</span>
+                </div>
+                <div class="requests-list" *ngIf="urgentChangeRequests.length > 0">
+                  <div *ngFor="let request of urgentChangeRequests" class="request-item change-request-sub-cards">
+                    <div class="request-content" (click)="viewChangeRequest(request)">
+                      <div class="d-flex justify-content-between">
+                        <h6 style="font-size: 14px !important; font-weight: 100;">{{ request.orderName }}</h6>
+                        <div class="d-flex flex-column">
+                          <span class="time-ago">Due: {{ request.formattedDueDate }}</span>
+                          <span [class]="'status-badge ' + getStatusClass(request.status)" style="margin-left: auto" class="mt-1">{{
+                            request.status }}</span>
+                        </div>
+                      </div>
+                      <div class="request-meta">
+                        <span class="amount linkable-column">{{ request.requestId }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="urgentChangeRequests.length === 0" class="zero-state">
+                  <div class="zero-state-icon">
+                    <i class="pi pi-check-circle"></i>
+                  </div>
+                  <h4>No Urgent Change Requests</h4>
+                  <p>You don't have any urgent change requests at the moment.</p>
+                  <app-configurable-button
+                    [configuration]="reviewAllRequestsConfig"
+                    (onClick)="navigateToChangeRequests()"
+                  ></app-configurable-button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upcoming Deadlines -->
+            <div class="col-lg-6 col-md-12">
+              <div class="deadlines-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4>
+                    <i class="pi pi-calendar text-info me-2"></i>
+                    Upcoming Deadlines
+                  </h4>
+                  <span class="badge bg-info">{{ upcomingDeadlines.length }}</span>
+                </div>
+                <div class="deadlines-list" *ngIf="upcomingDeadlines.length > 0">
+                  <div *ngFor="let deadline of upcomingDeadlines" class="deadline-item deadline-sub-cards">
+                    <div class="deadline-content" (click)="viewDeadlineOrder(deadline)">
+                      <div class="d-flex justify-content-between">
+                        <h6 style="font-size: 14px !important; font-weight: 100;">{{ deadline.orderName }}</h6>
+                        <div class="d-flex flex-column">
+                          <span class="time-ago">Due: {{ deadline.formattedDeadline }}</span>
+                          <span [class]="'status-badge ' + getStatusClass(deadline.priority)" style="margin-left: auto" class="mt-1">{{
+                            deadline.priority }}</span>
+                        </div>
+                      </div>
+                      <div class="deadline-meta">
+                        <span class="amount linkable-column">{{ deadline.orderId }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="upcomingDeadlines.length === 0" class="zero-state">
+                  <div class="zero-state-icon">
+                    <i class="pi pi-calendar-times"></i>
+                  </div>
+                  <h4>No Upcoming Deadlines</h4>
+                  <p>You don't have any orders with upcoming deadlines.</p>
+                  <app-configurable-button
+                    [configuration]="viewTimelineConfig"
+                    (onClick)="navigateToOrders()"
+                  ></app-configurable-button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div> 

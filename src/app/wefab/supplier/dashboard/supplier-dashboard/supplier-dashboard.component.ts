@@ -71,6 +71,31 @@ interface RecentRFQ {
   urgencyClass: string;
 }
 
+interface ChangeRequest {
+  requestId: string;
+  orderName: string;
+  orderNumber: string;
+  status: string;
+  dueDate: string;
+  formattedDueDate: string;
+  priority: string;
+  description: string;
+  requestType: string;
+}
+
+interface UpcomingDeadline {
+  orderId: string;
+  orderName: string;
+  orderNumber: string;
+  deadline: string;
+  formattedDeadline: string;
+  priority: string;
+  daysRemaining: number;
+  orderType: string;
+  amount: number;
+  currencyCode: string;
+}
+
 @Component({
   selector: 'app-supplier-dashboard',
   standalone: true,
@@ -408,6 +433,70 @@ export class SupplierDashboardComponent {
 
   recentRFQs: RecentRFQ[] = [];
 
+  urgentChangeRequests: ChangeRequest[] = [
+    {
+      requestId: 'ORD-2024-001',
+      orderName: 'Precision Metal Components Order',
+      orderNumber: 'ORD-PMC-2024-445',
+      status: 'Pending Review',
+      dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
+      formattedDueDate: this.getFormattedDate(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)),
+      priority: 'High',
+      description: 'Change in material specifications required',
+      requestType: 'Material Change'
+    },
+    {
+      requestId: 'ORD-2024-002',
+      orderName: 'Industrial Bearing Assembly',
+      orderNumber: 'ORD-IBA-2024-332',
+      status: 'Immediate Action',
+      dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day from now
+      formattedDueDate: this.getFormattedDate(new Date(Date.now() + 1 * 24 * 60 * 60 * 1000)),
+      priority: 'Critical',
+      description: 'Delivery schedule modification needed',
+      requestType: 'Schedule Change'
+    }
+  ];
+
+  upcomingDeadlines: UpcomingDeadline[] = [
+    {
+      orderId: 'ORD-2024-001',
+      orderName: 'Automotive Parts Manufacturing',
+      orderNumber: 'ORD-APM-2024-778',
+      deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
+      formattedDeadline: this.getFormattedDate(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)),
+      priority: 'High',
+      daysRemaining: 3,
+      orderType: 'Manufacturing',
+      amount: 145000,
+      currencyCode: 'INR'
+    },
+    {
+      orderId: 'ORD-2024-002',
+      orderName: 'Electronic Component Supply',
+      orderNumber: 'ORD-ECS-2024-556',
+      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+      formattedDeadline: this.getFormattedDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
+      priority: 'Medium',
+      daysRemaining: 7,
+      orderType: 'Supply',
+      amount: 89500,
+      currencyCode: 'INR'
+    },
+    {
+      orderId: 'ORD-2024-003',
+      orderName: 'Custom Machinery Parts',
+      orderNumber: 'ORD-CMP-2024-334',
+      deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
+      formattedDeadline: this.getFormattedDate(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)),
+      priority: 'Medium',
+      daysRemaining: 5,
+      orderType: 'Custom Manufacturing',
+      amount: 234000,
+      currencyCode: 'INR'
+    }
+  ];
+
   // Legacy activities for backward compatibility
   recentActivities = [
     {
@@ -483,12 +572,83 @@ export class SupplierDashboardComponent {
     }
   };
 
+  reviewAllRequestsConfig = {
+    label: 'Review All Requests',
+    icon: 'pi pi-eye',
+    severity: 'secondary',
+    size: 'normal',
+    disabled: false,
+    loading: false,
+    iconPos: 'left',
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.4rem 0.8rem',
+      borderRadius: '5px'
+    }
+  };
+
+  viewTimelineConfig = {
+    label: 'View Timeline',
+    icon: 'pi pi-calendar',
+    severity: 'secondary',
+    size: 'normal',
+    disabled: false,
+    loading: false,
+    iconPos: 'left',
+    style: {
+      fontSize: '0.875rem',
+      padding: '0.4rem 0.8rem',
+      borderRadius: '5px'
+    }
+  };
+
   navigateToRFQs(): void {
     this.router.navigate(['/wefab/supplier/rfq']);
   }
 
   navigateToQuotation(): void {
     this.router.navigate(['/wefab/supplier/quotation']);
+  }
+
+  navigateToChangeRequests(): void {
+    // Navigate to change requests page (placeholder route)
+    console.log('Navigate to change requests');
+    this.router.navigate(['/wefab/supplier/orders']);
+  }
+
+  navigateToOrders(): void {
+    // Navigate to orders page
+    console.log('Navigate to orders');
+    this.router.navigate(['/wefab/supplier/orders']);
+  }
+
+  viewChangeRequest(request: ChangeRequest): void {
+    // Handle change request view
+    console.log('View change request:', request);
+    this.router.navigate(['/wefab/supplier/orders/details', request.orderNumber]);
+  }
+
+  viewDeadlineOrder(deadline: UpcomingDeadline): void {
+    // Handle deadline order view
+    console.log('View deadline order:', deadline);
+    this.router.navigate(['/wefab/supplier/orders/details', deadline.orderNumber]);
+  }
+
+  getPriorityClass(priority: string): string {
+    if (!priority) return 'priority-default';
+    
+    switch (priority.toLowerCase()) {
+      case 'critical':
+        return 'priority-critical';
+      case 'high':
+        return 'priority-high';
+      case 'medium':
+        return 'priority-medium';
+      case 'low':
+        return 'priority-low';
+      default:
+        return 'priority-default';
+    }
   }
 
   getStatusClass(status: string): string {
@@ -499,6 +659,14 @@ export class SupplierDashboardComponent {
     console.log('Table status', status);
     
     switch (status) {
+      case 'high':
+        return 'status-rejected';
+      case 'medium':
+        return 'status-review'
+      case 'immediate-action':
+        return 'status-rejected';
+      case 'pending-review':
+        return 'status-review';
       case 'not-opened':
         return 'status-draft';
       case 'published':
