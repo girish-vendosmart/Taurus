@@ -747,4 +747,236 @@ $danger-red: #EF4444;
   100% {
     transform: translateX(100%);
   }
+}
+
+// Change Request Section Styles
+.change-request-section {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid rgba($safety-orange, 0.2);
+  box-shadow: 0 4px 12px rgba($safety-orange, 0.08);
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, $safety-orange 0%, darken($safety-orange, 10%) 100%);
+  }
+
+  .change-request-header {
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba($safety-orange, 0.03) 0%, rgba($safety-orange, 0.01) 100%);
+    border-bottom: 1px solid rgba($safety-orange, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .change-request-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      background: rgba($safety-orange, 0.1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse 2s infinite;
+
+      i {
+        font-size: 1.125rem;
+        color: $safety-orange;
+      }
+    }
+
+    .change-request-title {
+      flex: 1;
+
+      h5 {
+        font-size: $h5-font-size;
+        font-weight: $font-weight-bold;
+        color: $precision-black;
+        margin: 0 0 0.25rem 0;
+        line-height: 1.2;
+      }
+
+      .change-request-subtitle {
+        font-size: 0.75rem;
+        color: $safety-orange;
+        font-weight: $font-weight-semibold;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    }
+  }
+
+  .change-request-content {
+    padding: 1rem;
+
+    .change-request-details {
+      margin-bottom: 1rem;
+
+      .detail-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.375rem 0;
+        border-bottom: 1px solid rgba($material-silver, 0.1);
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .detail-label {
+          font-size: 0.75rem;
+          color: $machine-gray;
+          font-weight: $font-weight-medium;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .detail-value {
+          font-size: 0.875rem;
+          color: $precision-black;
+          font-weight: $font-weight-semibold;
+          text-align: right;
+        }
+
+        .urgency-badge {
+          display: inline-flex;
+          align-items: center;
+          padding: 0.125rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.625rem;
+          font-weight: $font-weight-bold;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+
+          &.urgency-high {
+            background-color: rgba($danger-red, 0.1);
+            color: $danger-red;
+          }
+
+          &.urgency-medium {
+            background-color: rgba($warning-yellow, 0.1);
+            color: $warning-yellow;
+          }
+
+          &.urgency-low {
+            background-color: rgba($info-blue, 0.1);
+            color: $info-blue;
+          }
+        }
+      }
+    }
+
+    .change-request-description {
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: rgba($technical-white, 0.5);
+      border-radius: 8px;
+      border-left: 3px solid $safety-orange;
+
+      .description-text {
+        font-size: 0.875rem;
+        color: $precision-black;
+        line-height: 1.5;
+        margin: 0;
+        word-wrap: break-word;
+      }
+    }
+
+    .change-request-actions {
+      display: flex;
+      justify-content: center;
+
+      ::ng-deep .review-btn {
+        width: 100%;
+        font-size: 0.75rem;
+        font-weight: $font-weight-semibold;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: $safety-orange !important;
+        border: 1px solid $safety-orange !important;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: darken($safety-orange, 10%) !important;
+          border-color: darken($safety-orange, 10%) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba($safety-orange, 0.3);
+        }
+
+        &:focus {
+          box-shadow: 0 0 0 2px rgba($safety-orange, 0.2) !important;
+        }
+
+        .p-button-icon {
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// Responsive adjustments for change request section
+@media (max-width: 768px) {
+  .change-request-section {
+    margin-bottom: 1rem;
+
+    .change-request-header {
+      padding: 0.75rem;
+
+      .change-request-icon {
+        width: 36px;
+        height: 36px;
+
+        i {
+          font-size: 1rem;
+        }
+      }
+
+      .change-request-title {
+        h5 {
+          font-size: 0.875rem;
+        }
+
+        .change-request-subtitle {
+          font-size: 0.625rem;
+        }
+      }
+    }
+
+    .change-request-content {
+      padding: 0.75rem;
+
+      .change-request-details {
+        .detail-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.25rem;
+
+          .detail-value {
+            text-align: left;
+          }
+        }
+      }
+    }
+  }
 } 

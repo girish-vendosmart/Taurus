@@ -64,6 +64,17 @@ export interface OrderAttachment {
   uploaded_on: string;
 }
 
+export interface ChangeRequest {
+  id: string;
+  changeType: string;
+  requestedBy: string;
+  urgency: 'High' | 'Medium' | 'Low';
+  requestedDate: string;
+  description: string;
+  status: 'Pending' | 'Approved' | 'Rejected' | 'In Review';
+  attachments?: any[];
+}
+
 @Component({
   selector: 'app-supplier-order-details',
   standalone: true,
@@ -109,6 +120,18 @@ export class SupplierOrderDetailsComponent implements OnInit {
   orderItems: OrderItem[] = [];
   orderAttachments: OrderAttachment[] = [];
   currencyCode: string = 'INR';
+
+  // Change Request properties
+  hasChangeRequest: boolean = false;
+  changeRequest: ChangeRequest = {
+    id: '',
+    changeType: '',
+    requestedBy: '',
+    urgency: 'Low',
+    requestedDate: '',
+    description: '',
+    status: 'Pending'
+  };
 
   // Activity trail properties
   activityTrail: ActivityLogData[] = [];
@@ -399,6 +422,18 @@ export class SupplierOrderDetailsComponent implements OnInit {
       supplier: 'Tata Consultancy Services Limited',
       purchase_order: 'PO-2025-001',
       status: 'In Progress'
+    };
+
+    // Initialize change request sample data
+    this.hasChangeRequest = true;
+    this.changeRequest = {
+      id: 'CR-2025-001',
+      changeType: 'Quantity Adjustment',
+      requestedBy: 'Fabster Industries',
+      urgency: 'High',
+      requestedDate: '2025-01-23 14:30:00',
+      description: 'Customer has requested to increase the quantity of Item 3.2.1 from 26 pieces to 35 pieces due to increased production requirements. This change needs to be processed urgently to meet the revised delivery schedule.',
+      status: 'Pending'
     };
 
     this.loadSampleOrderItems();
@@ -1087,5 +1122,140 @@ export class SupplierOrderDetailsComponent implements OnInit {
    */
   isWorkflowCompleted(): boolean {
     return this.workflowSteps.every(step => step.status === 'complete');
+  }
+
+  /**
+   * Get urgency class for change request badge
+   */
+  getUrgencyClass(urgency: string): string {
+    const urgencyClasses: { [key: string]: string } = {
+      'High': 'urgency-high',
+      'Medium': 'urgency-medium',
+      'Low': 'urgency-low'
+    };
+    
+    return urgencyClasses[urgency] || 'urgency-low';
+  }
+
+  /**
+   * Review change request - opens detailed view
+   */
+  reviewChangeRequest(): void {
+    console.log('Reviewing change request:', this.changeRequest);
+    
+    // Create detailed change request view
+    const changeRequestDetails = `
+      <div style="text-align: left; max-width: 500px;">
+        <div style="margin-bottom: 1rem;">
+          <strong>Change Request ID:</strong> ${this.changeRequest.id}<br/>
+          <strong>Type:</strong> ${this.changeRequest.changeType}<br/>
+          <strong>Requested By:</strong> ${this.changeRequest.requestedBy}<br/>
+          <strong>Urgency:</strong> <span style="color: ${this.getUrgencyColor(this.changeRequest.urgency)}; font-weight: bold;">${this.changeRequest.urgency}</span><br/>
+          <strong>Date:</strong> ${this.formatDate(this.changeRequest.requestedDate)}<br/>
+          <strong>Status:</strong> ${this.changeRequest.status}
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <strong>Description:</strong><br/>
+          <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin-top: 0.5rem; line-height: 1.5;">
+            ${this.changeRequest.description}
+          </div>
+        </div>
+        <div style="font-size: 0.875rem; color: #6b7280;">
+          <em>Review this change request and take appropriate action.</em>
+        </div>
+      </div>
+    `;
+
+    this.sweetAlert.htmlContent(
+      'Change Request Details',
+      changeRequestDetails,
+      'info'
+    ).then((result: any) => {
+      if (result.isConfirmed) {
+        // Show confirmation dialog for approval
+        this.approveChangeRequest();
+      }
+    });
+  }
+
+  /**
+   * Approve change request
+   */
+  private approveChangeRequest(): void {
+    this.sweetAlert.confirm(
+      'Approve Change Request',
+      'Are you sure you want to approve this change request? This action cannot be undone.',
+      'question',
+      'Yes, Approve',
+      'Cancel'
+    ).then((result: any) => {
+      if (result.isConfirmed) {
+        // Update change request status
+        this.changeRequest.status = 'Approved';
+        
+        // Here you would typically make an API call to update the change request
+        // this.commonService.postWefabData('/api/method/approve_change_request', {...})
+        
+        this.sweetAlert.success('Change request has been approved successfully!');
+        console.log('Change request approved:', this.changeRequest);
+        
+        // Optionally reload order details to reflect changes
+        this.loadOrderDetails();
+      }
+    });
+  }
+
+  /**
+   * Get urgency color for styling
+   */
+  private getUrgencyColor(urgency: string): string {
+    const urgencyColors: { [key: string]: string } = {
+      'High': '#ef4444',
+      'Medium': '#f59e0b',
+      'Low': '#3b82f6'
+    };
+    
+    return urgencyColors[urgency] || '#3b82f6';
+  }
+
+  /**
+   * Load change request data from API
+   */
+  private loadChangeRequestData(): void {
+    // This would typically make an API call to fetch change request data
+    const endpoint = `/api/resource/Order Change Request?filters=[["order_id", "=", "${this.orderId}"]]`;
+    
+    this.commonService.getWefabData(endpoint).subscribe({
+      next: (res: any) => {
+        console.log('Change request data:', res.data);
+        if (res.data && res.data.length > 0) {
+          this.hasChangeRequest = true;
+          this.changeRequest = this.transformApiDataToChangeRequest(res.data[0]);
+        } else {
+          this.hasChangeRequest = false;
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching change request data:', error);
+        // For demo purposes, show sample data if API fails
+        this.hasChangeRequest = true;
+      }
+    });
+  }
+
+  /**
+   * Transform API data to ChangeRequest interface
+   */
+  private transformApiDataToChangeRequest(apiData: any): ChangeRequest {
+    return {
+      id: apiData.name || apiData.change_request_id || '',
+      changeType: apiData.change_type || 'General Change',
+      requestedBy: apiData.requested_by || apiData.customer || '',
+      urgency: apiData.urgency || 'Medium',
+      requestedDate: apiData.creation || apiData.requested_date || '',
+      description: apiData.description || apiData.change_description || '',
+      status: apiData.status || 'Pending',
+      attachments: apiData.attachments || []
+    };
   }
 } 

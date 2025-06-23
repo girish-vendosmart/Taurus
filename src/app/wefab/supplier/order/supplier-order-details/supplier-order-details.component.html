@@ -115,6 +115,51 @@
       </div>
     </div>  
     <div class="col-3 mt-3">
+      <!-- Change Request Section -->
+      <div class="change-request-section mb-3" *ngIf="hasChangeRequest">
+        <div class="change-request-header">
+          <div class="change-request-icon">
+            <i class="pi pi-exclamation-triangle"></i>
+          </div>
+          <div class="change-request-title">
+            <h5>Change Request</h5>
+            <span class="change-request-subtitle">{{ changeRequest.changeType }}</span>
+          </div>
+        </div>
+        
+        <div class="change-request-content">
+          <div class="change-request-details">
+            <div class="detail-item">
+              <span class="detail-label">From:</span>
+              <span class="detail-value">{{ changeRequest.requestedBy }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Urgency:</span>
+              <span class="urgency-badge" [ngClass]="getUrgencyClass(changeRequest.urgency)">
+                {{ changeRequest.urgency }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Requested:</span>
+              <span class="detail-value">{{ formatDate(changeRequest.requestedDate) }}</span>
+            </div>
+          </div>
+          
+          <div class="change-request-description">
+            <p class="description-text">{{ changeRequest.description }}</p>
+          </div>
+          
+          <div class="change-request-actions">
+            <p-button 
+              label="Review Change Request" 
+              styleClass="p-button-sm p-button-primary review-btn"
+              icon="pi pi-eye"
+              (onClick)="reviewChangeRequest()">
+            </p-button>
+          </div>
+        </div>
+      </div>
+
       <app-approval-workflow
         title="Order Tracking"
         [steps]="workflowSteps"
