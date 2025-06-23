@@ -797,25 +797,37 @@ export class SupplierOrderDetailsComponent implements OnInit {
     return this.severityOptions && this.severityOptions.length > 0;
   }
 
-  getStatusClass(status: any) {
-    if (!status) return 'status-draft';
-    
-    const statusStr = status.toLowerCase();
-    
-    const statusClasses: { [key: string]: string } = {
-      'draft': 'status-draft',
-      'open': 'status-open',
-      'in progress': 'status-in-progress',
-      'processing': 'status-in-progress',
-      'completed': 'status-completed',
-      'delivered': 'status-completed',
-      'cancelled': 'status-cancelled',
-      'canceled': 'status-cancelled',
-      'on hold': 'status-on-hold',
-      'pending': 'status-pending'
-    };
-    
-    return statusClasses[statusStr] || 'status-draft';
+  // 
+  getStatusClass(status:any) {
+    console.log('Order Details page status', status);
+    switch (status) {
+      case 'High':
+        return 'status-rejected';
+      case 'Submitted':
+        return 'status-awarded';
+      case 'Cancelled':
+        return 'status-rejected';
+      case 'Draft':
+        return 'status-draft';
+      case 'Opened': 
+        return 'status-open';
+      case 'Not Opened':
+        return 'status-open';
+      case 'Paused':
+        return 'status-paused';
+      case 'Deactivate':
+        return 'status-deactivate';
+      case 'Closed':
+        return 'status-closed';
+      case 'Quoted':
+        return 'status-awarded';
+      case 'Not Opened':
+        return 'status-open';
+      case 'In Progress':
+        return 'status-progress';
+      default:
+        return 'status-default';
+    }
   }
 
   getStatusText(): string {
