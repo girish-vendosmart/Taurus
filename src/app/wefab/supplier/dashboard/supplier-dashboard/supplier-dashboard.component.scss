@@ -871,12 +871,11 @@ $transition: all 0.3s ease;
     &.linkable-column {
       color: $blueprint-blue;
       cursor: pointer;
-      text-decoration: underline;
       transition: $transition;
       
       &:hover {
         color: darken($blueprint-blue, 10%);
-        text-decoration: none;
+        text-decoration: underline;
       }
     }
   }

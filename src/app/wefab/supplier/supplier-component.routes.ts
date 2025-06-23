@@ -13,6 +13,7 @@ import { SupplierOnboardingCombinedComponent }  from './onboarding/supplier-onbo
 import { HelpSectionComponent } from './help-section/help-section.component';
 import { SupplierOrderComponent } from './order/supplier-order/supplier-order.component';
 import { SupplierOrderDetailsComponent } from './order/supplier-order-details/supplier-order-details.component';
+import { OrderChangeRequestReviewComponent } from './order/order-change-request-review/order-change-request-review.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
@@ -47,6 +48,11 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
             {
                 path: 'order/details/:id',
                 component: SupplierOrderDetailsComponent,
+                canActivate: [AuthGuard]
+            },
+            {
+                path: 'order/change-request-review/:orderId/:changeRequestId',
+                component: OrderChangeRequestReviewComponent,
                 canActivate: [AuthGuard]
             },
             {

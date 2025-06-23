@@ -117,10 +117,8 @@
               <div class="change-requests-section">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <h4>
-                    <i class="pi pi-exclamation-triangle text-warning me-2"></i>
                     Urgent Change Requests
                   </h4>
-                  <span class="badge bg-warning text-dark">{{ urgentChangeRequests.length }}</span>
                 </div>
                 <div class="requests-list" *ngIf="urgentChangeRequests.length > 0">
                   <div *ngFor="let request of urgentChangeRequests" class="request-item change-request-sub-cards">
@@ -158,10 +156,8 @@
               <div class="deadlines-section">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <h4>
-                    <i class="pi pi-calendar text-info me-2"></i>
                     Upcoming Deadlines
                   </h4>
-                  <span class="badge bg-info">{{ upcomingDeadlines.length }}</span>
                 </div>
                 <div class="deadlines-list" *ngIf="upcomingDeadlines.length > 0">
                   <div *ngFor="let deadline of upcomingDeadlines" class="deadline-item deadline-sub-cards">

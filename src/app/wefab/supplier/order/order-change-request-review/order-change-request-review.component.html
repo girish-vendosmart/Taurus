@@ -1,0 +1,157 @@
+<div class="change-request-review-page">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading change request details...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading" class="main-content">
+    <!-- Order Change Request Header -->
+    <div class="change-request-header-section">
+      <div class="request-header-info">
+        <div class="request-header-left">
+          <h4 class="main-heading">Order Change Request</h4>
+          <div class="request-meta">
+            <span class="request-id">Order #{{ changeRequestDetails.orderId }}</span>
+            <span class="request-submitted">• Submitted {{ changeRequestDetails.submittedDate }}</span>
+          </div>
+        </div>
+        <div class="request-header-right">
+          <span class="status-badge" [ngClass]="getUrgencyClass(changeRequestDetails.urgency)">
+            {{ changeRequestDetails.urgency }} Priority
+          </span>
+          <span class="change-id">{{ changeRequestDetails.id }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <!-- Customer Information -->
+      <div class="info-section">
+        <h5 class="section-title">Customer Information</h5>
+        <div class="customer-info-card">
+          <div class="customer-avatar">
+            <i class="pi pi-building"></i>
+          </div>
+          <div class="customer-details">
+            <h6 class="company-name">{{ customerInfo.companyName }}</h6>
+            <div class="contact-info">
+              <p>Contact: {{ customerInfo.contactPerson }} • {{ customerInfo.email }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Request Details -->
+      <div class="info-section">
+        <h5 class="section-title">Change Request Details</h5>
+        <div class="details-grid">
+          <div class="detail-row">
+            <span class="detail-label">Change Type</span>
+            <span class="detail-value">{{ changeRequestDetails.changeType }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Urgency Level</span>
+            <span class="detail-value">{{ changeRequestDetails.urgency }}</span>
+          </div>
+        </div>
+        
+        <div class="description-section">
+          <p class="description-label">Description</p>
+          <div class="description-content">
+            {{ changeRequestDetails.description }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Attached Files -->
+      <div class="info-section" *ngIf="changeRequestDetails.attachments && changeRequestDetails.attachments.length > 0">
+        <h5 class="section-title">Attached Files</h5>
+        <div class="attachments-list">
+          <div class="attachment-item" *ngFor="let attachment of changeRequestDetails.attachments">
+            <div class="file-icon">
+              <i class="pi pi-file-pdf"></i>
+            </div>
+            <div class="file-details">
+              <span class="file-name">{{ attachment.fileName }}</span>
+              <span class="file-size">({{ attachment.fileSize }})</span>
+            </div>
+            <button class="download-btn" (click)="downloadAttachment(attachment)">
+              <i class="pi pi-download"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Original Order Details -->
+      <div class="info-section">
+        <h5 class="section-title">Original Order Details</h5>
+        <div class="order-details-table">
+          <div class="table-header">
+            <div class="col">Quantity</div>
+            <div class="col">Unit Price</div>
+            <div class="col">Total Amount</div>
+            <div class="col">Delivery Date</div>
+          </div>
+          <div class="table-row">
+            <div class="col">{{ originalOrderDetails.quantity }} units</div>
+            <div class="col">{{ getFormattedCurrencyAmount(originalOrderDetails.unitPrice) }}</div>
+            <div class="col">{{ getFormattedCurrencyAmount(originalOrderDetails.totalAmount) }}</div>
+            <div class="col">{{ originalOrderDetails.deliveryDate }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Response Form - Full Width -->
+    <div class="response-section">
+      <h5 class="section-title">Your Response</h5>
+      
+      <div class="response-options">
+        <div class="response-option" *ngFor="let option of responseOptions">
+          <div class="radio-wrapper" [class.selected]="selectedResponse === option.value">
+            <p-radioButton 
+              [inputId]="option.value" 
+              [value]="option.value" 
+              [(ngModel)]="selectedResponse"
+              (onChange)="onResponseChange(option.value)">
+            </p-radioButton>
+            <label [for]="option.value" class="option-label">
+              <span class="option-title">{{ option.label }}</span>
+              <span class="option-description">{{ option.description }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="additional-notes">
+        <label for="notes" class="notes-label">Additional Notes (Optional)</label>
+        <textarea 
+          id="notes"
+          pInputTextarea 
+          [(ngModel)]="additionalNotes" 
+          rows="4" 
+          placeholder="Add any additional comments or clarifications..."
+          class="notes-textarea">
+        </textarea>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <p-button 
+        label="Back" 
+        styleClass="p-button-text back-action-btn"
+        (onClick)="goBack()">
+      </p-button>
+      
+      <p-button 
+        label="Submit Response" 
+        styleClass="p-button submit-response-btn"
+        icon="pi pi-send"
+        (onClick)="submitResponse()">
+      </p-button>
+    </div>
+  </div>
+</div> 

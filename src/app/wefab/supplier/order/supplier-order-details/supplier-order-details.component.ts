@@ -1150,44 +1150,17 @@ export class SupplierOrderDetailsComponent implements OnInit {
   }
 
   /**
-   * Review change request - opens detailed view
+   * Review change request - navigates to detailed review page
    */
   reviewChangeRequest(): void {
-    console.log('Reviewing change request:', this.changeRequest);
+    console.log('Navigating to change request review:', this.changeRequest);
     
-    // Create detailed change request view
-    const changeRequestDetails = `
-      <div style="text-align: left; max-width: 500px;">
-        <div style="margin-bottom: 1rem;">
-          <strong>Change Request ID:</strong> ${this.changeRequest.id}<br/>
-          <strong>Type:</strong> ${this.changeRequest.changeType}<br/>
-          <strong>Requested By:</strong> ${this.changeRequest.requestedBy}<br/>
-          <strong>Urgency:</strong> <span style="color: ${this.getUrgencyColor(this.changeRequest.urgency)}; font-weight: bold;">${this.changeRequest.urgency}</span><br/>
-          <strong>Date:</strong> ${this.formatDate(this.changeRequest.requestedDate)}<br/>
-          <strong>Status:</strong> ${this.changeRequest.status}
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <strong>Description:</strong><br/>
-          <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin-top: 0.5rem; line-height: 1.5;">
-            ${this.changeRequest.description}
-          </div>
-        </div>
-        <div style="font-size: 0.875rem; color: #6b7280;">
-          <em>Review this change request and take appropriate action.</em>
-        </div>
-      </div>
-    `;
-
-    this.sweetAlert.htmlContent(
-      'Change Request Details',
-      changeRequestDetails,
-      'info'
-    ).then((result: any) => {
-      if (result.isConfirmed) {
-        // Show confirmation dialog for approval
-        this.approveChangeRequest();
-      }
-    });
+    // Navigate to the change request review page
+    this.router.navigate([
+      '/wefab/supplier/order/change-request-review', 
+      this.orderId, 
+      this.changeRequest.id
+    ]);
   }
 
   /**
