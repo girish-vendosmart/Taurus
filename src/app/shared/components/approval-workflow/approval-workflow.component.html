@@ -52,9 +52,9 @@
     (onHide)="closeCompletionModal()"
   >
     <div class="completion-modal-content">
-      <!-- Photo Upload Section -->
-      <div class="form-section" *ngIf="currentStep?.requiresPhotos">
-        <label class="form-label required">Upload Evidence</label>
+      <!-- File Upload Section -->
+      <div class="form-section">
+        <label class="form-label" [class.required]="currentStep?.requiresPhotos">Upload Evidence (Photos, Videos, Documents)</label>
         <div class="file-upload-container" (click)="fileInput.click()">
           <div class="upload-area">
             <i class="pi pi-cloud-upload upload-icon"></i>
@@ -64,7 +64,7 @@
             #fileInput
             type="file"
             multiple
-            accept="image/*"
+            accept="image/*,video/*,.pdf,.doc,.docx,.txt,.xlsx,.xls,.ppt,.pptx"
             style="display: none"
             (change)="onFileSelected($event)"
           />

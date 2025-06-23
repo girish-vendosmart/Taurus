@@ -223,23 +223,28 @@ export class SupplierOrderDetailsComponent implements OnInit {
     {
       id: 'confirmation',
       title: 'Confirmation',
-      status: 'complete',
-      description: 'Complete',
-      allowCompletion: false
+      status: 'ready',
+      description: '',
+      allowCompletion: true,
+      isOpenDialog: false,
     },
     {
       id: 'preparation',
       title: 'Preparation',
-      status: 'complete',
-      description: 'Complete',
-      allowCompletion: false
+      status: 'waiting',
+      description: '',
+      allowCompletion: true,
+      isOpenDialog: true,
+      requiresPhotos: false,
+      requiresComments: false,
     },
     {
       id: 'work-in-progress',
       title: 'Work In Progress',
-      status: 'ready',
-      description: 'Ready to Start',
+      status: 'waiting',
+      description: '',
       allowCompletion: true,
+      isOpenDialog: true,
       requiresPhotos: true,
       requiresComments: true,
     },
@@ -247,26 +252,28 @@ export class SupplierOrderDetailsComponent implements OnInit {
       id: 'finishing',
       title: 'Finishing',
       status: 'waiting',
-      description: 'Waiting for Previous Step',
+      description: '',
       allowCompletion: true,
       requiresPhotos: true,
-      requiresComments: true
+      requiresComments: true,
     },
     {
       id: 'inspection',
       title: 'Inspection',
       status: 'waiting',
-      description: 'Waiting for Previous Step',
+      description: '',
       allowCompletion: true,
-      requiresComments: false
+      requiresPhotos: true,
+      requiresComments: true,
     },
     {
       id: 'dispatch',
       title: 'Dispatch In Progress',
       status: 'waiting',
-      description: 'Waiting for Previous Step',
+      description: '',
       allowCompletion: true,
-      requiresComments: false
+      requiresPhotos: true,
+      requiresComments: true
     }
   ];
 
@@ -962,6 +969,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
   }
 
   onWorkflowStepClicked(step: WorkflowStep): void {
+    debugger
     console.log('Workflow step clicked:', step);
     
     // Handle different actions based on step status

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -19,6 +19,7 @@ export interface WorkflowStep {
   allowCompletion?: boolean;
   requiresPhotos?: boolean;
   requiresComments?: boolean;
+  isOpenDialog?: boolean;
 }
 
 export interface WorkflowCompletionData {
@@ -48,6 +49,7 @@ export class ApprovalWorkflowComponent implements OnInit {
   @Input() steps: WorkflowStep[] = [];
   @Input() loading: boolean = false;
   @Input() allowInteraction: boolean = true;
+  @Input() useCustomSteps: boolean = false; // New property to control step behavior
 
   @Output() stepCompleted = new EventEmitter<WorkflowCompletionData>();
   @Output() stepClicked = new EventEmitter<WorkflowStep>();
@@ -59,63 +61,17 @@ export class ApprovalWorkflowComponent implements OnInit {
   selectedFiles: File[] = [];
   uploadError: string = '';
 
+  // Default workflow steps - starting from preparation
+  workflowSteps: any[] = [];
+
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.initializeDefaultSteps();
   }
 
-  private initializeDefaultSteps(): void {
-    if (this.steps.length === 0) {
-      this.steps = [
-        {
-          id: 'confirmation',
-          title: 'Confirmation',
-          status: 'complete',
-          description: 'Complete',
-          allowCompletion: false
-        },
-        {
-          id: 'preparation',
-          title: 'Preparation',
-          status: 'complete',
-          description: 'Complete',
-          allowCompletion: false
-        },
-        {
-          id: 'work-in-progress',
-          title: 'Work In Progress',
-          status: 'in-progress',
-          description: 'Ready to Start',
-          allowCompletion: true,
-          requiresComments: false
-        },
-        {
-          id: 'finishing',
-          title: 'Finishing',
-          status: 'waiting',
-          description: 'Waiting for Previous Step',
-          allowCompletion: true,
-          requiresPhotos: true,
-          requiresComments: true
-        },
-        {
-          id: 'inspection',
-          title: 'Inspection',
-          status: 'waiting',
-          description: 'Waiting for Previous Step',
-          allowCompletion: true,
-          requiresComments: false
-        },
-        {
-          id: 'dispatch',
-          title: 'Dispatch In Progress',
-          status: 'waiting',
-          description: 'Waiting for Previous Step',
-          allowCompletion: true,
-          requiresComments: false
-        }
-      ];
+  ngOnChanges(changes: any): void {
+    if(changes.steps && changes.steps.currentValue.length > 0) {
+      this.steps = changes.steps.currentValue;
     }
   }
 
@@ -137,6 +93,7 @@ export class ApprovalWorkflowComponent implements OnInit {
       case 'complete':
         return 'step-icon-complete';
       case 'in-progress':
+        return 'step-icon-under-review';
       case 'ready':
         return 'step-icon-active';
       default:
@@ -176,11 +133,21 @@ export class ApprovalWorkflowComponent implements OnInit {
   }
 
   onStepClick(step: WorkflowStep): void {
-    this.stepClicked.emit(step);
-    
-    if (this.canCompleteStep(step)) {
+    debugger
+    if(step.isOpenDialog) {
       this.openCompletionModal(step);
+    } else {
+      this.stepCompleted.emit({
+        stepId: step.id,
+        photos: [],
+        comments: ''
+      });
     }
+    // this.stepClicked.emit(step);
+    
+    // if (this.canCompleteStep(step)) {
+    //   this.openCompletionModal(step);
+    // }
   }
 
   openCompletionModal(step: WorkflowStep): void {
@@ -215,7 +182,17 @@ export class ApprovalWorkflowComponent implements OnInit {
 
   private validateFiles(): void {
     const maxSize = 10 * 1024 * 1024; // 10MB
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    const allowedTypes = [
+      // Images
+      'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp',
+      // Videos
+      'video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/flv', 'video/webm',
+      // Documents
+      'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'text/plain', 'text/csv'
+    ];
 
     for (const file of this.selectedFiles) {
       if (file.size > maxSize) {
@@ -225,7 +202,7 @@ export class ApprovalWorkflowComponent implements OnInit {
       }
 
       if (!allowedTypes.includes(file.type)) {
-        this.uploadError = `File "${file.name}" is not a supported image type.`;
+        this.uploadError = `File "${file.name}" is not a supported file type. Supported types: images, videos, PDF, Word, Excel, PowerPoint, and text files.`;
         this.selectedFiles = [];
         return;
       }
