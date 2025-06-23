@@ -1,0 +1,18 @@
+<div class="order-page">
+  <div class="content-section">
+    <!-- Common Table Component -->
+    <!-- Dashboard Cards -->
+    <app-common-card [cards]="dashboardCards"></app-common-card>
+
+    <div class="table-section">
+      <app-common-table 
+        [config]="tableConfig" 
+        [data]="allOrders"
+        [loading]="loading"
+        (rowClick)="onRowClick($event)"
+        (linkClick)="onLinkClick($event)"
+        (actionClick)="onActionClick($event)">
+      </app-common-table>
+    </div>
+  </div>
+</div> 
