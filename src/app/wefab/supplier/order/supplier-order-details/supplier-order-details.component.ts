@@ -14,6 +14,8 @@ import { SweetAlertService } from '../../../../shared/services/sweet-alert.servi
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { WorkflowStep, WorkflowCompletionData } from '../../../../shared/components/approval-workflow/approval-workflow.component';
+import { ApprovalWorkflowComponent } from '../../../../shared/components/approval-workflow/approval-workflow.component';
 
 export interface OrderDetails {
   name: string;
@@ -75,7 +77,8 @@ export interface OrderAttachment {
     ActivityTrailComponent,
     SplitButtonComponent,
     ButtonModule,
-    InputTextModule
+    InputTextModule,
+    ApprovalWorkflowComponent
   ],
   templateUrl: './supplier-order-details.component.html',
   styleUrl: './supplier-order-details.component.scss'
@@ -215,6 +218,57 @@ export class SupplierOrderDetailsComponent implements OnInit {
     private commonService: CommonService,
     private sweetAlert: SweetAlertService
   ) {}
+
+  workflowSteps: WorkflowStep[] = [
+    {
+      id: 'confirmation',
+      title: 'Confirmation',
+      status: 'complete',
+      description: 'Complete',
+      allowCompletion: false
+    },
+    {
+      id: 'preparation',
+      title: 'Preparation',
+      status: 'complete',
+      description: 'Complete',
+      allowCompletion: false
+    },
+    {
+      id: 'work-in-progress',
+      title: 'Work In Progress',
+      status: 'ready',
+      description: 'Ready to Start',
+      allowCompletion: true,
+      requiresPhotos: true,
+      requiresComments: true,
+    },
+    {
+      id: 'finishing',
+      title: 'Finishing',
+      status: 'waiting',
+      description: 'Waiting for Previous Step',
+      allowCompletion: true,
+      requiresPhotos: true,
+      requiresComments: true
+    },
+    {
+      id: 'inspection',
+      title: 'Inspection',
+      status: 'waiting',
+      description: 'Waiting for Previous Step',
+      allowCompletion: true,
+      requiresComments: false
+    },
+    {
+      id: 'dispatch',
+      title: 'Dispatch In Progress',
+      status: 'waiting',
+      description: 'Waiting for Previous Step',
+      allowCompletion: true,
+      requiresComments: false
+    }
+  ];
 
   ngOnInit() {
     this.route.params.subscribe(params => {
@@ -547,24 +601,6 @@ export class SupplierOrderDetailsComponent implements OnInit {
 
   setActiveTab(tab: 'overview' | 'comment' | 'activity') {
     this.activeTab = tab;
-    if (tab === 'activity') {
-      this.loadActivityTrail();
-    }
-  }
-
-  private loadActivityTrail(): void {
-    this.activityTrailLoading = true;
-    this.commonService.getData('/api/method/wefab.wefab.api.common.engine.trail.activity.get_new_versions_trail?doctype=Supplier Order&docname=' + this.orderId)
-      .subscribe({
-        next: (response: any) => {
-          this.activityTrail = response.data || [];
-          this.activityTrailLoading = false;
-        },
-        error: () => {
-          this.activityTrail = [];
-          this.activityTrailLoading = false;
-        }
-      });
   }
 
   goBack() {
@@ -878,5 +914,170 @@ export class SupplierOrderDetailsComponent implements OnInit {
     const extension = fileName.toLowerCase().split('.').pop();
     const documentExtensions = ['doc', 'docx', 'txt', 'rtf', 'odt'];
     return documentExtensions.includes(extension || '');
+  }
+
+  onWorkflowStepCompleted(data: WorkflowCompletionData): void {
+    console.log('Workflow step completed:', data);
+    
+    // Find the completed step
+    const completedStepIndex = this.workflowSteps.findIndex(step => step.id === data.stepId);
+    if (completedStepIndex === -1) {
+      console.error('Step not found:', data.stepId);
+      return;
+    }
+
+    // Update the completed step
+    this.workflowSteps[completedStepIndex] = {
+      ...this.workflowSteps[completedStepIndex],
+      status: 'complete',
+      completedDate: new Date(),
+      completedBy: 'Current User', // You can get this from auth service
+      comments: data.comments || '',
+      photos: data.photos ? data.photos.map(file => file.name) : []
+    };
+
+    // Activate the next step if it exists
+    if (completedStepIndex + 1 < this.workflowSteps.length) {
+      this.workflowSteps[completedStepIndex + 1] = {
+        ...this.workflowSteps[completedStepIndex + 1],
+        status: 'ready',
+        description: 'Ready to Start'
+      };
+    }
+
+    // Show success message
+    this.sweetAlert.success(
+      `${this.workflowSteps[completedStepIndex].title} has been completed successfully.`
+    );
+
+    // Handle photo uploads if any
+    if (data.photos && data.photos.length > 0) {
+      this.handlePhotoUploads(data.stepId, data.photos);
+    }
+
+    // Save the workflow progress (you might want to call an API here)
+    this.saveWorkflowProgress(data);
+    
+    console.log('Updated workflow steps:', this.workflowSteps);
+  }
+
+  onWorkflowStepClicked(step: WorkflowStep): void {
+    console.log('Workflow step clicked:', step);
+    
+    // Handle different actions based on step status
+    switch (step.status) {
+      case 'complete':
+        // Show step details for completed steps
+        this.showStepDetails(step);
+        break;
+        
+      case 'in-progress':
+      case 'ready':
+        // For active steps, the workflow component will handle the completion modal
+        console.log(`Step ${step.title} is ready for completion`);
+        break;
+        
+      case 'waiting':
+        // Show info that previous steps need to be completed first
+        this.sweetAlert.info(
+          `Please complete the previous steps before starting "${step.title}".`
+        );
+        break;
+        
+      default:
+        console.log('Unknown step status:', step.status);
+    }
+  }
+
+  /**
+   * Handle photo uploads for completed workflow steps
+   */
+  private handlePhotoUploads(stepId: string, photos: File[]): void {
+    console.log('Handling photo uploads for step:', stepId, photos);
+    
+    // Here you would typically upload photos to your server
+    // For now, we'll just log the action
+    photos.forEach((photo, index) => {
+      console.log(`Photo ${index + 1} for step ${stepId}:`, photo.name, photo.size);
+    });
+    
+    // You might want to use your file upload service here
+    // this.fileUploadService.uploadFiles(photos, stepId).subscribe(...)
+  }
+
+  /**
+   * Save workflow progress to the server
+   */
+  private saveWorkflowProgress(completionData: WorkflowCompletionData): void {
+    console.log('Saving workflow progress:', completionData);
+    
+    // Prepare the data for API call
+    const workflowData = {
+      orderId: this.orderId,
+      stepId: completionData.stepId,
+      comments: completionData.comments,
+      completedDate: new Date().toISOString(),
+      photos: completionData.photos ? completionData.photos.map(f => f.name) : []
+    };
+
+    // Here you would make an API call to save the workflow progress
+    // Example:
+    // this.commonService.postWefabData('/api/method/your.workflow.update', workflowData)
+    //   .subscribe({
+    //     next: (response) => {
+    //       console.log('Workflow progress saved:', response);
+    //     },
+    //     error: (error) => {
+    //       console.error('Error saving workflow progress:', error);
+    //       this.sweetAlert.error('Error', 'Failed to save workflow progress. Please try again.');
+    //     }
+    //   });
+    
+    console.log('Workflow data to save:', workflowData);
+  }
+
+  /**
+   * Show details of a completed step
+   */
+  private showStepDetails(step: WorkflowStep): void {
+    const stepDetails = `
+      <div style="text-align: left;">
+        <p><strong>Status:</strong> ${step.status}</p>
+        ${step.completedDate ? `<p><strong>Completed:</strong> ${this.formatDate(step.completedDate.toISOString())}</p>` : ''}
+        ${step.completedBy ? `<p><strong>Completed By:</strong> ${step.completedBy}</p>` : ''}
+        ${step.comments ? `<p><strong>Comments:</strong> ${step.comments}</p>` : ''}
+        ${step.photos && step.photos.length > 0 ? `<p><strong>Photos:</strong> ${step.photos.length} file(s) attached</p>` : ''}
+      </div>
+    `;
+
+    this.sweetAlert.htmlContent(
+      `${step.title} Details`,
+      stepDetails,
+      'info'
+    );
+  }
+
+  /**
+   * Get the current active step
+   */
+  getCurrentActiveStep(): WorkflowStep | null {
+    return this.workflowSteps.find(step => 
+      step.status === 'in-progress' || step.status === 'ready'
+    ) || null;
+  }
+
+  /**
+   * Get workflow completion percentage
+   */
+  getWorkflowCompletionPercentage(): number {
+    const completedSteps = this.workflowSteps.filter(step => step.status === 'complete').length;
+    return Math.round((completedSteps / this.workflowSteps.length) * 100);
+  }
+
+  /**
+   * Check if all workflow steps are completed
+   */
+  isWorkflowCompleted(): boolean {
+    return this.workflowSteps.every(step => step.status === 'complete');
   }
 } 

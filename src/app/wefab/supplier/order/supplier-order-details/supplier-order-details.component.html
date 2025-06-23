@@ -15,25 +15,6 @@
           {{ getStatusText() }}
         </span>
       </div>
-      
-      <div class="header-right">
-        <app-configurable-button
-          [configuration]="printButtonConfig"
-          (onClick)="printOrder()">
-        </app-configurable-button>
-        <app-configurable-button
-          *ngIf="orderDetails.status === 'Draft' || orderDetails.status === 'Open' || orderDetails.status === 'In Progress'"
-          [configuration]="editButtonConfig"
-          (onClick)="editOrder()">
-        </app-configurable-button>
-        <app-split-button
-          *ngIf="hasAvailableActions()"
-          [options]="severityOptions"
-          placeholder="Select Action"
-          severity="primary"
-          (actionTriggered)="onActionClick($event)">
-        </app-split-button>
-      </div>
     </div>
   </div>
 
@@ -74,7 +55,6 @@
       <span class="info-value">{{ formatDate(orderDetails.modified) }}</span>
     </div>
   </div>
-
   <!-- Tab Navigation -->
   <div class="tab-navigation">
     <p-button 
@@ -89,95 +69,58 @@
       [ngClass]="{'active': activeTab === 'comment'}"
       (onClick)="setActiveTab('comment')">
     </p-button>
-    <p-button 
-      label="Activity"
-      styleClass="p-button-text tab-btn"
-      [ngClass]="{'active': activeTab === 'activity'}"
-      (onClick)="setActiveTab('activity')">
-    </p-button>
   </div>
 
   <!-- Tab Content -->
-  <div class="tab-content">
-    <!-- Overview Tab -->
-    <div class="tab-panel" [class.active]="activeTab === 'overview'">
-      <div class="overview-content">
-        <!-- Order Terms & Conditions Section -->
-        <div class="description-box">
-          <h4>Order Instructions</h4>
-          <div [innerHTML]="orderDetails.special_instructions || orderDetails.description || 'Standard manufacturing and delivery terms apply for this order.'"></div>
-        </div>
+  <div class="content-layout row">
+    <div class="col-9">
+      <div [ngSwitch]="activeTab">
+        <!-- Overview Tab -->
+        <div class="tab-panel" *ngSwitchCase="'overview'">
+          <div class="overview-content">
+            <!-- Order Terms & Conditions Section -->
+            <div class="description-box">
+              <h4>Order Instructions</h4>
+              <div [innerHTML]="orderDetails.special_instructions || orderDetails.description || 'Standard manufacturing and delivery terms apply for this order.'"></div>
+            </div>
 
-        <!-- Items Section -->
-        <div class="items-section">
-          <div class="items-header p-3">
-            <p class="info-label" style="margin: 0 !important;">Total Items : <span class="info-value">{{ orderItems.length }}</span></p>
-            <p class="info-label" style="margin: 0 !important;">Total Quantity : <span class="info-value">{{ getTotalQuantity() }}</span></p>
-          </div>
+            <!-- Items Section -->
+            <div class="items-section">
+              <div class="items-header p-3">
+                <p class="info-label" style="margin: 0 !important;">Total Items : <span class="info-value">{{ orderItems.length }}</span></p>
+                <p class="info-label" style="margin: 0 !important;">Total Quantity : <span class="info-value">{{ getTotalQuantity() }}</span></p>
+              </div>
 
-          <!-- Common Table Component -->
-          <div class="items-table-container">
-            <app-common-table 
-              [config]="orderItemsTableConfig" 
-              [data]="orderItems"
-              [loading]="loading"
-              (rowClick)="onOrderItemRowClick($event)"
-              (linkClick)="onOrderItemLinkClick($event)"
-              (actionClick)="onOrderItemActionClick($event)">
-            </app-common-table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Attachments Section -->
-    <div class="attachments-section m-4" *ngIf="orderAttachments && orderAttachments.length > 0 && activeTab === 'overview'">
-      <div class="attachments-header">
-        <h3>Attachments ({{ orderAttachments.length }})</h3>
-        <p class="section-subtitle">Documents and files related to this order</p>
-      </div>
-
-      <div class="attachments-grid">
-        <div class="attachment-card" *ngFor="let attachment of orderAttachments">
-          <div class="file-icon">
-            <i class="bi bi-file-earmark-pdf" *ngIf="isFileTypePdf(attachment.file_name)"></i>
-            <i class="bi bi-file-earmark-image" *ngIf="isFileTypeImage(attachment.file_name)"></i>
-            <i class="bi bi-file-earmark-text" *ngIf="isFileTypeDocument(attachment.file_name)"></i>
-            <i class="bi bi-file-earmark" *ngIf="!isFileTypePdf(attachment.file_name) && !isFileTypeImage(attachment.file_name) && !isFileTypeDocument(attachment.file_name)"></i>
-          </div>
-          <div class="file-info">
-            <h4 class="file-name">{{ attachment.name }}</h4>
-            <div class="file-meta">
-              <span class="upload-date">{{ formatApiDate(attachment.uploaded_on) }}</span>
+              <!-- Common Table Component -->
+              <div class="items-table-container">
+                <app-common-table 
+                  [config]="orderItemsTableConfig" 
+                  [data]="orderItems"
+                  [loading]="loading"
+                  (rowClick)="onOrderItemRowClick($event)"
+                  (linkClick)="onOrderItemLinkClick($event)"
+                  (actionClick)="onOrderItemActionClick($event)">
+                </app-common-table>
+              </div>
             </div>
           </div>
-          <div class="file-actions">
-            <button class="view-btn" (click)="viewAttachment(attachment)" title="View">
-              <i class="bi bi-eye"></i>
-            </button>
-            <button class="download-btn" (click)="downloadAttachment(attachment)" title="Download">
-              <i class="bi bi-download"></i>
-            </button>
+        </div>
+
+        <!-- Comment Tab -->
+        <div class="tab-panel" *ngSwitchCase="'comment'">
+          <div class="comment-content">
+            <app-conversation-trail [docType]="'Supplier Order Messenger'" [docName]="orderId"></app-conversation-trail>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Comment Tab -->
-    <div class="tab-panel" [class.active]="activeTab === 'comment'">
-      <div class="comment-content">
-        <app-conversation-trail [docType]="'Supplier Order Messenger'" [docName]="orderId"></app-conversation-trail>
-      </div>
-    </div>
-
-    <!-- Activity Tab -->
-    <div class="tab-panel" [class.active]="activeTab === 'activity'">
-      <app-activity-trail 
-        [activityData]="activityTrail"
-        [loading]="activityTrailLoading"
-        [showHeader]="false"
-        [emptyMessage]="'No activity records found.'">
-      </app-activity-trail>
+    </div>  
+    <div class="col-3 mt-3">
+      <app-approval-workflow
+        title="Order Tracking"
+        [steps]="workflowSteps"
+        (stepCompleted)="onWorkflowStepCompleted($event)"
+        (stepClicked)="onWorkflowStepClicked($event)">
+      </app-approval-workflow>
     </div>
   </div>
 </div> 

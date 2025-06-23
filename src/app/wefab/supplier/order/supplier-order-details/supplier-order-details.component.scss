@@ -197,6 +197,32 @@ $danger-red: #EF4444;
     background-color: rgba(59, 130, 246, 0.1);
     color: #3b82f6;
   }
+
+  &.status-in-progress {
+    background-color: rgba(255, 87, 34, 0.1);
+    color: #ff5722;
+  }
+  
+  &.status-completed {
+    background-color: rgba(18, 133, 110, 0.1);
+    color: #12856e;
+  }
+  
+  &.status-cancelled {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+  
+  &.status-on-hold {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+  }
+  
+  &.status-pending {
+    background-color: rgba(156, 163, 175, 0.1);
+    color: #9ca3af;
+  }
+}
   
   &.status-in-progress {
     background-color: rgba(245, 158, 11, 0.1);
@@ -1230,5 +1256,87 @@ $danger-red: #EF4444;
         }
       }
     }
+  }
+}
+
+// Workflow Progress Styles
+.workflow-progress-info {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba($material-silver, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  .progress-header {
+    h5 {
+      font-size: 0.875rem;
+      font-weight: $font-weight-semibold;
+      color: $precision-black;
+      margin: 0 0 0.75rem 0;
+    }
+
+    .progress-bar-container {
+      background: rgba($material-silver, 0.3);
+      border-radius: 10px;
+      height: 8px;
+      overflow: hidden;
+      position: relative;
+
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, $process-green 0%, darken($process-green, 10%) 100%);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+        position: relative;
+
+        &::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+          animation: shimmer 2s infinite;
+        }
+      }
+    }
+  }
+
+  .current-step-info {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba($material-silver, 0.2);
+
+    small {
+      color: $machine-gray;
+      font-size: 0.75rem;
+
+      strong {
+        color: $blueprint-blue;
+        font-weight: $font-weight-semibold;
+      }
+    }
+  }
+
+  .completion-status {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba($material-silver, 0.2);
+
+    .text-success {
+      color: $process-green;
+      font-weight: $font-weight-semibold;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
   }
 } 
