@@ -63,9 +63,9 @@
           }
           
           &.step-icon-active {
-            background-color: #3b82f6;
+            background-color: #f59e0b;
             color: white;
-            border-color: #3b82f6;
+            border-color: #f59e0b;
           }
           
           &.step-icon-waiting {
@@ -120,7 +120,7 @@
       
       &.step-active {
         .step-content .step-title {
-          color: #3b82f6;
+          color: #f59e0b;
         }
         
         .step-icon-container .step-connector {
@@ -162,7 +162,7 @@
       transition: all 0.2s ease;
       
       &:hover {
-        border-color: #3b82f6;
+        border-color: #f59e0b;
         background-color: #f8fafc;
       }
       
@@ -266,12 +266,12 @@
     }
     
     &.p-button-primary {
-      background-color: #3b82f6;
-      border-color: #3b82f6;
+      background-color: #f59e0b;
+      border-color: #f59e0b;
       
       &:hover {
-        background-color: #2563eb;
-        border-color: #2563eb;
+        background-color: #f59e0b;
+        border-color: #f59e0b;
       }
     }
   }
