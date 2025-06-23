@@ -82,7 +82,11 @@ export class ApprovalWorkflowComponent implements OnInit {
       case 'in-progress':
         return 'pi pi-play';
       case 'ready':
-        return 'pi pi-camera';
+        // Use different icon based on isOpenDialog property
+        if (step.isOpenDialog === false) {
+          return 'pi pi-info-circle'; // Info/Under Review icon when dialog is not needed
+        }
+        return 'pi pi-camera'; // Default icon when dialog is needed
       default:
         return 'pi pi-clock';
     }
