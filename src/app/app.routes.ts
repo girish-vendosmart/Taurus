@@ -6,6 +6,7 @@ import { CommonTableComponent } from './shared/components/common-table/common-ta
 import { ConfigurableButtonDemoComponent } from './shared/components/configurable-button/configurable-button.demo.component';
 import { CommonCardComponent } from './shared/components/common-card/common-card.component';
 import { SupplierOnboardingCombinedComponent } from './wefab/supplier/onboarding/supplier-onboarding-combined/supplier-onboarding-combined.component';
+import { ApprovalWorkflowDemoComponent } from './shared/components/approval-workflow/demo/approval-workflow-demo.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'wefab', pathMatch: 'full' },
@@ -27,5 +28,9 @@ export const routes: Routes = [
     path: '**',
     redirectTo: 'dashboard',
     pathMatch: 'full'
+  },
+  {
+    path: 'approval-workflow-demo',
+    component: ApprovalWorkflowDemoComponent
   }
 ];
