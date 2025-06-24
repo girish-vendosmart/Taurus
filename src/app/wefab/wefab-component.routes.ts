@@ -27,7 +27,12 @@ export const WEFAB_ROUTES: Routes = [
         path: 'wefabTeam',
         loadChildren: () =>
           import('./wefabTeam/wefabTeam.routes').then(m => m.WEFAB_TEAM_ROUTES),
-      }
+      },
+      {
+        path: 'customer',
+        loadChildren: () =>
+          import('./customer/customer-component.routes').then(m => m.WEFAB_CUSTOMER_ROUTES),
+      },
     ]
   },
   {
