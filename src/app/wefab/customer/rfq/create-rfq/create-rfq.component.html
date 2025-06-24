@@ -1,0 +1,284 @@
+<div class="customer-app">
+  <div class="create-rfq-container">
+    <!-- Header -->
+    <div class="create-rfq-header">
+      <h2 class="mb-1">Create RFQ from Blank</h2>
+      <p class="text-muted mb-4">Manually input all your manufacturing requirements</p>
+    </div>
+
+    <form [formGroup]="createRfqForm" (ngSubmit)="submitRfq()">
+      
+      <!-- Section 1: Project Information -->
+      <div class="rfq-section mb-4">
+        <div class="section-header">
+          <span class="step-number">1</span>
+          <h4 class="section-title">Project Information</h4>
+        </div>
+        
+        <div class="section-content" formGroupName="projectInfo">
+          <div class="row">
+            <!-- Project Name -->
+            <div class="col-12 mb-3">
+              <label for="projectName" class="form-label">
+                Project Name <span class="text-danger">*</span>
+                <i class="fas fa-info-circle ms-1 text-muted"></i>
+              </label>
+              <input 
+                type="text" 
+                id="projectName"
+                class="form-control"
+                formControlName="projectName"
+                placeholder="Enter a descriptive project name"
+                [class.is-invalid]="isFieldInvalid('projectInfo.projectName')">
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.projectName')">
+                Project name is required
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- Target Delivery Date -->
+            <div class="col-md-6 mb-3">
+              <label for="targetDeliveryDate" class="form-label">
+                Target Delivery Date <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="date" 
+                id="targetDeliveryDate"
+                class="form-control"
+                formControlName="targetDeliveryDate"
+                placeholder="dd-mm-yyyy"
+                [class.is-invalid]="isFieldInvalid('projectInfo.targetDeliveryDate')">
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.targetDeliveryDate')">
+                Target delivery date is required
+              </div>
+            </div>
+
+            <!-- Delivery Location -->
+            <div class="col-md-6 mb-3">
+              <label for="deliveryLocation" class="form-label">Delivery Location</label>
+              <select 
+                id="deliveryLocation"
+                class="form-select"
+                formControlName="deliveryLocation">
+                <option value="" disabled>Select existing address...</option>
+                <option *ngFor="let location of deliveryLocations.slice(1)" [value]="location">
+                  {{ location }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Special Instructions -->
+          <div class="row">
+            <div class="col-12 mb-3">
+              <label for="specialInstructions" class="form-label">Special Instructions</label>
+              <textarea 
+                id="specialInstructions"
+                class="form-control"
+                formControlName="specialInstructions"
+                rows="4"
+                placeholder="Any special requirements, packaging instructions, or handling notes..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Bill of Materials (BOM) -->
+      <div class="rfq-section mb-4">
+        <div class="section-header">
+          <span class="step-number">2</span>
+          <h4 class="section-title">Bill of Materials (BOM)</h4>
+        </div>
+        
+        <div class="section-content">
+          <!-- BOM Action Buttons -->
+          <div class="bom-actions mb-4">
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <button 
+                  type="button" 
+                  class="btn btn-primary w-100"
+                  (click)="addLineItemsManually()">
+                  <i class="fas fa-plus me-2"></i>Add Line Items Manually
+                </button>
+              </div>
+              <div class="col-md-6 mb-2">
+                <button 
+                  type="button" 
+                  class="btn btn-outline-primary w-100"
+                  (click)="uploadBOMFile()">
+                  <i class="fas fa-upload me-2"></i>Upload BOM File
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Line Items -->
+          <div formArrayName="lineItems">
+            <div 
+              *ngFor="let lineItem of lineItems.controls; let i = index" 
+              class="line-item-card mb-3"
+              [formGroupName]="i">
+              
+              <div class="line-item-header">
+                <h6 class="mb-0">Line Item {{ i + 1 }}</h6>
+                <button 
+                  *ngIf="lineItems.length > 1"
+                  type="button" 
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="removeLineItem(i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+
+              <div class="row">
+                <!-- Part Number -->
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">
+                    Part Number <span class="text-danger">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    class="form-control"
+                    formControlName="partNumber"
+                    placeholder="Part number"
+                    [class.is-invalid]="isFieldInvalid('lineItems.' + i + '.partNumber')">
+                </div>
+
+                <!-- Description -->
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">
+                    Description <span class="text-danger">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    class="form-control"
+                    formControlName="description"
+                    placeholder="Part description"
+                    [class.is-invalid]="isFieldInvalid('lineItems.' + i + '.description')">
+                </div>
+
+                <!-- Quantity -->
+                <div class="col-md-2 mb-3">
+                  <label class="form-label">
+                    Quantity <span class="text-danger">*</span>
+                  </label>
+                  <div class="input-group">
+                    <button 
+                      type="button" 
+                      class="btn btn-outline-secondary"
+                      (click)="decrementQuantity(i)">
+                      -
+                    </button>
+                    <input 
+                      type="number" 
+                      class="form-control text-center"
+                      formControlName="quantity"
+                      min="1"
+                      [class.is-invalid]="isFieldInvalid('lineItems.' + i + '.quantity')">
+                    <button 
+                      type="button" 
+                      class="btn btn-outline-secondary"
+                      (click)="incrementQuantity(i)">
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Material -->
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Material</label>
+                  <select 
+                    class="form-select"
+                    formControlName="material">
+                    <option value="" disabled>Select material...</option>
+                    <option *ngFor="let material of materialOptions" [value]="material">
+                      {{ material }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Another Line Item -->
+          <div class="add-line-item">
+            <button 
+              type="button" 
+              class="btn btn-link add-line-btn"
+              (click)="addLineItem()">
+              <i class="fas fa-plus me-2"></i>Add Another Line Item
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Technical Drawings -->
+      <div class="rfq-section mb-4">
+        <div class="section-header">
+          <span class="step-number">3</span>
+          <h4 class="section-title">Technical Drawings</h4>
+        </div>
+        
+        <div class="section-content">
+          <div class="upload-area">
+            <div class="upload-content">
+              <i class="fas fa-file-upload upload-icon"></i>
+              <h5 class="upload-title">Upload Technical Drawings</h5>
+              <p class="upload-description">Upload drawings, CAD files, or specifications for your parts</p>
+              <p class="upload-formats">Supported formats: {{ supportedFormats }}</p>
+              
+              <input 
+                type="file" 
+                id="fileInput"
+                class="file-input"
+                multiple
+                accept=".pdf,.step,.stl,.iges,.dxf,.dwg,.sldprt"
+                (change)="onFileSelect($event)">
+              
+              <button 
+                type="button" 
+                class="btn btn-primary"
+                onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-download me-2"></i>Select Files
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </form>
+
+    <!-- Action Buttons -->
+    <div class="rfq-actions">
+      <div class="row">
+        <div class="col-md-4">
+          <button 
+            type="button" 
+            class="btn btn-outline-secondary w-100"
+            (click)="backToOptions()">
+            <i class="fas fa-arrow-left me-2"></i>Back to Options
+          </button>
+        </div>
+        <div class="col-md-4">
+          <button 
+            type="button" 
+            class="btn btn-outline-primary w-100"
+            (click)="saveDraft()">
+            <i class="fas fa-save me-2"></i>Save Draft
+          </button>
+        </div>
+        <div class="col-md-4">
+          <button 
+            type="submit" 
+            class="btn btn-primary w-100"
+            (click)="submitRfq()">
+            <i class="fas fa-paper-plane me-2"></i>Submit RFQ
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

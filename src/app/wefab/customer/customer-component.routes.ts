@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { CustomerComponentComponent } from './customer-component.component';
 import { LoginComponentComponent } from './login-component/login-component.component';
+import { CreateRfqComponent } from './rfq/create-rfq/create-rfq.component';
 
 export const WEFAB_CUSTOMER_ROUTES: Routes = [
     {
@@ -10,6 +11,10 @@ export const WEFAB_CUSTOMER_ROUTES: Routes = [
             {
                 path: 'login',
                 component: LoginComponentComponent,
+            },
+            {
+                path: 'create-rfq',
+                component: CreateRfqComponent,
             }
         ]
     }

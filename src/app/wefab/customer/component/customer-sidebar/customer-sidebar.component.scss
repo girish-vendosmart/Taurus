@@ -98,19 +98,61 @@
         cursor: pointer;
         position: relative;
 
-        &:hover:not(.disabled) {
+        &:hover:not(.disabled):not(.active) {
           background: rgba(255, 255, 255, 0.1);
           transform: translateX(4px);
         }
 
+        &:hover.active {
+          background: rgba(255, 255, 255, 0.3);
+          box-shadow: 
+            0 6px 20px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
         &.active {
-          background: rgba(255, 255, 255, 0.15);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          background: rgba(255, 255, 255, 0.25);
+          box-shadow: 
+            0 4px 15px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          transform: translateX(6px);
 
           .menu-item-content {
-            border-left: 3px solid rgba(255, 255, 255, 0.8);
-            padding-left: calc(1rem - 3px);
+            border-left: 4px solid rgba(255, 255, 255, 1);
+            padding-left: calc(1rem - 4px);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            
+            .menu-icon {
+              .menu-item-icon {
+                color: rgba(255, 255, 255, 1);
+                font-weight: 600;
+                transform: scale(1.1);
+              }
+            }
+            
+            .menu-label {
+              color: rgba(255, 255, 255, 1);
+              font-weight: 600;
+              text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            }
           }
+
+          // Add a glowing effect
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+            border-radius: 8px;
+            pointer-events: none;
+          }
+
+          // Add a subtle pulse animation
+          animation: activeGlow 2s ease-in-out infinite alternate;
         }
 
         &.completed {
@@ -275,5 +317,20 @@
     &:hover {
       background: rgba(255, 255, 255, 0.5);
     }
+  }
+}
+
+// Animation for active menu item
+@keyframes activeGlow {
+  0% {
+    box-shadow: 
+      0 4px 15px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  100% {
+    box-shadow: 
+      0 6px 20px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 0 15px rgba(255, 255, 255, 0.2);
   }
 }
