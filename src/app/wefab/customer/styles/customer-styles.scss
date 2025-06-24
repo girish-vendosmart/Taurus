@@ -1,0 +1,232 @@
+/* Customer Styles - Process Green Theme */
+
+/* Import global variables first */
+@import '../../../../assets/scss/variables.scss';
+
+/* Import customer-specific variables */
+@import 'customer-variables.scss';
+
+/* Customer Application Container */
+.customer-app {
+  // Set customer theme CSS variables
+  --primary-color: #{$customer-primary};
+  --primary-light: #{$customer-primary-light};
+  --primary-dark: #{$customer-primary-dark};
+  
+  /* Bootstrap Component Overrides for Customer Theme */
+  
+  // Primary Buttons
+  .btn-primary {
+    background-color: $customer-primary;
+    border-color: $customer-primary;
+    color: $customer-text-light;
+    
+    &:hover,
+    &:focus {
+      background-color: $customer-primary-hover;
+      border-color: $customer-primary-hover;
+      color: $customer-text-light;
+    }
+    
+    &:active,
+    &.active {
+      background-color: $customer-primary-dark;
+      border-color: $customer-primary-dark;
+    }
+  }
+  
+  // Outline Primary Buttons
+  .btn-outline-primary {
+    color: $customer-primary;
+    border-color: $customer-primary;
+    
+    &:hover,
+    &:focus {
+      background-color: $customer-primary;
+      border-color: $customer-primary;
+      color: $customer-text-light;
+    }
+  }
+  
+  // Links
+  a {
+    color: $customer-primary;
+    
+    &:hover,
+    &:focus {
+      color: $customer-primary-dark;
+    }
+  }
+  
+  // Form Controls
+  .form-control:focus {
+    border-color: $customer-border-light;
+    box-shadow: 0 0 0 0.2rem $customer-accent-light;
+  }
+  
+  .form-check-input:checked {
+    background-color: $customer-primary;
+    border-color: $customer-primary;
+  }
+  
+  /* Customer-Specific Component Styles */
+  
+  // Customer Header
+  .customer-header {
+    background-color: $customer-bg-primary;
+    color: $customer-text-light;
+    border-bottom: 1px solid $customer-border-light;
+    
+    .navbar-brand {
+      color: $customer-text-light;
+      
+      &:hover {
+        color: $customer-text-light;
+      }
+    }
+    
+    .nav-link {
+      color: rgba(255, 255, 255, 0.8);
+      
+      &:hover,
+      &:focus,
+      &.active {
+        color: $customer-text-light;
+      }
+    }
+  }
+  
+  // Customer Sidebar
+  .customer-sidebar {
+    background-color: $customer-bg-sidebar;
+    border-right: 1px solid $customer-border-default;
+    
+    .nav-link {
+      color: $customer-text-secondary;
+      
+      &:hover,
+      &:focus {
+        background-color: $customer-accent-light;
+        color: $customer-text-primary;
+      }
+      
+      &.active {
+        background-color: $customer-primary;
+        color: $customer-text-light;
+      }
+    }
+  }
+  
+  // Customer Cards
+  .customer-card {
+    background-color: $customer-bg-card;
+    border: 1px solid $customer-border-default;
+    border-top: 3px solid $customer-primary;
+    
+    .card-header {
+      background-color: $customer-bg-light;
+      border-bottom: 1px solid $customer-border-light;
+      color: $customer-text-dark;
+    }
+    
+    .card-title {
+      color: $customer-text-primary;
+    }
+  }
+  
+  // Customer Tables
+  .customer-table {
+    .table-header {
+      background-color: $customer-bg-light;
+      color: $customer-text-dark;
+    }
+    
+    .table-row {
+      &:hover {
+        background-color: $customer-accent-light;
+      }
+    }
+    
+    .table-primary {
+      background-color: $customer-accent-light;
+      color: $customer-text-dark;
+    }
+  }
+  
+  // Customer Status Badges
+  .customer-status-badge {
+    &.status-active {
+      background-color: $customer-accent-light;
+      color: $customer-text-primary;
+      border: 1px solid $customer-border-light;
+    }
+    
+    &.status-pending {
+      background-color: rgba($customer-warning, 0.15);
+      color: darken($customer-warning, 10%);
+      border: 1px solid rgba($customer-warning, 0.2);
+    }
+    
+    &.status-completed {
+      background-color: $customer-accent-light;
+      color: $customer-text-primary;
+      border: 1px solid $customer-border-light;
+    }
+  }
+  
+  // Customer Progress Bars
+  .customer-progress {
+    .progress-bar {
+      background-color: $customer-primary;
+    }
+  }
+  
+  // Customer Alerts
+  .alert-customer {
+    background-color: $customer-accent-light;
+    border-color: $customer-border-light;
+    color: $customer-text-dark;
+    
+    .alert-link {
+      color: $customer-text-primary;
+    }
+  }
+  
+  /* Utility Classes for Customer Theme */
+  .bg-customer-primary {
+    background-color: $customer-primary !important;
+  }
+  
+  .bg-customer-light {
+    background-color: $customer-bg-light !important;
+  }
+  
+  .text-customer-primary {
+    color: $customer-primary !important;
+  }
+  
+  .text-customer-secondary {
+    color: $customer-text-secondary !important;
+  }
+  
+  .border-customer {
+    border-color: $customer-border-primary !important;
+  }
+  
+  .border-customer-light {
+    border-color: $customer-border-light !important;
+  }
+}
+
+/* Global Customer Theme Classes (can be used outside .customer-app) */
+.customer-theme {
+  --bs-primary: #{$customer-primary};
+  --bs-primary-rgb: #{red($customer-primary)}, #{green($customer-primary)}, #{blue($customer-primary)};
+}
+
+/* Customer Loading Spinner */
+.customer-spinner {
+  .spinner-border {
+    color: $customer-primary;
+  }
+} 
