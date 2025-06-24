@@ -1,0 +1,57 @@
+<div class="customer-sidebar h-100 d-flex flex-column">
+  <!-- Logo Section -->
+  <div class="logo-section p-4 text-center">
+    <img src="../../../../../assets/Frame 1618868427.svg" [alt]="config.logoAlt" class="logo-img">
+  </div>
+
+  <!-- Menu Items -->
+  <div class="menu-section flex-grow-1 px-3">
+    <nav class="menu-items">
+      <div 
+        *ngFor="let item of config.menuItems; trackBy: trackByMenuItem"
+        class="menu-item"
+        [class.completed]="item.completed"
+        [class.active]="item.active"
+        [class.disabled]="item.disabled"
+        (click)="onMenuItemClick(item)">
+        
+        <div class="menu-item-content d-flex align-items-center p-3">
+          <!-- Icon -->
+          <div class="menu-icon me-3">
+            <i [class]="item.icon" class="menu-item-icon"></i>
+            <i *ngIf="item.completed" class="pi pi-check completion-check"></i>
+          </div>
+          
+          <!-- Label -->
+          <span class="menu-label flex-grow-1">{{ item.label }}</span>
+          
+          <!-- Status Indicator -->
+          <div class="status-indicator" *ngIf="item.statusIndicator">
+            <div 
+              class="status-dot"
+              [class.active]="item.statusIndicator.active"
+              [style.background-color]="item.statusIndicator.color">
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Help Section -->
+  <div class="help-section p-4 mt-auto" *ngIf="config.showHelpSection">
+    <div class="help-content p-3">
+      <div class="help-icon mb-2">
+        <i class="pi pi-question-circle"></i>
+      </div>
+      <h6 class="help-title mb-2">{{ config.helpSection.title }}</h6>
+      <p class="help-description mb-3">{{ config.helpSection.description }}</p>
+      <button 
+        type="button"
+        class="help-button w-100"
+        (click)="onHelpClick()">
+        {{ config.helpSection.buttonText }}
+      </button>
+    </div>
+  </div>
+</div>
