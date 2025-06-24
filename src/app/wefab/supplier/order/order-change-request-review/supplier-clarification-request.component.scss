@@ -1,0 +1,582 @@
+@import '../../../../../assets/scss/variables.scss';
+
+.supplier-clarification-request-page {
+  background: $technical-white;
+  min-height: 100vh;
+}
+
+// Page Header
+.page-header {
+  background: white;
+  border-bottom: 1px solid rgba($material-finish-silver, 0.3);
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  .header-top {
+    margin-bottom: 0.5rem;
+
+    .back-btn {
+      color: $blueprint-blue !important;
+      font-size: 0.875rem;
+      font-weight: $font-weight-medium;
+      padding: 0.25rem 0 !important;
+      border: none !important;
+      background: none !important;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &:hover {
+        color: darken($blueprint-blue, 10%) !important;
+        background: none !important;
+      }
+
+      &:focus {
+        box-shadow: none !important;
+        outline: none;
+      }
+
+      i {
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  .header-content {
+    .header-left {
+      .page-subtitle {
+        font-size: 0.875rem;
+        color: $machine-gray;
+        margin: 0;
+      }
+    }
+  }
+}
+
+// Loading State
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba($blueprint-blue, 0.2);
+    border-top: 3px solid $blueprint-blue;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: $machine-gray;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Main Content
+.main-content {
+  padding: 1rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+// Order Header Section
+.order-header-section {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba($material-finish-silver, 0.2);
+
+  .order-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .order-header-left {
+      .order-heading {
+        font-size: $h3-font-size;
+        font-weight: $h3-font-weight;
+        color: $precision-black;
+        margin: 0 0 0.25rem 0;
+        letter-spacing: -0.02em;
+      }
+
+      .company-name {
+        font-size: 0.875rem;
+        color: $machine-gray;
+        font-weight: $font-weight-medium;
+      }
+    }
+
+    .order-header-right {
+      .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: $font-weight-semibold;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+
+        &.pending {
+          background: rgba($safety-orange, 0.1);
+          color: $safety-orange;
+          border: 1px solid rgba($safety-orange, 0.2);
+        }
+
+        i {
+          font-size: 0.875rem;
+        }
+      }
+    }
+  }
+
+  .order-details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      .detail-label {
+        font-size: 0.75rem;
+        color: $machine-gray;
+        font-weight: $font-weight-medium;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .detail-value {
+        font-size: 0.875rem;
+        color: $precision-black;
+        font-weight: $font-weight-semibold;
+      }
+    }
+  }
+}
+
+// Info Sections
+.change-request-details-section,
+.clarification-section {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba($material-finish-silver, 0.2);
+
+  .section-title {
+    font-size: $h5-font-size;
+    font-weight: $h5-font-weight;
+    color: $precision-black;
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba($material-finish-silver, 0.2);
+  }
+}
+
+// Details Grid
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    .detail-label {
+      font-size: 0.75rem;
+      color: $machine-gray;
+      font-weight: $font-weight-medium;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .detail-value {
+      font-size: 0.875rem;
+      color: $precision-black;
+      font-weight: $font-weight-semibold;
+
+      &.status-rejected {
+        color: $safety-orange;
+      }
+
+      &.status-progress {
+        color: $blueprint-blue;
+      }
+
+      &.status-open {
+        color: $process-green;
+      }
+    }
+  }
+}
+
+// Description Section
+.description-section {
+  margin-bottom: 1rem;
+
+  .description-label {
+    font-size: 0.75rem;
+    color: $machine-gray;
+    font-weight: $font-weight-medium;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .description-content {
+    background: rgba($technical-white, 0.5);
+    padding: 1rem;
+    border-radius: 6px;
+    border-left: 3px solid $blueprint-blue;
+    font-size: 0.875rem;
+    color: $precision-black;
+    line-height: 1.6;
+  }
+}
+
+// Attached Files Section
+.attached-files-section {
+  margin-bottom: 1rem;
+
+  .files-label {
+    font-size: 0.75rem;
+    color: $machine-gray;
+    font-weight: $font-weight-medium;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba($technical-white, 0.5);
+    border-radius: 6px;
+    border: 1px solid rgba($material-finish-silver, 0.2);
+
+    .file-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba($safety-orange, 0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      i {
+        font-size: 1rem;
+        color: $safety-orange;
+      }
+    }
+
+    .file-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+
+      .file-name {
+        font-size: 0.875rem;
+        font-weight: $font-weight-medium;
+        color: $precision-black;
+      }
+
+      .file-size {
+        font-size: 0.75rem;
+        color: $machine-gray;
+      }
+    }
+
+    .download-btn {
+      width: 32px;
+      height: 32px;
+      background: rgba($process-green, 0.1);
+      border: none;
+      border-radius: 6px;
+      color: $process-green;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba($process-green, 0.2);
+        transform: scale(1.05);
+      }
+
+      i {
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+// Request Date Section
+.request-date-section {
+  .request-date-label {
+    font-size: 0.75rem;
+    color: $machine-gray;
+    font-weight: $font-weight-medium;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .request-date-value {
+    font-size: 0.875rem;
+    color: $precision-black;
+    font-weight: $font-weight-medium;
+    margin: 0;
+  }
+}
+
+// Clarification Questions Section
+.clarification-questions {
+  margin-bottom: 1.5rem;
+
+  .questions-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: $font-weight-medium;
+    color: $precision-black;
+    margin-bottom: 0.5rem;
+
+    .required {
+      color: $safety-orange;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  .questions-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba($material-finish-silver, 0.3);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 2px rgba($blueprint-blue, 0.1);
+    }
+
+    &::placeholder {
+      color: rgba($machine-gray, 0.7);
+    }
+  }
+}
+
+// Additional Notes Section
+.additional-notes {
+  .notes-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: $font-weight-medium;
+    color: $precision-black;
+    margin-bottom: 0.5rem;
+  }
+
+  .notes-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba($material-finish-silver, 0.3);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $blueprint-blue;
+      box-shadow: 0 0 0 2px rgba($blueprint-blue, 0.1);
+    }
+
+    &::placeholder {
+      color: rgba($machine-gray, 0.7);
+    }
+  }
+}
+
+// Action Buttons
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba($material-finish-silver, 0.2);
+  margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    
+    .action-buttons-left,
+    .action-buttons-right {
+      width: 100%;
+    }
+    
+    ::ng-deep .p-button {
+      width: 100%;
+    }
+  }
+
+  .action-buttons-right {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+  ::ng-deep .back-action-btn {
+    color: $machine-gray !important;
+    font-weight: $font-weight-medium;
+
+    &:hover {
+      color: $precision-black !important;
+      background: rgba($machine-gray, 0.1) !important;
+    }
+  }
+
+  ::ng-deep .save-draft-btn {
+    border-color: $blueprint-blue !important;
+    color: $blueprint-blue !important;
+    font-weight: $font-weight-medium;
+
+    &:hover {
+      background: rgba($blueprint-blue, 0.1) !important;
+    }
+  }
+
+  ::ng-deep .send-request-btn {
+    background: $blueprint-blue !important;
+    border-color: $blueprint-blue !important;
+    font-weight: $font-weight-semibold;
+
+    &:hover {
+      background: darken($blueprint-blue, 10%) !important;
+      border-color: darken($blueprint-blue, 10%) !important;
+    }
+
+    .p-button-icon {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// Tips Section
+.tips-section {
+  background: rgba($blueprint-blue, 0.05);
+  border: 1px solid rgba($blueprint-blue, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+
+  .tips-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+
+    i {
+      color: $blueprint-blue;
+      font-size: 1rem;
+    }
+
+    .tips-title {
+      font-size: 0.875rem;
+      font-weight: $font-weight-semibold;
+      color: $precision-black;
+    }
+  }
+
+  .tips-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    
+    li {
+      font-size: 0.875rem;
+      color: $machine-gray;
+      line-height: 1.5;
+      margin-bottom: 0.25rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .order-details-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .change-request-details-section,
+  .clarification-section {
+    padding: 1rem;
+  }
+} 

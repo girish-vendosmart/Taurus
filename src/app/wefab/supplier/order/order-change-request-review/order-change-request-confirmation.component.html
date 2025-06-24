@@ -1,0 +1,175 @@
+<div class="change-request-confirmation-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()">
+        <i class="pi pi-arrow-left"></i>
+        Back to Review
+      </button>
+    </div>
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">Supplier Side Page</h1>
+        <p class="page-subtitle">Order Change Request Confirmation</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading confirmation details...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading" class="main-content">
+    <!-- Order Information Header -->
+    <div class="order-header-section">
+      <div class="order-header-info">
+        <div class="order-header-left">
+          <h4 class="order-heading">Order #{{ changeRequestDetails.orderId }}</h4>
+          <span class="change-request-id">Change Request #{{ changeRequestDetails.id }}</span>
+        </div>
+        <div class="order-header-right">
+          <div class="customer-info">
+            <span class="customer-label">Customer</span>
+            <span class="customer-name">{{ customerInfo.companyName }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-layout">
+      <!-- Left Column -->
+      <div class="left-column">
+        <!-- Requested Changes -->
+        <div class="info-section">
+          <h5 class="section-title">Requested Changes</h5>
+          <div class="details-grid">
+            <div class="detail-row">
+              <span class="detail-label">Change Type</span>
+              <span class="detail-value">{{ changeRequestDetails.changeType }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Urgency Level</span>
+              <span class="detail-value" [ngClass]="getUrgencyClass(changeRequestDetails.urgency)">
+                {{ changeRequestDetails.urgency }} Priority
+              </span>
+            </div>
+          </div>
+          
+          <div class="description-section">
+            <p class="description-label">Description</p>
+            <div class="description-content">
+              {{ changeRequestDetails.description }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Response Status -->
+        <div class="response-status-section">
+          <div class="status-header">
+            <div class="status-icon">
+              <i class="pi pi-check-circle"></i>
+            </div>
+            <div class="status-content">
+              <h5 class="status-title">Changes Accepted with No Impact</h5>
+              <p class="status-description">
+                We can accommodate the requested quantity increase without any changes to the original price or delivery timeline.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Impact Details -->
+        <div class="impact-details-section">
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Price Impact</div>
+              <div class="impact-value">
+                <span class="impact-status">{{ orderImpactDetails.priceImpact }}</span>
+                <span class="impact-amount">{{ getFormattedCurrencyAmount(orderImpactDetails.priceAmount) }}</span>
+              </div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Timeline Impact</div>
+              <div class="impact-value">
+                <span class="impact-status">{{ orderImpactDetails.timelineImpact }}</span>
+                <span class="impact-date">{{ orderImpactDetails.timelineDate }}</span>
+              </div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">New Quantity</div>
+              <div class="impact-value">
+                <span class="new-quantity">{{ orderImpactDetails.newQuantity }} units</span>
+                <span class="quantity-increase">+{{ orderImpactDetails.quantityIncrease }} units</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="right-column">
+        <!-- Implementation Notes -->
+        <div class="notes-section">
+          <h5 class="section-title">Implementation Notes</h5>
+          <textarea 
+            pInputTextarea 
+            [(ngModel)]="implementationNotes" 
+            rows="4" 
+            placeholder="Add implementation notes..."
+            class="notes-textarea">
+          </textarea>
+        </div>
+
+        <!-- Additional Comments -->
+        <div class="comments-section">
+          <h5 class="section-title">Additional Comments</h5>
+          <textarea 
+            pInputTextarea 
+            [(ngModel)]="additionalComments" 
+            rows="5" 
+            placeholder="Add any additional comments..."
+            class="comments-textarea">
+          </textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <div class="action-buttons-left">
+        <p-button 
+          label="Back to Review" 
+          styleClass="p-button-text back-action-btn"
+          (onClick)="goBack()">
+        </p-button>
+      </div>
+      
+      <div class="action-buttons-right">
+        <p-button 
+          label="Save Draft" 
+          styleClass="p-button-outlined save-draft-btn"
+          icon="pi pi-save"
+          (onClick)="saveDraft()">
+        </p-button>
+        
+        <p-button 
+          label="Confirm & Update Order" 
+          styleClass="p-button confirm-update-btn"
+          icon="pi pi-check"
+          (onClick)="confirmAndUpdateOrder()">
+        </p-button>
+      </div>
+    </div>
+
+    <!-- Confirmation Notice -->
+    <div class="confirmation-notice">
+      <div class="notice-content">
+        <i class="pi pi-info-circle"></i>
+        <span>Once confirmed, the order will be automatically updated and the customer will be notified of the accepted changes.</span>
+      </div>
+    </div>
+  </div>
+</div> 

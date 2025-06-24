@@ -1,0 +1,176 @@
+<div class="supplier-clarification-request-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()">
+        <i class="pi pi-arrow-left"></i>
+        Supplier Clarification Request
+      </button>
+    </div>
+    <div class="header-content">
+      <div class="header-left">
+        <p class="page-subtitle">Request clarification from customer regarding order change request</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading clarification request details...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading" class="main-content">
+    <!-- Order Information Header -->
+    <div class="order-header-section">
+      <div class="order-header-info">
+        <div class="order-header-left">
+          <h4 class="order-heading">Order #{{ orderDetails.orderId }}</h4>
+          <span class="company-name">{{ orderDetails.companyName }}</span>
+        </div>
+        <div class="order-header-right">
+          <div class="status-badge pending">
+            <i class="pi pi-exclamation-triangle"></i>
+            {{ orderDetails.status }}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order Details Grid -->
+      <div class="order-details-grid">
+        <div class="detail-item">
+          <span class="detail-label">Original Quantity</span>
+          <span class="detail-value">{{ orderDetails.originalQuantity }} units</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Material</span>
+          <span class="detail-value">{{ orderDetails.material }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Delivery Date</span>
+          <span class="detail-value">{{ orderDetails.deliveryDate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Change Request Details -->
+    <div class="change-request-details-section">
+      <h5 class="section-title">Customer Change Request Details</h5>
+      
+      <div class="details-grid">
+        <div class="detail-row">
+          <span class="detail-label">Change Type</span>
+          <span class="detail-value">{{ changeRequestDetails.changeType }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Urgency Level</span>
+          <span class="detail-value" [ngClass]="getUrgencyClass(changeRequestDetails.urgency)">
+            {{ changeRequestDetails.urgency }}
+          </span>
+        </div>
+      </div>
+
+      <div class="description-section">
+        <p class="description-label">Description</p>
+        <div class="description-content">
+          {{ changeRequestDetails.description }}
+        </div>
+      </div>
+
+      <!-- Attached Files -->
+      <div class="attached-files-section" *ngIf="changeRequestDetails.attachedFiles.length > 0">
+        <p class="files-label">Attached Files</p>
+        <div class="file-item" *ngFor="let file of changeRequestDetails.attachedFiles">
+          <div class="file-icon">
+            <i class="pi pi-file-pdf"></i>
+          </div>
+          <div class="file-details">
+            <span class="file-name">{{ file.fileName }}</span>
+            <span class="file-size">({{ file.fileSize }})</span>
+          </div>
+          <button class="download-btn" (click)="downloadAttachment(file)">
+            <i class="pi pi-download"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="request-date-section">
+        <p class="request-date-label">Request Date</p>
+        <p class="request-date-value">{{ changeRequestDetails.requestDate }}</p>
+      </div>
+    </div>
+
+    <!-- Request Clarification Section -->
+    <div class="clarification-section">
+      <h5 class="section-title">Request Clarification from Customer</h5>
+      
+      <div class="clarification-questions">
+        <label for="clarificationQuestions" class="questions-label">
+          Clarification Questions <span class="required">*</span>
+        </label>
+        <textarea 
+          id="clarificationQuestions"
+          pInputTextarea 
+          [(ngModel)]="clarificationQuestions" 
+          rows="8" 
+          placeholder="Enter your clarification questions here..."
+          class="questions-textarea"
+          required>
+        </textarea>
+      </div>
+
+      <div class="additional-notes">
+        <label for="additionalNotes" class="notes-label">Additional Notes (Optional)</label>
+        <textarea 
+          id="additionalNotes"
+          pInputTextarea 
+          [(ngModel)]="additionalNotes" 
+          rows="3" 
+          placeholder="Any additional context or information..."
+          class="notes-textarea">
+        </textarea>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <div class="action-buttons-left">
+        <p-button 
+          label="Back to Review" 
+          styleClass="p-button-text back-action-btn"
+          (onClick)="goBack()">
+        </p-button>
+      </div>
+      
+      <div class="action-buttons-right">
+        <p-button 
+          label="Save Draft" 
+          styleClass="p-button-outlined save-draft-btn"
+          (onClick)="saveDraft()">
+        </p-button>
+        
+        <p-button 
+          label="Send Clarification Request" 
+          styleClass="p-button send-request-btn"
+          icon="pi pi-send"
+          (onClick)="sendClarificationRequest()">
+        </p-button>
+      </div>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="tips-section">
+      <div class="tips-header">
+        <i class="pi pi-info-circle"></i>
+        <span class="tips-title">Tips for Effective Clarification</span>
+      </div>
+      <ul class="tips-list">
+        <li>Be specific about what information you need</li>
+        <li>Number your questions for easy reference</li>
+        <li>Mention any potential impacts on cost or timeline</li>
+        <li>Request specific documentation if needed</li>
+      </ul>
+    </div>
+  </div>
+</div> 

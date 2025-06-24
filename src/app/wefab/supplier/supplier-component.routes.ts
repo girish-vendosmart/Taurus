@@ -14,6 +14,8 @@ import { HelpSectionComponent } from './help-section/help-section.component';
 import { SupplierOrderComponent } from './order/supplier-order/supplier-order.component';
 import { SupplierOrderDetailsComponent } from './order/supplier-order-details/supplier-order-details.component';
 import { OrderChangeRequestReviewComponent } from './order/order-change-request-review/order-change-request-review.component';
+import { OrderChangeRequestConfirmationComponent } from './order/order-change-request-review/order-change-request-confirmation.component';
+import { SupplierClarificationRequestComponent } from './order/order-change-request-review/supplier-clarification-request.component';
 
 export const WEFAB_SUPPLIER_ROUTES: Routes = [
     {
@@ -53,6 +55,16 @@ export const WEFAB_SUPPLIER_ROUTES: Routes = [
             {
                 path: 'order/change-request-review/:orderId/:changeRequestId',
                 component: OrderChangeRequestReviewComponent,
+                canActivate: [AuthGuard]
+            },
+            {
+                path: 'order/change-request-confirmation/:orderId/:changeRequestId',
+                component: OrderChangeRequestConfirmationComponent,
+                canActivate: [AuthGuard]
+            },
+            {
+                path: 'order/supplier-clarification-request/:orderId/:changeRequestId',
+                component: SupplierClarificationRequestComponent,
                 canActivate: [AuthGuard]
             },
             {

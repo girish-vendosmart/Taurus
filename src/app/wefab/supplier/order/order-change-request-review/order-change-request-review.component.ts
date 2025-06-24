@@ -189,6 +189,18 @@ export class OrderChangeRequestReviewComponent implements OnInit {
       return;
     }
 
+    // If "accept_no_impact" is selected, navigate to confirmation page
+    if (this.selectedResponse === 'accept_no_impact') {
+      this.router.navigate(['/wefab/supplier/order/change-request-confirmation', this.orderId, this.changeRequestId]);
+      return;
+    }
+
+    // If "need_clarification" is selected, navigate to clarification request page
+    if (this.selectedResponse === 'need_clarification') {
+      this.router.navigate(['/wefab/supplier/order/supplier-clarification-request', this.orderId, this.changeRequestId]);
+      return;
+    }
+
     this.sweetAlert.confirm(
       'Submit Response',
       'Are you sure you want to submit this response? This action cannot be undone.',
