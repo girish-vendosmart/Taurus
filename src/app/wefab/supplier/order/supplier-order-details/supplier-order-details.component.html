@@ -1,0 +1,126 @@
+<div class="order-details-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()">
+        <i class="bi bi-arrow-left"></i>
+        Back to Orders
+      </button>
+    </div>
+    
+    <div class="header-content">
+      <div class="header-left">
+        <h3 class="page-title">{{ orderDetails.name }}</h3>
+        <span class="status-badge" [ngClass]="getStatusClass(orderDetails.status)">
+          {{ getStatusText() }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Info Bar -->
+  <div class="rfq-info-bar">
+    <div class="info-item">
+      <span class="info-label">Created On:</span>
+      <span class="info-value">{{ formatDate(orderDetails.creation) }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Purchase Order:</span>
+      <span class="info-value">{{ orderDetails.purchase_order }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Order Name:</span>
+      <span class="info-value">{{ orderDetails.order_name }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Payment Terms:</span>
+      <span class="info-value">{{ orderDetails.payment_terms }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Expected Delivery:</span>
+      <span class="info-value">{{ formatDate(orderDetails.expected_delivery) }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Delivery Terms:</span>
+      <span class="info-value">{{ orderDetails.delivery_terms }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Last Modified:</span>
+      <span class="info-value">{{ formatDate(orderDetails.modified) }}</span>
+    </div>
+  </div>
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <p-button 
+      label="Overview"
+      styleClass="p-button-text tab-btn"
+      [ngClass]="{'active': activeTab === 'overview'}"
+      (onClick)="setActiveTab('overview')">
+    </p-button>
+    <p-button 
+      label="Comment"
+      styleClass="p-button-text tab-btn"
+      [ngClass]="{'active': activeTab === 'comment'}"
+      (onClick)="setActiveTab('comment')">
+    </p-button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="content-layout row">
+    <div class="col-9">
+      <div [ngSwitch]="activeTab">
+        <!-- Overview Tab -->
+        <div class="tab-panel" *ngSwitchCase="'overview'">
+          <div class="overview-content">
+            <!-- Order Terms & Conditions Section -->
+            <div class="description-box">
+              <h4>Order Instructions</h4>
+              <div [innerHTML]="orderDetails.special_instructions || orderDetails.description || 'Standard manufacturing and delivery terms apply for this order.'"></div>
+            </div>
+
+            <!-- Items Section -->
+            <div class="items-section">
+              <div class="items-header p-3">
+                <p class="info-label" style="margin: 0 !important;">Total Items : <span class="info-value">{{ orderItems.length }}</span></p>
+                <p class="info-label" style="margin: 0 !important;">Total Quantity : <span class="info-value">{{ getTotalQuantity() }}</span></p>
+              </div>
+
+              <!-- Common Table Component -->
+              <div class="items-table-container">
+                <app-common-table 
+                  [config]="orderItemsTableConfig" 
+                  [data]="orderItems"
+                  [loading]="loading"
+                  (rowClick)="onOrderItemRowClick($event)"
+                  (linkClick)="onOrderItemLinkClick($event)"
+                  (actionClick)="onOrderItemActionClick($event)">
+                </app-common-table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comment Tab -->
+        <div class="tab-panel" *ngSwitchCase="'comment'">
+          <div class="comment-content">
+            <app-conversation-trail [docType]="'Supplier Order Messenger'" [docName]="orderId"></app-conversation-trail>
+          </div>
+        </div>
+      </div>
+    </div>  
+    <div class="col-3 mt-3">
+      <app-approval-workflow
+        title="Order Tracking"
+        [steps]="workflowSteps"
+        (stepCompleted)="onWorkflowStepCompleted($event)"
+        (stepClicked)="onWorkflowStepClicked($event)">
+      </app-approval-workflow>
+    </div>
+  </div>
+</div> 

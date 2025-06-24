@@ -116,6 +116,11 @@ export class SupplierComponentComponent {
           icon: 'pi pi-chart-bar',
           name: 'Quotations',
           route: '/wefab/supplier/quotation'
+        },
+        {
+          icon: 'pi pi-shopping-cart',
+          name: 'Orders',
+          route: '/wefab/supplier/order'
         }
       ]
     }
