@@ -1,0 +1,151 @@
+<div class="customer-app ai-analysis-container">
+  <!-- Success Header -->
+  <div class="success-container">
+    <div class="success-header">
+      <div class="success-icon">
+        <i class="checkmark">✓</i>
+      </div>
+      <h1 class="success-title">RFQ Submitted Successfully</h1>
+      <p class="success-subtitle">Your request has been processed and analyzed by our AI system</p>
+      <div class="rfq-id">
+        <span class="rfq-id-label">RFQ ID:</span>
+        <span class="rfq-id-value">{{ rfqId }}</span>
+      </div>
+    </div>
+
+    <!-- AI Analysis Summary Card -->
+    <div class="analysis-summary-card">
+      <div class="card-header">
+        <div class="ai-icon">
+          <i class="pi pi-shield" style="font-size: 1.2rem;"></i>
+        </div>
+        <h2>AI Analysis Summary</h2>
+      </div>
+
+      <div class="card-content">
+        <!-- Project Overview -->
+        <div class="project-overview">
+          <h3>Project Overview</h3>
+          <p class="project-description">
+            Your RFQ "<strong>{{ projectOverview.title }}</strong>" contains <strong>8 unique parts</strong> requiring multiple manufacturing processes. The project involves precision machined components primarily in aluminum and steel materials. Based on the uploaded drawings and specifications, this appears to be a medium complexity manufacturing project suitable for CNC machining and assembly operations.
+          </p>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="metrics-section">
+          <div class="metrics-grid">
+            <div class="metric-card" *ngFor="let metric of metrics">
+              <div class="metric-value">{{ metric.value }}</div>
+              <div class="metric-label">{{ metric.label }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manufacturing Processes and Materials -->
+        <div class="info-grid">
+          <div class="info-section">
+            <h3>Manufacturing Processes Identified</h3>
+            <div class="info-list">
+              <div class="info-item" *ngFor="let process of manufacturingProcesses">
+                <i class="pi pi-circle-fill process-bullet"></i>
+                <span class="item-text">{{ process.name }}</span>
+                <span *ngIf="process.details" class="item-details">{{ process.details }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Materials Required</h3>
+            <div class="info-list">
+              <div class="info-item" *ngFor="let material of materialsRequired">
+                <i class="pi pi-circle-fill material-bullet"></i>
+                <span class="item-text">{{ material.name }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOM Analysis & Data Sufficiency -->
+    <div class="bom-analysis-section">
+      <div class="bom-header">
+        <div class="bom-title-section">
+          <div class="bom-icon">
+            <i class="pi pi-list" style="font-size: 1.2rem;"></i>
+          </div>
+          <div>
+            <h2 class="bom-title">BOM Analysis & Data Sufficiency</h2>
+            <p class="bom-subtitle">Review the completeness of data for each item in your BOM. Missing information may affect quote accuracy and timeline.</p>
+          </div>
+        </div>  
+      </div>
+      
+      <div class="bom-summary-stats">
+        <div class="stat-card complete">
+          <div class="stat-value">6</div>
+          <div class="stat-label">Complete Items</div>
+        </div>
+        <div class="stat-card missing">
+          <div class="stat-value">2</div>
+          <div class="stat-label">Missing Data</div>
+        </div>
+        <div class="stat-card total">
+          <div class="stat-value">8</div>
+          <div class="stat-label">Total Items</div>
+        </div>
+        <div class="stat-card percentage">
+          <div class="stat-value">75%</div>
+          <div class="stat-label">Data Complete</div>
+        </div>
+      </div>
+
+      <div class="bom-table-container">
+        <app-common-table
+          [config]="bomTableConfig"
+          [data]="bomData"
+          [loading]="false"
+          (rowClick)="onBomRowClick($event)"
+          (linkClick)="onBomLinkClick($event)"
+          (actionClick)="onBomActionClick($event)">
+        </app-common-table>
+      </div>
+    </div>
+
+    <!-- Manufacturing Process Timeline -->
+    <div class="timeline-section">
+      <div class="timeline-header">
+        <div class="timeline-icon">
+          <i class="pi pi-clock" style="font-size: 1.2rem;"></i>
+        </div>
+        <h2>Manufacturing Process Timeline</h2>
+      </div>
+
+      <!-- Timeline Workflow -->
+      <div class="timeline-workflow-container">
+        <app-approval-workflow
+          [title]="''"
+          [steps]="timelineSteps"
+          [loading]="false"
+          [allowInteraction]="true"
+          [useCustomSteps]="true"
+          (stepCompleted)="onTimelineStepCompleted($event)"
+          (stepClicked)="onTimelineStepClicked($event)">
+        </app-approval-workflow>
+      </div>
+
+      <!-- Feature Highlights -->
+      <div class="feature-highlights">
+        <div class="feature-item" *ngFor="let feature of featureHighlights">
+          <div class="feature-icon" [style.background-color]="feature.color">
+            <i [class]="feature.icon"></i>
+          </div>
+          <div class="feature-content">
+            <h4 class="feature-title">{{ feature.title }}</h4>
+            <p class="feature-description">{{ feature.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
