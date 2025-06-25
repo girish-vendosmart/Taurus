@@ -376,6 +376,10 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
     console.log('Table status', status);
     
     switch (status) {
+      case 'missing-data':
+        return 'status-review';
+      case 'complete':
+        return 'status-approved'
       case 'not-opened':
         return 'status-draft';
       case 'published':
