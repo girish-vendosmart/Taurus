@@ -111,6 +111,13 @@ export class CreateRfqComponent implements OnInit {
     }
   }
 
+  triggerFileInput() {
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
   addLineItemsManually() {
     // Add multiple line items functionality
     this.addLineItem();

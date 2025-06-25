@@ -94,23 +94,19 @@
         <div class="section-content">
           <!-- BOM Action Buttons -->
           <div class="bom-actions mb-4">
-            <div class="row">
-              <div class="col-md-6 mb-2">
-                <button 
-                  type="button" 
-                  class="btn btn-primary w-100"
-                  (click)="addLineItemsManually()">
-                  <i class="fas fa-plus me-2"></i>Add Line Items Manually
-                </button>
-              </div>
-              <div class="col-md-6 mb-2">
-                <button 
-                  type="button" 
-                  class="btn btn-outline-primary w-100"
-                  (click)="uploadBOMFile()">
-                  <i class="fas fa-upload me-2"></i>Upload BOM File
-                </button>
-              </div>
+            <div class="d-flex justify-content-end gap-3">
+              <button 
+                type="button" 
+                class="btn btn-primary"
+                (click)="addLineItemsManually()">
+                <i class="fas fa-plus me-2"></i>Add Line Items Manually
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-outline-primary"
+                (click)="uploadBOMFile()">
+                <i class="fas fa-upload me-2"></i>Upload BOM File
+              </button>
             </div>
           </div>
 
@@ -240,8 +236,8 @@
               <button 
                 type="button" 
                 class="btn btn-primary"
-                onclick="document.getElementById('fileInput').click()">
-                <i class="fas fa-download me-2"></i>Select Files
+                (click)="triggerFileInput()">
+                <i class="fas fa-cloud-upload-alt me-2"></i>Select Files
               </button>
             </div>
           </div>

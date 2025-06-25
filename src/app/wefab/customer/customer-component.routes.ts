@@ -22,5 +22,5 @@ export const WEFAB_CUSTOMER_ROUTES: Routes = [
                 component: SubmittedRfqComponent,
             }
         ]
-    }
+    }   
 ]

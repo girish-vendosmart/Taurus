@@ -88,71 +88,141 @@
     }
   }
 
-  // Menu Section
+  // Menu Section - Enhanced Selection Styling
   .menu-section {
     .menu-items {
       .menu-item {
-        margin-bottom: 4px;
-        border-radius: 8px;
-        transition: all 0.3s ease;
+        margin-bottom: 6px;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
         position: relative;
+        overflow: hidden;
 
+        // Default/Hover States
         &:hover:not(.disabled):not(.active) {
-          background: rgba(255, 255, 255, 0.1);
-          transform: translateX(4px);
+          background: rgba(255, 255, 255, 0.08);
+          transform: translateX(3px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          
+          .menu-item-content {
+            .menu-icon .menu-item-icon {
+              transform: scale(1.05);
+              color: rgba(255, 255, 255, 1);
+            }
+            
+            .menu-label {
+              color: rgba(255, 255, 255, 1);
+            }
+          }
         }
 
-        &:hover.active {
-          background: rgba(255, 255, 255, 0.3);
-          box-shadow: 
-            0 6px 20px rgba(0, 0, 0, 0.25),
-            inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
+        // Enhanced Active State
         &.active {
-          background: rgba(255, 255, 255, 0.25);
-          box-shadow: 
-            0 4px 15px rgba(0, 0, 0, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.25) 0%, 
+            rgba(255, 255, 255, 0.15) 50%, 
+            rgba(255, 255, 255, 0.20) 100%);
           border: 1px solid rgba(255, 255, 255, 0.4);
-          transform: translateX(6px);
+          transform: translateX(8px);
+          box-shadow: 
+            0 8px 25px rgba(0, 0, 0, 0.3),
+            0 3px 12px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+          backdrop-filter: blur(10px);
+          
+          // Left accent border
+          &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, 
+              rgba(255, 255, 255, 1) 0%, 
+              rgba(255, 255, 255, 0.8) 50%,
+              rgba(255, 255, 255, 1) 100%);
+            border-radius: 0 2px 2px 0;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+          }
+          
+          // Glow effect
+          &::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, 
+              rgba(255, 255, 255, 0.1) 0%, 
+              transparent 50%, 
+              rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 14px;
+            z-index: -1;
+            opacity: 0.8;
+          }
 
           .menu-item-content {
-            border-left: 4px solid rgba(255, 255, 255, 1);
-            padding-left: calc(1rem - 4px);
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            padding-left: 20px; // Account for left border
+            background: linear-gradient(90deg, 
+              rgba(255, 255, 255, 0.1) 0%, 
+              rgba(255, 255, 255, 0.05) 30%,
+              transparent 70%);
             
             .menu-icon {
               .menu-item-icon {
                 color: rgba(255, 255, 255, 1);
-                font-weight: 600;
-                transform: scale(1.1);
+                font-weight: 700;
+                transform: scale(1.15);
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+                filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
               }
             }
             
             .menu-label {
               color: rgba(255, 255, 255, 1);
-              font-weight: 600;
-              text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+              font-weight: 700;
+              font-size: 15px;
+              text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+              letter-spacing: 0.3px;
+            }
+            
+            .status-indicator {
+              .status-dot {
+                &.active {
+                  box-shadow: 
+                    0 0 8px rgba(76, 175, 80, 0.8),
+                    0 0 16px rgba(76, 175, 80, 0.4);
+                  transform: scale(1.2);
+                }
+              }
             }
           }
 
-          // Add a glowing effect
-          &::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
-            border-radius: 8px;
-            pointer-events: none;
+          // Enhanced hover state for active items
+          &:hover {
+            background: linear-gradient(135deg, 
+              rgba(255, 255, 255, 0.35) 0%, 
+              rgba(255, 255, 255, 0.25) 50%, 
+              rgba(255, 255, 255, 0.30) 100%);
+            transform: translateX(10px);
+            box-shadow: 
+              0 12px 35px rgba(0, 0, 0, 0.4),
+              0 5px 15px rgba(0, 0, 0, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+              
+            &::before {
+              width: 5px;
+              box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+            }
           }
 
-          // Add a subtle pulse animation
-          animation: activeGlow 2s ease-in-out infinite alternate;
+          // Pulse animation for active state
+          animation: activeItemPulse 3s ease-in-out infinite;
         }
 
         &.completed {
@@ -160,44 +230,58 @@
             position: relative;
 
             .menu-item-icon {
-              opacity: 0.7;
+              opacity: 0.8;
             }
 
             .completion-check {
               position: absolute;
-              top: -4px;
-              right: -4px;
-              background: #4CAF50;
+              top: -6px;
+              right: -6px;
+              background: linear-gradient(135deg, #4CAF50 0%, #45A049 100%);
               color: white;
               border-radius: 50%;
-              width: 18px;
-              height: 18px;
+              width: 20px;
+              height: 20px;
               display: flex;
               align-items: center;
               justify-content: center;
-              font-size: 10px;
-              border: 2px solid #12856E;
+              font-size: 11px;
+              font-weight: 700;
+              border: 2px solid rgba(255, 255, 255, 0.9);
+              box-shadow: 
+                0 2px 8px rgba(76, 175, 80, 0.4),
+                0 0 0 2px rgba(18, 133, 110, 0.2);
+              z-index: 10;
             }
           }
         }
 
         &.disabled {
-          opacity: 0.5;
+          opacity: 0.4;
           cursor: not-allowed;
+          transform: none !important;
+          box-shadow: none !important;
 
           .menu-item-content {
             pointer-events: none;
+          }
+          
+          &:hover {
+            background: transparent !important;
+            transform: none !important;
           }
         }
 
         .menu-item-content {
           color: rgba(255, 255, 255, 0.95);
-          border-radius: 8px;
-          transition: all 0.3s ease;
+          border-radius: 12px;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          padding: 14px 16px;
+          position: relative;
 
           .menu-icon {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -206,19 +290,22 @@
             .menu-item-icon {
               font-size: 18px;
               color: rgba(255, 255, 255, 0.9);
+              transition: all 0.3s ease;
             }
           }
 
           .menu-label {
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             color: rgba(255, 255, 255, 0.95);
+            transition: all 0.3s ease;
+            letter-spacing: 0.2px;
           }
 
           .status-indicator {
             .status-dot {
-              width: 8px;
-              height: 8px;
+              width: 10px;
+              height: 10px;
               border-radius: 50%;
               background: rgba(255, 255, 255, 0.4);
               transition: all 0.3s ease;
@@ -320,17 +407,29 @@
   }
 }
 
-// Animation for active menu item
-@keyframes activeGlow {
-  0% {
+// Enhanced Animation for active menu item
+@keyframes activeItemPulse {
+  0%, 100% {
     box-shadow: 
-      0 4px 15px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      0 8px 25px rgba(0, 0, 0, 0.3),
+      0 3px 12px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   }
-  100% {
+  50% {
     box-shadow: 
-      0 6px 20px rgba(0, 0, 0, 0.3),
+      0 12px 35px rgba(0, 0, 0, 0.35),
+      0 5px 15px rgba(0, 0, 0, 0.25),
       inset 0 1px 0 rgba(255, 255, 255, 0.5),
-      0 0 15px rgba(255, 255, 255, 0.2);
+      inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+      0 0 20px rgba(255, 255, 255, 0.1);
+  }
+}
+
+// Micro-interaction for menu items
+.menu-item {
+  &:active:not(.disabled) {
+    transform: translateX(6px) scale(0.98);
+    transition: all 0.1s ease;
   }
 }
