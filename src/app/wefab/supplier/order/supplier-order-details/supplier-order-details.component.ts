@@ -969,7 +969,6 @@ export class SupplierOrderDetailsComponent implements OnInit {
   }
 
   onWorkflowStepClicked(step: WorkflowStep): void {
-    debugger
     console.log('Workflow step clicked:', step);
     
     // Handle different actions based on step status
