@@ -4,6 +4,7 @@ import { LoginComponentComponent } from './login-component/login-component.compo
 import { CreateRfqComponent } from './rfq/create-rfq/create-rfq.component';
 import { SubmittedRfqComponent } from './rfq/submitted-rfq/submitted-rfq.component';
 import { TechnicalReviewPageComponent } from './rfq/technical-review-page/technical-review-page.component';
+import { AiAnalysisSummaryPagesComponent } from './rfq/ai-analysis-summary-pages/ai-analysis-summary-pages.component';
 
 export const WEFAB_CUSTOMER_ROUTES: Routes = [
     {
@@ -25,6 +26,10 @@ export const WEFAB_CUSTOMER_ROUTES: Routes = [
             {
                 path: 'technical-review-page',
                 component: TechnicalReviewPageComponent,
+            },
+            {
+                path: 'ai-analysis-summary-pages',
+                component: AiAnalysisSummaryPagesComponent,
             }
         ]
     }   

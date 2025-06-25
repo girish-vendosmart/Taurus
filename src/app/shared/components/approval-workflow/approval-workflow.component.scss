@@ -4,7 +4,6 @@
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
-  max-width: 400px;
   
   .workflow-header {
     margin-bottom: 24px;
@@ -95,20 +94,65 @@
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 4px;
+          margin-bottom: 8px;
           
           .step-title {
             font-size: 1rem;
             font-weight: 600;
             color: #1f2937;
             margin: 0;
+            flex: 1;
+            margin-right: 12px;
+          }
+
+          .status-badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+
+            &.status-in-progress {
+              background-color: rgba(#10b981, 0.1);
+              color: #10b981;
+              border: 1px solid rgba(#10b981, 0.2);
+            }
+
+            &.status-next {
+              background-color: rgba(#3b82f6, 0.1);
+              color: #3b82f6;
+              border: 1px solid rgba(#3b82f6, 0.2);
+            }
+
+            &.status-pending {
+              background-color: rgba(#6b7280, 0.1);
+              color: #6b7280;
+              border: 1px solid rgba(#6b7280, 0.2);
+            }
           }
         }
         
         .step-description {
           color: #6b7280;
-          margin: 0;
+          margin: 0 0 8px 0;
           font-size: 0.875rem;
+          line-height: 1.5;
+        }
+
+        .step-time-estimate {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.75rem;
+          color: #9ca3af;
+          font-weight: 500;
+          margin-top: 4px;
+
+          i {
+            font-size: 0.75rem;
+          }
         }
       }
       
@@ -326,6 +370,10 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 8px;
+
+            .step-title {
+              margin-right: 0;
+            }
           }
         }
       }

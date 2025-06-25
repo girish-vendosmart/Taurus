@@ -1,6 +1,6 @@
 <div class="approval-workflow-container">
   <!-- Header -->
-  <div class="workflow-header">
+  <div class="workflow-header" *ngIf="title">
     <h3 class="workflow-title">{{ title }}</h3>
   </div>
 
@@ -26,7 +26,7 @@
         <div class="step-header">
           <h4 class="step-title">{{ step.title }}</h4>
           <button 
-            *ngIf="step.status !== 'waiting'"
+            *ngIf="step.status !== 'waiting' && step.allowCompletion"
             type="button"
             pButton
             pRipple
@@ -35,6 +35,30 @@
             [disabled]="!canCompleteStep(step) || loading"
             (click)="onStepClick(step)"
           ></button>
+          <span 
+            *ngIf="step.status === 'ready' && !step.allowCompletion"
+            class="status-badge status-next">
+            Next
+          </span>
+          <span 
+            *ngIf="step.status === 'in-progress'"
+            class="status-badge status-in-progress">
+            In Progress
+          </span>
+          <span 
+            *ngIf="step.status === 'waiting'"
+            class="status-badge status-pending">
+            Pending
+          </span>
+        </div>
+        
+        <!-- Step Description -->
+        <p class="step-description" *ngIf="step.description">{{ step.description }}</p>
+        
+        <!-- Step Comments/Time Estimate -->
+        <div class="step-time-estimate" *ngIf="step.comments">
+          <i class="pi pi-clock"></i>
+          {{ step.comments }}
         </div>
       </div>
     </div>
