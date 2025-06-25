@@ -1,0 +1,552 @@
+// Import customer theme variables
+@import '../../../customer/styles/customer-variables.scss';
+
+.success-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+// Success Header Section
+.success-header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  .success-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background-color: $customer-primary;
+    border-radius: 50%;
+    margin-bottom: 20px;
+
+    .checkmark {
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      font-style: normal;
+    }
+  }
+
+  .success-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 10px 0;
+  }
+
+  .success-subtitle {
+    font-size: 16px;
+    color: #6b7280;
+    margin: 0;
+  }
+}
+
+// RFQ Details Card
+.rfq-details-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+
+// Card Header
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+
+  .rfq-info {
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0 0 8px 0;
+    }
+
+    .reference-text {
+      font-size: 14px;
+      color: #6b7280;
+      margin: 0;
+    }
+  }
+
+  .rfq-number {
+    text-align: right;
+
+    .number-label {
+      display: block;
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .number-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+  }
+}
+
+// Content Grid
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  padding: 0 24px 24px 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+// Info Sections
+.info-section {
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 16px 0;
+  }
+
+  .info-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .label {
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 500;
+      min-width: 120px;
+    }
+
+    .value {
+      font-size: 14px;
+      color: #1f2937;
+      font-weight: 500;
+      text-align: right;
+      flex: 1;
+    }
+  }
+}
+
+// Line Items Section
+.line-items-section {
+  padding: 24px 24px 0 24px;
+  border-top: 1px solid #e5e7eb;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 16px 0;
+  }
+
+  .common-table-wrapper {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+
+    // Override common table styles for customer theme
+    :host ::ng-deep app-common-table {
+      .table-wrapper,
+      .common-table-container {
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .p-datatable {
+        .p-datatable-wrapper {
+          border: none;
+          border-radius: 0;
+        }
+
+        .p-datatable-thead > tr > th {
+          background-color: $customer-primary !important;
+          color: white !important;
+          border-color: rgba(255, 255, 255, 0.2) !important;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-size: 12px;
+          padding: 12px 16px;
+        }
+
+        .p-datatable-tbody > tr {
+          &:nth-child(even) > td {
+            background-color: #f8fafc !important;
+          }
+
+          &:hover > td {
+            background-color: $customer-accent-light !important;
+          }
+
+          > td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #374151;
+            border-color: #e5e7eb;
+
+            &:first-child {
+              font-weight: 500;
+              color: $customer-primary;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .view-all-section {
+    text-align: center;
+    padding: 16px 0 24px 0;
+
+    .view-all-btn {
+      background: none;
+      border: none;
+      color: $customer-primary;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: color 0.2s ease;
+      
+      &:hover {
+        color: $customer-primary-dark;
+      }
+    }
+  }
+}
+
+// Attachments Section
+.attachments-section {
+  padding: 24px;
+  border-top: 1px solid #e5e7eb;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 16px 0;
+  }
+
+  .attachments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  .attachment-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+    gap: 12px;
+
+    .file-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 16px;
+
+      &.pdf {
+        background-color: #fee2e2;
+        color: #dc2626;
+      }
+
+      &.excel {
+        background-color: #dcfce7;
+        color: #16a34a;
+      }
+
+      &.step {
+        background-color: #fef3c7;
+        color: #d97706;
+      }
+
+      &.doc {
+        background-color: #e0e7ff;
+        color: #3730a3;
+      }
+    }
+
+    .file-info {
+      flex: 1;
+
+      .file-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1f2937;
+        margin-bottom: 2px;
+      }
+
+      .file-size {
+        font-size: 12px;
+        color: #6b7280;
+      }
+    }
+
+    .download-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      border-radius: 4px;
+      color: #6b7280;
+
+      &:hover {
+        background-color: #e5e7eb;
+        color: #374151;
+      }
+    }
+  }
+
+  .view-all-files {
+    .view-all-files-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px;
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      gap: 12px;
+      transition: all 0.2s;
+
+      &:hover {
+        border-color: #9ca3af;
+        background: #f9fafb;
+      }
+
+      &.show-less-btn {
+        border-color: $customer-primary;
+        background: rgba($customer-primary, 0.05);
+
+        &:hover {
+          border-color: $customer-primary-dark;
+          background: rgba($customer-primary, 0.1);
+        }
+
+        .minus-icon {
+          background-color: $customer-primary;
+          color: white;
+        }
+
+        .view-text .view-all-link {
+          color: $customer-primary;
+        }
+      }
+
+      .plus-icon,
+      .minus-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e5e7eb;
+        border-radius: 6px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #6b7280;
+      }
+
+      .view-text {
+        text-align: left;
+
+        div:first-child {
+          font-size: 14px;
+          font-weight: 500;
+          color: #1f2937;
+          margin-bottom: 2px;
+        }
+
+        .view-all-link {
+          font-size: 12px;
+          color: $customer-primary;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+// RFQ Reference Section
+.rfq-reference-section {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  text-align: center;
+
+  .reference-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 24px 0;
+  }
+
+  .rfq-number-card {
+    background: #11856e;
+    color: white;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+    width: 40% !important;
+    margin: auto !important;
+    margin-bottom: 15px !important;
+
+    .rfq-number-display {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .rfq-reference-text {
+      font-size: 14px;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+  }
+
+  .copy-rfq-btn {
+    background-color: #11856e;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 32px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    &:hover {
+      background-color: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    .copy-icon {
+      font-size: 16px;
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid #d1d5db;
+      text-decoration: none;
+      background-color: white;
+      color: #374151;
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        background-color: #f9fafb;
+        border-color: #9ca3af;
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      i {
+        font-size: 16px;
+        font-style: normal;
+      }
+
+      &.dashboard-btn {
+        background-color: $customer-primary !important;
+        color: white !important;
+        border-color: $customer-primary !important;
+
+        &:hover {
+          background-color: $customer-primary-dark !important;
+          border-color: $customer-primary-dark !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba($customer-primary, 0.3);
+        }
+      }
+
+      @media (max-width: 768px) {
+        width: 100%;
+        flex: none;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 24px;
+    margin: 0 16px;
+
+    .rfq-number-card {
+      padding: 20px;
+
+      .rfq-number-display {
+        font-size: 20px;
+      }
+    }
+  }
+}

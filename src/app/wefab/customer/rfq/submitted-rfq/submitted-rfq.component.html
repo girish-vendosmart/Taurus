@@ -1,1 +1,174 @@
-<p>submitted-rfq works!</p>
+<div class="success-container">
+  <!-- Success Header -->
+  <div class="success-header">
+    <div class="success-icon">
+      <i class="checkmark">✓</i>
+    </div>
+    <h1 class="success-title">RFQ Successfully Submitted!</h1>
+    <p class="success-subtitle">Your request for quote has been received and is being processed</p>
+  </div>
+
+  <!-- RFQ Details Card -->
+  <div class="rfq-details-card">
+    <!-- Header Section -->
+    <div class="card-header">
+      <div class="rfq-info">
+        <h2>RFQ Details</h2>
+        <p class="reference-text">{{ rfqData.reference }}</p>
+      </div>
+      <div class="rfq-number">
+        <span class="number-label">RFQ Number</span>
+        <span class="number-value">{{ rfqData.rfqNumber }}</span>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+      <!-- Project Information -->
+      <div class="info-section">
+        <h3>Project Information</h3>
+        <div class="info-rows">
+          <div class="info-row">
+            <span class="label">Project Name:</span>
+            <span class="value">{{ rfqData.projectInfo.projectName }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Delivery Date:</span>
+            <span class="value">{{ rfqData.projectInfo.deliveryDate }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Delivery Location:</span>
+            <span class="value">{{ rfqData.projectInfo.deliveryLocation }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Submitted:</span>
+            <span class="value">{{ rfqData.projectInfo.submitted }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOM Summary -->
+      <div class="info-section">
+        <h3>BOM Summary</h3>
+        <div class="info-rows">
+          <div class="info-row">
+            <span class="label">Total Line Items:</span>
+            <span class="value">{{ rfqData.bomSummary.totalLineItems }} parts</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Drawings Uploaded:</span>
+            <span class="value">{{ rfqData.bomSummary.drawingsUploaded }} files</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Total Quantity:</span>
+            <span class="value">{{ rfqData.bomSummary.totalQuantity }} units</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Materials:</span>
+            <span class="value">{{ rfqData.bomSummary.materials }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Line Items Section -->
+    <div class="line-items-section">
+      <h3>Line Items</h3>
+      <div class="common-table-wrapper">
+        <app-common-table
+          [config]="lineItemsTableConfig"
+          [data]="displayedLineItems"
+          [loading]="false"
+          (rowClick)="onLineItemRowClick($event)"
+          (linkClick)="onLineItemLinkClick($event)"
+          (actionClick)="onLineItemActionClick($event)">
+        </app-common-table>
+      </div>
+      <div class="view-all-section">
+        <button class="view-all-btn" (click)="viewAllItems()">
+          <span *ngIf="!showAllLineItems">✓ View All {{ remainingLineItemsCount }} Items</span>
+          <span *ngIf="showAllLineItems">✓ Show Less Items</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Attachments Section -->
+    <div class="attachments-section">
+      <h3>Attachments</h3>
+      <div class="attachments-grid">
+        <div *ngFor="let attachment of displayedAttachments" class="attachment-item">
+          <div class="file-icon" [ngClass]="attachment.type">
+            <span *ngIf="attachment.type === 'pdf'">📄</span>
+            <span *ngIf="attachment.type === 'excel'">📊</span>
+            <span *ngIf="attachment.type === 'step'">⚙️</span>
+            <span *ngIf="attachment.type === 'doc'">📝</span>
+          </div>
+          <div class="file-info">
+            <div class="file-name">{{ attachment.name }}</div>
+            <div class="file-size">{{ attachment.size }}</div>
+          </div>
+          <button class="download-btn" (click)="downloadAttachment(attachment)">
+            ⬇️
+          </button>
+        </div>
+        
+        <!-- View All Button -->
+        <div class="view-all-files" *ngIf="!showAllAttachments && remainingAttachmentsCount > 0">
+          <button class="view-all-files-btn" (click)="viewAllAttachments()">
+            <span class="plus-icon">+</span>
+            <div class="view-text">
+              <div>+{{ remainingAttachmentsCount }} more files</div>
+              <div class="view-all-link">View All</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Show Less Button -->
+        <div class="view-all-files" *ngIf="showAllAttachments">
+          <button class="view-all-files-btn show-less-btn" (click)="viewAllAttachments()">
+            <span class="minus-icon">-</span>
+            <div class="view-text">
+              <div>Show Less</div>
+              <div class="view-all-link">Collapse</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RFQ Reference Section -->
+  <div class="rfq-reference-section">
+    <h3 class="reference-title">Your RFQ Reference</h3>
+    
+    <!-- RFQ Number Card -->
+    <div class="rfq-number-card">
+      <div class="rfq-number-display">{{ rfqData.rfqNumber }}</div>
+      <div class="rfq-reference-text">Keep this number for reference</div>
+    </div>
+
+    <!-- Copy Button -->
+    <!-- <button class="copy-rfq-btn" (click)="copyRfqNumber()">
+      <i class="copy-icon">📋</i>
+      Copy RFQ Number
+    </button> -->
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="action-btn download-btn-action" (click)="downloadRfqSummary()">
+        <i class="download-icon">⬇️</i>
+        Download RFQ Summary
+      </button>
+      
+      <button class="action-btn dashboard-btn" (click)="goToDashboard()">
+        <i class="dashboard-icon">🏠</i>
+        Go to Dashboard
+      </button>
+
+      <button class="action-btn create-rfq-btn" (click)="createNewRfq()">
+        <i class="plus-icon-btn">+</i>
+        Create New RFQ
+      </button>
+    </div>
+  </div>
+</div>
