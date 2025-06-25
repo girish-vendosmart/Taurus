@@ -147,5 +147,56 @@
         </div>
       </div>
     </div>
+
+    <!-- Manufacturing Specialist & Quick Actions Section -->
+    <div class="specialist-actions-section">
+      <div class="specialist-actions-grid">
+        <!-- Your Manufacturing Specialist -->
+        <div class="specialist-card">
+          <h3 class="specialist-header">Your Manufacturing Specialist</h3>
+          <div class="specialist-content">
+            <div class="specialist-avatar">
+              <img [src]="manufacturingSpecialist.avatar" 
+                   [alt]="manufacturingSpecialist.name"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="avatar-placeholder">
+                <i class="pi pi-user"></i>
+              </div>
+            </div>
+            <div class="specialist-info">
+              <h4 class="specialist-name">{{ manufacturingSpecialist.name }}</h4>
+              <p class="specialist-title">{{ manufacturingSpecialist.title }}</p>
+              <p class="specialist-experience">{{ manufacturingSpecialist.experience }}</p>
+              <div class="specialist-contact">
+                <div class="specialist-email">
+                  <i class="pi pi-envelope"></i>
+                  <span>{{ manufacturingSpecialist.email }}</span>
+                </div>
+                <button class="btn btn-sm btn-outline-primary contact-btn" 
+                        (click)="onContactSpecialist()">
+                  <i class="pi pi-comments"></i>
+                  Contact
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-card">
+          <h3 class="actions-header">Quick Actions</h3>
+          <div class="actions-content">
+            <div class="action-buttons">
+              <button *ngFor="let action of quickActions"
+                      [class]="'btn action-btn btn-' + (action.type === 'primary' ? 'primary' : 'outline-primary')"
+                      (click)="onQuickActionClick(action.action)">
+                <i [class]="action.icon"></i>
+                {{ action.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

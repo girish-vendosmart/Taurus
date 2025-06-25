@@ -330,4 +330,49 @@ export class AiAnalysisSummaryPagesComponent {
   onTimelineStepClicked(step: WorkflowStep) {
     console.log('Timeline step clicked:', step);
   }
+
+  // Manufacturing Specialist Information
+  manufacturingSpecialist = {
+    name: 'Sarah Chen',
+    title: 'Senior Manufacturing Engineer',
+    experience: '10 years experience',
+    email: 'sarah.chen@wefabsmart.com',
+    avatar: '/assets/images/specialist-avatar.jpg' // Placeholder path
+  };
+
+  // Quick Actions
+  quickActions = [
+    {
+      label: 'Download 1Q Summary',
+      icon: 'pi pi-download',
+      action: 'download-summary',
+      type: 'primary'
+    },
+    {
+      label: 'Modify RFQ',
+      icon: 'pi pi-pencil',
+      action: 'modify-rfq',
+      type: 'outline'
+    }
+  ];
+
+  // Handle specialist and quick action events
+  onQuickActionClick(action: string) {
+    console.log('Quick action clicked:', action);
+    switch(action) {
+      case 'download-summary':
+        // Handle download summary
+        break;
+      case 'modify-rfq':
+        // Handle modify RFQ
+        break;
+      default:
+        break;
+    }
+  }
+
+  onContactSpecialist() {
+    console.log('Contact specialist clicked');
+    // Handle contacting the specialist
+  }
 }
