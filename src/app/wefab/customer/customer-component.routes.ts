@@ -23,7 +23,7 @@ export const WEFAB_CUSTOMER_ROUTES: Routes = [
                 component: CreateRfqComponent,
             },
             {
-                path: 'submitted-rfq',
+                path: 'rfq-details/:id',
                 component: SubmittedRfqComponent,
             },
             {

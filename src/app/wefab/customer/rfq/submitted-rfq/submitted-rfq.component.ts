@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonTableComponent, TableConfig, TableColumn } from '../../../../shared/components/common-table/common-table.component';
 
 @Component({
@@ -9,10 +10,13 @@ import { CommonTableComponent, TableConfig, TableColumn } from '../../../../shar
   templateUrl: './submitted-rfq.component.html',
   styleUrl: './submitted-rfq.component.scss'
 })
-export class SubmittedRfqComponent {
+export class SubmittedRfqComponent implements OnInit {
   // State management for view all functionality
   showAllLineItems = false;
   showAllAttachments = false;
+  
+  // Current RFQ ID from route
+  currentRfqId: string = '';
 
   rfqData = {
     rfqNumber: 'RFQ-2024-001847',
@@ -246,6 +250,31 @@ export class SubmittedRfqComponent {
   downloadAttachment(attachment: any) {
     // Implementation for download functionality
     console.log('Downloading:', attachment.name);
+  }
+
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    // Extract RFQ ID from route
+    this.activatedRoute.params.subscribe((params: any) => {
+      this.currentRfqId = params['id'];
+      console.log('Current RFQ ID:', this.currentRfqId);
+      // Here you can load specific RFQ data based on the ID
+      this.loadRfqData(this.currentRfqId);
+    });
+  }
+
+  private loadRfqData(rfqId: string) {
+    // Implementation to load RFQ data based on ID
+    // This would typically involve calling a service to fetch data from backend
+    console.log('Loading RFQ data for ID:', rfqId);
+    
+    // For now, you can update the static data to reflect the current RFQ ID
+    // In a real implementation, you would fetch this data from a service
+    this.rfqData.rfqNumber = rfqId;
   }
 
   viewAllItems() {

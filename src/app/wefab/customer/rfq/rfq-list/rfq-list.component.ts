@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonTableComponent, TableConfig, ActionButton, FilterOption } from '../../../../shared/components/common-table/common-table.component';
 
@@ -48,56 +48,56 @@ export class RfqListComponent implements OnInit {
       rfqId: 'RFQ0000136',
       creationDate: '26 June 2025, 12:10 PM',
       status: 'Quoted',
-      routerLink: '/customer/rfq-details/RFQ0000136'
+      routerLink: '/wefab/customer/rfq-details/RFQ0000136'
     },
     {
       rfqName: 'Precision CNC Machining Components',
       rfqId: 'RFQ0000137',
       creationDate: '25 June 2025, 09:30 AM',
       status: 'Open',
-      routerLink: '/customer/rfq-details/RFQ0000137'
+      routerLink: '/wefab/customer/rfq-details/RFQ0000137'
     },
     {
       rfqName: 'Automotive Parts Manufacturing',
       rfqId: 'RFQ0000138',
       creationDate: '24 June 2025, 02:15 PM',
       status: 'Under Review',
-      routerLink: '/customer/rfq-details/RFQ0000138'
+      routerLink: '/wefab/customer/rfq-details/RFQ0000138'
     },
     {
       rfqName: 'Electronic Enclosure Fabrication',
       rfqId: 'RFQ0000139',
       creationDate: '23 June 2025, 11:45 AM',
       status: 'Open',
-      routerLink: '/customer/rfq-details/RFQ0000139'
+      routerLink: '/wefab/customer/rfq-details/RFQ0000139'
     },
     {
       rfqName: 'Industrial Valve Components',
       rfqId: 'RFQ0000140',
       creationDate: '22 June 2025, 04:20 PM',
       status: 'Quoted',
-      routerLink: '/customer/rfq-details/RFQ0000140'
+      routerLink: '/wefab/customer/rfq-details/RFQ0000140'
     },
     {
       rfqName: 'Medical Device Parts',
       rfqId: 'RFQ0000141',
       creationDate: '21 June 2025, 10:30 AM',
       status: 'Expired',
-      routerLink: '/customer/rfq-details/RFQ0000141'
+      routerLink: '/wefab/customer/rfq-details/RFQ0000141'
     },
     {
       rfqName: 'Aerospace Component Manufacturing',
       rfqId: 'RFQ0000142',
       creationDate: '20 June 2025, 01:45 PM',
       status: 'Open',
-      routerLink: '/customer/rfq-details/RFQ0000142'
+      routerLink: '/wefab/customer/rfq-details/RFQ0000142'
     },
     {
       rfqName: 'Custom Fixture Design & Build',
       rfqId: 'RFQ0000143',
       creationDate: '19 June 2025, 03:20 PM',
       status: 'Draft',
-      routerLink: '/customer/rfq-details/RFQ0000143'
+      routerLink: '/wefab/customer/rfq-details/RFQ0000143'
     }
   ];
 
@@ -155,7 +155,7 @@ export class RfqListComponent implements OnInit {
 
   loading = false;
 
-  constructor() {}
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     // No loading needed since we have static data
@@ -163,11 +163,15 @@ export class RfqListComponent implements OnInit {
 
   onRowClick(event: any): void {
     console.log('Row clicked:', event.rowData);
+    // Navigate to RFQ details when row is clicked
+    if (event.rowData.routerLink) {
+      this.router.navigate([event.rowData.routerLink]);
+    }
   }
 
   onLinkClick(event: { rowData: any, column: any, event: any }): void {
     console.log('Link clicked:', event.rowData);
-    // Navigation will be handled automatically by the common-table component
+    // Navigation is now handled automatically by the routerLink directive in the template
   }
 
   onActionClick(event: { action: string, rowData: any }): void {
