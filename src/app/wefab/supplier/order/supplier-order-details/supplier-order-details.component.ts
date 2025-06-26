@@ -328,15 +328,16 @@ export class SupplierOrderDetailsComponent implements OnInit {
 
   loadOrderDetails() {
     this.loading = true;
-    let endpoint = `/api/resource/Supplier Order/${this.orderId}`;
+    let endpoint = `/api/resource/Purchase Order/${this.orderId}`;
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
+        debugger
         console.log('Order details:', res.data);
         if (res.data) {
           this.orderDetails = this.transformApiDataToOrderDetails(res.data);
-          this.loadOrderItems();
-          this.loadOrderAttachments();
+          // this.loadOrderItems();
+          // this.loadOrderAttachments();
         }
         this.loading = false;
       },
@@ -548,20 +549,20 @@ export class SupplierOrderDetailsComponent implements OnInit {
   transformApiDataToOrderDetails(apiData: any): OrderDetails {
     return {
       name: apiData.name || '',
-      order_name: apiData.order_name || apiData.title || '',
-      description: apiData.description || '',
-      docstatus: apiData.docstatus || 0,
+      order_name: apiData.po_name || apiData.title || '',
+      description: apiData.general_terms || '',
+      docstatus: apiData.po_status || 0,
       creation: apiData.creation || '',
       modified: apiData.modified || '',
-      expected_delivery: apiData.expected_delivery || '',
+      expected_delivery: apiData.actual_delivery_date || '',
       delivery_address: apiData.delivery_address || '',
-      special_instructions: apiData.special_instructions || '',
+      special_instructions: apiData.special_delivery_instructions || '',
       total_amount: apiData.total_amount || apiData.grand_total || 0,
       payment_terms: apiData.payment_terms || '',
       delivery_terms: apiData.delivery_terms || '',
-      supplier: apiData.supplier || '',
-      purchase_order: apiData.purchase_order || '',
-      status: apiData.status || ''
+      supplier: apiData.supplier || 'Tata Consultancy Services Limited',
+      purchase_order: apiData.name || '',
+      status: apiData.po_status || ''
     };
   }
 
