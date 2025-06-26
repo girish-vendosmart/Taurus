@@ -8,6 +8,7 @@ import { AiAnalysisSummaryPagesComponent } from './rfq/ai-analysis-summary-pages
 import { RfqListComponent } from './rfq/rfq-list/rfq-list.component';
 import { QuotationListComponent } from './quotation/quotation-list/quotation-list.component';
 import { OrderListComponent } from './order/order-list/order-list.component';
+import { QuotationDetailsComponent } from './quotation/quotation-details/quotation-details.component';
 
 export const WEFAB_CUSTOMER_ROUTES: Routes = [
     {
@@ -41,6 +42,10 @@ export const WEFAB_CUSTOMER_ROUTES: Routes = [
             {
                 path: 'quotation-list',
                 component: QuotationListComponent,
+            },
+            {
+                path: 'quotation-details/:id',
+                component: QuotationDetailsComponent,
             },
             {
                 path: 'order-list',

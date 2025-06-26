@@ -122,7 +122,8 @@ export class CustomerComponentComponent implements OnInit {
         }
       }
       // Handle Quotation nested routes  
-      else if (currentRoute.includes('/wefab/customer/quotation/')) {
+      else if (currentRoute.includes('/wefab/customer/quotation-details/') ||
+               currentRoute.includes('/wefab/customer/quotation-list')) {
         const quotationItem = this.sidebarConfig.menuItems.find(item => item.id === 'quotation');
         if (quotationItem) {
           quotationItem.active = true;

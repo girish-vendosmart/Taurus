@@ -59,7 +59,7 @@ export class QuotationListComponent implements OnInit {
       submittedDate: '25 June 2025, 03:45 PM',
       validity: '10 August 2025, 11:30 AM',
       status: 'Draft',
-      routerLink: '/customer/quotation-details/QTN0000368'
+      routerLink: '/wefab/customer/quotation-details/QTN0000368'
     },
     {
       quotationId: 'QTN0000369',
@@ -68,7 +68,7 @@ export class QuotationListComponent implements OnInit {
       submittedDate: '24 June 2025, 09:20 AM',
       validity: '15 August 2025, 02:15 PM',
       status: 'Submitted',
-      routerLink: '/customer/quotation-details/QTN0000369'
+      routerLink: '/wefab/customer/quotation-details/QTN0000369'
     },
     {
       quotationId: 'QTN0000370',
@@ -77,7 +77,7 @@ export class QuotationListComponent implements OnInit {
       submittedDate: '23 June 2025, 11:30 AM',
       validity: '20 July 2025, 06:00 PM',
       status: 'Expired',
-      routerLink: '/customer/quotation-details/QTN0000370'
+      routerLink: '/wefab/customer/quotation-details/QTN0000370'
     },
     {
       quotationId: 'QTN0000371',
@@ -86,7 +86,7 @@ export class QuotationListComponent implements OnInit {
       submittedDate: '22 June 2025, 02:15 PM',
       validity: '25 August 2025, 09:45 AM',
       status: 'Under Review',
-      routerLink: '/customer/quotation-details/QTN0000371'
+      routerLink: '/wefab/customer/quotation-details/QTN0000371'
     },
     {
       quotationId: 'QTN0000372',
@@ -95,7 +95,7 @@ export class QuotationListComponent implements OnInit {
       submittedDate: '21 June 2025, 04:50 PM',
       validity: '30 August 2025, 12:30 PM',
       status: 'Draft',
-      routerLink: '/customer/quotation-details/QTN0000372'
+      routerLink: '/wefab/customer/quotation-details/QTN0000372'
     },
     {
       quotationId: 'QTN0000373',
@@ -104,7 +104,7 @@ export class QuotationListComponent implements OnInit {
       submittedDate: '20 June 2025, 10:25 AM',
       validity: '5 September 2025, 04:20 PM',
       status: 'Submitted',
-      routerLink: '/customer/quotation-details/QTN0000373'
+      routerLink: '/wefab/customer/quotation-details/QTN0000373'
     },
     {
       quotationId: 'QTN0000374',
@@ -113,7 +113,7 @@ export class QuotationListComponent implements OnInit {
       submittedDate: '19 June 2025, 01:40 PM',
       validity: '10 September 2025, 08:15 AM',
       status: 'Draft',
-      routerLink: '/customer/quotation-details/QTN0000374'
+      routerLink: '/wefab/customer/quotation-details/QTN0000374'
     }
   ];
 
