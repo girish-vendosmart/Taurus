@@ -43,7 +43,7 @@ export class CustomerComponentComponent implements OnInit {
           active: true,
           color: '#4CAF50'
         },
-        route: '/customer/quotation'
+        route: '/wefab/customer/quotation-list'
       },
       {
         id: 'order',
@@ -52,7 +52,7 @@ export class CustomerComponentComponent implements OnInit {
         completed: false,
         active: false,
         disabled: false,
-        route: '/customer/order'
+        route: '/wefab/customer/order-list'
       }
     ],
     showHelpSection: true,

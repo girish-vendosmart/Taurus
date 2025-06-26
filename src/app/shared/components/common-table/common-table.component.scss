@@ -444,6 +444,10 @@ $font-weight-bold: 700;
   }
 }
 
+::ng-deep .p-column-filter {
+  width: 100% !important;
+}
+
 
 :host ::ng-deep p-ripple p-element p-paginator-prev p-paginator-element {
   display: none;
