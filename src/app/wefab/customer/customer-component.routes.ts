@@ -5,6 +5,7 @@ import { CreateRfqComponent } from './rfq/create-rfq/create-rfq.component';
 import { SubmittedRfqComponent } from './rfq/submitted-rfq/submitted-rfq.component';
 import { TechnicalReviewPageComponent } from './rfq/technical-review-page/technical-review-page.component';
 import { AiAnalysisSummaryPagesComponent } from './rfq/ai-analysis-summary-pages/ai-analysis-summary-pages.component';
+import { RfqListComponent } from './rfq/rfq-list/rfq-list.component';
 
 export const WEFAB_CUSTOMER_ROUTES: Routes = [
     {
@@ -30,6 +31,10 @@ export const WEFAB_CUSTOMER_ROUTES: Routes = [
             {
                 path: 'ai-analysis-summary-pages',
                 component: AiAnalysisSummaryPagesComponent,
+            },
+            {
+                path: 'rfq-list',
+                component: RfqListComponent,
             }
         ]
     }   

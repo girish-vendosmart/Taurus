@@ -30,7 +30,7 @@ export class CustomerComponentComponent implements OnInit {
         completed: true,
         active: false,
         disabled: false,
-        route: '/customer/rfq'
+        route: '/wefab/customer/rfq-list'
       },
       {
         id: 'quotation',

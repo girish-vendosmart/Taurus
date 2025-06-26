@@ -23,15 +23,6 @@
           
           <!-- Label -->
           <span class="menu-label flex-grow-1">{{ item.label }}</span>
-          
-          <!-- Status Indicator -->
-          <div class="status-indicator" *ngIf="item.statusIndicator">
-            <div 
-              class="status-dot"
-              [class.active]="item.statusIndicator.active"
-              [style.background-color]="item.statusIndicator.color">
-            </div>
-          </div>
         </div>
       </div>
     </nav>
