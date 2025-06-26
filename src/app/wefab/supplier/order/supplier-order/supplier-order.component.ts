@@ -162,7 +162,7 @@ export class SupplierOrderComponent implements OnInit {
       error: (error) => {
         console.error('Error fetching Order summary stats:', error);
         // Set sample data for now
-        this.loadSampleData();
+        // this.loadSampleData(); 
       }
     })
   }
@@ -181,22 +181,15 @@ export class SupplierOrderComponent implements OnInit {
   getOrderList() {
     this.loading = true;
     // This will be updated with actual API endpoint when available
-    let endpoint = `/api/resource/Supplier Order?fields=["*"]&filters=[["status", "not in", ["Draft"]],["supplier_id", "=", "${this.supplierId}"]]`
-    
-    this.commonService.getWefabData(endpoint).subscribe({
-      next: (res: any) => {
-        console.log(res.data);
-        // Transform API data to match OrderItem interface
-        this.allOrders = this.transformApiDataToOrderItems(res.data);
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error fetching Order data:', error);
-        this.loading = false;
-        // Fallback to sample data if API fails
-        this.loadSampleData();
-      }
-    });
+    let endpoint = `/api/resource/Purchase Order?fields=["*"]&filters=[["supplier_id", "=", "${this.supplierId}"]]`
+
+    this.commonService.getWefabData(endpoint).subscribe((res:any) => {
+      this.allOrders = this.transformApiDataToOrderItems(res.data);
+      this.loading = false;
+    },(error:any) => {
+      console.error('Error fetching Order data:', error);
+      this.loading = false;
+    })
   }
 
   // Load sample data for demonstration
@@ -260,18 +253,18 @@ export class SupplierOrderComponent implements OnInit {
 
     return apiData.map(item => ({
       orderId: item.name || item.order_id || '',
-      orderName: item.order_name || item.title || item.name || 'N/A',
+      orderName: item.po_name || item.title || item.name || 'N/A',
+      companySubInfo: item.name || item.order_id || '',
       creationDate: this.formatApiDate(item.creation || item.created_date || ''),
-      deliveryDate: this.formatApiDate(item.delivery_date || item.expected_delivery || ''),
+      deliveryDate: this.formatApiDate(item.actual_delivery_date || item.expected_delivery || ''),
       totalAmount: item.total_amount || item.grand_total || 0,
-      status: this.mapApiStatusToOrderStatus(item.status || 'Draft'),
+      status: this.mapApiStatusToOrderStatus(item.po_status || 'Draft'),
       name: item.name || '',
       owner: item.owner || '',
       modified: item.modified || '',
       docstatus: item.docstatus || 0,
-              routerLink: `/wefab/supplier/order/details/${item.name}`,
-      companySubInfo: item.company || ''
-    }));
+      routerLink: `/wefab/supplier/order/details/${item.name}`,
+    }));  
   }
 
   onOrderIdLinkClick(orderId: string, status: string = '') {
