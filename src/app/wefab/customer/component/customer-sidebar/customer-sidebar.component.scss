@@ -1,10 +1,12 @@
 .customer-sidebar {
-  background: linear-gradient(180deg, #16A085 0%, #12856E 30%, #0F6B5A 60%, #0A4B47 85%, #07363F 100%);
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  background: #f9fafc !important;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
   min-height: 100vh;
   width: 280px;
   position: relative;
-  overflow-y: auto;
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
   
   // Add subtle overlay for depth
   &::before {
@@ -27,15 +29,14 @@
 
   // Logo Section
   .logo-section {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.03);
-    padding: 20px 16px;
+      padding: 20px 16px;
     
     .logo-img {
       max-height: 40px;
       max-width: 150px;
       object-fit: contain;
-      filter: brightness(1.2);
+      // Use dark primary color for logo visibility
+      filter: brightness(0) saturate(100%) invert(15%) sepia(77%) saturate(6142%) hue-rotate(15deg) brightness(93%) contrast(93%);
     }
   }
 
@@ -103,38 +104,39 @@
 
         // Default/Hover States
         &:hover:not(.disabled):not(.active) {
-          background: rgba(255, 255, 255, 0.06);
-          
           .menu-item-content {
+            background: rgba(255, 87, 34, 0.08);
+            border-radius: 8px;
+            
             .menu-icon .menu-item-icon {
-              color: rgba(255, 255, 255, 0.95);
+              color: #E64A19;
+              transform: scale(1.1);
             }
             
             .menu-label {
-              color: rgba(255, 255, 255, 0.95);
+              color: #E64A19;
             }
           }
         }
 
         // Active State - Clean and Modern
         &.active {
-          background: rgba(255, 255, 255, 0.20);
-          border-left: 4px solid rgba(255, 255, 255, 0.9);
-          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-          
           .menu-item-content {
+            background: #fe5720;
+            // border-left: 4px solid #FF5722;
             padding-left: 8px; // Adjust for left border
+            box-shadow: 0 2px 8px rgba(255, 87, 34, 0.2);
             
             .menu-icon {
               .menu-item-icon {
-                color: rgba(255, 255, 255, 1);
+                color: white;
                 font-weight: 600;
               }
-            }
+            } 
             
             .menu-label {
-              color: rgba(255, 255, 255, 1);
-              font-weight: 700;
+              color: white;
+              font-weight: 600;
             }
             
             .status-indicator {
@@ -210,12 +212,14 @@
         }
 
         .menu-item-content {
-          color: rgba(255, 255, 255, 0.85);
+          color: #666666;
           border-radius: 8px;
           transition: all 0.2s ease;
           padding: 12px;
           display: flex;
           align-items: center;
+          background: transparent;
+          border: 1px solid transparent;
 
           .menu-icon {
             width: 20px;
@@ -228,7 +232,7 @@
 
             .menu-item-icon {
               font-size: 16px;
-              color: rgba(255, 255, 255, 0.8);
+              color: #FF5722;
               transition: all 0.2s ease;
             }
           }
@@ -236,7 +240,7 @@
           .menu-label {
             font-size: 16px;
             font-weight: 500;
-            color: rgba(255, 255, 255, 0.85);
+            color: #333333;
             transition: all 0.2s ease;
             flex: 1;
           }
@@ -266,11 +270,10 @@
     padding: 16px;
     
     .help-content {
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(255, 87, 34, 0.05);
       border-radius: 12px;
       text-align: center;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 87, 34, 0.1);
       padding: 20px 16px;
 
       .help-icon {
@@ -278,28 +281,28 @@
         
         i {
           font-size: 24px;
-          color: rgba(255, 255, 255, 0.7);
+          color: #FF5722;
         }
       }
 
       .help-title {
-        color: rgba(255, 255, 255, 0.9);
+        color: #333333;
         font-size: 16px;
         font-weight: 600;
         margin-bottom: 8px;
       }
 
       .help-description {
-        color: rgba(255, 255, 255, 0.6);
+        color: #666666;
         font-size: 12px;
         line-height: 1.4;
         margin-bottom: 16px;
       }
 
       .help-button {
-        background: rgba(255, 255, 255, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: rgba(255, 255, 255, 0.9);
+        background: #FF5722;
+        border: 1px solid #FF5722;
+        color: #ffffff;
         padding: 10px 20px;
         border-radius: 6px;
         font-size: 13px;
@@ -309,8 +312,8 @@
         width: 100%;
 
         &:hover {
-          background: rgba(255, 255, 255, 0.25);
-          border-color: rgba(255, 255, 255, 0.3);
+          background: #E64A19;
+          border-color: #E64A19;
           transform: translateY(-1px);
         }
 
@@ -331,23 +334,26 @@
   }
 }
 
-// Scrollbar Styling
+// Scrollbar Styling - Hidden
 .customer-sidebar {
   &::-webkit-scrollbar {
-    width: 4px;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
-
+  
   &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
+    display: none !important;
   }
-
+  
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.5);
-    }
+    display: none !important;
   }
+  
+  // For Firefox
+  scrollbar-width: none !important;
+  
+  // For IE and Edge
+  -ms-overflow-style: none !important;
 }
 
