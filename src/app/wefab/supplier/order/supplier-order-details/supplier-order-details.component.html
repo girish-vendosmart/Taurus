@@ -11,6 +11,7 @@
     <div class="header-content">
       <div class="header-left">
         <h3 class="page-title">{{ orderDetails.order_name }}</h3>
+        <p class="rfq-id" style="margin-bottom: 0px;">{{ orderDetails.name || 'Loading...' }}</p>
         <span class="status-badge" [ngClass]="getStatusClass(orderDetails.status)">
           {{ getStatusText() }}
         </span>
