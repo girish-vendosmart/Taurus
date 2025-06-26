@@ -48,6 +48,75 @@
   margin-bottom: 40px;
 }
 
+// Back Button Section
+.back-button-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+
+  .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+
+    &:hover {
+      background-color: #f3f4f6;
+      border-color: #9ca3af;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $customer-primary;
+      box-shadow: 0 0 0 3px rgba($customer-primary, 0.1);
+    }
+
+    i {
+      font-size: 16px;
+      color: #6b7280;
+    }
+
+    span {
+      font-weight: 500;
+    }
+
+    &:hover {
+      i {
+        color: $customer-primary;
+      }
+
+      span {
+        color: $customer-primary;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px 20px 0 20px;
+
+    .back-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
 // Card Header
 .card-header {
   display: flex;

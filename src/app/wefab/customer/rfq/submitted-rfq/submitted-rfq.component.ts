@@ -446,6 +446,12 @@ export class SubmittedRfqComponent implements OnInit {
     // Here you would typically navigate to dashboard page
   }
 
+  // Navigate back to RFQ list
+  goBack() {
+    console.log('Navigating back to RFQ list');
+    this.router.navigate(['/wefab/customer/rfq-list']);
+  }
+
   // Handle technical review report link click
   viewTechnicalReviewReport() {
     const rfqId = this.rfqData.rfqNumber; // Use current RFQ number

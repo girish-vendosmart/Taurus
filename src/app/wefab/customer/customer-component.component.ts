@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { CustomerSidebarComponent, MenuItem, SidebarConfig } from './component/customer-sidebar/customer-sidebar.component';
 import { CustomerHeaderComponent } from './component/customer-header/customer-header.component';
@@ -37,7 +38,7 @@ export class CustomerComponentComponent implements OnInit {
         label: 'Quotation',
         icon: 'pi pi-calculator',
         completed: false,
-        active: true,
+        active: false,
         disabled: false,
         statusIndicator: {
           active: true,
@@ -73,6 +74,13 @@ export class CustomerComponentComponent implements OnInit {
     this.checkScreenSize();
     this.updateActiveMenuBasedOnRoute();
     
+    // Listen for route changes to update active menu item
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.updateActiveMenuBasedOnRoute();
+      });
+    
     // Listen for window resize
     window.addEventListener('resize', () => {
       this.checkScreenSize();
@@ -89,8 +97,45 @@ export class CustomerComponentComponent implements OnInit {
   private updateActiveMenuBasedOnRoute(): void {
     const currentRoute = this.router.url;
     this.sidebarConfig.menuItems.forEach(item => {
-      item.active = item.route === currentRoute;
+      item.active = false; // Reset all items first
     });
+
+    // Check for exact matches first
+    this.sidebarConfig.menuItems.forEach(item => {
+      if (item.route === currentRoute) {
+        item.active = true;
+        return;
+      }
+    });
+
+    // Check for nested route matches if no exact match found
+    const hasExactMatch = this.sidebarConfig.menuItems.some(item => item.active);
+    if (!hasExactMatch) {
+      // Handle RFQ nested routes
+      if (currentRoute.includes('/wefab/customer/rfq-details/') || 
+          currentRoute.includes('/wefab/customer/create-rfq') ||
+          currentRoute.includes('/wefab/customer/technical-review-page/') ||
+          currentRoute.includes('/wefab/customer/ai-analysis-summary-pages')) {
+        const rfqItem = this.sidebarConfig.menuItems.find(item => item.id === 'rfq');
+        if (rfqItem) {
+          rfqItem.active = true;
+        }
+      }
+      // Handle Quotation nested routes  
+      else if (currentRoute.includes('/wefab/customer/quotation/')) {
+        const quotationItem = this.sidebarConfig.menuItems.find(item => item.id === 'quotation');
+        if (quotationItem) {
+          quotationItem.active = true;
+        }
+      }
+      // Handle Order nested routes
+      else if (currentRoute.includes('/wefab/customer/order/')) {
+        const orderItem = this.sidebarConfig.menuItems.find(item => item.id === 'order');
+        if (orderItem) {
+          orderItem.active = true;
+        }
+      }
+    }
   }
 
   // Header event handlers
