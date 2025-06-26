@@ -111,7 +111,7 @@ app-customer-header {
   height: calc(100vh - 70px); // Subtract header height (adjust as needed)
   overflow-y: auto;
   padding: 0;
-  background: $customer-bg-light;
+  background: #f6f7f9 !important;
   position: relative;
   
   // Smooth scrolling

@@ -1,13 +1,4 @@
-<div class="success-container">
-  <!-- Success Header -->
-  <div class="success-header">
-    <div class="success-icon">
-      <i class="checkmark">✓</i>
-    </div>
-    <h1 class="success-title">RFQ Successfully Submitted!</h1>
-    <p class="success-subtitle">Your request for quote has been received and is being processed</p>
-  </div>
-
+<div class="success-container p-4"> 
   <!-- RFQ Details Card -->
   <div class="rfq-details-card">
     <!-- Header Section -->
@@ -74,22 +65,17 @@
     <!-- Line Items Section -->
     <div class="line-items-section">
       <h3>Line Items</h3>
+      
       <div class="common-table-wrapper">
         <app-common-table
           [config]="lineItemsTableConfig"
-          [data]="displayedLineItems"
+          [data]="rfqData.allLineItems"
           [loading]="false"
           (rowClick)="onLineItemRowClick($event)"
           (linkClick)="onLineItemLinkClick($event)"
           (actionClick)="onLineItemActionClick($event)">
-        </app-common-table>
-      </div>
-      <div class="view-all-section">
-        <button class="view-all-btn" (click)="viewAllItems()">
-          <span *ngIf="!showAllLineItems">✓ View All {{ remainingLineItemsCount }} Items</span>
-          <span *ngIf="showAllLineItems">✓ Show Less Items</span>
-        </button>
-      </div>
+                </app-common-table>
+        </div>
     </div>
 
     <!-- Attachments Section -->
@@ -132,6 +118,52 @@
               <div class="view-all-link">Collapse</div>
             </div>
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Status Section -->
+  <div class="review-status-section">
+    <div class="status-header">
+      <h3>Review Status</h3>
+      <div class="status-indicator">
+        <span class="status-badge">{{ rfqData.reviewStatus.currentStatus }}</span>
+      </div>
+    </div>
+    
+    <p class="status-subtitle">Track the progress of your RFQ review</p>
+    
+    <div class="status-timeline">
+      <div *ngFor="let stage of rfqData.reviewStatus.stages; let i = index" 
+           class="timeline-item" 
+           [ngClass]="{
+             'completed': stage.status === 'completed',
+             'in-progress': stage.status === 'in-progress',
+             'pending': stage.status === 'pending'
+           }">
+        
+        <div class="timeline-connector" *ngIf="i < rfqData.reviewStatus.stages.length - 1"></div>
+        
+        <div class="timeline-marker">
+          <div class="marker-icon">
+            <i [class]="stage.icon"></i>
+          </div>
+        </div>
+        
+        <div class="timeline-content">
+          <h4 class="stage-title">{{ stage.title }}</h4>
+          <p class="stage-description">{{ stage.description }}</p>
+          <p class="stage-date" *ngIf="stage.completedDate">{{ stage.completedDate }}</p>
+          <p class="stage-estimate" *ngIf="stage.estimatedCompletion">{{ stage.estimatedCompletion }}</p>
+          
+          <!-- Technical Review Report Link -->
+          <div class="stage-actions" *ngIf="stage.hasReportLink && stage.status === 'completed'">
+            <button class="report-link-btn" (click)="viewTechnicalReviewReport()">
+              <i class="pi pi-external-link"></i>
+              {{ stage.reportLinkText }}
+            </button>
+          </div>
         </div>
       </div>
     </div>

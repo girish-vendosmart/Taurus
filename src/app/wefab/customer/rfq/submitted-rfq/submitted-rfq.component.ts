@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonTableComponent, TableConfig, TableColumn } from '../../../../shared/components/common-table/common-table.component';
 
 @Component({
   selector: 'app-submitted-rfq',
   standalone: true,
-  imports: [CommonModule, CommonTableComponent],
+  imports: [CommonModule, FormsModule, CommonTableComponent],
   templateUrl: './submitted-rfq.component.html',
   styleUrl: './submitted-rfq.component.scss'
 })
@@ -17,6 +18,14 @@ export class SubmittedRfqComponent implements OnInit {
   
   // Current RFQ ID from route
   currentRfqId: string = '';
+
+  // Filter properties
+  searchPartNumber: string = '';
+  selectedMaterial: string = '';
+  selectedUnit: string = '';
+  filteredLineItems: any[] = [];
+  availableMaterials: string[] = [];
+  availableUnits: string[] = [];
 
   rfqData = {
     rfqNumber: 'RFQ-2024-001847',
@@ -32,6 +41,45 @@ export class SubmittedRfqComponent implements OnInit {
       drawingsUploaded: 5,
       totalQuantity: 2500,
       materials: 'Aluminum, Steel, Plastic'
+    },
+    // Add review status data
+    reviewStatus: {
+      currentStatus: 'Under Review',
+      stages: [
+        {
+          id: 1,
+          title: 'RFQ Received',
+          description: 'Your request has been successfully submitted',
+          status: 'completed',
+          completedDate: 'January 15, 2024 at 2:30 PM',
+          icon: 'pi pi-check'
+        },
+        {
+          id: 2,
+          title: 'Technical Review Completed',
+          description: 'Engineering team has analyzed your requirements',
+          status: 'completed',
+          completedDate: 'January 17, 2024 at 11:45 AM',
+          icon: 'pi pi-check',
+          hasReportLink: true,
+          reportLinkText: 'View Technical Review Report'
+        },
+        {
+          id: 3,
+          title: 'Quote Generation',
+          description: 'Pricing and timeline calculation',
+          status: 'in-progress',
+          estimatedCompletion: 'Estimated completion: 2-3 business days',
+          icon: 'pi pi-info-circle'
+        },
+        {
+          id: 4,
+          title: 'Quote Delivery',
+          description: 'Final quote sent to your email',
+          status: 'pending',
+          icon: 'pi pi-send'
+        }
+      ]
     },
     allLineItems: [
       {
@@ -175,9 +223,16 @@ export class SubmittedRfqComponent implements OnInit {
 
   // Computed properties for displayed items
   get displayedLineItems() {
+    // Use filtered items if any filters are applied
+    const itemsToShow = this.hasActiveFilters() ? this.filteredLineItems : this.rfqData.allLineItems;
     return this.showAllLineItems 
-      ? this.rfqData.allLineItems 
-      : this.rfqData.allLineItems.slice(0, 3);
+      ? itemsToShow 
+      : itemsToShow.slice(0, 3);
+  }
+
+  // Check if any filters are active
+  hasActiveFilters(): boolean {
+    return this.searchPartNumber.trim() !== '' || this.selectedMaterial !== '' || this.selectedUnit !== '';
   }
 
   get displayedAttachments() {
@@ -187,7 +242,8 @@ export class SubmittedRfqComponent implements OnInit {
   }
 
   get remainingLineItemsCount() {
-    return this.rfqData.allLineItems.length - 3;
+    const totalItems = this.hasActiveFilters() ? this.filteredLineItems.length : this.rfqData.allLineItems.length;
+    return Math.max(0, totalItems - 3);
   }
 
   get remainingAttachmentsCount() {
@@ -217,7 +273,8 @@ export class SubmittedRfqComponent implements OnInit {
         field: 'quantity',
         header: 'Quantity',
         sortable: true,
-        filterable: false,
+        filterable: true,
+        filterType: 'text',
         width: '120px'
       },
       {
@@ -231,15 +288,16 @@ export class SubmittedRfqComponent implements OnInit {
       {
         field: 'unit',
         header: 'Unit',
-        sortable: false,
-        filterable: false,
+        sortable: true,
+        filterable: true,
+        filterType: 'text',
         width: '80px'
       }
     ],
-    enableSearch: false,
+    enableSearch: true,
     enableSort: true,
-    enableFilter: false,
-    enablePagination: false,
+    enableFilter: true,
+    enablePagination: true,
     pageSize: 10,
     showActions: false,
     enableColumnHide: false,
@@ -250,6 +308,52 @@ export class SubmittedRfqComponent implements OnInit {
   downloadAttachment(attachment: any) {
     // Implementation for download functionality
     console.log('Downloading:', attachment.name);
+  }
+
+  // Filter methods
+  initializeFilters() {
+    // Initialize filtered data
+    this.filteredLineItems = [...this.rfqData.allLineItems];
+    
+    // Get unique materials and units for filter options
+    this.availableMaterials = [...new Set(this.rfqData.allLineItems.map(item => item.material))];
+    this.availableUnits = [...new Set(this.rfqData.allLineItems.map(item => item.unit))];
+  }
+
+  onSearchPartNumber() {
+    this.applyFilters();
+  }
+
+  onFilterMaterial() {
+    this.applyFilters();
+  }
+
+  onFilterUnit() {
+    this.applyFilters();
+  }
+
+  private applyFilters() {
+    let filtered = [...this.rfqData.allLineItems];
+
+    // Apply part number search
+    if (this.searchPartNumber.trim()) {
+      filtered = filtered.filter(item => 
+        item.partNumber.toLowerCase().includes(this.searchPartNumber.toLowerCase()) ||
+        item.description.toLowerCase().includes(this.searchPartNumber.toLowerCase())
+      );
+    }
+
+    // Apply material filter
+    if (this.selectedMaterial) {
+      filtered = filtered.filter(item => item.material === this.selectedMaterial);
+    }
+
+    // Apply unit filter
+    if (this.selectedUnit) {
+      filtered = filtered.filter(item => item.unit === this.selectedUnit);
+    }
+
+    this.filteredLineItems = filtered;
   }
 
   constructor(
@@ -264,6 +368,8 @@ export class SubmittedRfqComponent implements OnInit {
       console.log('Current RFQ ID:', this.currentRfqId);
       // Here you can load specific RFQ data based on the ID
       this.loadRfqData(this.currentRfqId);
+      // Initialize filters after data is loaded
+      this.initializeFilters();
     });
   }
 
@@ -338,5 +444,11 @@ export class SubmittedRfqComponent implements OnInit {
     // Implementation for navigating to dashboard
     console.log('Navigating to dashboard');
     // Here you would typically navigate to dashboard page
+  }
+
+  // Handle technical review report link click
+  viewTechnicalReviewReport() {
+    const rfqId = this.rfqData.rfqNumber; // Use current RFQ number
+    this.router.navigate(['/wefab/customer/technical-review-page', rfqId]);
   }
 }

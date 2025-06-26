@@ -27,7 +27,7 @@ export const WEFAB_CUSTOMER_ROUTES: Routes = [
                 component: SubmittedRfqComponent,
             },
             {
-                path: 'technical-review-page',
+                path: 'technical-review-page/:id',
                 component: TechnicalReviewPageComponent,
             },
             {

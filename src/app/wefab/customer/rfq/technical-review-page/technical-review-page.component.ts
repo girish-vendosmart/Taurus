@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../../../shared/components/common-table/common-table.component';
 
 interface ReviewMetric {
@@ -84,8 +85,11 @@ interface TechnicalReviewData {
   templateUrl: './technical-review-page.component.html',
   styleUrl: './technical-review-page.component.scss'
 })
-export class TechnicalReviewPageComponent {
+export class TechnicalReviewPageComponent implements OnInit {
   
+  // Current RFQ ID from route
+  currentRfqId: string = '';
+
   // JSON data structure that can be replaced with API data
   reviewData: TechnicalReviewData = {
     rfqNumber: 'RFQ-2024-001847',
@@ -323,7 +327,7 @@ export class TechnicalReviewPageComponent {
     }
   ];
 
-  constructor() {}
+  constructor(private route: ActivatedRoute) {}
 
   // Missing Information Summary Data
   missingInfoData: MissingInfoSummary = {
@@ -416,5 +420,27 @@ export class TechnicalReviewPageComponent {
     } else if (action === 'update-missing') {
       // Handle update missing information
     }
+  }
+
+  ngOnInit() {
+    // Extract RFQ ID from route
+    this.route.params.subscribe(params => {
+      this.currentRfqId = params['id'];
+      console.log('Current RFQ ID:', this.currentRfqId);
+      // Load RFQ-specific data based on the ID
+      this.loadTechnicalReviewData(this.currentRfqId);
+    });
+  }
+
+  private loadTechnicalReviewData(rfqId: string) {
+    // Implementation to load technical review data based on RFQ ID
+    // This would typically involve calling a service to fetch data from backend
+    console.log('Loading technical review data for RFQ ID:', rfqId);
+    
+    // Update the review data with the current RFQ ID
+    this.reviewData.rfqNumber = rfqId;
+    
+    // In a real implementation, you would fetch this data from a service
+    // For now, we'll use the static data but with the correct RFQ number
   }
 }
