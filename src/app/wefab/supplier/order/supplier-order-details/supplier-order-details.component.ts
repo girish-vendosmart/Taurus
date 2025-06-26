@@ -36,7 +36,7 @@ export interface OrderDetails {
 }
 
 export interface OrderItem {
-  name: string;
+  item_name: string;
   item_number: string;
   item_code: string;
   item_description: string;
@@ -121,6 +121,13 @@ export class SupplierOrderDetailsComponent implements OnInit {
   orderItemsTableConfig: TableConfig = {
     columns: [
       {
+        field: 'item_name',
+        header: 'Item Name',
+        sortable: true,
+        filterable: true,
+        width: '120px'
+      },  
+      {
         field: 'item_number',
         header: 'Item Number',
         sortable: true,
@@ -154,14 +161,6 @@ export class SupplierOrderDetailsComponent implements OnInit {
         sortable: true,
         filterable: true,
         width: '100px'
-      },
-      {
-        field: 'current_status',
-        header: 'Current Status',
-        sortable: true,
-        filterable: true,
-        isStatus: true,
-        width: '140px'
       },
       {
         field: 'rate',
@@ -336,6 +335,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
         console.log('Order details:', res.data);
         if (res.data) {
           this.orderDetails = this.transformApiDataToOrderDetails(res.data);
+          this.orderItems = this.transformApiDataToOrderItems(res.data.items);
           // this.loadOrderItems();
           // this.loadOrderAttachments();
         }
@@ -346,7 +346,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
         this.loading = false;
         // Fallback to sample data if API fails
         this.loadSampleData();
-      }
+      } 
     });
   }
 
@@ -408,12 +408,12 @@ export class SupplierOrderDetailsComponent implements OnInit {
   loadSampleOrderItems() {
     this.orderItems = [
       {
-        name: 'ORD-ITEM-001',
+        item_name: 'ORD-ITEM-001',
         item_number: '3.2.1',
         item_code: 'COMP-001',
         item_description: 'description',
         drawing_ref: 'drwg-04',
-        material: 'Stainless Steel 316',
+        material: ' ',
         specification: 'Dia 50mm x 100mm Length',
         quantity: 26,
         unit: 'Pieces',
@@ -425,7 +425,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
         cad_file_reference: 'CAD-001.dwg'
       },
       {
-        name: 'ORD-ITEM-002',
+        item_name: 'ORD-ITEM-002',
         item_number: '9.2.1',
         item_code: 'COMP-002',
         item_description: 'description',
@@ -442,7 +442,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
         cad_file_reference: 'CAD-002.dwg'
       },
       {
-        name: 'ORD-ITEM-003',
+        item_name: 'ORD-ITEM-003',
         item_number: '8.2.1',
         item_code: 'COMP-003',
         item_description: 'description',
@@ -459,7 +459,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
         cad_file_reference: 'CAD-003.dwg'
       },
       {
-        name: 'ORD-ITEM-004',
+        item_name: 'ORD-ITEM-004',
         item_number: '6.2.1',
         item_code: 'COMP-004',
         item_description: 'description',
@@ -476,7 +476,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
         cad_file_reference: 'CAD-004.dwg'
       },
       {
-        name: 'ORD-ITEM-005',
+        item_name: 'ORD-ITEM-005',
         item_number: '3.2.4',
         item_code: 'COMP-005',
         item_description: 'description',
@@ -493,7 +493,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
         cad_file_reference: 'CAD-005.dwg'
       },
       {
-        name: 'ORD-ITEM-006',
+        item_name: 'ORD-ITEM-006',
         item_number: '5.2.1',
         item_code: 'COMP-006',
         item_description: 'description',
@@ -510,7 +510,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
         cad_file_reference: 'CAD-006.dwg'
       },
       {
-        name: 'ORD-ITEM-007',
+        item_name: 'ORD-ITEM-007',
         item_number: '3.2.3',
         item_code: 'COMP-007',
         item_description: 'description',
@@ -527,7 +527,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
         cad_file_reference: 'CAD-007.dwg'
       },
       {
-        name: 'ORD-ITEM-008',
+        item_name: 'ORD-ITEM-008',
         item_number: '71.2',
         item_code: 'COMP-008',
         item_description: 'description',
@@ -572,8 +572,8 @@ export class SupplierOrderDetailsComponent implements OnInit {
     }
 
     return apiData.map(item => ({
-      name: item.name || '',
-      item_number: item.item_number || '',
+      item_name: item.name || '',
+      item_number: item.item_code || '',
       item_code: item.item_code || '',
       item_description: item.item_description || item.description || '',
       drawing_ref: item.drawing_ref || '',
@@ -581,7 +581,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
       specification: item.specification || '',
       quantity: item.quantity || 0,
       unit: item.unit || '',
-      rate: item.rate || 0,
+      rate: item.unit_price || 0,
       amount: item.amount || (item.quantity * item.rate) || 0,
       current_status: item.current_status || '',
       delivery_date: item.delivery_date || '',
