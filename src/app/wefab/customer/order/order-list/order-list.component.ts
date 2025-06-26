@@ -52,7 +52,7 @@ export class OrderListComponent implements OnInit {
       deliveryDate: '15 August 2025, 02:00 PM',
       grandTotal: 'INR 65,000.00',
       status: 'Confirmed',
-      routerLink: '/customer/order-details/ORD0000245'
+      routerLink: '/wefab/customer/order-details/ORD0000245'
     },
     {
       orderId: 'ORD0000246',
@@ -61,7 +61,7 @@ export class OrderListComponent implements OnInit {
       deliveryDate: '20 August 2025, 11:30 AM',
       grandTotal: 'INR 1,25,000.00',
       status: 'In Progress',
-      routerLink: '/customer/order-details/ORD0000246'
+      routerLink: '/wefab/customer/order-details/ORD0000246'
     },
     {
       orderId: 'ORD0000247',
@@ -70,7 +70,7 @@ export class OrderListComponent implements OnInit {
       deliveryDate: '10 August 2025, 04:45 PM',
       grandTotal: 'INR 1,75,500.00',
       status: 'In Progress',
-      routerLink: '/customer/order-details/ORD0000247'
+      routerLink: '/wefab/customer/order-details/ORD0000247'
     },
     {
       orderId: 'ORD0000248',
@@ -79,7 +79,7 @@ export class OrderListComponent implements OnInit {
       deliveryDate: '5 August 2025, 09:20 AM',
       grandTotal: 'INR 85,750.00',
       status: 'Delivered',
-      routerLink: '/customer/order-details/ORD0000248'
+      routerLink: '/wefab/customer/order-details/ORD0000248'
     },
     {
       orderId: 'ORD0000249',
@@ -88,7 +88,7 @@ export class OrderListComponent implements OnInit {
       deliveryDate: '25 August 2025, 01:30 PM',
       grandTotal: 'INR 2,35,000.00',
       status: 'Confirmed',
-      routerLink: '/customer/order-details/ORD0000249'
+      routerLink: '/wefab/customer/order-details/ORD0000249'
     },
     {
       orderId: 'ORD0000250',
@@ -97,7 +97,7 @@ export class OrderListComponent implements OnInit {
       deliveryDate: '18 July 2025, 12:15 PM',
       grandTotal: 'INR 45,200.00',
       status: 'Cancelled',
-      routerLink: '/customer/order-details/ORD0000250'
+      routerLink: '/wefab/customer/order-details/ORD0000250'
     }
   ];
 

@@ -130,7 +130,8 @@ export class CustomerComponentComponent implements OnInit {
         }
       }
       // Handle Order nested routes
-      else if (currentRoute.includes('/wefab/customer/order/')) {
+      else if (currentRoute.includes('/wefab/customer/order-list') ||
+               currentRoute.includes('/wefab/customer/order-details/')) {
         const orderItem = this.sidebarConfig.menuItems.find(item => item.id === 'order');
         if (orderItem) {
           orderItem.active = true;

@@ -1,0 +1,269 @@
+<div class="success-container p-4"> 
+  <!-- Back Button Section -->
+  <div class="back-button-section">
+    <button class="back-button" (click)="goBack()">
+      <i class="pi pi-arrow-left"></i>
+      <span>Back to Order List</span>
+    </button>
+  </div>
+
+  <!-- Order Details Card -->
+  <div class="order-details-card">
+    <!-- Header Section -->
+    <div class="card-header">
+      <div class="order-info">
+        <h2>Order Details</h2>
+        <p class="reference-text">Reference: {{ orderDetails.purchase_order }}</p>
+      </div>
+      <div class="order-number">
+        <span class="number-label">Order Number</span>
+        <span class="number-value">{{ orderDetails.name }}</span>
+      </div>
+      <div class="order-status">
+        <span class="status-badge" [ngClass]="getStatusClass(orderDetails.status)">
+          {{ getStatusText() }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button 
+        class="tab-btn"
+        [class.active]="activeTab === 'overview'"
+        (click)="setActiveTab('overview')">
+        Overview
+      </button>
+      <button 
+        class="tab-btn"
+        [class.active]="activeTab === 'comment'"
+        (click)="setActiveTab('comment')">
+        Comments
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div [ngSwitch]="activeTab">
+      <!-- Overview Tab -->
+      <div class="tab-panel" *ngSwitchCase="'overview'">
+        <!-- Content Grid -->
+        <div class="content-grid">
+          <!-- Order Information -->
+          <div class="info-section">
+            <h3>Order Information</h3>
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="label">Order Name:</span>
+                <span class="value">{{ orderDetails.order_name }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Quotation ID:</span>
+                <span class="value">{{ orderDetails.quotation_id }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Expected Delivery:</span>
+                <span class="value">{{ formatDate(orderDetails.expected_delivery) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Created:</span>
+                <span class="value">{{ formatDate(orderDetails.creation) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Supplier Information -->
+          <div class="info-section">
+            <h3>Supplier Information</h3>
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="label">Supplier:</span>
+                <span class="value">{{ orderDetails.supplier }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Payment Terms:</span>
+                <span class="value">{{ orderDetails.payment_terms }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Delivery Terms:</span>
+                <span class="value">{{ orderDetails.delivery_terms }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Total Amount:</span>
+                <span class="value total-amount">{{ getFormattedCurrencyAmount(orderDetails.total_amount) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Instructions -->
+        <div class="description-section" *ngIf="orderDetails.special_instructions">
+          <h3>Special Instructions</h3>
+          <div class="description-content">
+            {{ orderDetails.special_instructions }}
+          </div>
+        </div>
+
+        <!-- Delivery Address -->
+        <div class="delivery-section" *ngIf="orderDetails.delivery_address">
+          <h3>Delivery Address</h3>
+          <div class="address-content">
+            {{ orderDetails.delivery_address }}
+          </div>
+        </div>
+
+        <!-- Line Items Section -->
+        <div class="line-items-section">
+          <h3>Order Items</h3>
+          
+          <div class="items-summary">
+            <span class="summary-text">Total Items: {{ orderItems.length }}</span>
+            <span class="summary-text">Total Quantity: {{ getTotalQuantity() }}</span>
+          </div>
+          
+          <div class="common-table-wrapper">
+            <app-common-table
+              [config]="orderItemsTableConfig"
+              [data]="displayedItems"
+              [loading]="loading"
+              (rowClick)="onItemRowClick($event)"
+              (linkClick)="onItemLinkClick($event)"
+              (actionClick)="onItemActionClick($event)">
+            </app-common-table>
+          </div>
+
+          <!-- View All Items Button -->
+          <div class="view-all-items" *ngIf="!showAllItems && remainingItemsCount > 0">
+            <button class="view-all-items-btn" (click)="viewAllItems()">
+              <span class="plus-icon">+</span>
+              <div class="view-text">
+                <div>+{{ remainingItemsCount }} more items</div>
+                <div class="view-all-link">View All</div>
+              </div>
+            </button>
+          </div>
+
+          <!-- Show Less Button -->
+          <div class="view-all-items" *ngIf="showAllItems">
+            <button class="view-all-items-btn show-less-btn" (click)="viewAllItems()">
+              <span class="minus-icon">-</span>
+              <div class="view-text">
+                <div>Show Less</div>
+                <div class="view-all-link">Collapse</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Attachments Section -->
+        <div class="attachments-section" *ngIf="orderAttachments.length > 0">
+          <div class="attachments-header">
+            <h3>Attachments ({{ orderAttachments.length }})</h3>
+            <p class="attachments-subtitle">Documents and files related to this order</p>
+          </div>
+          
+          <div class="attachments-container">
+            <div class="attachments-grid">
+              <div *ngFor="let attachment of displayedAttachments" class="attachment-card">
+                <div class="file-icon">
+                  <i class="pi pi-file-pdf" *ngIf="isFileTypePdf(attachment.file_name)"></i>
+                  <i class="pi pi-file" *ngIf="isFileTypeDocument(attachment.file_name)"></i>
+                  <i class="pi pi-folder" *ngIf="isFileTypeArchive(attachment.file_name)"></i>
+                  <i class="pi pi-file" *ngIf="!isFileTypePdf(attachment.file_name) && !isFileTypeDocument(attachment.file_name) && !isFileTypeArchive(attachment.file_name)"></i>
+                </div>
+                
+                <div class="file-content">
+                  <div class="file-title">{{ getTruncatedFileName(attachment.file_name) }}</div>
+                  <div class="file-date">{{ getFormattedFileDate(attachment.uploaded_on) }}</div>
+                </div>
+                
+                <div class="file-actions">
+                  <button class="action-btn view-btn" (click)="viewAttachment(attachment)" title="View">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="action-btn download-btn" (click)="downloadAttachment(attachment)" title="Download">
+                    <i class="pi pi-download"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- View All Files Button -->
+            <div class="view-all-files" *ngIf="!showAllAttachments && remainingAttachmentsCount > 0">
+              <button class="view-all-files-btn" (click)="viewAllAttachments()">
+                <span class="plus-icon">+</span>
+                <div class="view-text">
+                  <div>+{{ remainingAttachmentsCount }} more files</div>
+                  <div class="view-all-link">View All</div>
+                </div>
+              </button>
+            </div>
+
+            <!-- Show Less Button -->
+            <div class="view-all-files" *ngIf="showAllAttachments">
+              <button class="view-all-files-btn show-less-btn" (click)="viewAllAttachments()">
+                <span class="minus-icon">-</span>
+                <div class="view-text">
+                  <div>Show Less</div>
+                  <div class="view-all-link">Collapse</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- Comments Tab -->
+      <div class="tab-panel" *ngSwitchCase="'comment'">
+        <div class="comment-content">
+          <app-conversation-trail 
+            [docType]="'Customer Order'" 
+            [docName]="orderId">
+          </app-conversation-trail>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delivery Tracking Section -->
+  <div class="delivery-tracking-section">
+    <div class="tracking-card">
+      <div class="tracking-header">
+        <h3>Delivery Tracking</h3>
+      </div>      
+      <!-- Approval Workflow Component -->
+      <app-approval-workflow
+        title="Order Delivery Progress"
+        [steps]="deliveryWorkflowSteps"
+        [loading]="loading"
+        [allowInteraction]="true"
+        (stepCompleted)="onDeliveryStepCompleted($event)">
+      </app-approval-workflow>
+    </div>
+  </div>
+
+  <!-- Order Reference Section -->
+  <div class="order-reference-section">
+    <h3 class="reference-title">Your Order Reference</h3>
+    
+    <!-- Order Number Card -->
+    <div class="order-number-card">
+      <div class="order-number-display">{{ orderDetails.name }}</div>
+      <div class="order-reference-text">Keep this number for reference and tracking</div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <app-configurable-button
+        [configuration]="printButtonConfig"
+        (onClick)="printOrder()">
+      </app-configurable-button>
+      
+      <app-configurable-button
+        [configuration]="downloadButtonConfig"
+        (onClick)="downloadOrder()">
+      </app-configurable-button>
+    </div>
+  </div>
+</div>

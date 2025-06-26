@@ -9,6 +9,7 @@ import { RfqListComponent } from './rfq/rfq-list/rfq-list.component';
 import { QuotationListComponent } from './quotation/quotation-list/quotation-list.component';
 import { OrderListComponent } from './order/order-list/order-list.component';
 import { QuotationDetailsComponent } from './quotation/quotation-details/quotation-details.component';
+import { OrderDetailsComponent } from './order/order-details/order-details.component';
 
 export const WEFAB_CUSTOMER_ROUTES: Routes = [
     {
@@ -50,6 +51,10 @@ export const WEFAB_CUSTOMER_ROUTES: Routes = [
             {
                 path: 'order-list',
                 component: OrderListComponent,  
+            },
+            {
+                path: 'order-details/:id',
+                component: OrderDetailsComponent,
             }
         ]
     }   
