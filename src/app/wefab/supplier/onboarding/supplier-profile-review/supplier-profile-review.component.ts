@@ -1511,7 +1511,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     return maskedPart + lastFour;
   }
 
-  // Method to format currency using localStorage values with currency code instead of symbol
+  // Method to format currency using localStorage currencyFormat pattern
   formatCurrency(value: string | number): string {
     if (!value || value === 'Not provided' || value === '') return 'Not provided';
     
@@ -1527,53 +1527,82 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     const currencyFormatString = localStorage.getItem('currencyFormat');
     
     try {
-      // Parse the currency format if available
-      let currencyFormat = null;
+      // If currencyFormat exists, apply the pattern-based formatting
       if (currencyFormatString) {
-        currencyFormat = JSON.parse(currencyFormatString);
+        // Parse the format pattern (e.g., "#,###.##")
+        const formatPattern = JSON.parse(currencyFormatString);
+        
+        // Custom number formatting based on the pattern
+        let formattedNumber = this.formatNumberByPattern(number, formatPattern);
+        
+        return `${selectedCurrency} ${formattedNumber}`;
       }
       
-      // Determine locale based on currency
-      let locale = 'en-IN'; // Default
-      if (selectedCurrency === 'USD') locale = 'en-US';
-      else if (selectedCurrency === 'EUR') locale = 'en-EU';
-      else if (selectedCurrency === 'GBP') locale = 'en-GB';
-      else if (selectedCurrency === 'JPY') locale = 'ja-JP';
-      else if (selectedCurrency === 'CAD') locale = 'en-CA';
-      else if (selectedCurrency === 'AUD') locale = 'en-AU';
-      // Add more locales as needed
-      
-      // Format number without currency symbol using decimal style
-      let formattedNumber = number.toLocaleString(locale, {
-        style: 'decimal',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-      });
-      
-      // Apply custom formatting from currencyFormat if available
-      if (currencyFormat) {
-        // You can add more sophisticated formatting logic here based on currencyFormat structure
-        // For now, we'll use the standard locale formatting and append currency code
-        console.log('Using currency format from localStorage:', currencyFormat);
-      }
-      
-      // Return formatted number with currency code instead of symbol
-      return `${formattedNumber} ${selectedCurrency}`;
-      
-    } catch (error) {
-      console.error('Error parsing currency format from localStorage:', error);
-      // Fallback to default INR formatting if there's an error
+      // Fallback: Use basic formatting with Indian locale as default
       const formattedNumber = number.toLocaleString('en-IN', {
         style: 'decimal',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
       });
-      return `${formattedNumber} INR`;
+      
+      return `${selectedCurrency} ${formattedNumber}`;
+      
+    } catch (error) {
+      console.error('Error parsing currency format from localStorage:', error);
+      // Fallback to default formatting
+      const formattedNumber = number.toLocaleString('en-IN', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      return `INR ${formattedNumber}`;
     }
   }
 
-  // Alternative method for simple number formatting without currency code
-  formatNumber(value: string | number): string {
+  private formatNumberByPattern(number: number, pattern: string): string {
+    /* ---------- 1. Decimal part analyse karo ---------- */
+    let minimumFractionDigits = 0;
+    let maximumFractionDigits = 0;
+  
+    let integerPattern = pattern;
+    if (pattern.includes('.')) {
+      const [intPart, decPart] = pattern.split('.');
+      integerPattern = intPart;
+  
+      maximumFractionDigits = decPart.length;                 // jitne # ya 0 hain utna max
+      minimumFractionDigits = decPart.replace(/[^0]/g, '').length; // sirf 0 mandatory hote hain
+    }
+  
+    /* ---------- 2. Grouping style detect karo ---------- */
+    /**
+     *  Western pattern example  : #,### or #,###,###  → groups = [ '#', '###', '###' ] (second-last = 3)
+     *  Indian  pattern example  : #,##,###            → groups = [ '#', '##', '###' ] (second-last = 2)
+     */
+    const groups = integerPattern.split(',');
+    let isIndianFormat = false;
+  
+    if (groups.length > 1) {
+      const secondLastGroup = groups[groups.length - 2]
+                                .replace(/[^#0]/g, '');     // sirf digit-place chars dekho
+      if (secondLastGroup.length === 2) {
+        isIndianFormat = true;                             // 3-2-2-2 pattern ⇒ Indian
+      }
+    }
+  
+    /* ---------- 3. Number ko format karo ---------- */
+    const formatter = new Intl.NumberFormat(isIndianFormat ? 'en-IN' : 'en-US', {
+      minimumFractionDigits,
+      maximumFractionDigits,
+      useGrouping: true
+    });
+  
+    return formatter.format(number);
+  }
+  
+  
+
+  // Alternative method for simple number formatting using currencyFormat pattern from localStorage
+  formatNumber(value: string | number): any {
     if (!value || value === 'Not provided' || value === '') return 'Not provided';
     
     // Convert to string and remove any existing formatting
@@ -1583,24 +1612,35 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     const number = parseFloat(numericValue);
     if (isNaN(number)) return 'Not provided';
     
-    // Get currency information from localStorage to determine locale
+    // Get currency information from localStorage
     const selectedCurrency = localStorage.getItem('selectedCurrency') || 'INR';
+    const currencyFormatString = localStorage.getItem('currencyFormat');
     
-    // Determine locale based on currency
-    let locale = 'en-IN'; // Default
-    if (selectedCurrency === 'USD') locale = 'en-US';
-    else if (selectedCurrency === 'EUR') locale = 'en-EU';
-    else if (selectedCurrency === 'GBP') locale = 'en-GB';
-    else if (selectedCurrency === 'JPY') locale = 'ja-JP';
-    else if (selectedCurrency === 'CAD') locale = 'en-CA';
-    else if (selectedCurrency === 'AUD') locale = 'en-AU';
+    // If currencyFormat exists, apply it
+    if (currencyFormatString) {
+      try {
+        // Parse the format pattern (e.g., "#,###.##")
+        const formatPattern = JSON.parse(currencyFormatString);
+        
+        // Custom number formatting based on the pattern
+        let formattedNumber = this.formatNumberByPattern(number, formatPattern);
+        
+        return `${selectedCurrency} ${formattedNumber}`;
+        
+      } catch (error) {
+        console.error('Error parsing currency format pattern:', error);
+        // Fallback to default formatting
+      }
+    }
     
-    // Format with appropriate locale for comma separation (no currency)
-    return number.toLocaleString(locale, {
+    // Fallback: Default formatting with currency code
+    const formattedNumber = number.toLocaleString('en-IN', {
       style: 'decimal',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     });
+    
+    return `${selectedCurrency} ${formattedNumber}`;
   }
 
   isImageFile(url: string): boolean {
