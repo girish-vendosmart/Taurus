@@ -58,62 +58,77 @@ $danger-red: $customer-danger;
 
       .card-header {
       background: linear-gradient(135deg, rgba($customer-primary, 0.02) 0%, rgba($customer-primary, 0.01) 100%);
-      padding: 2rem;
+      padding: 2rem 2rem 1.5rem 2rem;
       border-bottom: 1px solid rgba($material-silver, 0.2);
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 1rem;
+      align-items: center;
+      gap: 2rem;
 
     @media (max-width: 768px) {
       flex-direction: column;
       align-items: stretch;
       gap: 1.5rem;
+      padding: 1.5rem;
     }
 
     .order-info {
       flex: 1;
 
-      h2 {
-        font-size: 1.75rem;
+      .order-name {
+        font-size: $h3-font-size;
         font-weight: 700;
         color: $precision-black;
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.25rem 0;
         line-height: 1.2;
       }
 
-      .reference-text {
-        color: $machine-gray;
-        font-size: 0.875rem;
+      .order-id {
+        color: $customer-primary;
+        font-size: 18px;
         margin: 0;
-        font-weight: 500;
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 0.025em;
       }
     }
 
-    .order-number {
-      text-align: right;
+    .header-actions {
+      display: flex;
+      align-items: center;
 
-      @media (max-width: 768px) {
-        text-align: left;
-      }
+      .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
 
-      .number-label {
-        display: block;
-        color: $machine-gray;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.25rem;
-      }
+        app-configurable-button {
+          ::ng-deep {
+                         .p-button {
+               background: rgba($machine-gray, 0.1);
+               border: 1px solid rgba($machine-gray, 0.2);
+               color: $machine-gray;
+               font-size: 0.875rem;
+               padding: 0.5rem 1rem;
+               border-radius: 6px;
+               font-weight: 500;
+               transition: all 0.2s ease;
 
-      .number-value {
-        display: block;
-        color: $customer-primary;
-        font-size: 1.25rem;
-        font-weight: 700;
-        font-family: 'Courier New', monospace;
+              &:hover {
+                background: rgba($customer-primary, 0.1);
+                border-color: rgba($customer-primary, 0.3);
+                color: $customer-primary;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              }
+
+              .p-button-icon {
+                margin-right: 0.5rem;
+                font-size: 0.75rem;
+              }
+            }
+          }
+        }
       }
     }
 
@@ -244,7 +259,6 @@ $danger-red: $customer-danger;
   .info-rows {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
   }
 
   .info-row {
@@ -358,35 +372,33 @@ $danger-red: $customer-danger;
 // View All Buttons
 .view-all-items,
 .view-all-files {
-  display: flex;
-  justify-content: center;
-  margin-top: 1rem;
+  display: contents; // Make the wrapper behave as if it doesn't exist in the grid
 
   .view-all-items-btn,
   .view-all-files-btn {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem 1.5rem;
-    background: rgba($customer-primary, 0.05);
-    border: 1px solid rgba($customer-primary, 0.2);
+    padding: 1rem;
+    background: white;
+    border: 2px dashed rgba($material-silver, 0.4);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 0.875rem;
+    width: 100%;
 
     &:hover {
-      background: rgba($customer-primary, 0.1);
       border-color: rgba($customer-primary, 0.3);
-      transform: translateY(-1px);
+      background: rgba($customer-primary, 0.02);
     }
 
     &.show-less-btn {
-      background: rgba($machine-gray, 0.05);
+      border-style: solid;
       border-color: rgba($machine-gray, 0.2);
 
       &:hover {
-        background: rgba($machine-gray, 0.1);
+        background: rgba($machine-gray, 0.05);
         border-color: rgba($machine-gray, 0.3);
       }
     }
@@ -396,24 +408,35 @@ $danger-red: $customer-danger;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
-      background: $customer-primary;
-      color: white;
-      border-radius: 50%;
-      font-size: 0.75rem;
-      font-weight: 700;
+      width: 28px;
+      height: 28px;
+      background: rgba($material-silver, 0.15);
+      color: $machine-gray;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      flex-shrink: 0;
     }
 
     .view-text {
       text-align: left;
+      flex: 1;
+
+      div:first-child {
+        color: $precision-black;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+      }
 
       .view-all-link {
         color: $customer-primary;
         font-weight: 600;
         font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
+        text-decoration: none;
+        
+        &:hover {
+          text-decoration: underline;
+        }
       }
     }
   }
@@ -424,7 +447,6 @@ $danger-red: $customer-danger;
   margin-bottom: 2rem;
 
   .attachments-header {
-    margin-bottom: 1.5rem;
 
     h3 {
       font-size: 1.25rem;
@@ -446,12 +468,20 @@ $danger-red: $customer-danger;
   }
 
   .attachments-grid {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1rem;
-    flex-wrap: wrap;
 
     @media (max-width: 768px) {
-      flex-direction: column;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 1025px) {
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 
@@ -463,9 +493,8 @@ $danger-red: $customer-danger;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    min-width: 280px;
-    flex: 1;
     transition: all 0.2s ease;
+    width: 100%;
 
     &:hover {
       border-color: rgba($customer-primary, 0.3);

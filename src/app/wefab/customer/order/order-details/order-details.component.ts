@@ -201,17 +201,12 @@ export class OrderDetailsComponent implements OnInit {
 
   // Button configurations
   printButtonConfig = {
-    label: 'Print Order',
+    label: 'Print',
     icon: 'pi pi-print',
-    size: 'normal',
+    size: 'small',
     disabled: false,
     loading: false,
-    iconPos: 'left',
-    style: {
-      fontSize: '0.875rem',
-      padding: '0.4rem 0.8rem',
-      borderRadius: '5px'
-    }
+    iconPos: 'left'
   };
 
   downloadButtonConfig = {
@@ -359,6 +354,66 @@ export class OrderDetailsComponent implements OnInit {
         description: 'Complete set of CAD drawings and assembly instructions',
         category: 'CAD Files',
         uploaded_on: '2025-01-15T11:30:00'
+      },
+      {
+        name: 'ORDER-QUALITY-001',
+        file: '/files/quality-certificate.pdf',
+        file_url: '/files/quality-certificate.pdf',
+        file_name: 'Quality Certificate.pdf',
+        file_type: 'application/pdf',
+        description: 'Quality assurance certificate',
+        category: 'Quality',
+        uploaded_on: '2025-01-16T09:15:00'
+      },
+      {
+        name: 'ORDER-MATERIAL-001',
+        file: '/files/material-test-report.pdf',
+        file_url: '/files/material-test-report.pdf',
+        file_name: 'Material Test Report.pdf',
+        file_type: 'application/pdf',
+        description: 'Material testing and certification report',
+        category: 'Testing',
+        uploaded_on: '2025-01-16T14:20:00'
+      },
+      {
+        name: 'ORDER-IMAGES-001',
+        file: '/files/production-images.zip',
+        file_url: '/files/production-images.zip',
+        file_name: 'Production Images.zip',
+        file_type: 'application/zip',
+        description: 'Photos from production process',
+        category: 'Images',
+        uploaded_on: '2025-01-17T10:45:00'
+      },
+      {
+        name: 'ORDER-INVOICE-001',
+        file: '/files/invoice-details.pdf',
+        file_url: '/files/invoice-details.pdf',
+        file_name: 'Invoice Details.pdf',
+        file_type: 'application/pdf',
+        description: 'Detailed invoice breakdown',
+        category: 'Financial',
+        uploaded_on: '2025-01-18T11:30:00'
+      },
+      {
+        name: 'ORDER-SHIPPING-001',
+        file: '/files/shipping-manifest.pdf',
+        file_url: '/files/shipping-manifest.pdf',
+        file_name: 'Shipping Manifest.pdf',
+        file_type: 'application/pdf',
+        description: 'Shipping documentation and manifest',
+        category: 'Shipping',
+        uploaded_on: '2025-01-19T08:15:00'
+      },
+      {
+        name: 'ORDER-WARRANTY-001',
+        file: '/files/warranty-information.pdf',
+        file_url: '/files/warranty-information.pdf',
+        file_name: 'Warranty Information.pdf',
+        file_type: 'application/pdf',
+        description: 'Product warranty details and terms',
+        category: 'Warranty',
+        uploaded_on: '2025-01-19T15:30:00'
       }
     ];
 
@@ -482,7 +537,7 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   get displayedAttachments() {
-    return this.showAllAttachments ? this.orderAttachments : this.orderAttachments.slice(0, 3);
+    return this.showAllAttachments ? this.orderAttachments : this.orderAttachments.slice(0, 5);
   }
 
   get remainingItemsCount() {
@@ -490,7 +545,7 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   get remainingAttachmentsCount() {
-    return Math.max(0, this.orderAttachments.length - 3);
+    return Math.max(0, this.orderAttachments.length - 5);
   }
 
   setActiveTab(tab: 'overview' | 'comment') {

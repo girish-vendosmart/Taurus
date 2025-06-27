@@ -12,17 +12,16 @@
     <!-- Header Section -->
     <div class="card-header">
       <div class="order-info">
-        <h2>Order Details</h2>
-        <p class="reference-text">Reference: {{ orderDetails.purchase_order }}</p>
+        <h3 class="order-name">{{ orderDetails.order_name }}</h3>
+        <p class="order-id">{{ orderDetails.name }}</p>
       </div>
-      <div class="order-number">
-        <span class="number-label">Order Number</span>
-        <span class="number-value">{{ orderDetails.name }}</span>
-      </div>
-      <div class="order-status">
-        <span class="status-badge" [ngClass]="getStatusClass(orderDetails.status)">
-          {{ getStatusText() }}
-        </span>
+      <div class="header-actions">
+        <div class="action-buttons">
+          <app-configurable-button
+            [configuration]="printButtonConfig"
+            (onClick)="printOrder()">
+          </app-configurable-button>
+        </div>
       </div>
     </div>
 
@@ -185,28 +184,28 @@
                   </button>
                 </div>
               </div>
-            </div>
-            
-            <!-- View All Files Button -->
-            <div class="view-all-files" *ngIf="!showAllAttachments && remainingAttachmentsCount > 0">
-              <button class="view-all-files-btn" (click)="viewAllAttachments()">
-                <span class="plus-icon">+</span>
-                <div class="view-text">
-                  <div>+{{ remainingAttachmentsCount }} more files</div>
-                  <div class="view-all-link">View All</div>
-                </div>
-              </button>
-            </div>
+              
+              <!-- View All Files Button -->
+              <div class="view-all-files" *ngIf="!showAllAttachments && remainingAttachmentsCount > 0">
+                <button class="view-all-files-btn" (click)="viewAllAttachments()">
+                  <span class="plus-icon">+</span>
+                  <div class="view-text">
+                    <div>+{{ remainingAttachmentsCount }} more files</div>
+                    <div class="view-all-link">View All</div>
+                  </div>
+                </button>
+              </div>
 
-            <!-- Show Less Button -->
-            <div class="view-all-files" *ngIf="showAllAttachments">
-              <button class="view-all-files-btn show-less-btn" (click)="viewAllAttachments()">
-                <span class="minus-icon">-</span>
-                <div class="view-text">
-                  <div>Show Less</div>
-                  <div class="view-all-link">Collapse</div>
-                </div>
-              </button>
+              <!-- Show Less Button -->
+              <div class="view-all-files" *ngIf="showAllAttachments">
+                <button class="view-all-files-btn show-less-btn" (click)="viewAllAttachments()">
+                  <span class="minus-icon">-</span>
+                  <div class="view-text">
+                    <div>Show Less</div>
+                    <div class="view-all-link">Collapse</div>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -240,30 +239,6 @@
         [allowInteraction]="true"
         (stepCompleted)="onDeliveryStepCompleted($event)">
       </app-approval-workflow>
-    </div>
-  </div>
-
-  <!-- Order Reference Section -->
-  <div class="order-reference-section">
-    <h3 class="reference-title">Your Order Reference</h3>
-    
-    <!-- Order Number Card -->
-    <div class="order-number-card">
-      <div class="order-number-display">{{ orderDetails.name }}</div>
-      <div class="order-reference-text">Keep this number for reference and tracking</div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <app-configurable-button
-        [configuration]="printButtonConfig"
-        (onClick)="printOrder()">
-      </app-configurable-button>
-      
-      <app-configurable-button
-        [configuration]="downloadButtonConfig"
-        (onClick)="downloadOrder()">
-      </app-configurable-button>
     </div>
   </div>
 </div>
