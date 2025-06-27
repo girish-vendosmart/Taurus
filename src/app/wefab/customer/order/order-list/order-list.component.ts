@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonTableComponent, TableConfig, ActionButton, FilterOption } from '../../../../shared/components/common-table/common-table.component';
+import { CommonService } from '../../../../shared/services/common.service';
+import { DateFormatPipe } from '../../../../shared/pipes/date-format.pipe';
 
 export interface OrderSummary {
   totalOrders: number;
@@ -12,13 +14,14 @@ export interface OrderSummary {
 }
 
 export interface OrderData {
-  orderId: string;
-  quotationId: string;
-  orderDate: string;
-  deliveryDate: string;
-  grandTotal: string;
-  status: 'Confirmed' | 'In Progress' | 'Delivered' | 'Cancelled' | 'Pending';
-  routerLink?: string;
+  name: string;
+  quotation_name: string;
+  creation: string;
+  delivery_date: string;
+  grand_total: number;
+  status: string;
+  currency_code: string;
+  workflow_state: string;
 }
 
 @Component({
@@ -28,94 +31,28 @@ export interface OrderData {
     CommonModule,
     RouterModule,
     FormsModule,
-    CommonTableComponent
+    CommonTableComponent,
+    DateFormatPipe
   ],
   templateUrl: './order-list.component.html',
   styleUrl: './order-list.component.scss'
 })
 export class OrderListComponent implements OnInit {
-  
-  // Order Summary Data
-  orderSummary: OrderSummary = {
-    totalOrders: 6,
-    confirmedOrders: 2,
-    inProgressOrders: 2,
-    deliveredOrders: 1
+  orderData: OrderData[] = [];
+  loading = false;
+
+  orderSummary = {
+    totalOrders: 0,
+    confirmedOrders: 0,
+    inProgressOrders: 0,
+    deliveredOrders: 0
   };
-
-  // Sample Order Data
-  orderData: OrderData[] = [
-    {
-      orderId: 'ORD0000245',
-      quotationId: 'QTN0000367',
-      orderDate: '28 June 2025, 10:30 AM',
-      deliveryDate: '15 August 2025, 02:00 PM',
-      grandTotal: 'INR 65,000.00',
-      status: 'Confirmed',
-      routerLink: '/wefab/customer/order-details/ORD0000245'
-    },
-    {
-      orderId: 'ORD0000246',
-      quotationId: 'QTN0000369',
-      orderDate: '27 June 2025, 03:20 PM',
-      deliveryDate: '20 August 2025, 11:30 AM',
-      grandTotal: 'INR 1,25,000.00',
-      status: 'In Progress',
-      routerLink: '/wefab/customer/order-details/ORD0000246'
-    },
-    {
-      orderId: 'ORD0000247',
-      quotationId: 'QTN0000373',
-      orderDate: '26 June 2025, 09:15 AM',
-      deliveryDate: '10 August 2025, 04:45 PM',
-      grandTotal: 'INR 1,75,500.00',
-      status: 'In Progress',
-      routerLink: '/wefab/customer/order-details/ORD0000247'
-    },
-    {
-      orderId: 'ORD0000248',
-      quotationId: 'QTN0000355',
-      orderDate: '25 June 2025, 02:40 PM',
-      deliveryDate: '5 August 2025, 09:20 AM',
-      grandTotal: 'INR 85,750.00',
-      status: 'Delivered',
-      routerLink: '/wefab/customer/order-details/ORD0000248'
-    },
-    {
-      orderId: 'ORD0000249',
-      quotationId: 'QTN0000358',
-      orderDate: '24 June 2025, 11:55 AM',
-      deliveryDate: '25 August 2025, 01:30 PM',
-      grandTotal: 'INR 2,35,000.00',
-      status: 'Confirmed',
-      routerLink: '/wefab/customer/order-details/ORD0000249'
-    },
-    {
-      orderId: 'ORD0000250',
-      quotationId: 'QTN0000360',
-      orderDate: '23 June 2025, 04:25 PM',
-      deliveryDate: '18 July 2025, 12:15 PM',
-      grandTotal: 'INR 45,200.00',
-      status: 'Cancelled',
-      routerLink: '/wefab/customer/order-details/ORD0000250'
-    }
-  ];
-
-  // Status filter options
-  statusOptions: FilterOption[] = [
-    { label: 'All Status', value: null },
-    { label: 'Confirmed', value: 'Confirmed' },
-    { label: 'In Progress', value: 'In Progress' },
-    { label: 'Delivered', value: 'Delivered' },
-    { label: 'Cancelled', value: 'Cancelled' },
-    { label: 'Pending', value: 'Pending' }
-  ];
 
   // Table configuration
   tableConfig: TableConfig = {
     columns: [
       {
-        field: 'orderId',
+        field: 'name',
         header: 'Order Id',
         sortable: true,
         filterable: true,
@@ -125,7 +62,7 @@ export class OrderListComponent implements OnInit {
         width: '15%'
       },
       {
-        field: 'quotationId',
+        field: 'wefab_quotation',
         header: 'Quotation Id',
         sortable: true,
         filterable: true,
@@ -133,7 +70,7 @@ export class OrderListComponent implements OnInit {
         width: '15%'
       },
       {
-        field: 'orderDate',
+        field: 'creation',
         header: 'Order Date',
         sortable: true,
         filterable: true,
@@ -141,7 +78,7 @@ export class OrderListComponent implements OnInit {
         width: '20%'
       },
       {
-        field: 'deliveryDate',
+        field: 'requested_delivery_date',
         header: 'Delivery Date',
         sortable: true,
         filterable: true,
@@ -149,7 +86,7 @@ export class OrderListComponent implements OnInit {
         width: '20%'
       },
       {
-        field: 'grandTotal',
+        field: 'formattedGrandTotal',
         header: 'Grand Total',
         sortable: true,
         filterable: true,
@@ -162,7 +99,14 @@ export class OrderListComponent implements OnInit {
         sortable: true,
         filterable: true,
         filterType: 'dropdown',
-        filterOptions: this.statusOptions,
+        filterOptions: [
+          { label: 'All Status', value: null },
+          { label: 'Draft', value: 'Draft' },
+          { label: 'Confirmed', value: 'Confirmed' },
+          { label: 'In Progress', value: 'In Progress' },
+          { label: 'Delivered', value: 'Delivered' },
+          { label: 'Cancelled', value: 'Cancelled' }
+        ],
         isStatus: true,
         width: '15%'
       }
@@ -177,21 +121,55 @@ export class OrderListComponent implements OnInit {
     enableColumnResize: false
   };
 
-  loading = false;
-
-  constructor() {}
+  constructor(private router: Router, private commonService: CommonService) {}
 
   ngOnInit(): void {
-    // No loading needed since we have static data
+    this.getOrderList();
+  }
+
+  getOrderList() {
+    this.loading = true;
+    let apiEndpoint = '/api/resource/Customer Purchase Order?fields=["*"]';
+    this.commonService.getData(apiEndpoint).subscribe({
+      next: (res: any) => {
+        this.orderData = res.data.map((order: any) => ({
+          ...order,
+          routerLink: `/wefab/customer/order-details/${order.name}`,
+          formattedGrandTotal: `${order.currency_code} ${order.grand_total.toLocaleString('en-IN', {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2
+          })}`
+        }));
+        this.updateOrderSummary();
+      },
+      error: (error) => {
+        console.error('Error fetching order list:', error);
+        this.loading = false;
+      },
+      complete: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  updateOrderSummary() {
+    const summary = {
+      totalOrders: this.orderData.length,
+      confirmedOrders: this.orderData.filter(o => o.workflow_state === 'Confirmed').length,
+      inProgressOrders: this.orderData.filter(o => o.workflow_state === 'In Progress').length,
+      deliveredOrders: this.orderData.filter(o => o.workflow_state === 'Delivered').length
+    };
+    this.orderSummary = summary;
   }
 
   onRowClick(event: any): void {
-    console.log('Row clicked:', event.rowData);
+    if (event.rowData.routerLink) {
+      this.router.navigate([event.rowData.routerLink]);
+    }
   }
 
   onLinkClick(event: { rowData: any, column: any, event: any }): void {
-    console.log('Link clicked:', event.rowData);
-    // Navigation will be handled automatically by the common-table component
+    // Navigation handled by routerLink
   }
 
   onActionClick(event: { action: string, rowData: any }): void {
