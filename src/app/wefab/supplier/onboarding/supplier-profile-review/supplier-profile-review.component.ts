@@ -903,7 +903,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         this.bankVerified = financialInformation.bankVerified || false;
         
         // Set request to resubmit comment
-        this.requestToResubmitCommentL1 = result.data.comment || '';
+        this.requestToResubmitCommentL1 = result.data.request_for_change_comment || '';
         
         console.log('✅ All data processed successfully from L1 API:');
         console.log('📋 Company Profile (L1):', this.getCompanyProfile);
@@ -964,7 +964,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     if (result.data) {
       try {
         this.manufacturingData = JSON.parse(result.data.company_profile);
-        this.requestToResubmitCommentL2 = result.data.comment || '';
+        this.requestToResubmitCommentL2 = result.data.request_for_change_comment || '';
         
         console.log('✅ Manufacturing data parsed successfully:', this.manufacturingData);
         console.log('🔧 Machines available:', this.manufacturingData?.machines?.length || 0);
@@ -991,10 +991,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   private processL3Data(result: any): void {
     if (result.data) {
+      debugger
       try {
         this.newFinancialData = JSON.parse(result.data.company_profile);
         debugger;
-        this.requestToResubmitCommentL3 = result.data.comment || '';
+        this.requestToResubmitCommentL3 = result.data.request_for_change_comment || '';
       } catch (error) {
         console.error('Error parsing L3 data:', error);
         this.newFinancialData = null;
