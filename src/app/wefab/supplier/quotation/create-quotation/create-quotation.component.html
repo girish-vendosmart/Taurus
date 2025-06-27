@@ -110,17 +110,7 @@
       <div class="col-12">
         <label class="form-label me-3">Currency: <span class="text-danger">*</span></label>
         <div class="d-flex gap-4">
-          <div class="form-check">
-            <p-radioButton 
-              inputId="inr" 
-              name="currency" 
-              value="INR"
-              [(ngModel)]="model.currency_code"
-              [ngModelOptions]="{standalone: true}"
-              (onClick)="onCurrencyChange(); clearFieldError('currency_code')">
-            </p-radioButton>
-            <label for="inr" class="form-check-label ms-2">INR</label>
-          </div>
+          <!-- USD Option - Always Available -->
           <div class="form-check">
             <p-radioButton 
               inputId="usd" 
@@ -131,6 +121,19 @@
               (onClick)="onCurrencyChange(); clearFieldError('currency_code')">
             </p-radioButton>
             <label for="usd" class="form-check-label ms-2">USD</label>
+          </div>
+          
+          <!-- Selected Currency Option - Dynamic -->
+          <div class="form-check" *ngIf="selectedCurrency && selectedCurrency !== 'USD'">
+            <p-radioButton 
+              [inputId]="selectedCurrency.toLowerCase()" 
+              name="currency" 
+              [value]="selectedCurrency"
+              [(ngModel)]="model.currency_code"
+              [ngModelOptions]="{standalone: true}"
+              (onClick)="onCurrencyChange(); clearFieldError('currency_code')">
+            </p-radioButton>
+            <label [for]="selectedCurrency.toLowerCase()" class="form-check-label ms-2">{{ selectedCurrency }}</label>
           </div>
         </div>
         <div *ngIf="hasValidationError('currency_code')" class="text-danger small mt-1">
@@ -229,15 +232,15 @@
                  pTooltip="No bid are the items excluded from the quote"
                  tooltipPosition="top"></i>
             </th>
-            <th style="width: 200px;">Item Price ({{ model.currency_code }}) <span class="text-danger">*</span></th>
-            <th style="width: 250px;">Total Price ({{ model.currency_code }})</th>
+            <th style="width: 200px;">Item Price ({{ currentCurrencyDisplay }}) <span class="text-danger">*</span></th>
+            <th style="width: 250px;">Total Price ({{ currentCurrencyDisplay }})</th>
             <th style="width: 120px;">Tax Type <span class="text-danger">*</span></th>
-            <th style="width: 120px;">Tax Amount ({{ model.currency_code }})</th>
+            <th style="width: 120px;">Tax Amount ({{ currentCurrencyDisplay }})</th>
             <th style="width: 120px;">
-              Miscellaneous ({{ model.currency_code }})
+              Miscellaneous ({{ currentCurrencyDisplay }})
             </th>
             <th style="width: 100px;">
-              Tooling ({{ model.currency_code }})
+              Tooling ({{ currentCurrencyDisplay }})
             </th>
             <th style="width: 200px;">
               Comments
@@ -340,7 +343,7 @@
             <!-- Total Price -->
             <td class="text-center align-middle">
               <span class="text-muted small fw-medium">
-                {{ getLineTotalPrice(item) > 0 ? (model.currency_code + ' ' + (getLineTotalPrice(item) | number:'1.2-2')) : '-----' }}
+                {{ getLineTotalPrice(item) > 0 ? (currentCurrencyDisplay + ' ' + (getLineTotalPrice(item) | number:'1.2-2')) : '-----' }}
               </span>
             </td>
             
@@ -365,7 +368,7 @@
             <!-- Tax Amount -->
             <td class="text-center align-middle">
               <span class="text-muted small">
-                {{ getLineTaxAmount(item) > 0 ? (model.currency_code + ' ' + (getLineTaxAmount(item) | number:'1.2-2')) : '-----' }}
+                {{ getLineTaxAmount(item) > 0 ? (currentCurrencyDisplay + ' ' + (getLineTaxAmount(item) | number:'1.2-2')) : '-----' }}
               </span>
             </td>
             
@@ -383,7 +386,7 @@
                 placeholder="0.00"
                 min="0"
                 step="0.01"
-                [pTooltip]="'Enter miscellaneous amount: ' + (model.currency_code) + ' ' + (item.miscellaneous || 0)"
+                [pTooltip]="'Enter miscellaneous amount: ' + currentCurrencyDisplay + ' ' + (item.miscellaneous || 0)"
                 tooltipPosition="top"
                 style="height: 32px; font-size: 14px;">
             </td>
@@ -403,7 +406,7 @@
                 placeholder="0.00"
                 min="0"
                 step="0.01"
-                [pTooltip]="'Enter tooling amount: ' + (model.currency_code) + ' ' + (item.tooling || 0)"
+                [pTooltip]="'Enter tooling amount: ' + currentCurrencyDisplay + ' ' + (item.tooling || 0)"
                 tooltipPosition="top"
                 style="height: 32px; font-size: 14px;">
             </td>
@@ -461,7 +464,7 @@
           <!-- Sub Total -->
           <div class="d-flex justify-content-between align-items-center mb-2 py-1 border-bottom">
             <span class="total-label small fw-medium" style="font-size: 14px !important;">Sub Total:</span>
-            <span class="total-value small fw-bold" style="font-size: 14px !important;">{{ model.currency_code }} {{ calculatedSubTotal | number:'1.2-2' }}</span>
+            <span class="total-value small fw-bold" style="font-size: 14px !important;">{{ currentCurrencyDisplay }} {{ calculatedSubTotal | number:'1.2-2' }}</span>
           </div>
           
           <!-- Discount -->
@@ -493,10 +496,10 @@
                   [ngModelOptions]="{standalone: true}"
                   style="width: 60px; font-size: 12px;">
                   <option value="percentage">%</option>
-                  <option value="amount">{{ model.currency_code }}</option>
+                  <option value="amount">{{ currentCurrencyDisplay }}</option>
                 </select>
                 <span *ngIf="getDiscountAmount() > 0" class="discount-amount amount-display small" style="font-size: 14px !important;">
-                  -{{ model.currency_code }} {{ getDiscountAmount() | number:'1.2-2' }}
+                  -{{ currentCurrencyDisplay }} {{ getDiscountAmount() | number:'1.2-2' }}
                 </span>
               </div>
               <!-- Discount validation error message -->
@@ -512,7 +515,7 @@
               {{ discountType === 'percentage' ? 'Discount (' + discountValue + '%)' : 'Discount (Fixed Amount)' }}:
             </span>
             <span class="text-muted" style="font-size: 14px !important;">
-              -{{ model.currency_code }} {{ getDiscountAmount() | number:'1.2-2' }}
+              -{{ currentCurrencyDisplay }} {{ getDiscountAmount() | number:'1.2-2' }}
             </span>
           </div>
           
@@ -533,9 +536,9 @@
                 (paste)="onNumberPaste($event)"
                 pattern="[0-9]*\.?[0-9]*"
                 style="width: 80px; font-size: 12px;">
-              <span class="small me-2">{{ model.currency_code }}</span>
+              <span class="small me-2">{{ currentCurrencyDisplay }}</span>
               <span *ngIf="shippingCharges > 0" class="shipping-amount amount-display small" style="font-size: 14px !important;">
-                +{{ model.currency_code }} {{ shippingCharges | number:'1.2-2' }}
+                +{{ currentCurrencyDisplay }} {{ shippingCharges | number:'1.2-2' }}
               </span>
             </div>
           </div>
@@ -549,25 +552,25 @@
           <!-- Total Miscellaneous -->
           <div class="d-flex justify-content-between align-items-center mb-2 py-1">
             <span class="total-label small fw-medium" style="font-size: 14px !important;">Total Miscellaneous:</span>
-            <span class="total-value small" style="font-size: 14px !important;">{{ model.currency_code }} {{ getTotalMiscellaneous() | number:'1.2-2' }}</span>
+            <span class="total-value small" style="font-size: 14px !important;">{{ currentCurrencyDisplay }} {{ getTotalMiscellaneous() | number:'1.2-2' }}</span>
           </div>
           
           <!-- Total Tooling -->
           <div class="d-flex justify-content-between align-items-center mb-2 py-1">
             <span class="total-label small fw-medium" style="font-size: 14px !important;">Total Tooling:</span>
-            <span class="total-value small" style="font-size: 14px !important;">{{ model.currency_code }} {{ getTotalTooling() | number:'1.2-2' }}</span>
+            <span class="total-value small" style="font-size: 14px !important;">{{ currentCurrencyDisplay }} {{ getTotalTooling() | number:'1.2-2' }}</span>
           </div>
           
           <!-- Total Taxable Amount -->
           <div class="d-flex justify-content-between align-items-center mb-2 py-1">
             <span class="total-label small fw-medium" style="font-size: 14px !important;">Total Tax Amount:</span>
-            <span class="total-value small" style="font-size: 14px !important;">{{ model.currency_code }} {{ getTotalTaxAmount() | number:'1.2-2' }}</span>
+            <span class="total-value small" style="font-size: 14px !important;">{{ currentCurrencyDisplay }} {{ getTotalTaxAmount() | number:'1.2-2' }}</span>
           </div>
           
           <!-- Total Amount -->
           <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-2">
             <span class="total-amount-label fw-bold" style="font-size: 14px !important;">Total Amount:</span>
-            <span class="total-amount-value fw-bold text-primary" style="font-size: 14px !important;">{{ model.currency_code }} {{ calculatedTotalAmount | number:'1.2-2' }}</span>
+            <span class="total-amount-value fw-bold text-primary" style="font-size: 14px !important;">{{ currentCurrencyDisplay }} {{ calculatedTotalAmount | number:'1.2-2' }}</span>
           </div>
         </div>
       </div>

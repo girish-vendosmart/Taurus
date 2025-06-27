@@ -342,7 +342,7 @@ export class CreateQuotationComponent implements OnInit {
     totalLeadTime: '',
     paymentTerms: 'Net 10',
     quoteValidTill: null,
-    currency_code: 'USD',
+    currency_code: 'USD', // Default to USD
     email: 'email@example.com',
     reference: '',
     termsAndConditions: '',
@@ -400,6 +400,10 @@ export class CreateQuotationComponent implements OnInit {
   // Store original state for reset functionality
   originalQuotationItems: any[] = [];
 
+  // Currency properties
+  selectedCurrency: string = 'INR'; // Default fallback for second currency option
+  currencyOptions: { label: string; value: string }[] = [];
+
   // Dropdown options
   paymentTermsOptions = [
     { label: 'Net 10', value: 'Net 10' },
@@ -408,11 +412,6 @@ export class CreateQuotationComponent implements OnInit {
     { label: 'Net 45', value: 'Net 45' },
     { label: 'Net 60', value: 'Net 60' },
     { label: 'Due on receipt', value: 'Due on receipt' }
-  ];
-
-  currencyOptions = [
-    { label: 'INR', value: 'INR' },
-    { label: 'USD', value: 'USD' }
   ];
 
   unitOptions = [
@@ -445,9 +444,20 @@ export class CreateQuotationComponent implements OnInit {
   csvImportErrors: string[] = [];
   showValidationErrors: boolean = false;
 
-  constructor(private sweetAlert: SweetAlertService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private commonService: CommonService, private fileUploadService: FileUploadService) {}
+  constructor(private sweetAlert: SweetAlertService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private commonService: CommonService, private fileUploadService: FileUploadService) {
+    // Initialize currency options on component creation
+    this.initializeCurrencyOptions();
+    
+    // Ensure USD is selected by default
+    this.model.currency_code = 'USD';
+  }
 
   ngOnInit() {
+    // Initialize currency options first
+    this.initializeCurrencyOptions();
+    
+    // Ensure USD is selected by default
+    this.model.currency_code = 'USD';
     
     // Extract and set RFQ ID from URL
     this.extractRfqIdFromUrl();
@@ -510,7 +520,89 @@ export class CreateQuotationComponent implements OnInit {
     // Initialize tax calculations
     setTimeout(() => {
       this.updateTaxCalculations();
+      this.ensureDefaultCurrency(); // Ensure USD is default for new quotations
     }, 500);
+  }
+
+  /**
+   * Initialize currency options with USD and selected currency from localStorage
+   */
+  private initializeCurrencyOptions() {
+    // Get selected currency from localStorage
+    this.selectedCurrency = this.getSelectedCurrencyFromStorage();
+    
+    // Always include USD as the first option
+    this.currencyOptions = [
+      { label: 'USD', value: 'USD' }
+    ];
+    
+    // Add selected currency if it's different from USD
+    if (this.selectedCurrency && this.selectedCurrency !== 'USD') {
+      this.currencyOptions.push({ 
+        label: this.selectedCurrency, 
+        value: this.selectedCurrency 
+      });
+    }
+    
+    // Ensure USD is set as default currency
+    if (!this.model.currency_code || this.model.currency_code === '') {
+      this.model.currency_code = 'USD';
+    }
+    
+    console.log('Currency options initialized:', this.currencyOptions);
+    console.log('Selected currency from storage:', this.selectedCurrency);
+    console.log('Default currency set to:', this.model.currency_code);
+  }
+
+  /**
+   * Get selected currency from localStorage with fallback
+   */
+  private getSelectedCurrencyFromStorage(): string {
+    try {
+      // Try different possible keys for selected currency
+      const selectedCurrency = 
+        localStorage.getItem('selected_currency') ||
+        localStorage.getItem('selectedCurrency') ||
+        localStorage.getItem('currency') ||
+        localStorage.getItem('user_currency') ||
+        'INR'; // Default fallback
+      
+      console.log('Currency retrieved from localStorage:', selectedCurrency);
+      return selectedCurrency;
+    } catch (error) {
+      console.warn('Error accessing localStorage for currency:', error);
+      return 'INR'; // Default fallback
+    }
+  }
+
+  /**
+   * Check if current currency is the selected currency (not USD)
+   */
+  get isSelectedCurrency(): boolean {
+    return this.model.currency_code === this.selectedCurrency;
+  }
+
+  /**
+   * Check if current currency is USD
+   */
+  get isUSDCurrency(): boolean {
+    return this.model.currency_code === 'USD';
+  }
+
+  /**
+   * Get display name for current currency
+   */
+  get currentCurrencyDisplay(): string {
+    return this.model.currency_code || 'USD';
+  }
+
+  /**
+   * Ensure currency is always USD by default for new quotations
+   */
+  private ensureDefaultCurrency() {
+    if (!this.isEditMode) {
+      this.model.currency_code = 'USD';
+    }
   }
 
   loadCreateQuotation(rfqId: string) {
@@ -533,7 +625,7 @@ export class CreateQuotationComponent implements OnInit {
           totalLeadTime: this.extractDaysFromDuration(createQuotationData.estimated_completion_duration),
           paymentTerms: createQuotationData.payment_terms || 'Net 30',
           quoteValidTill: this.parseApiDateForInput(createQuotationData.validity),
-          currency_code: createQuotationData.items?.[0]?.currency_code || 'USD',
+          currency_code: 'USD', // Always default to USD for new quotations
           email: 'email@example.com', // This might come from user/supplier data
           reference: createQuotationData.quotation_id || '',
           termsAndConditions: this.stripHtmlTags(createQuotationData.notes || ''),
@@ -1166,14 +1258,17 @@ export class CreateQuotationComponent implements OnInit {
 
   // Method to handle currency change
   onCurrencyChange() {
+    console.log('Currency changed to:', this.model.currency_code);
+    
     // If currency is changed to USD, reset tax options
     if (this.model.currency_code === 'USD') {
       this.selectedTaxType = 'No Tax';
       this.model.cgstSgst = false;
       this.model.igst = false;
-    } else if (this.model.currency_code === 'INR' && this.selectedTaxType === 'No Tax') {
-      // If currency is changed to INR and no tax was selected, you might want to set a default
-      // Uncomment the following line if you want to default to 'No Tax' for INR as well
+    } else if (this.model.currency_code === this.selectedCurrency && this.selectedTaxType === 'No Tax') {
+      // If currency is changed to selected currency and no tax was selected, 
+      // you might want to set a default tax option
+      // Uncomment the following line if you want to default to 'No Tax' for selected currency as well
       // this.selectedTaxType = 'No Tax';
     }
     
@@ -1374,7 +1469,7 @@ export class CreateQuotationComponent implements OnInit {
             totalLeadTime: this.extractDaysFromDuration(quotationData.estimated_completion_duration),
             paymentTerms: quotationData.payment_terms || 'Net 30',
             quoteValidTill: this.parseApiDateForInput(quotationData.validity),
-            currency_code: quotationData.currency_code || 'USD',
+            currency_code: quotationData.currency_code || 'USD', // Use existing currency in edit mode, default to USD for new
             email: 'email@example.com',
             reference: quotationData.name || '',
             termsAndConditions: this.stripHtmlTags(quotationData.notes || ''),
