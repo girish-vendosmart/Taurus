@@ -124,8 +124,8 @@ export class LoginComponentComponent {
                 if (response && response.data && response.data.token) {
                   localStorage.setItem('token', response.data.token);
                   localStorage.setItem('primary_email_id', response.data.email_id);
+                  localStorage.setItem('country', response.data.country);
                   localStorage.setItem('user_type', response.data.user_type);
-                  
                   // Navigate based on user type
                   if (response.data.user_type === 'supplier') {
                     localStorage.setItem('supplier_id', response.data.supplier_info.supplier_company_id);

@@ -687,6 +687,14 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       this.countryList = res.data || [];
       
       console.log('Country list loaded:', this.countryList.length);
+
+      // Get country directly from localStorage
+      const storedCountry = localStorage.getItem('country');
+      if (storedCountry) {
+        this.selectedCountry = storedCountry;
+        this.model.country = storedCountry;
+        this.getStates(storedCountry);
+      }
       
       // Initialize step fields - combining all L1, L2 and L3 steps
       this.stepFields = [
@@ -697,6 +705,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         this.getFinancialInformationFields(),      // Step 5: From L3
         this.getAdditionalInformationFields()      // Step 6: From L3
       ];
+
+      // Force change detection to update the view
+      this.cdr.detectChanges();
     }, error => {
       console.error('Error loading country list:', error);
       // Initialize with empty country list if there's an error
@@ -3292,6 +3303,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             className: 'col-md-4 mb-2',
             key: 'country',
             type: 'searchable-select',
+            defaultValue: this.model.country || localStorage.getItem('country'),
             templateOptions: {
               label: 'Country',
               required: true,
@@ -3299,10 +3311,18 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
               options: this.countryList.map((country: any) => ({
                 label: country.name,
                 value: country.name
-              }))
+              })),
+              disabled: !!localStorage.getItem('country')
             },
             hooks: {
               onInit: (field) => {
+                // Set initial value from model or localStorage
+                const countryValue = this.model.country || localStorage.getItem('country');
+                if (countryValue) {
+                  this.selectedCountry = countryValue;
+                  this.getStates(countryValue);
+                }
+
                 field.formControl?.valueChanges.subscribe(selectedCountry => {
                   if (selectedCountry) {
                     this.selectedCountry = selectedCountry;
