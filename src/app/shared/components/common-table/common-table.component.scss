@@ -882,3 +882,21 @@ $font-weight-bold: 700;
   }
 }
 
+.empty-message {
+  padding: 2rem;
+  text-align: center;
+  
+  span {
+    font-size: 1.5rem;
+    color: #6b7280;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
+

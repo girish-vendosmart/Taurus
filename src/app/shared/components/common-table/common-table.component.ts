@@ -372,7 +372,6 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
     
     // Convert to lowercase and replace spaces with hyphens
     status = status.toLowerCase().replace(/\s+/g, '-');
-    console.log('Table status', status);
     
     switch (status) {
       case 'missing-data':
@@ -426,6 +425,17 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
       default:
         return 'status-default';
     }
+  }
+
+  formatStatusText(status: string): string {
+    if (!status) return '';
+    
+    // Split by spaces or hyphens and capitalize each word
+    return status
+      .toLowerCase()
+      .split(/[\s-]+/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 
   sortTable(field: string) {

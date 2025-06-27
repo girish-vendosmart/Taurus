@@ -125,7 +125,7 @@
                 <!-- Status Cell -->
                 <div class="status-cell" *ngSwitchCase="col.isStatus">
                   <span [class]="'status-badge ' + getStatusClass(rowData[col.field])">
-                    {{ rowData[col.field] }}
+                    {{ formatStatusText(rowData[col.field]) }}
                   </span>
                 </div>
 
@@ -163,7 +163,10 @@
         <ng-template pTemplate="emptymessage">
           <tr>
             <td [attr.colspan]="getVisibleColumns().length" class="text-center">
-              No records found
+              <div class="empty-message">
+                <span>-----</span>
+                <p>No records found</p>
+              </div>
             </td>
           </tr>
         </ng-template>
