@@ -116,7 +116,7 @@
                   <a class="linkable-column" 
                      [routerLink]="getRouterLink(col, rowData) || rowData.routerLink"
                      (click)="onLinkClick($event, rowData, col)" 
-                     [innerHTML]="rowData[col.field]"></a>
+                     [innerHTML]="rowData[col.field] || '-------'"></a>
                   <div class="sub-info" *ngIf="rowData.companySubInfo">
                     {{ rowData.companySubInfo }}
                   </div>
@@ -125,7 +125,7 @@
                 <!-- Status Cell -->
                 <div class="status-cell" *ngSwitchCase="col.isStatus">
                   <span [class]="'status-badge ' + getStatusClass(rowData[col.field])">
-                    {{ formatStatusText(rowData[col.field]) }}
+                    {{ formatStatusText(rowData[col.field]) || '-------' }}
                   </span>
                 </div>
 
@@ -142,16 +142,16 @@
 
                 <!-- HTML Cell -->
                 <div class="html-cell" *ngSwitchCase="col.isHtml">
-                  <div [innerHTML]="rowData[col.field]"></div>
+                  <div [innerHTML]="rowData[col.field] || '-------'"></div>
                 </div>
 
                 <!-- Default Cell -->
                 <div [class]="col.field + '-cell'" *ngSwitchDefault>
                   <ng-container *ngIf="col.field === 'creation'">
-                    {{ rowData[col.field] | dateFormat:'medium' }}
+                    {{ rowData[col.field] ? (rowData[col.field] | dateFormat:'medium') : '-------' }}
                   </ng-container>
                   <ng-container *ngIf="col.field !== 'creation'">
-                    {{ rowData[col.field] }}
+                    {{ rowData[col.field] || '-------' }}
                   </ng-container>
                 </div>
               </ng-container>
@@ -164,7 +164,7 @@
           <tr>
             <td [attr.colspan]="getVisibleColumns().length" class="text-center">
               <div class="empty-message">
-                <span>-----</span>
+                <span>-------</span>
                 <p>No records found</p>
               </div>
             </td>

@@ -257,6 +257,18 @@ $font-weight-bold: 700;
           &:last-child {
             border-right: none;
           }
+
+          // Style for empty values
+          &:empty::before,
+          &:has(> :empty)::before {
+            content: "-------";
+            @extend .empty-value;
+          }
+          
+          // Apply empty value style to our dashes
+          &:contains("-------") {
+            @extend .empty-value;
+          }
         }
 
         &:hover {
@@ -898,5 +910,13 @@ $font-weight-bold: 700;
     margin: 0;
     font-size: 0.875rem;
   }
+}
+
+// Empty value styling
+.empty-value {
+  color: #6b7280;
+  font-weight: normal;
+  opacity: 0.75;
+  letter-spacing: 2px;
 }
 

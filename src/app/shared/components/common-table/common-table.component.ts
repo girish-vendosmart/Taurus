@@ -368,7 +368,7 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
   }
 
   getStatusClass(status: string): string {
-    if (!status) return 'status-default';
+    if (this.isEmptyValue(status)) return 'status-default';
     
     // Convert to lowercase and replace spaces with hyphens
     status = status.toLowerCase().replace(/\s+/g, '-');
@@ -428,7 +428,7 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
   }
 
   formatStatusText(status: string): string {
-    if (!status) return '';
+    if (this.isEmptyValue(status)) return '-------';
     
     // Split by spaces or hyphens and capitalize each word
     return status
@@ -476,7 +476,9 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
     if (!column.routerLink) return '';
     
     if (column.routerLinkField) {
-      return `${column.routerLink}/${rowData[column.routerLinkField]}`;
+      const fieldValue = rowData[column.routerLinkField];
+      if (this.isEmptyValue(fieldValue)) return '';
+      return `${column.routerLink}/${fieldValue}`;
     }
     
     return column.routerLink;
@@ -709,5 +711,21 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
       return DEFAULT_STATUS_OPTIONS;
     }
     return column.filterOptions || [];
+  }
+
+  /**
+   * Checks if a value is empty (null, undefined, empty string, or only whitespace)
+   */
+  isEmptyValue(value: any): boolean {
+    if (value === null || value === undefined) return true;
+    if (typeof value === 'string' && value.trim() === '') return true;
+    return false;
+  }
+
+  /**
+   * Gets the display value for a cell, returning "-------" for empty values
+   */
+  getCellDisplayValue(value: any): string {
+    return this.isEmptyValue(value) ? '-------' : String(value);
   }
 }
