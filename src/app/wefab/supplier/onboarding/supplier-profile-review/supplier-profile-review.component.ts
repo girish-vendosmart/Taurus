@@ -903,7 +903,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         this.bankVerified = financialInformation.bankVerified || false;
         
         // Set request to resubmit comment
-        this.requestToResubmitCommentL1 = result.data.comment || '';
+        this.requestToResubmitCommentL1 = result.data.request_for_change_comment || '';
         
         console.log('✅ All data processed successfully from L1 API:');
         console.log('📋 Company Profile (L1):', this.getCompanyProfile);
@@ -964,7 +964,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     if (result.data) {
       try {
         this.manufacturingData = JSON.parse(result.data.company_profile);
-        this.requestToResubmitCommentL2 = result.data.comment || '';
+        this.requestToResubmitCommentL2 = result.data.request_for_change_comment || '';
         
         console.log('✅ Manufacturing data parsed successfully:', this.manufacturingData);
         console.log('🔧 Machines available:', this.manufacturingData?.machines?.length || 0);
@@ -991,10 +991,11 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
 
   private processL3Data(result: any): void {
     if (result.data) {
+      debugger
       try {
         this.newFinancialData = JSON.parse(result.data.company_profile);
         debugger;
-        this.requestToResubmitCommentL3 = result.data.comment || '';
+        this.requestToResubmitCommentL3 = result.data.request_for_change_comment || '';
       } catch (error) {
         console.error('Error parsing L3 data:', error);
         this.newFinancialData = null;
@@ -1511,7 +1512,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     return maskedPart + lastFour;
   }
 
-  // Method to format currency in Indian format with comma separation
+  // Method to format currency using localStorage currencyFormat pattern
   formatCurrency(value: string | number): string {
     if (!value || value === 'Not provided' || value === '') return 'Not provided';
     
@@ -1522,19 +1523,87 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     const number = parseFloat(numericValue);
     if (isNaN(number)) return 'Not provided';
     
-    // Format with Indian locale (en-IN) for comma separation
-    const formatted = number.toLocaleString('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
+    // Get currency information from localStorage
+    const selectedCurrency = localStorage.getItem('selectedCurrency') || 'INR';
+    const currencyFormatString = localStorage.getItem('currencyFormat');
     
-    return formatted;
+    try {
+      // If currencyFormat exists, apply the pattern-based formatting
+      if (currencyFormatString) {
+        // Parse the format pattern (e.g., "#,###.##")
+        const formatPattern = JSON.parse(currencyFormatString);
+        
+        // Custom number formatting based on the pattern
+        let formattedNumber = this.formatNumberByPattern(number, formatPattern);
+        
+        return `${selectedCurrency} ${formattedNumber}`;
+      }
+      
+      // Fallback: Use basic formatting with Indian locale as default
+      const formattedNumber = number.toLocaleString('en-IN', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      
+      return `${selectedCurrency} ${formattedNumber}`;
+      
+    } catch (error) {
+      console.error('Error parsing currency format from localStorage:', error);
+      // Fallback to default formatting
+      const formattedNumber = number.toLocaleString('en-IN', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      return `INR ${formattedNumber}`;
+    }
   }
 
-  // Alternative method for simple number formatting without currency symbol
-  formatNumber(value: string | number): string {
+  private formatNumberByPattern(number: number, pattern: string): string {
+    /* ---------- 1. Decimal part analyse karo ---------- */
+    let minimumFractionDigits = 0;
+    let maximumFractionDigits = 0;
+  
+    let integerPattern = pattern;
+    if (pattern.includes('.')) {
+      const [intPart, decPart] = pattern.split('.');
+      integerPattern = intPart;
+  
+      maximumFractionDigits = decPart.length;                 // jitne # ya 0 hain utna max
+      minimumFractionDigits = decPart.replace(/[^0]/g, '').length; // sirf 0 mandatory hote hain
+    }
+  
+    /* ---------- 2. Grouping style detect karo ---------- */
+    /**
+     *  Western pattern example  : #,### or #,###,###  → groups = [ '#', '###', '###' ] (second-last = 3)
+     *  Indian  pattern example  : #,##,###            → groups = [ '#', '##', '###' ] (second-last = 2)
+     */
+    const groups = integerPattern.split(',');
+    let isIndianFormat = false;
+  
+    if (groups.length > 1) {
+      const secondLastGroup = groups[groups.length - 2]
+                                .replace(/[^#0]/g, '');     // sirf digit-place chars dekho
+      if (secondLastGroup.length === 2) {
+        isIndianFormat = true;                             // 3-2-2-2 pattern ⇒ Indian
+      }
+    }
+  
+    /* ---------- 3. Number ko format karo ---------- */
+    const formatter = new Intl.NumberFormat(isIndianFormat ? 'en-IN' : 'en-US', {
+      minimumFractionDigits,
+      maximumFractionDigits,
+      useGrouping: true
+    });
+  
+    return formatter.format(number);
+  }
+  
+  
+
+  // Alternative method for simple number formatting using currencyFormat pattern from localStorage
+  formatNumber(value: string | number): any {
     if (!value || value === 'Not provided' || value === '') return 'Not provided';
     
     // Convert to string and remove any existing formatting
@@ -1544,8 +1613,35 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     const number = parseFloat(numericValue);
     if (isNaN(number)) return 'Not provided';
     
-    // Format with Indian locale (en-IN) for comma separation
-    return number.toLocaleString('en-IN');
+    // Get currency information from localStorage
+    const selectedCurrency = localStorage.getItem('selectedCurrency') || 'INR';
+    const currencyFormatString = localStorage.getItem('currencyFormat');
+    
+    // If currencyFormat exists, apply it
+    if (currencyFormatString) {
+      try {
+        // Parse the format pattern (e.g., "#,###.##")
+        const formatPattern = JSON.parse(currencyFormatString);
+        
+        // Custom number formatting based on the pattern
+        let formattedNumber = this.formatNumberByPattern(number, formatPattern);
+        
+        return `${selectedCurrency} ${formattedNumber}`;
+        
+      } catch (error) {
+        console.error('Error parsing currency format pattern:', error);
+        // Fallback to default formatting
+      }
+    }
+    
+    // Fallback: Default formatting with currency code
+    const formattedNumber = number.toLocaleString('en-IN', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+    
+    return `${selectedCurrency} ${formattedNumber}`;
   }
 
   isImageFile(url: string): boolean {
