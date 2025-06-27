@@ -1,27 +1,23 @@
 <div class="success-container p-4"> 
-  <!-- Back Button Section -->
-  <div class="back-button-section">
-    <button class="back-button" (click)="goBack()">
-      <i class="pi pi-arrow-left"></i>
-      <span>Back to RFQ List</span>
-    </button>
-  </div>
   <!-- RFQ Details Card -->
   <div class="rfq-details-card">
 
     <!-- Header Section -->
-    <div class="card-header">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
       <div class="rfq-info">
-        <h2>RFQ Details</h2>
-        <p class="reference-text">{{ rfqData.reference }}</p>
+        <h2>{{ rfqName }}</h2>
+        <p class="reference-text">{{ rfqData.rfqNumber }}</p>
+        <span [class]="'status-badge ' + getStatusClass(rfqStatus)">{{ rfqStatus }}</span>
       </div>
-      <div class="rfq-number">
-        <span class="number-label">RFQ Number</span>
-        <span class="number-value">{{ rfqData.rfqNumber }}</span>
+      <div class="back-button-section">
+        <button class="back-button" (click)="goBack()">
+          <i class="pi pi-arrow-left"></i>
+          <span>Back to RFQ List</span>
+        </button>
       </div>
     </div>
 
-    <!-- Content Grid -->
+    <!-- Content Grid -->`
     <div class="content-grid">
       <!-- Project Information -->
       <div class="info-section">
@@ -134,16 +130,24 @@
         <div class="timeline-connector" *ngIf="i < rfqData.reviewStatus.stages.length - 1"></div>
         
         <div class="timeline-marker">
-          <div class="marker-icon">
-            <i [class]="stage.icon"></i>
+          <div class="marker-icon" [ngClass]="{
+            'completed': stage.status === 'completed',
+            'in-progress': stage.status === 'in-progress',
+            'pending': stage.status === 'pending'
+          }">
+            <i class="pi" [ngClass]="{
+              'pi-check': stage.status === 'completed',
+              'pi-info-circle': stage.status === 'in-progress',
+              'pi-circle': stage.status === 'pending'
+            }"></i>
           </div>
         </div>
         
         <div class="timeline-content">
-          <h4 class="stage-title">{{ stage.title }}</h4>
-          <p class="stage-description">{{ stage.description }}</p>
-          <p class="stage-date" *ngIf="stage.completedDate">{{ stage.completedDate }}</p>
-          <p class="stage-estimate" *ngIf="stage.estimatedCompletion">{{ stage.estimatedCompletion }}</p>
+          <h4 class="stage-title" style="margin-bottom: 0px;">{{ stage.title }}</h4>
+          <p class="stage-description" style="margin-bottom: 0px;">{{ stage.description }}</p>
+          <p class="stage-date" *ngIf="stage.completedDate" style="margin-bottom: 0px;">{{ stage.completedDate }}</p>
+          <p class="stage-estimate" *ngIf="stage.estimatedCompletion" style="margin-bottom: 0px;">{{ stage.estimatedCompletion }}</p>
           
           <!-- Technical Review Report Link -->
           <div class="stage-actions" *ngIf="stage.hasReportLink && stage.status === 'completed'">

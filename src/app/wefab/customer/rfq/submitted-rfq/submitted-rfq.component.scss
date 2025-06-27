@@ -129,10 +129,10 @@
 
   .rfq-info {
     h2 {
-      font-size: 20px;
+      font-size: 24px;
+      margin-bottom: 0px;
       font-weight: 600;
       color: #1f2937;
-      margin: 0 0 8px 0;
     }
 
     .reference-text {
@@ -555,11 +555,11 @@
       }
 
       &.completed .timeline-connector {
-        background-color: $customer-primary;
+        background-color: #22c55e;
       }
 
       &.in-progress .timeline-connector {
-        background: linear-gradient(to bottom, $customer-primary 50%, #e5e7eb 50%);
+        background: linear-gradient(to bottom, #fbbf24 50%, #e5e7eb 50%);
       }
 
       .timeline-marker {
@@ -580,41 +580,56 @@
           border: 3px solid #e5e7eb;
           background-color: white;
           color: #9ca3af;
+          transition: all 0.3s ease;
+
+          &.completed {
+            background-color: #22c55e;
+            border-color: #22c55e;
+            color: white;
+          }
+
+          &.in-progress {
+            background-color: #fbbf24;
+            border-color: #fbbf24;
+            color: white;
+            animation: pulse-yellow 2s infinite;
+          }
+
+          &.pending {
+            background-color: #f3f4f6;
+            border-color: #d1d5db;
+            color: #9ca3af;
+          }
 
           i {
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 20px;
           }
         }
       }
 
-      &.completed .timeline-marker .marker-icon {
-        background-color: #10b981;
-        border-color: #10b981;
-        color: white;
-
-        i {
-          color: white;
+      &.completed .timeline-content {
+        .stage-title {
+          color: #1f2937;
+        }
+        .stage-description {
+          color: #1f2937;
         }
       }
 
-      &.in-progress .timeline-marker .marker-icon {
-        background-color: #f59e0b;
-        border-color: #f59e0b;
-        color: white;
-        animation: pulse-yellow 2s infinite;
-
-        i {
-          color: white;
+      &.in-progress .timeline-content {
+        .stage-title {
+          color: #1f2937;
+        }
+        .stage-description {
+          color: #1f2937;
         }
       }
 
-      &.pending .timeline-marker .marker-icon {
-        background-color: #f3f4f6;
-        border-color: #d1d5db;
-        color: #9ca3af;
-
-        i {
+      &.pending .timeline-content {
+        .stage-title {
+          color: #9ca3af;
+        }
+        .stage-description {
           color: #9ca3af;
         }
       }
@@ -626,13 +641,11 @@
         .stage-title {
           font-size: 16px;
           font-weight: 600;
-          color: #1f2937;
           margin: 0 0 8px 0;
         }
 
         .stage-description {
           font-size: 14px;
-          color: #6b7280;
           margin: 0 0 4px 0;
           line-height: 1.5;
         }
@@ -690,28 +703,6 @@
               font-size: 12px;
             }
           }
-        }
-      }
-
-      &.completed .timeline-content {
-        .stage-title {
-          color: $customer-primary;
-        }
-      }
-
-      &.in-progress .timeline-content {
-        .stage-title {
-          color: #f59e0b;
-        }
-      }
-
-      &.pending .timeline-content {
-        .stage-title {
-          color: #9ca3af;
-        }
-        
-        .stage-description {
-          color: #d1d5db;
         }
       }
     }

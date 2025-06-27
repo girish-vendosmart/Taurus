@@ -59,8 +59,7 @@ export class SubmittedRfqComponent implements OnInit {
           title: 'RFQ Received',
           description: 'Your request has been successfully submitted',
           status: 'completed',
-          completedDate: 'January 15, 2024 at 2:30 PM',
-          icon: 'pi pi-check'
+          completedDate: 'January 15, 2024 at 2:30 PM'
         },
         {
           id: 2,
@@ -68,7 +67,6 @@ export class SubmittedRfqComponent implements OnInit {
           description: 'Engineering team has analyzed your requirements',
           status: 'completed',
           completedDate: 'January 17, 2024 at 11:45 AM',
-          icon: 'pi pi-check',
           hasReportLink: true,
           reportLinkText: 'View Technical Review Report'
         },
@@ -77,15 +75,13 @@ export class SubmittedRfqComponent implements OnInit {
           title: 'Quote Generation',
           description: 'Pricing and timeline calculation',
           status: 'in-progress',
-          estimatedCompletion: 'Estimated completion: 2-3 business days',
-          icon: 'pi pi-info-circle'
+          estimatedCompletion: 'Estimated completion: 2-3 business days'
         },
         {
           id: 4,
           title: 'Quote Delivery',
           description: 'Final quote sent to your email',
-          status: 'pending',
-          icon: 'pi pi-send'
+          status: 'pending'
         }
       ]
     },
@@ -177,6 +173,8 @@ export class SubmittedRfqComponent implements OnInit {
     ],
     allAttachments: [] as RfqAttachment[]
   };
+  rfqName: any;
+  rfqStatus: any;
 
   // Computed properties for displayed items
   get displayedLineItems() {
@@ -335,10 +333,13 @@ export class SubmittedRfqComponent implements OnInit {
   getRfqData(rfqId: string) {
     let apiEndpoint = `/api/resource/Customer Request for Quotation/${rfqId}?fields=["*"]`;
     this.commonService.getData(apiEndpoint).subscribe((res: any) => {
+      this.rfqName = res.data.customer_rfq_name;
+      this.rfqStatus = res.data.workflow_state
       this.rfqData.rfqNumber = res.data.name;
       this.rfqData.reference = res.data.reference || '----';
       this.rfqData.projectInfo.projectName = res.data.project_name || '----';
       this.rfqData.projectInfo.deliveryDate = res.data.delivery_date || '----';
+      this
       
       // Transform line items
       const transformedLineItems = (res.data.line_items || []).map((item: any) => ({
@@ -468,5 +469,64 @@ export class SubmittedRfqComponent implements OnInit {
   viewTechnicalReviewReport() {
     const rfqId = this.rfqData.rfqNumber; // Use current RFQ number
     this.router.navigate(['/wefab/customer/technical-review-page', rfqId]);
+  }
+
+  getStatusClass(status: string): string {
+    
+    // Convert to lowercase and replace spaces with hyphens
+    status = status.toLowerCase().replace(/\s+/g, '-');
+    
+    switch (status) {
+      case 'missing-data':
+        return 'status-review';
+      case 'complete':
+        return 'status-approved'
+      case 'not-opened':
+        return 'status-draft';
+      case 'published':
+        return 'status-approved';
+      case 'deactivated':
+        return 'status-paused'; 
+      case 'invited':
+        return 'status-open';
+      case 'not-started':
+        return 'status-draft';
+      case 'under-review':
+        return 'status-review';
+      case 'approved':
+        return 'status-approved';
+      case 'rejected':
+        return 'status-rejected';
+      case 'draft':
+        return 'status-draft';
+      case 'open':
+        return 'status-open';
+      case 'in-progress':
+        return 'status-progress';
+      case 'closed':
+        return 'status-closed';
+      case 'awarded':
+        return 'status-awarded';
+      case 'quoted':
+        return 'status-awarded';
+      case 'opened':
+        return 'status-open';
+      case 'cancelled':
+        return 'status-rejected';
+      case 'deactivate':
+        return 'status-deactivate';
+      case 'paused':
+        return 'status-paused';
+      case 'submitted':
+        return 'status-awarded';
+      case 'pending':
+        return 'status-pending';
+      case 'review':
+        return 'status-review';
+      case 'not-started':
+        return 'status-draft';
+      default:
+        return 'status-default';
+    }
   }
 }
