@@ -315,6 +315,64 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     setTimeout(() => {
       this.setupFormValidationMonitoring();
     }, 1500);
+
+    this.getCountryList()
+  }
+
+  // Add method to get currency from localStorage
+  getSelectedCurrency(): string {
+    return localStorage.getItem('selectedCurrency') || 'INR';
+  }
+
+  // Add method to get currency format from localStorage
+  getCurrencyFormat(): any {
+    try {
+      const format = localStorage.getItem('currencyFormat');
+      return format ? JSON.parse(format) : '#,##,###.##';
+    } catch (error) {
+      console.error('Error parsing currency format:', error);
+      return '#,##,###.##'; // Default Indian format
+    }
+  }
+
+  // Add method to format numbers according to currency format
+  formatCurrencyAmount(amount: string | number): string {
+    if (!amount) return '';
+    
+    const numericValue = typeof amount === 'string' ? amount.replace(/[^\d]/g, '') : amount.toString();
+    if (!numericValue || isNaN(Number(numericValue))) return '';
+    
+    const format = this.getCurrencyFormat();
+    const num = Number(numericValue);
+    
+    // Handle different currency formats
+    if (typeof format === 'string') {
+      if (format.includes('#,##,###')) {
+        // Indian format (lakhs and crores)
+        return this.formatIndianCurrency(num);
+      } else if (format.includes('#,###')) {
+        // International format (thousands)
+        return this.formatInternationalCurrency(num);
+      }
+    }
+    
+    // Default to Indian format if format is not recognized
+    return this.formatIndianCurrency(num);
+  }
+
+  // International currency formatting (thousands separator)
+  formatInternationalCurrency(num: number): string {
+    return num.toLocaleString('en-US');
+  }
+
+  getCountryList() {
+    let endPoint = '/api/resource/Country?fields=["*"]&limit=300';
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      debugger
+      console.log(res)
+      // this.countryList = res.data || [];
+
+    });
   }
 
   // Add method to check if current step is valid
@@ -2611,7 +2669,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             key: 'companyFinancials.annualRevenue2024',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (This Year) (INR)',
+              label: `Annual Revenue (This Year) (${this.getSelectedCurrency()})`,
               required: true,
               type: 'text',
               placeholder: 'Enter current year revenue'
@@ -2624,7 +2682,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                     if (value && value.length > 0) {
                       const numericValue = value.replace(/[^\d]/g, '');
                       if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        const formatted = this.formatCurrencyAmount(Number(numericValue));
                         if (formatted !== value) {
                           field.formControl.setValue(formatted, { emitEvent: false });
                         }
@@ -2650,7 +2708,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             key: 'companyFinancials.annualRevenue2023',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (Last Year) (INR)',
+              label: `Annual Revenue (Last Year) (${this.getSelectedCurrency()})`,
               required: true,
               type: 'text',
               placeholder: 'Enter last year revenue'
@@ -2663,7 +2721,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                     if (value && value.length > 0) {
                       const numericValue = value.replace(/[^\d]/g, '');
                       if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        const formatted = this.formatCurrencyAmount(Number(numericValue));
                         if (formatted !== value) {
                           field.formControl.setValue(formatted, { emitEvent: false });
                         }
@@ -2689,7 +2747,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             key: 'companyFinancials.annualRevenue2022',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (Two Years Ago) (INR)',
+              label: `Annual Revenue (Two Years Ago) (${this.getSelectedCurrency()})`,
               required: true,
               type: 'text',
               placeholder: 'Enter two years ago revenue'
@@ -2702,7 +2760,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                     if (value && value.length > 0) {
                       const numericValue = value.replace(/[^\d]/g, '');
                       if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        const formatted = this.formatCurrencyAmount(Number(numericValue));
                         if (formatted !== value) {
                           field.formControl.setValue(formatted, { emitEvent: false });
                         }
@@ -2749,7 +2807,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             key: 'insuranceCoverage.generalLiabilityInsurance',
             type: 'input',
             templateOptions: {
-              label: 'General Liability Insurance (INR)',
+              label: `General Liability Insurance (${this.getSelectedCurrency()})`,
               placeholder: 'Enter General Liability Insurance Amount',
               type: 'text'
             },
@@ -2761,7 +2819,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                     if (value && value.length > 0) {
                       const numericValue = value.replace(/[^\d]/g, '');
                       if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        const formatted = this.formatCurrencyAmount(Number(numericValue));
                         if (formatted !== value) {
                           field.formControl.setValue(formatted, { emitEvent: false });
                         }
@@ -2787,7 +2845,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             key: 'insuranceCoverage.productLiabilityInsurance',
             type: 'input',
             templateOptions: {
-              label: 'Product Liability Insurance (INR)',
+              label: `Product Liability Insurance (${this.getSelectedCurrency()})`,
               placeholder: 'Enter Product Liability Insurance Amount',
               type: 'text'
             },
@@ -2799,7 +2857,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                     if (value && value.length > 0) {
                       const numericValue = value.replace(/[^\d]/g, '');
                       if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        const formatted = this.formatCurrencyAmount(Number(numericValue));
                         if (formatted !== value) {
                           field.formControl.setValue(formatted, { emitEvent: false });
                         }

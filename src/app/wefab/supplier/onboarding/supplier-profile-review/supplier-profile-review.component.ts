@@ -1511,7 +1511,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     return maskedPart + lastFour;
   }
 
-  // Method to format currency in Indian format with comma separation
+  // Method to format currency using localStorage values with currency code instead of symbol
   formatCurrency(value: string | number): string {
     if (!value || value === 'Not provided' || value === '') return 'Not provided';
     
@@ -1522,18 +1522,57 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     const number = parseFloat(numericValue);
     if (isNaN(number)) return 'Not provided';
     
-    // Format with Indian locale (en-IN) for comma separation
-    const formatted = number.toLocaleString('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
+    // Get currency information from localStorage
+    const selectedCurrency = localStorage.getItem('selectedCurrency') || 'INR';
+    const currencyFormatString = localStorage.getItem('currencyFormat');
     
-    return formatted;
+    try {
+      // Parse the currency format if available
+      let currencyFormat = null;
+      if (currencyFormatString) {
+        currencyFormat = JSON.parse(currencyFormatString);
+      }
+      
+      // Determine locale based on currency
+      let locale = 'en-IN'; // Default
+      if (selectedCurrency === 'USD') locale = 'en-US';
+      else if (selectedCurrency === 'EUR') locale = 'en-EU';
+      else if (selectedCurrency === 'GBP') locale = 'en-GB';
+      else if (selectedCurrency === 'JPY') locale = 'ja-JP';
+      else if (selectedCurrency === 'CAD') locale = 'en-CA';
+      else if (selectedCurrency === 'AUD') locale = 'en-AU';
+      // Add more locales as needed
+      
+      // Format number without currency symbol using decimal style
+      let formattedNumber = number.toLocaleString(locale, {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      
+      // Apply custom formatting from currencyFormat if available
+      if (currencyFormat) {
+        // You can add more sophisticated formatting logic here based on currencyFormat structure
+        // For now, we'll use the standard locale formatting and append currency code
+        console.log('Using currency format from localStorage:', currencyFormat);
+      }
+      
+      // Return formatted number with currency code instead of symbol
+      return `${formattedNumber} ${selectedCurrency}`;
+      
+    } catch (error) {
+      console.error('Error parsing currency format from localStorage:', error);
+      // Fallback to default INR formatting if there's an error
+      const formattedNumber = number.toLocaleString('en-IN', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      return `${formattedNumber} INR`;
+    }
   }
 
-  // Alternative method for simple number formatting without currency symbol
+  // Alternative method for simple number formatting without currency code
   formatNumber(value: string | number): string {
     if (!value || value === 'Not provided' || value === '') return 'Not provided';
     
@@ -1544,8 +1583,24 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
     const number = parseFloat(numericValue);
     if (isNaN(number)) return 'Not provided';
     
-    // Format with Indian locale (en-IN) for comma separation
-    return number.toLocaleString('en-IN');
+    // Get currency information from localStorage to determine locale
+    const selectedCurrency = localStorage.getItem('selectedCurrency') || 'INR';
+    
+    // Determine locale based on currency
+    let locale = 'en-IN'; // Default
+    if (selectedCurrency === 'USD') locale = 'en-US';
+    else if (selectedCurrency === 'EUR') locale = 'en-EU';
+    else if (selectedCurrency === 'GBP') locale = 'en-GB';
+    else if (selectedCurrency === 'JPY') locale = 'ja-JP';
+    else if (selectedCurrency === 'CAD') locale = 'en-CA';
+    else if (selectedCurrency === 'AUD') locale = 'en-AU';
+    
+    // Format with appropriate locale for comma separation (no currency)
+    return number.toLocaleString(locale, {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
   }
 
   isImageFile(url: string): boolean {
