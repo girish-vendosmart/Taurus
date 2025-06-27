@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonTableComponent, TableConfig, ActionButton, FilterOption } from '../../../../shared/components/common-table/common-table.component';
+import { CommonService } from '../../../../shared/services/common.service';
+import { DateFormatPipe } from '../../../../shared/pipes/date-format.pipe';
 
 export interface RFQSummary {
   totalRfqs: number;
@@ -12,11 +14,15 @@ export interface RFQSummary {
 }
 
 export interface RFQData {
-  rfqName: string;
-  rfqId: string;
-  creationDate: string;
-  status: 'Open' | 'Quoted' | 'Expired' | 'Draft' | 'Under Review';
-  routerLink?: string;
+  name: string;
+  customer_rfq_name: string;
+  creation: string;
+  status: string;
+  workflow_state: string;
+  customer_name: string;
+  priority: string;
+  project_type: string;
+  expiry_date: string;
 }
 
 @Component({
@@ -26,121 +32,67 @@ export interface RFQData {
     CommonModule,
     RouterModule,
     FormsModule,
-    CommonTableComponent
+    CommonTableComponent,
+    DateFormatPipe
   ],
   templateUrl: './rfq-list.component.html',
   styleUrl: './rfq-list.component.scss'
 })
 export class RfqListComponent implements OnInit {
-  
-  // RFQ Summary Data
-  rfqSummary: RFQSummary = {
-    totalRfqs: 8,
-    openRfqs: 3,
-    quotedRfqs: 2,
-    expiredRfqs: 1
+  rfqData: RFQData[] = [];
+  loading = false;
+
+  rfqSummary = {
+    totalRfqs: 0,
+    openRfqs: 0,
+    quotedRfqs: 0,
+    expiredRfqs: 0
   };
-
-  // Sample RFQ Data with 8 entries
-  rfqData: RFQData[] = [
-    {
-      rfqName: 'Tool & Die Manufacturing Project',
-      rfqId: 'RFQ0000136',
-      creationDate: '26 June 2025, 12:10 PM',
-      status: 'Quoted',
-      routerLink: '/wefab/customer/rfq-details/RFQ0000136'
-    },
-    {
-      rfqName: 'Precision CNC Machining Components',
-      rfqId: 'RFQ0000137',
-      creationDate: '25 June 2025, 09:30 AM',
-      status: 'Open',
-      routerLink: '/wefab/customer/rfq-details/RFQ0000137'
-    },
-    {
-      rfqName: 'Automotive Parts Manufacturing',
-      rfqId: 'RFQ0000138',
-      creationDate: '24 June 2025, 02:15 PM',
-      status: 'Under Review',
-      routerLink: '/wefab/customer/rfq-details/RFQ0000138'
-    },
-    {
-      rfqName: 'Electronic Enclosure Fabrication',
-      rfqId: 'RFQ0000139',
-      creationDate: '23 June 2025, 11:45 AM',
-      status: 'Open',
-      routerLink: '/wefab/customer/rfq-details/RFQ0000139'
-    },
-    {
-      rfqName: 'Industrial Valve Components',
-      rfqId: 'RFQ0000140',
-      creationDate: '22 June 2025, 04:20 PM',
-      status: 'Quoted',
-      routerLink: '/wefab/customer/rfq-details/RFQ0000140'
-    },
-    {
-      rfqName: 'Medical Device Parts',
-      rfqId: 'RFQ0000141',
-      creationDate: '21 June 2025, 10:30 AM',
-      status: 'Expired',
-      routerLink: '/wefab/customer/rfq-details/RFQ0000141'
-    },
-    {
-      rfqName: 'Aerospace Component Manufacturing',
-      rfqId: 'RFQ0000142',
-      creationDate: '20 June 2025, 01:45 PM',
-      status: 'Open',
-      routerLink: '/wefab/customer/rfq-details/RFQ0000142'
-    },
-    {
-      rfqName: 'Custom Fixture Design & Build',
-      rfqId: 'RFQ0000143',
-      creationDate: '19 June 2025, 03:20 PM',
-      status: 'Draft',
-      routerLink: '/wefab/customer/rfq-details/RFQ0000143'
-    }
-  ];
-
-  // Status filter options
-  statusOptions: FilterOption[] = [
-    { label: 'All Status', value: null },
-    { label: 'Open', value: 'Open' },
-    { label: 'Quoted', value: 'Quoted' },
-    { label: 'Expired', value: 'Expired' },
-    { label: 'Draft', value: 'Draft' },
-    { label: 'Under Review', value: 'Under Review' }
-  ];
 
   // Table configuration
   tableConfig: TableConfig = {
     columns: [
       {
-        field: 'rfqName',
+        field: 'customer_rfq_name',
         header: 'RFQ Name',
         sortable: true,
         filterable: true,
         filterType: 'text',
         isLink: true,
         routerLinkField: 'routerLink',
-        width: '40%'
+        width: '25%'
       },
       {
-        field: 'creationDate',
+        field: 'customer_name',
+        header: 'Customer',
+        sortable: true,
+        filterable: true,
+        filterType: 'text',
+        width: '25%'
+      },
+      {
+        field: 'creation',
         header: 'Creation Date',
         sortable: true,
         filterable: true,
         filterType: 'dateRange',
-        width: '30%'
+        width: '25%'
       },
       {
-        field: 'status',
+        field: 'workflow_state',
         header: 'Status',
         sortable: true,
         filterable: true,
         filterType: 'dropdown',
-        filterOptions: this.statusOptions,
+        filterOptions: [
+          { label: 'All Status', value: null },
+          { label: 'Draft', value: 'Draft' },
+          { label: 'Under Review', value: 'Under Review' },
+          { label: 'Quoted', value: 'Quoted' },
+          { label: 'Expired', value: 'Expired' }
+        ],
         isStatus: true,
-        width: '30%'
+        width: '25%'
       }
     ],
     enableSearch: false,
@@ -153,25 +105,51 @@ export class RfqListComponent implements OnInit {
     enableColumnResize: false
   };
 
-  loading = false;
-
-  constructor(private router: Router) {}
+  constructor(private router: Router, private commonService: CommonService) {}
 
   ngOnInit(): void {
-    // No loading needed since we have static data
+    this.getRFQList();
+  }
+
+  getRFQList() {
+    this.loading = true;
+    let apiEndpoint = '/api/resource/Customer Request for Quotation?fields=["*"]';
+    this.commonService.getData(apiEndpoint).subscribe({
+      next: (res: any) => {
+        this.rfqData = res.data.map((rfq: any) => ({
+          ...rfq,
+          routerLink: `/wefab/customer/rfq-details/${rfq.name}`
+        }));
+        this.updateRFQSummary();
+      },
+      error: (error) => {
+        console.error('Error fetching RFQ list:', error);
+        this.loading = false;
+      },
+      complete: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  updateRFQSummary() {
+    const summary = {
+      totalRfqs: this.rfqData.length,
+      openRfqs: this.rfqData.filter(rfq => rfq.workflow_state === 'Open').length,
+      quotedRfqs: this.rfqData.filter(rfq => rfq.workflow_state === 'Quoted').length,
+      expiredRfqs: this.rfqData.filter(rfq => rfq.workflow_state === 'Expired').length
+    };
+    this.rfqSummary = summary;
   }
 
   onRowClick(event: any): void {
-    console.log('Row clicked:', event.rowData);
-    // Navigate to RFQ details when row is clicked
     if (event.rowData.routerLink) {
       this.router.navigate([event.rowData.routerLink]);
     }
   }
 
   onLinkClick(event: { rowData: any, column: any, event: any }): void {
-    console.log('Link clicked:', event.rowData);
-    // Navigation is now handled automatically by the routerLink directive in the template
+    // Navigation handled by routerLink
   }
 
   onActionClick(event: { action: string, rowData: any }): void {

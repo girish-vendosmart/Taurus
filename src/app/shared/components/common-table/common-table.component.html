@@ -19,7 +19,7 @@
       <!-- Table -->
       <p-table 
         #dt 
-        [value]="data.length ? data : sampleData"
+        [value]="data"
         [columns]="getVisibleColumns()"
         [paginator]="config.enablePagination"
         [rows]="config.pageSize || 10"
@@ -147,7 +147,12 @@
 
                 <!-- Default Cell -->
                 <div [class]="col.field + '-cell'" *ngSwitchDefault>
-                  {{ rowData[col.field] }}
+                  <ng-container *ngIf="col.field === 'creation'">
+                    {{ rowData[col.field] | dateFormat:'medium' }}
+                  </ng-container>
+                  <ng-container *ngIf="col.field !== 'creation'">
+                    {{ rowData[col.field] }}
+                  </ng-container>
                 </div>
               </ng-container>
             </td>
@@ -164,7 +169,7 @@
         </ng-template>
 
         <!-- Loading Message -->
-        <ng-template pTemplate="loadingbody">
+        <ng-template pTemplate="loadingbody" let-columns="columns">
           <tr>
             <td [attr.colspan]="getVisibleColumns().length" class="text-center">
               Loading data...

@@ -156,35 +156,6 @@
                 font-size: 0.875rem;
               }
               
-              // Simple status badge styling
-              .status-badge {
-                font-size: 0.7rem;
-                padding: 0.2rem 0.6rem;
-                border-radius: 12px;
-                font-weight: 500;
-                text-transform: uppercase;
-                
-                &.status-quoted {
-                  background-color: #d1fae5;
-                  color: #065f46;
-                }
-                
-                &.status-open {
-                  background-color: #dbeafe;
-                  color: #1e40af;
-                }
-                
-                &.status-expired {
-                  background-color: #fee2e2;
-                  color: #991b1b;
-                }
-                
-                &.status-draft {
-                  background-color: #f3f4f6;
-                  color: #374151;
-                }
-              }
-              
               // Simple link styling
               .linkable-column {
                 color: $customer-primary;

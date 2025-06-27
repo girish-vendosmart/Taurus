@@ -16,7 +16,6 @@ $danger-red: $customer-danger;
 .success-container {
   min-height: 100vh;
   background: $technical-white;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 // Back Button Section
@@ -88,7 +87,6 @@ $danger-red: $customer-danger;
         font-size: 18px;
         margin: 0;
         font-weight: 600;
-        font-family: 'Courier New', monospace;
         letter-spacing: 0.025em;
       }
     }
@@ -924,7 +922,6 @@ $danger-red: $customer-danger;
       font-size: 2rem;
       font-weight: 700;
       color: $customer-primary;
-      font-family: 'Courier New', monospace;
       margin-bottom: 0.5rem;
       letter-spacing: 0.025em;
     }

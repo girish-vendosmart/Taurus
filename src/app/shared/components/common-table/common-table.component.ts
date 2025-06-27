@@ -11,6 +11,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { CalendarModule } from 'primeng/calendar';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
 
 export interface ActionButton {
   label?: string;
@@ -83,6 +84,7 @@ const DEFAULT_STATUS_OPTIONS: FilterOption[] = [
     MultiSelectModule,
     OverlayPanelModule,
     CalendarModule,
+    DateFormatPipe
   ],
   templateUrl: './common-table.component.html',
   styleUrl: './common-table.component.scss'
@@ -191,9 +193,6 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
   // Filter states
   dateRangeFilters: any = {};
   dropdownFilters: { [key: string]: any } = {};
-
-  // Sample data for demonstration
-  sampleData = [];
 
   ngOnChanges(changes: SimpleChanges) {
     
@@ -522,7 +521,7 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
 
   getTotalPages(): number {
     if (!this.table || this.table.rows === undefined) return 1;
-    const totalRecords = this.data.length || this.sampleData.length;
+    const totalRecords = this.data.length;
     return Math.ceil(totalRecords / this.table.rows);
   }
 
@@ -533,7 +532,7 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
 
   isLastPage(): boolean {
     if (!this.table || this.table.first === undefined || this.table.first === null || this.table.rows === undefined) return true;
-    const totalRecords = this.data.length || this.sampleData.length;
+    const totalRecords = this.data.length;
     return this.table.first + this.table.rows >= totalRecords;
   }
 
@@ -550,7 +549,7 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
   goToNextPage(): void {
     if (!this.table || this.isLastPage()) return;
     const newFirst = (this.table.first || 0) + (this.table.rows || 10);
-    const totalRecords = this.data.length || this.sampleData.length;
+    const totalRecords = this.data.length;
     if (newFirst < totalRecords) {
       this.table.first = newFirst;
       this.table.onPageChange({

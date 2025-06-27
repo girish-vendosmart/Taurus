@@ -46,7 +46,7 @@ export class CommonService {
     getData(endPoint: string, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Authorization': `Token 3f36743188b20d5:afcc7c21d6aeac0`,
             'Content-Type': 'application/json'
         });
         return this.http.get(`${this.baseUrl}${endPoint}`, { headers, params });
