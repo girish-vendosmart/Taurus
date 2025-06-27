@@ -403,6 +403,10 @@ export class CreateQuotationComponent implements OnInit {
   // Currency properties
   selectedCurrency: string = 'INR'; // Default fallback for second currency option
   currencyOptions: { label: string; value: string }[] = [];
+  
+  // Number formatting properties
+  private defaultCurrencyFormat: string = '#,###.##'; // USD format
+  private selectedCurrencyFormat: string = ''; // Format from localStorage
 
   // Dropdown options
   paymentTermsOptions = [
@@ -447,6 +451,9 @@ export class CreateQuotationComponent implements OnInit {
   constructor(private sweetAlert: SweetAlertService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private commonService: CommonService, private fileUploadService: FileUploadService) {
     // Initialize currency options on component creation
     this.initializeCurrencyOptions();
+    
+    // Initialize currency formatting
+    this.initializeCurrencyFormatting();
     
     // Ensure USD is selected by default
     this.model.currency_code = 'USD';
@@ -555,6 +562,18 @@ export class CreateQuotationComponent implements OnInit {
   }
 
   /**
+   * Initialize currency formatting options from localStorage
+   */
+  private initializeCurrencyFormatting() {
+    // Get currency format from localStorage
+    this.selectedCurrencyFormat = this.getCurrencyFormatFromStorage();
+    
+    console.log('Currency formatting initialized:');
+    console.log('USD format:', this.defaultCurrencyFormat);
+    console.log('Selected currency format:', this.selectedCurrencyFormat);
+  }
+
+  /**
    * Get selected currency from localStorage with fallback
    */
   private getSelectedCurrencyFromStorage(): string {
@@ -572,6 +591,25 @@ export class CreateQuotationComponent implements OnInit {
     } catch (error) {
       console.warn('Error accessing localStorage for currency:', error);
       return 'INR'; // Default fallback
+    }
+  }
+
+  /**
+   * Get currency format from localStorage with fallback
+   */
+  private getCurrencyFormatFromStorage(): string {
+    try {
+      const currencyFormat = 
+        localStorage.getItem('currency_format') ||
+        localStorage.getItem('currencyFormat') ||
+        localStorage.getItem('number_format') ||
+        '#,###.##'; // Default fallback to USD format
+      
+      console.log('Currency format retrieved from localStorage:', currencyFormat);
+      return currencyFormat;
+    } catch (error) {
+      console.warn('Error accessing localStorage for currency format:', error);
+      return '#,###.##'; // Default fallback to USD format
     }
   }
 
@@ -603,6 +641,177 @@ export class CreateQuotationComponent implements OnInit {
     if (!this.isEditMode) {
       this.model.currency_code = 'USD';
     }
+  }
+
+  /**
+   * Get the current number format based on selected currency
+   */
+  private getCurrentNumberFormat(): string {
+    if (this.model.currency_code === 'USD') {
+      return this.defaultCurrencyFormat; // #,###.##
+    } else {
+      return this.selectedCurrencyFormat || this.defaultCurrencyFormat;
+    }
+  }
+
+  /**
+   * Format number according to current currency format
+   */
+  formatCurrency(value: number | null | undefined): string {
+    if (value === null || value === undefined || isNaN(value)) {
+      return '-----';
+    }
+
+    // Handle different currencies with their specific formatting
+    if (this.model.currency_code === 'USD') {
+      // USD: Use standard US number format (#,###.##)
+      return this.formatUSDNumber(value);
+    } else if (this.model.currency_code === 'INR') {
+      // INR: Use Indian number format (##,##,###.##)
+      return this.formatIndianNumber(value);
+    } else {
+      // Other currencies: Use custom format from localStorage
+      const format = this.getCurrentNumberFormat();
+      return this.formatNumberByPattern(value, format);
+    }
+  }
+
+  /**
+   * Format number for USD currency (#,###.##)
+   */
+  private formatUSDNumber(value: number): string {
+    try {
+      // Use Intl.NumberFormat for USD formatting
+      return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value);
+    } catch (error) {
+      console.warn('Error formatting USD number:', error);
+      return value.toFixed(2);
+    }
+  }
+
+  /**
+   * Format number by custom pattern from localStorage
+   */
+  private formatNumberByPattern(value: number, pattern: string): string {
+    try {
+      // Basic pattern matching for common formats
+      if (pattern.includes(',') && pattern.includes('.')) {
+        // Format like #,###.## or ##,##,###.##
+        if (pattern.includes('##,##,###')) {
+          // Indian number format (##,##,###.##)
+          return this.formatIndianNumber(value);
+        } else {
+          // Standard international format (#,###.##)
+          return this.formatUSDNumber(value);
+        }
+      } else if (pattern.includes('.') && pattern.includes(' ')) {
+        // European format (# ###.##)
+        return this.formatEuropeanNumber(value);
+      } else if (pattern.includes(',') && pattern.includes(' ')) {
+        // French format (# ###,##)
+        return this.formatFrenchNumber(value);
+      } else {
+        // Fallback to USD format
+        return this.formatUSDNumber(value);
+      }
+    } catch (error) {
+      console.warn('Error formatting number with pattern:', pattern, error);
+      return this.formatUSDNumber(value);
+    }
+  }
+
+  /**
+   * Format number in Indian style (##,##,###.##)
+   */
+  private formatIndianNumber(value: number): string {
+    try {
+      // First try with native Intl.NumberFormat for Indian locale
+      const formatter = new Intl.NumberFormat('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      const formatted = formatter.format(value);
+      
+      return formatted;
+    } catch (error) {
+      console.warn('Error with Intl.NumberFormat en-IN, using manual formatting:', error);
+      // Fallback to manual Indian formatting
+      return this.manualIndianFormat(value);
+    }
+  }
+
+  /**
+   * Manual Indian number formatting as fallback
+   */
+  private manualIndianFormat(value: number): string {
+    try {
+      const fixed = value.toFixed(2);
+      const [integerPart, decimalPart] = fixed.split('.');
+      
+      // Reverse the string to make it easier to process
+      const reversed = integerPart.split('').reverse().join('');
+      let formatted = '';
+      
+      for (let i = 0; i < reversed.length; i++) {
+        if (i === 3) {
+          // First comma after 3 digits from right
+          formatted = ',' + formatted;
+        } else if (i > 3 && (i - 3) % 2 === 0) {
+          // Subsequent commas every 2 digits
+          formatted = ',' + formatted;
+        }
+        formatted = reversed[i] + formatted;
+      }
+      
+      return `${formatted}.${decimalPart}`;
+    } catch (error) {
+      console.warn('Error in manual Indian formatting:', error);
+      return value.toFixed(2);
+    }
+  }
+
+  /**
+   * Format number in European style (# ###.##)
+   */
+  private formatEuropeanNumber(value: number): string {
+    try {
+      return new Intl.NumberFormat('fr-FR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value).replace(',', '.');
+    } catch (error) {
+      return this.formatUSDNumber(value);
+    }
+  }
+
+  /**
+   * Format number in French style (# ###,##)
+   */
+  private formatFrenchNumber(value: number): string {
+    try {
+      return new Intl.NumberFormat('fr-FR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value);
+    } catch (error) {
+      return this.formatUSDNumber(value);
+    }
+  }
+
+  /**
+   * Format currency display with symbol
+   */
+  formatCurrencyDisplay(value: number | null | undefined): string {
+    const formattedNumber = this.formatCurrency(value);
+    
+    if (formattedNumber === '-----') {
+      return '-----';
+    }
+    
+    return `${this.currentCurrencyDisplay} ${formattedNumber}`;
   }
 
   loadCreateQuotation(rfqId: string) {
@@ -1272,7 +1481,19 @@ export class CreateQuotationComponent implements OnInit {
       // this.selectedTaxType = 'No Tax';
     }
     
-    this.calculateTotals();
+    // Refresh currency formatting when currency changes
+    this.initializeCurrencyFormatting();
+    
+    // Force UI update to apply new number formatting
+    setTimeout(() => {
+      this.calculateTotals();
+      // Trigger change detection to update all currency displays
+      if (this.model.quotationItems) {
+        this.model.quotationItems = [...this.model.quotationItems];
+      }
+    }, 100);
+    
+    console.log('Currency formatting updated for:', this.model.currency_code);
   }
 
   onSubmit() {
@@ -3106,6 +3327,57 @@ export class CreateQuotationComponent implements OnInit {
     errorMessage += '\n\nPlease fix the errors and try again. Use the CSV template for correct format.';
 
     this.sweetAlert.error(errorMessage);
+  }
+
+  /**
+   * Update currency options when localStorage changes (optional method for future use)
+   */
+  refreshCurrencyFromStorage() {
+    const newSelectedCurrency = this.getSelectedCurrencyFromStorage();
+    
+    if (newSelectedCurrency !== this.selectedCurrency) {
+      this.selectedCurrency = newSelectedCurrency;
+      this.initializeCurrencyOptions();
+      
+      // If current currency is no longer available, reset to USD
+      const isCurrentCurrencyAvailable = this.currencyOptions.some(option => 
+        option.value === this.model.currency_code
+      );
+      
+      if (!isCurrentCurrencyAvailable) {
+        this.model.currency_code = 'USD';
+        this.onCurrencyChange();
+      }
+      
+      console.log('Currency options refreshed due to localStorage change');
+    }
+  }
+
+  /**
+   * Get CSS class for currency formatting
+   */
+  getCurrencyFormatClass(): string {
+    return this.model.currency_code === 'USD' ? 'number-format-usd' : 'number-format-local';
+  }
+
+  /**
+   * Get current currency format info for display
+   */
+  get currentCurrencyFormatInfo(): string {
+    const format = this.getCurrentNumberFormat();
+    return `Current format: ${format} (${this.model.currency_code})`;
+  }
+
+  /**
+   * Test method to verify number formatting - for debugging purposes
+   */
+  testNumberFormatting() {
+    const testValue = 5400000;
+    console.log('Testing number formatting for value:', testValue);
+    console.log('Current currency:', this.model.currency_code);
+    console.log('USD format:', this.formatUSDNumber(testValue));
+    console.log('INR format:', this.formatIndianNumber(testValue));
+    console.log('Current format:', this.formatCurrency(testValue));
   }
 
   // ... existing code ...
