@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonTableComponent, TableConfig, TableColumn } from '../../../../shared/components/common-table/common-table.component';
+import { CommonService } from '../../../../shared/services/common.service';
 
 @Component({
   selector: 'app-submitted-rfq',
@@ -358,7 +359,8 @@ export class SubmittedRfqComponent implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private commonService: CommonService
   ) {}
 
   ngOnInit() {
@@ -367,8 +369,36 @@ export class SubmittedRfqComponent implements OnInit {
       this.currentRfqId = params['id'];
       console.log('Current RFQ ID:', this.currentRfqId);
       // Here you can load specific RFQ data based on the ID
+      this.getRfqData(this.currentRfqId);
       this.loadRfqData(this.currentRfqId);
       // Initialize filters after data is loaded
+      this.initializeFilters();
+    });
+  }
+
+  getRfqData(rfqId: string) {
+    let apiEndpoint = `/api/resource/Customer Request for Quotation/${rfqId}?fields=["*"]`;
+    this.commonService.getData(apiEndpoint).subscribe((res: any) => {
+      this.rfqData.rfqNumber = res.data.name;
+      this.rfqData.reference = res.data.reference || '----';
+      this.rfqData.projectInfo.projectName = res.data.project_name || '----';
+      this.rfqData.projectInfo.deliveryDate = res.data.delivery_date || '----';
+      
+      // Transform line items to match the expected format
+      const transformedLineItems = (res.data.line_items || []).map((item: any) => ({
+        partNumber: item.name,
+        description: item.item_description,
+        quantity: item.quantity,
+        material: item.surface_finish || '----', // Using surface_finish as material since material isn't in the API response
+        unit: item.unit
+      }));
+
+      this.rfqData.allLineItems = transformedLineItems;
+      this.rfqData.bomSummary.totalLineItems = transformedLineItems.length;
+      this.rfqData.bomSummary.drawingsUploaded = res.data.attachments?.length || 0;
+      this.rfqData.bomSummary.totalQuantity = transformedLineItems.reduce((acc: number, item: any) => acc + item.quantity, 0);
+
+      // Initialize filters after updating line items
       this.initializeFilters();
     });
   }
