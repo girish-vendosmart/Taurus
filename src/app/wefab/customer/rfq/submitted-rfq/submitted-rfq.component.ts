@@ -5,6 +5,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonTableComponent, TableConfig, TableColumn } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
 
+interface RfqAttachment {
+  name: string;
+  size: string;
+  type: string;
+  creation: string;
+}
+
 @Component({
   selector: 'app-submitted-rfq',
   standalone: true,
@@ -168,58 +175,7 @@ export class SubmittedRfqComponent implements OnInit {
         unit: 'EA'
       }
     ],
-    allAttachments: [
-      {
-        name: 'RFK-001-Drawing.pdf',
-        size: '2.1 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'BOM-Complete.xlsx',
-        size: '1.2 MB',
-        type: 'excel'
-      },
-      {
-        name: 'Assembly-Model.step',
-        size: '8.9 MB',
-        type: 'step'
-      },
-      {
-        name: 'RFK-002-Drawing.pdf',
-        size: '1.8 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'RFK-003-Drawing.pdf',
-        size: '1.5 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'RFK-004-Drawing.pdf',
-        size: '2.3 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'RFK-005-Drawing.pdf',
-        size: '1.9 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'Material-Specifications.pdf',
-        size: '3.2 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'Quality-Requirements.docx',
-        size: '0.8 MB',
-        type: 'doc'
-      },
-      {
-        name: 'Assembly-Instructions.pdf',
-        size: '2.7 MB',
-        type: 'pdf'
-      }
-    ]
+    allAttachments: [] as RfqAttachment[]
   };
 
   // Computed properties for displayed items
@@ -236,7 +192,7 @@ export class SubmittedRfqComponent implements OnInit {
     return this.searchPartNumber.trim() !== '' || this.selectedMaterial !== '' || this.selectedUnit !== '';
   }
 
-  get displayedAttachments() {
+  get displayedAttachments(): RfqAttachment[] {
     return this.showAllAttachments 
       ? this.rfqData.allAttachments 
       : this.rfqData.allAttachments.slice(0, 5);
@@ -306,9 +262,9 @@ export class SubmittedRfqComponent implements OnInit {
     actionButtons: []
   };
 
-  downloadAttachment(attachment: any) {
-    // Implementation for download functionality
+  downloadAttachment(attachment: RfqAttachment) {
     console.log('Downloading:', attachment.name);
+    // Implementation for download functionality
   }
 
   // Filter methods
@@ -384,23 +340,49 @@ export class SubmittedRfqComponent implements OnInit {
       this.rfqData.projectInfo.projectName = res.data.project_name || '----';
       this.rfqData.projectInfo.deliveryDate = res.data.delivery_date || '----';
       
-      // Transform line items to match the expected format
+      // Transform line items
       const transformedLineItems = (res.data.line_items || []).map((item: any) => ({
         partNumber: item.name,
         description: item.item_description,
         quantity: item.quantity,
-        material: item.surface_finish || '----', // Using surface_finish as material since material isn't in the API response
+        material: item.surface_finish || '----',
         unit: item.unit
       }));
 
       this.rfqData.allLineItems = transformedLineItems;
       this.rfqData.bomSummary.totalLineItems = transformedLineItems.length;
-      this.rfqData.bomSummary.drawingsUploaded = res.data.attachments?.length || 0;
+      
+      // Transform attachments with proper typing
+      this.rfqData.allAttachments = (res.data.attachments || []).map((attachment: any): RfqAttachment => ({
+        name: attachment.file_name || attachment.name,
+        size: attachment.file_size || '0 KB',
+        type: this.getFileType(attachment.file_name || attachment.name),
+        creation: attachment.creation || new Date().toISOString()
+      }));
+      
+      this.rfqData.bomSummary.drawingsUploaded = this.rfqData.allAttachments.length;
       this.rfqData.bomSummary.totalQuantity = transformedLineItems.reduce((acc: number, item: any) => acc + item.quantity, 0);
 
       // Initialize filters after updating line items
       this.initializeFilters();
     });
+  }
+
+  // Add helper method to determine file type
+  private getFileType(fileName: string): string {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return 'pdf';
+      case 'doc':
+      case 'docx':
+        return 'doc';
+      case 'xls':
+      case 'xlsx':
+        return 'excel';
+      default:
+        return 'file';
+    }
   }
 
   private loadRfqData(rfqId: string) {

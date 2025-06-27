@@ -83,45 +83,29 @@
     </div>
 
     <!-- Attachments Section -->
-    <div class="attachments-section">
-      <h3>Attachments</h3>
+    <div class="attachments-section m-4 p-3">
+      <h3>Attachments ({{ rfqData.allAttachments.length }})</h3>
+      <p class="text-muted">Documents and files related to this quotation</p>
+      
       <div class="attachments-grid">
-        <div *ngFor="let attachment of displayedAttachments" class="attachment-item">
-          <div class="file-icon" [ngClass]="attachment.type">
-            <span *ngIf="attachment.type === 'pdf'">📄</span>
-            <span *ngIf="attachment.type === 'excel'">📊</span>
-            <span *ngIf="attachment.type === 'step'">⚙️</span>
-            <span *ngIf="attachment.type === 'doc'">📝</span>
-          </div>
-          <div class="file-info">
-            <div class="file-name">{{ attachment.name }}</div>
-            <div class="file-size">{{ attachment.size }}</div>
-          </div>
-          <button class="download-btn" (click)="downloadAttachment(attachment)">
-            ⬇️
-          </button>
-        </div>
-        
-        <!-- View All Button -->
-        <div class="view-all-files" *ngIf="!showAllAttachments && remainingAttachmentsCount > 0">
-          <button class="view-all-files-btn" (click)="viewAllAttachments()">
-            <span class="plus-icon">+</span>
-            <div class="view-text">
-              <div>+{{ remainingAttachmentsCount }} more files</div>
-              <div class="view-all-link">View All</div>
+        <div *ngFor="let attachment of displayedAttachments" class="attachment-card">
+          <div class="attachment-content">
+            <div class="file-icon">
+              <i class="pi pi-file-pdf"></i> <!-- Use appropriate icon based on file type -->
             </div>
-          </button>
-        </div>
-
-        <!-- Show Less Button -->
-        <div class="view-all-files" *ngIf="showAllAttachments">
-          <button class="view-all-files-btn show-less-btn" (click)="viewAllAttachments()">
-            <span class="minus-icon">-</span>
-            <div class="view-text">
-              <div>Show Less</div>
-              <div class="view-all-link">Collapse</div>
+            <div class="attachment-details">
+              <div class="attachment-name">{{ attachment.name }}</div>
+              <div class="attachment-date">{{ attachment.creation | date:'MMM dd, yyyy, HH:mm a' }}</div>
             </div>
-          </button>
+            <div class="attachment-actions">
+              <button class="view-btn" title="View">
+                <i class="pi pi-eye"></i>
+              </button>
+              <button class="download-btn" (click)="downloadAttachment(attachment)" title="Download">
+                <i class="pi pi-download"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -170,41 +154,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- RFQ Reference Section -->
-  <div class="rfq-reference-section">
-    <h3 class="reference-title">Your RFQ Reference</h3>
-    
-    <!-- RFQ Number Card -->
-    <div class="rfq-number-card">
-      <div class="rfq-number-display">{{ rfqData.rfqNumber }}</div>
-      <div class="rfq-reference-text">Keep this number for reference</div>
-    </div>
-
-    <!-- Copy Button -->
-    <!-- <button class="copy-rfq-btn" (click)="copyRfqNumber()">
-      <i class="copy-icon">📋</i>
-      Copy RFQ Number
-    </button> -->
-
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <button class="action-btn download-btn-action" (click)="downloadRfqSummary()">
-        <i class="download-icon">⬇️</i>
-        Download RFQ Summary
-      </button>
-      
-      <button class="action-btn dashboard-btn" (click)="goToDashboard()">
-        <i class="dashboard-icon">🏠</i>
-        Go to Dashboard
-      </button>
-
-      <button class="action-btn create-rfq-btn" (click)="createNewRfq()">
-        <i class="plus-icon-btn">+</i>
-        Create New RFQ
-      </button>
     </div>
   </div>
 </div>
