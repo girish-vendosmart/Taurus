@@ -529,6 +529,8 @@ $danger-red: #EF4444;
 // Comment and Resolution Content
 .comment-content,
 .resolution-content {
+  margin-top: 20px;
+  padding: 1rem;
   background: white;
   border-radius: 12px;
   border: 1px solid rgba($material-finish-silver, 0.2);

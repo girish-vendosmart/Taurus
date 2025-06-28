@@ -139,13 +139,6 @@ export class SupplierOrderDetailsComponent implements OnInit {
         width: '200px'
       },
       {
-        field: 'drawing_ref',
-        header: 'Drawing Ref',
-        sortable: true,
-        filterable: true,
-        width: '130px'
-      },
-      {
         field: 'unit',
         header: 'Unit',
         sortable: true,
@@ -158,14 +151,6 @@ export class SupplierOrderDetailsComponent implements OnInit {
         sortable: true,
         filterable: true,
         width: '100px'
-      },
-      {
-        field: 'current_status',
-        header: 'Current Status',
-        sortable: true,
-        filterable: true,
-        isStatus: true,
-        width: '140px'
       },
       {
         field: 'rate',
@@ -339,8 +324,8 @@ export class SupplierOrderDetailsComponent implements OnInit {
         console.log('Order details:', res.data);
         if (res.data) {
           this.orderDetails = this.transformApiDataToOrderDetails(res.data);
-          this.loadOrderItems();
-          this.loadOrderAttachments();
+          this.orderItems = this.transformApiDataToOrderItems(res.data.items);
+          this.orderAttachments = this.transformApiDataToOrderAttachments(res.data.technical_drawings);
         }
         this.loading = false;
       },
@@ -363,21 +348,6 @@ export class SupplierOrderDetailsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error fetching Order items:', error);
-      }
-    });
-  }
-
-  loadOrderAttachments() {
-    // Load order attachments from API
-    let endpoint = `/api/resource/File?filters=[["attached_to_doctype", "=", "Purchase Order"],["attached_to_name", "=", "${this.orderId}"]]`;
-    
-    this.commonService.getWefabData(endpoint).subscribe({
-      next: (res: any) => {
-        console.log('Order attachments:', res.data);
-        this.orderAttachments = this.transformApiDataToOrderAttachments(res.data);
-      },
-      error: (error) => {
-        console.error('Error fetching Order attachments:', error);
       }
     });
   }
@@ -406,12 +376,12 @@ export class SupplierOrderDetailsComponent implements OnInit {
 
   transformApiDataToOrderItems(apiData: any[]): OrderItem[] {
     if (!apiData || !Array.isArray(apiData)) {
-      return [];
+      return [];  
     }
 
     return apiData.map(item => ({
       name: item.name || '',
-      item_number: item.item_number || '',
+      item_number: item.item_code || '',
       item_code: item.item_code || '',
       item_description: item.item_description || item.description || '',
       drawing_ref: item.drawing_ref || '',
@@ -419,7 +389,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
       specification: item.specification || '',
       quantity: item.quantity || 0,
       unit: item.unit || '',
-      rate: item.rate || 0,
+      rate: item.unit_price || 0,
       amount: item.amount || (item.quantity * item.rate) || 0,
       current_status: item.current_status || '',
       delivery_date: item.delivery_date || '',
@@ -437,7 +407,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
       name: attachment.name || '',
       file: attachment.file_url || '',
       file_url: attachment.file_url || '',
-      file_name: attachment.file_name || '',
+      file_name: attachment.name || '',
       file_type: attachment.file_type || '',
       description: attachment.description || '',
       category: attachment.category || '',

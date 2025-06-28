@@ -416,9 +416,9 @@ $danger-red: #EF4444;
 // Comment and Activity Content
 .comment-content,
 .activity-content {
-  padding: 2rem;
+  margin-top: 20px;
+  padding: 1rem;
   background: white;
-  margin: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba($material-finish-silver, 0.2);
@@ -957,9 +957,9 @@ $danger-red: #EF4444;
 // Comment and Activity Content
 .comment-content,
 .activity-content {
-  padding: 2rem;
+  margin-top: 20px;
+  padding: 1rem;
   background: white;
-  margin: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba($material-finish-silver, 0.2);
