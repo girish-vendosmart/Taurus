@@ -12,12 +12,12 @@
       <div class="header-left">
         <h3 class="page-title">{{ orderDetails.name }}</h3>
         <span class="status-badge" [ngClass]="getStatusClass(orderDetails.status)">
-          {{ getStatusText() }}
+          {{orderDetails.status}}
         </span>
       </div>
     </div>
   </div>
-
+  
   <!-- Order Info Bar -->
   <div class="rfq-info-bar">
     <div class="info-item">
@@ -26,8 +26,13 @@
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
-      <span class="info-label">Purchase Order:</span>
-      <span class="info-value">{{ orderDetails.purchase_order }}</span>
+      <span class="info-label">RFQ Reference:</span>
+      <span class="info-value">{{ orderDetails.rfq_id }}</span>
+    </div>
+    <div class="info-separator">|</div>
+    <div class="info-item">
+      <span class="info-label">Quotation Reference:</span>
+      <span class="info-value">{{ orderDetails.quotation_id }}</span>
     </div>
     <div class="info-separator">|</div>
     <div class="info-item">
@@ -109,7 +114,7 @@
         <!-- Comment Tab -->
         <div class="tab-panel" *ngSwitchCase="'comment'">
           <div class="comment-content">
-            <app-conversation-trail [docType]="'Supplier Order Messenger'" [docName]="orderId"></app-conversation-trail>
+            <app-conversation-trail [docType]="'Purchase Order Messenger'" [docName]="orderId"></app-conversation-trail>
           </div>
         </div>
       </div>

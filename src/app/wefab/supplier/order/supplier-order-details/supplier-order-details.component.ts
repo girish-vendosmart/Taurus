@@ -32,6 +32,8 @@ export interface OrderDetails {
   delivery_terms: string;
   supplier: string;
   purchase_order: string;
+  rfq_id: string;
+  quotation_id: string;
   status: string;
 }
 
@@ -103,6 +105,8 @@ export class SupplierOrderDetailsComponent implements OnInit {
     delivery_terms: '',
     supplier: '',
     purchase_order: '',
+    rfq_id: '',
+    quotation_id: '',
     status: ''
   };
 
@@ -282,7 +286,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
       this.orderId = params['id'];
       console.log('Order ID:', this.orderId);
       if (this.orderId) {
-        this.accessFirebaseTrigger('Supplier Order', this.orderId);
+        this.accessFirebaseTrigger('Purchase Order', this.orderId);
       }
     });
   }
@@ -303,7 +307,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
 
   getActionList() {
     let obj: any = {
-      doctype: 'Supplier Order',
+      doctype: 'Purchase Order',
       name: this.orderId
     }
     let params = new HttpParams();
@@ -328,7 +332,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
 
   loadOrderDetails() {
     this.loading = true;
-    let endpoint = `/api/resource/Supplier Order/${this.orderId}`;
+    let endpoint = `/api/resource/Purchase Order/${this.orderId}`;
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
@@ -344,14 +348,13 @@ export class SupplierOrderDetailsComponent implements OnInit {
         console.error('Error fetching Order details:', error);
         this.loading = false;
         // Fallback to sample data if API fails
-        this.loadSampleData();
       }
     });
   }
 
   loadOrderItems() {
     // Load order items from API
-    let endpoint = `/api/resource/Supplier Order Item?filters=[["parent", "=", "${this.orderId}"]]`;
+    let endpoint = `/api/resource/Purchase Order Item?filters=[["parent", "=", "${this.orderId}"]]`;
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
@@ -360,15 +363,13 @@ export class SupplierOrderDetailsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error fetching Order items:', error);
-        // Use sample data
-        this.loadSampleOrderItems();
       }
     });
   }
 
   loadOrderAttachments() {
     // Load order attachments from API
-    let endpoint = `/api/resource/File?filters=[["attached_to_doctype", "=", "Supplier Order"],["attached_to_name", "=", "${this.orderId}"]]`;
+    let endpoint = `/api/resource/File?filters=[["attached_to_doctype", "=", "Purchase Order"],["attached_to_name", "=", "${this.orderId}"]]`;
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
@@ -381,179 +382,15 @@ export class SupplierOrderDetailsComponent implements OnInit {
     });
   }
 
-  // Load sample data for demonstration
-  loadSampleData() {
-    this.orderDetails = {
-      name: 'ORD0000001',
-      order_name: 'Precision Components Order',
-      description: 'Manufacturing order for precision machined components',
-      docstatus: 1,
-      creation: '2025-01-15 10:30:00',
-      modified: '2025-01-20 14:15:00',
-      expected_delivery: '2025-02-15',
-      delivery_address: '123 Industrial Park, Manufacturing District, City, State 12345',
-      special_instructions: 'Handle with care. Quality inspection required before shipment.',
-      total_amount: 15000.00,
-      payment_terms: 'Net 30 days',
-      delivery_terms: 'FOB Origin',
-      supplier: 'Tata Consultancy Services Limited',
-      purchase_order: 'PO-2025-001',
-      status: 'In Progress'
-    };
-
-    this.loadSampleOrderItems();
-  }
-
-  loadSampleOrderItems() {
-    this.orderItems = [
-      {
-        name: 'ORD-ITEM-001',
-        item_number: '3.2.1',
-        item_code: 'COMP-001',
-        item_description: 'description',
-        drawing_ref: 'drwg-04',
-        material: 'Stainless Steel 316',
-        specification: 'Dia 50mm x 100mm Length',
-        quantity: 26,
-        unit: 'Pieces',
-        rate: 2,
-        amount: 5000.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-10',
-        notes: 'Surface finish: Ra 0.8',
-        cad_file_reference: 'CAD-001.dwg'
-      },
-      {
-        name: 'ORD-ITEM-002',
-        item_number: '9.2.1',
-        item_code: 'COMP-002',
-        item_description: 'description',
-        drawing_ref: 'drwg-06',
-        material: 'Carbon Steel AISI 4140',
-        specification: 'Dia 25mm x 200mm Length',
-        quantity: 13,
-        unit: 'Sqm',
-        rate: 3,
-        amount: 4000.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-12',
-        notes: 'Heat treatment required',
-        cad_file_reference: 'CAD-002.dwg'
-      },
-      {
-        name: 'ORD-ITEM-003',
-        item_number: '8.2.1',
-        item_code: 'COMP-003',
-        item_description: 'description',
-        drawing_ref: 'drwg-07',
-        material: 'Aluminum 6061',
-        specification: 'Custom bracket design',
-        quantity: 8,
-        unit: 'Sqm',
-        rate: 1,
-        amount: 2400.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-08',
-        notes: 'Anodized finish',
-        cad_file_reference: 'CAD-003.dwg'
-      },
-      {
-        name: 'ORD-ITEM-004',
-        item_number: '6.2.1',
-        item_code: 'COMP-004',
-        item_description: 'description',
-        drawing_ref: 'drwg-02',
-        material: 'Brass C360',
-        specification: 'Threaded connector',
-        quantity: 12,
-        unit: 'Pieces',
-        rate: 4,
-        amount: 1800.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-14',
-        notes: 'High precision threading',
-        cad_file_reference: 'CAD-004.dwg'
-      },
-      {
-        name: 'ORD-ITEM-005',
-        item_number: '3.2.4',
-        item_code: 'COMP-005',
-        item_description: 'description',
-        drawing_ref: 'drwg-05',
-        material: 'Steel A36',
-        specification: 'Welded assembly',
-        quantity: 14,
-        unit: 'Pieces',
-        rate: 2,
-        amount: 3500.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-16',
-        notes: 'Powder coating required',
-        cad_file_reference: 'CAD-005.dwg'
-      },
-      {
-        name: 'ORD-ITEM-006',
-        item_number: '5.2.1',
-        item_code: 'COMP-006',
-        item_description: 'description',
-        drawing_ref: 'drwg-03',
-        material: 'Titanium Ti-6Al-4V',
-        specification: 'Aerospace grade',
-        quantity: 7,
-        unit: 'Sqm',
-        rate: 1,
-        amount: 4200.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-18',
-        notes: 'Certified material',
-        cad_file_reference: 'CAD-006.dwg'
-      },
-      {
-        name: 'ORD-ITEM-007',
-        item_number: '3.2.3',
-        item_code: 'COMP-007',
-        item_description: 'description',
-        drawing_ref: 'drwg-08',
-        material: 'Copper C101',
-        specification: 'Electrical component',
-        quantity: 9,
-        unit: 'Cm',
-        rate: 2,
-        amount: 1800.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-20',
-        notes: 'High conductivity grade',
-        cad_file_reference: 'CAD-007.dwg'
-      },
-      {
-        name: 'ORD-ITEM-008',
-        item_number: '71.2',
-        item_code: 'COMP-008',
-        item_description: 'description',
-        drawing_ref: 'drw-01',
-        material: 'Stainless Steel 304',
-        specification: 'Food grade finish',
-        quantity: 5,
-        unit: 'Pieces',
-        rate: 1,
-        amount: 2250.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-22',
-        notes: 'Sanitary finish required',
-        cad_file_reference: 'CAD-008.dwg'
-      }
-    ];
-  }
-
   transformApiDataToOrderDetails(apiData: any): OrderDetails {
     return {
       name: apiData.name || '',
-      order_name: apiData.order_name || apiData.title || '',
+      order_name: apiData.po_name || apiData.title || '',
       description: apiData.description || '',
       docstatus: apiData.docstatus || 0,
       creation: apiData.creation || '',
       modified: apiData.modified || '',
-      expected_delivery: apiData.expected_delivery || '',
+      expected_delivery: apiData.actual_delivery_date || '',
       delivery_address: apiData.delivery_address || '',
       special_instructions: apiData.special_instructions || '',
       total_amount: apiData.total_amount || apiData.grand_total || 0,
@@ -561,7 +398,9 @@ export class SupplierOrderDetailsComponent implements OnInit {
       delivery_terms: apiData.delivery_terms || '',
       supplier: apiData.supplier || '',
       purchase_order: apiData.purchase_order || '',
-      status: apiData.status || ''
+      rfq_id: apiData.rfq_reference || '',
+      quotation_id: apiData.supplier_quotation || '',
+      status: apiData.po_status || ''
     };
   }
 
@@ -739,7 +578,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
     const action = {
       action: status,
       doc: {
-        doctype: 'Supplier Order',
+        doctype: 'Purchase Order',
         name: this.orderId
       }
     };
@@ -762,45 +601,37 @@ export class SupplierOrderDetailsComponent implements OnInit {
     return this.severityOptions && this.severityOptions.length > 0;
   }
 
-  getStatusClass(status: any) {
-    if (!status) return 'status-draft';
-    
-    const statusStr = status.toLowerCase();
-    
-    const statusClasses: { [key: string]: string } = {
-      'draft': 'status-draft',
-      'open': 'status-open',
-      'in progress': 'status-in-progress',
-      'processing': 'status-in-progress',
-      'completed': 'status-completed',
-      'delivered': 'status-completed',
-      'cancelled': 'status-cancelled',
-      'canceled': 'status-cancelled',
-      'on hold': 'status-on-hold',
-      'pending': 'status-pending'
-    };
-    
-    return statusClasses[statusStr] || 'status-draft';
-  }
-
-  getStatusText(): string {
-    const status = this.orderDetails?.status;
-    if (!status) return 'Unknown';
-    
-    const statusMap: { [key: string]: string } = {
-      'Draft': 'Draft',
-      'Open': 'Open',
-      'In Progress': 'In Progress',
-      'Processing': 'In Progress',
-      'Completed': 'Completed',
-      'Delivered': 'Completed',
-      'Cancelled': 'Cancelled',
-      'Canceled': 'Cancelled',
-      'On Hold': 'On Hold',
-      'Pending': 'Pending'
-    };
-    
-    return statusMap[status] || status;
+   // 
+   getStatusClass(status:any) {
+    console.log('RFQ Details page status', status);
+    switch (status) {
+      case 'Supplier Confirmation':
+        return 'status-open';
+      case 'Submitted':
+        return 'status-awarded';
+      case 'Cancelled':
+        return 'status-rejected';
+      case 'Draft':
+        return 'status-draft';
+      case 'Opened': 
+        return 'status-open';
+      case 'Not Opened':
+        return 'status-open';
+      case 'Paused':
+        return 'status-paused';
+      case 'Deactivate':
+        return 'status-deactivate';
+      case 'Closed':
+        return 'status-closed';
+      case 'Quoted':
+        return 'status-awarded';
+      case 'Not Opened':
+        return 'status-open';
+      case 'In Progress':
+        return 'status-progress';
+      default:
+        return 'status-default';
+    }
   }
 
   formatDate(dateString: string): string {
