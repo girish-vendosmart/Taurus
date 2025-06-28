@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChanges, Pipe, PipeTransform } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -6,6 +6,23 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
 import { FormsModule } from '@angular/forms';
+import { CommonService } from '../../services/common.service';
+import { forkJoin, Observable } from 'rxjs';
+import { HttpEvent, HttpEventType } from '@angular/common/http';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
+@Pipe({
+  name: 'nl2br',
+  standalone: true
+})
+export class Nl2BrPipe implements PipeTransform {
+  constructor(private sanitizer: DomSanitizer) {}
+
+  transform(value: string): SafeHtml {
+    if (!value) return '';
+    return this.sanitizer.bypassSecurityTrustHtml(value.replace(/\n/g, '<br>'));
+  }
+}
 
 export interface WorkflowStep {
   id: string;
@@ -25,6 +42,7 @@ export interface WorkflowStep {
 export interface WorkflowCompletionData {
   stepId: string;
   photos?: File[];
+  fileUrls?: string[];
   comments?: string;
 }
 
@@ -38,7 +56,8 @@ export interface WorkflowCompletionData {
     InputTextareaModule,
     RippleModule,
     TooltipModule,
-    FormsModule
+    FormsModule,
+    Nl2BrPipe
   ],
   templateUrl: './approval-workflow.component.html',
   styleUrls: ['./approval-workflow.component.scss'],
@@ -49,7 +68,7 @@ export class ApprovalWorkflowComponent implements OnInit {
   @Input() steps: WorkflowStep[] = [];
   @Input() loading: boolean = false;
   @Input() allowInteraction: boolean = true;
-  @Input() useCustomSteps: boolean = false; // New property to control step behavior
+  @Input() useCustomSteps: boolean = false;
 
   @Output() stepCompleted = new EventEmitter<WorkflowCompletionData>();
   @Output() stepClicked = new EventEmitter<WorkflowStep>();
@@ -59,38 +78,20 @@ export class ApprovalWorkflowComponent implements OnInit {
   currentStep: WorkflowStep | null = null;
   completionComments: string = '';
   selectedFiles: File[] = [];
+  uploadProgress: { [key: string]: number } = {};
   uploadError: string = '';
+  commentError: string = '';
+  validationErrors: string[] = [];
 
   // Default workflow steps - starting from preparation
   workflowSteps: any[] = [];
 
-  isDocumentRequired(): boolean {
-    if (!this.currentStep) return false;
-    
-    const mandatorySteps = [
-      'finishing',
-      'quality-inspection',
-      'dispatch',
-      'order-complete'
-    ];
-    
-    return mandatorySteps.includes(this.currentStep.id);
-  }
+  uploadedFileUrls: string[] = [];
 
-  isCommentRequired(): boolean {
-    if (!this.currentStep) return false;
-    
-    const mandatorySteps = [
-      'finishing',
-      'quality-inspection',
-      'dispatch',
-      'order-complete'
-    ];
-    
-    return mandatorySteps.includes(this.currentStep.id);
-  }
-
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private commonService: CommonService
+  ) {}
 
   ngOnInit(): void {
   }
@@ -215,15 +216,22 @@ export class ApprovalWorkflowComponent implements OnInit {
     const element = event.target as HTMLInputElement;
     const files = element.files;
     this.uploadError = '';
+    this.validationErrors = [];
 
     if (files && files.length > 0) {
-      this.selectedFiles = Array.from(files);
+      // Add new files to existing selection
+      const newFiles = Array.from(files);
+      this.selectedFiles = [...this.selectedFiles, ...newFiles];
       this.validateFiles();
     }
+    
+    // Reset input value to allow selecting the same file again
+    element.value = '';
     this.cdr.detectChanges();
   }
 
   private validateFiles(): void {
+    this.validationErrors = [];
     const maxSize = 10 * 1024 * 1024; // 10MB
     const allowedTypes = [
       // Images
@@ -231,73 +239,137 @@ export class ApprovalWorkflowComponent implements OnInit {
       // Videos
       'video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/flv', 'video/webm',
       // Documents
-      'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'text/plain', 'text/csv'
+      'application/pdf', 
+      'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel', 
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint', 
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'text/plain', 
+      'text/csv'
     ];
 
-    for (const file of this.selectedFiles) {
-      if (file.size > maxSize) {
-        this.uploadError = `File "${file.name}" is too large. Maximum size is 10MB.`;
-        this.selectedFiles = [];
-        return;
-      }
-
-      if (!allowedTypes.includes(file.type)) {
-        this.uploadError = `File "${file.name}" is not a supported file type. Supported types: images, videos, PDF, Word, Excel, PowerPoint, and text files.`;
-        this.selectedFiles = [];
-        return;
-      }
+    // Check if any files exceed size limit
+    const oversizedFiles = this.selectedFiles.filter(file => file.size > maxSize);
+    if (oversizedFiles.length > 0) {
+      this.validationErrors.push(
+        `Files exceeding 10MB size limit: ${oversizedFiles.map(f => f.name).join(', ')}`
+      );
     }
+
+    // Check for invalid file types
+    const invalidFiles = this.selectedFiles.filter(file => !allowedTypes.includes(file.type));
+    if (invalidFiles.length > 0) {
+      this.validationErrors.push(
+        `Unsupported file types: ${invalidFiles.map(f => f.name).join(', ')}`
+      );
+    }
+
+    // If there are validation errors, clear the invalid files
+    if (this.validationErrors.length > 0) {
+      this.selectedFiles = this.selectedFiles.filter(file => 
+        file.size <= maxSize && allowedTypes.includes(file.type)
+      );
+    }
+
+    this.uploadError = this.validationErrors.join('\n');
   }
 
   removeFile(index: number): void {
     this.selectedFiles.splice(index, 1);
+    this.validateCompletionRequirements();
     this.cdr.detectChanges();
   }
 
+  validateCompletionRequirements(): boolean {
+    this.validationErrors = [];
+    this.commentError = '';
+
+    // Validate files if required
+    if (this.isDocumentRequired() && this.selectedFiles.length === 0) {
+      this.validationErrors.push('Please attach at least one document');
+    }
+
+    // Validate comments if required
+    if (this.isCommentRequired() && !this.completionComments?.trim()) {
+      this.commentError = 'Please add comments for this step';
+      this.validationErrors.push(this.commentError);
+    }
+
+    // Validate existing files
+    this.validateFiles();
+
+    return this.validationErrors.length === 0;
+  }
+
   canSubmitCompletion(): boolean {
-    if (!this.currentStep) return false;
-
-    // For Finishing, Quality Inspection, Dispatch, and Order Complete steps
-    const mandatorySteps = [
-      'finishing',
-      'quality-inspection',
-      'dispatch',
-      'order-complete'
-    ];
-
-    if (mandatorySteps.includes(this.currentStep.id)) {
-      // Both photos and comments are mandatory
-      if (this.selectedFiles.length === 0) {
-        this.uploadError = 'Please attach at least one document';
-        return false;
-      }
-      if (!this.completionComments.trim()) {
-        this.uploadError = 'Please add comments';
-        return false;
-      }
-    }
-
-    // For other steps (Preparation, Work In Progress)
-    // Photos and comments are optional, but validate if provided
-    if (this.selectedFiles.length > 0) {
-      this.validateFiles();
-      if (this.uploadError) return false;
-    }
-
-    return true;
+    return this.validateCompletionRequirements();
   }
 
   onCompleteStep(): void {
-    if (!this.currentStep || !this.canSubmitCompletion()) {
+    if (!this.currentStep || !this.validateCompletionRequirements()) {
       return;
     }
 
+    // If there are files to upload, handle them first
+    if (this.selectedFiles.length > 0) {
+      this.uploadFiles().subscribe({
+        next: (fileUrls) => {
+          this.emitCompletionWithFiles(fileUrls);
+        },
+        error: (error) => {
+          console.error('Error uploading files:', error);
+          this.uploadError = 'Failed to upload files. Please try again.';
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      // If no files, just emit completion
+      this.emitCompletionWithFiles([]);
+    }
+  }
+
+  private uploadFiles(): Observable<string[]> {
+    // Create an array of observables for each file upload
+    const uploadObservables = this.selectedFiles.map(file => {
+      return new Observable<string>(observer => {
+        this.uploadProgress[file.name] = 0;
+        
+        this.commonService.uploadFile(file).subscribe({
+          next: (event: HttpEvent<any>) => {
+            if (event.type === HttpEventType.UploadProgress && event.total) {
+              // Calculate and update progress
+              this.uploadProgress[file.name] = Math.round(100 * event.loaded / event.total);
+              this.cdr.detectChanges();
+            } else if (event.type === HttpEventType.Response) {
+              // Get the file URL from the response
+              const fileUrl = event.body?.message?.file_url;
+              if (fileUrl) {
+                observer.next(fileUrl);
+                observer.complete();
+              } else {
+                observer.error('No file URL in response');
+              }
+            }
+          },
+          error: (error) => {
+            console.error(`Error uploading file ${file.name}:`, error);
+            observer.error(error);
+          }
+        });
+      });
+    });
+
+    // Use forkJoin to wait for all uploads to complete
+    return forkJoin(uploadObservables);
+  }
+
+  private emitCompletionWithFiles(fileUrls: string[]): void {
     const completionData: WorkflowCompletionData = {
-      stepId: this.currentStep.id,
+      stepId: this.currentStep!.id,
       photos: this.selectedFiles,
+      fileUrls: fileUrls,
       comments: this.completionComments.trim()
     };
 
@@ -328,5 +400,15 @@ export class ApprovalWorkflowComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  isDocumentRequired(): boolean {
+    if (!this.currentStep) return false;
+    return this.currentStep.requiresPhotos === true;
+  }
+
+  isCommentRequired(): boolean {
+    if (!this.currentStep) return false;
+    return this.currentStep.requiresComments === true;
   }
 } 

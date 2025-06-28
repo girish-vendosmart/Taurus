@@ -597,6 +597,18 @@ export class SupplierOrderDetailsComponent implements OnInit {
     switch (status) {
       case 'Supplier Confirmation':
         return 'status-open';
+      case 'Finishing':
+        return 'status-progress';
+      case 'Preparation':
+        return 'status-progress';
+      case 'Work In Progress':  
+        return 'status-progress';
+      case 'Quality Inspection':
+        return 'status-progress';
+      case 'Dispatch':
+        return 'status-progress';
+      case 'Order Completed':
+        return 'status-approved';
       case 'Submitted':
         return 'status-awarded';
       case 'Cancelled':
@@ -774,7 +786,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
             po_name: this.orderId,
             action_name: action,
             comments: data.comments || '',
-            attached_files: data.photos ? data.photos.map(file => file.name) : []
+            attached_files: data.fileUrls || [] // Use the file URLs from the upload
           };
 
           // Call the execute_po_action API
@@ -790,7 +802,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
                   completedDate: new Date(),
                   completedBy: 'Current User',
                   comments: data.comments || '',
-                  photos: data.photos ? data.photos.map(file => file.name) : []
+                  photos: data.fileUrls || [] // Store the file URLs instead of File objects
                 };
 
                 // If there's a next step, update its status to ready
@@ -828,34 +840,6 @@ export class SupplierOrderDetailsComponent implements OnInit {
         this.sweetAlert.error('Failed to get available actions');
       }
     });
-  }
-
-  onWorkflowStepClicked(step: WorkflowStep): void {
-    console.log('Workflow step clicked:', step);
-    
-    // Handle different actions based on step status
-    switch (step.status) {
-      case 'complete':
-        // Show step details for completed steps
-        this.showStepDetails(step);
-        break;
-        
-      case 'ready':
-      case 'in-progress':
-        // The workflow component will handle the completion modal
-        console.log(`Step ${step.title} is ready for completion`);
-        break;
-        
-      case 'waiting':
-        // Show info that previous steps need to be completed first
-        this.sweetAlert.info(
-          `Please complete the previous steps before starting "${step.title}".`
-        );
-        break;
-        
-      default:
-        console.log('Unknown step status:', step.status);
-    }
   }
 
   /**
@@ -901,5 +885,33 @@ export class SupplierOrderDetailsComponent implements OnInit {
    */
   isWorkflowCompleted(): boolean {
     return this.workflowSteps.every(step => step.status === 'complete');
+  }
+
+  onWorkflowStepClicked(step: WorkflowStep): void {
+    console.log('Workflow step clicked:', step);
+    
+    // Handle different actions based on step status
+    switch (step.status) {
+      case 'complete':
+        // Show step details for completed steps
+        this.showStepDetails(step);
+        break;
+        
+      case 'ready':
+      case 'in-progress':
+        // The workflow component will handle the completion modal
+        console.log(`Step ${step.title} is ready for completion`);
+        break;
+        
+      case 'waiting':
+        // Show info that previous steps need to be completed first
+        this.sweetAlert.info(
+          `Please complete the previous steps before starting "${step.title}".`
+        );
+        break;
+        
+      default:
+        console.log('Unknown step status:', step.status);
+    }
   }
 } 

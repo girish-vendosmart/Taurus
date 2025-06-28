@@ -232,6 +232,11 @@
         background-color: #f8fafc;
       }
       
+      &.has-error {
+        border-color: #ef4444;
+        background-color: #fef2f2;
+      }
+      
       .upload-area {
         display: flex;
         flex-direction: column;
@@ -246,6 +251,11 @@
         .upload-text {
           color: #374151;
           font-weight: 500;
+        }
+
+        .upload-hint {
+          color: #6b7280;
+          font-size: 0.75rem;
         }
       }
     }
@@ -270,15 +280,48 @@
           color: #6b7280;
         }
         
-        .file-name {
+        .file-info {
           flex: 1;
-          color: #374151;
-          font-size: 0.875rem;
-        }
-        
-        .file-size {
-          color: #6b7280;
-          font-size: 0.75rem;
+          min-width: 0;
+          
+          .file-name {
+            color: #374151;
+            font-size: 0.875rem;
+            display: block;
+          }
+          
+          .file-size {
+            color: #6b7280;
+            font-size: 0.75rem;
+            display: block;
+            margin-top: 2px;
+          }
+
+          .upload-progress {
+            margin-top: 6px;
+            background: #e5e7eb;
+            height: 4px;
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+
+            .progress-bar {
+              position: absolute;
+              left: 0;
+              top: 0;
+              height: 100%;
+              background: #10b981;
+              transition: width 0.3s ease;
+            }
+
+            .progress-text {
+              position: absolute;
+              right: 0;
+              top: -18px;
+              font-size: 0.75rem;
+              color: #6b7280;
+            }
+          }
         }
         
         .remove-file-btn {
@@ -289,8 +332,13 @@
           padding: 4px;
           border-radius: 4px;
           
-          &:hover {
+          &:hover:not(:disabled) {
             background-color: #fef2f2;
+          }
+
+          &:disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
           }
         }
       }
@@ -301,8 +349,37 @@
       color: #ef4444;
       font-size: 0.875rem;
       display: flex;
-      align-items: center;
-      gap: 4px;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 12px;
+      background-color: #fef2f2;
+      border-radius: 4px;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+
+      i {
+        margin-top: 3px;
+      }
+
+      .error-text {
+        flex: 1;
+        white-space: pre-line;
+      }
+    }
+
+    // Style for invalid textarea
+    ::ng-deep .p-inputtextarea.ng-invalid {
+      border-color: #ef4444;
+
+      &:enabled:focus {
+        box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2);
+      }
+    }
+
+    .hint-text {
+      display: block;
+      margin-top: 4px;
+      color: #6b7280;
+      font-size: 0.75rem;
     }
   }
 }

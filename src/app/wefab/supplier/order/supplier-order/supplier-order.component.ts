@@ -181,7 +181,7 @@ export class SupplierOrderComponent implements OnInit {
   getOrderList() {
     this.loading = true;
     // This will be updated with actual API endpoint when available
-    let endpoint = `/api/resource/Purchase Order?fields=["*"]&filters=[["po_status", "not in", ["Draft"]],["supplier_id", "=", "${this.supplierId}"]]`
+    let endpoint = `/api/resource/Purchase Order?fields=["*"]&filters=[["po_status", "not in", ["Draft", "Approval"]],["supplier_id", "=", "${this.supplierId}"]]`
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
@@ -264,7 +264,7 @@ export class SupplierOrderComponent implements OnInit {
       creationDate: this.formatApiDate(item.creation || item.created_date || ''),
       deliveryDate: this.formatApiDate(item.actual_delivery_date || item.expected_delivery || ''),
       totalAmount: item.total_amount || item.grand_total || 0,
-      status: this.mapApiStatusToOrderStatus(item.status || 'Draft'),
+      status: this.mapApiStatusToOrderStatus(item.po_status || 'Draft'),
       name: item.name || '',
       owner: item.owner || '',
       modified: item.modified || '',
@@ -312,8 +312,8 @@ export class SupplierOrderComponent implements OnInit {
     }
   }
 
-  private mapApiStatusToOrderStatus(apiStatus: string): 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' {
-    const statusMap: { [key: string]: 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' } = {
+  private mapApiStatusToOrderStatus(apiStatus: string): 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' | 'Supplier Confirmation' | 'Finishing' | 'Preparation' | 'Work In Progress' | 'Quality Inspection' | 'Dispatch' | 'Order Completed' {
+    const statusMap: { [key: string]: 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' | 'Supplier Confirmation' | 'Finishing' | 'Preparation' | 'Work In Progress' | 'Quality Inspection' | 'Dispatch' | 'Order Completed' } = {
       'Open': 'Open',
       'Pending': 'Open',
       'In Progress': 'In Progress',
@@ -323,9 +323,16 @@ export class SupplierOrderComponent implements OnInit {
       'Cancelled': 'Cancelled',
       'Canceled': 'Cancelled',
       'Draft': 'Draft',
-      'Not Started': 'Open'
+      'Not Started': 'Open',
+      'Supplier Confirmation': 'Supplier Confirmation',
+      'Finishing': 'Finishing',
+      'Preparation': 'Preparation',
+      'Work In Progress': 'Work In Progress',
+      'Quality Inspection': 'Quality Inspection',
+      'Dispatch': 'Dispatch',
+      'Order Completed': 'Order Completed',
     };
-
+    
     return statusMap[apiStatus] || 'Draft';
   }
 

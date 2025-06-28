@@ -53,7 +53,7 @@
       <!-- File Upload Section -->
       <div class="form-section">
         <label class="form-label" [class.required]="isDocumentRequired()">Upload Evidence (Photos, Videos, Documents)</label>
-        <div class="file-upload-container" (click)="fileInput.click()">
+        <div class="file-upload-container" (click)="fileInput.click()" [class.has-error]="uploadError">
           <div class="upload-area">
             <i class="pi pi-cloud-upload upload-icon"></i>
             <span class="upload-text">Choose Evidence</span>
@@ -74,12 +74,20 @@
         <div class="selected-files" *ngIf="selectedFiles.length > 0">
           <div class="file-item" *ngFor="let file of selectedFiles; let i = index">
             <i class="pi pi-file file-icon"></i>
-            <span class="file-name">{{ file.name }}</span>
-            <span class="file-size">({{ formatFileSize(file.size) }})</span>
+            <div class="file-info">
+              <span class="file-name">{{ file.name }}</span>
+              <span class="file-size">({{ formatFileSize(file.size) }})</span>
+              <!-- Add progress bar -->
+              <div class="upload-progress" *ngIf="uploadProgress[file.name]">
+                <div class="progress-bar" [style.width.%]="uploadProgress[file.name]"></div>
+                <span class="progress-text">{{ uploadProgress[file.name] }}%</span>
+              </div>
+            </div>
             <button 
               type="button"
               class="remove-file-btn"
               (click)="removeFile(i)"
+              [disabled]="uploadProgress[file.name]"
             >
               <i class="pi pi-times"></i>
             </button>
@@ -89,7 +97,9 @@
         <!-- Upload Error -->
         <div class="error-message" *ngIf="uploadError">
           <i class="pi pi-exclamation-triangle"></i>
-          {{ uploadError }}
+          <div class="error-text">
+            <div *ngFor="let error of validationErrors">{{ error }}</div>
+          </div>
         </div>
       </div>
 
@@ -102,9 +112,16 @@
           placeholder="Add your comments about this step..."
           rows="4"
           class="w-full"
+          [class.ng-invalid]="commentError"
         ></textarea>
         <small class="hint-text" *ngIf="isCommentRequired()">* Required for this step</small>
         <small class="hint-text" *ngIf="!isCommentRequired()">Optional for this step</small>
+        
+        <!-- Comment Error -->
+        <div class="error-message" *ngIf="commentError">
+          <i class="pi pi-exclamation-triangle"></i>
+          {{ commentError }}
+        </div>
       </div>
     </div>
 
@@ -123,7 +140,9 @@
         class="p-button-success"
         [disabled]="!canSubmitCompletion() || loading"
         (click)="onCompleteStep()"
-      ></button>
+      >
+        <i class="pi pi-spin pi-spinner" *ngIf="loading"></i>
+      </button>
     </ng-template>
   </p-dialog>
 </div> 

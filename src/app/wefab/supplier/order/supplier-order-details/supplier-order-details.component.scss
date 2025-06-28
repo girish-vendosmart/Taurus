@@ -42,7 +42,7 @@ $danger-red: #EF4444;
   }
 
   p {
-    font-size: 0.875rem;
+    font-size: $p-font-size;
     color: $precision-black;
     line-height: 1.7;
     margin: 0;
