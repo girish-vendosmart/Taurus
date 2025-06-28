@@ -10,11 +10,12 @@ import { ConfigurableButtonComponent } from '../../../../shared/components/confi
 import { ActivityTrailComponent, ActivityLogData } from '../../../../shared/components/activity-trail/activity-trail.component';
 import { SplitButtonComponent } from '../../../../shared/components/split-button/split-button.component';
 import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
+import { WorkflowStep, WorkflowCompletionData, WorkflowStepCompletionData } from '../../../../shared/components/approval-workflow/approval-workflow.component';
+import { forkJoin, Observable } from 'rxjs';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { WorkflowStep, WorkflowCompletionData } from '../../../../shared/components/approval-workflow/approval-workflow.component';
 import { ApprovalWorkflowComponent } from '../../../../shared/components/approval-workflow/approval-workflow.component';
 
 export interface OrderDetails {
@@ -229,67 +230,118 @@ export class SupplierOrderDetailsComponent implements OnInit {
 
   getOrderTrackerView(orderId: string) {
     let endPoint = `/api/method/wefab.wefab.api.common.po_tracker_api.get_po_workflow_states?po_name=${orderId}`;
-    debugger
-    this.commonService.getWefabData(endPoint).subscribe((res:any) => {
-      debugger
-      console.log('res:', res);
-      // debugger
-      if (res.message && res.message.data.states) {
-        debugger
-        // Filter out Draft and Approval states
-        const relevantStates = res.message.data.states.filter((state: WorkflowState) => 
-          !['Draft', 'Approval'].includes(state.state_name)
-        );
+    
+    // Show loading state
+    this.loading = true;
+    
+    this.commonService.getWefabData(endPoint).subscribe({
+      next: (res: any) => {
+        console.log('Order tracker view response:', res);
+        
+        if (res.message && res.message.data.states) {
+          // Filter out Draft and Approval states
+          const relevantStates = res.message.data.states.filter((state: WorkflowState) => 
+            !['Draft', 'Approval'].includes(state.state_name)
+          );
 
-        debugger
+          // Create workflow steps from API states
+          this.workflowSteps = relevantStates.map((state: WorkflowState) => {
+            const stepId = state.state_name.toLowerCase().replace(/\s+/g, '-');
+            let status: 'complete' | 'in-progress' | 'waiting' | 'ready' = 'waiting';
+            
+            switch (state.status) {
+              case 'Completed':
+                status = 'complete';
+                break;
+              case 'In Progress':
+                status = 'ready';
+                break;
+              case 'Yet to Start':
+                status = 'waiting';
+                break;
+            }
 
-        // Create workflow steps from API states
-        this.workflowSteps = relevantStates.map((state: WorkflowState) => {
-          const stepId = state.state_name.toLowerCase().replace(/\s+/g, '-');
-          let status: 'complete' | 'in-progress' | 'waiting' | 'ready' = 'waiting';
-          
-          switch (state.status) {
-            case 'Completed':
-              status = 'complete';
-              break;
-            case 'In Progress':
-              status = 'ready';
-              break;
-            case 'Yet to Start':
-              status = 'waiting';
-              break;
-          }
+            // Set requirements based on step name
+            let requiresDocuments = false;
+            let requiresComments = false;
+            let isDialogRequired = true;
+            let isDocumentOptional = false;
+            let isCommentOptional = false;
 
-          // Determine if step requires documents and comments
-          const requiresDocuments = ['Finishing', 'Quality Inspection', 'Dispatch', 'Order Complete'].includes(state.state_name);
-          const isDialogRequired = state.state_name !== 'Supplier Confirmation';
+            switch (state.state_name) {
+              case 'Supplier Confirmation':
+                // No documents or comments required, no dialog needed
+                requiresDocuments = false;
+                requiresComments = false;
+                isDialogRequired = false;
+                break;
+              
+              case 'Preparation':
+              case 'Work In Progress':
+                // Documents and comments are optional
+                requiresDocuments = false;
+                requiresComments = false;
+                isDialogRequired = true;
+                isDocumentOptional = true;
+                isCommentOptional = true;
+                break;
+              
+              case 'Finishing':
+              case 'Quality Inspection':
+              case 'Dispatch':
+              case 'Order Complete':
+                // Documents and comments are required
+                requiresDocuments = true;
+                requiresComments = true;
+                isDialogRequired = true;
+                break;
+              
+              default:
+                // Default case - optional
+                requiresDocuments = false;
+                requiresComments = false;
+                isDialogRequired = true;
+                isDocumentOptional = true;
+                isCommentOptional = true;
+                break;
+            }
 
-          return {
-            id: stepId,
-            title: state.state_name,
-            status: status,
-            description: '',
-            allowCompletion: status === 'ready',
-            isOpenDialog: isDialogRequired,
-            requiresPhotos: requiresDocuments,
-            requiresComments: requiresDocuments
-          };
-        });
+            const workflowStep = {
+              id: stepId,
+              title: state.state_name,
+              status: status,
+              description: '',
+              allowCompletion: status === 'ready',
+              isOpenDialog: isDialogRequired,
+              requiresPhotos: requiresDocuments,
+              requiresComments: requiresComments,
+              isDocumentOptional: isDocumentOptional,
+              isCommentOptional: isCommentOptional
+            };
+            
+            console.log(`📋 Created workflow step: ${state.state_name} -> ID: ${stepId}`, workflowStep);
+            return workflowStep;
+          });
 
-        debugger
-        console.log('Workflow steps:', this.workflowSteps);
+          console.log('Updated workflow steps:', this.workflowSteps);
 
-        // Enable next step if current step is in progress
-        this.workflowSteps.forEach((step, index) => {
-          if (step.status === 'ready' && index < this.workflowSteps.length - 1) {
-            this.workflowSteps[index + 1].allowCompletion = true;
-          }
-        });
-
-        debugger
-
-        console.log('Workflow steps:', this.workflowSteps);
-
+          // Enable next step if current step is in progress
+          this.workflowSteps.forEach((step, index) => {
+            if (step.status === 'ready' && index < this.workflowSteps.length - 1) {
+              this.workflowSteps[index + 1].allowCompletion = true;
+            }
+          });
+        } else {
+          console.error('Invalid API response format:', res);
+          this.sweetAlert.error('Failed to load workflow states');
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching workflow states:', error);
+        this.sweetAlert.error('Failed to load workflow states');
+      },
+      complete: () => {
+        this.loading = false;
         this.cdr.detectChanges();
       }
     });
@@ -766,80 +818,44 @@ export class SupplierOrderDetailsComponent implements OnInit {
       return;
     }
 
-    // Get current available actions
-    let obj: any = {
-      doctype: 'Purchase Order',
-      name: this.orderId
-    }
-    let params = new HttpParams();
-    params = params.append('doc', JSON.stringify(obj));
-    let endPoint = `/api/method/frappe.model.workflow.get_transitions`;
-    
-    this.commonService.getWefabData(endPoint, params).subscribe({
-      next: (res: any) => {
-        if (res.message && res.message.length > 0) {
-          // Get the first available action
-          const action = res.message[0].action;
+    // Prepare the payload for execute_po_action
+    const payload = {
+      po_name: this.orderId,
+      action_name: "Approve",  // Default to Approve for Finishing step
+      comments: data.comments || '',
+      attached_files: data.fileUrls || []
+    };
+
+    console.log('Sending API request with payload:', payload);
+
+    // Call the execute_po_action API
+    this.commonService.postWefabData('/api/method/wefab.wefab.api.common.po_tracker_api.execute_po_action', payload)
+      .subscribe({
+        next: (response: any) => {
+          console.log('Action executed successfully:', response);
           
-          // Prepare the payload for execute_po_action
-          const payload = {
-            po_name: this.orderId,
-            action_name: action,
-            comments: data.comments || '',
-            attached_files: data.fileUrls || [] // Use the file URLs from the upload
-          };
+          // Show success message
+          this.sweetAlert.success(
+            `${this.workflowSteps[completedStepIndex].title} has been completed successfully.`
+          );
 
-          // Call the execute_po_action API
-          this.commonService.postWefabData('/api/method/wefab.wefab.api.common.po_tracker_api.execute_po_action', payload)
-            .subscribe({
-              next: (response: any) => {
-                console.log('Action executed successfully:', response);
-                
-                // Update local state
-                this.workflowSteps[completedStepIndex] = {
-                  ...this.workflowSteps[completedStepIndex],
-                  status: 'complete',
-                  completedDate: new Date(),
-                  completedBy: 'Current User',
-                  comments: data.comments || '',
-                  photos: data.fileUrls || [] // Store the file URLs instead of File objects
-                };
+          // Refresh the workflow steps from API
+          this.getOrderTrackerView(this.orderId);
 
-                // If there's a next step, update its status to ready
-                if (completedStepIndex + 1 < this.workflowSteps.length) {
-                  this.workflowSteps[completedStepIndex + 1] = {
-                    ...this.workflowSteps[completedStepIndex + 1],
-                    status: 'ready',
-                    allowCompletion: true
-                  };
-                }
+          // Refresh the order details
+          this.loadOrderDetails();
 
-                // Show success message
-                this.sweetAlert.success(
-                  `${this.workflowSteps[completedStepIndex].title} has been completed successfully.`
-                );
+          // Refresh action list
+          this.getActionList();
 
-                // Refresh action list
-                this.getActionList();
-
-                // Force change detection
-                this.cdr.detectChanges();
-              },
-              error: (error) => {
-                console.error('Error executing action:', error);
-                this.sweetAlert.error('Failed to complete the step');
-              }
-            });
-        } else {
-          console.error('No actions available');
-          this.sweetAlert.error('No actions available for this step');
+          // Force change detection
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error executing action:', error);
+          this.sweetAlert.error('Failed to complete the step');
         }
-      },
-      error: (error) => {
-        console.error('Error getting actions:', error);
-        this.sweetAlert.error('Failed to get available actions');
-      }
-    });
+      });
   }
 
   /**
@@ -913,5 +929,132 @@ export class SupplierOrderDetailsComponent implements OnInit {
       default:
         console.log('Unknown step status:', step.status);
     }
+  }
+
+  // Handle workflow step completion
+  onStepCompleted(data: WorkflowStepCompletionData): void {
+    console.log('🔄 Step completed event received:', data);
+    console.log('🔄 Order ID:', this.orderId);
+    this.loading = true;
+
+    // If there are files, upload them first
+    if (data.files && data.files.length > 0) {
+      const uploadObservables = data.files.map(file => 
+        this.commonService.uploadFile(file)
+      );
+
+      forkJoin(uploadObservables).subscribe({
+        next: (responses) => {
+          // Extract file URLs from responses
+          const fileUrls = responses.map(response => response.message?.file_url).filter(url => url);
+          console.log('Files uploaded successfully:', fileUrls);
+          
+          // Call API with file URLs
+          this.completeWorkflowStep({
+            ...data,
+            fileUrls: fileUrls
+          });
+        },
+        error: (error) => {
+          console.error('Error uploading files:', error);
+          this.sweetAlert.error('Failed to upload files. Please try again.');
+          this.loading = false;
+        }
+      });
+    } else {
+      // No files to upload, call API directly
+      this.completeWorkflowStep(data);
+    }
+  }
+
+  private completeWorkflowStep(data: WorkflowStepCompletionData): void {
+    console.log('🚀 Completing workflow step:', data);
+    console.log('🚀 Using Order ID:', this.orderId);
+    
+    // Get current available actions
+    let obj: any = {
+      doctype: 'Purchase Order',
+      name: this.orderId
+    }
+    let params = new HttpParams();
+    params = params.append('doc', JSON.stringify(obj));
+    let endPoint = `/api/method/frappe.model.workflow.get_transitions`;
+    
+    this.commonService.getWefabData(endPoint, params).subscribe({
+      next: (res: any) => {
+        console.log('Available actions:', res);
+        if (res.message && res.message.length > 0) {
+          // Get the first available action
+          const action = res.message[0].action;
+          
+          // Prepare the payload for execute_po_action
+          const payload = {
+            po_name: this.orderId,
+            action_name: action,
+            comments: data.comments || '',
+            attached_files: data.fileUrls || []
+          };
+
+          console.log('📤 Sending API request with payload:', payload);
+          console.log('📤 API Endpoint: /api/method/wefab.wefab.api.common.po_tracker_api.execute_po_action');
+
+          // Call the execute_po_action API
+          this.commonService.postWefabData('/api/method/wefab.wefab.api.common.po_tracker_api.execute_po_action', payload)
+            .subscribe({
+              next: (response: any) => {
+                console.log('Action executed successfully:', response);
+                
+                // Show success message
+                this.sweetAlert.success(
+                  `Step has been completed successfully.`
+                );
+
+                // Refresh the workflow steps from API
+                this.getOrderTrackerView(this.orderId);
+
+                // Refresh the order details
+                this.loadOrderDetails();
+
+                // Refresh action list
+                this.getActionList();
+
+                this.loading = false;
+                this.cdr.detectChanges();
+                
+                // Reset the workflow component's submitting state
+                this.resetWorkflowSubmittingState();
+              },
+              error: (error) => {
+                console.error('❌ Error executing action:', error);
+                this.sweetAlert.error('Failed to complete the step');
+                this.loading = false;
+                
+                // Reset the workflow component's submitting state
+                this.resetWorkflowSubmittingState();
+              }
+            });
+        } else {
+          console.error('No actions available');
+          this.sweetAlert.error('No actions available for this step');
+          this.loading = false;
+        }
+      },
+      error: (error) => {
+        console.error('Error getting actions:', error);
+        this.sweetAlert.error('Failed to get available actions');
+        this.loading = false;
+      }
+    });
+  }
+
+  onStepClicked(step: WorkflowStep): void {
+    // Handle step click event if needed
+    console.log('Step clicked:', step);
+  }
+
+  private resetWorkflowSubmittingState(): void {
+    // This method can be used to reset the workflow component's submitting state
+    // For now, we'll just trigger change detection
+    this.cdr.detectChanges();
   }
 } 

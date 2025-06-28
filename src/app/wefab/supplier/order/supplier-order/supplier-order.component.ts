@@ -161,8 +161,6 @@ export class SupplierOrderComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error fetching Order summary stats:', error);
-        // Set sample data for now
-        this.loadSampleData();
       }
     })
   }
@@ -193,63 +191,8 @@ export class SupplierOrderComponent implements OnInit {
       error: (error) => {
         console.error('Error fetching Order data:', error);
         this.loading = false;
-        // Fallback to sample data if API fails
-        this.loadSampleData();
       }
     });
-  }
-
-  // Load sample data for demonstration
-  loadSampleData() {
-    this.allOrders = [
-      {
-        orderId: 'ORD0000001',
-        orderName: 'Precision Components Order',
-        creationDate: '2025-01-15',
-        deliveryDate: '2025-02-15',
-        totalAmount: 15000.00,
-        status: 'In Progress',
-        name: 'ORD0000001',
-        owner: 'supplier@example.com',
-        modified: '2025-01-15 10:30:00',
-        docstatus: 1,
-        routerLink: '/wefab/supplier/order/details/ORD0000001'
-      },
-      {
-        orderId: 'ORD0000002',
-        orderName: 'Industrial Parts Manufacturing',
-        creationDate: '2025-01-10',
-        deliveryDate: '2025-01-30',
-        totalAmount: 25000.00,
-        status: 'Open',
-        name: 'ORD0000002',
-        owner: 'supplier@example.com',
-        modified: '2025-01-10 14:15:00',
-        docstatus: 1,
-        routerLink: '/wefab/supplier/order/details/ORD0000002'
-      },
-      {
-        orderId: 'ORD0000003',
-        orderName: 'Custom Machined Parts',
-        creationDate: '2025-01-05',
-        deliveryDate: '2025-01-25',
-        totalAmount: 8500.00,
-        status: 'Completed',
-        name: 'ORD0000003',
-        owner: 'supplier@example.com',
-        modified: '2025-01-25 16:45:00',
-        docstatus: 1,
-        routerLink: '/wefab/supplier/order/details/ORD0000003'
-      }
-    ];
-
-    // Update dashboard cards with sample data
-    this.dashboardCards[0].value = this.allOrders.length.toString();
-    this.dashboardCards[1].value = this.allOrders.filter(o => o.status === 'Open').length.toString();
-    this.dashboardCards[2].value = this.allOrders.filter(o => o.status === 'In Progress').length.toString();
-    this.dashboardCards[3].value = this.allOrders.filter(o => o.status === 'Completed').length.toString();
-
-    this.updateFilterOptions();
   }
 
   // Transform API data to match OrderItem interface
@@ -332,7 +275,7 @@ export class SupplierOrderComponent implements OnInit {
       'Dispatch': 'Dispatch',
       'Order Completed': 'Order Completed',
     };
-    
+
     return statusMap[apiStatus] || 'Draft';
   }
 

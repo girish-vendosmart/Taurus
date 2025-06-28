@@ -4,8 +4,14 @@
     <h3 class="workflow-title">{{ title }}</h3>
   </div>
 
+  <!-- Loading State -->
+  <div class="workflow-loading" *ngIf="loading">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Updating workflow...</span>
+  </div>
+
   <!-- Steps Timeline -->
-  <div class="workflow-steps">
+  <div class="workflow-steps" [class.loading]="loading">
     <div 
       *ngFor="let step of steps; trackBy: trackByStepId" 
       class="workflow-step"
@@ -58,7 +64,8 @@
             <i class="pi pi-cloud-upload upload-icon"></i>
             <span class="upload-text">Choose Evidence</span>
             <small class="upload-hint" *ngIf="isDocumentRequired()">* Required for this step</small>
-            <small class="upload-hint" *ngIf="!isDocumentRequired()">Optional for this step</small>
+            <small class="upload-hint" *ngIf="!isDocumentRequired() && isDocumentOptional()">Optional for this step</small>
+            <small class="upload-hint" *ngIf="!isDocumentRequired() && !isDocumentOptional()">Not applicable for this step</small>
           </div>
           <input 
             #fileInput
@@ -115,13 +122,9 @@
           [class.ng-invalid]="commentError"
         ></textarea>
         <small class="hint-text" *ngIf="isCommentRequired()">* Required for this step</small>
-        <small class="hint-text" *ngIf="!isCommentRequired()">Optional for this step</small>
+        <small class="hint-text" *ngIf="!isCommentRequired() && isCommentOptional()">Optional for this step</small>
+        <small class="hint-text" *ngIf="!isCommentRequired() && !isCommentOptional()">Not applicable for this step</small>
         
-        <!-- Comment Error -->
-        <div class="error-message" *ngIf="commentError">
-          <i class="pi pi-exclamation-triangle"></i>
-          {{ commentError }}
-        </div>
       </div>
     </div>
 
@@ -138,7 +141,7 @@
         pButton 
         label="Complete Step"
         class="p-button-success"
-        [disabled]="!canSubmitCompletion() || loading"
+        [disabled]="!canSubmitCompletion()"
         (click)="onCompleteStep()"
       >
         <i class="pi pi-spin pi-spinner" *ngIf="loading"></i>

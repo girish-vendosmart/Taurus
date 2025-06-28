@@ -7,6 +7,7 @@ import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
 import { FormsModule } from '@angular/forms';
 import { CommonService } from '../../services/common.service';
+import { SweetAlertService } from '../../services/sweet-alert.service';
 import { forkJoin, Observable } from 'rxjs';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -25,7 +26,7 @@ export class Nl2BrPipe implements PipeTransform {
 }
 
 export interface WorkflowStep {
-  id: string;
+  id: string;  // This should be the PO number (e.g., "PO-0000217")
   title: string;
   status: 'complete' | 'in-progress' | 'waiting' | 'ready';
   description?: string;
@@ -37,6 +38,9 @@ export interface WorkflowStep {
   requiresPhotos?: boolean;
   requiresComments?: boolean;
   isOpenDialog?: boolean;
+  po_number?: string;  // Additional field for PO number if id is different
+  isDocumentOptional?: boolean;  // New field for optional documents
+  isCommentOptional?: boolean;   // New field for optional comments
 }
 
 export interface WorkflowCompletionData {
@@ -44,6 +48,14 @@ export interface WorkflowCompletionData {
   photos?: File[];
   fileUrls?: string[];
   comments?: string;
+}
+
+export interface WorkflowStepCompletionData {
+  stepId: string;  // PO number
+  comments: string;
+  files: File[];
+  fileUrls: string[];
+  action: string;
 }
 
 @Component({
@@ -70,8 +82,9 @@ export class ApprovalWorkflowComponent implements OnInit {
   @Input() allowInteraction: boolean = true;
   @Input() useCustomSteps: boolean = false;
 
-  @Output() stepCompleted = new EventEmitter<WorkflowCompletionData>();
+  @Output() stepCompleted = new EventEmitter<WorkflowStepCompletionData>();
   @Output() stepClicked = new EventEmitter<WorkflowStep>();
+  @Output() filesUploaded = new EventEmitter<File[]>();
 
   // Modal states
   showCompletionModal: boolean = false;
@@ -88,9 +101,13 @@ export class ApprovalWorkflowComponent implements OnInit {
 
   uploadedFileUrls: string[] = [];
 
+  // Add new property for tracking API call status
+  private isSubmitting: boolean = false;
+
   constructor(
     private cdr: ChangeDetectorRef,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private sweetAlertService: SweetAlertService
   ) {}
 
   ngOnInit(): void {
@@ -185,11 +202,24 @@ export class ApprovalWorkflowComponent implements OnInit {
       this.openCompletionModal(step);
     } else {
       // For steps that don't require a dialog (like Supplier Confirmation)
-      // emit the completion event directly
-      this.stepCompleted.emit({
-        stepId: step.id,
-        photos: [],
-        comments: ''
+      // Show confirmation dialog first
+      this.sweetAlertService.confirm(
+        'Complete Step',
+        `Are you sure you want to complete the "${step.title}" step?`,
+        'question',
+        'Yes, Complete',
+        'Cancel'
+      ).then((result) => {
+        if (result.isConfirmed) {
+          // Emit the completion event directly
+          this.stepCompleted.emit({
+            stepId: step.id,
+            comments: '',
+            files: [],
+            fileUrls: [],
+            action: 'Approve'
+          });
+        }
       });
     }
   }
@@ -286,95 +316,181 @@ export class ApprovalWorkflowComponent implements OnInit {
     this.validationErrors = [];
     this.commentError = '';
 
-    // Validate files if required
-    if (this.isDocumentRequired() && this.selectedFiles.length === 0) {
+    let isValid = true;
+
+    // Validate files if required (not optional)
+    if (this.isDocumentRequired() && (!this.selectedFiles || this.selectedFiles.length === 0)) {
       this.validationErrors.push('Please attach at least one document');
+      isValid = false;
     }
 
-    // Validate comments if required
-    if (this.isCommentRequired() && !this.completionComments?.trim()) {
-      this.commentError = 'Please add comments for this step';
-      this.validationErrors.push(this.commentError);
+    // Validate comments if required (not optional)
+    if (this.isCommentRequired() && (!this.completionComments || !this.completionComments.trim())) {
+      this.commentError = ' ';
+      this.validationErrors.push('Comments are required for this step');
+      isValid = false;
     }
 
     // Validate existing files
-    this.validateFiles();
+    if (this.selectedFiles && this.selectedFiles.length > 0) {
+      this.validateFiles();
+      // If there are file validation errors, mark as invalid
+      if (this.validationErrors.length > 0) {
+        isValid = false;
+      }
+    }
 
-    return this.validationErrors.length === 0;
+    return isValid;
   }
 
   canSubmitCompletion(): boolean {
-    return this.validateCompletionRequirements();
+    // For steps with required fields, validate them
+    if ((this.currentStep?.requiresPhotos && !this.isDocumentOptional()) || 
+        (this.currentStep?.requiresComments && !this.isCommentOptional())) {
+      const isValid = this.validateCompletionRequirements();
+      console.log('Validation state for required fields:', {
+        hasFiles: this.selectedFiles?.length > 0,
+        hasComments: !!this.completionComments?.trim(),
+        validationErrors: this.validationErrors,
+        isValid: isValid,
+        isDocumentRequired: this.isDocumentRequired(),
+        isCommentRequired: this.isCommentRequired(),
+        isDocumentOptional: this.isDocumentOptional(),
+        isCommentOptional: this.isCommentOptional()
+      });
+      return isValid;
+    }
+    
+    // For steps with only optional fields, always allow submission
+    // but still validate file formats if files are provided
+    if (this.selectedFiles && this.selectedFiles.length > 0) {
+      this.validateFiles();
+      if (this.validationErrors.length > 0) {
+        return false; // Invalid file formats
+      }
+    }
+    
+    console.log('Optional fields step - allowing submission');
+    return true;
   }
 
   onCompleteStep(): void {
-    if (!this.currentStep || !this.validateCompletionRequirements()) {
+    console.log('🔥 Complete step clicked');
+    console.log('🔥 Current step:', this.currentStep);
+    console.log('🔥 Is submitting:', this.isSubmitting);
+    
+    if (!this.currentStep || this.isSubmitting) {
+      console.log('❌ No current step or already submitting');
       return;
     }
 
-    // If there are files to upload, handle them first
-    if (this.selectedFiles.length > 0) {
-      this.uploadFiles().subscribe({
-        next: (fileUrls) => {
-          this.emitCompletionWithFiles(fileUrls);
-        },
-        error: (error) => {
-          console.error('Error uploading files:', error);
-          this.uploadError = 'Failed to upload files. Please try again.';
-          this.cdr.detectChanges();
-        }
-      });
-    } else {
-      // If no files, just emit completion
-      this.emitCompletionWithFiles([]);
-    }
-  }
-
-  private uploadFiles(): Observable<string[]> {
-    // Create an array of observables for each file upload
-    const uploadObservables = this.selectedFiles.map(file => {
-      return new Observable<string>(observer => {
-        this.uploadProgress[file.name] = 0;
-        
-        this.commonService.uploadFile(file).subscribe({
-          next: (event: HttpEvent<any>) => {
-            if (event.type === HttpEventType.UploadProgress && event.total) {
-              // Calculate and update progress
-              this.uploadProgress[file.name] = Math.round(100 * event.loaded / event.total);
-              this.cdr.detectChanges();
-            } else if (event.type === HttpEventType.Response) {
-              // Get the file URL from the response
-              const fileUrl = event.body?.message?.file_url;
-              if (fileUrl) {
-                observer.next(fileUrl);
-                observer.complete();
-              } else {
-                observer.error('No file URL in response');
-              }
-            }
-          },
-          error: (error) => {
-            console.error(`Error uploading file ${file.name}:`, error);
-            observer.error(error);
-          }
-        });
-      });
+    // For steps with required fields, validate first
+    console.log('🔍 Checking validation requirements:', {
+      requiresPhotos: this.currentStep.requiresPhotos,
+      requiresComments: this.currentStep.requiresComments,
+      isDocumentOptional: this.isDocumentOptional(),
+      isCommentOptional: this.isCommentOptional()
     });
+    
+    if ((this.currentStep.requiresPhotos && !this.isDocumentOptional()) || 
+        (this.currentStep.requiresComments && !this.isCommentOptional())) {
+      console.log('🔍 Validating required fields...');
+      if (!this.validateCompletionRequirements()) {
+        console.log('❌ Validation failed for required fields');
+        return;
+      }
+      console.log('✅ Validation passed for required fields');
+    } else {
+      console.log('ℹ️ No required fields to validate');
+    }
 
-    // Use forkJoin to wait for all uploads to complete
-    return forkJoin(uploadObservables);
-  }
-
-  private emitCompletionWithFiles(fileUrls: string[]): void {
-    const completionData: WorkflowCompletionData = {
-      stepId: this.currentStep!.id,
-      photos: this.selectedFiles,
-      fileUrls: fileUrls,
-      comments: this.completionComments.trim()
+    // Store current values
+    const currentStepData = {
+      step: this.currentStep,
+      files: [...this.selectedFiles],
+      comments: this.completionComments?.trim() || ''
     };
 
-    this.stepCompleted.emit(completionData);
+    // Close the completion modal first
     this.closeCompletionModal();
+
+    // Always show confirmation dialog before completing any step
+    this.sweetAlertService.confirm(
+      'Complete Step',
+      `Are you sure you want to complete the "${currentStepData.step.title}" step?`,
+      'question',
+      'Yes, Complete',
+      'Cancel'
+    ).then((result) => {
+      if (result.isConfirmed) {
+        console.log('✅ User confirmed step completion');
+        console.log('🚀 Setting isSubmitting to true');
+        this.isSubmitting = true;
+
+        // Handle file uploads first
+        if (currentStepData.files.length > 0) {
+          const uploadObservables = currentStepData.files.map(file => 
+            this.commonService.uploadFile(file)
+          );
+
+          forkJoin(uploadObservables).subscribe({
+            next: (responses) => {
+              // Extract file URLs from responses
+              const fileUrls = responses.map(response => response.message?.file_url).filter(url => url);
+              console.log('Files uploaded successfully:', fileUrls);
+
+              // Format comments with HTML paragraph tags if needed
+              const formattedComments = currentStepData.comments.startsWith('<p>') ? 
+                currentStepData.comments : 
+                `<p>${currentStepData.comments}</p>`;
+
+              // Emit completion data to parent with file URLs
+              const completionData: WorkflowStepCompletionData = {
+                stepId: currentStepData.step.id,
+                comments: formattedComments,
+                files: [],  // Clear files array since we now have URLs
+                fileUrls: fileUrls,
+                action: 'Approve'
+              };
+
+                        console.log('🎯 Emitting completion data with files:', completionData);
+          this.stepCompleted.emit(completionData);
+          this.isSubmitting = false;
+            },
+            error: (error) => {
+              console.error('Error uploading files:', error);
+              this.sweetAlertService.error('Failed to upload files. Please try again.');
+              this.isSubmitting = false;
+            }
+          });
+        } else {
+          // No files to upload, emit completion data directly
+          const formattedComments = currentStepData.comments.startsWith('<p>') ? 
+            currentStepData.comments : 
+            `<p>${currentStepData.comments}</p>`;
+
+          const completionData: WorkflowStepCompletionData = {
+            stepId: currentStepData.step.id,
+            comments: formattedComments,
+            files: [],
+            fileUrls: [],
+            action: 'Approve'
+          };
+
+          console.log('🎯 Emitting completion data (no files):', completionData);
+          this.stepCompleted.emit(completionData);
+          this.isSubmitting = false;
+        }
+      } else {
+        console.log('User cancelled step completion');
+        // If user cancels, reopen the modal with previous data
+        this.currentStep = currentStepData.step;
+        this.selectedFiles = currentStepData.files;
+        this.completionComments = currentStepData.comments;
+        this.showCompletionModal = true;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   formatFileSize(bytes: number): string {
@@ -403,12 +519,18 @@ export class ApprovalWorkflowComponent implements OnInit {
   }
 
   isDocumentRequired(): boolean {
-    if (!this.currentStep) return false;
-    return this.currentStep.requiresPhotos === true;
+    return this.currentStep?.requiresPhotos === true && !this.isDocumentOptional();
   }
 
   isCommentRequired(): boolean {
-    if (!this.currentStep) return false;
-    return this.currentStep.requiresComments === true;
+    return this.currentStep?.requiresComments === true && !this.isCommentOptional();
+  }
+
+  isDocumentOptional(): boolean {
+    return this.currentStep?.isDocumentOptional === true;
+  }
+
+  isCommentOptional(): boolean {
+    return this.currentStep?.isCommentOptional === true;
   }
 } 

@@ -5,6 +5,28 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
   max-width: 400px;
+  position: relative;
+  
+  .workflow-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    
+    i {
+      color: #f59e0b;
+      font-size: 1.2rem;
+    }
+    
+    span {
+      color: #374151;
+      font-size: 0.875rem;
+    }
+  }
   
   .workflow-header {
     margin-bottom: 24px;
@@ -18,6 +40,11 @@
   }
   
   .workflow-steps {
+    &.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    
     .workflow-step {
       display: flex;
       align-items: flex-start;
@@ -454,6 +481,16 @@
     min-height: 80px;
     resize: vertical;
   }
+}
+
+// Set z-index for PrimeNG dialog to be lower than SweetAlert
+:host ::ng-deep .p-dialog-mask {
+  z-index: 1000 !important;
+}
+
+// Ensure SweetAlert appears above PrimeNG dialog
+:root {
+  --swal2-z-index: 2000;
 }
 
 // Responsive Design

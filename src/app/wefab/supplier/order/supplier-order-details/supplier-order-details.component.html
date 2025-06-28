@@ -123,9 +123,9 @@
       <app-approval-workflow
         title="Order Tracking"
         [steps]="workflowSteps"
-        (stepCompleted)="onWorkflowStepCompleted($event)"
-        (stepClicked)="onWorkflowStepClicked($event)"
-        [loading]="loading">
+        [loading]="loading"
+        (stepCompleted)="onStepCompleted($event)"
+        (stepClicked)="onStepClicked($event)">
       </app-approval-workflow>
     </div>
   </div>
