@@ -181,7 +181,7 @@ export class SupplierOrderComponent implements OnInit {
   getOrderList() {
     this.loading = true;
     // This will be updated with actual API endpoint when available
-    let endpoint = `/api/resource/Supplier Order?fields=["*"]&filters=[["status", "not in", ["Draft"]],["supplier_id", "=", "${this.supplierId}"]]`
+    let endpoint = `/api/resource/Purchase Order?fields=["*"]&filters=[["po_status", "not in", ["Draft"]],["supplier_id", "=", "${this.supplierId}"]]`
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
@@ -262,7 +262,7 @@ export class SupplierOrderComponent implements OnInit {
       orderId: item.name || item.order_id || '',
       orderName: item.order_name || item.title || item.name || 'N/A',
       creationDate: this.formatApiDate(item.creation || item.created_date || ''),
-      deliveryDate: this.formatApiDate(item.delivery_date || item.expected_delivery || ''),
+      deliveryDate: this.formatApiDate(item.actual_delivery_date || item.expected_delivery || ''),
       totalAmount: item.total_amount || item.grand_total || 0,
       status: this.mapApiStatusToOrderStatus(item.status || 'Draft'),
       name: item.name || '',

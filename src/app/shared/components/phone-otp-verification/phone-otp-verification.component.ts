@@ -768,8 +768,8 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   verificationId: string = '';
 
   constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService, private cdr: ChangeDetectorRef, private sweetAlertService: SweetAlertService) {
-    // Set default country to India or use the provided countryCode
-    this.selectedCountry = this.countries.find(c => c.code === this.countryCode) || this.countries[0];
+    // Initialize with first country as fallback
+    this.selectedCountry = this.countries[0];
     
     // If created in verified state (from parent's phoneVerified=true), set visually verified
     if (this._isVerified) {
@@ -798,8 +798,15 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
       }
     });
     
-    // Set the default country based on the input
-    if (this.countryCode) {
+    // Set country from localStorage if available
+    const storedCountry = localStorage.getItem('country');
+    if (storedCountry) {
+      const country = this.countries.find(c => c.name === storedCountry);
+      if (country) {
+        this.selectedCountry = country;
+      }
+    } else if (this.countryCode) {
+      // Fallback to input countryCode if no localStorage value
       const country = this.countries.find(c => c.code === this.countryCode);
       if (country) {
         this.selectedCountry = country;
