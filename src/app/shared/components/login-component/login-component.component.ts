@@ -130,8 +130,8 @@ export class LoginComponentComponent {
                   if (response.data.user_type === 'supplier') {
                     localStorage.setItem('supplier_id', response.data.supplier_info.supplier_company_id);
                     localStorage.setItem('supplier_company_name', response.data.supplier_info.supplier_company_name)
-                    localStorage.setItem('currency_format', '#,##,###.##')
-                    localStorage.setItem('selected_currency', 'INR')
+                    localStorage.setItem('currency_format', response.data.number_format)
+                    localStorage.setItem('selected_currency', response.data.currency)
                     if(!response.data.supplier_info.supplier_company_id) {
                       this.router.navigate(['/wefab/supplier/supplier-onboarding-welcome']);
                     } else {
