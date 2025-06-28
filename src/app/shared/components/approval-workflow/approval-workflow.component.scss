@@ -23,6 +23,22 @@
       align-items: flex-start;
       margin-bottom: 20px;
       position: relative;
+      transition: all 0.2s ease;
+      cursor: default;
+      
+      &.clickable {
+        cursor: pointer;
+        
+        &:hover {
+          .step-icon {
+            transform: scale(1.05);
+          }
+          
+          .step-content .step-title {
+            color: #f59e0b;
+          }
+        }
+      }
       
       &:last-child {
         margin-bottom: 0;
@@ -49,23 +65,26 @@
           position: relative;
           z-index: 2;
           border: 3px solid transparent;
+          transition: all 0.3s ease;
           
           &.step-icon-complete {
             background-color: #10b981;
             color: white;
             border-color: #10b981;
-          }
-          
-          &.step-icon-under-review {
-            background-color: #f59e0b;
-            color: white;
-            border-color: #f59e0b;
+            
+            i {
+              animation: checkmark 0.3s ease-in-out;
+            }
           }
           
           &.step-icon-active {
             background-color: #f59e0b;
             color: white;
             border-color: #f59e0b;
+            
+            i {
+              animation: pulse 1.5s infinite;
+            }
           }
           
           &.step-icon-waiting {
@@ -84,6 +103,7 @@
           height: 28px;
           background-color: #e5e7eb;
           z-index: 1;
+          transition: background-color 0.3s ease;
         }
       }
       
@@ -102,6 +122,29 @@
             font-weight: 600;
             color: #1f2937;
             margin: 0;
+            transition: color 0.3s ease;
+          }
+
+          .step-status {
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 12px;
+            
+            &.status-complete {
+              background-color: rgba(16, 185, 129, 0.1);
+              color: #10b981;
+            }
+            
+            &.status-in-progress {
+              background-color: rgba(245, 158, 11, 0.1);
+              color: #f59e0b;
+            }
+            
+            &.status-waiting {
+              background-color: rgba(156, 163, 175, 0.1);
+              color: #6b7280;
+            }
           }
         }
         
@@ -116,18 +159,41 @@
         .step-icon-container .step-connector {
           background-color: #10b981;
         }
+        
+        .step-content .step-title {
+          color: #10b981;
+        }
       }
       
       &.step-active {
         .step-content .step-title {
           color: #f59e0b;
         }
-        
-        .step-icon-container .step-connector {
-          background-color: #e5e7eb;
-        }
       }
     }
+  }
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 

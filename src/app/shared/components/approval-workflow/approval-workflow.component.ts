@@ -64,6 +64,32 @@ export class ApprovalWorkflowComponent implements OnInit {
   // Default workflow steps - starting from preparation
   workflowSteps: any[] = [];
 
+  isDocumentRequired(): boolean {
+    if (!this.currentStep) return false;
+    
+    const mandatorySteps = [
+      'finishing',
+      'quality-inspection',
+      'dispatch',
+      'order-complete'
+    ];
+    
+    return mandatorySteps.includes(this.currentStep.id);
+  }
+
+  isCommentRequired(): boolean {
+    if (!this.currentStep) return false;
+    
+    const mandatorySteps = [
+      'finishing',
+      'quality-inspection',
+      'dispatch',
+      'order-complete'
+    ];
+    
+    return mandatorySteps.includes(this.currentStep.id);
+  }
+
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
@@ -79,14 +105,10 @@ export class ApprovalWorkflowComponent implements OnInit {
     switch (step.status) {
       case 'complete':
         return 'pi pi-check';
-      case 'in-progress':
-        return 'pi pi-play';
       case 'ready':
-        // Use different icon based on isOpenDialog property
-        if (step.isOpenDialog === false) {
-          return 'pi pi-info-circle'; // Info/Under Review icon when dialog is not needed
-        }
-        return 'pi pi-camera'; // Default icon when dialog is needed
+        return 'pi pi-play';
+      case 'in-progress':
+        return 'pi pi-sync';
       default:
         return 'pi pi-clock';
     }
@@ -96,10 +118,10 @@ export class ApprovalWorkflowComponent implements OnInit {
     switch (step.status) {
       case 'complete':
         return 'step-icon-complete';
-      case 'in-progress':
-        return 'step-icon-under-review';
       case 'ready':
         return 'step-icon-active';
+      case 'in-progress':
+        return 'step-icon-under-review';
       default:
         return 'step-icon-waiting';
     }
@@ -108,13 +130,13 @@ export class ApprovalWorkflowComponent implements OnInit {
   getStepButtonText(step: WorkflowStep): string {
     switch (step.status) {
       case 'complete':
-        return 'Complete';
-      case 'in-progress':
-        return 'Click to Start';
+        return 'Completed';
       case 'ready':
-        return 'Click to Complete';
+        return 'Start';
+      case 'in-progress':
+        return 'In Progress';
       default:
-        return '';
+        return 'Waiting';
     }
   }
 
@@ -131,27 +153,44 @@ export class ApprovalWorkflowComponent implements OnInit {
   }
 
   canCompleteStep(step: WorkflowStep): boolean {
-    return this.allowInteraction && 
-           (step.allowCompletion ?? false) && 
-           (step.status === 'in-progress' || step.status === 'ready');
+    // A step can be completed if:
+    // 1. Interaction is allowed
+    // 2. The step is ready or in-progress
+    // 3. All previous steps are complete
+    if (!this.allowInteraction) return false;
+    
+    const stepIndex = this.steps.findIndex(s => s.id === step.id);
+    if (stepIndex === -1) return false;
+    
+    // Check if all previous steps are complete
+    const allPreviousComplete = this.steps
+      .slice(0, stepIndex)
+      .every(s => s.status === 'complete');
+    
+    return (step.status === 'ready' || step.status === 'in-progress') && allPreviousComplete;
   }
 
   onStepClick(step: WorkflowStep): void {
-    debugger
-    if(step.isOpenDialog) {
+    // First emit the click event
+    this.stepClicked.emit(step);
+    
+    // Check if the step can be completed
+    if (!this.canCompleteStep(step)) {
+      return;
+    }
+    
+    if (step.isOpenDialog) {
+      // Open the completion modal for steps that require it
       this.openCompletionModal(step);
     } else {
+      // For steps that don't require a dialog (like Supplier Confirmation)
+      // emit the completion event directly
       this.stepCompleted.emit({
         stepId: step.id,
         photos: [],
         comments: ''
       });
     }
-    // this.stepClicked.emit(step);
-    
-    // if (this.canCompleteStep(step)) {
-    //   this.openCompletionModal(step);
-    // }
   }
 
   openCompletionModal(step: WorkflowStep): void {
@@ -221,14 +260,31 @@ export class ApprovalWorkflowComponent implements OnInit {
   canSubmitCompletion(): boolean {
     if (!this.currentStep) return false;
 
-    // Check if photos are required
-    if (this.currentStep.requiresPhotos && this.selectedFiles.length === 0) {
-      return false;
+    // For Finishing, Quality Inspection, Dispatch, and Order Complete steps
+    const mandatorySteps = [
+      'finishing',
+      'quality-inspection',
+      'dispatch',
+      'order-complete'
+    ];
+
+    if (mandatorySteps.includes(this.currentStep.id)) {
+      // Both photos and comments are mandatory
+      if (this.selectedFiles.length === 0) {
+        this.uploadError = 'Please attach at least one document';
+        return false;
+      }
+      if (!this.completionComments.trim()) {
+        this.uploadError = 'Please add comments';
+        return false;
+      }
     }
 
-    // Check if comments are required
-    if (this.currentStep.requiresComments && !this.completionComments.trim()) {
-      return false;
+    // For other steps (Preparation, Work In Progress)
+    // Photos and comments are optional, but validate if provided
+    if (this.selectedFiles.length > 0) {
+      this.validateFiles();
+      if (this.uploadError) return false;
     }
 
     return true;
@@ -259,5 +315,18 @@ export class ApprovalWorkflowComponent implements OnInit {
 
   trackByStepId(index: number, step: WorkflowStep): string {
     return step.id;
+  }
+
+  getStepStatusText(step: WorkflowStep): string {
+    switch (step.status) {
+      case 'complete':
+        return 'Completed';
+      case 'ready':
+        return 'In Progress';
+      case 'waiting':
+        return 'Yet to Start';
+      default:
+        return '';
+    }
   }
 } 

@@ -687,7 +687,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       this.countryList = res.data || [];
       
       console.log('Country list loaded:', this.countryList.length);
-
+      
       // Get country directly from localStorage
       const storedCountry = localStorage.getItem('country');
       if (storedCountry) {

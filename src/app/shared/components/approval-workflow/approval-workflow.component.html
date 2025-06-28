@@ -10,8 +10,9 @@
       *ngFor="let step of steps; trackBy: trackByStepId" 
       class="workflow-step"
       [class.step-completed]="step.status === 'complete'"
-      [class.step-active]="step.status === 'in-progress' || step.status === 'ready'"
-      [class.step-waiting]="step.status === 'waiting'"
+      [class.step-active]="step.status === 'ready'"
+      (click)="onStepClick(step)"
+      [class.clickable]="canCompleteStep(step)"
     >
       <!-- Step Icon -->
       <div class="step-icon-container">
@@ -25,16 +26,13 @@
       <div class="step-content">
         <div class="step-header">
           <h4 class="step-title">{{ step.title }}</h4>
-          <button 
-            *ngIf="step.status !== 'waiting'"
-            type="button"
-            pButton
-            pRipple
-            [label]="getStepButtonText(step)"
-            [class]="getStepButtonClass(step)"
-            [disabled]="!canCompleteStep(step) || loading"
-            (click)="onStepClick(step)"
-          ></button>
+          <span class="step-status" [ngClass]="{
+            'status-complete': step.status === 'complete',
+            'status-in-progress': step.status === 'ready',
+            'status-waiting': step.status === 'waiting'
+          }">
+            {{ getStepStatusText(step) }}
+          </span>
         </div>
       </div>
     </div>
@@ -54,11 +52,13 @@
     <div class="completion-modal-content">
       <!-- File Upload Section -->
       <div class="form-section">
-        <label class="form-label" [class.required]="currentStep?.requiresPhotos">Upload Evidence (Photos, Videos, Documents)</label>
+        <label class="form-label" [class.required]="isDocumentRequired()">Upload Evidence (Photos, Videos, Documents)</label>
         <div class="file-upload-container" (click)="fileInput.click()">
           <div class="upload-area">
             <i class="pi pi-cloud-upload upload-icon"></i>
             <span class="upload-text">Choose Evidence</span>
+            <small class="upload-hint" *ngIf="isDocumentRequired()">* Required for this step</small>
+            <small class="upload-hint" *ngIf="!isDocumentRequired()">Optional for this step</small>
           </div>
           <input 
             #fileInput
@@ -95,7 +95,7 @@
 
       <!-- Comments Section -->
       <div class="form-section">
-        <label class="form-label" [class.required]="currentStep?.requiresComments">Comments</label>
+        <label class="form-label" [class.required]="isCommentRequired()">Comments</label>
         <textarea
           pInputTextarea
           [(ngModel)]="completionComments"
@@ -103,6 +103,8 @@
           rows="4"
           class="w-full"
         ></textarea>
+        <small class="hint-text" *ngIf="isCommentRequired()">* Required for this step</small>
+        <small class="hint-text" *ngIf="!isCommentRequired()">Optional for this step</small>
       </div>
     </div>
 

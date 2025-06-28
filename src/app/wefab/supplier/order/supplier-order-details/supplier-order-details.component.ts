@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -64,6 +64,11 @@ export interface OrderAttachment {
   description: string;
   category: string;
   uploaded_on: string;
+}
+
+interface WorkflowState {
+  state_name: string;
+  status: string;
 }
 
 @Component({
@@ -205,66 +210,11 @@ export class SupplierOrderDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private commonService: CommonService,
-    private sweetAlert: SweetAlertService
+    private sweetAlert: SweetAlertService,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  workflowSteps: WorkflowStep[] = [
-    {
-      id: 'confirmation',
-      title: 'Confirmation',
-      status: 'ready',
-      description: '',
-      allowCompletion: true,
-      isOpenDialog: false,
-    },
-    {
-      id: 'preparation',
-      title: 'Preparation',
-      status: 'waiting',
-      description: '',
-      allowCompletion: true,
-      isOpenDialog: true,
-      requiresPhotos: false,
-      requiresComments: false,
-    },
-    {
-      id: 'work-in-progress',
-      title: 'Work In Progress',
-      status: 'waiting',
-      description: '',
-      allowCompletion: true,
-      isOpenDialog: true,
-      requiresPhotos: true,
-      requiresComments: true,
-    },
-    {
-      id: 'finishing',
-      title: 'Finishing',
-      status: 'waiting',
-      description: '',
-      allowCompletion: true,
-      requiresPhotos: true,
-      requiresComments: true,
-    },
-    {
-      id: 'inspection',
-      title: 'Inspection',
-      status: 'waiting',
-      description: '',
-      allowCompletion: true,
-      requiresPhotos: true,
-      requiresComments: true,
-    },
-    {
-      id: 'dispatch',
-      title: 'Dispatch In Progress',
-      status: 'waiting',
-      description: '',
-      allowCompletion: true,
-      requiresPhotos: true,
-      requiresComments: true
-    }
-  ];
+  workflowSteps: WorkflowStep[] = [];
 
   ngOnInit() {
     this.route.params.subscribe(params => {
@@ -272,6 +222,75 @@ export class SupplierOrderDetailsComponent implements OnInit {
       console.log('Order ID:', this.orderId);
       if (this.orderId) {
         this.accessFirebaseTrigger('Purchase Order', this.orderId);
+        this.getOrderTrackerView(this.orderId);
+      }
+    });
+  }
+
+  getOrderTrackerView(orderId: string) {
+    let endPoint = `/api/method/wefab.wefab.api.common.po_tracker_api.get_po_workflow_states?po_name=${orderId}`;
+    debugger
+    this.commonService.getWefabData(endPoint).subscribe((res:any) => {
+      debugger
+      console.log('res:', res);
+      // debugger
+      if (res.message && res.message.data.states) {
+        debugger
+        // Filter out Draft and Approval states
+        const relevantStates = res.message.data.states.filter((state: WorkflowState) => 
+          !['Draft', 'Approval'].includes(state.state_name)
+        );
+
+        debugger
+
+        // Create workflow steps from API states
+        this.workflowSteps = relevantStates.map((state: WorkflowState) => {
+          const stepId = state.state_name.toLowerCase().replace(/\s+/g, '-');
+          let status: 'complete' | 'in-progress' | 'waiting' | 'ready' = 'waiting';
+          
+          switch (state.status) {
+            case 'Completed':
+              status = 'complete';
+              break;
+            case 'In Progress':
+              status = 'ready';
+              break;
+            case 'Yet to Start':
+              status = 'waiting';
+              break;
+          }
+
+          // Determine if step requires documents and comments
+          const requiresDocuments = ['Finishing', 'Quality Inspection', 'Dispatch', 'Order Complete'].includes(state.state_name);
+          const isDialogRequired = state.state_name !== 'Supplier Confirmation';
+
+          return {
+            id: stepId,
+            title: state.state_name,
+            status: status,
+            description: '',
+            allowCompletion: status === 'ready',
+            isOpenDialog: isDialogRequired,
+            requiresPhotos: requiresDocuments,
+            requiresComments: requiresDocuments
+          };
+        });
+
+        debugger
+        console.log('Workflow steps:', this.workflowSteps);
+
+        // Enable next step if current step is in progress
+        this.workflowSteps.forEach((step, index) => {
+          if (step.status === 'ready' && index < this.workflowSteps.length - 1) {
+            this.workflowSteps[index + 1].allowCompletion = true;
+          }
+        });
+
+        debugger
+
+        console.log('Workflow steps:', this.workflowSteps);
+
+        this.cdr.detectChanges();
       }
     });
   }
@@ -281,6 +300,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
     this.commonService.commonFirebaseTrigger(doctType_name, doctypeId).subscribe({
       next: (res: any) => {
         this.loadOrderDetails();
+        this.getOrderTrackerView(this.orderId);
         this.getActionList();
       },
       error: (error) => {
@@ -734,43 +754,83 @@ export class SupplierOrderDetailsComponent implements OnInit {
       return;
     }
 
-    // Update the completed step
-    this.workflowSteps[completedStepIndex] = {
-      ...this.workflowSteps[completedStepIndex],
-      status: 'complete',
-      completedDate: new Date(),
-      completedBy: 'Current User', // You can get this from auth service
-      comments: data.comments || '',
-      photos: data.photos ? data.photos.map(file => file.name) : []
-    };
-
-    // Activate the next step if it exists
-    if (completedStepIndex + 1 < this.workflowSteps.length) {
-      this.workflowSteps[completedStepIndex + 1] = {
-        ...this.workflowSteps[completedStepIndex + 1],
-        status: 'ready',
-        description: 'Ready to Start'
-      };
+    // Get current available actions
+    let obj: any = {
+      doctype: 'Purchase Order',
+      name: this.orderId
     }
-
-    // Show success message
-    this.sweetAlert.success(
-      `${this.workflowSteps[completedStepIndex].title} has been completed successfully.`
-    );
-
-    // Handle photo uploads if any
-    if (data.photos && data.photos.length > 0) {
-      this.handlePhotoUploads(data.stepId, data.photos);
-    }
-
-    // Save the workflow progress (you might want to call an API here)
-    this.saveWorkflowProgress(data);
+    let params = new HttpParams();
+    params = params.append('doc', JSON.stringify(obj));
+    let endPoint = `/api/method/frappe.model.workflow.get_transitions`;
     
-    console.log('Updated workflow steps:', this.workflowSteps);
+    this.commonService.getWefabData(endPoint, params).subscribe({
+      next: (res: any) => {
+        if (res.message && res.message.length > 0) {
+          // Get the first available action
+          const action = res.message[0].action;
+          
+          // Prepare the payload for execute_po_action
+          const payload = {
+            po_name: this.orderId,
+            action_name: action,
+            comments: data.comments || '',
+            attached_files: data.photos ? data.photos.map(file => file.name) : []
+          };
+
+          // Call the execute_po_action API
+          this.commonService.postWefabData('/api/method/wefab.wefab.api.common.po_tracker_api.execute_po_action', payload)
+            .subscribe({
+              next: (response: any) => {
+                console.log('Action executed successfully:', response);
+                
+                // Update local state
+                this.workflowSteps[completedStepIndex] = {
+                  ...this.workflowSteps[completedStepIndex],
+                  status: 'complete',
+                  completedDate: new Date(),
+                  completedBy: 'Current User',
+                  comments: data.comments || '',
+                  photos: data.photos ? data.photos.map(file => file.name) : []
+                };
+
+                // If there's a next step, update its status to ready
+                if (completedStepIndex + 1 < this.workflowSteps.length) {
+                  this.workflowSteps[completedStepIndex + 1] = {
+                    ...this.workflowSteps[completedStepIndex + 1],
+                    status: 'ready',
+                    allowCompletion: true
+                  };
+                }
+
+                // Show success message
+                this.sweetAlert.success(
+                  `${this.workflowSteps[completedStepIndex].title} has been completed successfully.`
+                );
+
+                // Refresh action list
+                this.getActionList();
+
+                // Force change detection
+                this.cdr.detectChanges();
+              },
+              error: (error) => {
+                console.error('Error executing action:', error);
+                this.sweetAlert.error('Failed to complete the step');
+              }
+            });
+        } else {
+          console.error('No actions available');
+          this.sweetAlert.error('No actions available for this step');
+        }
+      },
+      error: (error) => {
+        console.error('Error getting actions:', error);
+        this.sweetAlert.error('Failed to get available actions');
+      }
+    });
   }
 
   onWorkflowStepClicked(step: WorkflowStep): void {
-    debugger
     console.log('Workflow step clicked:', step);
     
     // Handle different actions based on step status
@@ -780,9 +840,9 @@ export class SupplierOrderDetailsComponent implements OnInit {
         this.showStepDetails(step);
         break;
         
-      case 'in-progress':
       case 'ready':
-        // For active steps, the workflow component will handle the completion modal
+      case 'in-progress':
+        // The workflow component will handle the completion modal
         console.log(`Step ${step.title} is ready for completion`);
         break;
         
@@ -796,53 +856,6 @@ export class SupplierOrderDetailsComponent implements OnInit {
       default:
         console.log('Unknown step status:', step.status);
     }
-  }
-
-  /**
-   * Handle photo uploads for completed workflow steps
-   */
-  private handlePhotoUploads(stepId: string, photos: File[]): void {
-    console.log('Handling photo uploads for step:', stepId, photos);
-    
-    // Here you would typically upload photos to your server
-    // For now, we'll just log the action
-    photos.forEach((photo, index) => {
-      console.log(`Photo ${index + 1} for step ${stepId}:`, photo.name, photo.size);
-    });
-    
-    // You might want to use your file upload service here
-    // this.fileUploadService.uploadFiles(photos, stepId).subscribe(...)
-  }
-
-  /**
-   * Save workflow progress to the server
-   */
-  private saveWorkflowProgress(completionData: WorkflowCompletionData): void {
-    console.log('Saving workflow progress:', completionData);
-    
-    // Prepare the data for API call
-    const workflowData = {
-      orderId: this.orderId,
-      stepId: completionData.stepId,
-      comments: completionData.comments,
-      completedDate: new Date().toISOString(),
-      photos: completionData.photos ? completionData.photos.map(f => f.name) : []
-    };
-
-    // Here you would make an API call to save the workflow progress
-    // Example:
-    // this.commonService.postWefabData('/api/method/your.workflow.update', workflowData)
-    //   .subscribe({
-    //     next: (response) => {
-    //       console.log('Workflow progress saved:', response);
-    //     },
-    //     error: (error) => {
-    //       console.error('Error saving workflow progress:', error);
-    //       this.sweetAlert.error('Error', 'Failed to save workflow progress. Please try again.');
-    //     }
-    //   });
-    
-    console.log('Workflow data to save:', workflowData);
   }
 
   /**
