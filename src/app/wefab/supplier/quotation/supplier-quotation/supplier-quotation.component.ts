@@ -321,7 +321,7 @@ export class SupplierQuotationComponent implements OnInit {
 
   onLinkClick(event: { rowData: any, column: any }) {
     console.log('Quotation link clicked:', event.rowData);
-    this.router.navigate(['/wefab/supplier/quotation/details', event.rowData.quotationId]);
+    this.router.navigate(['/wefab/supplier/quotation/details', event.rowData.companySubInfo]);
   }
 
   onActionClick(event: { action: string, rowData: any }) {

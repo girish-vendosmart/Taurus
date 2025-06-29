@@ -1094,6 +1094,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
   getStatusClass(status:any) {
     console.log('RFQ Details page status', status);
     switch (status) {
+      case 'Awarded':
+        return 'status-awarded';
       case 'Submitted':
         return 'status-awarded';
       case 'Cancelled':
