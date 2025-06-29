@@ -55,13 +55,17 @@
       <div class="table-card customer-card">
         <div class="table-header">
           <h3 class="table-title">RFQ List</h3>
+          <button class="create-rfq-btn" (click)="createRFQ()">
+            <i class="pi pi-plus"></i>
+            Create RFQ
+          </button>
         </div>
         
         <div class="table-content">
           <app-common-table
             [config]="tableConfig"
             [data]="rfqData"
-            [loading]="loading"
+            [loading]="false"
             (rowClick)="onRowClick($event)"
             (linkClick)="onLinkClick($event)"
             (actionClick)="onActionClick($event)">

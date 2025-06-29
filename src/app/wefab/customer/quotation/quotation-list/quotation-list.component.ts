@@ -1,23 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonTableComponent, TableConfig, ActionButton, FilterOption } from '../../../../shared/components/common-table/common-table.component';
+import { CommonService } from '../../../../shared/services/common.service';
+import { DateFormatPipe } from '../../../../shared/pipes/date-format.pipe';
 
 export interface QuotationSummary {
   totalQuotations: number;
+  openQuotations: number;
   submittedQuotations: number;
-  draftQuotations: number;
+  expiredQuotations: number;
 }
 
 export interface QuotationData {
-  quotationId: string;
-  rfqId: string;
-  grandTotal: string;
-  submittedDate: string;
+  name: string;
+  quotation_name: string;
+  customer_rfq_id: string;
+  creation: string;
   validity: string;
-  status: 'Submitted' | 'Draft' | 'Expired' | 'Under Review';
-  routerLink?: string;
+  grand_total: number;
+  status: string;
+  currency_code: string;
+  workflow_state: string;
 }
 
 @Component({
@@ -27,145 +32,55 @@ export interface QuotationData {
     CommonModule,
     RouterModule,
     FormsModule,
-    CommonTableComponent
+    CommonTableComponent,
+    DateFormatPipe
   ],
   templateUrl: './quotation-list.component.html',
   styleUrl: './quotation-list.component.scss'
 })
 export class QuotationListComponent implements OnInit {
-  
-  // Quotation Summary Data
-  quotationSummary: QuotationSummary = {
-    totalQuotations: 8,
-    submittedQuotations: 3,
-    draftQuotations: 3
+  quotationData: QuotationData[] = [];
+  loading = false;
+
+  quotationSummary = {
+    totalQuotations: 0,
+    openQuotations: 0,
+    submittedQuotations: 0,
+    expiredQuotations: 0
   };
-
-  // Sample Quotation Data
-  quotationData: QuotationData[] = [
-    {
-      quotationId: 'QTN0000367',
-      rfqId: 'RFQ0000136',
-      grandTotal: 'INR 65,000.00',
-      submittedDate: '26 June 2025, 12:11 PM',
-      validity: '5 August 2025, 5:30 AM',
-      status: 'Submitted',
-      routerLink: '/customer/quotation-details/QTN0000367'
-    },
-    {
-      quotationId: 'QTN0000368',
-      rfqId: 'RFQ0000137',
-      grandTotal: 'INR 85,500.00',
-      submittedDate: '25 June 2025, 03:45 PM',
-      validity: '10 August 2025, 11:30 AM',
-      status: 'Draft',
-      routerLink: '/wefab/customer/quotation-details/QTN0000368'
-    },
-    {
-      quotationId: 'QTN0000369',
-      rfqId: 'RFQ0000138',
-      grandTotal: 'INR 1,25,000.00',
-      submittedDate: '24 June 2025, 09:20 AM',
-      validity: '15 August 2025, 02:15 PM',
-      status: 'Submitted',
-      routerLink: '/wefab/customer/quotation-details/QTN0000369'
-    },
-    {
-      quotationId: 'QTN0000370',
-      rfqId: 'RFQ0000139',
-      grandTotal: 'INR 45,750.00',
-      submittedDate: '23 June 2025, 11:30 AM',
-      validity: '20 July 2025, 06:00 PM',
-      status: 'Expired',
-      routerLink: '/wefab/customer/quotation-details/QTN0000370'
-    },
-    {
-      quotationId: 'QTN0000371',
-      rfqId: 'RFQ0000140',
-      grandTotal: 'INR 2,15,000.00',
-      submittedDate: '22 June 2025, 02:15 PM',
-      validity: '25 August 2025, 09:45 AM',
-      status: 'Under Review',
-      routerLink: '/wefab/customer/quotation-details/QTN0000371'
-    },
-    {
-      quotationId: 'QTN0000372',
-      rfqId: 'RFQ0000141',
-      grandTotal: 'INR 95,200.00',
-      submittedDate: '21 June 2025, 04:50 PM',
-      validity: '30 August 2025, 12:30 PM',
-      status: 'Draft',
-      routerLink: '/wefab/customer/quotation-details/QTN0000372'
-    },
-    {
-      quotationId: 'QTN0000373',
-      rfqId: 'RFQ0000142',
-      grandTotal: 'INR 1,75,500.00',
-      submittedDate: '20 June 2025, 10:25 AM',
-      validity: '5 September 2025, 04:20 PM',
-      status: 'Submitted',
-      routerLink: '/wefab/customer/quotation-details/QTN0000373'
-    },
-    {
-      quotationId: 'QTN0000374',
-      rfqId: 'RFQ0000143',
-      grandTotal: 'INR 55,800.00',
-      submittedDate: '19 June 2025, 01:40 PM',
-      validity: '10 September 2025, 08:15 AM',
-      status: 'Draft',
-      routerLink: '/wefab/customer/quotation-details/QTN0000374'
-    }
-  ];
-
-  // Status filter options
-  statusOptions: FilterOption[] = [
-    { label: 'All Status', value: null },
-    { label: 'Submitted', value: 'Submitted' },
-    { label: 'Draft', value: 'Draft' },
-    { label: 'Expired', value: 'Expired' },
-    { label: 'Under Review', value: 'Under Review' }
-  ];
 
   // Table configuration
   tableConfig: TableConfig = {
     columns: [
       {
-        field: 'quotationId',
+        field: 'quotation_name',
         header: 'Quotation Id',
         sortable: true,
         filterable: true,
         filterType: 'text',
         isLink: true,
         routerLinkField: 'routerLink',
-        width: '15%'
+        width: '20%'
       },
       {
-        field: 'rfqId',
+        field: 'customer_rfq_id',
         header: 'RFQ Id',
         sortable: true,
         filterable: true,
         filterType: 'text',
-        width: '15%'
+        width: '20%'
       },
       {
-        field: 'grandTotal',
+        field: 'formattedGrandTotal',
         header: 'Grand Total',
         sortable: true,
         filterable: true,
         filterType: 'text',
-        width: '15%'
-      },
-      {
-        field: 'submittedDate',
-        header: 'Submitted Date',
-        sortable: true,
-        filterable: true,
-        filterType: 'dateRange',
         width: '20%'
       },
       {
-        field: 'validity',
-        header: 'Validity',
+        field: 'creation',
+        header: 'Creation Date',
         sortable: true,
         filterable: true,
         filterType: 'dateRange',
@@ -177,9 +92,15 @@ export class QuotationListComponent implements OnInit {
         sortable: true,
         filterable: true,
         filterType: 'dropdown',
-        filterOptions: this.statusOptions,
+        filterOptions: [
+          { label: 'All Status', value: null },
+          { label: 'Draft', value: 'Draft' },
+          { label: 'Open', value: 'Open' },
+          { label: 'Submitted', value: 'Submitted' },
+          { label: 'Expired', value: 'Expired' }
+        ],
         isStatus: true,
-        width: '15%'
+        width: '20%'
       }
     ],
     enableSearch: false,
@@ -192,21 +113,55 @@ export class QuotationListComponent implements OnInit {
     enableColumnResize: false
   };
 
-  loading = false;
-
-  constructor() {}
+  constructor(private router: Router, private commonService: CommonService) {}
 
   ngOnInit(): void {
-    // No loading needed since we have static data
+    this.getQuotationList();
+  }
+
+  getQuotationList() {
+    this.loading = true;
+    let apiEndpoint = '/api/resource/Wefab Quotation?fields=["*"]';
+    this.commonService.getData(apiEndpoint).subscribe({
+      next: (res: any) => {
+        this.quotationData = res.data.map((quotation: any) => ({
+          ...quotation,
+          routerLink: `/wefab/customer/quotation-details/${quotation.name}`,
+          formattedGrandTotal: `${quotation.currency_code} ${quotation.grand_total.toLocaleString('en-IN', {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2
+          })}`
+        }));
+        this.updateQuotationSummary();
+      },
+      error: (error) => {
+        console.error('Error fetching quotation list:', error);
+        this.loading = false;
+      },
+      complete: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  updateQuotationSummary() {
+    const summary = {
+      totalQuotations: this.quotationData.length,
+      openQuotations: this.quotationData.filter(q => q.workflow_state === 'Open').length,
+      submittedQuotations: this.quotationData.filter(q => q.workflow_state === 'Submitted').length,
+      expiredQuotations: this.quotationData.filter(q => q.workflow_state === 'Expired').length
+    };
+    this.quotationSummary = summary;
   }
 
   onRowClick(event: any): void {
-    console.log('Row clicked:', event.rowData);
+    if (event.rowData.routerLink) {
+      this.router.navigate([event.rowData.routerLink]);
+    }
   }
 
   onLinkClick(event: { rowData: any, column: any, event: any }): void {
-    console.log('Link clicked:', event.rowData);
-    // Navigation will be handled automatically by the common-table component
+    // Navigation handled by routerLink
   }
 
   onActionClick(event: { action: string, rowData: any }): void {

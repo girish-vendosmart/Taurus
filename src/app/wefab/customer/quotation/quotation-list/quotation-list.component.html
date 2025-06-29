@@ -15,6 +15,17 @@
           </div>
         </div>
 
+        <!-- Open Quotations -->
+        <div class="stat-card open-quotations">
+          <div class="stat-icon">
+            <i class="pi pi-folder-open"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ quotationSummary.openQuotations }}</div>
+            <div class="stat-label">Open Quotations</div>
+          </div>
+        </div>
+
         <!-- Submitted Quotations -->
         <div class="stat-card submitted-quotations">
           <div class="stat-icon">
@@ -26,14 +37,14 @@
           </div>
         </div>
 
-        <!-- Draft Quotations -->
-        <div class="stat-card draft-quotations">
+        <!-- Expired Quotations -->
+        <div class="stat-card expired-quotations">
           <div class="stat-icon">
-            <i class="pi pi-clock"></i>
+            <i class="pi pi-lock"></i>
           </div>
           <div class="stat-content">
-            <div class="stat-number">{{ quotationSummary.draftQuotations }}</div>
-            <div class="stat-label">Draft Quotations</div>
+            <div class="stat-number">{{ quotationSummary.expiredQuotations }}</div>
+            <div class="stat-label">Expired Quotations</div>
           </div>
         </div>
       </div>
@@ -42,6 +53,10 @@
     <!-- Quotation Table Section -->
     <div class="quotation-table-section">
       <div class="table-card customer-card">
+        <div class="table-header">
+          <h3 class="table-title">Quotation List</h3>
+        </div>
+        
         <div class="table-content">
           <app-common-table
             [config]="tableConfig"

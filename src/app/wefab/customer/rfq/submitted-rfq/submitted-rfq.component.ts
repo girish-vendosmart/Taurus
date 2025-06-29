@@ -3,6 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonTableComponent, TableConfig, TableColumn } from '../../../../shared/components/common-table/common-table.component';
+import { CommonService } from '../../../../shared/services/common.service';
+
+interface RfqAttachment {
+  name: string;
+  size: string;
+  type: string;
+  creation: string;
+}
 
 @Component({
   selector: 'app-submitted-rfq',
@@ -51,8 +59,7 @@ export class SubmittedRfqComponent implements OnInit {
           title: 'RFQ Received',
           description: 'Your request has been successfully submitted',
           status: 'completed',
-          completedDate: 'January 15, 2024 at 2:30 PM',
-          icon: 'pi pi-check'
+          completedDate: 'January 15, 2024 at 2:30 PM'
         },
         {
           id: 2,
@@ -60,7 +67,6 @@ export class SubmittedRfqComponent implements OnInit {
           description: 'Engineering team has analyzed your requirements',
           status: 'completed',
           completedDate: 'January 17, 2024 at 11:45 AM',
-          icon: 'pi pi-check',
           hasReportLink: true,
           reportLinkText: 'View Technical Review Report'
         },
@@ -69,15 +75,13 @@ export class SubmittedRfqComponent implements OnInit {
           title: 'Quote Generation',
           description: 'Pricing and timeline calculation',
           status: 'in-progress',
-          estimatedCompletion: 'Estimated completion: 2-3 business days',
-          icon: 'pi pi-info-circle'
+          estimatedCompletion: 'Estimated completion: 2-3 business days'
         },
         {
           id: 4,
           title: 'Quote Delivery',
           description: 'Final quote sent to your email',
-          status: 'pending',
-          icon: 'pi pi-send'
+          status: 'pending'
         }
       ]
     },
@@ -167,59 +171,10 @@ export class SubmittedRfqComponent implements OnInit {
         unit: 'EA'
       }
     ],
-    allAttachments: [
-      {
-        name: 'RFK-001-Drawing.pdf',
-        size: '2.1 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'BOM-Complete.xlsx',
-        size: '1.2 MB',
-        type: 'excel'
-      },
-      {
-        name: 'Assembly-Model.step',
-        size: '8.9 MB',
-        type: 'step'
-      },
-      {
-        name: 'RFK-002-Drawing.pdf',
-        size: '1.8 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'RFK-003-Drawing.pdf',
-        size: '1.5 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'RFK-004-Drawing.pdf',
-        size: '2.3 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'RFK-005-Drawing.pdf',
-        size: '1.9 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'Material-Specifications.pdf',
-        size: '3.2 MB',
-        type: 'pdf'
-      },
-      {
-        name: 'Quality-Requirements.docx',
-        size: '0.8 MB',
-        type: 'doc'
-      },
-      {
-        name: 'Assembly-Instructions.pdf',
-        size: '2.7 MB',
-        type: 'pdf'
-      }
-    ]
+    allAttachments: [] as RfqAttachment[]
   };
+  rfqName: any;
+  rfqStatus: any;
 
   // Computed properties for displayed items
   get displayedLineItems() {
@@ -235,7 +190,7 @@ export class SubmittedRfqComponent implements OnInit {
     return this.searchPartNumber.trim() !== '' || this.selectedMaterial !== '' || this.selectedUnit !== '';
   }
 
-  get displayedAttachments() {
+  get displayedAttachments(): RfqAttachment[] {
     return this.showAllAttachments 
       ? this.rfqData.allAttachments 
       : this.rfqData.allAttachments.slice(0, 5);
@@ -305,9 +260,9 @@ export class SubmittedRfqComponent implements OnInit {
     actionButtons: []
   };
 
-  downloadAttachment(attachment: any) {
-    // Implementation for download functionality
+  downloadAttachment(attachment: RfqAttachment) {
     console.log('Downloading:', attachment.name);
+    // Implementation for download functionality
   }
 
   // Filter methods
@@ -358,7 +313,8 @@ export class SubmittedRfqComponent implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private commonService: CommonService
   ) {}
 
   ngOnInit() {
@@ -367,10 +323,67 @@ export class SubmittedRfqComponent implements OnInit {
       this.currentRfqId = params['id'];
       console.log('Current RFQ ID:', this.currentRfqId);
       // Here you can load specific RFQ data based on the ID
+      this.getRfqData(this.currentRfqId);
       this.loadRfqData(this.currentRfqId);
       // Initialize filters after data is loaded
       this.initializeFilters();
     });
+  }
+
+  getRfqData(rfqId: string) {
+    let apiEndpoint = `/api/resource/Customer Request for Quotation/${rfqId}?fields=["*"]`;
+    this.commonService.getData(apiEndpoint).subscribe((res: any) => {
+      this.rfqName = res.data.customer_rfq_name;
+      this.rfqStatus = res.data.workflow_state
+      this.rfqData.rfqNumber = res.data.name;
+      this.rfqData.reference = res.data.reference || '----';
+      this.rfqData.projectInfo.projectName = res.data.project_name || '----';
+      this.rfqData.projectInfo.deliveryDate = res.data.delivery_date || '----';
+      this
+      
+      // Transform line items
+      const transformedLineItems = (res.data.line_items || []).map((item: any) => ({
+        partNumber: item.name,
+        description: item.item_description,
+        quantity: item.quantity,
+        material: item.surface_finish || '----',
+        unit: item.unit
+      }));
+
+      this.rfqData.allLineItems = transformedLineItems;
+      this.rfqData.bomSummary.totalLineItems = transformedLineItems.length;
+      
+      // Transform attachments with proper typing
+      this.rfqData.allAttachments = (res.data.attachments || []).map((attachment: any): RfqAttachment => ({
+        name: attachment.file_name || attachment.name,
+        size: attachment.file_size || '0 KB',
+        type: this.getFileType(attachment.file_name || attachment.name),
+        creation: attachment.creation || new Date().toISOString()
+      }));
+      
+      this.rfqData.bomSummary.drawingsUploaded = this.rfqData.allAttachments.length;
+      this.rfqData.bomSummary.totalQuantity = transformedLineItems.reduce((acc: number, item: any) => acc + item.quantity, 0);
+
+      // Initialize filters after updating line items
+      this.initializeFilters();
+    });
+  }
+
+  // Add helper method to determine file type
+  private getFileType(fileName: string): string {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return 'pdf';
+      case 'doc':
+      case 'docx':
+        return 'doc';
+      case 'xls':
+      case 'xlsx':
+        return 'excel';
+      default:
+        return 'file';
+    }
   }
 
   private loadRfqData(rfqId: string) {
@@ -456,5 +469,64 @@ export class SubmittedRfqComponent implements OnInit {
   viewTechnicalReviewReport() {
     const rfqId = this.rfqData.rfqNumber; // Use current RFQ number
     this.router.navigate(['/wefab/customer/technical-review-page', rfqId]);
+  }
+
+  getStatusClass(status: string): string {
+    
+    // Convert to lowercase and replace spaces with hyphens
+    status = status.toLowerCase().replace(/\s+/g, '-');
+    
+    switch (status) {
+      case 'missing-data':
+        return 'status-review';
+      case 'complete':
+        return 'status-approved'
+      case 'not-opened':
+        return 'status-draft';
+      case 'published':
+        return 'status-approved';
+      case 'deactivated':
+        return 'status-paused'; 
+      case 'invited':
+        return 'status-open';
+      case 'not-started':
+        return 'status-draft';
+      case 'under-review':
+        return 'status-review';
+      case 'approved':
+        return 'status-approved';
+      case 'rejected':
+        return 'status-rejected';
+      case 'draft':
+        return 'status-draft';
+      case 'open':
+        return 'status-open';
+      case 'in-progress':
+        return 'status-progress';
+      case 'closed':
+        return 'status-closed';
+      case 'awarded':
+        return 'status-awarded';
+      case 'quoted':
+        return 'status-awarded';
+      case 'opened':
+        return 'status-open';
+      case 'cancelled':
+        return 'status-rejected';
+      case 'deactivate':
+        return 'status-deactivate';
+      case 'paused':
+        return 'status-paused';
+      case 'submitted':
+        return 'status-awarded';
+      case 'pending':
+        return 'status-pending';
+      case 'review':
+        return 'status-review';
+      case 'not-started':
+        return 'status-draft';
+      default:
+        return 'status-default';
+    }
   }
 }

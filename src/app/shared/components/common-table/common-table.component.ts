@@ -84,6 +84,7 @@ const DEFAULT_STATUS_OPTIONS: FilterOption[] = [
     MultiSelectModule,
     OverlayPanelModule,
     CalendarModule,
+    DateFormatPipe
   ],
   templateUrl: './common-table.component.html',
   styleUrl: './common-table.component.scss'
@@ -192,9 +193,6 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
   // Filter states
   dateRangeFilters: any = {};
   dropdownFilters: { [key: string]: any } = {};
-
-  // Sample data for demonstration
-  sampleData = [];
 
   ngOnChanges(changes: SimpleChanges) {
     
@@ -370,7 +368,18 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
   }
 
   getStatusClass(status: string): string {
-    return this.badgeService.getStatusClass(status);
+    return this.badgeService.getStatusClass(status)
+  }
+
+  formatStatusText(status: string): string {
+    if (this.isEmptyValue(status)) return '-------';
+    
+    // Split by spaces or hyphens and capitalize each word
+    return status
+      .toLowerCase()
+      .split(/[\s-]+/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 
   sortTable(field: string) {
@@ -411,7 +420,9 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
     if (!column.routerLink) return '';
     
     if (column.routerLinkField) {
-      return `${column.routerLink}/${rowData[column.routerLinkField]}`;
+      const fieldValue = rowData[column.routerLinkField];
+      if (this.isEmptyValue(fieldValue)) return '';
+      return `${column.routerLink}/${fieldValue}`;
     }
     
     return column.routerLink;
@@ -466,7 +477,7 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
 
   getTotalPages(): number {
     if (!this.table || this.table.rows === undefined) return 1;
-    const totalRecords = this.data.length || this.sampleData.length;
+    const totalRecords = this.data.length;
     return Math.ceil(totalRecords / this.table.rows);
   }
 
@@ -477,7 +488,7 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
 
   isLastPage(): boolean {
     if (!this.table || this.table.first === undefined || this.table.first === null || this.table.rows === undefined) return true;
-    const totalRecords = this.data.length || this.sampleData.length;
+    const totalRecords = this.data.length;
     return this.table.first + this.table.rows >= totalRecords;
   }
 
@@ -494,7 +505,7 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
   goToNextPage(): void {
     if (!this.table || this.isLastPage()) return;
     const newFirst = (this.table.first || 0) + (this.table.rows || 10);
-    const totalRecords = this.data.length || this.sampleData.length;
+    const totalRecords = this.data.length;
     if (newFirst < totalRecords) {
       this.table.first = newFirst;
       this.table.onPageChange({
@@ -644,5 +655,21 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
       return DEFAULT_STATUS_OPTIONS;
     }
     return column.filterOptions || [];
+  }
+
+  /**
+   * Checks if a value is empty (null, undefined, empty string, or only whitespace)
+   */
+  isEmptyValue(value: any): boolean {
+    if (value === null || value === undefined) return true;
+    if (typeof value === 'string' && value.trim() === '') return true;
+    return false;
+  }
+
+  /**
+   * Gets the display value for a cell, returning "-------" for empty values
+   */
+  getCellDisplayValue(value: any): string {
+    return this.isEmptyValue(value) ? '-------' : String(value);
   }
 }
