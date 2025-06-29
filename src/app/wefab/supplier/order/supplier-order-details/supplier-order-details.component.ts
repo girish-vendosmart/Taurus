@@ -647,6 +647,8 @@ export class SupplierOrderDetailsComponent implements OnInit {
    getStatusClass(status:any) {
     console.log('RFQ Details page status', status);
     switch (status) {
+      case 'Order Complete':
+        return 'status-approved';
       case 'Supplier Confirmation':
         return 'status-open';
       case 'Work in Progress':
