@@ -16,6 +16,8 @@ $warning-yellow: #f59e0b;
   flex-direction: column;
   background: white;
   overflow: hidden;
+  height: 100%;
+  min-height: 500px;
 }
 
 .message-type-badge {
@@ -33,6 +35,8 @@ $warning-yellow: #f59e0b;
   
   &.action_update {
     color: #7c3aed;
+    background: none;
+    padding: 0;
 
     .state-transition {
       display: flex;
@@ -107,6 +111,13 @@ $warning-yellow: #f59e0b;
           display: flex;
           flex-direction: column;
           gap: 0.125rem;
+          
+          .sender-details {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+          }
           
           .sender-name {
             font-weight: 600;
@@ -212,11 +223,12 @@ $warning-yellow: #f59e0b;
                 align-items: center;
                 justify-content: center;
                 border-radius: 6px;
-                border: 1px solid darkgray;
+                border: 1px solid #e5e7eb;
+                background: $technical-white;
                 
                 .file-icon {
                   font-size: 1.5rem;
-                  color: white;
+                  color: $machine-gray;
                 }
               }
             }
@@ -327,63 +339,59 @@ $warning-yellow: #f59e0b;
 .compose-section {
   background: white;
   padding: 1rem;
+  border-top: 1px solid #e5e7eb;
   flex-shrink: 0;
   
   .editor-section {
     margin-bottom: 1rem;
     
-    p-editor {
-      display: block;
+    ::ng-deep .p-editor-container {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      overflow: hidden;
       
-      ::ng-deep .p-editor-container {
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        f
+      .p-editor-toolbar {
+        background: $technical-white;
+        border-bottom: 1px solid #e5e7eb;
+        border-radius: 8px 8px 0 0;
+        padding: 0.5rem;
         
-        .p-editor-toolbar {
-          background: $technical-white;
-          border-bottom: 1px solid #e5e7eb;
-          border-radius: 8px 8px 0 0;
-          padding: 0.5rem;
+        .ql-formats {
+          margin-right: 1rem;
           
-          .ql-formats {
-            margin-right: 1rem;
-            
-            &:last-child {
-              margin-right: 0;
-            }
-          }
-          
-          .ql-picker, .ql-button {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            transition: background-color 0.2s ease;
-            
-            &:hover {
-              background-color: rgba(26, 58, 95, 0.1);
-            }
-            
-            &.ql-active {
-              background-color: $blueprint-blue;
-              color: white;
-            }
+          &:last-child {
+            margin-right: 0;
           }
         }
         
-        .p-editor-content {
-          border-radius: 0 0 8px 8px;
-          f
+        .ql-picker, .ql-button {
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          transition: background-color 0.2s ease;
           
-          .ql-editor {
-            font-size: 0.875rem;
-            line-height: 1.5;
-            padding: 0.75rem;
-            min-height: 80px;
-            
-            &.ql-blank::before {
-              color: $machine-gray;
-              font-style: normal;
-            }
+          &:hover {
+            background-color: rgba(26, 58, 95, 0.1);
+          }
+          
+          &.ql-active {
+            background-color: $blueprint-blue;
+            color: white;
+          }
+        }
+      }
+      
+      .p-editor-content {
+        border-radius: 0 0 8px 8px;
+        
+        .ql-editor {
+          font-size: 0.875rem;
+          line-height: 1.5;
+          padding: 0.75rem;
+          min-height: 80px;
+          
+          &.ql-blank::before {
+            color: $machine-gray;
+            font-style: normal;
           }
         }
       }
@@ -435,11 +443,12 @@ $warning-yellow: #f59e0b;
           align-items: center;
           justify-content: center;
           border-radius: 6px;
-          border: 1px solid darkgray;
+          border: 1px solid #e5e7eb;
+          background: $technical-white;
           
           .file-icon {
             font-size: 1.5rem;
-            color: white;
+            color: $machine-gray;
           }
         }
       }
@@ -503,7 +512,6 @@ $warning-yellow: #f59e0b;
             
             &:hover {
               background: #fecaca;
-              color: darken($safety-orange, 10%);
               transform: translateY(-1px);
             }
           }
@@ -515,7 +523,8 @@ $warning-yellow: #f59e0b;
   .action-section {
     display: flex;
     gap: 0.75rem;
-    justify-content: end;
+    justify-content: flex-end;
+    align-items: center;
     
     .attach-file-btn {
       display: flex;
@@ -530,46 +539,12 @@ $warning-yellow: #f59e0b;
       font-weight: 500;
       color: $machine-gray;
       transition: all 0.2s ease;
-      f
+      height: 38px;
       
       &:hover {
         background: $technical-white;
         border-color: $blueprint-blue;
         color: $blueprint-blue;
-      }
-      
-      i {
-        font-size: 1rem;
-      }
-    }
-    
-    .send-message-btn {
-      background: $blueprint-blue;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 0.625rem 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      f
-      
-      &:hover:not(:disabled) {
-        background: darken($blueprint-blue, 8%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(26, 58, 95, 0.15);
-      }
-      
-      &:disabled {
-        background: $material-finish-silver;
-        color: $machine-gray;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
       }
       
       i {
@@ -624,117 +599,9 @@ $warning-yellow: #f59e0b;
   background: $machine-gray;
 }
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.1rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
+// Status badge styles are now imported from global badges.scss
 
-  &.status-draft {
-    background-color: rgba(156, 163, 175, 0.15);
-    color: #6b7280;
-    border: 1px solid rgba(156, 163, 175, 0.2);
-    text-transform: capitalize;
-    font-size: 12px !important;
-  }
-
-  &.status-open {
-    background-color: rgba($info-blue, 0.15);
-    color: $info-blue;
-    border: 1px solid rgba($info-blue, 0.2);
-    text-transform: capitalize;
-    font-size: 12px !important;
-  }
-
-  &.status-progress {
-    background-color: rgba($warning-yellow, 0.15);
-    color: #d97706;
-    border: 1px solid rgba($warning-yellow, 0.2);
-    text-transform: capitalize;
-    font-size: 12px !important;
-  }
-
-  &.status-closed {
-    background-color: rgba($machine-gray, 0.15);
-    color: $machine-gray;
-    border: 1px solid rgba($machine-gray, 0.2);
-    text-transform: capitalize;
-    font-size: 12px !important;
-  }
-
-  &.status-awarded {
-    background-color: rgba(16, 185, 129, 0.15);
-    color: #059669;
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    font-size: 12px !important;
-    text-transform: capitalize;
-  }
-
-  &.status-approved {
-    background-color: rgba(16, 185, 129, 0.15);
-    color: #059669;
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    font-size: 12px !important;
-    text-transform: capitalize;
-  }
-
-  &.status-rejected {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    text-transform: capitalize;
-    font-size: 12px !important;
-  }
-
-  &.status-pending {
-    background-color: rgba(168, 85, 247, 0.15);
-    color: #7c3aed;
-    border: 1px solid rgba(168, 85, 247, 0.2);
-    text-transform: capitalize;
-    font-size: 12px !important;
-  }
-
-  &.status-review {
-    background-color: rgba(245, 158, 11, 0.15);
-    color: #d97706;
-    border: 1px solid rgba(245, 158, 11, 0.2);
-    text-transform: capitalize;
-    font-size: 12px !important;
-  }
-
-  &.status-deactivate {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    text-transform: capitalize;
-    font-size: 12px !important;
-  }
-
-  &.status-paused {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    text-transform: capitalize;
-    font-size: 12px !important;
-  }
-
-  &.status-default {
-    background-color: rgba(156, 163, 175, 0.15);
-    color: #6b7280;
-    border: 1px solid rgba(156, 163, 175, 0.2);
-    text-transform: capitalize;
-    font-size: 12px !important;
-  }
-}
-
-// Update the state transition styles
+// State transition
 .state-transition {
   display: flex;
   align-items: center;

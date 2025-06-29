@@ -1,5 +1,4 @@
 <div class="conversation-container">
-  <!-- Componse Section container -->
   <!-- Compose Section -->
   <div class="compose-section">
     <!-- Rich Text Editor -->
@@ -43,7 +42,7 @@
 
     <!-- Action Buttons -->
     <div class="action-section">
-      <label class="attach-file-btn" for="file-input" style="height: 38px !important;">
+      <label class="attach-file-btn" for="file-input">
         <i class="pi pi-paperclip"></i>
         <span>Attach File</span>
         <input 
@@ -69,6 +68,7 @@
       </app-configurable-button>
     </div>
   </div>
+
   <!-- Messages Section -->
   <div class="messages-section">
     <!-- Zero State -->
@@ -88,10 +88,10 @@
       <div class="message-bubble">
         <div class="message-header">
           <div class="sender-info">
-            <div class="d-flex align-items-center gap-2">
+            <div class="sender-details">
               <span class="sender-name">{{ msg.sender }}</span>
               <span class="message-type-badge" [ngClass]="msg.message_type">
-                <span *ngIf="msg.message_type === 'action_update'; else commentBadge" class="state-transition">
+                <span *ngIf="msg.message_type === 'action_update'" class="state-transition">
                   <span class="status-badge" [ngClass]="getStatusClass(msg.message_current_state)">
                     {{ msg.message_current_state }}
                   </span>
@@ -100,9 +100,9 @@
                     {{ msg.message_new_state }}
                   </span>
                 </span>
-                <ng-template #commentBadge>
+                <ng-container *ngIf="msg.message_type === 'comment'">
                   Comment
-                </ng-template>
+                </ng-container>
               </span>
             </div>
             <span class="sender-email">{{ msg.email }}</span>

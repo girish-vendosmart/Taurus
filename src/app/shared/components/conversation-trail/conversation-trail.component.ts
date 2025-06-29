@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CommonService } from '../../services/common.service';
 import { DialogModule } from 'primeng/dialog';
 import { FileUploadService, FileUploadResult } from '../../services/file-upload.service';
+import { BadgeService } from '../../services/badge.service';
 import { EditorModule } from 'primeng/editor';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { ConfigurableButtonComponent } from '../configurable-button/configurable-button.component';
@@ -42,7 +43,8 @@ export class ConversationTrailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private commonService: CommonService,
-    private fileUploadService: FileUploadService
+    private fileUploadService: FileUploadService,
+    private badgeService: BadgeService
   ) {}
 
   ngOnInit() {
@@ -273,38 +275,6 @@ export class ConversationTrailComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
-    switch (status?.toLowerCase()) {
-      case 'supplier confirmation':
-        return 'status-open';
-      case 'work in progress':
-      case 'finishing':
-      case 'preparation':
-      case 'work in progress':
-      case 'quality inspection':
-      case 'dispatch':
-        return 'status-progress';
-      case 'order completed':
-        return 'status-approved';
-      case 'submitted':
-      case 'quoted':
-        return 'status-awarded';
-      case 'cancelled':
-        return 'status-rejected';
-      case 'draft':
-        return 'status-draft';
-      case 'opened':
-      case 'not opened':
-        return 'status-open';
-      case 'paused':
-        return 'status-paused';
-      case 'deactivate':
-        return 'status-deactivate';
-      case 'closed':
-        return 'status-closed';
-      case 'in progress':
-        return 'status-progress';
-      default:
-        return 'status-default';
-    }
+    return this.badgeService.getStatusClass(status);
   }
 } 

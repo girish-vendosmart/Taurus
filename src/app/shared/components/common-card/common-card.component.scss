@@ -174,27 +174,8 @@ $font-weight-bold: 700;
 
 // Custom status overrides for the common table component
 :host ::ng-deep {
-  // Override status badge colors to match quotation-specific styling
-  .status-badge {
-    &.status-draft {
-      background-color: rgba($machine-gray, 0.1) !important;
-      color: $machine-gray !important;
-      border: 1px solid rgba($machine-gray, 0.2) !important;
-    }
-    
-    &.status-submitted,
-    &.status-quoted {
-      background-color: rgba($blueprint-blue, 0.1) !important;
-      color: $blueprint-blue !important;
-      border: 1px solid rgba($blueprint-blue, 0.2) !important;
-    }
-    
-    &.status-awarded {
-      background-color: rgba($process-green, 0.1) !important;
-      color: $process-green !important;
-      border: 1px solid rgba($process-green, 0.2) !important;
-    }
-  }
+  // Component-specific badge overrides if needed
+  // Status badge styles are now managed globally in badges.scss
 
   // Style the amount columns to be right-aligned
   .totalamount-column,

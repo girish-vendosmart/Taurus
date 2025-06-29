@@ -18,6 +18,7 @@ import {
 import { CommonService } from '../../../../shared/services/common.service';
 import { Router } from '@angular/router';
 import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
+import { BadgeService } from '../../../../shared/services/badge.service';
 import { ConfigurableButtonComponent } from '../../../../shared/components/configurable-button/configurable-button.component';
 
 export type ChartOptions = {
@@ -86,7 +87,7 @@ export class SupplierDashboardComponent {
   supplierId: string;
   supplierCompanyName: string;
   
-  constructor(private commonService: CommonService, private router: Router, private sweetAlertService: SweetAlertService) {
+  constructor(private commonService: CommonService, private router: Router, private sweetAlertService: SweetAlertService, private badgeService: BadgeService) {
     // Get supplier information from session storage
     this.supplierName = localStorage.getItem('supplier_name') || 'Supplier';
 
@@ -492,60 +493,7 @@ export class SupplierDashboardComponent {
   }
 
   getStatusClass(status: string): string {
-    if (!status) return 'status-default';
-    
-    // Convert to lowercase and replace spaces with hyphens
-    status = status.toLowerCase().replace(/\s+/g, '-');
-    console.log('Table status', status);
-    
-    switch (status) {
-      case 'not-opened':
-        return 'status-draft';
-      case 'published':
-        return 'status-approved';
-      case 'deactivated':
-        return 'status-paused'; 
-      case 'invited':
-        return 'status-open';
-      case 'not-started':
-        return 'status-draft';
-      case 'under-review':
-        return 'status-review';
-      case 'approved':
-        return 'status-approved';
-      case 'rejected':
-        return 'status-rejected';
-      case 'draft':
-        return 'status-draft';
-      case 'open':
-        return 'status-open';
-      case 'in-progress':
-        return 'status-progress';
-      case 'closed':
-        return 'status-closed';
-      case 'awarded':
-        return 'status-awarded';
-      case 'quoted':
-        return 'status-awarded';
-      case 'opened':
-        return 'status-open';
-      case 'cancelled':
-        return 'status-rejected';
-      case 'deactivate':
-        return 'status-deactivate';
-      case 'paused':
-        return 'status-paused';
-      case 'submitted':
-        return 'status-awarded';
-      case 'pending':
-        return 'status-pending';
-      case 'review':
-        return 'status-review';
-      case 'not-started':
-        return 'status-draft';
-      default:
-        return 'status-default';
-    }
+    return this.badgeService.getStatusClass(status);
   }
 
 } 

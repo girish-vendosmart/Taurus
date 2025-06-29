@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonService } from '../../../../shared/services/common.service';
+import { BadgeService } from '../../../../shared/services/badge.service';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../../../shared/components/common-table/common-table.component';
 import { CommonCardComponent } from '../../../../shared/components/common-card/common-card.component';
 
@@ -75,7 +76,11 @@ export interface QuotationTableItem {
 export class SupplierQuotationComponent implements OnInit {
   supplierId: string = '';
 
-  constructor(private router: Router, private commonService: CommonService) { }
+  constructor(
+    private router: Router, 
+    private commonService: CommonService,
+    private badgeService: BadgeService
+  ) { }
   
   // Raw API data
   rawQuotationData: SupplierQuotationData[] = [];
@@ -263,13 +268,7 @@ export class SupplierQuotationComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
-    switch (status?.toLowerCase()) {
-      case 'draft': return 'status-draft';
-      case 'submitted': return 'status-quoted';
-      case 'quoted': return 'status-quoted';
-      case 'awarded': return 'status-awarded';
-      default: return 'status-draft';
-    }
+    return this.badgeService.getStatusClass(status);
   }
 
   // Utility methods

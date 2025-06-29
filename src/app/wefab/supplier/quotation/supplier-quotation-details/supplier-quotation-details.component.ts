@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
+import { BadgeService } from '../../../../shared/services/badge.service';
 import { HttpParams } from '@angular/common/http';
 import { ActivityTrailComponent, ActivityLogData } from '../../../../shared/components/activity-trail/activity-trail.component';
 import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
@@ -356,6 +357,7 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private commonService: CommonService,
+    private badgeService: BadgeService,
     private sweetAlert: SweetAlertService
   ) {}
 
@@ -1090,37 +1092,8 @@ export class SupplierQuotationDetailsComponent implements OnInit {
     return this.severityOptions && this.severityOptions.length > 0;
   }
 
-  // 
-  getStatusClass(status:any) {
-    console.log('RFQ Details page status', status);
-    switch (status) {
-      case 'Awarded':
-        return 'status-awarded';
-      case 'Submitted':
-        return 'status-awarded';
-      case 'Cancelled':
-        return 'status-rejected';
-      case 'Draft':
-        return 'status-draft';
-      case 'Opened': 
-        return 'status-open';
-      case 'Not Opened':
-        return 'status-open';
-      case 'Paused':
-        return 'status-paused';
-      case 'Deactivate':
-        return 'status-deactivate';
-      case 'Closed':
-        return 'status-closed';
-      case 'Quoted':
-        return 'status-awarded';
-      case 'Not Opened':
-        return 'status-open';
-      case 'In Progress':
-        return 'status-progress';
-      default:
-        return 'status-default';
-    }
+  getStatusClass(status: string): string {
+    return this.badgeService.getStatusClass(status);
   }
 
   /**

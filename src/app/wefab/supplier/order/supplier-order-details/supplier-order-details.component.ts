@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpParams } from '@angular/common/http';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
+import { BadgeService } from '../../../../shared/services/badge.service';
 import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
 import { ConfigurableButtonComponent } from '../../../../shared/components/configurable-button/configurable-button.component';
 import { ActivityTrailComponent, ActivityLogData } from '../../../../shared/components/activity-trail/activity-trail.component';
@@ -211,6 +212,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private commonService: CommonService,
+    private badgeService: BadgeService,
     private sweetAlert: SweetAlertService,
     private cdr: ChangeDetectorRef
   ) {}
@@ -643,53 +645,8 @@ export class SupplierOrderDetailsComponent implements OnInit {
     return this.severityOptions && this.severityOptions.length > 0;
   }
 
-   // 
-   getStatusClass(status:any) {
-    console.log('RFQ Details page status', status);
-    switch (status) {
-      case 'Order Complete':
-        return 'status-approved';
-      case 'Supplier Confirmation':
-        return 'status-open';
-      case 'Work in Progress':
-        return 'status-progress';
-      case 'Finishing':
-        return 'status-progress';
-      case 'Preparation':
-        return 'status-progress';
-      case 'Work In Progress':  
-        return 'status-progress';
-      case 'Quality Inspection':
-        return 'status-progress';
-      case 'Dispatch':
-        return 'status-progress';
-      case 'Order Complete':
-        return 'status-approved';
-      case 'Submitted':
-        return 'status-awarded';
-      case 'Cancelled':
-        return 'status-rejected';
-      case 'Draft':
-        return 'status-draft';
-      case 'Opened': 
-        return 'status-open';
-      case 'Not Opened':
-        return 'status-open';
-      case 'Paused':
-        return 'status-paused';
-      case 'Deactivate':
-        return 'status-deactivate';
-      case 'Closed':
-        return 'status-closed';
-      case 'Quoted':
-        return 'status-awarded';
-      case 'Not Opened':
-        return 'status-open';
-      case 'In Progress':
-        return 'status-progress';
-      default:
-        return 'status-default';
-    }
+  getStatusClass(status: string): string {
+    return this.badgeService.getStatusClass(status);
   }
 
   formatDate(dateString: string): string {
