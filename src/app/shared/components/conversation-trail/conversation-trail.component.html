@@ -88,10 +88,28 @@
       <div class="message-bubble">
         <div class="message-header">
           <div class="sender-info">
-            <span class="sender-name">{{ msg.sender }}</span>
+            <div class="d-flex align-items-center gap-2">
+              <span class="sender-name">{{ msg.sender }}</span>
+              <span class="message-type-badge" [ngClass]="msg.message_type">
+                <span *ngIf="msg.message_type === 'action_update'; else commentBadge" class="state-transition">
+                  <span class="status-badge" [ngClass]="getStatusClass(msg.message_current_state)">
+                    {{ msg.message_current_state }}
+                  </span>
+                  <i class="pi pi-arrow-right transition-arrow"></i>
+                  <span class="status-badge" [ngClass]="getStatusClass(msg.message_new_state)">
+                    {{ msg.message_new_state }}
+                  </span>
+                </span>
+                <ng-template #commentBadge>
+                  Comment
+                </ng-template>
+              </span>
+            </div>
             <span class="sender-email">{{ msg.email }}</span>
           </div>
-          <span class="message-timestamp">{{ msg.timestamp | dateFormat }}</span>
+          <div class="message-metadata">
+            <span class="message-timestamp">{{ msg.timestamp | dateFormat }}</span>
+          </div>
         </div>
         <div class="message-content">
           <p class="message-text">{{ msg.text }}</p>

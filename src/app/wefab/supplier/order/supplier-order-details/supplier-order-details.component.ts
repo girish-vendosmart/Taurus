@@ -649,6 +649,8 @@ export class SupplierOrderDetailsComponent implements OnInit {
     switch (status) {
       case 'Supplier Confirmation':
         return 'status-open';
+      case 'Work in Progress':
+        return 'status-progress';
       case 'Finishing':
         return 'status-progress';
       case 'Preparation':
@@ -811,51 +813,51 @@ export class SupplierOrderDetailsComponent implements OnInit {
   onWorkflowStepCompleted(data: WorkflowCompletionData): void {
     console.log('Workflow step completed:', data);
     
-    // Find the completed step
-    const completedStepIndex = this.workflowSteps.findIndex(step => step.id === data.stepId);
-    if (completedStepIndex === -1) {
-      console.error('Step not found:', data.stepId);
-      return;
-    }
+    // // Find the completed step
+    // const completedStepIndex = this.workflowSteps.findIndex(step => step.id === data.stepId);
+    // if (completedStepIndex === -1) {
+    //   console.error('Step not found:', data.stepId);
+    //   return;
+    // }
 
-    // Prepare the payload for execute_po_action
-    const payload = {
-      po_name: this.orderId,
-      action_name: "Approve",  // Default to Approve for Finishing step
-      comments: data.comments || '',
-      attached_files: data.fileUrls || []
-    };
+    // // Prepare the payload for execute_po_action
+    // const payload = {
+    //   po_name: this.orderId,
+    //   action_name: "Approve",  // Default to Approve for Finishing step
+    //   comments: data.comments || '',
+    //   attached_files: data.fileUrls || []
+    // };
 
-    console.log('Sending API request with payload:', payload);
+    // console.log('Sending API request with payload:', payload);
 
-    // Call the execute_po_action API
-    this.commonService.postWefabData('/api/method/wefab.wefab.api.common.po_tracker_api.execute_po_action', payload)
-      .subscribe({
-        next: (response: any) => {
-          console.log('Action executed successfully:', response);
+    // // Call the execute_po_action API
+    // this.commonService.postWefabData('/api/method/wefab.wefab.api.common.po_tracker_api.execute_po_action', payload)
+    //   .subscribe({
+    //     next: (response: any) => {
+    //       console.log('Action executed successfully:', response);
           
-          // Show success message
-          this.sweetAlert.success(
-            `${this.workflowSteps[completedStepIndex].title} has been completed successfully.`
-          );
+    //       // Show success message
+    //       this.sweetAlert.success(
+    //         `${this.workflowSteps[completedStepIndex].title} has been completed successfully.`
+    //       );
 
-          // Refresh the workflow steps from API
-          this.getOrderTrackerView(this.orderId);
+    //       // Refresh the workflow steps from API
+    //       this.getOrderTrackerView(this.orderId);
 
-          // Refresh the order details
-          this.loadOrderDetails();
+    //       // Refresh the order details
+    //       this.loadOrderDetails();
 
-          // Refresh action list
-          this.getActionList();
+    //       // Refresh action list
+    //       this.getActionList();
 
-          // Force change detection
-          this.cdr.detectChanges();
-        },
-        error: (error) => {
-          console.error('Error executing action:', error);
-          this.sweetAlert.error('Failed to complete the step');
-        }
-      });
+    //       // Force change detection
+    //       this.cdr.detectChanges();
+    //     },
+    //     error: (error) => {
+    //       console.error('Error executing action:', error);
+    //       this.sweetAlert.error('Failed to complete the step');
+    //     }
+    //   });
   }
 
   /**
@@ -935,36 +937,12 @@ export class SupplierOrderDetailsComponent implements OnInit {
   onStepCompleted(data: WorkflowStepCompletionData): void {
     console.log('🔄 Step completed event received:', data);
     console.log('🔄 Order ID:', this.orderId);
+    console.log('🔄 File URLs received:', data.fileUrls);
     this.loading = true;
 
-    // If there are files, upload them first
-    if (data.files && data.files.length > 0) {
-      const uploadObservables = data.files.map(file => 
-        this.commonService.uploadFile(file)
-      );
-
-      forkJoin(uploadObservables).subscribe({
-        next: (responses) => {
-          // Extract file URLs from responses
-          const fileUrls = responses.map(response => response.message?.file_url).filter(url => url);
-          console.log('Files uploaded successfully:', fileUrls);
-          
-          // Call API with file URLs
-          this.completeWorkflowStep({
-            ...data,
-            fileUrls: fileUrls
-          });
-        },
-        error: (error) => {
-          console.error('Error uploading files:', error);
-          this.sweetAlert.error('Failed to upload files. Please try again.');
-          this.loading = false;
-        }
-      });
-    } else {
-      // No files to upload, call API directly
-      this.completeWorkflowStep(data);
-    }
+    // The workflow component has already handled file uploads and provided file URLs
+    // No need to upload files again - directly call the completion API
+    this.completeWorkflowStep(data);
   }
 
   private completeWorkflowStep(data: WorkflowStepCompletionData): void {

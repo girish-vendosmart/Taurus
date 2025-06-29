@@ -435,9 +435,39 @@ export class ApprovalWorkflowComponent implements OnInit {
 
           forkJoin(uploadObservables).subscribe({
             next: (responses) => {
-              // Extract file URLs from responses
-              const fileUrls = responses.map(response => response.message?.file_url).filter(url => url);
-              console.log('Files uploaded successfully:', fileUrls);
+              console.log('📤 Raw upload responses:', responses);
+              
+              // Extract file URLs from responses - handle different response structures
+              const fileUrls: string[] = [];
+              responses.forEach((event: any) => {
+                // Check if this is the final HTTP response event
+                if (event && event.type === 4 && event.body) { // HttpEventType.Response = 4
+                  const response = event.body;
+                  console.log('📤 Processing upload response:', response);
+                  
+                  let fileUrl = null;
+                  
+                  // Try different possible response structures
+                  if (response.message && response.message.file_url) {
+                    fileUrl = response.message.file_url;
+                  } else if (response.file_url) {
+                    fileUrl = response.file_url;
+                  } else if (response.url) {
+                    fileUrl = response.url;
+                  } else if (typeof response.message === 'string') {
+                    fileUrl = response.message;
+                  }
+                  
+                  if (fileUrl) {
+                    fileUrls.push(fileUrl);
+                    console.log('✅ Extracted file URL:', fileUrl);
+                  } else {
+                    console.warn('⚠️ Could not extract file URL from response:', response);
+                  }
+                }
+              });
+              
+              console.log('📤 Final extracted file URLs:', fileUrls);
 
               // Format comments with HTML paragraph tags if needed
               const formattedComments = currentStepData.comments.startsWith('<p>') ? 
@@ -453,9 +483,9 @@ export class ApprovalWorkflowComponent implements OnInit {
                 action: 'Approve'
               };
 
-                        console.log('🎯 Emitting completion data with files:', completionData);
-          this.stepCompleted.emit(completionData);
-          this.isSubmitting = false;
+              console.log('🎯 Emitting completion data with files:', completionData);
+              this.stepCompleted.emit(completionData);
+              this.isSubmitting = false;
             },
             error: (error) => {
               console.error('Error uploading files:', error);

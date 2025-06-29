@@ -67,7 +67,10 @@ export class ConversationTrailComponent implements OnInit {
           company: msg.company_name,
           text: this.stripHtml(msg.comment),
           timestamp: new Date(msg.creation),
-          attachments: msg.attachment || []
+          attachments: msg.attachment || [],
+          message_type: msg.comment_type || 'comments', // Default to 'comments' if not specified
+          message_current_state: msg.current_state || '',
+          message_new_state: msg.new_state || ''
         }));
         this.loading = false;
       },
@@ -267,5 +270,41 @@ export class ConversationTrailComponent implements OnInit {
     const hasText = this.newMessage && this.newMessage.trim().length > 0;
     const hasAttachments = this.attachments && this.attachments.length > 0;
     this.hasValidMessageStatus = hasText || hasAttachments;
+  }
+
+  getStatusClass(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'supplier confirmation':
+        return 'status-open';
+      case 'work in progress':
+      case 'finishing':
+      case 'preparation':
+      case 'work in progress':
+      case 'quality inspection':
+      case 'dispatch':
+        return 'status-progress';
+      case 'order completed':
+        return 'status-approved';
+      case 'submitted':
+      case 'quoted':
+        return 'status-awarded';
+      case 'cancelled':
+        return 'status-rejected';
+      case 'draft':
+        return 'status-draft';
+      case 'opened':
+      case 'not opened':
+        return 'status-open';
+      case 'paused':
+        return 'status-paused';
+      case 'deactivate':
+        return 'status-deactivate';
+      case 'closed':
+        return 'status-closed';
+      case 'in progress':
+        return 'status-progress';
+      default:
+        return 'status-default';
+    }
   }
 } 
