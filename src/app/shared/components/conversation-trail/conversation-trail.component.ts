@@ -68,7 +68,7 @@ export class ConversationTrailComponent implements OnInit {
           text: this.stripHtml(msg.comment),
           timestamp: new Date(msg.creation),
           attachments: msg.attachment || [],
-          message_type: msg.comment_type || 'comments', // Default to 'comments' if not specified
+          message_type: msg.comment_type || 'comment', // Default to 'comments' if not specified
           message_current_state: msg.current_state || '',
           message_new_state: msg.new_state || ''
         }));
