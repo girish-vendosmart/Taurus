@@ -10,6 +10,8 @@ import { CommonCardComponent } from '../../../../shared/components/common-card/c
 export interface SupplierQuotationData {
   name: string;
   owner: string;
+  companySubInfo: string;
+  quotation_name: string;
   creation: string;
   modified: string;
   modified_by: string;
@@ -36,6 +38,7 @@ export interface SupplierQuotationData {
 
 export interface QuotationTableItem {
   quotationId: string;
+  companySubInfo: string;
   rfqId: string;
   title: string;
   parts: number;
@@ -240,7 +243,8 @@ export class SupplierQuotationComponent implements OnInit {
 
   mapApiDataToTableItem(apiItem: SupplierQuotationData): QuotationTableItem {
     return {
-      quotationId: apiItem.name,
+      quotationId: apiItem.quotation_name,
+      companySubInfo: apiItem.name || '',
       rfqId: apiItem.rfq_id,
       title: `Quotation ${apiItem.name}`,
       parts: 1, // Default value as not provided in API
