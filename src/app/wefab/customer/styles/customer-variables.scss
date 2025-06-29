@@ -1,0 +1,60 @@
+// Customer Theme Variables
+// Primary color using deep orange as specified
+$customer-primary: #FF5722;
+$customer-primary-light: #FF7043;
+$customer-primary-dark: #E64A19;
+$customer-primary-hover: #F4511E;
+
+// Customer-specific color palette
+$customer-secondary: #545A64;
+$customer-success: #FF5722;
+$customer-info: #3B82F6;
+$customer-warning: #F59E0B;
+$customer-danger: #EF4444;
+$customer-light: #F6F7F9;
+$customer-dark: #1A1D21;
+
+// Customer accent colors
+$customer-accent: #FF5722;
+$customer-accent-light: rgba(255, 87, 34, 0.1);
+$customer-accent-medium: rgba(255, 87, 34, 0.2);
+
+// Customer background colors
+$customer-bg-primary: #FF5722;
+$customer-bg-light: #fff8f6;
+$customer-bg-card: #ffffff;
+$customer-bg-sidebar: #f6f7f9;
+
+// Customer text colors
+$customer-text-primary: #FF5722;
+$customer-text-secondary: #545A64;
+$customer-text-dark: #1A1D21;
+$customer-text-light: #ffffff;
+
+// Customer border colors
+$customer-border-primary: #FF5722;
+$customer-border-light: rgba(255, 87, 34, 0.2);
+$customer-border-default: #D1D5DB;
+
+// CSS Custom Properties for dynamic theming
+:root {
+  --customer-primary: #{$customer-primary};
+  --customer-primary-light: #{$customer-primary-light};
+  --customer-primary-dark: #{$customer-primary-dark};
+  --customer-primary-hover: #{$customer-primary-hover};
+  --customer-accent: #{$customer-accent};
+  --customer-accent-light: #{$customer-accent-light};
+  --customer-bg-primary: #{$customer-bg-primary};
+  --customer-text-primary: #{$customer-text-primary};
+  --customer-border-primary: #{$customer-border-primary};
+}
+
+// Bootstrap variable overrides for customer theme
+$customer-theme-primary: $customer-primary;
+$customer-theme-secondary: $customer-secondary;
+$customer-theme-success: $customer-success;
+$customer-theme-info: $customer-info;
+$customer-theme-warning: $customer-warning;
+$customer-theme-danger: $customer-danger;
+$customer-theme-light: $customer-light;
+$customer-theme-dark: $customer-dark; 

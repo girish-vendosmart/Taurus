@@ -1,0 +1,40 @@
+<div class="customer-layout">
+  <!-- Customer Header -->
+  <app-customer-header
+    [showMobileMenu]="sidebarOpen"
+    (logoutEvent)="onLogout()"
+    (mobileMenuToggle)="toggleSidebar()"
+    (profileEvent)="onProfileClick()"
+    (helpEvent)="onHelpClick()">
+  </app-customer-header>
+
+  <!-- Main Layout Container -->
+  <div class="main-layout "> 
+    <div class="layout-wrapper d-flex h-100">
+      <!-- Sidebar -->
+      <div class="sidebar-container" 
+           [class.mobile-open]="sidebarOpen && isMobile"
+           [class.mobile-closed]="!sidebarOpen && isMobile">
+        <app-customer-sidebar 
+          [config]="sidebarConfig"
+          (menuItemClick)="onMenuItemClick($event)"
+          (helpClick)="onHelpClick()"
+          (progressUpdate)="onProgressUpdate($event)">
+        </app-customer-sidebar>
+      </div>
+
+      <!-- Main Content Area -->
+      <div class="main-content flex-grow-1">
+        <div class="content-wrapper mt-5">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="mobile-sidebar-overlay" 
+         [class.show]="sidebarOpen && isMobile"
+         (click)="closeSidebar()">
+    </div>
+  </div>
+</div>

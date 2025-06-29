@@ -1,0 +1,74 @@
+<div class="customer-app">
+  <div class="rfq-list-container">
+    
+    <!-- RFQ Statistics Header -->
+    <div class="rfq-statistics">
+      <div class="stats-grid">
+        <!-- Total RFQs -->
+        <div class="stat-card total-rfqs">
+          <div class="stat-icon">
+            <i class="pi pi-file-o"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ rfqSummary.totalRfqs }}</div>
+            <div class="stat-label">Total RFQs</div>
+          </div>
+        </div>
+
+        <!-- Open RFQs -->
+        <div class="stat-card open-rfqs">
+          <div class="stat-icon">
+            <i class="pi pi-folder-open"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ rfqSummary.openRfqs }}</div>
+            <div class="stat-label">Open RFQs</div>
+          </div>
+        </div>
+
+        <!-- Quoted RFQs -->
+        <div class="stat-card quoted-rfqs">
+          <div class="stat-icon">
+            <i class="pi pi-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ rfqSummary.quotedRfqs }}</div>
+            <div class="stat-label">Quoted RFQ</div>
+          </div>
+        </div>
+
+        <!-- Expired RFQs -->
+        <div class="stat-card expired-rfqs">
+          <div class="stat-icon">
+            <i class="pi pi-lock"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ rfqSummary.expiredRfqs }}</div>
+            <div class="stat-label">Expired RFQs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RFQ Table Section -->
+    <div class="rfq-table-section">
+      <div class="table-card customer-card">
+        <div class="table-header">
+          <h3 class="table-title">RFQ List</h3>
+        </div>
+        
+        <div class="table-content">
+          <app-common-table
+            [config]="tableConfig"
+            [data]="rfqData"
+            [loading]="loading"
+            (rowClick)="onRowClick($event)"
+            (linkClick)="onLinkClick($event)"
+            (actionClick)="onActionClick($event)">
+          </app-common-table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

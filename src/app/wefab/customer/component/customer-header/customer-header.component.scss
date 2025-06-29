@@ -1,0 +1,694 @@
+@import '../../styles/customer-variables.scss';
+@import '../../../../../assets/scss/variables.scss';
+
+.customer-header {
+  background: white !important;
+  color: $precision-black;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1001;
+  width: 85%;
+  backdrop-filter: blur(10px);
+  height: 55px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  max-width: 100%;
+  margin: 0 auto;
+  min-height: 45px;
+  gap: 1.5rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 1.5rem;
+}
+
+.header-center {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+  min-width: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-shrink: 0;
+}
+
+// Mobile menu toggle
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: $precision-black;
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  &.active {
+    background: rgba(0, 0, 0, 0.15);
+  }
+}
+
+// Logo section
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  
+  .wefab-logo {
+    height: 32px;
+    width: auto;
+    border-radius: 6px;
+    filter: brightness(1.1);
+  }
+  
+  .brand-info {
+    display: flex;
+    flex-direction: column;
+    
+    .brand-title {
+      color: $precision-black;
+      font-size: 1.3rem;
+      font-weight: $font-weight-bold;
+      margin: 0;
+      line-height: 1.2;
+      letter-spacing: 0.5px;
+    }
+    
+    .portal-subtitle {
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 0.75rem;
+      font-weight: $font-weight-medium;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+  }
+}
+
+// Navigation menu
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(0, 0, 0, 0.7);
+    text-decoration: none;
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: $font-weight-medium;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    
+    .pi {
+      font-size: 1rem;
+    }
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: $precision-black;
+      transform: translateY(-1px);
+    }
+    
+    &.active {
+      background: rgba($customer-primary, 0.1);
+      color: $customer-primary;
+      font-weight: $font-weight-semibold;
+    }
+  }
+}
+
+// Search section
+.search-section {
+  .search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: rgba(0, 0, 0, 0.5);
+      font-size: 0.9rem;
+      z-index: 1;
+    }
+    
+    .search-input {
+      background: #f8f9fa;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: 25px;
+      padding: 0.6rem 1rem 0.6rem 2.5rem;
+      font-size: 0.9rem;
+      color: $precision-black;
+      width: 280px;
+      transition: all 0.2s ease;
+      
+      &::placeholder {
+        color: rgba(0, 0, 0, 0.5);
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: $customer-primary;
+        box-shadow: 0 0 0 3px rgba(18, 133, 110, 0.1);
+        width: 320px;
+      }
+    }
+  }
+}
+
+// Header actions
+.header-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 0.9rem;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  
+  .pi {
+    font-size: 1rem;
+  }
+  
+  .action-text {
+    letter-spacing: 0.3px;
+  }
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: $precision-black;
+  }
+}
+
+// Notification dropdown
+.notification-dropdown {
+  position: relative;
+}
+
+.notification-button {
+  background: none;
+  border: none;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 1rem;
+  padding: 0.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: $precision-black;
+  }
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: $safety-orange;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: $font-weight-bold;
+  padding: 0.2rem 0.4rem;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1;
+}
+
+// User dropdown
+.user-dropdown {
+  position: relative;
+}
+
+.user-button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: $precision-black;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+  }
+}
+
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  
+  .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .avatar-initials {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: $customer-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: $font-weight-semibold;
+    color: $technical-white;
+  }
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  
+  .user-name {
+    font-size: 0.85rem;
+    font-weight: $font-weight-semibold;
+    line-height: 1.2;
+  }
+  
+  .user-role {
+    font-size: 0.7rem;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: $font-weight-medium;
+  }
+}
+
+.dropdown-arrow {
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.6);
+  transition: transform 0.2s ease;
+}
+
+.user-button:hover .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+// Dropdown menus
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: $technical-white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  min-width: 280px;
+  padding: 1rem 0;
+  z-index: 1001;
+  display: none;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  
+  &.show {
+    display: block;
+    animation: dropdownFadeIn 0.2s ease;
+  }
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// User profile section in dropdown
+.user-profile-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.5rem 1rem;
+  
+  .profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    
+    .profile-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .profile-initials {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: $customer-primary;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: $font-weight-semibold;
+      color: $technical-white;
+    }
+  }
+  
+  .profile-details {
+    flex: 1;
+    
+    .profile-name {
+      font-size: 1rem;
+      font-weight: $font-weight-semibold;
+      color: $precision-black;
+      margin-bottom: 0.2rem;
+    }
+    
+    .profile-email {
+      font-size: 0.85rem;
+      color: $machine-gray;
+      font-weight: $font-weight-medium;
+    }
+  }
+}
+
+.dropdown-divider {
+  border: none;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.1);
+  margin: 0.5rem 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: none;
+  color: $precision-black;
+  font-size: 0.9rem;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+
+  .pi {
+    font-size: 1rem;
+    color: $machine-gray;
+    width: 16px;
+  }
+
+  &:hover {
+    background: rgba($customer-primary, 0.05);
+    color: $customer-primary;
+
+    .pi {
+      color: $customer-primary;
+    }
+  }
+  
+  &.logout-item {
+    color: $safety-orange;
+    
+    .pi {
+      color: $safety-orange;
+    }
+    
+    &:hover {
+      background: rgba($safety-orange, 0.05);
+      color: $safety-orange;
+      
+      .pi {
+        color: $safety-orange;
+      }
+    }
+  }
+}
+
+// Notification menu specific styles
+.notification-menu {
+  min-width: 360px;
+  max-height: 480px;
+  overflow-y: auto;
+  
+  .notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem 1rem;
+    
+    h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: $font-weight-semibold;
+      color: $precision-black;
+    }
+    
+    .mark-all-read-btn {
+      background: none;
+      border: none;
+      color: $customer-primary;
+      font-size: 0.8rem;
+      font-weight: $font-weight-medium;
+      cursor: pointer;
+      padding: 0.4rem 0.6rem;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: rgba($customer-primary, 0.1);
+      }
+    }
+  }
+  
+  .notification-list {
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  
+  .notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    
+    &:hover {
+      background: rgba($customer-primary, 0.03);
+    }
+    
+    &.unread {
+      background: rgba($customer-primary, 0.05);
+      border-left-color: $customer-primary;
+    }
+    
+    .notification-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      
+      .pi {
+        font-size: 1rem;
+      }
+    }
+    
+    &.notification-info .notification-icon {
+      background: rgba($customer-info, 0.1);
+      color: $customer-info;
+    }
+    
+    &.notification-warning .notification-icon {
+      background: rgba($customer-warning, 0.1);
+      color: $customer-warning;
+    }
+    
+    &.notification-success .notification-icon {
+      background: rgba($customer-success, 0.1);
+      color: $customer-success;
+    }
+    
+    &.notification-error .notification-icon {
+      background: rgba($customer-danger, 0.1);
+      color: $customer-danger;
+    }
+    
+    .notification-content {
+      flex: 1;
+      
+      .notification-title {
+        font-size: 0.9rem;
+        font-weight: $font-weight-semibold;
+        color: $precision-black;
+        margin-bottom: 0.3rem;
+      }
+      
+      .notification-message {
+        font-size: 0.85rem;
+        color: $machine-gray;
+        line-height: 1.4;
+        margin-bottom: 0.3rem;
+      }
+      
+      .notification-time {
+        font-size: 0.75rem;
+        color: rgba($machine-gray, 0.8);
+        font-weight: $font-weight-medium;
+      }
+    }
+    
+    .notification-status {
+      .unread-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: $customer-primary;
+      }
+    }
+  }
+  
+  .notification-footer {
+    padding: 1.5rem;
+    text-align: center;
+    color: $machine-gray;
+    font-size: 0.9rem;
+  }
+}
+
+// Responsive design
+@media (max-width: 1200px) {
+  .nav-menu .nav-link span {
+    display: none;
+  }
+  
+  .search-section .search-input {
+    width: 240px;
+    
+    &:focus {
+      width: 280px;
+    }
+  }
+}
+
+@media (max-width: 992px) {
+  .header-center {
+    display: none;
+  }
+  
+  .header-action .action-text {
+    display: none;
+  }
+  
+  .user-info {
+    display: none;
+  }
+  
+  .search-section .search-input {
+    width: 200px;
+    
+    &:focus {
+      width: 240px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0 16px;
+    gap: 1rem;
+  }
+  
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  .logo-section .brand-info {
+    display: none;
+  }
+  
+  .search-section {
+    display: none;
+  }
+  
+  .header-action {
+    padding: 0.6rem;
+    
+    .action-text {
+      display: none;
+    }
+  }
+  
+  .user-button {
+    padding: 0.5rem;
+    gap: 0;
+  }
+  
+  .dropdown-menu {
+    min-width: 260px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-container {
+    min-height: 64px;
+  }
+  
+  .logo-section .wefab-logo {
+    height: 32px;
+  }
+  
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    
+    .avatar-initials {
+      width: 32px;
+      height: 32px;
+      font-size: 0.8rem;
+    }
+  }
+}
+

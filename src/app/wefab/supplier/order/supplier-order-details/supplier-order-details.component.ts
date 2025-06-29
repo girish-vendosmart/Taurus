@@ -800,8 +800,10 @@ export class SupplierOrderDetailsComponent implements OnInit {
     //         `${this.workflowSteps[completedStepIndex].title} has been completed successfully.`
     //       );
 
+
     //       // Refresh the workflow steps from API
     //       this.getOrderTrackerView(this.orderId);
+
 
     //       // Refresh the order details
     //       this.loadOrderDetails();
