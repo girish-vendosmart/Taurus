@@ -208,7 +208,7 @@ export class SupplierOrderComponent implements OnInit {
       creationDate: this.formatApiDate(item.creation || item.created_date || ''),
       deliveryDate: this.formatApiDate(item.actual_delivery_date || item.expected_delivery || ''),
       totalAmount: item.total_amount || item.grand_total || 0,
-      status: this.mapApiStatusToOrderStatus(item.po_status || 'Draft'),
+      status: this.mapApiStatusToOrderStatus(item.po_status),
       name: item.name || '',
       owner: item.owner || '',
       modified: item.modified || '',
@@ -255,8 +255,8 @@ export class SupplierOrderComponent implements OnInit {
     }
   }
 
-  private mapApiStatusToOrderStatus(apiStatus: string): 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' | 'Supplier Confirmation' | 'Finishing' | 'Preparation' | 'Work In Progress' | 'Quality Inspection' | 'Dispatch' | 'Order Completed' {
-    const statusMap: { [key: string]: 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' | 'Supplier Confirmation' | 'Finishing' | 'Preparation' | 'Work In Progress' | 'Quality Inspection' | 'Dispatch' | 'Order Completed' } = {
+  private mapApiStatusToOrderStatus(apiStatus: string): 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' | 'Supplier Confirmation' | 'Finishing' | 'Preparation' | 'Work In Progress' | 'Quality Inspection' | 'Dispatch' | 'Order Complete' {
+    const statusMap: { [key: string]: 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' | 'Supplier Confirmation' | 'Finishing' | 'Preparation' | 'Work In Progress' | 'Quality Inspection' | 'Dispatch' | 'Order Complete' } = {
       'Open': 'Open',
       'Pending': 'Open',
       'In Progress': 'In Progress',
@@ -273,7 +273,7 @@ export class SupplierOrderComponent implements OnInit {
       'Work In Progress': 'Work In Progress',
       'Quality Inspection': 'Quality Inspection',
       'Dispatch': 'Dispatch',
-      'Order Completed': 'Order Completed',
+      'Order Complete': 'Order Complete',
     };
 
     return statusMap[apiStatus] || 'Draft';

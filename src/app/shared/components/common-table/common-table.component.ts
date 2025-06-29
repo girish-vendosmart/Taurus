@@ -376,7 +376,7 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
     console.log('Table status', status);
     
     switch (status) {
-      case 'Order Complete':
+      case 'order-complete':
         return 'status-approved';
       case 'dispatch':
         return 'status-progress';

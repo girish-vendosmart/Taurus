@@ -663,7 +663,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
         return 'status-progress';
       case 'Dispatch':
         return 'status-progress';
-      case 'Order Completed':
+      case 'Order Complete':
         return 'status-approved';
       case 'Submitted':
         return 'status-awarded';

@@ -153,24 +153,32 @@
           }
 
           .step-status {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             font-weight: 500;
             padding: 4px 12px;
-            border-radius: 12px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+            text-align: center;
             
             &.status-complete {
-              background-color: rgba(16, 185, 129, 0.1);
-              color: #10b981;
+              background-color: #E8F5E9;
+              color: #2E7D32;
+              border: 1px solid #A5D6A7;
             }
             
             &.status-in-progress {
-              background-color: rgba(245, 158, 11, 0.1);
-              color: #f59e0b;
+              background-color: #FFF3E0;
+              color: #E65100;
+              border: 1px solid #FFB74D;
             }
             
             &.status-waiting {
-              background-color: rgba(156, 163, 175, 0.1);
-              color: #6b7280;
+              background-color: #ECEFF1;
+              color: #455A64;
+              border: 1px solid #B0BEC5;
             }
           }
         }
