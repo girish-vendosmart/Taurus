@@ -202,7 +202,7 @@ export class SupplierOrderComponent implements OnInit {
     }
 
     return apiData.map(item => ({
-      orderId: item.po_name || item.order_id || '',
+      orderId: item.name || item.order_id || '',
       companySubInfo: item.name,
       orderName: item.po_name || item.title || item.name || 'N/A',
       creationDate: this.formatApiDate(item.creation || item.created_date || ''),
@@ -213,7 +213,7 @@ export class SupplierOrderComponent implements OnInit {
       owner: item.owner || '',
       modified: item.modified || '',
       docstatus: item.docstatus || 0,
-              routerLink: `/wefab/supplier/order/details/${item.name}`,
+      routerLink: `/wefab/supplier/order/details/${item.po_name || item.order_id || item.name}`,
     }));
   }
 
