@@ -4,12 +4,15 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonService } from '../../../../shared/services/common.service';
+import { BadgeService } from '../../../../shared/services/badge.service';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../../../shared/components/common-table/common-table.component';
 import { CommonCardComponent } from '../../../../shared/components/common-card/common-card.component';
 
 export interface SupplierQuotationData {
   name: string;
   owner: string;
+  companySubInfo: string;
+  quotation_name: string;
   creation: string;
   modified: string;
   modified_by: string;
@@ -36,6 +39,7 @@ export interface SupplierQuotationData {
 
 export interface QuotationTableItem {
   quotationId: string;
+  companySubInfo: string;
   rfqId: string;
   title: string;
   parts: number;
@@ -72,7 +76,11 @@ export interface QuotationTableItem {
 export class SupplierQuotationComponent implements OnInit {
   supplierId: string = '';
 
-  constructor(private router: Router, private commonService: CommonService) { }
+  constructor(
+    private router: Router, 
+    private commonService: CommonService,
+    private badgeService: BadgeService
+  ) { }
   
   // Raw API data
   rawQuotationData: SupplierQuotationData[] = [];
@@ -240,7 +248,8 @@ export class SupplierQuotationComponent implements OnInit {
 
   mapApiDataToTableItem(apiItem: SupplierQuotationData): QuotationTableItem {
     return {
-      quotationId: apiItem.name,
+      quotationId: apiItem.quotation_name,
+      companySubInfo: apiItem.name || '',
       rfqId: apiItem.rfq_id,
       title: `Quotation ${apiItem.name}`,
       parts: 1, // Default value as not provided in API
@@ -259,13 +268,7 @@ export class SupplierQuotationComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
-    switch (status?.toLowerCase()) {
-      case 'draft': return 'status-draft';
-      case 'submitted': return 'status-quoted';
-      case 'quoted': return 'status-quoted';
-      case 'awarded': return 'status-awarded';
-      default: return 'status-draft';
-    }
+    return this.badgeService.getStatusClass(status);
   }
 
   // Utility methods
@@ -317,7 +320,7 @@ export class SupplierQuotationComponent implements OnInit {
 
   onLinkClick(event: { rowData: any, column: any }) {
     console.log('Quotation link clicked:', event.rowData);
-    this.router.navigate(['/wefab/supplier/quotation/details', event.rowData.quotationId]);
+    this.router.navigate(['/wefab/supplier/quotation/details', event.rowData.companySubInfo]);
   }
 
   onActionClick(event: { action: string, rowData: any }) {

@@ -1,20 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpParams } from '@angular/common/http';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
+import { BadgeService } from '../../../../shared/services/badge.service';
 import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
 import { ConfigurableButtonComponent } from '../../../../shared/components/configurable-button/configurable-button.component';
 import { ActivityTrailComponent, ActivityLogData } from '../../../../shared/components/activity-trail/activity-trail.component';
 import { SplitButtonComponent } from '../../../../shared/components/split-button/split-button.component';
 import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
+import { WorkflowStep, WorkflowCompletionData, WorkflowStepCompletionData } from '../../../../shared/components/approval-workflow/approval-workflow.component';
+import { forkJoin, Observable } from 'rxjs';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { WorkflowStep, WorkflowCompletionData } from '../../../../shared/components/approval-workflow/approval-workflow.component';
 import { ApprovalWorkflowComponent } from '../../../../shared/components/approval-workflow/approval-workflow.component';
 
 export interface OrderDetails {
@@ -32,6 +34,8 @@ export interface OrderDetails {
   delivery_terms: string;
   supplier: string;
   purchase_order: string;
+  rfq_id: string;
+  quotation_id: string;
   status: string;
 }
 
@@ -62,6 +66,11 @@ export interface OrderAttachment {
   description: string;
   category: string;
   uploaded_on: string;
+}
+
+interface WorkflowState {
+  state_name: string;
+  status: string;
 }
 
 @Component({
@@ -103,6 +112,8 @@ export class SupplierOrderDetailsComponent implements OnInit {
     delivery_terms: '',
     supplier: '',
     purchase_order: '',
+    rfq_id: '',
+    quotation_id: '',
     status: ''
   };
 
@@ -135,13 +146,6 @@ export class SupplierOrderDetailsComponent implements OnInit {
         width: '200px'
       },
       {
-        field: 'drawing_ref',
-        header: 'Drawing Ref',
-        sortable: true,
-        filterable: true,
-        width: '130px'
-      },
-      {
         field: 'unit',
         header: 'Unit',
         sortable: true,
@@ -154,14 +158,6 @@ export class SupplierOrderDetailsComponent implements OnInit {
         sortable: true,
         filterable: true,
         width: '100px'
-      },
-      {
-        field: 'current_status',
-        header: 'Current Status',
-        sortable: true,
-        filterable: true,
-        isStatus: true,
-        width: '140px'
       },
       {
         field: 'rate',
@@ -216,73 +212,139 @@ export class SupplierOrderDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private commonService: CommonService,
-    private sweetAlert: SweetAlertService
+    private badgeService: BadgeService,
+    private sweetAlert: SweetAlertService,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  workflowSteps: WorkflowStep[] = [
-    {
-      id: 'confirmation',
-      title: 'Confirmation',
-      status: 'ready',
-      description: '',
-      allowCompletion: true,
-      isOpenDialog: false,
-    },
-    {
-      id: 'preparation',
-      title: 'Preparation',
-      status: 'waiting',
-      description: '',
-      allowCompletion: true,
-      isOpenDialog: true,
-      requiresPhotos: false,
-      requiresComments: false,
-    },
-    {
-      id: 'work-in-progress',
-      title: 'Work In Progress',
-      status: 'waiting',
-      description: '',
-      allowCompletion: true,
-      isOpenDialog: true,
-      requiresPhotos: true,
-      requiresComments: true,
-    },
-    {
-      id: 'finishing',
-      title: 'Finishing',
-      status: 'waiting',
-      description: '',
-      allowCompletion: true,
-      requiresPhotos: true,
-      requiresComments: true,
-    },
-    {
-      id: 'inspection',
-      title: 'Inspection',
-      status: 'waiting',
-      description: '',
-      allowCompletion: true,
-      requiresPhotos: true,
-      requiresComments: true,
-    },
-    {
-      id: 'dispatch',
-      title: 'Dispatch In Progress',
-      status: 'waiting',
-      description: '',
-      allowCompletion: true,
-      requiresPhotos: true,
-      requiresComments: true
-    }
-  ];
+  workflowSteps: WorkflowStep[] = [];
 
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.orderId = params['id'];
       console.log('Order ID:', this.orderId);
       if (this.orderId) {
-        this.accessFirebaseTrigger('Supplier Order', this.orderId);
+        this.accessFirebaseTrigger('Purchase Order', this.orderId);
+        this.getOrderTrackerView(this.orderId);
+      }
+    });
+  }
+
+  getOrderTrackerView(orderId: string) {
+    let endPoint = `/api/method/wefab.wefab.api.common.po_tracker_api.get_po_workflow_states?po_name=${orderId}`;
+    
+    // Show loading state
+    this.loading = true;
+    
+    this.commonService.getWefabData(endPoint).subscribe({
+      next: (res: any) => {
+        console.log('Order tracker view response:', res);
+        
+        if (res.message && res.message.data.states) {
+          // Filter out Draft and Approval states
+          const relevantStates = res.message.data.states.filter((state: WorkflowState) => 
+            !['Draft', 'Approval'].includes(state.state_name)
+          );
+
+          // Create workflow steps from API states
+          this.workflowSteps = relevantStates.map((state: WorkflowState) => {
+            const stepId = state.state_name.toLowerCase().replace(/\s+/g, '-');
+            let status: 'complete' | 'in-progress' | 'waiting' | 'ready' = 'waiting';
+            
+            switch (state.status) {
+              case 'Completed':
+                status = 'complete';
+                break;
+              case 'In Progress':
+                status = 'ready';
+                break;
+              case 'Yet to Start':
+                status = 'waiting';
+                break;
+            }
+
+            // Set requirements based on step name
+            let requiresDocuments = false;
+            let requiresComments = false;
+            let isDialogRequired = true;
+            let isDocumentOptional = false;
+            let isCommentOptional = false;
+
+            switch (state.state_name) {
+              case 'Supplier Confirmation':
+                // No documents or comments required, no dialog needed
+                requiresDocuments = false;
+                requiresComments = false;
+                isDialogRequired = false;
+                break;
+              
+              case 'Preparation':
+              case 'Work In Progress':
+                // Documents and comments are optional
+                requiresDocuments = false;
+                requiresComments = false;
+                isDialogRequired = true;
+                isDocumentOptional = true;
+                isCommentOptional = true;
+                break;
+              
+              case 'Finishing':
+              case 'Quality Inspection':
+              case 'Dispatch':
+              case 'Order Complete':
+                // Documents and comments are required
+                requiresDocuments = true;
+                requiresComments = true;
+                isDialogRequired = true;
+                break;
+              
+              default:
+                // Default case - optional
+                requiresDocuments = false;
+                requiresComments = false;
+                isDialogRequired = true;
+                isDocumentOptional = true;
+                isCommentOptional = true;
+                break;
+            }
+
+            const workflowStep = {
+              id: stepId,
+              title: state.state_name,
+              status: status,
+              description: '',
+              allowCompletion: status === 'ready',
+              isOpenDialog: isDialogRequired,
+              requiresPhotos: requiresDocuments,
+              requiresComments: requiresComments,
+              isDocumentOptional: isDocumentOptional,
+              isCommentOptional: isCommentOptional
+            };
+            
+            console.log(`📋 Created workflow step: ${state.state_name} -> ID: ${stepId}`, workflowStep);
+            return workflowStep;
+          });
+
+          console.log('Updated workflow steps:', this.workflowSteps);
+
+          // Enable next step if current step is in progress
+          this.workflowSteps.forEach((step, index) => {
+            if (step.status === 'ready' && index < this.workflowSteps.length - 1) {
+              this.workflowSteps[index + 1].allowCompletion = true;
+            }
+          });
+        } else {
+          console.error('Invalid API response format:', res);
+          this.sweetAlert.error('Failed to load workflow states');
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching workflow states:', error);
+        this.sweetAlert.error('Failed to load workflow states');
+      },
+      complete: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -292,6 +354,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
     this.commonService.commonFirebaseTrigger(doctType_name, doctypeId).subscribe({
       next: (res: any) => {
         this.loadOrderDetails();
+        this.getOrderTrackerView(this.orderId);
         this.getActionList();
       },
       error: (error) => {
@@ -303,7 +366,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
 
   getActionList() {
     let obj: any = {
-      doctype: 'Supplier Order',
+      doctype: 'Purchase Order',
       name: this.orderId
     }
     let params = new HttpParams();
@@ -328,15 +391,15 @@ export class SupplierOrderDetailsComponent implements OnInit {
 
   loadOrderDetails() {
     this.loading = true;
-    let endpoint = `/api/resource/Supplier Order/${this.orderId}`;
+    let endpoint = `/api/resource/Purchase Order/${this.orderId}`;
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
         console.log('Order details:', res.data);
         if (res.data) {
           this.orderDetails = this.transformApiDataToOrderDetails(res.data);
-          this.loadOrderItems();
-          this.loadOrderAttachments();
+          this.orderItems = this.transformApiDataToOrderItems(res.data.items);
+          this.orderAttachments = this.transformApiDataToOrderAttachments(res.data.technical_drawings);
         }
         this.loading = false;
       },
@@ -344,14 +407,13 @@ export class SupplierOrderDetailsComponent implements OnInit {
         console.error('Error fetching Order details:', error);
         this.loading = false;
         // Fallback to sample data if API fails
-        this.loadSampleData();
       }
     });
   }
 
   loadOrderItems() {
     // Load order items from API
-    let endpoint = `/api/resource/Supplier Order Item?filters=[["parent", "=", "${this.orderId}"]]`;
+    let endpoint = `/api/resource/Purchase Order Item?filters=[["parent", "=", "${this.orderId}"]]`;
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
@@ -360,200 +422,19 @@ export class SupplierOrderDetailsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error fetching Order items:', error);
-        // Use sample data
-        this.loadSampleOrderItems();
       }
     });
-  }
-
-  loadOrderAttachments() {
-    // Load order attachments from API
-    let endpoint = `/api/resource/File?filters=[["attached_to_doctype", "=", "Supplier Order"],["attached_to_name", "=", "${this.orderId}"]]`;
-    
-    this.commonService.getWefabData(endpoint).subscribe({
-      next: (res: any) => {
-        console.log('Order attachments:', res.data);
-        this.orderAttachments = this.transformApiDataToOrderAttachments(res.data);
-      },
-      error: (error) => {
-        console.error('Error fetching Order attachments:', error);
-      }
-    });
-  }
-
-  // Load sample data for demonstration
-  loadSampleData() {
-    this.orderDetails = {
-      name: 'ORD0000001',
-      order_name: 'Precision Components Order',
-      description: 'Manufacturing order for precision machined components',
-      docstatus: 1,
-      creation: '2025-01-15 10:30:00',
-      modified: '2025-01-20 14:15:00',
-      expected_delivery: '2025-02-15',
-      delivery_address: '123 Industrial Park, Manufacturing District, City, State 12345',
-      special_instructions: 'Handle with care. Quality inspection required before shipment.',
-      total_amount: 15000.00,
-      payment_terms: 'Net 30 days',
-      delivery_terms: 'FOB Origin',
-      supplier: 'Tata Consultancy Services Limited',
-      purchase_order: 'PO-2025-001',
-      status: 'In Progress'
-    };
-
-    this.loadSampleOrderItems();
-  }
-
-  loadSampleOrderItems() {
-    this.orderItems = [
-      {
-        name: 'ORD-ITEM-001',
-        item_number: '3.2.1',
-        item_code: 'COMP-001',
-        item_description: 'description',
-        drawing_ref: 'drwg-04',
-        material: 'Stainless Steel 316',
-        specification: 'Dia 50mm x 100mm Length',
-        quantity: 26,
-        unit: 'Pieces',
-        rate: 2,
-        amount: 5000.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-10',
-        notes: 'Surface finish: Ra 0.8',
-        cad_file_reference: 'CAD-001.dwg'
-      },
-      {
-        name: 'ORD-ITEM-002',
-        item_number: '9.2.1',
-        item_code: 'COMP-002',
-        item_description: 'description',
-        drawing_ref: 'drwg-06',
-        material: 'Carbon Steel AISI 4140',
-        specification: 'Dia 25mm x 200mm Length',
-        quantity: 13,
-        unit: 'Sqm',
-        rate: 3,
-        amount: 4000.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-12',
-        notes: 'Heat treatment required',
-        cad_file_reference: 'CAD-002.dwg'
-      },
-      {
-        name: 'ORD-ITEM-003',
-        item_number: '8.2.1',
-        item_code: 'COMP-003',
-        item_description: 'description',
-        drawing_ref: 'drwg-07',
-        material: 'Aluminum 6061',
-        specification: 'Custom bracket design',
-        quantity: 8,
-        unit: 'Sqm',
-        rate: 1,
-        amount: 2400.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-08',
-        notes: 'Anodized finish',
-        cad_file_reference: 'CAD-003.dwg'
-      },
-      {
-        name: 'ORD-ITEM-004',
-        item_number: '6.2.1',
-        item_code: 'COMP-004',
-        item_description: 'description',
-        drawing_ref: 'drwg-02',
-        material: 'Brass C360',
-        specification: 'Threaded connector',
-        quantity: 12,
-        unit: 'Pieces',
-        rate: 4,
-        amount: 1800.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-14',
-        notes: 'High precision threading',
-        cad_file_reference: 'CAD-004.dwg'
-      },
-      {
-        name: 'ORD-ITEM-005',
-        item_number: '3.2.4',
-        item_code: 'COMP-005',
-        item_description: 'description',
-        drawing_ref: 'drwg-05',
-        material: 'Steel A36',
-        specification: 'Welded assembly',
-        quantity: 14,
-        unit: 'Pieces',
-        rate: 2,
-        amount: 3500.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-16',
-        notes: 'Powder coating required',
-        cad_file_reference: 'CAD-005.dwg'
-      },
-      {
-        name: 'ORD-ITEM-006',
-        item_number: '5.2.1',
-        item_code: 'COMP-006',
-        item_description: 'description',
-        drawing_ref: 'drwg-03',
-        material: 'Titanium Ti-6Al-4V',
-        specification: 'Aerospace grade',
-        quantity: 7,
-        unit: 'Sqm',
-        rate: 1,
-        amount: 4200.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-18',
-        notes: 'Certified material',
-        cad_file_reference: 'CAD-006.dwg'
-      },
-      {
-        name: 'ORD-ITEM-007',
-        item_number: '3.2.3',
-        item_code: 'COMP-007',
-        item_description: 'description',
-        drawing_ref: 'drwg-08',
-        material: 'Copper C101',
-        specification: 'Electrical component',
-        quantity: 9,
-        unit: 'Cm',
-        rate: 2,
-        amount: 1800.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-20',
-        notes: 'High conductivity grade',
-        cad_file_reference: 'CAD-007.dwg'
-      },
-      {
-        name: 'ORD-ITEM-008',
-        item_number: '71.2',
-        item_code: 'COMP-008',
-        item_description: 'description',
-        drawing_ref: 'drw-01',
-        material: 'Stainless Steel 304',
-        specification: 'Food grade finish',
-        quantity: 5,
-        unit: 'Pieces',
-        rate: 1,
-        amount: 2250.00,
-        current_status: 'KWD',
-        delivery_date: '2025-02-22',
-        notes: 'Sanitary finish required',
-        cad_file_reference: 'CAD-008.dwg'
-      }
-    ];
   }
 
   transformApiDataToOrderDetails(apiData: any): OrderDetails {
     return {
       name: apiData.name || '',
-      order_name: apiData.order_name || apiData.title || '',
+      order_name: apiData.po_name || apiData.title || '',
       description: apiData.description || '',
       docstatus: apiData.docstatus || 0,
       creation: apiData.creation || '',
       modified: apiData.modified || '',
-      expected_delivery: apiData.expected_delivery || '',
+      expected_delivery: apiData.actual_delivery_date || '',
       delivery_address: apiData.delivery_address || '',
       special_instructions: apiData.special_instructions || '',
       total_amount: apiData.total_amount || apiData.grand_total || 0,
@@ -561,18 +442,20 @@ export class SupplierOrderDetailsComponent implements OnInit {
       delivery_terms: apiData.delivery_terms || '',
       supplier: apiData.supplier || '',
       purchase_order: apiData.purchase_order || '',
-      status: apiData.status || ''
+      rfq_id: apiData.rfq_reference || '',
+      quotation_id: apiData.supplier_quotation || '',
+      status: apiData.po_status || ''
     };
   }
 
   transformApiDataToOrderItems(apiData: any[]): OrderItem[] {
     if (!apiData || !Array.isArray(apiData)) {
-      return [];
+      return [];  
     }
 
     return apiData.map(item => ({
       name: item.name || '',
-      item_number: item.item_number || '',
+      item_number: item.item_code || '',
       item_code: item.item_code || '',
       item_description: item.item_description || item.description || '',
       drawing_ref: item.drawing_ref || '',
@@ -580,7 +463,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
       specification: item.specification || '',
       quantity: item.quantity || 0,
       unit: item.unit || '',
-      rate: item.rate || 0,
+      rate: item.unit_price || 0,
       amount: item.amount || (item.quantity * item.rate) || 0,
       current_status: item.current_status || '',
       delivery_date: item.delivery_date || '',
@@ -598,7 +481,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
       name: attachment.name || '',
       file: attachment.file_url || '',
       file_url: attachment.file_url || '',
-      file_name: attachment.file_name || '',
+      file_name: attachment.name || '',
       file_type: attachment.file_type || '',
       description: attachment.description || '',
       category: attachment.category || '',
@@ -739,7 +622,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
     const action = {
       action: status,
       doc: {
-        doctype: 'Supplier Order',
+        doctype: 'Purchase Order',
         name: this.orderId
       }
     };
@@ -762,45 +645,8 @@ export class SupplierOrderDetailsComponent implements OnInit {
     return this.severityOptions && this.severityOptions.length > 0;
   }
 
-  getStatusClass(status: any) {
-    if (!status) return 'status-draft';
-    
-    const statusStr = status.toLowerCase();
-    
-    const statusClasses: { [key: string]: string } = {
-      'draft': 'status-draft',
-      'open': 'status-open',
-      'in progress': 'status-in-progress',
-      'processing': 'status-in-progress',
-      'completed': 'status-completed',
-      'delivered': 'status-completed',
-      'cancelled': 'status-cancelled',
-      'canceled': 'status-cancelled',
-      'on hold': 'status-on-hold',
-      'pending': 'status-pending'
-    };
-    
-    return statusClasses[statusStr] || 'status-draft';
-  }
-
-  getStatusText(): string {
-    const status = this.orderDetails?.status;
-    if (!status) return 'Unknown';
-    
-    const statusMap: { [key: string]: string } = {
-      'Draft': 'Draft',
-      'Open': 'Open',
-      'In Progress': 'In Progress',
-      'Processing': 'In Progress',
-      'Completed': 'Completed',
-      'Delivered': 'Completed',
-      'Cancelled': 'Cancelled',
-      'Canceled': 'Cancelled',
-      'On Hold': 'On Hold',
-      'Pending': 'Pending'
-    };
-    
-    return statusMap[status] || status;
+  getStatusClass(status: string): string {
+    return this.badgeService.getStatusClass(status);
   }
 
   formatDate(dateString: string): string {
@@ -926,121 +772,53 @@ export class SupplierOrderDetailsComponent implements OnInit {
   onWorkflowStepCompleted(data: WorkflowCompletionData): void {
     console.log('Workflow step completed:', data);
     
-    // Find the completed step
-    const completedStepIndex = this.workflowSteps.findIndex(step => step.id === data.stepId);
-    if (completedStepIndex === -1) {
-      console.error('Step not found:', data.stepId);
-      return;
-    }
+    // // Find the completed step
+    // const completedStepIndex = this.workflowSteps.findIndex(step => step.id === data.stepId);
+    // if (completedStepIndex === -1) {
+    //   console.error('Step not found:', data.stepId);
+    //   return;
+    // }
 
-    // Update the completed step
-    this.workflowSteps[completedStepIndex] = {
-      ...this.workflowSteps[completedStepIndex],
-      status: 'complete',
-      completedDate: new Date(),
-      completedBy: 'Current User', // You can get this from auth service
-      comments: data.comments || '',
-      photos: data.photos ? data.photos.map(file => file.name) : []
-    };
+    // // Prepare the payload for execute_po_action
+    // const payload = {
+    //   po_name: this.orderId,
+    //   action_name: "Approve",  // Default to Approve for Finishing step
+    //   comments: data.comments || '',
+    //   attached_files: data.fileUrls || []
+    // };
 
-    // Activate the next step if it exists
-    if (completedStepIndex + 1 < this.workflowSteps.length) {
-      this.workflowSteps[completedStepIndex + 1] = {
-        ...this.workflowSteps[completedStepIndex + 1],
-        status: 'ready',
-        description: 'Ready to Start'
-      };
-    }
+    // console.log('Sending API request with payload:', payload);
 
-    // Show success message
-    this.sweetAlert.success(
-      `${this.workflowSteps[completedStepIndex].title} has been completed successfully.`
-    );
-
-    // Handle photo uploads if any
-    if (data.photos && data.photos.length > 0) {
-      this.handlePhotoUploads(data.stepId, data.photos);
-    }
-
-    // Save the workflow progress (you might want to call an API here)
-    this.saveWorkflowProgress(data);
-    
-    console.log('Updated workflow steps:', this.workflowSteps);
-  }
-
-  onWorkflowStepClicked(step: WorkflowStep): void {
-    console.log('Workflow step clicked:', step);
-    
-    // Handle different actions based on step status
-    switch (step.status) {
-      case 'complete':
-        // Show step details for completed steps
-        this.showStepDetails(step);
-        break;
-        
-      case 'in-progress':
-      case 'ready':
-        // For active steps, the workflow component will handle the completion modal
-        console.log(`Step ${step.title} is ready for completion`);
-        break;
-        
-      case 'waiting':
-        // Show info that previous steps need to be completed first
-        this.sweetAlert.info(
-          `Please complete the previous steps before starting "${step.title}".`
-        );
-        break;
-        
-      default:
-        console.log('Unknown step status:', step.status);
-    }
-  }
-
-  /**
-   * Handle photo uploads for completed workflow steps
-   */
-  private handlePhotoUploads(stepId: string, photos: File[]): void {
-    console.log('Handling photo uploads for step:', stepId, photos);
-    
-    // Here you would typically upload photos to your server
-    // For now, we'll just log the action
-    photos.forEach((photo, index) => {
-      console.log(`Photo ${index + 1} for step ${stepId}:`, photo.name, photo.size);
-    });
-    
-    // You might want to use your file upload service here
-    // this.fileUploadService.uploadFiles(photos, stepId).subscribe(...)
-  }
-
-  /**
-   * Save workflow progress to the server
-   */
-  private saveWorkflowProgress(completionData: WorkflowCompletionData): void {
-    console.log('Saving workflow progress:', completionData);
-    
-    // Prepare the data for API call
-    const workflowData = {
-      orderId: this.orderId,
-      stepId: completionData.stepId,
-      comments: completionData.comments,
-      completedDate: new Date().toISOString(),
-      photos: completionData.photos ? completionData.photos.map(f => f.name) : []
-    };
-
-    // Here you would make an API call to save the workflow progress
-    // Example:
-    // this.commonService.postWefabData('/api/method/your.workflow.update', workflowData)
+    // // Call the execute_po_action API
+    // this.commonService.postWefabData('/api/method/wefab.wefab.api.common.po_tracker_api.execute_po_action', payload)
     //   .subscribe({
-    //     next: (response) => {
-    //       console.log('Workflow progress saved:', response);
+    //     next: (response: any) => {
+    //       console.log('Action executed successfully:', response);
+          
+    //       // Show success message
+    //       this.sweetAlert.success(
+    //         `${this.workflowSteps[completedStepIndex].title} has been completed successfully.`
+    //       );
+
+
+    //       // Refresh the workflow steps from API
+    //       this.getOrderTrackerView(this.orderId);
+
+
+    //       // Refresh the order details
+    //       this.loadOrderDetails();
+
+    //       // Refresh action list
+    //       this.getActionList();
+
+    //       // Force change detection
+    //       this.cdr.detectChanges();
     //     },
     //     error: (error) => {
-    //       console.error('Error saving workflow progress:', error);
-    //       this.sweetAlert.error('Error', 'Failed to save workflow progress. Please try again.');
+    //       console.error('Error executing action:', error);
+    //       this.sweetAlert.error('Failed to complete the step');
     //     }
     //   });
-    
-    console.log('Workflow data to save:', workflowData);
   }
 
   /**
@@ -1086,5 +864,136 @@ export class SupplierOrderDetailsComponent implements OnInit {
    */
   isWorkflowCompleted(): boolean {
     return this.workflowSteps.every(step => step.status === 'complete');
+  }
+
+  onWorkflowStepClicked(step: WorkflowStep): void {
+    console.log('Workflow step clicked:', step);
+    
+    // Handle different actions based on step status
+    switch (step.status) {
+      case 'complete':
+        // Show step details for completed steps
+        this.showStepDetails(step);
+        break;
+        
+      case 'ready':
+      case 'in-progress':
+        // The workflow component will handle the completion modal
+        console.log(`Step ${step.title} is ready for completion`);
+        break;
+        
+      case 'waiting':
+        // Show info that previous steps need to be completed first
+        this.sweetAlert.info(
+          `Please complete the previous steps before starting "${step.title}".`
+        );
+        break;
+        
+      default:
+        console.log('Unknown step status:', step.status);
+    }
+  }
+
+  // Handle workflow step completion
+  onStepCompleted(data: WorkflowStepCompletionData): void {
+    console.log('🔄 Step completed event received:', data);
+    console.log('🔄 Order ID:', this.orderId);
+    console.log('🔄 File URLs received:', data.fileUrls);
+    this.loading = true;
+
+    // The workflow component has already handled file uploads and provided file URLs
+    // No need to upload files again - directly call the completion API
+    this.completeWorkflowStep(data);
+  }
+
+  private completeWorkflowStep(data: WorkflowStepCompletionData): void {
+    console.log('🚀 Completing workflow step:', data);
+    console.log('🚀 Using Order ID:', this.orderId);
+    
+    // Get current available actions
+    let obj: any = {
+      doctype: 'Purchase Order',
+      name: this.orderId
+    }
+    let params = new HttpParams();
+    params = params.append('doc', JSON.stringify(obj));
+    let endPoint = `/api/method/frappe.model.workflow.get_transitions`;
+    
+    this.commonService.getWefabData(endPoint, params).subscribe({
+      next: (res: any) => {
+        console.log('Available actions:', res);
+        if (res.message && res.message.length > 0) {
+          // Get the first available action
+          const action = res.message[0].action;
+          
+          // Prepare the payload for execute_po_action
+          const payload = {
+            po_name: this.orderId,
+            action_name: action,
+            comments: data.comments || '',
+            attached_files: data.fileUrls || []
+          };
+
+          console.log('📤 Sending API request with payload:', payload);
+          console.log('📤 API Endpoint: /api/method/wefab.wefab.api.common.po_tracker_api.execute_po_action');
+
+          // Call the execute_po_action API
+          this.commonService.postWefabData('/api/method/wefab.wefab.api.common.po_tracker_api.execute_po_action', payload)
+            .subscribe({
+              next: (response: any) => {
+                console.log('Action executed successfully:', response);
+                
+                // Show success message
+                this.sweetAlert.success(
+                  `Step has been completed successfully.`
+                );
+
+                // Refresh the workflow steps from API
+                this.getOrderTrackerView(this.orderId);
+
+                // Refresh the order details
+                this.loadOrderDetails();
+
+                // Refresh action list
+                this.getActionList();
+
+                this.loading = false;
+                this.cdr.detectChanges();
+                
+                // Reset the workflow component's submitting state
+                this.resetWorkflowSubmittingState();
+              },
+              error: (error) => {
+                console.error('❌ Error executing action:', error);
+                this.sweetAlert.error('Failed to complete the step');
+                this.loading = false;
+                
+                // Reset the workflow component's submitting state
+                this.resetWorkflowSubmittingState();
+              }
+            });
+        } else {
+          console.error('No actions available');
+          this.sweetAlert.error('No actions available for this step');
+          this.loading = false;
+        }
+      },
+      error: (error) => {
+        console.error('Error getting actions:', error);
+        this.sweetAlert.error('Failed to get available actions');
+        this.loading = false;
+      }
+    });
+  }
+
+  onStepClicked(step: WorkflowStep): void {
+    // Handle step click event if needed
+    console.log('Step clicked:', step);
+  }
+
+  private resetWorkflowSubmittingState(): void {
+    // This method can be used to reset the workflow component's submitting state
+    // For now, we'll just trigger change detection
+    this.cdr.detectChanges();
   }
 } 

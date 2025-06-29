@@ -1,0 +1,458 @@
+@import 'variables.scss';
+
+// Additional colors for comprehensive badge system - Unique color palette
+$info-blue: #3B82F6;
+$warning-yellow: #F59E0B;
+$danger-red: #EF4444;
+
+// Extended unique color palette for distinct badges
+$emerald-green: #10B981;      // For approved/verified
+$rose-red: #F43F5E;           // For rejected/failed
+$violet-purple: #8B5CF6;      // For pending/waiting
+$amber-orange: #F59E0B;       // For review/caution
+$sky-blue: #0EA5E9;           // For open/available
+$indigo-blue: #6366F1;        // For progress/active
+$slate-gray: #64748B;         // For draft/inactive
+$zinc-gray: #71717A;          // For closed/ended
+$teal-cyan: #14B8A6;          // For awarded/won
+$orange-red: #FF6B35;         // For deactivated/stopped
+$pink-magenta: #EC4899;       // For paused/halted
+$lime-green: #84CC16;         // For success/completed
+$cyan-blue: #06B6D4;          // For information/data
+$purple-indigo: #7C3AED;      // For analysis/processing
+$red-crimson: #DC2626;        // For critical/urgent
+$blue-navy: #1E40AF;          // For state changes
+$green-forest: #059669;       // For data modifications
+$yellow-gold: #D97706;        // For updates/changes
+$gray-neutral: #6B7280;       // For default/unknown
+
+// Base badge styles
+.badge-base {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  
+  // Icon spacing
+  i {
+    margin-right: 0.375rem;
+    font-size: 0.875em;
+  }
+  
+  // Clickable badges
+  &.badge-clickable {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+// Status badges - Main status indicators
+.status-badge {
+  @extend .badge-base;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 12px !important;
+  font-size: 0.75rem !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid transparent !important;
+
+  &.status-draft {
+    background-color: rgba($slate-gray, 0.15) !important;
+    color: $slate-gray !important;
+    border-color: rgba($slate-gray, 0.2) !important;
+  }
+
+  &.status-open {
+    background-color: rgba($sky-blue, 0.15) !important;
+    color: $sky-blue !important;
+    border-color: rgba($sky-blue, 0.2) !important;
+  }
+
+  &.status-progress {
+    background-color: rgba($indigo-blue, 0.15) !important;
+    color: $indigo-blue !important;
+    border-color: rgba($indigo-blue, 0.2) !important;
+  }
+
+  &.status-closed {
+    background-color: rgba($zinc-gray, 0.15) !important;
+    color: $zinc-gray !important;
+    border-color: rgba($zinc-gray, 0.2) !important;
+  }
+
+  &.status-awarded {
+    background-color: rgba($teal-cyan, 0.15) !important;
+    color: $teal-cyan !important;
+    border-color: rgba($teal-cyan, 0.2) !important;
+  }
+
+  &.status-approved {
+    background-color: rgba($emerald-green, 0.15) !important;
+    color: $emerald-green !important;
+    border-color: rgba($emerald-green, 0.2) !important;
+  }
+
+  &.status-rejected {
+    background-color: rgba($rose-red, 0.15) !important;
+    color: $rose-red !important;
+    border-color: rgba($rose-red, 0.2) !important;
+  }
+
+  &.status-pending {
+    background-color: rgba($violet-purple, 0.15) !important;
+    color: $violet-purple !important;
+    border-color: rgba($violet-purple, 0.2) !important;
+  }
+
+  &.status-review {
+    background-color: rgba($amber-orange, 0.15) !important;
+    color: $amber-orange !important;
+    border-color: rgba($amber-orange, 0.2) !important;
+  }
+
+  &.status-deactivate {
+    background-color: rgba($orange-red, 0.15) !important;
+    color: $orange-red !important;
+    border-color: rgba($orange-red, 0.2) !important;
+  }
+
+  &.status-paused {
+    background-color: rgba($pink-magenta, 0.15) !important;
+    color: $pink-magenta !important;
+    border-color: rgba($pink-magenta, 0.2) !important;
+  }
+
+  &.status-default {
+    background-color: rgba($gray-neutral, 0.15) !important;
+    color: $gray-neutral !important;
+    border-color: rgba($gray-neutral, 0.2) !important;
+  }
+
+  // Hover effect for interactive badges
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Activity badges - For activity trails and logs
+.activity-badge {
+  @extend .badge-base;
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+
+  &.activity-state-change,
+  &.badge-state-change {
+    background-color: $blue-navy;
+    color: white;
+  }
+
+  &.activity-data-modified,
+  &.badge-data-modified {
+    background-color: $green-forest;
+    color: white;
+  }
+
+  &.activity-rows-updated,
+  &.badge-rows-updated {
+    background-color: $yellow-gold;
+    color: white;
+  }
+
+  &.activity-default,
+  &.badge-default {
+    background-color: $gray-neutral;
+    color: white;
+  }
+
+  // Small variant for timeline items
+  &.activity-badge-small {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    margin-bottom: 0;
+    
+    &.status-approved {
+      background-color: $emerald-green;
+    }
+    
+    &.status-rejected {
+      background-color: $rose-red;
+    }
+    
+    &.status-updated {
+      background-color: $cyan-blue;
+    }
+
+    &.status-submitted {
+      background-color: $purple-indigo;
+    }
+    
+    &.status-created {
+      background-color: $lime-green;
+    }
+  }
+}
+
+// Verification badges - For document/profile verification
+.verification-badge {
+  @extend .badge-base;
+  padding: 4px 10px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  border: 1px solid transparent;
+  
+  &.verification-verified,
+  &.verified {
+    background-color: rgba($lime-green, 0.1);
+    color: $lime-green;
+    border-color: rgba($lime-green, 0.2);
+    
+    i {
+      color: $lime-green;
+    }
+  }
+  
+  &.verification-not-verified,
+  &.not-verified {
+    background-color: rgba($red-crimson, 0.1);
+    color: $red-crimson;
+    border-color: rgba($red-crimson, 0.2);
+    
+    i {
+      color: $red-crimson;
+    }
+  }
+
+  &.verification-analyzing,
+  &.analyzing {
+    background-color: rgba($purple-indigo, 0.1);
+    color: $purple-indigo;
+    border-color: rgba($purple-indigo, 0.2);
+    
+    i {
+      color: $purple-indigo;
+    }
+  }
+}
+
+// Level badges - For skill/certification levels
+.level-badge {
+  @extend .badge-base;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: $font-weight-medium;
+  background-color: rgba($info-blue, 0.1);
+  color: $info-blue;
+  border: 1px solid rgba($info-blue, 0.2);
+}
+
+// Message type badges - For conversation trails
+.message-type-badge {
+  @extend .badge-base;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  text-transform: capitalize;
+  
+  &.message-comment,
+  &.comment {
+    background-color: rgba($cyan-blue, 0.15);
+    color: $cyan-blue;
+    border: 1px solid rgba($cyan-blue, 0.2);
+  }
+  
+  &.message-action-update,
+  &.action_update {
+    background-color: rgba($purple-indigo, 0.15);
+    color: $purple-indigo;
+    padding: 0.25rem 0.5rem;
+
+    .state-transition {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .state-badge {
+        background-color: $purple-indigo;
+        color: white;
+        padding: 0.125rem 0.375rem;
+        border-radius: 8px;
+        font-size: 0.75rem;
+      }
+
+      .transition-arrow {
+        font-size: 0.75rem;
+        color: $purple-indigo;
+      }
+    }
+  }
+}
+
+// Notification badges - For header notifications
+.notification-badge {
+  @extend .badge-base;
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: $red-crimson;
+  color: white;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: $font-weight-bold;
+  min-width: 18px;
+  height: 18px;
+  padding: 0;
+  justify-content: center;
+  line-height: 1;
+  border: 2px solid $blueprint-blue;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: pulse 2s infinite;
+}
+
+// Badge size variants
+.badge-xs {
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+}
+
+.badge-sm {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.badge-md {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+}
+
+.badge-lg {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+// Badge shape variants
+.badge-pill {
+  border-radius: 50px;
+}
+
+.badge-square {
+  border-radius: 4px;
+}
+
+.badge-rounded {
+  border-radius: 8px;
+}
+
+// Badge with icon variants
+.badge-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  
+  i {
+    font-size: 0.875em;
+  }
+}
+
+// Pulse animation for notification badges
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .status-badge,
+  .activity-badge,
+  .verification-badge {
+    font-size: 0.6875rem;
+    padding: 0.2rem 0.6rem;
+  }
+  
+  .message-type-badge {
+    font-size: 0.6875rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+// Dark theme support (if needed in future)
+@media (prefers-color-scheme: dark) {
+  .status-badge {
+    &.status-draft {
+      background-color: rgba($slate-gray, 0.25);
+      border-color: rgba($slate-gray, 0.3);
+    }
+    
+    &.status-open {
+      background-color: rgba($sky-blue, 0.25);
+      border-color: rgba($sky-blue, 0.3);
+    }
+
+    &.status-progress {
+      background-color: rgba($indigo-blue, 0.25);
+      border-color: rgba($indigo-blue, 0.3);
+    }
+
+    &.status-approved {
+      background-color: rgba($emerald-green, 0.25);
+      border-color: rgba($emerald-green, 0.3);
+    }
+
+    &.status-awarded {
+      background-color: rgba($teal-cyan, 0.25);
+      border-color: rgba($teal-cyan, 0.3);
+    }
+    
+    // Add other dark theme variants as needed
+  }
+}
+
+// Utility classes for badge combinations
+.badge-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.badge-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+}
+
+// Print styles
+@media print {
+  .badge-base {
+    color: #000 !important;
+    background-color: transparent !important;
+    border: 1px solid #000 !important;
+  }
+} 

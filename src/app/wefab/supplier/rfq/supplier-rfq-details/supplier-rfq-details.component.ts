@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonTableComponent, TableConfig, ActionButton } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
+import { BadgeService } from '../../../../shared/services/badge.service';
 import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
 import { ConfigurableButtonComponent } from '../../../../shared/components/configurable-button/configurable-button.component';
 
@@ -175,7 +176,8 @@ export class SupplierRfqDetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private badgeService: BadgeService
   ) {}
 
   ngOnInit() {
@@ -370,32 +372,8 @@ export class SupplierRfqDetailsComponent implements OnInit {
     console.log('Downloading file for RFQ:', this.rfqId);
   }
 
-  getStatusClass(status:any) {
-    console.log('RFQ Details page status', status);
-    switch (status) {
-      case 'Cancelled':
-        return 'status-rejected';
-      case 'Draft':
-        return 'status-draft';
-      case 'Opened': 
-        return 'status-open';
-      case 'Not Opened':
-        return 'status-open';
-      case 'Paused':
-        return 'status-paused';
-      case 'Deactivate':
-        return 'status-deactivate';
-      case 'Closed':
-        return 'status-closed';
-      case 'Quoted':
-        return 'status-awarded';
-      case 'Not Opened':
-        return 'status-open';
-      case 'In Progress':
-        return 'status-progress';
-      default:
-        return 'status-default';
-    }
+  getStatusClass(status: string): string {
+    return this.badgeService.getStatusClass(status);
   }
 
   getStatusText(): string {

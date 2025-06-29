@@ -293,6 +293,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     // Check URL parameters first
     this.handleUrlParameters();
     
+    // Initialize currency data on page reload
+    this.initializeCurrencyData();
+    
     // Load country list first, then initialize form
     this.getCountryListAndInitializeForm();
     
@@ -315,6 +318,186 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
     setTimeout(() => {
       this.setupFormValidationMonitoring();
     }, 1500);
+
+    this.getCountryList()
+  }
+
+  // New method to initialize currency data on page reload
+  private initializeCurrencyData(): void {
+    console.log('🔄 Initializing currency data...');
+    
+    // Check if we have currency data in localStorage
+    const selectedCurrency = this.getSelectedCurrency();
+    const currencyFormat = this.getCurrencyFormat();
+    
+    console.log('💰 Current currency data:', {
+      selectedCurrency: selectedCurrency,
+      currencyFormat: currencyFormat,
+      hasCurrencyFormat: !!localStorage.getItem('currencyFormat')
+    });
+    
+    // If we have a selected currency but no format, fetch it
+    if (selectedCurrency && selectedCurrency !== 'INR' && !localStorage.getItem('currencyFormat')) {
+      console.log('🔄 Currency found but no format data, fetching from API...');
+      this.fetchCurrencyFormat(selectedCurrency);
+    }
+    
+    // If we have verified country data in localStorage, use it
+    const verifiedCountry = this.getVerifiedCountryData();
+    if (verifiedCountry && verifiedCountry.currency) {
+      console.log('✅ Using verified country currency data:', verifiedCountry);
+      
+      // Ensure we have the currency format for this currency
+      if (!localStorage.getItem('currencyFormat')) {
+        this.fetchCurrencyFormat(verifiedCountry.currency);
+      }
+    }
+  }
+
+  // New method to get verified country data from localStorage
+  private getVerifiedCountryData(): any {
+    try {
+      const verifiedCountryString = localStorage.getItem('verifiedCountry');
+      return verifiedCountryString ? JSON.parse(verifiedCountryString) : null;
+    } catch (error) {
+      console.error('Error parsing verified country data:', error);
+      return null;
+    }
+  }
+
+  // New method to fetch currency format from API
+  private fetchCurrencyFormat(currency: string | null): void {
+    if (!currency) {
+      console.log('❌ No currency provided for fetching format');
+      this.setDefaultCurrencyFormat();
+      return;
+    }
+    
+    console.log('🔄 Fetching currency format for:', currency);
+    
+    const endPoint = `/api/resource/Currency/${currency}`;
+    this.commonService.getData(endPoint).subscribe(
+      (res: any) => {
+        if (res.data && res.data.number_format) {
+          localStorage.setItem('currencyFormat', JSON.stringify(res.data.number_format));
+          console.log('✅ Currency format updated:', res.data.number_format);
+          
+          // Update the current component's formatting
+          this.updateCurrencyFormatting();
+        }
+      },
+      (error) => {
+        console.error('❌ Error fetching currency format:', error);
+        // Set default format if API fails
+        this.setDefaultCurrencyFormat();
+      }
+    );
+  }
+
+  // New method to set default currency format
+  private setDefaultCurrencyFormat(): void {
+    const defaultFormat = '#,##,###.##';
+    localStorage.setItem('currencyFormat', JSON.stringify(defaultFormat));
+    console.log('✅ Set default currency format:', defaultFormat);
+  }
+
+  // New method to update currency formatting throughout the component
+  private updateCurrencyFormatting(): void {
+    console.log('🔄 Updating currency formatting...');
+    
+    // Re-initialize financial fields with new format
+    if (this.activeStepIndex === 4) { // Financial Information step
+      this.stepFields[4] = this.getFinancialInformationFields();
+      
+      // Update form with new formatting
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 100);
+    }
+  }
+
+  // Enhanced method to get currency from localStorage with fallback logic
+  getSelectedCurrency(): string {
+    // First, try to get from selectedCurrency key
+    let currency = localStorage.getItem('selectedCurrency');
+    
+    // If not found, try to get from verified country data
+    if (!currency) {
+      const verifiedCountry = this.getVerifiedCountryData();
+      if (verifiedCountry && verifiedCountry.currency) {
+        currency = verifiedCountry.currency;
+        // Store it for future use - only if currency is not null
+        if (currency) {
+          localStorage.setItem('selectedCurrency', currency);
+        }
+      }
+    }
+    
+    // Fallback to INR if nothing found
+    return currency || 'INR';
+  }
+
+  // Enhanced method to get currency format from localStorage with API fallback
+  getCurrencyFormat(): any {
+    try {
+      const format = localStorage.getItem('currencyFormat');
+      if (format) {
+        return JSON.parse(format);
+      }
+      
+      // If no format in localStorage, try to fetch it
+      const selectedCurrency = this.getSelectedCurrency();
+      if (selectedCurrency && selectedCurrency !== 'INR') {
+        // Fetch format asynchronously in background
+        this.fetchCurrencyFormat(selectedCurrency);
+      }
+      
+      // Return default format while API call is in progress
+      return '#,##,###.##'; // Default Indian format
+    } catch (error) {
+      console.error('Error parsing currency format:', error);
+      return '#,##,###.##'; // Default Indian format
+    }
+  }
+
+  // Add method to format numbers according to currency format
+  formatCurrencyAmount(amount: string | number): string {
+    if (!amount) return '';
+    
+    const numericValue = typeof amount === 'string' ? amount.replace(/[^\d]/g, '') : amount.toString();
+    if (!numericValue || isNaN(Number(numericValue))) return '';
+    
+    const format = this.getCurrencyFormat();
+    const num = Number(numericValue);
+    
+    // Handle different currency formats
+    if (typeof format === 'string') {
+      if (format.includes('#,##,###')) {
+        // Indian format (lakhs and crores)
+        return this.formatIndianCurrency(num);
+      } else if (format.includes('#,###')) {
+        // International format (thousands)
+        return this.formatInternationalCurrency(num);
+      }
+    }
+    
+    // Default to Indian format if format is not recognized
+    return this.formatIndianCurrency(num);
+  }
+
+  // International currency formatting (thousands separator)
+  formatInternationalCurrency(num: number): string {
+    return num.toLocaleString('en-US');
+  }
+
+  getCountryList() {
+    let endPoint = '/api/resource/Country?fields=["*"]&limit=300';
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      debugger
+      console.log(res)
+      // this.countryList = res.data || [];
+
+    });
   }
 
   // Add method to check if current step is valid
@@ -505,6 +688,14 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       
       console.log('Country list loaded:', this.countryList.length);
       
+      // Get country directly from localStorage
+      const storedCountry = localStorage.getItem('country');
+      if (storedCountry) {
+        this.selectedCountry = storedCountry;
+        this.model.country = storedCountry;
+        this.getStates(storedCountry);
+      }
+      
       // Initialize step fields - combining all L1, L2 and L3 steps
       this.stepFields = [
         this.getBasicDetailsFields(),              // Step 1: From L1
@@ -514,6 +705,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         this.getFinancialInformationFields(),      // Step 5: From L3
         this.getAdditionalInformationFields()      // Step 6: From L3
       ];
+
+      // Force change detection to update the view
+      this.cdr.detectChanges();
     }, error => {
       console.error('Error loading country list:', error);
       // Initialize with empty country list if there's an error
@@ -1414,6 +1608,8 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       gst_verified: this.gstVerified,
       pan_verified: this.panVerified,
       onboarding_status: this.currentOnboardingFormStatus === 'L1 Request for Change' ? 'L1 Under Review' : this.currentOnboardingFormStatus === 'L2 Request for Change' ? 'L2 Under Review' : this.currentOnboardingFormStatus === 'L3 Request for Change' ? 'L3 Under Review' : this.currentOnboardingFormStatus,
+      selected_currency: this.getSelectedCurrency(),
+      currency_format: this.getCurrencyFormat() || '',
       [currentStepKey]: JSON.stringify(body)
     };
 
@@ -1806,6 +2002,21 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   onPhoneVerified(verified: boolean): void {
     this.phoneVerified = verified;
     console.log('Phone verification status:', verified);
+    
+    // If phone is verified, ensure currency data is available
+    if (verified) {
+      console.log('✅ Phone verified, checking currency data...');
+      
+      // Re-initialize currency data to ensure we have the latest
+      this.initializeCurrencyData();
+      
+      // Update financial fields if we're on that step
+      if (this.activeStepIndex === 4) {
+        setTimeout(() => {
+          this.updateCurrencyFormatting();
+        }, 500);
+      }
+    }
     
     // Update the phone field verification status dynamically
     this.updatePhoneFieldVerificationStatus();
@@ -2611,7 +2822,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             key: 'companyFinancials.annualRevenue2024',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (This Year) (INR)',
+              label: `Annual Revenue (This Year) (${this.getSelectedCurrency()})`,
               required: true,
               type: 'text',
               placeholder: 'Enter current year revenue'
@@ -2624,7 +2835,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                     if (value && value.length > 0) {
                       const numericValue = value.replace(/[^\d]/g, '');
                       if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        const formatted = this.formatCurrencyAmount(Number(numericValue));
                         if (formatted !== value) {
                           field.formControl.setValue(formatted, { emitEvent: false });
                         }
@@ -2650,7 +2861,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             key: 'companyFinancials.annualRevenue2023',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (Last Year) (INR)',
+              label: `Annual Revenue (Last Year) (${this.getSelectedCurrency()})`,
               required: true,
               type: 'text',
               placeholder: 'Enter last year revenue'
@@ -2663,7 +2874,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                     if (value && value.length > 0) {
                       const numericValue = value.replace(/[^\d]/g, '');
                       if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        const formatted = this.formatCurrencyAmount(Number(numericValue));
                         if (formatted !== value) {
                           field.formControl.setValue(formatted, { emitEvent: false });
                         }
@@ -2689,7 +2900,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             key: 'companyFinancials.annualRevenue2022',
             type: 'input',
             templateOptions: {
-              label: 'Annual Revenue (Two Years Ago) (INR)',
+              label: `Annual Revenue (Two Years Ago) (${this.getSelectedCurrency()})`,
               required: true,
               type: 'text',
               placeholder: 'Enter two years ago revenue'
@@ -2702,7 +2913,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                     if (value && value.length > 0) {
                       const numericValue = value.replace(/[^\d]/g, '');
                       if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        const formatted = this.formatCurrencyAmount(Number(numericValue));
                         if (formatted !== value) {
                           field.formControl.setValue(formatted, { emitEvent: false });
                         }
@@ -2749,7 +2960,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             key: 'insuranceCoverage.generalLiabilityInsurance',
             type: 'input',
             templateOptions: {
-              label: 'General Liability Insurance (INR)',
+              label: `General Liability Insurance (${this.getSelectedCurrency()})`,
               placeholder: 'Enter General Liability Insurance Amount',
               type: 'text'
             },
@@ -2761,7 +2972,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                     if (value && value.length > 0) {
                       const numericValue = value.replace(/[^\d]/g, '');
                       if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        const formatted = this.formatCurrencyAmount(Number(numericValue));
                         if (formatted !== value) {
                           field.formControl.setValue(formatted, { emitEvent: false });
                         }
@@ -2787,7 +2998,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             key: 'insuranceCoverage.productLiabilityInsurance',
             type: 'input',
             templateOptions: {
-              label: 'Product Liability Insurance (INR)',
+              label: `Product Liability Insurance (${this.getSelectedCurrency()})`,
               placeholder: 'Enter Product Liability Insurance Amount',
               type: 'text'
             },
@@ -2799,7 +3010,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                     if (value && value.length > 0) {
                       const numericValue = value.replace(/[^\d]/g, '');
                       if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatIndianCurrency(Number(numericValue));
+                        const formatted = this.formatCurrencyAmount(Number(numericValue));
                         if (formatted !== value) {
                           field.formControl.setValue(formatted, { emitEvent: false });
                         }
@@ -3092,6 +3303,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
             className: 'col-md-4 mb-2',
             key: 'country',
             type: 'searchable-select',
+            defaultValue: this.model.country || localStorage.getItem('country'),
             templateOptions: {
               label: 'Country',
               required: true,
@@ -3099,10 +3311,18 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
               options: this.countryList.map((country: any) => ({
                 label: country.name,
                 value: country.name
-              }))
+              })),
+              disabled: !!localStorage.getItem('country')
             },
             hooks: {
               onInit: (field) => {
+                // Set initial value from model or localStorage
+                const countryValue = this.model.country || localStorage.getItem('country');
+                if (countryValue) {
+                  this.selectedCountry = countryValue;
+                  this.getStates(countryValue);
+                }
+
                 field.formControl?.valueChanges.subscribe(selectedCountry => {
                   if (selectedCountry) {
                     this.selectedCountry = selectedCountry;
@@ -3534,7 +3754,9 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
           totalEmployees: combinedData.totalEmployees,
           foundedYear: combinedData.foundedYear,
           companyDocuments: combinedData.companyDocuments,
-          phoneVerified: this.phoneVerified
+          phoneVerified: this.phoneVerified,
+          selected_currency: this.getSelectedCurrency(),
+          currency_format: this.getCurrencyFormat() || ''
         };
         
         // Also update the model to ensure consistency
@@ -3848,8 +4070,7 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       pan_verified: this.panVerified,
       onboarding_status: this.currentOnboardingFormStatus || 'L1 Under Review',
       [currentStepKey]: JSON.stringify(body)
-    };
-
+    };  
     console.log(`💾 Saving ${currentStepKey} data:`, {
       endpoint: endPoint,
       stepKey: currentStepKey,

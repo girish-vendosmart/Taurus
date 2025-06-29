@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CommonService } from '../../services/common.service';
 import { DialogModule } from 'primeng/dialog';
 import { FileUploadService, FileUploadResult } from '../../services/file-upload.service';
+import { BadgeService } from '../../services/badge.service';
 import { EditorModule } from 'primeng/editor';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { ConfigurableButtonComponent } from '../configurable-button/configurable-button.component';
@@ -42,7 +43,8 @@ export class ConversationTrailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private commonService: CommonService,
-    private fileUploadService: FileUploadService
+    private fileUploadService: FileUploadService,
+    private badgeService: BadgeService
   ) {}
 
   ngOnInit() {
@@ -67,7 +69,10 @@ export class ConversationTrailComponent implements OnInit {
           company: msg.company_name,
           text: this.stripHtml(msg.comment),
           timestamp: new Date(msg.creation),
-          attachments: msg.attachment || []
+          attachments: msg.attachment || [],
+          message_type: msg.comment_type || 'comment', // Default to 'comments' if not specified
+          message_current_state: msg.current_state || '',
+          message_new_state: msg.new_state || ''
         }));
         this.loading = false;
       },
@@ -267,5 +272,9 @@ export class ConversationTrailComponent implements OnInit {
     const hasText = this.newMessage && this.newMessage.trim().length > 0;
     const hasAttachments = this.attachments && this.attachments.length > 0;
     this.hasValidMessageStatus = hasText || hasAttachments;
+  }
+
+  getStatusClass(status: string): string {
+    return this.badgeService.getStatusClass(status);
   }
 } 

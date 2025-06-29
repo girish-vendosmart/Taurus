@@ -263,7 +263,21 @@ export class CommonService {
         );
     }
     
+    completeWorkflowStep(data: {
+        stepId: string;
+        comments: string;
+        fileUrls: string[];
+    }): Observable<any> {
+        // Transform the data to match the API format
+        const apiPayload = {
+            po_name: data.stepId,
+            action_name: 'Approve',
+            comments: data.comments,
+            attached_files: data.fileUrls
+        };
 
-    
-
+        // Replace with your actual API endpoint
+        const endpoint = `${environment.apiUrl}/workflow/complete-step`;
+        return this.http.post(endpoint, apiPayload);
+    }
 }

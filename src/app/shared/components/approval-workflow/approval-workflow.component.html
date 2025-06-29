@@ -4,14 +4,21 @@
     <h3 class="workflow-title">{{ title }}</h3>
   </div>
 
+  <!-- Loading State -->
+  <div class="workflow-loading" *ngIf="loading">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Updating workflow...</span>
+  </div>
+
   <!-- Steps Timeline -->
-  <div class="workflow-steps">
+  <div class="workflow-steps" [class.loading]="loading">
     <div 
       *ngFor="let step of steps; trackBy: trackByStepId" 
       class="workflow-step"
       [class.step-completed]="step.status === 'complete'"
-      [class.step-active]="step.status === 'in-progress' || step.status === 'ready'"
-      [class.step-waiting]="step.status === 'waiting'"
+      [class.step-active]="step.status === 'ready'"
+      (click)="onStepClick(step)"
+      [class.clickable]="canCompleteStep(step)"
     >
       <!-- Step Icon -->
       <div class="step-icon-container">
@@ -25,40 +32,13 @@
       <div class="step-content">
         <div class="step-header">
           <h4 class="step-title">{{ step.title }}</h4>
-          <button 
-            *ngIf="step.status !== 'waiting' && step.allowCompletion"
-            type="button"
-            pButton
-            pRipple
-            [label]="getStepButtonText(step)"
-            [class]="getStepButtonClass(step)"
-            [disabled]="!canCompleteStep(step) || loading"
-            (click)="onStepClick(step)"
-          ></button>
-          <span 
-            *ngIf="step.status === 'ready' && !step.allowCompletion"
-            class="status-badge status-next">
-            Next
+          <span class="step-status" [ngClass]="{
+            'status-complete': step.status === 'complete',
+            'status-in-progress': step.status === 'ready',
+            'status-waiting': step.status === 'waiting'
+          }">
+            {{ getStepStatusText(step) }}
           </span>
-          <span 
-            *ngIf="step.status === 'in-progress'"
-            class="status-badge status-in-progress">
-            In Progress
-          </span>
-          <span 
-            *ngIf="step.status === 'waiting'"
-            class="status-badge status-pending">
-            Pending
-          </span>
-        </div>
-        
-        <!-- Step Description -->
-        <p class="step-description" *ngIf="step.description">{{ step.description }}</p>
-        
-        <!-- Step Comments/Time Estimate -->
-        <div class="step-time-estimate" *ngIf="step.comments">
-          <i class="pi pi-clock"></i>
-          {{ step.comments }}
         </div>
       </div>
     </div>
@@ -78,11 +58,14 @@
     <div class="completion-modal-content">
       <!-- File Upload Section -->
       <div class="form-section">
-        <label class="form-label" [class.required]="currentStep?.requiresPhotos">Upload Evidence (Photos, Videos, Documents)</label>
-        <div class="file-upload-container" (click)="fileInput.click()">
+        <label class="form-label" [class.required]="isDocumentRequired()">Upload Evidence (Photos, Videos, Documents)</label>
+        <div class="file-upload-container" (click)="fileInput.click()" [class.has-error]="uploadError">
           <div class="upload-area">
             <i class="pi pi-cloud-upload upload-icon"></i>
             <span class="upload-text">Choose Evidence</span>
+            <small class="upload-hint" *ngIf="isDocumentRequired()">* Required for this step</small>
+            <small class="upload-hint" *ngIf="!isDocumentRequired() && isDocumentOptional()">Optional for this step</small>
+            <small class="upload-hint" *ngIf="!isDocumentRequired() && !isDocumentOptional()">Not applicable for this step</small>
           </div>
           <input 
             #fileInput
@@ -98,12 +81,20 @@
         <div class="selected-files" *ngIf="selectedFiles.length > 0">
           <div class="file-item" *ngFor="let file of selectedFiles; let i = index">
             <i class="pi pi-file file-icon"></i>
-            <span class="file-name">{{ file.name }}</span>
-            <span class="file-size">({{ formatFileSize(file.size) }})</span>
+            <div class="file-info">
+              <span class="file-name">{{ file.name }}</span>
+              <span class="file-size">({{ formatFileSize(file.size) }})</span>
+              <!-- Add progress bar -->
+              <div class="upload-progress" *ngIf="uploadProgress[file.name]">
+                <div class="progress-bar" [style.width.%]="uploadProgress[file.name]"></div>
+                <span class="progress-text">{{ uploadProgress[file.name] }}%</span>
+              </div>
+            </div>
             <button 
               type="button"
               class="remove-file-btn"
               (click)="removeFile(i)"
+              [disabled]="uploadProgress[file.name]"
             >
               <i class="pi pi-times"></i>
             </button>
@@ -113,20 +104,27 @@
         <!-- Upload Error -->
         <div class="error-message" *ngIf="uploadError">
           <i class="pi pi-exclamation-triangle"></i>
-          {{ uploadError }}
+          <div class="error-text">
+            <div *ngFor="let error of validationErrors">{{ error }}</div>
+          </div>
         </div>
       </div>
 
       <!-- Comments Section -->
       <div class="form-section">
-        <label class="form-label" [class.required]="currentStep?.requiresComments">Comments</label>
+        <label class="form-label" [class.required]="isCommentRequired()">Comments</label>
         <textarea
           pInputTextarea
           [(ngModel)]="completionComments"
           placeholder="Add your comments about this step..."
           rows="4"
           class="w-full"
+          [class.ng-invalid]="commentError"
         ></textarea>
+        <small class="hint-text" *ngIf="isCommentRequired()">* Required for this step</small>
+        <small class="hint-text" *ngIf="!isCommentRequired() && isCommentOptional()">Optional for this step</small>
+        <small class="hint-text" *ngIf="!isCommentRequired() && !isCommentOptional()">Not applicable for this step</small>
+        
       </div>
     </div>
 
@@ -143,9 +141,11 @@
         pButton 
         label="Complete Step"
         class="p-button-success"
-        [disabled]="!canSubmitCompletion() || loading"
+        [disabled]="!canSubmitCompletion()"
         (click)="onCompleteStep()"
-      ></button>
+      >
+        <i class="pi pi-spin pi-spinner" *ngIf="loading"></i>
+      </button>
     </ng-template>
   </p-dialog>
 </div> 

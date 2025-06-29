@@ -26,7 +26,8 @@ import { SweetAlertService } from '../../services/sweet-alert.service';
 interface Country {
   name: string;
   code: string;
-  emoji: string;  // Using emoji flags instead of image assets
+  emoji: string;  // Using emoji flags instead of image assets  
+  currency: string;  // Currency code
 }
 
 @Component({
@@ -546,18 +547,212 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   private resendTimerInterval: any;
   
   countries: Country[] = [
-    { name: 'India', code: '91', emoji: '🇮🇳' },
-    { name: 'United States', code: '1', emoji: '🇺🇸' },
-    { name: 'United Kingdom', code: '44', emoji: '🇬🇧' },
-    { name: 'Australia', code: '61', emoji: '🇦🇺' },
-    { name: 'Canada', code: '1', emoji: '🇨🇦' },
-    { name: 'China', code: '86', emoji: '🇨🇳' },
-    { name: 'Germany', code: '49', emoji: '🇩🇪' },
-    { name: 'France', code: '33', emoji: '🇫🇷' },
-    { name: 'Japan', code: '81', emoji: '🇯🇵' },
-    { name: 'UAE', code: '971', emoji: '🇦🇪' },
-    { name: 'Singapore', code: '65', emoji: '🇸🇬' },
-    { name: 'Malaysia', code: '60', emoji: '🇲🇾' },
+    { name: 'Afghanistan', code: '93', emoji: '🇦🇫', currency: 'AFN' },
+    { name: 'Albania', code: '355', emoji: '🇦🇱', currency: 'ALL' },
+    { name: 'Algeria', code: '213', emoji: '🇩🇿', currency: 'DZD' },
+    { name: 'American Samoa', code: '1', emoji: '🇦🇸', currency: 'USD' },
+    { name: 'Andorra', code: '376', emoji: '🇦🇩', currency: 'EUR' },
+    { name: 'Angola', code: '244', emoji: '🇦🇴', currency: 'AOA' },
+    { name: 'Antigua and Barbuda', code: '1', emoji: '🇦🇬', currency: 'XCD' },
+    { name: 'Argentina', code: '54', emoji: '🇦🇷', currency: 'ARS' },
+    { name: 'Armenia', code: '374', emoji: '🇦🇲', currency: 'AMD' },
+    { name: 'Australia', code: '61', emoji: '🇦🇺', currency: 'AUD' },
+    { name: 'Austria', code: '43', emoji: '🇦🇹', currency: 'EUR' },
+    { name: 'Azerbaijan', code: '994', emoji: '🇦🇿', currency: 'AZN' },
+    { name: 'Bahamas', code: '1', emoji: '🇧🇸', currency: 'BSD' },
+    { name: 'Bahrain', code: '973', emoji: '🇧🇭', currency: 'BHD' },
+    { name: 'Bangladesh', code: '880', emoji: '🇧🇩', currency: 'BDT' },
+    { name: 'Barbados', code: '1', emoji: '🇧🇧', currency: 'BBD' },
+    { name: 'Belarus', code: '375', emoji: '🇧🇾', currency: 'BYN' },
+    { name: 'Belgium', code: '32', emoji: '🇧🇪', currency: 'EUR' },
+    { name: 'Belize', code: '501', emoji: '🇧🇿', currency: 'BZD' },
+    { name: 'Benin', code: '229', emoji: '🇧🇯', currency: 'XOF' },
+    { name: 'Bermuda', code: '1', emoji: '🇧🇲', currency: 'BMD' },
+    { name: 'Bhutan', code: '975', emoji: '🇧🇹', currency: 'BTN' },
+    { name: 'Bolivia', code: '591', emoji: '🇧🇴', currency: 'BOB' },
+    { name: 'Bosnia and Herzegovina', code: '387', emoji: '🇧🇦', currency: 'BAM' },
+    { name: 'Botswana', code: '267', emoji: '🇧🇼', currency: 'BWP' },
+    { name: 'Brazil', code: '55', emoji: '🇧🇷', currency: 'BRL' },
+    { name: 'British Virgin Islands', code: '1', emoji: '🇻🇬', currency: 'USD' },
+    { name: 'Brunei', code: '673', emoji: '🇧🇳', currency: 'BND' },
+    { name: 'Bulgaria', code: '359', emoji: '🇧🇬', currency: 'BGN' },
+    { name: 'Burkina Faso', code: '226', emoji: '🇧🇫', currency: 'XOF' },
+    { name: 'Burundi', code: '257', emoji: '🇧🇮', currency: 'BIF' },
+    { name: 'Cambodia', code: '855', emoji: '🇰🇭', currency: 'KHR' },
+    { name: 'Cameroon', code: '237', emoji: '🇨🇲', currency: 'XAF' },
+    { name: 'Canada', code: '1', emoji: '🇨🇦', currency: 'CAD' },
+    { name: 'Cape Verde', code: '238', emoji: '🇨🇻', currency: 'CVE' },
+    { name: 'Cayman Islands', code: '1', emoji: '🇰🇾', currency: 'KYD' },
+    { name: 'Central African Republic', code: '236', emoji: '🇨🇫', currency: 'XAF' },
+    { name: 'Chad', code: '235', emoji: '🇹🇩', currency: 'XAF' },
+    { name: 'Chile', code: '56', emoji: '🇨🇱', currency: 'CLP' },
+    { name: 'China', code: '86', emoji: '🇨🇳', currency: 'CNY' },
+    { name: 'Colombia', code: '57', emoji: '🇨🇴', currency: 'COP' },
+    { name: 'Comoros', code: '269', emoji: '🇰🇲', currency: 'KMF' },
+    { name: 'Congo', code: '242', emoji: '🇨🇬', currency: 'XAF' },
+    { name: 'Congo (DRC)', code: '243', emoji: '🇨🇩', currency: 'CDF' },
+    { name: 'Cook Islands', code: '682', emoji: '🇨🇰', currency: 'NZD' },
+    { name: 'Costa Rica', code: '506', emoji: '🇨🇷', currency: 'CRC' },
+    { name: 'Croatia', code: '385', emoji: '🇭🇷', currency: 'EUR' },
+    { name: 'Cuba', code: '53', emoji: '🇨🇺', currency: 'CUP' },
+    { name: 'Cyprus', code: '357', emoji: '🇨🇾', currency: 'EUR' },
+    { name: 'Czech Republic', code: '420', emoji: '🇨🇿', currency: 'CZK' },
+    { name: 'Denmark', code: '45', emoji: '🇩🇰', currency: 'DKK' },
+    { name: 'Djibouti', code: '253', emoji: '🇩🇯', currency: 'DJF' },
+    { name: 'Dominica', code: '1', emoji: '🇩🇲', currency: 'XCD' },
+    { name: 'Dominican Republic', code: '1', emoji: '🇩🇴', currency: 'DOP' },
+    { name: 'East Timor', code: '670', emoji: '🇹🇱', currency: 'USD' },
+    { name: 'Ecuador', code: '593', emoji: '🇪🇨', currency: 'USD' },
+    { name: 'Egypt', code: '20', emoji: '🇪🇬', currency: 'EGP' },
+    { name: 'El Salvador', code: '503', emoji: '🇸🇻', currency: 'USD' },
+    { name: 'Equatorial Guinea', code: '240', emoji: '🇬🇶', currency: 'XAF' },
+    { name: 'Eritrea', code: '291', emoji: '🇪🇷', currency: 'ERN' },
+    { name: 'Estonia', code: '372', emoji: '🇪🇪', currency: 'EUR' },
+    { name: 'Ethiopia', code: '251', emoji: '🇪🇹', currency: 'ETB' },
+    { name: 'Fiji', code: '679', emoji: '🇫🇯', currency: 'FJD' },
+    { name: 'Finland', code: '358', emoji: '🇫🇮', currency: 'EUR' },
+    { name: 'France', code: '33', emoji: '🇫🇷', currency: 'EUR' },
+    { name: 'Gabon', code: '241', emoji: '🇬🇦', currency: 'XAF' },
+    { name: 'Gambia', code: '220', emoji: '🇬🇲', currency: 'GMD' },
+    { name: 'Georgia', code: '995', emoji: '🇬🇪', currency: 'GEL' },
+    { name: 'Germany', code: '49', emoji: '🇩🇪', currency: 'EUR' },
+    { name: 'Ghana', code: '233', emoji: '🇬🇭', currency: 'GHS' },
+    { name: 'Gibraltar', code: '350', emoji: '🇬🇮', currency: 'GIP' },
+    { name: 'Greece', code: '30', emoji: '🇬🇷', currency: 'EUR' },
+    { name: 'Greenland', code: '299', emoji: '🇬🇱', currency: 'DKK' },
+    { name: 'Grenada', code: '1', emoji: '🇬🇩', currency: 'XCD' },
+    { name: 'Guam', code: '1', emoji: '🇬🇺', currency: 'USD' },
+    { name: 'Guatemala', code: '502', emoji: '🇬🇹', currency: 'GTQ' },
+    { name: 'Guinea', code: '224', emoji: '🇬🇳', currency: 'GNF' },
+    { name: 'Guinea-Bissau', code: '245', emoji: '🇬🇼', currency: 'XOF' },
+    { name: 'Guyana', code: '592', emoji: '🇬🇾', currency: 'GYD' },
+    { name: 'Haiti', code: '509', emoji: '🇭🇹', currency: 'HTG' },
+    { name: 'Honduras', code: '504', emoji: '🇭🇳', currency: 'HNL' },
+    { name: 'Hong Kong', code: '852', emoji: '🇭🇰', currency: 'HKD' },
+    { name: 'Hungary', code: '36', emoji: '🇭🇺', currency: 'HUF' },
+    { name: 'Iceland', code: '354', emoji: '🇮🇸', currency: 'ISK' },
+    { name: 'India', code: '91', emoji: '🇮🇳', currency: 'INR' },
+    { name: 'Indonesia', code: '62', emoji: '🇮🇩', currency: 'IDR' },
+    { name: 'Iran', code: '98', emoji: '🇮🇷', currency: 'IRR' },
+    { name: 'Iraq', code: '964', emoji: '🇮🇶', currency: 'IQD' },
+    { name: 'Ireland', code: '353', emoji: '🇮🇪', currency: 'EUR' },
+    { name: 'Israel', code: '972', emoji: '🇮🇱', currency: 'ILS' },
+    { name: 'Italy', code: '39', emoji: '🇮🇹', currency: 'EUR' },
+    { name: 'Ivory Coast', code: '225', emoji: '🇨🇮', currency: 'XOF' },
+    { name: 'Jamaica', code: '1', emoji: '🇯🇲', currency: 'JMD' },
+    { name: 'Japan', code: '81', emoji: '🇯🇵', currency: 'JPY' },
+    { name: 'Jordan', code: '962', emoji: '🇯🇴', currency: 'JOD' },
+    { name: 'Kazakhstan', code: '7', emoji: '🇰🇿', currency: 'KZT' },
+    { name: 'Kenya', code: '254', emoji: '🇰🇪', currency: 'KES' },
+    { name: 'Kiribati', code: '686', emoji: '🇰🇮', currency: 'AUD' },
+    { name: 'Kuwait', code: '965', emoji: '🇰🇼', currency: 'KWD' },
+    { name: 'Kyrgyzstan', code: '996', emoji: '🇰🇬', currency: 'KGS' },
+    { name: 'Laos', code: '856', emoji: '🇱🇦', currency: 'LAK' },
+    { name: 'Latvia', code: '371', emoji: '🇱🇻', currency: 'EUR' },
+    { name: 'Lebanon', code: '961', emoji: '🇱🇧', currency: 'LBP' },
+    { name: 'Lesotho', code: '266', emoji: '🇱🇸', currency: 'LSL' },
+    { name: 'Liberia', code: '231', emoji: '🇱🇷', currency: 'LRD' },
+    { name: 'Libya', code: '218', emoji: '🇱🇾', currency: 'LYD' },
+    { name: 'Liechtenstein', code: '423', emoji: '🇱🇮', currency: 'CHF' },
+    { name: 'Lithuania', code: '370', emoji: '🇱🇹', currency: 'EUR' },
+    { name: 'Luxembourg', code: '352', emoji: '🇱🇺', currency: 'EUR' },
+    { name: 'Macau', code: '853', emoji: '🇲🇴', currency: 'MOP' },
+    { name: 'Madagascar', code: '261', emoji: '🇲🇬', currency: 'MGA' },
+    { name: 'Malawi', code: '265', emoji: '🇲🇼', currency: 'MWK' },
+    { name: 'Malaysia', code: '60', emoji: '🇲🇾', currency: 'MYR' },
+    { name: 'Maldives', code: '960', emoji: '🇲🇻', currency: 'MVR' },
+    { name: 'Mali', code: '223', emoji: '🇲🇱', currency: 'XOF' },
+    { name: 'Malta', code: '356', emoji: '🇲🇹', currency: 'EUR' },
+    { name: 'Marshall Islands', code: '692', emoji: '🇲🇭', currency: 'USD' },
+    { name: 'Mauritania', code: '222', emoji: '🇲🇷', currency: 'MRU' },
+    { name: 'Mauritius', code: '230', emoji: '🇲🇺', currency: 'MUR' },
+    { name: 'Mexico', code: '52', emoji: '🇲🇽', currency: 'MXN' },
+    { name: 'Micronesia', code: '691', emoji: '🇫🇲', currency: 'USD' },
+    { name: 'Moldova', code: '373', emoji: '🇲🇩', currency: 'MDL' },
+    { name: 'Monaco', code: '377', emoji: '🇲🇨', currency: 'EUR' },
+    { name: 'Mongolia', code: '976', emoji: '🇲🇳', currency: 'MNT' },
+    { name: 'Montenegro', code: '382', emoji: '🇲🇪', currency: 'EUR' },
+    { name: 'Morocco', code: '212', emoji: '🇲🇦', currency: 'MAD' },
+    { name: 'Mozambique', code: '258', emoji: '🇲🇿', currency: 'MZN' },
+    { name: 'Myanmar', code: '95', emoji: '🇲🇲', currency: 'MMK' },
+    { name: 'Namibia', code: '264', emoji: '🇳🇦', currency: 'NAD' },
+    { name: 'Nauru', code: '674', emoji: '🇳🇷', currency: 'AUD' },
+    { name: 'Nepal', code: '977', emoji: '🇳🇵', currency: 'NPR' },
+    { name: 'Netherlands', code: '31', emoji: '🇳🇱', currency: 'EUR' },
+    { name: 'New Zealand', code: '64', emoji: '🇳🇿', currency: 'NZD' },
+    { name: 'Nicaragua', code: '505', emoji: '🇳🇮', currency: 'NIO' },
+    { name: 'Niger', code: '227', emoji: '🇳🇪', currency: 'XOF' },
+    { name: 'Nigeria', code: '234', emoji: '🇳🇬', currency: 'NGN' },
+    { name: 'North Korea', code: '850', emoji: '🇰🇵', currency: 'KPW' },
+    { name: 'North Macedonia', code: '389', emoji: '🇲🇰', currency: 'MKD' },
+    { name: 'Norway', code: '47', emoji: '🇳🇴', currency: 'NOK' },
+    { name: 'Oman', code: '968', emoji: '🇴🇲', currency: 'OMR' },
+    { name: 'Pakistan', code: '92', emoji: '🇵🇰', currency: 'PKR' },
+    { name: 'Palau', code: '680', emoji: '🇵🇼', currency: 'USD' },
+    { name: 'Palestine', code: '970', emoji: '🇵🇸', currency: 'ILS' },
+    { name: 'Panama', code: '507', emoji: '🇵🇦', currency: 'PAB' },
+    { name: 'Papua New Guinea', code: '675', emoji: '🇵🇬', currency: 'PGK' },
+    { name: 'Paraguay', code: '595', emoji: '🇵🇾', currency: 'PYG' },
+    { name: 'Peru', code: '51', emoji: '🇵🇪', currency: 'PEN' },
+    { name: 'Philippines', code: '63', emoji: '🇵🇭', currency: 'PHP' },
+    { name: 'Poland', code: '48', emoji: '🇵🇱', currency: 'PLN' },
+    { name: 'Portugal', code: '351', emoji: '🇵🇹', currency: 'EUR' },
+    { name: 'Puerto Rico', code: '1', emoji: '🇵🇷', currency: 'USD' },
+    { name: 'Qatar', code: '974', emoji: '🇶🇦', currency: 'QAR' },
+    { name: 'Romania', code: '40', emoji: '🇷🇴', currency: 'RON' },
+    { name: 'Russia', code: '7', emoji: '🇷🇺', currency: 'RUB' },
+    { name: 'Rwanda', code: '250', emoji: '🇷🇼', currency: 'RWF' },
+    { name: 'Saint Kitts and Nevis', code: '1', emoji: '🇰🇳', currency: 'XCD' },
+    { name: 'Saint Lucia', code: '1', emoji: '🇱🇨', currency: 'XCD' },
+    { name: 'Saint Vincent and the Grenadines', code: '1', emoji: '🇻🇨', currency: 'XCD' },
+    { name: 'Samoa', code: '685', emoji: '🇼🇸', currency: 'WST' },
+    { name: 'San Marino', code: '378', emoji: '🇸🇲', currency: 'EUR' },
+    { name: 'Sao Tome and Principe', code: '239', emoji: '🇸🇹', currency: 'STN' },
+    { name: 'Saudi Arabia', code: '966', emoji: '🇸🇦', currency: 'SAR' },
+    { name: 'Senegal', code: '221', emoji: '🇸🇳', currency: 'XOF' },
+    { name: 'Serbia', code: '381', emoji: '🇷🇸', currency: 'RSD' },
+    { name: 'Seychelles', code: '248', emoji: '🇸🇨', currency: 'SCR' },
+    { name: 'Sierra Leone', code: '232', emoji: '🇸🇱', currency: 'SLL' },
+    { name: 'Singapore', code: '65', emoji: '🇸🇬', currency: 'SGD' },
+    { name: 'Slovakia', code: '421', emoji: '🇸🇰', currency: 'EUR' },
+    { name: 'Slovenia', code: '386', emoji: '🇸🇮', currency: 'EUR' },
+    { name: 'Solomon Islands', code: '677', emoji: '🇸🇧', currency: 'SBD' },
+    { name: 'Somalia', code: '252', emoji: '🇸🇴', currency: 'SOS' },
+    { name: 'South Africa', code: '27', emoji: '🇿🇦', currency: 'ZAR' },
+    { name: 'South Korea', code: '82', emoji: '🇰🇷', currency: 'KRW' },
+    { name: 'South Sudan', code: '211', emoji: '🇸🇸', currency: 'SSP' },
+    { name: 'Spain', code: '34', emoji: '🇪🇸', currency: 'EUR' },
+    { name: 'Sri Lanka', code: '94', emoji: '🇱🇰', currency: 'LKR' },
+    { name: 'Sudan', code: '249', emoji: '🇸🇩', currency: 'SDG' },
+    { name: 'Suriname', code: '597', emoji: '🇸🇷', currency: 'SRD' },
+    { name: 'Sweden', code: '46', emoji: '🇸🇪', currency: 'SEK' },
+    { name: 'Switzerland', code: '41', emoji: '🇨🇭', currency: 'CHF' },
+    { name: 'Syria', code: '963', emoji: '🇸🇾', currency: 'SYP' },
+    { name: 'Taiwan', code: '886', emoji: '🇹🇼', currency: 'TWD' },
+    { name: 'Tajikistan', code: '992', emoji: '🇹🇯', currency: 'TJS' },
+    { name: 'Tanzania', code: '255', emoji: '🇹🇿', currency: 'TZS' },
+    { name: 'Thailand', code: '66', emoji: '🇹🇭', currency: 'THB' },
+    { name: 'Togo', code: '228', emoji: '🇹🇬', currency: 'XOF' },
+    { name: 'Tonga', code: '676', emoji: '🇹🇴', currency: 'TOP' },
+    { name: 'Trinidad and Tobago', code: '1', emoji: '🇹🇹', currency: 'TTD' },
+    { name: 'Tunisia', code: '216', emoji: '🇹🇳', currency: 'TND' },
+    { name: 'Turkey', code: '90', emoji: '🇹🇷', currency: 'TRY' },
+    { name: 'Turkmenistan', code: '993', emoji: '🇹🇲', currency: 'TMT' },
+    { name: 'Tuvalu', code: '688', emoji: '🇹🇻', currency: 'AUD' },
+    { name: 'Uganda', code: '256', emoji: '🇺🇬', currency: 'UGX' },
+    { name: 'Ukraine', code: '380', emoji: '🇺🇦', currency: 'UAH' },
+    { name: 'United Arab Emirates', code: '971', emoji: '🇦🇪', currency: 'AED' },
+    { name: 'United Kingdom', code: '44', emoji: '🇬🇧', currency: 'GBP' },
+    { name: 'United States', code: '1', emoji: '🇺🇸', currency: 'USD' },
+    { name: 'Uruguay', code: '598', emoji: '🇺🇾', currency: 'UYU' },
+    { name: 'Uzbekistan', code: '998', emoji: '🇺🇿', currency: 'UZS' },
+    { name: 'Vanuatu', code: '678', emoji: '🇻🇺', currency: 'VUV' },
+    { name: 'Vatican City', code: '379', emoji: '🇻🇦', currency: 'EUR' },
+    { name: 'Venezuela', code: '58', emoji: '🇻🇪', currency: 'VES' },
+    { name: 'Vietnam', code: '84', emoji: '🇻🇳', currency: 'VND' },
+    { name: 'Yemen', code: '967', emoji: '🇾🇪', currency: 'YER' },
+    { name: 'Zambia', code: '260', emoji: '🇿🇲', currency: 'ZMW' },
+    { name: 'Zimbabwe', code: '263', emoji: '🇿🇼', currency: 'ZWL' }
   ];
   
   selectedCountry: Country;
@@ -573,8 +768,8 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   verificationId: string = '';
 
   constructor(private messageService: MessageService, private commonService: CommonService, private firebaseService: FirebaseService, private cdr: ChangeDetectorRef, private sweetAlertService: SweetAlertService) {
-    // Set default country to India or use the provided countryCode
-    this.selectedCountry = this.countries.find(c => c.code === this.countryCode) || this.countries[0];
+    // Initialize with first country as fallback
+    this.selectedCountry = this.countries[0];
     
     // If created in verified state (from parent's phoneVerified=true), set visually verified
     if (this._isVerified) {
@@ -603,8 +798,15 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
       }
     });
     
-    // Set the default country based on the input
-    if (this.countryCode) {
+    // Set country from localStorage if available
+    const storedCountry = localStorage.getItem('country');
+    if (storedCountry) {
+      const country = this.countries.find(c => c.name === storedCountry);
+      if (country) {
+        this.selectedCountry = country;
+      }
+    } else if (this.countryCode) {
+      // Fallback to input countryCode if no localStorage value
       const country = this.countries.find(c => c.code === this.countryCode);
       if (country) {
         this.selectedCountry = country;
@@ -628,6 +830,7 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
   }
   
   sendOTP() {
+    console.log('Selected Country', this.selectedCountry)
     if (!this.phoneControl.value) {
       this.messageService.add({
         severity: 'error',
@@ -642,7 +845,6 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
     // Reset OTP error state
     this.otpError = false;
     this.otpErrorMessage = '';
-
     // let endPoint = `/api/method/wefab.wefab.api.common.core.authentication.mobile_otp_verification.send_otp`
 
     // let body = {
@@ -726,7 +928,22 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
           life: 3000
         });
         
-        this.showOtpDialog = false;
+        // Store selected country information in local storage
+        const countryInfo = {
+          name: this.selectedCountry.name,
+          code: this.selectedCountry.code,
+          emoji: this.selectedCountry.emoji,
+          currency: this.selectedCountry.currency,
+          phoneNumber: this.phoneControl.value,
+          verifiedAt: new Date().toISOString()
+        };
+        
+        localStorage.setItem('verifiedCountry', JSON.stringify(countryInfo));
+        localStorage.setItem('selectedCurrency', this.selectedCountry.currency);
+
+        this.getCurrencyList(this.selectedCountry.currency);
+        
+        this.showOtpDialog = false; 
         this._isVerified = true;
         this.verified.emit(true);
         
@@ -756,6 +973,13 @@ export class PhoneOtpVerificationComponent implements OnInit, ControlValueAccess
         
         this.cdr.detectChanges();
       });
+  }
+
+  getCurrencyList(currency: string) { 
+    let endPoint = '/api/resource/Currency/' + currency;
+    this.commonService.getData(endPoint).subscribe((res: any) => {
+      localStorage.setItem('currencyFormat', JSON.stringify(res.data.number_format));
+    });
   }
   
   // Get user-friendly error messages

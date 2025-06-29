@@ -4,6 +4,29 @@
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
+  max-width: 400px;
+  position: relative;
+  
+  .workflow-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    
+    i {
+      color: #f59e0b;
+      font-size: 1.2rem;
+    }
+    
+    span {
+      color: #374151;
+      font-size: 0.875rem;
+    }
+  }
   
   .workflow-header {
     margin-bottom: 24px;
@@ -17,10 +40,31 @@
   }
   
   .workflow-steps {
+    &.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    
     .workflow-step {
       display: flex;
       align-items: flex-start;
       position: relative;
+      transition: all 0.2s ease;
+      cursor: default;
+      
+      &.clickable {
+        cursor: pointer;
+        
+        &:hover {
+          .step-icon {
+            transform: scale(1.05);
+          }
+          
+          .step-content .step-title {
+            color: #f59e0b;
+          }
+        }
+      }
       
       &:last-child {
         margin-bottom: 0;
@@ -47,23 +91,26 @@
           position: relative;
           z-index: 2;
           border: 3px solid transparent;
+          transition: all 0.3s ease;
           
           &.step-icon-complete {
             background-color: #10b981;
             color: white;
             border-color: #10b981;
-          }
-          
-          &.step-icon-under-review {
-            background-color: #f59e0b;
-            color: white;
-            border-color: #f59e0b;
+            
+            i {
+              animation: checkmark 0.3s ease-in-out;
+            }
           }
           
           &.step-icon-active {
             background-color: #f59e0b;
             color: white;
             border-color: #f59e0b;
+            
+            i {
+              animation: pulse 1.5s infinite;
+            }
           }
           
           &.step-icon-waiting {
@@ -82,6 +129,7 @@
           height: 44px;
           background-color: #e5e7eb;
           z-index: 1;
+          transition: background-color 0.3s ease;
         }
       }
       
@@ -100,35 +148,36 @@
             font-weight: 600;
             color: #1f2937;
             margin: 0;
-            flex: 1;
-            margin-right: 12px;
+            transition: color 0.3s ease;
           }
 
-          .status-badge {
+          .step-status {
             font-size: 0.75rem;
             font-weight: 500;
             padding: 4px 12px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+            text-align: center;
+            
+            &.status-complete {
+              background-color: #E8F5E9;
+              color: #2E7D32;
+              border: 1px solid #A5D6A7;
+            }
+            
             &.status-in-progress {
-              background-color: rgba(#10b981, 0.1);
-              color: #10b981;
-              border: 1px solid rgba(#10b981, 0.2);
+              background-color: #FFF3E0;
+              color: #E65100;
+              border: 1px solid #FFB74D;
             }
-
-            &.status-next {
-              background-color: rgba(#3b82f6, 0.1);
-              color: #3b82f6;
-              border: 1px solid rgba(#3b82f6, 0.2);
-            }
-
-            &.status-pending {
-              background-color: rgba(#6b7280, 0.1);
-              color: #6b7280;
-              border: 1px solid rgba(#6b7280, 0.2);
+            
+            &.status-waiting {
+              background-color: #ECEFF1;
+              color: #455A64;
+              border: 1px solid #B0BEC5;
             }
           }
         }
@@ -159,18 +208,41 @@
         .step-icon-container .step-connector {
           background-color: #10b981;
         }
+        
+        .step-content .step-title {
+          color: #10b981;
+        }
       }
       
       &.step-active {
         .step-content .step-title {
           color: #f59e0b;
         }
-        
-        .step-icon-container .step-connector {
-          background-color: #e5e7eb;
-        }
       }
     }
+  }
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
@@ -209,6 +281,11 @@
         background-color: #f8fafc;
       }
       
+      &.has-error {
+        border-color: #ef4444;
+        background-color: #fef2f2;
+      }
+      
       .upload-area {
         display: flex;
         flex-direction: column;
@@ -223,6 +300,11 @@
         .upload-text {
           color: #374151;
           font-weight: 500;
+        }
+
+        .upload-hint {
+          color: #6b7280;
+          font-size: 0.75rem;
         }
       }
     }
@@ -247,15 +329,48 @@
           color: #6b7280;
         }
         
-        .file-name {
+        .file-info {
           flex: 1;
-          color: #374151;
-          font-size: 0.875rem;
-        }
-        
-        .file-size {
-          color: #6b7280;
-          font-size: 0.75rem;
+          min-width: 0;
+          
+          .file-name {
+            color: #374151;
+            font-size: 0.875rem;
+            display: block;
+          }
+          
+          .file-size {
+            color: #6b7280;
+            font-size: 0.75rem;
+            display: block;
+            margin-top: 2px;
+          }
+
+          .upload-progress {
+            margin-top: 6px;
+            background: #e5e7eb;
+            height: 4px;
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+
+            .progress-bar {
+              position: absolute;
+              left: 0;
+              top: 0;
+              height: 100%;
+              background: #10b981;
+              transition: width 0.3s ease;
+            }
+
+            .progress-text {
+              position: absolute;
+              right: 0;
+              top: -18px;
+              font-size: 0.75rem;
+              color: #6b7280;
+            }
+          }
         }
         
         .remove-file-btn {
@@ -266,8 +381,13 @@
           padding: 4px;
           border-radius: 4px;
           
-          &:hover {
+          &:hover:not(:disabled) {
             background-color: #fef2f2;
+          }
+
+          &:disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
           }
         }
       }
@@ -278,8 +398,37 @@
       color: #ef4444;
       font-size: 0.875rem;
       display: flex;
-      align-items: center;
-      gap: 4px;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 12px;
+      background-color: #fef2f2;
+      border-radius: 4px;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+
+      i {
+        margin-top: 3px;
+      }
+
+      .error-text {
+        flex: 1;
+        white-space: pre-line;
+      }
+    }
+
+    // Style for invalid textarea
+    ::ng-deep .p-inputtextarea.ng-invalid {
+      border-color: #ef4444;
+
+      &:enabled:focus {
+        box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2);
+      }
+    }
+
+    .hint-text {
+      display: block;
+      margin-top: 4px;
+      color: #6b7280;
+      font-size: 0.75rem;
     }
   }
 }
@@ -354,6 +503,16 @@
     min-height: 80px;
     resize: vertical;
   }
+}
+
+// Set z-index for PrimeNG dialog to be lower than SweetAlert
+:host ::ng-deep .p-dialog-mask {
+  z-index: 1000 !important;
+}
+
+// Ensure SweetAlert appears above PrimeNG dialog
+:root {
+  --swal2-z-index: 2000;
 }
 
 // Responsive Design

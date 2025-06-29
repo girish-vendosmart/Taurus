@@ -161,8 +161,6 @@ export class SupplierOrderComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error fetching Order summary stats:', error);
-        // Set sample data for now
-        this.loadSampleData();
       }
     })
   }
@@ -181,7 +179,7 @@ export class SupplierOrderComponent implements OnInit {
   getOrderList() {
     this.loading = true;
     // This will be updated with actual API endpoint when available
-    let endpoint = `/api/resource/Supplier Order?fields=["*"]&filters=[["status", "not in", ["Draft"]],["supplier_id", "=", "${this.supplierId}"]]`
+    let endpoint = `/api/resource/Purchase Order?fields=["*"]&filters=[["po_status", "not in", ["Draft", "Approval"]],["supplier_id", "=", "${this.supplierId}"]]`
     
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
@@ -193,63 +191,8 @@ export class SupplierOrderComponent implements OnInit {
       error: (error) => {
         console.error('Error fetching Order data:', error);
         this.loading = false;
-        // Fallback to sample data if API fails
-        this.loadSampleData();
       }
     });
-  }
-
-  // Load sample data for demonstration
-  loadSampleData() {
-    this.allOrders = [
-      {
-        orderId: 'ORD0000001',
-        orderName: 'Precision Components Order',
-        creationDate: '2025-01-15',
-        deliveryDate: '2025-02-15',
-        totalAmount: 15000.00,
-        status: 'In Progress',
-        name: 'ORD0000001',
-        owner: 'supplier@example.com',
-        modified: '2025-01-15 10:30:00',
-        docstatus: 1,
-        routerLink: '/wefab/supplier/order/details/ORD0000001'
-      },
-      {
-        orderId: 'ORD0000002',
-        orderName: 'Industrial Parts Manufacturing',
-        creationDate: '2025-01-10',
-        deliveryDate: '2025-01-30',
-        totalAmount: 25000.00,
-        status: 'Open',
-        name: 'ORD0000002',
-        owner: 'supplier@example.com',
-        modified: '2025-01-10 14:15:00',
-        docstatus: 1,
-        routerLink: '/wefab/supplier/order/details/ORD0000002'
-      },
-      {
-        orderId: 'ORD0000003',
-        orderName: 'Custom Machined Parts',
-        creationDate: '2025-01-05',
-        deliveryDate: '2025-01-25',
-        totalAmount: 8500.00,
-        status: 'Completed',
-        name: 'ORD0000003',
-        owner: 'supplier@example.com',
-        modified: '2025-01-25 16:45:00',
-        docstatus: 1,
-        routerLink: '/wefab/supplier/order/details/ORD0000003'
-      }
-    ];
-
-    // Update dashboard cards with sample data
-    this.dashboardCards[0].value = this.allOrders.length.toString();
-    this.dashboardCards[1].value = this.allOrders.filter(o => o.status === 'Open').length.toString();
-    this.dashboardCards[2].value = this.allOrders.filter(o => o.status === 'In Progress').length.toString();
-    this.dashboardCards[3].value = this.allOrders.filter(o => o.status === 'Completed').length.toString();
-
-    this.updateFilterOptions();
   }
 
   // Transform API data to match OrderItem interface
@@ -260,17 +203,17 @@ export class SupplierOrderComponent implements OnInit {
 
     return apiData.map(item => ({
       orderId: item.name || item.order_id || '',
-      orderName: item.order_name || item.title || item.name || 'N/A',
+      companySubInfo: item.name,
+      orderName: item.po_name || item.title || item.name || 'N/A',
       creationDate: this.formatApiDate(item.creation || item.created_date || ''),
-      deliveryDate: this.formatApiDate(item.delivery_date || item.expected_delivery || ''),
+      deliveryDate: this.formatApiDate(item.actual_delivery_date || item.expected_delivery || ''),
       totalAmount: item.total_amount || item.grand_total || 0,
-      status: this.mapApiStatusToOrderStatus(item.status || 'Draft'),
+      status: this.mapApiStatusToOrderStatus(item.po_status),
       name: item.name || '',
       owner: item.owner || '',
       modified: item.modified || '',
       docstatus: item.docstatus || 0,
-              routerLink: `/wefab/supplier/order/details/${item.name}`,
-      companySubInfo: item.company || ''
+      routerLink: `/wefab/supplier/order/details/${item.po_name || item.order_id || item.name}`,
     }));
   }
 
@@ -312,8 +255,8 @@ export class SupplierOrderComponent implements OnInit {
     }
   }
 
-  private mapApiStatusToOrderStatus(apiStatus: string): 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' {
-    const statusMap: { [key: string]: 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' } = {
+  private mapApiStatusToOrderStatus(apiStatus: string): 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' | 'Supplier Confirmation' | 'Finishing' | 'Preparation' | 'Work In Progress' | 'Quality Inspection' | 'Dispatch' | 'Order Complete' {
+    const statusMap: { [key: string]: 'Open' | 'In Progress' | 'Completed' | 'Cancelled' | 'Draft' | 'Supplier Confirmation' | 'Finishing' | 'Preparation' | 'Work In Progress' | 'Quality Inspection' | 'Dispatch' | 'Order Complete' } = {
       'Open': 'Open',
       'Pending': 'Open',
       'In Progress': 'In Progress',
@@ -323,7 +266,14 @@ export class SupplierOrderComponent implements OnInit {
       'Cancelled': 'Cancelled',
       'Canceled': 'Cancelled',
       'Draft': 'Draft',
-      'Not Started': 'Open'
+      'Not Started': 'Open',
+      'Supplier Confirmation': 'Supplier Confirmation',
+      'Finishing': 'Finishing',
+      'Preparation': 'Preparation',
+      'Work In Progress': 'Work In Progress',
+      'Quality Inspection': 'Quality Inspection',
+      'Dispatch': 'Dispatch',
+      'Order Complete': 'Order Complete',
     };
 
     return statusMap[apiStatus] || 'Draft';

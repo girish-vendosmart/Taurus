@@ -11,6 +11,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { CalendarModule } from 'primeng/calendar';
+import { BadgeService } from '../../services/badge.service';
 
 export interface ActionButton {
   label?: string;
@@ -91,9 +92,9 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
   @ViewChild('dt') table!: Table;
   
   // Make Math available in template
-  Math = Math;
-  
-  constructor() {}
+    Math = Math;
+
+  constructor(private badgeService: BadgeService) {}
 
   @Input() config: TableConfig = {
     columns: [
@@ -369,64 +370,7 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
   }
 
   getStatusClass(status: string): string {
-    if (!status) return 'status-default';
-    
-    // Convert to lowercase and replace spaces with hyphens
-    status = status.toLowerCase().replace(/\s+/g, '-');
-    console.log('Table status', status);
-    
-    switch (status) {
-      case 'missing-data':
-        return 'status-review';
-      case 'complete':
-        return 'status-approved'
-      case 'not-opened':
-        return 'status-draft';
-      case 'published':
-        return 'status-approved';
-      case 'deactivated':
-        return 'status-paused'; 
-      case 'invited':
-        return 'status-open';
-      case 'not-started':
-        return 'status-draft';
-      case 'under-review':
-        return 'status-review';
-      case 'approved':
-        return 'status-approved';
-      case 'rejected':
-        return 'status-rejected';
-      case 'draft':
-        return 'status-draft';
-      case 'open':
-        return 'status-open';
-      case 'in-progress':
-        return 'status-progress';
-      case 'closed':
-        return 'status-closed';
-      case 'awarded':
-        return 'status-awarded';
-      case 'quoted':
-        return 'status-awarded';
-      case 'opened':
-        return 'status-open';
-      case 'cancelled':
-        return 'status-rejected';
-      case 'deactivate':
-        return 'status-deactivate';
-      case 'paused':
-        return 'status-paused';
-      case 'submitted':
-        return 'status-awarded';
-      case 'pending':
-        return 'status-pending';
-      case 'review':
-        return 'status-review';
-      case 'not-started':
-        return 'status-draft';
-      default:
-        return 'status-default';
-    }
+    return this.badgeService.getStatusClass(status);
   }
 
   sortTable(field: string) {

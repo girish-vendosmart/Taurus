@@ -1759,4 +1759,114 @@
   }
 }
 
+/* Currency Formatting Styles */
+.currency-usd {
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  font-weight: 500;
+}
+
+.currency-local {
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.currency-display {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.number-format-usd .currency-value {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+.number-format-local .currency-value {
+  font-family: inherit;
+  letter-spacing: normal;
+}
+
+/* Enhanced currency input styling */
+.currency-input {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+.currency-input.usd-format {
+  background-color: #f8f9fa;
+  border-left: 3px solid #28a745;
+}
+
+.currency-input.local-format {
+  background-color: #fff3cd;
+  border-left: 3px solid #ffc107;
+}
+
+/* Tooltip styling for currency format info */
+.currency-format-info {
+  font-size: 11px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.currency-format-tooltip {
+  max-width: 200px;
+  font-size: 12px;
+}
+
+/* Number formatting indicators */
+.format-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 4px;
+}
+
+.format-indicator.usd {
+  background-color: #28a745;
+}
+
+.format-indicator.local {
+  background-color: #ffc107;
+}
+
+/* Table cell currency alignment */
+.table .currency-cell {
+  text-align: right;
+  vertical-align: middle;
+}
+
+.table .currency-cell .currency-value {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+/* Responsive currency display */
+@media (max-width: 768px) {
+  .currency-display {
+    font-size: 12px;
+  }
+  
+  .currency-input {
+    font-size: 12px;
+  }
+  
+  .table .currency-cell .currency-value {
+    font-size: 11px;
+  }
+}
+
+/* Animation for currency format changes */
+.currency-transition {
+  transition: all 0.3s ease-in-out;
+}
+
+.currency-highlight {
+  background-color: #fff3cd;
+  border-color: #ffc107;
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
 
