@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonTableComponent, TableConfig, TableColumn } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
+import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
 
 interface RfqAttachment {
   name: string;
@@ -12,14 +13,65 @@ interface RfqAttachment {
   creation: string;
 }
 
+interface RfqLineItem {
+  partNumber: string;
+  description: string;
+  quantity: number;
+  material: string;
+  unit: string;
+}
+
+interface ReviewStage {
+  title: string;
+  status: 'completed' | 'in-progress' | 'pending';
+}
+
 @Component({
   selector: 'app-submitted-rfq',
   standalone: true,
-  imports: [CommonModule, FormsModule, CommonTableComponent],
+  imports: [CommonModule, FormsModule, CommonTableComponent, ConversationTrailComponent],
   templateUrl: './submitted-rfq.component.html',
   styleUrl: './submitted-rfq.component.scss'
 })
 export class SubmittedRfqComponent implements OnInit {
+  // Tab management
+  activeTab: string = 'overview';
+  
+  // Comments functionality
+  newComment: string = '';
+  comments: any[] = [
+    {
+      id: 1,
+      author: 'John Smith',
+      role: 'Customer',
+      roleClass: 'customer-role',
+      message: 'Could you please clarify the material specification for part RFK-001? We need to ensure it meets our quality standards.',
+      date: new Date('2024-01-16T10:30:00'),
+      avatarColor: '#3b82f6',
+      canEdit: true
+    },
+    {
+      id: 2,
+      author: 'Sarah Johnson',
+      role: 'Wefab Engineer',
+      roleClass: 'engineer-role',
+      message: 'Thank you for your question. Part RFK-001 uses Aluminum 6061-T6 which exceeds standard automotive quality requirements. I\'ve attached the material certification for your review.',
+      date: new Date('2024-01-16T14:45:00'),
+      avatarColor: '#10b981',
+      canEdit: false
+    },
+    {
+      id: 3,
+      author: 'John Smith',
+      role: 'Customer',
+      roleClass: 'customer-role',
+      message: 'Perfect, that looks good. One more question - what\'s the expected lead time for the tooling setup?',
+      date: new Date('2024-01-17T09:15:00'),
+      avatarColor: '#3b82f6',
+      canEdit: true
+    }
+  ];
+
   // State management for view all functionality
   showAllLineItems = false;
   showAllAttachments = false;
@@ -31,146 +83,30 @@ export class SubmittedRfqComponent implements OnInit {
   searchPartNumber: string = '';
   selectedMaterial: string = '';
   selectedUnit: string = '';
-  filteredLineItems: any[] = [];
+  filteredLineItems: RfqLineItem[] = [];
   availableMaterials: string[] = [];
   availableUnits: string[] = [];
 
   rfqData = {
-    rfqNumber: 'RFQ-2024-001847',
-    reference: 'Reference this number for all communications',
+    rfqNumber: '',
+    reference: '',
     projectInfo: {
-      projectName: 'Automotive Backup Assembly',
-      deliveryDate: 'March 15, 2024',
-      deliveryLocation: 'Factory A - Industrial Blvd',
-      submitted: 'January 15, 2024, 2:30 PM'
+      projectName: '',
+      deliveryDate: '',
+      deliveryLocation: '',
+      submitted: ''
     },
     bomSummary: {
-      totalLineItems: 12,
-      drawingsUploaded: 5,
-      totalQuantity: 2500,
-      materials: 'Aluminum, Steel, Plastic'
+      totalLineItems: 0,
+      drawingsUploaded: 0,
+      totalQuantity: 0,
+      materials: ''
     },
-    // Add review status data
     reviewStatus: {
-      currentStatus: 'Under Review',
-      stages: [
-        {
-          id: 1,
-          title: 'RFQ Received',
-          description: 'Your request has been successfully submitted',
-          status: 'completed',
-          completedDate: 'January 15, 2024 at 2:30 PM'
-        },
-        {
-          id: 2,
-          title: 'Technical Review Completed',
-          description: 'Engineering team has analyzed your requirements',
-          status: 'completed',
-          completedDate: 'January 17, 2024 at 11:45 AM',
-          hasReportLink: true,
-          reportLinkText: 'View Technical Review Report'
-        },
-        {
-          id: 3,
-          title: 'Quote Generation',
-          description: 'Pricing and timeline calculation',
-          status: 'in-progress',
-          estimatedCompletion: 'Estimated completion: 2-3 business days'
-        },
-        {
-          id: 4,
-          title: 'Quote Delivery',
-          description: 'Final quote sent to your email',
-          status: 'pending'
-        }
-      ]
+      currentStatus: '',
+      stages: [] as ReviewStage[]
     },
-    allLineItems: [
-      {
-        partNumber: 'RFK-001',
-        description: 'Main Support Bracket',
-        quantity: 700,
-        material: 'Aluminum 6061',
-        unit: 'EA'
-      },
-      {
-        partNumber: 'RFK-002',
-        description: 'Mounting Plate',
-        quantity: 1000,
-        material: 'Steel A36',
-        unit: 'EA'
-      },
-      {
-        partNumber: 'RFK-003',
-        description: 'Spacer Ring',
-        quantity: 1000,
-        material: 'Nylon',
-        unit: 'EA'
-      },
-      {
-        partNumber: 'RFK-004',
-        description: 'Bearing Housing',
-        quantity: 400,
-        material: 'Aluminum 6061',
-        unit: 'EA'
-      },
-      {
-        partNumber: 'RFK-005',
-        description: 'Connecting Rod',
-        quantity: 800,
-        material: 'Steel A36',
-        unit: 'EA'
-      },
-      {
-        partNumber: 'RFK-006',
-        description: 'Pivot Pin',
-        quantity: 1600,
-        material: 'Stainless Steel',
-        unit: 'EA'
-      },
-      {
-        partNumber: 'RFK-007',
-        description: 'Adjustment Screw',
-        quantity: 400,
-        material: 'Steel A36',
-        unit: 'EA'
-      },
-      {
-        partNumber: 'RFK-008',
-        description: 'Spring Washer',
-        quantity: 2400,
-        material: 'Spring Steel',
-        unit: 'EA'
-      },
-      {
-        partNumber: 'RFK-009',
-        description: 'Rubber Gasket',
-        quantity: 800,
-        material: 'EPDM Rubber',
-        unit: 'EA'
-      },
-      {
-        partNumber: 'RFK-010',
-        description: 'Cover Plate',
-        quantity: 400,
-        material: 'Aluminum 6061',
-        unit: 'EA'
-      },
-      {
-        partNumber: 'RFK-011',
-        description: 'Lock Nut',
-        quantity: 1200,
-        material: 'Steel A36',
-        unit: 'EA'
-      },
-      {
-        partNumber: 'RFK-012',
-        description: 'Assembly Label',
-        quantity: 400,
-        material: 'Vinyl',
-        unit: 'EA'
-      }
-    ],
+    allLineItems: [] as RfqLineItem[],
     allAttachments: [] as RfqAttachment[]
   };
   rfqName: any;
@@ -334,12 +270,11 @@ export class SubmittedRfqComponent implements OnInit {
     let apiEndpoint = `/api/resource/Customer Request for Quotation/${rfqId}?fields=["*"]`;
     this.commonService.getData(apiEndpoint).subscribe((res: any) => {
       this.rfqName = res.data.customer_rfq_name;
-      this.rfqStatus = res.data.workflow_state
+      this.rfqStatus = res.data.workflow_state;
       this.rfqData.rfqNumber = res.data.name;
       this.rfqData.reference = res.data.reference || '----';
       this.rfqData.projectInfo.projectName = res.data.project_name || '----';
       this.rfqData.projectInfo.deliveryDate = res.data.delivery_date || '----';
-      this
       
       // Transform line items
       const transformedLineItems = (res.data.line_items || []).map((item: any) => ({
@@ -363,6 +298,38 @@ export class SubmittedRfqComponent implements OnInit {
       
       this.rfqData.bomSummary.drawingsUploaded = this.rfqData.allAttachments.length;
       this.rfqData.bomSummary.totalQuantity = transformedLineItems.reduce((acc: number, item: any) => acc + item.quantity, 0);
+
+      // Set up order tracking stages
+      this.rfqData.reviewStatus.stages = [
+        {
+          title: 'Supplier Confirmation',
+          status: 'completed'
+        },
+        {
+          title: 'Preparation',
+          status: 'completed'
+        },
+        {
+          title: 'Work in Progress',
+          status: 'completed'
+        },
+        {
+          title: 'Finishing',
+          status: 'in-progress'
+        },
+        {
+          title: 'Quality Inspection',
+          status: 'pending'
+        },
+        {
+          title: 'Dispatch',
+          status: 'pending'
+        },
+        {
+          title: 'Order Complete',
+          status: 'pending'
+        }
+      ];
 
       // Initialize filters after updating line items
       this.initializeFilters();
@@ -528,5 +495,10 @@ export class SubmittedRfqComponent implements OnInit {
       default:
         return 'status-default';
     }
+  }
+
+  // Tab management methods
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
   }
 }
