@@ -2712,7 +2712,10 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
       },
       // Bank Verification Section
       {
-        template: '<h5 class="bank-verification-title mb-2 mt-3">Account Verification</h5>'
+        template: '<h5 class="bank-verification-title mb-2 mt-3">Account Verification</h5>',
+        expressionProperties: {
+          'template': (model: any) => model.country === 'India' ? '<h5 class="bank-verification-title mb-2 mt-3">Account Verification</h5>' : ''
+        }
       },
       {
         key: 'bankDetails.verification',
@@ -2725,311 +2728,87 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
         templateOptions: {
           parentComponent: this,
           isVerified: this.bankVerified,
-          // Pass initial values to the bank verification component
           accountNumber: this.model.bankDetails?.accountNumber || '',
           reverifyAccountNumber: this.model.bankDetails?.accountNumber || '',
           ifscCode: this.model.bankDetails?.ifscCode || ''
         },
-        // Update templateOptions when bankVerified changes
         expressionProperties: {
           'templateOptions.isVerified': () => this.bankVerified,
           'templateOptions.accountNumber': () => this.model.bankDetails?.accountNumber || '',
           'templateOptions.reverifyAccountNumber': () => this.model.bankDetails?.accountNumber || '',
-          'templateOptions.ifscCode': () => this.model.bankDetails?.ifscCode || ''
-        },
-        hooks: {
-          onInit: (field) => {
-            // Ensure the field gets the initial values when it's created
-            console.log('🔧 Bank verification field onInit hook called');
-            console.log('📋 Initial bank details:', this.model.bankDetails);
-            
-            // Set initial value if we have bank details
-            if (this.model.bankDetails?.accountNumber || this.model.bankDetails?.ifscCode) {
-              const initialValue = {
-                accountNumber: this.model.bankDetails.accountNumber || '',
-                reverifyAccountNumber: this.model.bankDetails.accountNumber || '',
-                ifscCode: this.model.bankDetails.ifscCode || ''
-              };
-              
-              console.log('📝 Setting initial value:', initialValue);
-              field.formControl?.setValue(initialValue, { emitEvent: false });
-              
-              // Also update template options
-              if (field.templateOptions) {
-                field.templateOptions['accountNumber'] = initialValue.accountNumber;
-                field.templateOptions['reverifyAccountNumber'] = initialValue.reverifyAccountNumber;
-                field.templateOptions['ifscCode'] = initialValue.ifscCode;
-                field.templateOptions['isVerified'] = this.bankVerified;
-              }
-            }
-            
-            // Listen to form control value changes
-            if (field.formControl) {
-              field.formControl.valueChanges.subscribe((value: any) => {
-                console.log('🔄 Bank verification form control value changed:', value);
-                
-                if (value && typeof value === 'object') {
-                  // Update the model when form control changes
-                  if (!this.model.bankDetails) {
-                    this.model.bankDetails = {};
-                  }
-                  
-                  if (value.accountNumber !== undefined) {
-                    this.model.bankDetails.accountNumber = value.accountNumber;
-                  }
-                  if (value.ifscCode !== undefined) {
-                    this.model.bankDetails.ifscCode = value.ifscCode;
-                  }
-                  
-                  console.log('📋 Updated model.bankDetails from form:', this.model.bankDetails);
-                }
-              });
-            }
-          },
-          afterViewInit: (field) => {
-            // Additional setup after view is initialized
-            console.log('🔧 Bank verification field afterViewInit hook called');
-            
-            // Force update the component with current data
-            if (this.model.bankDetails?.accountNumber || this.model.bankDetails?.ifscCode) {
-              setTimeout(() => {
-                const currentValue = {
-                  accountNumber: this.model.bankDetails?.accountNumber || '',
-                  reverifyAccountNumber: this.model.bankDetails?.accountNumber || '',
-                  ifscCode: this.model.bankDetails?.ifscCode || ''
-                };
-                
-                console.log('🔄 Forcing update with current value:', currentValue);
-                field.formControl?.setValue(currentValue, { emitEvent: false });
-                
-                // Trigger change detection
-                this.cdr.detectChanges();
-              }, 100);
-            }
-          }
+          'templateOptions.ifscCode': () => this.model.bankDetails?.ifscCode || '',
+          'hide': (model: any) => model.country !== 'India'
         }
       },
-      
-      // Financial Overview Section
+      // International Bank Details Section
       {
-        template: '<h4 class="financial-overview-title mb-2 mt-4">Financial Overview (Last 3 Years)</h4>'
-      },
-      {
-        fieldGroupClassName: 'row',
+        key: 'bankDetails.international',
         fieldGroup: [
           {
-            className: 'col-md-4',
-            key: 'companyFinancials.annualRevenue2024',
-            type: 'input',
-            templateOptions: {
-              label: `Annual Revenue (This Year) (${this.getSelectedCurrency()})`,
-              required: true,
-              type: 'text',
-              placeholder: 'Enter current year revenue'
-            },
-            hooks: {
-              onInit: (field: any) => {
-                if (field.formControl) {
-                  // Format on value changes
-                  field.formControl.valueChanges.subscribe((value: string) => {
-                    if (value && value.length > 0) {
-                      const numericValue = value.replace(/[^\d]/g, '');
-                      if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatCurrencyAmount(Number(numericValue));
-                        if (formatted !== value) {
-                          field.formControl.setValue(formatted, { emitEvent: false });
-                        }
-                      }
-                    }
-                  });
+            fieldGroupClassName: 'row',
+            fieldGroup: [
+              {
+                className: 'col-md-6',
+                key: 'accountNumber',
+                type: 'input',
+                templateOptions: {
+                  label: 'Account Number',
+                  required: true,
+                  placeholder: 'Enter your account number'
+                },
+                expressionProperties: {
+                  'hide': (model: any) => model.country === 'India',
+                  'templateOptions.required': (model: any) => model.country !== 'India'
+                }
+              },
+              {
+                className: 'col-md-6',
+                key: 'swiftCode',
+                type: 'input',
+                templateOptions: {
+                  label: 'SWIFT/BIC Code',
+                  required: true,
+                  placeholder: 'Enter SWIFT/BIC code'
+                },
+                expressionProperties: {
+                  'hide': (model: any) => model.country === 'India',
+                  'templateOptions.required': (model: any) => model.country !== 'India'
                 }
               }
-            },
-            validators: {
-              numberOnly: {
-                expression: (c: AbstractControl) => {
-                  if (!c.value) return true;
-                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
-                  return /^\d+$/.test(numericValue);
-                },
-                message: 'Please enter only numbers'
-              }
-            },
+            ]
           },
           {
-            className: 'col-md-4',
-            key: 'companyFinancials.annualRevenue2023',
-            type: 'input',
-            templateOptions: {
-              label: `Annual Revenue (Last Year) (${this.getSelectedCurrency()})`,
-              required: true,
-              type: 'text',
-              placeholder: 'Enter last year revenue'
-            },
-            hooks: {
-              onInit: (field: any) => {
-                if (field.formControl) {
-                  // Format on value changes
-                  field.formControl.valueChanges.subscribe((value: string) => {
-                    if (value && value.length > 0) {
-                      const numericValue = value.replace(/[^\d]/g, '');
-                      if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatCurrencyAmount(Number(numericValue));
-                        if (formatted !== value) {
-                          field.formControl.setValue(formatted, { emitEvent: false });
-                        }
-                      }
-                    }
-                  });
+            fieldGroupClassName: 'row',
+            fieldGroup: [
+              {
+                className: 'col-md-6',
+                key: 'bankName',
+                type: 'input',
+                templateOptions: {
+                  label: 'Bank Name',
+                  required: true,
+                  placeholder: 'Enter bank name'
+                },
+                expressionProperties: {
+                  'hide': (model: any) => model.country === 'India',
+                  'templateOptions.required': (model: any) => model.country !== 'India'
+                }
+              },
+              {
+                className: 'col-md-6',
+                key: 'branchName',
+                type: 'input',
+                templateOptions: {
+                  label: 'Branch Name',
+                  required: true,
+                  placeholder: 'Enter branch name'
+                },
+                expressionProperties: {
+                  'hide': (model: any) => model.country === 'India',
+                  'templateOptions.required': (model: any) => model.country !== 'India'
                 }
               }
-            },
-            validators: {
-              numberOnly: {
-                expression: (c: AbstractControl) => {
-                  if (!c.value) return true;
-                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
-                  return /^\d+$/.test(numericValue);
-                },
-                message: 'Please enter only numbers'
-              }
-            },
-          },
-          {
-            className: 'col-md-4',
-            key: 'companyFinancials.annualRevenue2022',
-            type: 'input',
-            templateOptions: {
-              label: `Annual Revenue (Two Years Ago) (${this.getSelectedCurrency()})`,
-              required: true,
-              type: 'text',
-              placeholder: 'Enter two years ago revenue'
-            },
-            hooks: {
-              onInit: (field: any) => {
-                if (field.formControl) {
-                  // Format on value changes
-                  field.formControl.valueChanges.subscribe((value: string) => {
-                    if (value && value.length > 0) {
-                      const numericValue = value.replace(/[^\d]/g, '');
-                      if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatCurrencyAmount(Number(numericValue));
-                        if (formatted !== value) {
-                          field.formControl.setValue(formatted, { emitEvent: false });
-                        }
-                      }
-                    }
-                  });
-                }
-              }
-            },
-            validators: {
-              numberOnly: {
-                expression: (c: AbstractControl) => {
-                  if (!c.value) return true;
-                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
-                  return /^\d+$/.test(numericValue);
-                },
-                message: 'Please enter only numbers'
-              }
-            },
-          }
-        ]
-      },
-      
-      // Tax Compliance
-      {
-        key: 'companyFinancials.taxCompliant',
-        type: 'checkbox',
-        className: 'mb-3',
-        templateOptions: {
-          label: 'We are compliant with all applicable tax regulations',
-          required: true
-        }
-      },
-      
-      // Insurance Coverage Section
-      {
-        template: '<h4 class="insurance-title mt-3 mb-2">Insurance Coverage</h4>'
-      },
-      {
-        fieldGroupClassName: 'row',
-        fieldGroup: [
-          {
-            className: 'col-md-6',
-            key: 'insuranceCoverage.generalLiabilityInsurance',
-            type: 'input',
-            templateOptions: {
-              label: `General Liability Insurance (${this.getSelectedCurrency()})`,
-              placeholder: 'Enter General Liability Insurance Amount',
-              type: 'text'
-            },
-            hooks: {
-              onInit: (field: any) => {
-                if (field.formControl) {
-                  // Format on value changes
-                  field.formControl.valueChanges.subscribe((value: string) => {
-                    if (value && value.length > 0) {
-                      const numericValue = value.replace(/[^\d]/g, '');
-                      if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatCurrencyAmount(Number(numericValue));
-                        if (formatted !== value) {
-                          field.formControl.setValue(formatted, { emitEvent: false });
-                        }
-                      }
-                    }
-                  });
-                }
-              }
-            },
-            validators: {
-              numberOnly: {
-                expression: (c: AbstractControl) => {
-                  if (!c.value) return true;
-                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
-                  return /^\d+$/.test(numericValue);
-                },
-                message: 'Please enter only numbers'
-              }
-            },
-          },
-          {
-            className: 'col-md-6',
-            key: 'insuranceCoverage.productLiabilityInsurance',
-            type: 'input',
-            templateOptions: {
-              label: `Product Liability Insurance (${this.getSelectedCurrency()})`,
-              placeholder: 'Enter Product Liability Insurance Amount',
-              type: 'text'
-            },
-            hooks: {
-              onInit: (field: any) => {
-                if (field.formControl) {
-                  // Format on value changes
-                  field.formControl.valueChanges.subscribe((value: string) => {
-                    if (value && value.length > 0) {
-                      const numericValue = value.replace(/[^\d]/g, '');
-                      if (numericValue && !isNaN(Number(numericValue))) {
-                        const formatted = this.formatCurrencyAmount(Number(numericValue));
-                        if (formatted !== value) {
-                          field.formControl.setValue(formatted, { emitEvent: false });
-                        }
-                      }
-                    }
-                  });
-                }
-              }
-            },
-            validators: {
-              numberOnly: {
-                expression: (c: AbstractControl) => {
-                  if (!c.value) return true;
-                  const numericValue = c.value.toString().replace(/[^\d]/g, '');
-                  return /^\d+$/.test(numericValue);
-                },
-                message: 'Please enter only numbers'
-              }
-            },
+            ]
           }
         ]
       }
@@ -3109,198 +2888,209 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
 
   // L1 Field Configurations
   getBasicDetailsFields(): FormlyFieldConfig[] {
-    return [
+    const fields: FormlyFieldConfig[] = [];
+
+    // For non-India countries
+    fields.push(
       {
         fieldGroupClassName: 'row',
+        hideExpression: (model: any) => model.country === 'India',
         fieldGroup: [
           {
             className: 'col-md-6 mb-3',
-            fieldGroup: [
-              {
-                key: 'gstinNumber',
-                type: 'gst-verify',
-                templateOptions: {
-                  label: 'GSTIN',
-                  placeholder: '22AAAAA0000A1Z5',
-                  required: true,
-                  description: '',
-                  parentComponent: this,
-                  isVerified: this.gstVerified
-                },
-                expressionProperties: {
-                  'templateOptions.required': (model: any) => !model.noGst,
-                  'templateOptions.isVerified': () => this.gstVerified,
-                  'hide': (model: any) => model.noGst
-                },
-                validators: {
-                  validation: [gstValidator]
-                },
-                validation: {
-                  messages: {
-                    required: 'Please enter your GSTIN number',
-                    gstFormat: 'Invalid GSTIN format'
-                  }
-                }
-              },
-              {
-                key: 'panNumber',
-                type: 'pan-verify',
-                className: 'mb-2',
-                templateOptions: {
-                  label: 'PAN',
-                  placeholder: 'ABCDE1234F',
-                  required: false,
-                  description: 'Enter 10-character PAN (e.g., ABCDE1234F)',
-                  parentComponent: this,
-                  isVerified: this.panVerified
-                },
-                expressionProperties: {
-                  'hide': (model: any) => !model.noGst,
-                  'templateOptions.required': (model: any) => model.noGst,
-                  'templateOptions.isVerified': () => this.panVerified,
-                  'templateOptions.disabled': (model: any) => !model.noGst
-                },
-                validators: {
-                  validation: [panValidator]
-                },
-                validation: {
-                  messages: {
-                    required: 'Please enter your PAN number',
-                    panFormat: 'Invalid PAN format. Please enter a valid 10-character PAN (e.g., ABCDE1234F)'
-                  }
-                }
-              },
-              {
-                key: 'noGst',
-                type: 'checkbox',
-                defaultValue: false,
-                templateOptions: {
-                  label: 'We don\'t have GST'
-                },
-                hooks: {
-                  onInit: (field) => {
-                    field.formControl?.valueChanges.subscribe(value => {
-                      const gstinField = field.form?.get('gstinNumber');
-                      const panField = field.form?.get('panNumber');
-                      
-                      if (value && gstinField) {
-                        gstinField.setErrors(null);
-                        gstinField.setValue('');
-                      }
-                      
-                      if (!value && panField) {
-                        panField.setValue('');
-                        panField.setErrors(null);
-                      }
-                      
-                      this.model.noGst = value;
-                      
-                      setTimeout(() => {
-                        this.model = { ...this.model };
-                        this.cdr.detectChanges();
-                        
-                        if (panField) {
-                          panField.updateValueAndValidity();
-                        }
-                        if (gstinField) {
-                          gstinField.updateValueAndValidity();
-                        }
-                      }, 0);
-                    });
-                  }
-                }
-              }
-            ]
-          },
-          {
-            className: 'col-md-6 mb-2',
             key: 'company_name',
             type: 'input',
             templateOptions: {
               label: 'Legal Business Name',
-              placeholder: 'Your company\'s registered name',
-              required: true
-            },
-            validation: {
-              messages: {
-                required: 'Please enter legal business name'
-              }
+              required: true,
+              placeholder: 'Enter your company\'s registered name'
+            }
+          },
+          {
+            className: 'col-md-6 mb-3',
+            key: 'primary_email_id',
+            type: 'input',
+            templateOptions: {
+              label: 'Email Id',
+              required: true,
+              placeholder: 'Enter your business email'
             }
           }
         ]
       },
       {
         fieldGroupClassName: 'row',
+        hideExpression: (model: any) => model.country === 'India',
         fieldGroup: [
           {
-            className: 'col-md-6 mb-2',
+            className: 'col-md-12 mb-3',
+            key: 'registeredAddress',
+            type: 'google-places',
+            templateOptions: {
+              label: 'Registered Address',
+              required: true,
+              placeholder: 'Search for your registered business address',
+              updateFields: {
+                'city': 'city',
+                'state': 'state',
+                'country': 'country',
+                'pincode': 'postalCode'
+              }
+            }
+          }
+        ]
+      }
+    );
+
+      // For India
+  fields.push(
+    {
+            fieldGroupClassName: 'row',
+      hideExpression: (model: any) => model.country !== 'India',
+      fieldGroup: [
+        {
+          className: 'col-md-6 mb-3',
+          fieldGroup: [
+            {
+              className: 'col-md-6 mb-2',
+              key: 'gstinNumber',
+              type: 'gst-verify',
+              templateOptions: {
+                label: 'GSTIN',
+                placeholder: '22AAAAA0000A1Z5',
+                required: true,
+                description: '',
+                parentComponent: this,
+                isVerified: this.gstVerified
+              },
+              expressionProperties: {
+                'templateOptions.required': (model: any) => !model.noGst,
+                'templateOptions.isVerified': () => this.gstVerified,
+                'hide': (model: any) => model.noGst === true
+              },
+              validators: {
+                validation: [gstValidator]
+              }
+            },
+            {
+              className: 'col-md-6 mb-2',
+              key: 'panNumber',
+              type: 'pan-verify',
+              templateOptions: {
+                label: 'PAN',
+                placeholder: 'ABCDE1234F',
+                required: true,
+                description: 'Enter 10-character PAN (e.g., ABCDE1234F)',
+                parentComponent: this,
+                isVerified: this.panVerified
+              },
+              expressionProperties: {
+                'templateOptions.required': (model: any) => model.noGst === true,
+                'templateOptions.isVerified': () => this.panVerified,
+                'hide': (model: any) => model.noGst !== true
+              },
+              validators: {
+                validation: [panValidator]
+              }
+            },
+            {
+              className: 'col-md-6 mb-2',
+              key: 'noGst',
+              type: 'checkbox',
+              defaultValue: false,
+              templateOptions: {
+                label: 'We don\'t have GST'
+              },
+              hooks: {
+                onInit: (field) => {
+                  field.formControl?.valueChanges.subscribe(value => {
+                    const gstinField = field.form?.get('gstinNumber');
+                    const panField = field.form?.get('panNumber');
+                    
+                    if (value && gstinField) {
+                      gstinField.setErrors(null);
+                      gstinField.setValue('');
+                      this.gstVerified = false;
+                    }
+                    
+                    if (!value && panField) {
+                      panField.setValue('');
+                      panField.setErrors(null);
+                      this.panVerified = false;
+                    }
+                    
+                    this.model.noGst = value;
+                    
+                    setTimeout(() => {
+                      this.model = { ...this.model };
+                      this.cdr.detectChanges();
+                      
+                      if (panField) {
+                        panField.updateValueAndValidity();
+                      }
+                      if (gstinField) {
+                        gstinField.updateValueAndValidity();
+                      }
+                    }, 0);
+                  });
+                }
+              }
+            },
+          ]
+        },
+        {
+          className: 'col-md-6 mb-3 mt-3',
+          key: 'company_name',
+            type: 'input',
+            templateOptions: {
+              label: 'Legal Business Name',
+              required: true,
+              placeholder: 'Enter your company\'s registered name'
+            }
+          }
+        ]
+      },
+      {
+        fieldGroupClassName: 'row',
+        hideExpression: (model: any) => model.country !== 'India',
+        fieldGroup: [
+          {
+            className: 'col-md-6 mb-3',
             key: 'primary_email_id',
             type: 'input',
             templateOptions: {
               label: 'Email Id',
-              placeholder: 'Please enter your email id',
               required: true,
-              disabled: true
-            },
-            validation: {
-              messages: {
-                required: 'Please enter your email id'
-              }
+              placeholder: 'Enter your business email'
             }
           },
           {
             className: 'col-md-6 mb-3',
             key: 'registeredAddress',
             type: 'google-places',
-            // Fix: Use model's registeredAddress instead of undefined getCompanyProfile
-            defaultValue: this.model.registeredAddress || null,
             templateOptions: {
               label: 'Registered Address',
-              placeholder: 'Search for your registered address',
               required: true,
+              placeholder: 'Search for your registered business address',
               updateFields: {
+                'city': 'city',
+                'state': 'state',
                 'country': 'country',
-                'state': 'state', 
-                'city': 'city'
-              }
-            },
-            // Add expression property to dynamically update when model changes
-            expressionProperties: {
-              'defaultValue': () => this.model.registeredAddress
-            },
-            // Add hooks to ensure proper initialization
-            hooks: {
-              onInit: (field) => {
-                // Set initial value if we have registered address data
-                if (this.model.registeredAddress && typeof this.model.registeredAddress === 'object') {
-                  console.log('🏠 Setting initial registered address value:', this.model.registeredAddress);
-                  field.formControl?.setValue(this.model.registeredAddress, { emitEvent: false });
-                }
-              },
-              afterViewInit: (field) => {
-                // Force update the field with loaded data after view initialization
-                if (this.model.registeredAddress && typeof this.model.registeredAddress === 'object') {
-                  setTimeout(() => {
-                    console.log('🔄 Forcing address field update with loaded data:', this.model.registeredAddress);
-                    field.formControl?.setValue(this.model.registeredAddress, { emitEvent: false });
-                    this.cdr.detectChanges();
-                  }, 200);
-                }
-              }
-            },
-            validation: {
-              messages: {
-                required: 'Please select a registered address'
+                'pincode': 'postalCode'
               }
             }
           }
         ]
-      },
+      }
+    );
+
+    // Common fields for both India and non-India
+    fields.push(
       {
         fieldGroupClassName: 'row',
         fieldGroup: [
           {
-            className: 'col-md-4 mb-2',
+            className: 'col-md-4 mb-3',
             key: 'country',
             type: 'searchable-select',
             defaultValue: this.model.country || localStorage.getItem('country'),
@@ -3312,85 +3102,135 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
                 label: country.name,
                 value: country.name
               })),
-              disabled: !!localStorage.getItem('country')
+              disabled: true
             },
             hooks: {
               onInit: (field) => {
-                // Set initial value from model or localStorage
-                const countryValue = this.model.country || localStorage.getItem('country');
-                if (countryValue) {
-                  this.selectedCountry = countryValue;
-                  this.getStates(countryValue);
-                }
-
-                field.formControl?.valueChanges.subscribe(selectedCountry => {
-                  if (selectedCountry) {
-                    this.selectedCountry = selectedCountry;
-                    
-                    if (field.form?.get('state')) {
-                      field.form.get('state')!.setValue(null);
+                field.formControl?.valueChanges.subscribe(value => {
+                  this.selectedCountry = value;
+                  this.getStates(value);
+                  
+                  if (value !== 'India') {
+                    const form = field.form;
+                    if (form) {
+                      form.get('gstinNumber')?.setValue('');
+                      form.get('panNumber')?.setValue('');
+                      form.get('noGst')?.setValue(false);
+                      
+                      if (this.model.bankDetails) {
+                        this.model.bankDetails.verification = {
+                          accountNumber: '',
+                          reverifyAccountNumber: '',
+                          ifscCode: ''
+                        };
+                      }
                     }
-                    
-                    this.getStates(selectedCountry);
+                    this.gstVerified = false;
+                    this.panVerified = false;
+                    this.bankVerified = false;
                   }
+                  
+                  setTimeout(() => {
+                    this.model = { ...this.model };
+                    this.cdr.detectChanges();
+                  }, 0);
                 });
-              }
-            },
-            validation: {
-              messages: {
-                required: 'Please select a country'
               }
             }
           },
           {
-            className: 'col-md-4 mb-2',
+            className: 'col-md-4 mb-3',
             key: 'state',
             type: 'searchable-select',
             templateOptions: {
               label: 'State',
               required: true,
               placeholder: 'Select state',
-              options: this.stateList || []
-            },
-            hooks: {
-              onInit: (field) => {
-                field.formControl?.valueChanges.subscribe(selectedState => {
-                  if (selectedState) {
-                    this.selectedState = selectedState;
-                  }
-                });
-              }
-            },
-            validation: {
-              messages: {
-                required: 'Please select a state'
-              }
-            },
-            expressionProperties: {
-              'templateOptions.disabled': '!model.country'
+              options: this.stateList
             }
           },
           {
-            className: 'col-md-4 mb-2',
+            className: 'col-md-4 mb-3',
             key: 'city',
             type: 'input',
             templateOptions: {
               label: 'City',
-              placeholder: 'Please enter your city',
-              required: true
-            },
-            validation: {
-              messages: {
-                required: 'Please enter city name'
-              }
-            },
-            expressionProperties: {
-              'templateOptions.disabled': '!model.state'
+              required: true,
+              placeholder: 'Enter city'
             }
           }
         ]
       }
-    ];
+    );
+
+    // // GST checkbox and PAN field for India
+    // if (this.model.country === 'India') {
+    //   fields.push(
+    //     {
+    //       hideExpression: (model: any) => model.country !== 'India',
+    //       key: 'noGst',
+    //       type: 'checkbox',
+    //       defaultValue: false,
+    //       templateOptions: {
+    //         label: 'We don\'t have GST'
+    //       },
+    //       hooks: {
+    //         onInit: (field) => {
+    //           field.formControl?.valueChanges.subscribe(value => {
+    //             const gstinField = field.form?.get('gstinNumber');
+    //             const panField = field.form?.get('panNumber');
+                
+    //             if (value && gstinField) {
+    //               gstinField.setErrors(null);
+    //               gstinField.setValue('');
+    //             }
+                
+    //             if (!value && panField) {
+    //               panField.setValue('');
+    //               panField.setErrors(null);
+    //             }
+                
+    //             this.model.noGst = value;
+                
+    //             setTimeout(() => {
+    //               this.model = { ...this.model };
+    //               this.cdr.detectChanges();
+                  
+    //               if (panField) {
+    //                 panField.updateValueAndValidity();
+    //               }
+    //               if (gstinField) {
+    //                 gstinField.updateValueAndValidity();
+    //               }
+    //             }, 0);
+    //           });
+    //         }
+    //       }
+    //     },
+    //     {
+    //       hideExpression: (model: any) => model.country !== 'India' || !model.noGst,
+    //       key: 'panNumber',
+    //       type: 'pan-verify',
+    //       className: 'mb-2',
+    //       templateOptions: {
+    //         label: 'PAN',
+    //         placeholder: 'ABCDE1234F',
+    //         required: true,
+    //         description: 'Enter 10-character PAN (e.g., ABCDE1234F)',
+    //         parentComponent: this,
+    //         isVerified: this.panVerified
+    //       },
+    //       expressionProperties: {
+    //         'templateOptions.isVerified': () => this.panVerified
+    //       },
+    //       validators: {
+    //         validation: [panValidator]
+    //       }
+    //     }
+    //   );
+    // }
+
+    return fields;
   }
 
   getContactCapabilitiesFields(): FormlyFieldConfig[] {
@@ -3856,13 +3696,27 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
 
   // Add methods to check if each step is complete
   isBasicDetailsComplete(): boolean {
-    return !!(this.model.company_name && 
-              this.model.primary_email_id && 
-              this.model.registeredAddress && 
-              this.model.country && 
-              this.model.state && 
-              this.model.city &&
-              (this.gstVerified || (this.model.noGst && this.panVerified)));
+    // Basic required fields for all countries
+    if (!this.model.company_name || !this.model.country || !this.model.state) {
+      return false;
+    }
+
+    // Additional validation for Indian suppliers
+    if (this.model.country === 'IN') {
+      // If noGst is true, PAN is required and must be verified
+      if (this.model.noGst) {
+        if (!this.model.panNumber || !this.panVerified) {
+          return false;
+        }
+      } else {
+        // If noGst is false, GSTIN is required and must be verified
+        if (!this.model.gstinNumber || !this.gstVerified) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   isContactCapabilitiesComplete(): boolean {
@@ -3892,11 +3746,35 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
   }
 
   isFinancialInformationComplete(): boolean {
-    return !!(this.bankVerified && 
-              this.model.companyFinancials?.annualRevenue2024 &&
-              this.model.companyFinancials?.annualRevenue2023 &&
-              this.model.companyFinancials?.annualRevenue2022 &&
-              this.model.companyFinancials?.taxCompliant);
+    if (!this.model.bankDetails) {
+      return false;
+    }
+
+    // For Indian suppliers
+    if (this.model.country === 'IN') {
+      // Bank verification is required for Indian suppliers
+      if (!this.bankVerified) {
+        return false;
+      }
+      
+      // Check if bank verification details are present
+      if (!this.model.bankDetails.verification ||
+          !this.model.bankDetails.verification.accountNumber ||
+          !this.model.bankDetails.verification.ifscCode) {
+        return false;
+      }
+    } else {
+      // For international suppliers
+      if (!this.model.bankDetails.international ||
+          !this.model.bankDetails.international.accountNumber ||
+          !this.model.bankDetails.international.swiftCode ||
+          !this.model.bankDetails.international.bankName ||
+          !this.model.bankDetails.international.branchName) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   isAdditionalInformationComplete(): boolean {
