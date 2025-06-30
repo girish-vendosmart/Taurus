@@ -809,7 +809,7 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
           gstinNumber: basicDetails.gstinNumber,
           panNumber: basicDetails.panNumber,
           noGst: basicDetails.noGst || false,
-          country: basicDetails.country,
+          country: basicDetails.country || 'India',
           state: basicDetails.state,
           city: basicDetails.city,
           registeredAddress: basicDetails.registeredAddress || {},
@@ -901,6 +901,10 @@ export class SupplierProfileReviewComponent implements OnInit, OnDestroy {
         this.panVerified = this.getCompanyProfile?.panVerified || false;
         this.phoneVerified = this.getCompanyProfile?.phone_verified || false;
         this.bankVerified = financialInformation.bankVerified || false;
+        
+        // Update country for verification status display
+        this.country = basicDetails.country || 'India';
+        console.log('🌍 Country set to:', this.country, '- Verification status will be filtered accordingly');
         
         // Set request to resubmit comment
         this.requestToResubmitCommentL1 = result.data.request_for_change_comment || '';
