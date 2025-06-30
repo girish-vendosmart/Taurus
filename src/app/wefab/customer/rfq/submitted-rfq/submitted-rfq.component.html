@@ -17,140 +17,163 @@
       </div>
     </div>
 
-    <!-- Content Grid -->`
-    <div class="content-grid">
-      <!-- Project Information -->
-      <div class="info-section">
-        <h3>Project Information</h3>
-        <div class="info-rows">
-          <div class="info-row">
-            <span class="label">Project Name:</span>
-            <span class="value">{{ rfqData.projectInfo.projectName }}</span>
+    <!-- Tabs Section -->
+    <div class="tabs-container">
+      <div class="tab-headers">
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'overview'"
+          (click)="setActiveTab('overview')">
+          <i class="pi pi-list"></i>
+          Overview
+        </button>
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'comments'"
+          (click)="setActiveTab('comments')">
+          <i class="pi pi-comments"></i>
+          Comments
+        </button>
+      </div>
+
+      <!-- Overview Tab Content --> 
+      <div class="tab-content mt-3" *ngIf="activeTab === 'overview'">
+        <!-- Content Grid -->
+        <div class="content-grid">
+          <!-- Project Information -->
+          <div class="info-section">
+            <h3>Project Information</h3>
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="label">Project Name:</span>
+                <span class="value">{{ rfqData.projectInfo.projectName }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Delivery Date:</span>
+                <span class="value">{{ rfqData.projectInfo.deliveryDate }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Delivery Location:</span>
+                <span class="value">{{ rfqData.projectInfo.deliveryLocation }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Submitted:</span>
+                <span class="value">{{ rfqData.projectInfo.submitted }}</span>
+              </div>
+            </div>
           </div>
-          <div class="info-row">
-            <span class="label">Delivery Date:</span>
-            <span class="value">{{ rfqData.projectInfo.deliveryDate }}</span>
+
+          <!-- BOM Summary -->
+          <div class="info-section">
+            <h3>BOM Summary</h3>
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="label">Total Line Items:</span>
+                <span class="value">{{ rfqData.bomSummary.totalLineItems }} parts</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Drawings Uploaded:</span>
+                <span class="value">{{ rfqData.bomSummary.drawingsUploaded }} files</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Total Quantity:</span>
+                <span class="value">{{ rfqData.bomSummary.totalQuantity }} units</span>
+              </div>
+            </div>
           </div>
-          <div class="info-row">
-            <span class="label">Delivery Location:</span>
-            <span class="value">{{ rfqData.projectInfo.deliveryLocation }}</span>
+        </div>
+
+        <!-- Line Items Section -->
+        <div class="line-items-section">
+          <h3>Line Items</h3>
+          
+          <div class="common-table-wrapper">
+            <app-common-table
+              [config]="lineItemsTableConfig"
+              [data]="rfqData.allLineItems"
+              [loading]="false"
+              (rowClick)="onLineItemRowClick($event)"
+              (linkClick)="onLineItemLinkClick($event)"
+              (actionClick)="onLineItemActionClick($event)">
+            </app-common-table>
           </div>
-          <div class="info-row">
-            <span class="label">Submitted:</span>
-            <span class="value">{{ rfqData.projectInfo.submitted }}</span>
+        </div>
+
+        <!-- Attachments Section -->
+        <div class="attachments-section m-4 p-3">
+          <h3>Attachments ({{ rfqData.allAttachments.length }})</h3>
+          <p class="text-muted">Documents and files related to this quotation</p>
+          
+          <div class="attachments-grid">
+            <div *ngFor="let attachment of displayedAttachments" class="attachment-card">
+              <div class="attachment-content">
+                <div class="file-icon">
+                  <i class="pi pi-file-pdf"></i>
+                </div>
+                <div class="attachment-details">
+                  <div class="attachment-name">{{ attachment.name }}</div>
+                  <div class="attachment-date">{{ attachment.creation | date:'MMM dd, yyyy, HH:mm a' }}</div>
+                </div>
+                <div class="attachment-actions">
+                  <button class="view-btn" title="View">
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button class="download-btn" (click)="downloadAttachment(attachment)" title="Download">
+                    <i class="pi pi-download"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- BOM Summary -->
-      <div class="info-section">
-        <h3>BOM Summary</h3>
-        <div class="info-rows">
-          <div class="info-row">
-            <span class="label">Total Line Items:</span>
-            <span class="value">{{ rfqData.bomSummary.totalLineItems }} parts</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Drawings Uploaded:</span>
-            <span class="value">{{ rfqData.bomSummary.drawingsUploaded }} files</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Total Quantity:</span>
-            <span class="value">{{ rfqData.bomSummary.totalQuantity }} units</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Line Items Section -->
-    <div class="line-items-section">
-      <h3>Line Items</h3>
-      
-      <div class="common-table-wrapper">
-        <app-common-table
-          [config]="lineItemsTableConfig"
-          [data]="rfqData.allLineItems"
-          [loading]="false"
-          (rowClick)="onLineItemRowClick($event)"
-          (linkClick)="onLineItemLinkClick($event)"
-          (actionClick)="onLineItemActionClick($event)">
-                </app-common-table>
-        </div>
-    </div>
-
-    <!-- Attachments Section -->
-    <div class="attachments-section m-4 p-3">
-      <h3>Attachments ({{ rfqData.allAttachments.length }})</h3>
-      <p class="text-muted">Documents and files related to this quotation</p>
-      
-      <div class="attachments-grid">
-        <div *ngFor="let attachment of displayedAttachments" class="attachment-card">
-          <div class="attachment-content">
-            <div class="file-icon">
-              <i class="pi pi-file-pdf"></i> <!-- Use appropriate icon based on file type -->
-            </div>
-            <div class="attachment-details">
-              <div class="attachment-name">{{ attachment.name }}</div>
-              <div class="attachment-date">{{ attachment.creation | date:'MMM dd, yyyy, HH:mm a' }}</div>
-            </div>
-            <div class="attachment-actions">
-              <button class="view-btn" title="View">
-                <i class="pi pi-eye"></i>
-              </button>
-              <button class="download-btn" (click)="downloadAttachment(attachment)" title="Download">
-                <i class="pi pi-download"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+      <!-- Comments Tab Content -->
+      <div class="tab-content mt-3" *ngIf="activeTab === 'comments'">
+        <app-conversation-trail
+          [docType]="'Customer Request for Quotation'"
+          [docName]="rfqData.rfqNumber">
+        </app-conversation-trail>
       </div>
     </div>
   </div>
 
   <!-- Review Status Section -->
-  <div class="review-status-section">
-    <div class="status-header">
-      <h3>Review Status</h3>
-      <div class="status-indicator">
-        <span class="status-badge">{{ rfqData.reviewStatus.currentStatus }}</span>
-      </div>
-    </div>
+  <div class="order-tracking-card">
+    <h3>Review Status</h3>
     
-    <p class="status-subtitle">Track the progress of your RFQ review</p>
-    
-    <div class="status-timeline">
-      <div *ngFor="let stage of rfqData.reviewStatus.stages; let i = index" 
-           class="timeline-item" 
-           [ngClass]="{
-             'completed': stage.status === 'completed',
-             'in-progress': stage.status === 'in-progress',
-             'pending': stage.status === 'pending'
-           }">
-        
-        <div class="timeline-connector" *ngIf="i < rfqData.reviewStatus.stages.length - 1"></div>
-        
-        <div class="timeline-marker">
-          <div class="marker-icon" [ngClass]="{
-            'completed': stage.status === 'completed',
-            'in-progress': stage.status === 'in-progress',
-            'pending': stage.status === 'pending'
-          }">
-            <i class="pi" [ngClass]="{
-              'pi-check': stage.status === 'completed',
-              'pi-info-circle': stage.status === 'in-progress',
-              'pi-circle': stage.status === 'pending'
-            }"></i>
-          </div>
+    <div class="tracking-timeline">
+      <div *ngFor="let stage of rfqData.reviewStatus.stages" class="tracking-item">
+        <div class="tracking-marker" [ngClass]="{
+          'completed': stage.status === 'completed',
+          'in-progress': stage.status === 'in-progress',
+          'pending': stage.status === 'pending'
+        }">
+          <i class="pi" [ngClass]="{
+            'pi-check': stage.status === 'completed',
+            'pi-play': stage.status === 'in-progress',
+            'pi-clock': stage.status === 'pending'
+          }"></i>
         </div>
-        
-        <div class="timeline-content">
-          <h4 class="stage-title" style="margin-bottom: 0px;">{{ stage.title }}</h4>
-          <p class="stage-description" style="margin-bottom: 0px;">{{ stage.description }}</p>
-          <p class="stage-date" *ngIf="stage.completedDate" style="margin-bottom: 0px;">{{ stage.completedDate }}</p>
-          <p class="stage-estimate" *ngIf="stage.estimatedCompletion" style="margin-bottom: 0px;">{{ stage.estimatedCompletion }}</p>
-          
-          <!-- Technical Review Report Link -->
-          <div class="stage-actions" *ngIf="stage.hasReportLink && stage.status === 'completed'">
+        <div class="tracking-content">
+          <div class="tracking-title">{{ stage.title }}</div>
+          <div class="tracking-description">{{ stage.description }}</div>
+          <div class="tracking-status" [ngClass]="{
+            'status-completed': stage.status === 'completed',
+            'status-in-progress': stage.status === 'in-progress',
+            'status-pending': stage.status === 'pending'
+          }">
+            {{ stage.status === 'completed' ? 'Completed' : 
+               stage.status === 'in-progress' ? 'In Progress' : 
+               'Pending' }}
+          </div>
+          <div *ngIf="stage.completedDate" class="tracking-date">
+            {{ stage.completedDate | date:'MMM dd, yyyy' }}
+          </div>
+          <div *ngIf="stage.estimatedCompletion" class="tracking-estimate">
+            {{ stage.estimatedCompletion }}
+          </div>
+          <div *ngIf="stage.hasReportLink && stage.status === 'completed'" class="tracking-actions">
             <button class="report-link-btn" (click)="viewTechnicalReviewReport()">
               <i class="pi pi-external-link"></i>
               {{ stage.reportLinkText }}
