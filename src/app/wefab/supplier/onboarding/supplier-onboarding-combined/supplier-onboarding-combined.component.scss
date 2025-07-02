@@ -37,6 +37,7 @@
         padding-bottom: 1rem;
         border-bottom: 1px solid rgba($blueprint-blue, 0.1);
         margin-bottom: 1.5rem;
+        letter-spacing: 0.5px;
       }
     }
   }
@@ -133,6 +134,7 @@ h2 {
     transition: all 0.3s ease;
     position: relative;
     cursor: pointer;
+    width: 100%; /* Ensure full width */
     
     &:not(:last-child)::after {
       content: '';
@@ -161,10 +163,24 @@ h2 {
       z-index: 2;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       font-size: 1.1rem;
+      
+      @media (min-width: 768px) and (max-width: 1244px) {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+      }
     }
     
     .step-content {
       padding-top: 0.5rem;
+      flex: 1;
+      min-width: 0; /* Enable text truncation */
+      max-width: calc(100% - 60px); /* Account for step number width + gap */
+      
+      @media (min-width: 768px) and (max-width: 1244px) {
+        padding-top: 0.35rem;
+        max-width: calc(100% - 52px); /* Adjusted for smaller step number */
+      }
       
       .step-title {
         color: $machine-gray;
@@ -173,6 +189,18 @@ h2 {
         font-size: 1.05rem;
         display: block;
         line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap; /* Keep text in one line */
+        
+        @media (min-width: 768px) and (max-width: 1244px) {
+          font-size: 0.9rem;
+          line-height: 1.3;
+        }
+        
+        @media (min-width: 768px) and (max-width: 991px) {
+          font-size: 0.85rem;
+        }
       }
     }
     
@@ -187,7 +215,7 @@ h2 {
       .step-content {
         .step-title {
           font-weight: $font-weight-semibold;
-          transform: translateX(3px);
+          color: darken($machine-gray, 15%);
         }
       }
       
@@ -211,17 +239,29 @@ h2 {
 
 /* Main content styling */
 .step-main-title {
-  color: #1f2937;
-  font-weight: 600;
+  color: $precision-black;
+  font-weight: $font-weight-semibold;
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
 }
 
 .step-description {
-  color: #6b7280;
+  color: $machine-gray;
   font-size: 0.875rem;
   line-height: 1.5;
   margin-bottom: 1.5rem;
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Form styling */
@@ -230,31 +270,95 @@ h2 {
 }
 
 .form-label {
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  font-weight: $font-weight-medium;
+  color: $precision-black;
+  margin-bottom: 0.4rem;
+  font-size: 1.05rem;
+
+  ::ng-deep .ng-star-inserted {
+    color: red;
+  }
+  
+  .text-danger {
+    margin-left: 3px;
+    font-size: 1.2em;
+    position: relative;
+    top: 2px;
+  }
+  
+  /* Mobile label adjustments */
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  @media (max-width: 576px) {
+    font-size: 0.95rem;
+  }
 }
 
 .form-control {
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 0.75rem;
-  font-size: 0.875rem;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  border: 1px solid $material-finish-silver;
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #ffffff !important; /* CLEAR WHITE BACKGROUND FOR ENABLED FIELDS */
+  width: 100%;
+  
+  &:hover {
+    border-color: lighten($blueprint-blue, 20%);
+    background-color: #ffffff !important;
+  }
   
   &:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: $blueprint-blue;
+    box-shadow: 0 0 0 3px rgba($blueprint-blue, 0.15);
+    background-color: #ffffff !important;
     outline: none;
   }
   
-  &.is-invalid {
-    border-color: #ef4444;
+  &::placeholder {
+    color: lighten($machine-gray, 20%);
+    font-style: italic;
+    opacity: 0.7;
   }
   
-  &::placeholder {
-    color: #9ca3af;
+  /* MUCH CLEARER DISABLED FIELD STYLES */
+  &:disabled, &[readonly], &.disabled {
+    background-color: #f8f9fa !important;
+    border: 2px solid #dee2e6 !important;
+    color: #6c757d !important;
+    cursor: not-allowed !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+    
+    &::placeholder {
+      color: #adb5bd !important;
+    }
+    
+    /* Remove hover effects for disabled fields */
+    &:hover {
+      border-color: #dee2e6 !important;
+      background-color: #f8f9fa !important;
+    }
+    
+    &:focus {
+      border-color: #dee2e6 !important;
+      box-shadow: none !important;
+      background-color: #f8f9fa !important;
+    }
+  }
+  
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    padding: 0.7rem 1rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 576px) {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -504,6 +608,341 @@ h2 {
   .step-main-title {
     font-size: 1.125rem;
   }
+  
+  /* Button responsive fixes */
+  .d-flex.justify-content-between {
+    flex-direction: column;
+    gap: 1rem;
+    
+    &.mt-4 {
+      margin-top: 2rem !important;
+    }
+    
+    .btn {
+      width: 100%;
+      text-align: center;
+      padding: 0.875rem 1rem;
+      font-size: 0.95rem;
+      min-height: 48px; /* Touch-friendly minimum height */
+      
+      i {
+        font-size: 1rem;
+      }
+    }
+    
+    .d-flex.gap-2 {
+      flex-direction: column;
+      gap: 0.75rem !important;
+      width: 100%;
+      
+      .btn {
+        width: 100%;
+        min-width: unset;
+      }
+    }
+  }
+  
+  /* Progress bar mobile adjustments */
+  .progress-container {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+    
+    .progress-bar-wrapper {
+      margin-right: 0;
+      order: 2;
+    }
+    
+    .progress-text {
+      order: 1;
+      text-align: center;
+      align-self: center;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+  }
+  
+  /* Step navigation mobile improvements */
+  .col-md-3 {
+    margin-bottom: 2rem;
+    
+    .steps-container {
+      flex-direction: row;
+      overflow-x: auto;
+      padding: 1rem;
+      gap: 1rem;
+      
+      &::-webkit-scrollbar {
+        height: 4px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: $material-finish-silver;
+        border-radius: 2px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: $blueprint-blue;
+        border-radius: 2px;
+      }
+      
+      .step {
+        flex-direction: column;
+        align-items: center;
+        min-width: 80px;
+        padding: 0.5rem;
+        gap: 0.5rem;
+        
+        &:not(:last-child)::after {
+          display: none;
+        }
+        
+        .step-number {
+          width: 36px;
+          height: 36px;
+          font-size: 0.9rem;
+        }
+        
+        .step-content {
+          padding-top: 0;
+          text-align: center;
+          
+          .step-title {
+            font-size: 0.8rem;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80px;
+          }
+        }
+      }
+    }
+  }
+  
+  /* Form field mobile adjustments */
+  .formly-field {
+    .row {
+      margin-left: -8px;
+      margin-right: -8px;
+      
+      [class*="col-"] {
+        padding-left: 8px;
+        padding-right: 8px;
+        margin-bottom: 1rem;
+      }
+    }
+  }
+  
+  /* Header mobile adjustments */
+  h2 {
+    font-size: 1.25rem;
+    text-align: center;
+  }
+  
+  .text-muted {
+    text-align: center;
+    font-size: 0.8rem;
+  }
+}
+
+/* Extra small devices (phones, less than 576px) */
+@media (max-width: 576px) {
+  .container-fluid {
+    padding: 1rem 0.75rem;
+  }
+  
+  .card .card-body {
+    padding: 1rem;
+  }
+  
+  .col-md-3 {
+    .card-title {
+      font-size: 1rem;
+      text-align: center;
+    }
+    
+    .steps-container {
+      padding: 0.5rem;
+      
+      .step {
+        min-width: 70px;
+        
+        .step-number {
+          width: 32px;
+          height: 32px;
+          font-size: 0.8rem;
+        }
+        
+        .step-content .step-title {
+          font-size: 0.75rem;
+          max-width: 70px;
+        }
+      }
+    }
+  }
+  
+  .step-main-title {
+    font-size: 1rem;
+    text-align: center;
+  }
+  
+  .step-description {
+    font-size: 0.8rem;
+    text-align: center;
+  }
+  
+  /* Button adjustments for very small screens */
+  .d-flex.justify-content-between {
+    .btn {
+      padding: 0.75rem 0.75rem;
+      font-size: 0.9rem;
+      min-height: 44px;
+      
+      i {
+        font-size: 0.9rem;
+      }
+      
+      &.btn-outline-primary {
+        font-size: 0.85rem;
+      }
+    }
+  }
+  
+  /* Progress text smaller */
+  .progress-text {
+    font-size: 0.75rem !important;
+    padding: 0.3rem 0.6rem !important;
+  }
+}
+
+/* Large tablets (768px to 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+  .container-fluid {
+    padding: 2rem 1.5rem;
+  }
+  
+  .col-md-3 {
+    .steps-container {
+      gap: 2rem;
+      
+      .step {
+        .step-number {
+          width: 38px;
+          height: 38px;
+          font-size: 1rem;
+        }
+        
+        .step-content .step-title {
+          font-size: 0.95rem;
+        }
+      }
+    }
+  }
+  
+  /* Button adjustments for tablets */
+  .d-flex.justify-content-between {
+    .btn {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.9rem;
+    }
+    
+    .d-flex.gap-2 {
+      gap: 0.5rem !important;
+      
+      .btn {
+        min-width: 90px;
+        
+        &.btn-outline-primary {
+          min-width: 75px;
+        }
+      }
+    }
+  }
+}
+
+/* Landscape phones and small tablets */
+@media (max-width: 768px) and (orientation: landscape) {
+  .col-md-3 {
+    .steps-container {
+      flex-direction: row;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      
+      .step {
+        flex-direction: row;
+        align-items: center;
+        min-width: auto;
+        padding: 0.25rem 0.5rem;
+        gap: 0.5rem;
+        
+        .step-number {
+          width: 28px;
+          height: 28px;
+          font-size: 0.8rem;
+        }
+        
+        .step-content .step-title {
+          font-size: 0.75rem;
+          white-space: nowrap;
+          max-width: none;
+        }
+      }
+    }
+  }
+}
+
+/* Fix for button text wrapping */
+.btn {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  @media (max-width: 768px) {
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.3;
+  }
+}
+
+/* Ensure buttons maintain proper spacing */
+.d-flex.gap-2 {
+  @media (max-width: 768px) {
+    .btn:not(:last-child) {
+      margin-bottom: 0;
+    }
+  }
+}
+
+/* Edit mode styles */
+:host.edit-mode {
+  .card {
+    border-left: 4px solid #059669;
+    
+    .card-title {
+      color: #059669;
+    }
+  }
+  
+  .progress-bar {
+    background: linear-gradient(90deg, #059669, lighten(#059669, 10%)) !important;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #059669, darken(#059669, 8%));
+    border-color: #059669;
+    
+    &:hover, &:focus {
+      background: linear-gradient(135deg, darken(#059669, 5%), darken(#059669, 15%));
+      border-color: darken(#059669, 10%);
+    }
+  }
+  
+  .step.active .step-number {
+    background-color: #059669;
+    box-shadow: 0 4px 12px rgba(#059669, 0.4);
+  }
 }
 
 /* Form styling enhancements - matching reference component */
@@ -561,6 +1000,17 @@ h2 {
         background-color: #f8f9fa !important;
       }
     }
+    
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+      padding: 0.7rem 1rem;
+      font-size: 0.95rem;
+    }
+    
+    @media (max-width: 576px) {
+      padding: 0.6rem 0.8rem;
+      font-size: 0.9rem;
+    }
   }
   
   /* Special styling for verified fields (like GST) */
@@ -613,6 +1063,16 @@ h2 {
       position: relative;
       top: 2px;
     }
+    
+    /* Mobile label adjustments */
+    @media (max-width: 768px) {
+      font-size: 1rem;
+      margin-bottom: 0.3rem;
+    }
+    
+    @media (max-width: 576px) {
+      font-size: 0.95rem;
+    }
   }
   
   /* Field descriptions */
@@ -622,6 +1082,10 @@ h2 {
     margin-top: 0.3rem;
     margin-bottom: 0.3rem;
     font-style: italic;
+    
+    @media (max-width: 768px) {
+      font-size: 0.8rem;
+    }
   }
   
   /* Checkboxes and radio buttons */
@@ -653,11 +1117,23 @@ h2 {
         border-color: #dee2e6 !important;
         opacity: 1 !important;
       }
+      
+      /* Mobile checkbox adjustments */
+      @media (max-width: 768px) {
+        width: 1.2rem;
+        height: 1.2rem;
+        margin-top: 0.2rem;
+      }
     }
     
     .form-check-label {
       font-size: 0.95rem;
       line-height: 1.5;
+      
+      @media (max-width: 768px) {
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
     }
     
     /* DISABLED CHECKBOX LABEL */
@@ -665,71 +1141,19 @@ h2 {
       color: #6c757d !important;
       opacity: 0.8;
     }
-  }
-  
-  /* Buttons */
-  .btn {
-    font-weight: $font-weight-medium;
-    padding: 0.7rem 1.8rem;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 0.9rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
     
-    &:active {
-      transform: translateY(1px);
-    }
-    
-    .pi {
-      font-size: 0.85rem;
-    }
-    
-    /* DISABLED BUTTON STYLES */
-    &:disabled {
-      background-color: #f8f9fa !important;
-      border-color: #dee2e6 !important;
-      color: #6c757d !important;
-      cursor: not-allowed !important;
-      opacity: 1 !important;
-      box-shadow: none !important;
+    /* Mobile checkbox spacing */
+    @media (max-width: 768px) {
+      padding-left: 2rem;
+      margin-bottom: 0.75rem;
       
-      &:hover {
-        background-color: #f8f9fa !important;
-        border-color: #dee2e6 !important;
-        transform: none !important;
+      .form-check-input {
+        margin-left: -2rem;
       }
     }
   }
   
-  .btn-primary {
-    background: linear-gradient(135deg, $blueprint-blue, darken($blueprint-blue, 8%));
-    border-color: $blueprint-blue;
-    box-shadow: 0 4px 10px rgba($blueprint-blue, 0.3);
-    
-    &:hover, &:focus {
-      background: linear-gradient(135deg, darken($blueprint-blue, 5%), darken($blueprint-blue, 15%));
-      border-color: darken($blueprint-blue, 10%);
-      box-shadow: 0 6px 15px rgba($blueprint-blue, 0.4);
-      transform: translateY(-2px);
-    }
-  }
-  
-  .btn-outline-secondary {
-    color: $machine-gray;
-    border: 1px solid $machine-gray;
-    background-color: transparent;
-    
-    &:hover, &:focus {
-      background-color: $machine-gray;
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba($machine-gray, 0.25);
-    }
-  }
-  
-  /* File upload */
+  /* File upload styling */
   .file-upload {
     border: 2px dashed rgba($blueprint-blue, 0.3);
     border-radius: 8px;
@@ -744,6 +1168,16 @@ h2 {
       background-color: rgba($blueprint-blue, 0.05);
       transform: translateY(-2px);
     }
+    
+    /* Mobile file upload adjustments */
+    @media (max-width: 768px) {
+      padding: 1.5rem 1rem;
+      margin: 0.75rem 0;
+    }
+    
+    @media (max-width: 576px) {
+      padding: 1rem 0.75rem;
+    }
   }
   
   /* Error messages */
@@ -756,6 +1190,10 @@ h2 {
     font-weight: $font-weight-medium;
     animation: fadeIn 0.3s ease;
     line-height: 1.2;
+    
+    @media (max-width: 768px) {
+      font-size: 0.75rem;
+    }
   }
   
   /* Add specific styles for the phone number error message */
@@ -773,6 +1211,10 @@ h2 {
     margin-bottom: 1.5rem;
     animation: fadeIn 0.4s ease;
     position: relative;
+    
+    @media (max-width: 768px) {
+      margin-bottom: 1.25rem;
+    }
   }
   
   /* Position error messages in a consistent way */
@@ -808,6 +1250,10 @@ h2 {
   .formly-field [class*="col-"].mb-3,
   .formly-field [class*="col-"].mb-2 {
     margin-bottom: 1.5rem !important; /* Increase margin to accommodate error messages */
+    
+    @media (max-width: 768px) {
+      margin-bottom: 1.25rem !important;
+    }
   }
   
   /* Row field groups */
@@ -819,11 +1265,26 @@ h2 {
       padding-left: 15px;
       padding-right: 15px;
     }
+    
+    /* Mobile row adjustments */
+    @media (max-width: 768px) {
+      margin-left: -8px;
+      margin-right: -8px;
+      
+      [class*="col-"] {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+    }
   }
   
   /* Textarea fields */
   textarea.form-control {
     min-height: 80px;
+    
+    @media (max-width: 768px) {
+      min-height: 70px;
+    }
   }
   
   /* Additional global spacing adjustments */
@@ -892,6 +1353,12 @@ h2 {
       cursor: not-allowed;
       opacity: 0.7;
     }
+    
+    /* Mobile GST button adjustments */
+    @media (max-width: 768px) {
+      padding: 0.6rem 0.8rem;
+      font-size: 0.85rem;
+    }
   }
 
   /* Adjust input field when it has an addon */
@@ -943,67 +1410,443 @@ h2 {
   margin-bottom: 1.5rem;
 }
 
-/* Animation keyframes */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+/* Additional mobile-specific improvements */
+@media (max-width: 768px) {
+  /* Improve touch targets */
+  .btn, .form-control, .form-check-input {
+    min-height: 44px; /* iOS recommended minimum touch target */
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  /* Better spacing for mobile forms */
+  .card .card-body {
+    padding: 1rem 0.75rem;
+  }
+  
+  /* Mobile-friendly step indicators */
+  .col-md-3 .card {
+    margin-bottom: 1.5rem;
+    
+    .card-body {
+      padding: 1rem;
+    }
+  }
+  
+  /* Optimize button text for small screens */
+  .btn {
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    
+    &.btn-outline-primary {
+      border-width: 1.5px;
+    }
+    
+    /* Better icon spacing on mobile */
+    i {
+      margin-right: 0.4rem !important;
+      margin-left: 0.4rem !important;
+    }
+    
+    &.btn-complete {
+      font-weight: 600;
+    }
+  }
+  
+  /* Mobile header improvements */
+  .text-center.mb-4 {
+    margin-bottom: 2rem !important;
+    
+    h2 {
+      margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+    
+    .text-muted {
+      margin-bottom: 0.5rem;
+      padding: 0 1rem;
+    }
+  }
+  
+  /* Better mobile form spacing */
+  .formly-form {
+    .row {
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  /* Mobile progress improvements */
+  .progress-container {
+    margin-bottom: 2rem;
+    
+    .progress {
+      height: 8px;
+    }
   }
 }
 
-/* Media queries for responsive design */
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .btn, .card, .progress-bar, .step-number {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn-primary {
+    border: 2px solid currentColor;
+  }
+  
+  .btn-outline-primary, .btn-outline-secondary {
+    border-width: 2px;
+  }
+  
+  .form-control {
+    border-width: 2px;
+  }
+}
+
+/* Dark mode considerations (if needed in future) */
+@media (prefers-color-scheme: dark) {
+  :host {
+    .card {
+      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1) !important;
+    }
+  }
+}
+
+/* Focus improvements for keyboard navigation */
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-check-input:focus-visible {
+  outline: 2px solid $blueprint-blue;
+  outline-offset: 2px;
+}
+
+/* Loading state improvements */
+.btn[disabled] {
+  position: relative;
+  
+  .pi-spinner {
+    animation: spin 1s linear infinite;
+  }
+}
+
+/* Better mobile scroll behavior for step navigation */
 @media (max-width: 768px) {
-  .container-fluid {
-    padding: 1.5rem 1rem;
+  .col-md-3 .steps-container {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    
+    /* Add scroll indicators */
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 10px;
+      background: linear-gradient(to right, rgba(255,255,255,0.8), transparent);
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    &::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 10px;
+      background: linear-gradient(to left, rgba(255,255,255,0.8), transparent);
+      pointer-events: none;
+      z-index: 1;
+    }
+  }
+}
+
+/* Navigation buttons styling */
+.navigation-buttons {
+  .back-button-container {
+    flex-shrink: 0;
+  }
+  
+  .action-buttons {
+    flex-shrink: 0;
+  }
+  
+  /* Mobile navigation improvements */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    
+    .back-button-container,
+    .action-buttons {
+      width: 100%;
+    }
+    
+    .action-buttons {
+      flex-direction: column;
+      gap: 0.75rem;
+      
+      .btn {
+        width: 100%;
+      }
+    }
+    
+    /* Reorder buttons on mobile - action buttons first, then back button */
+    .back-button-container {
+      order: 2;
+    }
+    
+    .action-buttons {
+      order: 1;
+    }
+  }
+  
+  /* Extra small screens */
+  @media (max-width: 576px) {
+    .btn {
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      
+      i {
+        font-size: 0.85rem;
+      }
+    }
+  }
+}
+
+/* Medium screen adjustments (768px to 1244px) */
+@media (min-width: 768px) and (max-width: 1244px) {
+  .steps-container {
+    padding: 0.5rem;
+    
+    .step {
+      gap: 1rem;
+      
+      .step-number {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+      }
+      
+      .step-content {
+        padding-top: 0.35rem;
+        
+        .step-title {
+          font-size: 0.9rem;
+          line-height: 1.3;
+        }
+      }
+      
+      &:not(:last-child)::after {
+        left: 17px;
+      }
+    }
+  }
+  
+  /* Adjust card padding for better text fit */
+  .card .card-body {
+    padding: 1.25rem 1rem;
+  }
+  
+  /* Adjust card title for better spacing */
+  .card-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+}
+
+/* Additional adjustments for smaller medium screens */
+@media (min-width: 768px) and (max-width: 991px) {
+  .steps-container {
+    .step {
+      .step-content {
+        .step-title {
+          font-size: 0.85rem;
+        }
+      }
+    }
   }
   
   .card .card-body {
-    padding: 1.25rem;
-  }
-  
-  .steps-container {
-    gap: 1.5rem;
-  }
-  
-  .col-md-9 {
-    padding-left: 1rem;
-  }
-  
-  .step-main-title {
-    font-size: 1.125rem;
+    padding: 1rem 0.75rem;
   }
 }
 
-/* Edit mode styles */
-:host.edit-mode {
+/* Ensure proper text wrapping and container sizing */
+.col-md-3 {
+  @media (min-width: 768px) and (max-width: 1244px) {
+    padding-right: 1rem;
+    padding-left: 1rem;
+    
+    .card {
+      width: 100%;
+      max-width: none;
+    }
+  }
+}
+
+/* Mobile Stepper Styles */
+.mobile-stepper {
+  .stepper-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+    
+    .step-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      position: relative;
+      min-width: 0; /* Enable text truncation */
+      
+      &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 16px;
+        left: calc(50% + 16px);
+        width: calc(100% - 16px);
+        height: 2px;
+        background-color: $material-finish-silver;
+        z-index: 1;
+      }
+      
+      .step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: $material-finish-silver;
+        color: $machine-gray;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: $font-weight-semibold;
+        font-size: 0.9rem;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease;
+      }
+      
+      .step-label {
+        font-size: 0.75rem;
+        color: $machine-gray;
+        text-align: center;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+        font-weight: $font-weight-medium;
+      }
+      
+      &.active {
+        .step-number {
+          background-color: $blueprint-blue;
+          color: $technical-white;
+          transform: scale(1.1);
+          box-shadow: 0 2px 8px rgba($blueprint-blue, 0.3);
+        }
+        
+        .step-label {
+          color: $blueprint-blue;
+          font-weight: $font-weight-semibold;
+        }
+        
+        &:not(:last-child)::after {
+          background: linear-gradient(to right, $blueprint-blue 50%, $material-finish-silver 50%);
+        }
+      }
+      
+      &.completed {
+        .step-number {
+          background-color: lighten($blueprint-blue, 35%);
+          color: $blueprint-blue;
+        }
+        
+        &:not(:last-child)::after {
+          background-color: lighten($blueprint-blue, 35%);
+        }
+      }
+    }
+  }
+  
+  .stepper-progress {
+    padding: 0 0.5rem;
+    margin-top: 1rem;
+    
+    .progress {
+      height: 6px;
+      background-color: $material-finish-silver;
+      border-radius: 3px;
+      overflow: hidden;
+      
+      .progress-bar {
+        background: linear-gradient(90deg, $blueprint-blue, lighten($blueprint-blue, 10%));
+        transition: width 0.3s ease;
+      }
+    }
+  }
+}
+
+/* Extra small devices (phones) */
+@media (max-width: 375px) {
+  .mobile-stepper {
+    .stepper-row {
+      gap: 4px;
+      padding: 0 0.25rem;
+      
+      .step-item {
+        .step-number {
+          width: 28px;
+          height: 28px;
+          font-size: 0.8rem;
+        }
+        
+        .step-label {
+          font-size: 0.7rem;
+        }
+        
+        &:not(:last-child)::after {
+          top: 14px;
+          left: calc(50% + 14px);
+        }
+      }
+    }
+  }
+}
+
+/* Small devices (landscape phones) */
+@media (min-width: 376px) and (max-width: 767px) {
+  .mobile-stepper {
+    .stepper-row {
+      .step-item {
+        .step-label {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+}
+
+/* Card adjustments for mobile */
+@media (max-width: 767px) {
   .card {
-    border-left: 4px solid #059669;
+    .card-body {
+      padding: 1rem;
+    }
     
     .card-title {
-      color: #059669;
+      font-size: 1rem;
+      padding-bottom: 0.75rem;
+      margin-bottom: 1rem;
     }
-  }
-  
-  .progress-bar {
-    background: linear-gradient(90deg, #059669, lighten(#059669, 10%)) !important;
-  }
-  
-  .btn-primary {
-    background: linear-gradient(135deg, #059669, darken(#059669, 8%));
-    border-color: #059669;
-    
-    &:hover, &:focus {
-      background: linear-gradient(135deg, darken(#059669, 5%), darken(#059669, 15%));
-      border-color: darken(#059669, 10%);
-    }
-  }
-  
-  .step.active .step-number {
-    background-color: #059669;
-    box-shadow: 0 4px 12px rgba(#059669, 0.4);
   }
 } 

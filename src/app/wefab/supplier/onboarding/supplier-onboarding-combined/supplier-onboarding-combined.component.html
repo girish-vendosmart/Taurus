@@ -4,17 +4,53 @@
       
       <div class="row align-items-start">
         <!-- Left Navigation Panel -->
-        <div class="col-md-3 mb-3 mb-md-0" style="margin-top: 75px;">
+        <div class="col-md-3 col-12 mb-3 mb-md-0" style="margin-top: 75px;">
           <div class="card shadow-sm border-0">
             <div class="card-body">
-              <h5 class="card-title mb-3">ONBOARDING STEPS</h5>
+              <h5 class="card-title text-uppercase">ONBOARDING STEPS</h5>
               
-              <div class="steps-container">
+              <!-- Mobile Stepper View -->
+              <div class="mobile-stepper d-md-none">
+                <div class="stepper-row">
+                  <div class="step-item" [ngClass]="{'active': activeStepIndex === 0, 'completed': activeStepIndex > 0}" (click)="goToStep(0)">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Basic</div>
+                  </div>
+                  <div class="step-item" [ngClass]="{'active': activeStepIndex === 1, 'completed': activeStepIndex > 1}" (click)="goToStep(1)">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Contact</div>
+                  </div>
+                  <div class="step-item" [ngClass]="{'active': activeStepIndex === 2, 'completed': activeStepIndex > 2}" (click)="goToStep(2)">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Machine</div>
+                  </div>
+                  <div class="step-item" [ngClass]="{'active': activeStepIndex === 3, 'completed': activeStepIndex > 3}" (click)="goToStep(3)">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Facility</div>
+                  </div>
+                  <div class="step-item" [ngClass]="{'active': activeStepIndex === 4, 'completed': activeStepIndex > 4}" (click)="goToStep(4)">
+                    <div class="step-number">5</div>
+                    <div class="step-label">Finance</div>
+                  </div>
+                  <div class="step-item" [ngClass]="{'active': activeStepIndex === 5, 'completed': activeStepIndex > 5}" (click)="goToStep(5)">
+                    <div class="step-number">6</div>
+                    <div class="step-label">Additional</div>
+                  </div>
+                </div>
+                <div class="stepper-progress">
+                  <div class="progress">
+                    <div class="progress-bar" [style.width]="(activeStepIndex + 1) * 100 / totalSteps + '%'"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Desktop Stepper View -->
+              <div class="steps-container d-none d-md-flex">
                 <!-- Step 1: Basic Details -->
                 <div class="step" [ngClass]="{'active': activeStepIndex === 0, 'completed': activeStepIndex > 0}" (click)="goToStep(0)">
                   <div class="step-number">1</div>
                   <div class="step-content">
-                    <span class="step-title">Basic Details</span>
+                    <span class="step-title text-truncate">Basic Details</span>
                   </div>
                 </div>
                 
@@ -22,7 +58,7 @@
                 <div class="step" [ngClass]="{'active': activeStepIndex === 1, 'completed': activeStepIndex > 1}" (click)="goToStep(1)">
                   <div class="step-number">2</div>
                   <div class="step-content">
-                    <span class="step-title">Contact & Capabilities</span>
+                    <span class="step-title text-truncate">Contact &amp; Capabilities</span>
                   </div>
                 </div>
                 
@@ -30,7 +66,7 @@
                 <div class="step" [ngClass]="{'active': activeStepIndex === 2, 'completed': activeStepIndex > 2}" (click)="goToStep(2)">
                   <div class="step-number">3</div>
                   <div class="step-content">
-                    <span class="step-title">Machine Capabilities</span>
+                    <span class="step-title text-truncate">Machine Capabilities</span>
                   </div>
                 </div>
                 
@@ -38,7 +74,7 @@
                 <div class="step" [ngClass]="{'active': activeStepIndex === 3, 'completed': activeStepIndex > 3}" (click)="goToStep(3)">
                   <div class="step-number">4</div>
                   <div class="step-content">
-                    <span class="step-title">Facility Verification</span>
+                    <span class="step-title text-truncate">Facility Verification</span>
                   </div>
                 </div>
                 
@@ -46,7 +82,7 @@
                 <div class="step" [ngClass]="{'active': activeStepIndex === 4, 'completed': activeStepIndex > 4}" (click)="goToStep(4)">
                   <div class="step-number">5</div>
                   <div class="step-content">
-                    <span class="step-title">Financial Information</span>
+                    <span class="step-title text-truncate">Financial Information</span>
                   </div>
                 </div>
                 
@@ -54,7 +90,7 @@
                 <div class="step" [ngClass]="{'active': activeStepIndex === 5, 'completed': activeStepIndex > 5}" (click)="goToStep(5)">
                   <div class="step-number">6</div>
                   <div class="step-content">
-                    <span class="step-title">Additional Information</span>
+                    <span class="step-title text-truncate">Additional Information</span>
                   </div>
                 </div>
               </div>
@@ -63,7 +99,8 @@
         </div>
         
         <!-- Right Form Area -->
-        <div class="col-md-9"><!-- Header Section -->
+        <div class="col-md-9 col-12">
+          <!-- Header Section -->
           <div class="text-center mb-4">
             <h2 class="mb-2">
               <ng-container>
@@ -111,16 +148,20 @@
                 </formly-form>
                 
                 <!-- Navigation buttons -->
-                <div class="d-flex justify-content-between mt-4">
-                  <button 
-                    type="button" 
-                    class="btn btn-outline-secondary" 
-                    (click)="prevStep()" 
-                    [disabled]="activeStepIndex === 0">
-                    <i class="pi pi-arrow-left me-2"></i>Back
-                  </button>
+                <div class="navigation-buttons d-flex justify-content-between mt-4">
+                  <div class="back-button-container">
+                    <button 
+                      type="button" 
+                      class="btn btn-outline-secondary" 
+                      (click)="prevStep()" 
+                      [disabled]="activeStepIndex === 0">
+                      <i class="pi pi-arrow-left me-2"></i>
+                      <span class="d-none d-sm-inline">Back</span>
+                      <span class="d-sm-none">Back</span>
+                    </button>
+                  </div>
 
-                  <div class="d-flex gap-2">
+                  <div class="action-buttons d-flex gap-2">
                     <!-- Save Button (visible when step is not completed) -->
                     <button 
                       *ngIf="shouldShowSaveButton()"
@@ -129,9 +170,12 @@
                       (click)="saveCurrentStep()"
                       [disabled]="isSaving">
                       <i class="pi pi-save me-2"></i>
-                      <span *ngIf="!isSaving">Save</span>
+                      <span *ngIf="!isSaving" class="d-none d-sm-inline">Save</span>
+                      <span *ngIf="!isSaving" class="d-sm-none">Save</span>
                       <span *ngIf="isSaving">
-                        <i class="pi pi-spin pi-spinner me-1"></i>Saving...
+                        <i class="pi pi-spin pi-spinner me-1"></i>
+                        <span class="d-none d-sm-inline">Saving...</span>
+                        <span class="d-sm-none">Saving...</span>
                       </span>
                     </button>
                     
@@ -142,7 +186,9 @@
                         (click)="nextStep()"
                         [disabled]="!isCurrentStepValid()"
                         [ngClass]="{'btn-secondary': !isCurrentStepValid(), 'btn-primary': isCurrentStepValid()}">
-                        Next <i class="pi pi-arrow-right ms-2"></i>
+                        <span class="d-none d-sm-inline">Next</span>
+                        <span class="d-sm-none">Next</span>
+                        <i class="pi pi-arrow-right ms-2"></i>
                       </button>
                     </ng-container>
                     
@@ -154,8 +200,14 @@
                         [disabled]="!isCurrentStepValid()"
                         [ngClass]="{'btn-secondary': !isCurrentStepValid(), 'btn-primary': isCurrentStepValid()}">
                         <i class="pi pi-check me-2"></i>
-                        <ng-container *ngIf="!isEditMode">Submit Onboarding</ng-container>
-                        <ng-container *ngIf="isEditMode">Save Changes</ng-container>
+                        <ng-container *ngIf="!isEditMode">
+                          <span class="d-none d-sm-inline">Submit Onboarding</span>
+                          <span class="d-sm-none">Submit</span>
+                        </ng-container>
+                        <ng-container *ngIf="isEditMode">
+                          <span class="d-none d-sm-inline">Save Changes</span>
+                          <span class="d-sm-none">Save</span>
+                        </ng-container>
                       </button>
                     </ng-template>
                   </div>
