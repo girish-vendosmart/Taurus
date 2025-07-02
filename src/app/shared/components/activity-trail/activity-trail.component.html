@@ -3,22 +3,76 @@
   <!-- Header -->
   <div class="activity-trail-header" *ngIf="showHeader">
     <h3 class="activity-trail-title">{{ title }}</h3>
-    <button 
-      pButton 
-      pRipple 
-      type="button" 
-      icon="pi pi-refresh" 
-      class="p-button-text p-button-sm refresh-btn"
-      (click)="refresh()"
-      [disabled]="loading"
-      [attr.aria-label]="'Refresh ' + title.toLowerCase()"
-      pTooltip="Refresh activity trail"
-      tooltipPosition="left">
-    </button>
+    <div class="header-actions">
+      <button 
+        pButton 
+        pRipple 
+        type="button" 
+        icon="pi pi-refresh" 
+        class="p-button-text p-button-sm refresh-btn"
+        (click)="refresh()"
+        [disabled]="loading"
+        [attr.aria-label]="'Refresh ' + title.toLowerCase()"
+        pTooltip="Refresh activity trail"
+        tooltipPosition="left">
+      </button>
+    </div>
+  </div>
+
+  <!-- Search and Filter Controls -->
+  <div class="activity-controls" *ngIf="showSearch || showFilter">
+    <!-- Search Input -->
+    <div class="search-container" *ngIf="showSearch">
+      <span class="p-input-icon-left p-input-icon-right">
+        <i class="pi pi-search"></i>
+        <input 
+          type="text" 
+          pInputText 
+          placeholder="Search activities..." 
+          [value]="searchTerm"
+          (input)="onSearchChange($event)"
+          class="search-input"
+          [attr.aria-label]="'Search in ' + title.toLowerCase()">
+        <i class="pi pi-times clear-search" 
+           *ngIf="searchTerm" 
+           (click)="clearSearch()"
+           [attr.aria-label]="'Clear search'"
+           pTooltip="Clear search"
+           [style.cursor]="'pointer'"></i>
+      </span>
+    </div>
+
+    <!-- Filter Dropdown -->
+    <div class="filter-container" *ngIf="showFilter">
+      <p-dropdown 
+        [options]="filterOptions" 
+        [(ngModel)]="selectedFilter"
+        (onChange)="onFilterChange($event.value)"
+        optionLabel="label" 
+        optionValue="value"
+        placeholder="Filter by type"
+        [showClear]="true"
+        class="filter-dropdown"
+        [attr.aria-label]="'Filter activities by type'">
+      </p-dropdown>
+    </div>
+
+    <!-- Results count -->
+    <div class="results-info" *ngIf="showSearch || showFilter">
+      <span class="results-count" [attr.aria-live]="'polite'">
+        {{ filteredActivities.length }} of {{ processedActivities.length }} activities
+        <span *ngIf="searchTerm || selectedFilter"> found</span>
+      </span>
+    </div>
   </div>
 
   <!-- Content -->
-  <div class="activity-trail-content" role="log">
+  <div class="activity-trail-content" 
+       role="log" 
+       [style.maxHeight]="maxHeight"
+       [attr.aria-live]="'polite'"
+       [attr.aria-label]="'Activity timeline with ' + displayedActivities.length + ' items'">
+    
     <!-- Loading State -->
     <div class="loading-container" *ngIf="loading" role="status" aria-live="polite">
       <p-progressSpinner 
@@ -31,17 +85,36 @@
     </div>
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="!loading && processedActivities.length === 0" role="status" aria-live="polite">
+    <div class="empty-state" *ngIf="!loading && displayedActivities.length === 0" role="status" aria-live="polite">
       <i class="pi pi-history empty-icon" aria-hidden="true"></i>
-      <p class="empty-message">{{ emptyMessage }}</p>
+      <p class="empty-message">
+        <span *ngIf="!searchTerm && !selectedFilter">{{ emptyMessage }}</span>
+        <span *ngIf="searchTerm || selectedFilter">No activities match your search criteria</span>
+      </p>
+      <button 
+        *ngIf="searchTerm || selectedFilter"
+        pButton 
+        type="button" 
+        label="Clear Filters" 
+        class="p-button-text p-button-sm"
+        (click)="clearSearch(); onFilterChange({label: 'All Activities', value: null})"
+        icon="pi pi-filter-slash">
+      </button>
     </div>
 
     <!-- Activity Timeline -->
-    <div class="activity-timeline" *ngIf="!loading && processedActivities.length > 0">
+    <div class="activity-timeline" *ngIf="!loading && displayedActivities.length > 0">
       <div 
         class="activity-item" 
-        *ngFor="let activity of processedActivities; trackBy: trackByActivityId; let isFirst = first; let isLast = last"
-        role="article">
+        *ngFor="let activity of displayedActivities; trackBy: trackByActivityId; let isFirst = first; let isLast = last"
+        role="article"
+        [attr.aria-label]="getActivityAriaLabel(activity)"
+        [class]="getLevelClass(activity.level)"
+        [class.animate-entry]="animateEntries"
+        tabindex="0"
+        (click)="onActivityClick(activity)"
+        (keydown.enter)="onActivityClick(activity)"
+        (keydown.space)="onActivityClick(activity)">
         
         <!-- Timeline Connector (Left Side) -->
         <div class="timeline-connector">
@@ -49,8 +122,11 @@
           <div class="timeline-line timeline-line-top" *ngIf="!isFirst" aria-hidden="true"></div>
           
           <!-- Timeline Dot -->
-          <div class="timeline-dot" aria-hidden="true">
-            <i class="pi pi-stop-circle"></i>
+          <div class="timeline-dot" 
+               [ngClass]="getTimelineDotClass(activity.action)" 
+               aria-hidden="true"
+               [attr.title]="activity.action">
+            <i [class]="getActivityIcon(activity.action)" [attr.aria-label]="activity.action"></i>
           </div>
           
           <!-- Timeline Line Below Dot (only show if not last item) -->
@@ -60,23 +136,22 @@
         <!-- Activity Content Box (Right Side) -->
         <div class="activity-content-box">
           <!-- Activity Badge -->
-          
-          <!-- Timestamp (top right) -->
-          <!-- <div class="activity-timestamp">
-            <i class="pi pi-clock" aria-hidden="true"></i>
-            <span class="time-since">{{ activity.time_since }}</span>
-          </div> -->
+          <div class="activity-header">
+            <span class="activity-badge" [ngClass]="getActivityBadgeClass(activity.action)">
+              {{ getActivityBadgeText(activity.action) }}
+            </span>
+            <span class="activity-title" *ngIf="activity.title">{{ activity.title }}</span>
+          </div>
 
           <!-- Activity Description -->
           <div class="activity-description">
             <div class="activity-main-text">
-              <i class="pi pi-sync" aria-hidden="true"></i>
-              <span>{{ activity.description }}</span>
+              <span class="description-text">{{ activity.description }}</span>
             </div>
             
-            <!-- Data Changes for Data Modified activities -->
-            <div class="activity-changes" *ngIf="activity.action === 'Data Modified' && activity.changes && activity.changes.length > 0">
-              <div class="change-item" *ngFor="let change of activity.changes">
+            <!-- Data Changes for activities with multiple changes -->
+            <div class="activity-changes" *ngIf="activity.changes && activity.changes.length > 1">
+              <div class="change-item" *ngFor="let change of activity.changes; let i = index">
                 <span class="change-indicator" [ngClass]="getChangeIndicator(change)">
                   {{ getChangeSymbol(change) }}
                 </span>
@@ -87,15 +162,49 @@
 
           <!-- User Info - Name and Date on same line -->
           <div class="user-info">
-            <div class="user-avatar">
-              {{ getUserInitials(activity.user) }}
-            </div>
-            <span class="user-name">{{ activity.user }}</span>
-            <time class="activity-time" [attr.datetime]="activity.date | date:'yyyy-MM-ddTHH:mm:ssZ'">
-              {{ activity.date | dateFormat }}
+            <button 
+              class="user-avatar-btn"
+              (click)="onUserClick(activity.user); $event.stopPropagation()"
+              [attr.aria-label]="getUserAriaLabel(activity.user)"
+              pTooltip="View user activities"
+              tooltipPosition="top">
+              <div class="user-avatar">
+                {{ getUserInitials(activity.user) }}
+              </div>
+            </button>
+            <span class="user-name" 
+                  (click)="onUserClick(activity.user); $event.stopPropagation()"
+                  [style.cursor]="'pointer'"
+                  [attr.title]="'View activities by ' + activity.user">
+              {{ activity.user }}
+            </span>
+            <time class="activity-time" 
+                  [attr.datetime]="activity.date | date:'yyyy-MM-ddTHH:mm:ssZ'"
+                  [attr.title]="activity.date | date:'medium'">
+              {{ activity.time_since }}
             </time>
           </div>
+
+          <!-- Priority indicator for critical/important items -->
+          <div class="priority-indicator" 
+               *ngIf="activity.level === 'critical' || activity.level === 'important'"
+               [attr.aria-label]="activity.level + ' priority'"
+               [ngClass]="'priority-' + activity.level">
+          </div>
         </div>
+      </div>
+
+      <!-- Load More Button (for virtual scrolling) -->
+      <div class="load-more-container" *ngIf="enableVirtualScroll && hasMoreItems()">
+        <button 
+          pButton 
+          type="button" 
+          label="Load More Activities" 
+          class="p-button-outlined load-more-btn"
+          (click)="loadMore()"
+          icon="pi pi-chevron-down"
+          [attr.aria-label]="'Load more activities, showing ' + displayedActivities.length + ' of ' + filteredActivities.length">
+        </button>
       </div>
     </div>
   </div>
