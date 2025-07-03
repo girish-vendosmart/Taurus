@@ -119,23 +119,6 @@ $danger-red: #EF4444;      // Danger color
   }
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-
-  &.status-draft { background: rgba($machine-gray, 0.1); color: $machine-gray; }
-  &.status-submitted { background: rgba($info-blue, 0.1); color: $info-blue; }
-  &.status-approved { background: rgba($process-green, 0.1); color: $process-green; }
-  &.status-rejected { background: rgba($danger-red, 0.1); color: $danger-red; }
-  &.status-in-progress { background: rgba($warning-yellow, 0.1); color: $warning-yellow; }
-  &.status-completed { background: rgba($process-green, 0.1); color: $process-green; }
-}
-
 .content-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -221,6 +204,26 @@ $danger-red: #EF4444;      // Danger color
         color: #6b7280;
         margin-bottom: 0.25rem;
       }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+
+        .label {
+          font-size: 14px;
+          color: #6b7280;
+          font-weight: 500;
+        }
+
+        .value {
+          font-size: 14px;
+          color: #1f2937;
+          font-weight: 500;
+          text-align: right;
+        }
+      }
     }
   }
 }
@@ -274,6 +277,83 @@ $danger-red: #EF4444;      // Danger color
       font-size: 0.875rem;
       color: #1f2937;
       font-weight: 600;
+    }
+  }
+}
+
+// Requirements Section
+.requirements-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 0 24px 24px;
+  border-top: 1px solid #e5e7eb;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 24px 0;
+  }
+
+  .requirements-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+
+  .requirement-item {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+
+    h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.5;
+      margin: 0;
+    }
+  }
+
+  .general-terms {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+
+    h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0 0 8px 0;
+    }
+
+    div {
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.5;
+
+      p {
+        margin: 0 0 8px 0;
+      }
+
+      strong {
+        color: #1f2937;
+      }
     }
   }
 }
@@ -335,6 +415,13 @@ $danger-red: #EF4444;      // Danger color
         color: #1f2937;
         margin-bottom: 4px;
         font-size: 14px;
+      }
+
+      .attachment-category {
+        font-size: 12px;
+        color: #3b82f6;
+        font-weight: 500;
+        margin-bottom: 4px;
       }
 
       .attachment-date {

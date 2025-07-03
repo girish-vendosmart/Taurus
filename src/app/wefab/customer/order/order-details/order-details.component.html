@@ -6,7 +6,7 @@
       <div class="title-section">
         <h2>{{ orderDetails.order_name }}</h2>
         <p class="reference-text">{{ orderDetails.name }}</p>
-        <span [class]="'status-badge ' + getStatusClass(orderDetails.status)">{{ orderDetails.status }}</span>
+        <span [class]="'status-badge ' + getStatusClass(orderDetails.cpo_status)">{{ orderDetails.cpo_status }}</span>
       </div>
       <div class="action-buttons">
         <button class="print-btn" (click)="printOrder()">
@@ -27,54 +27,87 @@
         <h3>Order Information</h3>
         <div class="info-rows">
           <div class="info-row">
-            <span class="label">Created On</span>
-            <span class="value">{{ formatDate(orderDetails.creation) }}</span>
+            <span class="label">Customer PO Number:</span>
+            <span class="value">{{ orderDetails.customer_po_number }}</span>
           </div>
           <div class="info-row">
-            <span class="label">Last Modified</span>
-            <span class="value">{{ formatDate(orderDetails.modified) }}</span>
+            <span class="label">Priority:</span>
+            <span class="value">{{ orderDetails.priority }}</span>
           </div>
           <div class="info-row">
-            <span class="label">Expected Delivery</span>
-            <span class="value">{{ formatDate(orderDetails.expected_delivery) }}</span>
+            <span class="label">Created On:</span>
+            <span class="value">{{ formatApiDate(orderDetails.creation) }}</span>
           </div>
           <div class="info-row">
-            <span class="label">Total Amount</span>
-            <span class="value">{{ getFormattedCurrencyAmount(orderDetails.total_amount) }}</span>
+            <span class="label">Last Modified:</span>
+            <span class="value">{{ formatApiDate(orderDetails.modified) }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Terms & Conditions -->
+      <!-- Order Summary -->
       <div class="info-section">
-        <h3>Terms & Conditions</h3>
+        <h3>Order Summary</h3>
         <div class="info-rows">
           <div class="info-row">
-            <span class="label">Payment Terms</span>
-            <span class="value">{{ orderDetails.payment_terms }}</span>
+            <span class="label">Total Line Items:</span>
+            <span class="value">{{ orderItems.length }} parts</span>
           </div>
           <div class="info-row">
-            <span class="label">Delivery Terms</span>
-            <span class="value">{{ orderDetails.delivery_terms }}</span>
+            <span class="label">Total Quantity:</span>
+            <span class="value">{{ getTotalQuantity() }} units</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Total Amount:</span>
+            <span class="value">{{ getFormattedCurrencyAmount(orderDetails.grand_total) }}</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Quote Parties Section -->
+    <!-- Delivery & Reference Information -->
     <div class="quote-parties-section">
       <div class="quote-from">
-        <h4>Supplier</h4>
+        <h4>Delivery Information</h4>
         <div class="party-details">
-          <div class="company-name">{{ orderDetails.supplier }}</div>
-          <div class="contact-info">Purchase Order: {{ orderDetails.purchase_order }}</div>
+          <div class="info-row">
+            <span class="label">Requested Delivery:</span>
+            <span class="value">{{ orderDetails.expected_delivery }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Promised Delivery:</span>
+            <span class="value">{{ orderDetails.promised_delivery }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Delivery Terms:</span>
+            <span class="value">{{ orderDetails.delivery_terms }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Shipping Method:</span>
+            <span class="value">{{ orderDetails.shipping_method }}</span>
+          </div>
         </div>
       </div>
+      
       <div class="quote-to">
-        <h4>Customer</h4>
+        <h4>Reference Information</h4>
         <div class="party-details">
-          <div class="company-name">{{ orderDetails.customer }}</div>
-          <div class="contact-info">Quotation ID: {{ orderDetails.quotation_id }}</div>
+          <div class="info-row">
+            <span class="label">RFQ Reference:</span>
+            <span class="value">{{ orderDetails.rfq_reference }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Quotation ID:</span>
+            <span class="value">{{ orderDetails.quotation_id }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Payment Terms:</span>
+            <span class="value">{{ orderDetails.payment_terms }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Payment Method:</span>
+            <span class="value">{{ orderDetails.payment_method }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -82,54 +115,91 @@
     <!-- Line Items Section -->
     <div class="line-items-section">
       <h3>Order Items</h3>
-      <app-common-table
-        [data]="orderItems"
-        [config]="orderItemsTableConfig"
-        (rowClick)="onItemRowClick($event)"
-        (linkClick)="onItemLinkClick($event)"
-        (actionClick)="onItemActionClick($event)">
-      </app-common-table>
+      
+      <div class="common-table-wrapper">
+        <app-common-table
+          [config]="orderItemsTableConfig"
+          [data]="orderItems"
+          [loading]="loading"
+          (rowClick)="onItemRowClick($event)"
+          (linkClick)="onItemLinkClick($event)"
+          (actionClick)="onItemActionClick($event)">
+        </app-common-table>
+      </div>
+
+      <!-- Summary Section -->
+      <div class="summary-section">
+        <div class="summary-row">
+          <span class="summary-label">Sub Total:</span>
+          <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.sub_total) }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">{{ getDiscountDisplayText() }}</span>
+          <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.discount_amount) }}</span>
+        </div>
+        
+        <div class="summary-row" *ngIf="orderDetails.total_tax_amount > 0">
+          <span class="summary-label">Total Tax Amount:</span>
+          <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.total_tax_amount) }}</span>
+        </div>
+        
+        <div class="summary-row" *ngIf="orderDetails.shipping_charges > 0">
+          <span class="summary-label">Shipping Charges:</span>
+          <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.shipping_charges) }}</span>
+        </div>
+        
+        <div class="summary-row total-row">
+          <span class="summary-label">Grand Total:</span>
+          <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.grand_total) }}</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Summary Section -->
-    <div class="summary-section">
-      <div class="summary-row">
-        <span class="summary-label">Total Items</span>
-        <span class="summary-value">{{ getTotalQuantity() }}</span>
+    <!-- Requirements Section -->
+    <div class="requirements-section" *ngIf="orderDetails.quality_requirements || orderDetails.packaging_requirements">
+      <h3>Requirements & Instructions</h3>
+      <div class="requirements-grid">
+        <div class="requirement-item" *ngIf="orderDetails.quality_requirements">
+          <h4>Quality Requirements</h4>
+          <p>{{ orderDetails.quality_requirements }}</p>
+        </div>
+        <div class="requirement-item" *ngIf="orderDetails.packaging_requirements">
+          <h4>Packaging Requirements</h4>
+          <p>{{ orderDetails.packaging_requirements }}</p>
+        </div>
       </div>
-      <div class="summary-row">
-        <span class="summary-label">Total Amount</span>
-        <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.total_amount) }}</span>
+      <div class="general-terms" *ngIf="orderDetails.general_terms">
+        <h4>General Terms</h4>
+        <div [innerHTML]="orderDetails.general_terms"></div>
       </div>
     </div>
-  </div>
 
-  <!-- Attachments Section -->
-  <div class="attachments-section">
-    <h3>Attachments</h3>
-    <p class="text-muted">All related documents and files for this order</p>
-    <div class="attachments-grid">
-      <div class="attachment-card" *ngFor="let attachment of orderAttachments">
-        <div class="attachment-content">
-          <div class="file-icon">
-            <i class="pi" [ngClass]="{
-              'pi-file-pdf': isFileTypePdf(attachment.file_name),
-              'pi-file-excel': isFileTypeDocument(attachment.file_name),
-              'pi-image': isFileTypeImage(attachment.file_name),
-              'pi-file': !isFileTypePdf(attachment.file_name) && !isFileTypeDocument(attachment.file_name) && !isFileTypeImage(attachment.file_name)
-            }"></i>
-          </div>
-          <div class="attachment-details">
-            <div class="attachment-name">{{ getTruncatedFileName(attachment.file_name) }}</div>
-            <div class="attachment-date">{{ getFormattedFileDate(attachment.uploaded_on) }}</div>
-          </div>
-          <div class="attachment-actions">
-            <button (click)="viewAttachment(attachment)" title="View">
-              <i class="pi pi-eye"></i>
-            </button>
-            <button (click)="downloadAttachment(attachment)" title="Download">
-              <i class="pi pi-download"></i>
-            </button>
+    <!-- Attachments Section -->
+    <div class="attachments-section" *ngIf="orderAttachments && orderAttachments.length > 0">
+      <h3>Attachments ({{ orderAttachments.length }})</h3>
+      <p class="text-muted">Documents and files related to this order</p>
+      
+      <div class="attachments-grid">
+        <div *ngFor="let attachment of orderAttachments" class="attachment-card">
+          <div class="attachment-content">
+            <div class="file-icon">
+              <i class="pi" [ngClass]="{
+                'pi-file-pdf': isFileTypePdf(attachment.file_name),
+                'pi-file-excel': isFileTypeDocument(attachment.file_name),
+                'pi-image': isFileTypeImage(attachment.file_name),
+                'pi-file': !isFileTypePdf(attachment.file_name) && !isFileTypeDocument(attachment.file_name) && !isFileTypeImage(attachment.file_name)
+              }"></i>
+            </div>
+            <div class="attachment-details">
+              <div class="attachment-name">{{ attachment.name }}</div>
+              <div class="attachment-category">{{ attachment.category }}</div>
+              <div class="attachment-date">{{ formatApiDate(attachment.uploaded_on) }}</div>
+            </div>
+            <div class="attachment-actions">
+              <button class="download-btn" (click)="downloadAttachment(attachment)" title="Download">
+                <i class="pi pi-download"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>

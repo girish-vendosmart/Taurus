@@ -5,24 +5,128 @@ import { FormsModule } from '@angular/forms';
 import { CommonTableComponent, TableConfig } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
 
+// API Response Interfaces
+export interface CustomerPurchaseOrderApiResponse {
+  name: string;
+  owner: string;
+  creation: string;
+  modified: string;
+  modified_by: string;
+  docstatus: number;
+  idx: number;
+  cpo_status: string;
+  po_name: string;
+  rfq_reference: string;
+  wefab_quotation: string;
+  customer_id: string;
+  enquiry_reference: string;
+  customer_po_number: string;
+  priority: string;
+  requested_delivery_date: string;
+  promised_delivery_date: string;
+  delivery_terms: string;
+  shipping_method: string;
+  currency_code: string;
+  sub_total: number;
+  discount_type: string;
+  discount: number;
+  discount_amount: number;
+  total_tax_amount: number;
+  shipping_charges: number;
+  grand_total: number;
+  payment_terms: string;
+  payment_method: string;
+  quality_requirements: string;
+  packaging_requirements: string;
+  general_terms: string;
+  status: string;
+  doctype: string;
+  items: OrderLineItem[];
+  other_attachments: AttachmentItem[];
+  customs_documentation: AttachmentItem[];
+  quality_certificates: AttachmentItem[];
+  technical_drawings: AttachmentItem[];
+}
+
+export interface OrderLineItem {
+  name: string;
+  owner: string;
+  creation: string;
+  modified: string;
+  modified_by: string;
+  docstatus: number;
+  idx: number;
+  item_code: string;
+  item_description: string;
+  material: string;
+  quantity: number;
+  unit: string;
+  unit_price: number;
+  comments: string;
+  no_bid: number;
+  miscellaneous: number;
+  tooling: number;
+  notes: string;
+  tax_type: string;
+  tax_amount: number;
+  total_price: number;
+  parent: string;
+  parentfield: string;
+  parenttype: string;
+  doctype: string;
+}
+
+export interface AttachmentItem {
+  name: string;
+  owner: string;
+  creation: string;
+  modified: string;
+  modified_by: string;
+  docstatus: number;
+  file_url: string;
+  idx: number;
+  parent: string;
+  parentfield: string;
+  parenttype: string;
+  doctype: string;
+}
+
+// Component Data Interfaces
 export interface OrderDetails {
   name: string;
   order_name: string;
+  cpo_status: string;
   description: string;
   docstatus: number;
   creation: string;
   modified: string;
   expected_delivery: string;
-  delivery_address: string;
+  promised_delivery: string;
+  delivery_terms: string;
+  shipping_method: string;
   special_instructions: string;
   total_amount: number;
   payment_terms: string;
-  delivery_terms: string;
+  payment_method: string;
   supplier: string;
   purchase_order: string;
   status: string;
   customer: string;
   quotation_id: string;
+  priority: string;
+  currency_code: string;
+  sub_total: number;
+  discount_type: string;
+  discount: number;
+  discount_amount: number;
+  total_tax_amount: number;
+  shipping_charges: number;
+  grand_total: number;
+  quality_requirements: string;
+  packaging_requirements: string;
+  general_terms: string;
+  rfq_reference: string;
+  customer_po_number: string;
 }
 
 export interface OrderItem {
@@ -39,6 +143,18 @@ export interface OrderItem {
   material: string;
   specification: string;
   drawing_ref: string;
+  unit_price: number;
+  comments: string;
+  miscellaneous: number;
+  tooling: number;
+  tax_type: string;
+  tax_amount: number;
+  total_price: number;
+  unit_price_formatted?: string;
+  total_price_formatted?: string;
+  tax_amount_formatted?: string;
+  miscellaneous_formatted?: string;
+  tooling_formatted?: string;
 }
 
 export interface OrderAttachment {
@@ -67,29 +183,47 @@ export interface OrderAttachment {
 export class OrderDetailsComponent implements OnInit {
   orderId: string = '';
   loading: boolean = false;
-  currencyCode: string = 'INR';
+  currencyCode: string = 'USD';
   
   orderDetails: OrderDetails = {
     name: '',
     order_name: '',
+    cpo_status: '',
     description: '',
     docstatus: 0,
     creation: '',
     modified: '',
     expected_delivery: '',
-    delivery_address: '',
+    promised_delivery: '',
+    delivery_terms: '',
+    shipping_method: '',
     special_instructions: '',
     total_amount: 0,
     payment_terms: '',
-    delivery_terms: '',
+    payment_method: '',
     supplier: '',
     purchase_order: '',
     status: '',
     customer: '',
-    quotation_id: ''
+    quotation_id: '',
+    priority: '',
+    currency_code: '',
+    sub_total: 0,
+    discount_type: '',
+    discount: 0,
+    discount_amount: 0,
+    total_tax_amount: 0,
+    shipping_charges: 0,
+    grand_total: 0,
+    quality_requirements: '',
+    packaging_requirements: '',
+    general_terms: '',
+    rfq_reference: '',
+    customer_po_number: ''
   };
 
   orderItems: OrderItem[] = [];
+  rawOrderItems: OrderLineItem[] = [];
   orderAttachments: OrderAttachment[] = [];
 
   // Order Items Table Configuration
@@ -108,13 +242,6 @@ export class OrderDetailsComponent implements OnInit {
         sortable: true,
         filterable: true,
         width: '200px'
-      },
-      {
-        field: 'drawing_ref',
-        header: 'Drawing Ref',
-        sortable: true,
-        filterable: true,
-        width: '130px'
       },
       {
         field: 'material',
@@ -138,26 +265,53 @@ export class OrderDetailsComponent implements OnInit {
         width: '80px'
       },
       {
-        field: 'rate',
-        header: 'Rate',
+        field: 'unit_price_formatted',
+        header: 'Unit Price',
+        sortable: true,
+        filterable: true,
+        width: '120px'
+      },
+      {
+        field: 'miscellaneous_formatted',
+        header: 'Miscellaneous',
+        sortable: true,
+        filterable: true,
+        width: '120px'
+      },
+      {
+        field: 'tooling_formatted',
+        header: 'Tooling',
+        sortable: true,
+        filterable: true,
+        width: '120px'
+      },
+      {
+        field: 'tax_type',
+        header: 'Tax Type',
         sortable: true,
         filterable: true,
         width: '100px'
       },
       {
-        field: 'amount',
-        header: 'Amount',
+        field: 'tax_amount_formatted',
+        header: 'Tax Amount',
         sortable: true,
         filterable: true,
         width: '120px'
       },
       {
-        field: 'current_status',
-        header: 'Status',
+        field: 'total_price_formatted',
+        header: 'Total Price',
         sortable: true,
         filterable: true,
-        isStatus: true,
         width: '120px'
+      },
+      {
+        field: 'comments',
+        header: 'Comments',
+        sortable: true,
+        filterable: true,
+        width: '150px'
       }
     ],
     enableSearch: true,
@@ -179,6 +333,27 @@ export class OrderDetailsComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.orderId = params['id'];
       if (this.orderId) {
+        this.accessFirebaseTrigger('Customer Purchase Order', this.orderId);
+      }
+    });
+  }
+
+  // Firebase trigger access method (similar to quotation-details)
+  accessFirebaseTrigger(docType: string, docName: string) {
+    const payload = {
+      doctype: docType,
+      docname: docName
+    };
+
+    this.commonService.postWefabData('/api/method/wefab.wefab.utils.web_service.access_document', payload).subscribe({
+      next: (res: any) => {
+        console.log('Firebase trigger response:', res);
+        if (res && res.message && res.message.success) {
+          this.loadOrderDetails();
+        }
+      },
+      error: (error) => {
+        console.error('Error accessing firebase trigger:', error);
         this.loadOrderDetails();
       }
     });
@@ -186,90 +361,138 @@ export class OrderDetailsComponent implements OnInit {
 
   loadOrderDetails() {
     this.loading = true;
+    let endPoint = `/api/resource/Customer Purchase Order/${this.orderId}`;
     
-    // For now, load sample data - replace with actual API call
-    setTimeout(() => {
-      this.loadSampleData();
-      this.loading = false;
-    }, 1000);
+    this.commonService.getData(endPoint).subscribe({
+      next: (res: any) => {
+        console.log('Order Details API Response:', res);
+        if (res && res.data) {
+          this.mapApiResponseToComponent(res.data);
+        }
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching order details:', error);
+        this.loading = false;
+      }
+    });
   }
 
-  loadSampleData() {
+  // Map API response to component data structure
+  mapApiResponseToComponent(apiData: CustomerPurchaseOrderApiResponse) {
+    console.log('API Data:', apiData);
+
+    // Extract currency code
+    this.currencyCode = apiData.currency_code || 'USD';
+
+    // Map main order details
     this.orderDetails = {
-      name: this.orderId || 'ORD0000245',
-      order_name: 'Automotive Backup Assembly Quote',
-      description: 'Manufacturing order for precision machined components based on approved quotation',
-      docstatus: 1,
-      creation: '2024-01-20T10:30:00',
-      modified: '2024-01-20T14:15:00',
-      expected_delivery: '2024-02-15T14:00:00',
-      delivery_address: 'Factory A - Industrial Blvd',
-      special_instructions: 'Handle with care. Quality inspection required before delivery.',
-      total_amount: 151000.00,
-      payment_terms: 'Net 30 days',
-      delivery_terms: '15-20 business days',
-      supplier: 'Precision Manufacturing Co.',
-      purchase_order: 'PO-2024-001234',
-      status: 'In Progress',
-      customer: 'Automotive Solutions Ltd.',
-      quotation_id: 'QTN0000264'
+      name: apiData.name,
+      order_name: apiData.po_name,
+      cpo_status: apiData.cpo_status,
+      description: apiData.general_terms,
+      docstatus: apiData.docstatus,
+      creation: apiData.creation,
+      modified: apiData.modified,
+      expected_delivery: apiData.requested_delivery_date,
+      promised_delivery: apiData.promised_delivery_date,
+      delivery_terms: apiData.delivery_terms,
+      shipping_method: apiData.shipping_method,
+      special_instructions: '', // Not in API, keeping for compatibility
+      total_amount: apiData.grand_total,
+      payment_terms: apiData.payment_terms,
+      payment_method: apiData.payment_method,
+      supplier: '', // Not directly available in API
+      purchase_order: apiData.customer_po_number,
+      status: apiData.status,
+      customer: '', // Customer details not directly available
+      quotation_id: apiData.wefab_quotation,
+      priority: apiData.priority,
+      currency_code: apiData.currency_code,
+      sub_total: apiData.sub_total,
+      discount_type: apiData.discount_type,
+      discount: apiData.discount,
+      discount_amount: apiData.discount_amount,
+      total_tax_amount: apiData.total_tax_amount,
+      shipping_charges: apiData.shipping_charges,
+      grand_total: apiData.grand_total,
+      quality_requirements: apiData.quality_requirements,
+      packaging_requirements: apiData.packaging_requirements,
+      general_terms: apiData.general_terms,
+      rfq_reference: apiData.rfq_reference,
+      customer_po_number: apiData.customer_po_number
     };
 
-    this.orderItems = [
-      {
-        name: 'RFK-001',
-        item_code: 'RFK-001',
-        item_description: 'Main Support Bracket - CNC Machined Aluminum',
-        quantity: 700,
-        unit: 'EA',
-        rate: 85.50,
-        amount: 59850.00,
-        current_status: 'In Progress',
-        delivery_date: '2024-02-10',
-        notes: 'Material: Aluminum 6061-T6, Finish: Anodized',
-        material: 'Aluminum 6061-T6',
-        specification: 'Anodized Finish',
-        drawing_ref: 'DRW-001'
-      },
-      {
-        name: 'RFK-002',
-        item_code: 'RFK-002',
-        item_description: 'Mounting Plate Assembly',
-        quantity: 1000,
-        unit: 'EA',
-        rate: 45.75,
-        amount: 45750.00,
-        current_status: 'Pending',
-        delivery_date: '2024-02-12',
-        notes: 'Material: A36, Powder Coated',
-        material: 'Steel A36',
-        specification: 'Powder Coated',
-        drawing_ref: 'DRW-002'
-      }
-    ];
+    // Map order items
+    this.orderItems = apiData.items.map(item => ({
+      name: item.name,
+      item_code: item.item_code,
+      item_description: item.item_description,
+      quantity: item.quantity,
+      unit: item.unit,
+      rate: item.unit_price, // For backward compatibility
+      amount: item.total_price, // For backward compatibility
+      current_status: '', // Not available in new API
+      delivery_date: '', // Not available in new API
+      notes: item.notes,
+      material: item.material,
+      specification: '', // Not available in new API
+      drawing_ref: '', // Not available in new API
+      unit_price: item.unit_price,
+      comments: item.comments,
+      miscellaneous: item.miscellaneous,
+      tooling: item.tooling,
+      tax_type: item.tax_type,
+      tax_amount: item.tax_amount,
+      total_price: item.total_price,
+      unit_price_formatted: this.getFormattedCurrencyAmount(item.unit_price),
+      total_price_formatted: this.getFormattedCurrencyAmount(item.total_price),
+      tax_amount_formatted: this.getFormattedCurrencyAmount(item.tax_amount),
+      miscellaneous_formatted: this.getFormattedCurrencyAmount(item.miscellaneous || 0),
+      tooling_formatted: this.getFormattedCurrencyAmount(item.tooling || 0)
+    }));
 
-    this.orderAttachments = [
-      {
-        name: 'Technical Drawing',
-        file: '/files/technical-drawing.pdf',
-        file_url: '/files/technical-drawing.pdf',
-        file_name: 'Technical Drawing.pdf',
-        file_type: 'application/pdf',
-        description: 'Technical specifications and drawings',
-        category: 'Technical',
-        uploaded_on: '2024-01-20T10:30:00'
-      },
-      {
-        name: 'Quality Requirements',
-        file: '/files/quality-requirements.pdf',
-        file_url: '/files/quality-requirements.pdf',
-        file_name: 'Quality Requirements.pdf',
-        file_type: 'application/pdf',
-        description: 'Quality requirements and specifications',
-        category: 'Quality',
-        uploaded_on: '2024-01-20T10:35:00'
-      }
-    ];
+    this.rawOrderItems = apiData.items.map(item => ({
+      ...item,
+      unit_price_formatted: this.getFormattedCurrencyAmount(item.unit_price),
+      total_price_formatted: this.getFormattedCurrencyAmount(item.total_price),
+      tax_amount_formatted: this.getFormattedCurrencyAmount(item.tax_amount),
+      miscellaneous_formatted: this.getFormattedCurrencyAmount(item.miscellaneous || 0),
+      tooling_formatted: this.getFormattedCurrencyAmount(item.tooling || 0)
+    }));
+
+    // Combine all attachments from different categories
+    this.orderAttachments = this.combineAttachments(
+      apiData.other_attachments || [],
+      apiData.customs_documentation || [],
+      apiData.quality_certificates || [],
+      apiData.technical_drawings || []
+    );
+  }
+
+  // Combine attachments from different categories
+  combineAttachments(...attachmentArrays: AttachmentItem[][]): OrderAttachment[] {
+    const allAttachments: OrderAttachment[] = [];
+    
+    attachmentArrays.forEach((attachments, index) => {
+      const categoryNames = ['Other', 'Customs', 'Quality', 'Technical'];
+      const category = categoryNames[index] || 'Other';
+      
+      attachments.forEach(attachment => {
+        allAttachments.push({
+          name: attachment.name,
+          file: attachment.name,
+          file_url: attachment.file_url, // URL not available in current API structure
+          file_name: attachment.name,
+          file_type: 'pdf', // Default type
+          description: '',
+          category: category,
+          uploaded_on: attachment.creation
+        });
+      });
+    });
+    
+    return allAttachments;
   }
 
   goBack() {
@@ -312,7 +535,8 @@ export class OrderDetailsComponent implements OnInit {
     const statusClasses: { [key: string]: string } = {
       'draft': 'status-draft',
       'submitted': 'status-submitted',
-      'in progress': 'status-in-progress',
+      'preparation': 'status-progress',
+      'in progress': 'status-progress',
       'completed': 'status-completed',
       'cancelled': 'status-rejected'
     };
@@ -340,12 +564,48 @@ export class OrderDetailsComponent implements OnInit {
     }
   }
 
+  // Format API date (similar to quotation-details)
+  formatApiDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
   getFormattedCurrencyAmount(amount: number, currency?: string): string {
-    const currencyToUse = currency || this.currencyCode;
-    return `${currencyToUse} ${amount.toLocaleString('en-IN', {
+    if (!amount && amount !== 0) return '$0.00';
+    
+    const currencySymbol = this.getCurrencySymbol(currency || this.currencyCode);
+    return `${currencySymbol}${amount.toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })}`;
+  }
+
+  // Get currency symbol
+  getCurrencySymbol(currencyCode: string): string {
+    const currencySymbols: { [key: string]: string } = {
+      'USD': '$',
+      'EUR': '€',
+      'GBP': '£',
+      'INR': '₹',
+      'JPY': '¥'
+    };
+    return currencySymbols[currencyCode] || '$';
+  }
+
+  // Get discount display text based on discount type
+  getDiscountDisplayText(): string {
+    if (this.orderDetails.discount_type === 'Percentage') {
+      return `Discount (${this.orderDetails.discount}%):`;
+    } else {
+      return 'Discount Amount:';
+    }
   }
 
   getTotalQuantity(): number {
