@@ -11,6 +11,7 @@ interface RfqAttachment {
   size: string;
   type: string;
   creation: string;
+  url: string;
 }
 
 interface RfqLineItem {
@@ -199,6 +200,7 @@ export class SubmittedRfqComponent implements OnInit {
   downloadAttachment(attachment: RfqAttachment) {
     console.log('Downloading:', attachment.name);
     // Implementation for download functionality
+    window.open(attachment.url, '_blank');
   }
 
   // Filter methods
@@ -275,6 +277,7 @@ export class SubmittedRfqComponent implements OnInit {
       this.rfqData.reference = res.data.reference || '----';
       this.rfqData.projectInfo.projectName = res.data.project_name || '----';
       this.rfqData.projectInfo.deliveryDate = res.data.delivery_date || '----';
+      this.rfqData.projectInfo.deliveryLocation = res.data.delivery_location || '----';
       
       // Transform line items
       const transformedLineItems = (res.data.line_items || []).map((item: any) => ({
@@ -292,6 +295,7 @@ export class SubmittedRfqComponent implements OnInit {
       this.rfqData.allAttachments = (res.data.attachments || []).map((attachment: any): RfqAttachment => ({
         name: attachment.file_name || attachment.name,
         size: attachment.file_size || '0 KB',
+        url: attachment.file_url || '----',
         type: this.getFileType(attachment.file_name || attachment.name),
         creation: attachment.creation || new Date().toISOString()
       }));
