@@ -431,6 +431,103 @@ $danger-red: #EF4444;      // Danger color
   }
 }
 
+// Tabs Section
+.tabs-container {
+  border-top: 1px solid #e5e7eb;
+  
+  .tab-headers {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f8fafc;
+    
+    .tab-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 24px;
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+      position: relative;
+      
+      &:hover {
+        color: $safety-orange;
+        background-color: #f1f5f9;
+        transform: translateY(-1px);
+      }
+      
+      &.active {
+        color: $safety-orange;
+        background-color: white;
+        border-bottom-color: $safety-orange;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba($safety-orange, 0.15);
+        
+        i {
+          color: $safety-orange;
+          transform: scale(1.1);
+        }
+        
+        // Add a subtle glow effect
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, rgba($safety-orange, 0.05), rgba($safety-orange, 0.02));
+          border-radius: 8px 8px 0 0;
+          z-index: -1;
+        }
+      }
+      
+      i {
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+    }
+  }
+  
+  .tab-content {
+    background: white;
+    min-height: 400px;
+  }
+}
+
+// Responsive adjustments for tabs
+@media (max-width: 768px) {
+  .tabs-container {
+    .tab-headers {
+      .tab-header {
+        padding: 12px 16px;
+        font-size: 13px;
+        
+        &:hover {
+          transform: none; // Remove hover transform on mobile
+        }
+        
+        &.active {
+          font-weight: 600; // Slightly less bold on mobile
+          
+          i {
+            transform: scale(1.05); // Smaller scale on mobile
+          }
+        }
+        
+        i {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
+
 // Review Status Section
 .review-status-section {
   background: white;
