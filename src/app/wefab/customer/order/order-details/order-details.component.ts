@@ -2,9 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpParams } from '@angular/common/http';
 import { CommonTableComponent, TableConfig } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
 import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
+import { ApprovalWorkflowComponent, WorkflowStep, WorkflowCompletionData, WorkflowStepCompletionData } from '../../../../shared/components/approval-workflow/approval-workflow.component';
+import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
 
 // API Response Interfaces
 export interface CustomerPurchaseOrderApiResponse {
@@ -169,6 +172,11 @@ export interface OrderAttachment {
   uploaded_on: string;
 }
 
+interface WorkflowState {
+  state_name: string;
+  status: string;
+}
+
 @Component({
   selector: 'app-order-details',
   standalone: true,
@@ -177,7 +185,8 @@ export interface OrderAttachment {
     RouterModule,
     FormsModule,
     CommonTableComponent,
-    ConversationTrailComponent
+    ConversationTrailComponent,
+    ApprovalWorkflowComponent
   ],
   templateUrl: './order-details.component.html',
   styleUrl: './order-details.component.scss'
@@ -189,6 +198,9 @@ export class OrderDetailsComponent implements OnInit {
   orderId: string = '';
   loading: boolean = false;
   currencyCode: string = 'USD';
+  
+  // Workflow properties
+  workflowSteps: WorkflowStep[] = [];
   
   orderDetails: OrderDetails = {
     name: '',
@@ -331,7 +343,8 @@ export class OrderDetailsComponent implements OnInit {
   constructor(
     private commonService: CommonService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private sweetAlert: SweetAlertService
   ) {}
 
   ngOnInit() {
@@ -339,6 +352,7 @@ export class OrderDetailsComponent implements OnInit {
       this.orderId = params['id'];
       if (this.orderId) {
         this.accessFirebaseTrigger('Customer Purchase Order', this.orderId);
+        this.getOrderTrackerView(this.orderId);
       }
     });
   }
@@ -360,6 +374,118 @@ export class OrderDetailsComponent implements OnInit {
       error: (error) => {
         console.error('Error accessing firebase trigger:', error);
         this.loadOrderDetails();
+      }
+    });
+  }
+
+  getOrderTrackerView(orderId: string) {
+    let endPoint = `/api/method/wefab.wefab.api.common.po_tracker_api.get_po_workflow_states?po_name=${orderId}`;
+    
+    // Show loading state
+    this.loading = true;
+    
+    this.commonService.getWefabData(endPoint).subscribe({
+      next: (res: any) => {
+        res = {
+          message: {
+              success: true,
+              data: {
+                  current_state: "Supplier Confirmation",
+                  states: [
+                      {
+                          state_name: "Draft",
+                          status: "Completed"
+                      },
+                      {
+                          state_name: "Approval",
+                          status: "Completed"
+                      },
+                      {
+                          state_name: "Supplier Confirmation",
+                          status: "In Progress"
+                      },
+                      {
+                          state_name: "Preparation",
+                          status: "Yet to Start"
+                      },
+                      {
+                          state_name: "Work in Progress",
+                          status: "Yet to Start"
+                      },
+                      {
+                          state_name: "Finishing",
+                          status: "Yet to Start"
+                      },
+                      {
+                          state_name: "Quality Inspection",
+                          status: "Yet to Start"
+                      },
+                      {
+                          state_name: "Dispatch",
+                          status: "Yet to Start"
+                      },
+                      {
+                          state_name: "Order Complete",
+                          status: "Yet to Start"
+                      }
+                  ]
+              }
+          }
+      }
+        
+        if (res.message && res.message.data.states) {
+          // Filter out Draft and Approval states
+          const relevantStates = res.message.data.states.filter((state: WorkflowState) => 
+            !['Draft', 'Approval'].includes(state.state_name)
+          );
+
+          // Create workflow steps from API states
+          this.workflowSteps = relevantStates.map((state: WorkflowState) => {
+            const stepId = state.state_name.toLowerCase().replace(/\s+/g, '-');
+            let status: 'complete' | 'in-progress' | 'waiting' | 'ready' = 'waiting';
+            
+            switch (state.status) {
+              case 'Completed':
+                status = 'complete';
+                break;
+              case 'In Progress':
+                status = 'ready';
+                break;
+              case 'Yet to Start':
+                status = 'waiting';
+                break;
+            }
+
+            // For customer view, most steps are view-only (no interaction)
+            const workflowStep = {
+              id: stepId,
+              title: state.state_name,
+              status: status,
+              description: '',
+              allowCompletion: false, // Customer cannot complete steps
+              isOpenDialog: false,
+              requiresPhotos: false,
+              requiresComments: false,
+              isDocumentOptional: true,
+              isCommentOptional: true
+            };
+            
+            console.log(`📋 Created workflow step: ${state.state_name} -> ID: ${stepId}`, workflowStep);
+            return workflowStep;
+          });
+
+          console.log('Updated workflow steps:', this.workflowSteps);
+        } else {
+          console.error('Invalid API response format:', res);
+          this.sweetAlert.error('Failed to load workflow states');
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching workflow states:', error);
+        this.sweetAlert.error('Failed to load workflow states');
+      },
+      complete: () => {
+        this.loading = false;
       }
     });
   }
@@ -661,5 +787,41 @@ export class OrderDetailsComponent implements OnInit {
   // Tab management methods
   setActiveTab(tab: string) {
     this.activeTab = tab;
+  }
+
+  // Workflow event handlers (for customer view - mostly informational)
+  onStepCompleted(data: WorkflowStepCompletionData): void {
+    console.log('Step completed event received (customer view):', data);
+    // Customer cannot complete steps - this is for viewing only
+  }
+
+  onStepClicked(step: WorkflowStep): void {
+    console.log('Step clicked (customer view):', step);
+    // Show step details for completed steps
+    if (step.status === 'complete') {
+      this.showStepDetails(step);
+    } else {
+      this.sweetAlert.info(
+        `This step is currently "${step.status}". Only the supplier can update the order progress.`
+      );
+    }
+  }
+
+  private showStepDetails(step: WorkflowStep): void {
+    const stepDetails = `
+      <div style="text-align: left;">
+        <p><strong>Status:</strong> ${step.status}</p>
+        ${step.completedDate ? `<p><strong>Completed:</strong> ${this.formatDate(step.completedDate.toISOString())}</p>` : ''}
+        ${step.completedBy ? `<p><strong>Completed By:</strong> ${step.completedBy}</p>` : ''}
+        ${step.comments ? `<p><strong>Comments:</strong> ${step.comments}</p>` : ''}
+        ${step.photos && step.photos.length > 0 ? `<p><strong>Photos:</strong> ${step.photos.length} file(s) attached</p>` : ''}
+      </div>
+    `;
+
+    this.sweetAlert.htmlContent(
+      `${step.title} Details`,
+      stepDetails,
+      'info'
+    );
   }
 }

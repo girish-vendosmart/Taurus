@@ -456,27 +456,6 @@ $danger-red: #EF4444;      // Danger color
   }
 }
 
-@media (max-width: 768px) {
-  .success-container {
-    padding: 1rem;
-
-    .order-details-card {
-      .order-header {
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .content-grid {
-        padding: 16px;
-      }
-    }
-
-    .line-items-section {
-      padding: 16px;
-    }
-  }
-}
-
 // Tab styling
 .tabs-container {
   .tab-headers {
@@ -520,6 +499,38 @@ $danger-red: #EF4444;      // Danger color
     
     .mt-3 {
       margin-top: 1rem;
+    }
+  }
+}
+
+// Add content layout grid styles
+.content-layout {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  
+  .col-9 {
+    flex: 0 0 75%;
+    max-width: 75%;
+    padding-right: 1rem;
+    
+    @media (max-width: 768px) {
+      flex: 0 0 100%;
+      max-width: 100%;
+      padding-right: 0;
+      margin-bottom: 1rem;
+    }
+  }
+  
+  .col-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+    padding-left: 1rem;
+    
+    @media (max-width: 768px) {
+      flex: 0 0 100%;
+      max-width: 100%;
+      padding-left: 0;
     }
   }
 }
@@ -586,4 +597,150 @@ $danger-red: #EF4444;      // Danger color
   border-radius: 8px;
   padding: 24px;
   margin: 0 24px 24px;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .success-container {
+    padding: 1rem;
+
+    .order-details-card {
+      .order-header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .tab-content .content-grid {
+        padding: 16px;
+      }
+    }
+
+    .tab-content .line-items-section {
+      padding: 16px;
+    }
+  }
+}
+
+.workflow-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  
+  ::ng-deep {
+    .approval-workflow-container {
+      padding: 24px;
+      border: none;
+      box-shadow: none;
+      
+      .workflow-steps {
+        .workflow-step {
+          display: flex;
+          align-items: flex-start;
+          position: relative;
+          margin-bottom: 32px;
+          
+          &:last-child {
+            margin-bottom: 0;
+            
+            .step-connector {
+              display: none;
+            }
+          }
+          
+          .step-icon-container {
+            position: relative;
+            margin-right: 16px;
+            
+            .step-icon {
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: #f3f4f6;
+              border: 2px solid #e5e7eb;
+              color: #9ca3af;
+              position: relative;
+              z-index: 2;
+              
+              i {
+                font-size: 14px;
+              }
+              
+              &.step-icon-complete {
+                background: #10b981;
+                border-color: #10b981;
+                color: white;
+              }
+              
+              &.step-icon-active {
+                background: #f59e0b;
+                border-color: #f59e0b;
+                color: white;
+              }
+              
+              &.step-icon-waiting {
+                background: #f3f4f6;
+                border-color: #e5e7eb;
+                color: #9ca3af;
+              }
+            }
+            
+            .step-connector {
+              position: absolute;
+              top: 32px;
+              left: 50%;
+              transform: translateX(-50%);
+              width: 2px;
+              height: 32px;
+              background-color: #e5e7eb;
+              z-index: 1;
+            }
+          }
+          
+          &.step-completed {
+            .step-connector {
+              background-color: #10b981;
+            }
+          }
+          
+          .step-content {
+            flex: 1;
+            padding-top: 4px;
+            
+            .step-title {
+              font-size: 14px;
+              font-weight: 500;
+              color: #374151;
+              margin: 0 0 4px;
+            }
+            
+            .step-status {
+              font-size: 12px;
+              padding: 4px 8px;
+              border-radius: 12px;
+              display: inline-block;
+              
+              &.status-complete {
+                background: #d1fae5;
+                color: #059669;
+              }
+              
+              &.status-in-progress {
+                background: #fef3c7;
+                color: #d97706;
+              }
+              
+              &.status-waiting {
+                background: #f3f4f6;
+                color: #6b7280;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
