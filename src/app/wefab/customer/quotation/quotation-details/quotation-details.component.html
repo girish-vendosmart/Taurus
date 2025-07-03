@@ -13,13 +13,13 @@
           <i class="pi pi-print"></i>
           Print
         </button>
-        <button class="accept-btn" *ngIf="quotationDetails.workflowState === 'Submitted' || quotationDetails.workflowState === 'Received'" (click)="acceptQuotation()">
-          <i class="pi pi-check"></i>
-          Accept Quotation
+        <button class="award-btn" *ngIf="quotationDetails.workflowState === 'Submitted' || quotationDetails.workflowState === 'Received'" (click)="awardQuotation()">
+          <i class="pi pi-star"></i>
+          Award
         </button>
-        <button class="reject-btn" *ngIf="quotationDetails.workflowState === 'Submitted' || quotationDetails.workflowState === 'Received'" (click)="rejectQuotation()">
+        <button class="cancel-btn" *ngIf="quotationDetails.workflowState === 'Submitted' || quotationDetails.workflowState === 'Received'" (click)="cancelQuotation()">
           <i class="pi pi-times"></i>
-          Reject
+          Cancel
         </button>
         <button class="back-btn" (click)="onBackToQuotations()">
           <i class="pi pi-arrow-left"></i>

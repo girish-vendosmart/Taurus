@@ -4,10 +4,12 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonTableComponent, TableConfig, TableColumn, ActionButton } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
+import { BadgeService } from '../../../../shared/services/badge.service';
 import { HttpParams } from '@angular/common/http';
 import { ActivityTrailComponent, ActivityLogData } from '../../../../shared/components/activity-trail/activity-trail.component';
 import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
 import { SplitButtonComponent } from '../../../../shared/components/split-button/split-button.component';
+import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
 
 import { ConfigurableButtonComponent } from '../../../../shared/components/configurable-button/configurable-button.component';
 
@@ -344,26 +346,28 @@ export class QuotationDetailsComponent implements OnInit {
     outlined: true
   };
 
-  acceptButtonConfig: any = {
+  awardButtonConfig: any = {
     size: 'medium',
     severity: 'success',
-    label: 'Accept Quotation',
-    icon: 'bi bi-check2',
+    label: 'Award',
+    icon: 'bi bi-award',
     outlined: false
   };
 
-  rejectButtonConfig: any = {
+  cancelButtonConfig: any = {
     size: 'medium',
     severity: 'danger',
-    label: 'Reject',
+    label: 'Cancel',
     icon: 'bi bi-x-lg',
     outlined: false
   };
 
   constructor(
     private commonService: CommonService,
+    private badgeService: BadgeService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private sweetAlertService: SweetAlertService
   ) {}
 
   ngOnInit(): void {
@@ -377,9 +381,41 @@ export class QuotationDetailsComponent implements OnInit {
       
       // Uncomment these lines when actual API is available
       if (quotationId) {
-        this.accessFirebaseTrigger('Customer Quotation', quotationId)
+        this.accessFirebaseTrigger('Wefab Quotation', quotationId)
+        this.getActionList()
       }
     });
+  }
+
+  // Action List
+  getActionList() {
+    let obj:any = {
+      doctype: 'Wefab Quotation',
+      name: this.quotationId
+    }
+    let params = new HttpParams();
+    params = params.append('doc', JSON.stringify(obj));
+    let endPoint = `/api/method/frappe.model.workflow.get_transitions`;
+    this.commonService.getWefabData(endPoint, params).subscribe((res:any) => {
+      console.log('Action List Response:', res);
+      if (res && res.message) {
+        let updatedActionList = this.modifyActionList(res.message);
+        this.severityOptions = [...updatedActionList];
+      }
+    });
+  }
+
+  modifyActionList(actionList: any) {
+    let updatedActionList:any = []
+
+    actionList.forEach((action:any) => {
+      let obj:any = {}
+      obj['label'] = action.action 
+      obj['value'] = action.action
+      updatedActionList.push(obj)
+    })
+
+    return updatedActionList;
   }
   // Firebase trigger access method
   accessFirebaseTrigger(docType: string, docName: string) {
@@ -486,16 +522,16 @@ export class QuotationDetailsComponent implements OnInit {
       totalMiscellaneous: apiData.total_miscellaneous,
       totalTooling: apiData.total_tooling,
       quoteFrom: {
-        company: apiData.quotation_from.split('\n')[0] || '----',
-        address: apiData.quotation_from.split('\n')[1] || '----',
-        email: apiData.quotation_from.split('\n')[2] || '----',
-        phone: apiData.quotation_from.split('\n')[3] || '----'
+        company: apiData?.quotation_from?.split('\n')[0] || '----',
+        address: apiData?.quotation_from?.split('\n')[1] || '----',
+        email: apiData?.quotation_from?.split('\n')[2] || '----',
+        phone: apiData?.quotation_from?.split('\n')[3] || '----'
       },
       quoteTo: {
-        company: apiData.quotation_to.split('\n')[0] || '----',
-        address: apiData.quotation_to.split('\n')[1] || '----',
-        email: apiData.quotation_to.split('\n')[2] || '----',
-        phone: apiData.quotation_to.split('\n')[3] || '----'
+        company: apiData?.quotation_to?.split('\n')[0] || '----',
+        address: apiData?.quotation_to?.split('\n')[1] || '----',
+        email: apiData?.quotation_to?.split('\n')[2] || '----',
+        phone: apiData?.quotation_to?.split('\n')[3] || '----'
       }
     };
 
@@ -637,20 +673,7 @@ export class QuotationDetailsComponent implements OnInit {
 
   // Status class for status badge
   getStatusClass(status: string): string {
-    switch (status?.toLowerCase()) {
-      case 'draft':
-        return 'status-draft';
-      case 'submitted':
-        return 'status-submitted';
-      case 'approved':
-        return 'status-approved';
-      case 'rejected':
-        return 'status-rejected';
-      case 'accepted':
-        return 'status-accepted';
-      default:
-        return 'status-default';
-    }
+    return this.badgeService.getStatusClass(status);
   }
 
   // Table event handlers
@@ -663,7 +686,24 @@ export class QuotationDetailsComponent implements OnInit {
   }
 
   onActionClick(event: any) {
-    console.log('Action clicked:', event);
+    console.log('Action triggered:', event);
+    
+    if (!event.option) return;
+    
+    const actionValue = event.option.value;
+    console.log('Action value:', actionValue);
+
+    this.sweetAlertService.confirm(
+      '',
+      `Are you sure you want to ${event.option.label} this quotation?`,
+      'question',
+      'Yes, ' + event.option.label,
+      'Cancel'
+    ).then((result: any) => {
+      if (result.isConfirmed) {
+        this.performQuotationAction(actionValue);
+      }
+    });
   }
 
   // Navigation methods
@@ -708,7 +748,7 @@ export class QuotationDetailsComponent implements OnInit {
       <head>
         <title>Quotation Details - ${this.quotationDetails.quotationId}</title>
         <style>
-          body { font-family: Arial, sans-serif; margin: 40px; }
+          body { margin: 40px; }
           .header { text-align: center; margin-bottom: 30px; }
           .quote-parties { display: flex; justify-content: space-between; margin: 20px 0; }
           .quote-section { flex: 1; margin: 0 10px; }
@@ -816,16 +856,32 @@ export class QuotationDetailsComponent implements OnInit {
   }
 
   // Customer-specific actions
-  acceptQuotation() {
-    if (confirm('Are you sure you want to accept this quotation?')) {
-      this.performQuotationAction('Accept');
-    }
+  awardQuotation() {
+    this.sweetAlertService.confirm(
+      '',
+      'Are you sure you want to award this quotation?',
+      'question',
+      'Yes, Award',
+      'Cancel'
+    ).then((result: any) => {
+      if (result.isConfirmed) {
+        this.performQuotationAction('Award');
+      }
+    });
   }
 
-  rejectQuotation() {
-    if (confirm('Are you sure you want to reject this quotation?')) {
-      this.performQuotationAction('Reject');
-    }
+  cancelQuotation() {
+    this.sweetAlertService.confirm(
+      '',
+      'Are you sure you want to cancel this quotation?',
+      'question',
+      'Yes, Cancel',
+      'No'
+    ).then((result: any) => {
+      if (result.isConfirmed) {
+        this.performQuotationAction('Cancel');
+      }
+    });
   }
 
   // Perform quotation action
@@ -841,13 +897,15 @@ export class QuotationDetailsComponent implements OnInit {
     this.commonService.postWefabData(`/api/method/frappe.model.workflow.apply_workflow`, actionPayload).subscribe({
       next: (res: any) => {
         console.log(`Quotation ${action} response:`, res);
-        alert(`The quotation has been ${action.toLowerCase()}ed successfully.`);
+        this.sweetAlertService.success(`The quotation has been ${action.toLowerCase()}ed successfully.`);
         // Refresh the quotation details
         this.getQuotationDetails(this.quotationId);
+        // Refresh action list after status change
+        this.getActionList();
       },
       error: (error) => {
         console.error(`Error ${action.toLowerCase()}ing quotation:`, error);
-        alert(`Failed to ${action.toLowerCase()} the quotation. Please try again.`);
+        this.sweetAlertService.error(`Failed to ${action.toLowerCase()} the quotation. Please try again.`);
       }
     });
   }
@@ -855,6 +913,11 @@ export class QuotationDetailsComponent implements OnInit {
   // Check if actions are available based on status
   hasAvailableActions(): boolean {
     return ['Submitted', 'Received'].includes(this.quotationDetails.workflowState);
+  }
+
+  // Check if there are any actions available for the split button
+  hasAvailableActionsList(): boolean {
+    return this.severityOptions && this.severityOptions.length > 0;
   }
 
   // Calculate total quantity
