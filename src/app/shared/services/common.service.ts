@@ -55,7 +55,7 @@ export class CommonService {
     getCSVData(endPoint: string, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Authorization': `Token 3f36743188b20d5:afcc7c21d6aeac0`,
             'Accept': 'text/csv, application/csv' // Tell server we want CSV
         });
         
@@ -74,7 +74,7 @@ export class CommonService {
         });
         if (localStorage.getItem('token')) {
             headers = new HttpHeaders({
-                'Authorization': `Token ${localStorage.getItem('token')}`,
+                'Authorization': `Token 3f36743188b20d5:afcc7c21d6aeac0`,
                 'Content-Type': 'application/json'
             });
         }
@@ -90,7 +90,7 @@ export class CommonService {
     putData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Authorization': `Token 3f36743188b20d5:afcc7c21d6aeac0`,
             'Content-Type': 'application/json'
         });
     
@@ -160,7 +160,7 @@ export class CommonService {
     uploadFile(uploadData: File): Observable<any> {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Authorization': `Token 3f36743188b20d5:afcc7c21d6aeac0`,
         });
 
         const formData = new FormData();
@@ -182,7 +182,7 @@ export class CommonService {
     uploadFileWithProgress(formData: FormData): Observable<any> {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Authorization': `Token 3f36743188b20d5:afcc7c21d6aeac0`,
         });
 
         return this.http.post(
@@ -212,7 +212,7 @@ export class CommonService {
 
     getWefabData(endPoint: string, params?: HttpParams) {
         const headers = new HttpHeaders({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Authorization': `Token 3f36743188b20d5:afcc7c21d6aeac0`,
             'Content-Type': 'application/json'
         });
         return this.http.get(`${environment.wefabApiUrl}${endPoint}`, { headers, params });
@@ -221,7 +221,7 @@ export class CommonService {
     postWefabData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Authorization': `Token 3f36743188b20d5:afcc7c21d6aeac0`,
             'Content-Type': 'application/json'
         });
     
@@ -236,7 +236,7 @@ export class CommonService {
     putWefabData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Authorization': `Token 3f36743188b20d5:afcc7c21d6aeac0`,
             'Content-Type': 'application/json'
         });
     
@@ -251,7 +251,7 @@ export class CommonService {
     patchWefabData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         const headers = new HttpHeaders({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Authorization': `Token 3f36743188b20d5:afcc7c21d6aeac0`,
             'Content-Type': 'application/json'
         });
     

@@ -125,6 +125,7 @@ export class QuotationListComponent implements OnInit {
     this.commonService.getData(apiEndpoint).subscribe({
       next: (res: any) => {
         this.quotationData = res.data.map((quotation: any) => ({
+          companySubInfo: quotation.name,
           ...quotation,
           routerLink: `/wefab/customer/quotation-details/${quotation.name}`,
           formattedGrandTotal: `${quotation.currency_code} ${quotation.grand_total.toLocaleString('en-IN', {

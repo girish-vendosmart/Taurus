@@ -19,6 +19,9 @@ import { InputTextModule } from 'primeng/inputtext';
 export interface CustomerQuotationApiResponse {
   name: string;
   owner: string;
+  project_name: string;
+  delivery_date: string;
+  delivery_location: string;
   creation: string;
   modified: string;
   modified_by: string;
@@ -90,6 +93,9 @@ export interface QuotationDetails {
   estimatedDuration: string;
   validity: string;
   deliveryAddress: string;
+  projectName: string;
+  deliveryDate: string;
+  deliveryLocation: string;
   totalAmount: number;
   discountPercentage: number;
   discountAmount: number;
@@ -117,13 +123,15 @@ export interface QuotationDetails {
   totalTooling: number;
   quoteFrom: {
     company: string;
+    address: string;
     email: string;
     phone: string;
   };
   quoteTo: {
     company: string;
+    address: string;
     email: string;
-    location: string;
+    phone: string;
   };
 }
 
@@ -187,6 +195,9 @@ export class QuotationDetailsComponent implements OnInit {
     estimatedDuration: '',
     validity: '',
     deliveryAddress: '',
+    projectName: '',
+    deliveryDate: '',
+    deliveryLocation: '',
     totalAmount: 0,
     discountPercentage: 0,
     discountAmount: 0,
@@ -214,13 +225,15 @@ export class QuotationDetailsComponent implements OnInit {
     totalTooling: 0,
     quoteFrom: {
       company: '',
+      address: '',
       email: '',
       phone: ''
     },
     quoteTo: {
       company: '',
+      address: '',
       email: '',
-      location: ''
+      phone: ''
     }
   };
 
@@ -360,253 +373,14 @@ export class QuotationDetailsComponent implements OnInit {
       this.quotationId = quotationId || 'QUO-2024-001847';
       
       // Initialize with dummy data for demo purposes
-      this.initializeDummyData();
+      // this.initializeDummyData();
       
       // Uncomment these lines when actual API is available
-      // if (quotationId) {
-      //   this.accessFirebaseTrigger('Customer Quotation', quotationId)
-      // }
+      if (quotationId) {
+        this.accessFirebaseTrigger('Customer Quotation', quotationId)
+      }
     });
   }
-
-  // Initialize dummy data for demonstration
-  private initializeDummyData() {
-    this.loading = false;
-    
-    // Dummy quotation details
-    this.quotationDetails = {
-      quotationId: this.quotationId,
-      rfqId: 'RFQ-2024-001847',
-      createdOn: 'January 20, 2024, 10:30 AM',
-      lastModified: 'January 22, 2024, 3:45 PM',
-      workflowState: 'Received',
-      status: 'Received',
-      estimatedDuration: '15-20 business days',
-      validity: 'February 20, 2024',
-      deliveryAddress: 'Factory A - Industrial Blvd',
-      totalAmount: 156750.00,
-      discountPercentage: 5,
-      discountAmount: 8250.00,
-      shippingCharges: 2500.00,
-      grandTotal: 151000.00,
-      taxApplicable: 18,
-      sgstCgstApplicable: true,
-      igstApplicable: false,
-      sgstRate: 9,
-      cgstRate: 9,
-      sub_total: 156750.00,
-      quotation_name: 'Automotive Backup Assembly Quote',
-      igstRate: 0,
-      taxableAmount: 151000.00,
-      sgstAmount: 13590.00,
-      cgstAmount: 13590.00,
-      igstAmount: 0,
-      totalTaxAmount: 27180.00,
-      grandTotalWithTax: 178180.00,
-      paymentTerms: '30% Advance, 70% on Delivery',
-      shippingTerms: 'FOB Factory',
-      notes: 'All parts will be manufactured according to customer specifications. Quality certificates will be provided. Delivery timeline may vary based on raw material availability.',
-      supplierId: 'SUP-001',
-      totalMiscellaneous: 1500.00,
-      totalTooling: 3500.00,
-      quoteFrom: {
-        company: 'Precision Manufacturing Co.',
-        email: 'quotes@precisionmfg.com',
-        phone: '+91 98765 43210'
-      },
-      quoteTo: {
-        company: 'Automotive Solutions Ltd.',
-        email: 'procurement@autosolutions.com',
-        location: 'Mumbai, Maharashtra, India'
-      }
-    };
-
-    // Dummy quotation items
-    this.quotationItems = [
-      {
-        itemCode: 'RFK-001',
-        description: 'Main Support Bracket - CNC Machined Aluminum',
-        quantity: 700,
-        unit: 'EA',
-        currency: 'INR',
-        unitPrice: 85.50,
-        totalPrice: 59850.00,
-        comments: 'Material: Aluminum 6061-T6, Finish: Anodized',
-        discount: 0,
-        discountType: 'Amount',
-        tax_type: 'CGST+SGST',
-        tax_amount: 10773.00,
-        miscellaneous: 300.00,
-        tooling: 1200.00
-      },
-      {
-        itemCode: 'RFK-002',
-        description: 'Mounting Plate Assembly',
-        quantity: 1000,
-        unit: 'EA',
-        currency: 'INR',
-        unitPrice: 45.75,
-        totalPrice: 45750.00,
-        comments: 'Material: Steel A36, Coating: Powder Coated',
-        discount: 0,
-        discountType: 'Amount',
-        tax_type: 'CGST+SGST',
-        tax_amount: 8235.00,
-        miscellaneous: 500.00,
-        tooling: 800.00
-      },
-      {
-        itemCode: 'RFK-003',
-        description: 'Spacer Ring - Precision Turned',
-        quantity: 1000,
-        unit: 'EA',
-        currency: 'INR',
-        unitPrice: 12.25,
-        totalPrice: 12250.00,
-        comments: 'Material: Nylon 6, Tolerance: ±0.05mm',
-        discount: 0,
-        discountType: 'Amount',
-        tax_type: 'CGST+SGST',
-        tax_amount: 2205.00,
-        miscellaneous: 200.00,
-        tooling: 400.00
-      },
-      {
-        itemCode: 'RFK-004',
-        description: 'Bearing Housing - Cast & Machined',
-        quantity: 400,
-        unit: 'EA',
-        currency: 'INR',
-        unitPrice: 95.00,
-        totalPrice: 38000.00,
-        comments: 'Material: Cast Iron, Grade: FG 200',
-        discount: 0,
-        discountType: 'Amount',
-        tax_type: 'CGST+SGST',
-        tax_amount: 6840.00,
-        miscellaneous: 300.00,
-        tooling: 600.00
-      },
-      {
-        itemCode: 'RFK-005',
-        description: 'Connecting Rod - Forged Steel',
-        quantity: 800,
-        unit: 'EA',
-        currency: 'INR',
-        unitPrice: 125.00,
-        totalPrice: 100000.00,
-        comments: 'Material: Forged Steel EN8, Heat Treatment: Normalized',
-        discount: 0,
-        discountType: 'Amount',
-        tax_type: 'CGST+SGST',
-        tax_amount: 18000.00,
-        miscellaneous: 800.00,
-        tooling: 1500.00
-      }
-    ];
-
-    // Format items for table display
-    this.rawQuotationItems = this.quotationItems.map(item => ({
-      name: `${item.itemCode}-LINE`,
-      owner: 'System',
-      creation: '2024-01-20 10:30:00',
-      modified: '2024-01-22 15:45:00',
-      modified_by: 'admin@company.com',
-      docstatus: 1,
-      idx: this.quotationItems.indexOf(item) + 1,
-      item_code: item.itemCode,
-      item_description: item.description,
-      quantity: item.quantity,
-      unit: item.unit,
-      currency_code: item.currency,
-      unit_price: item.unitPrice,
-      total_price: item.totalPrice,
-      comments: item.comments,
-      discount_type: item.discountType,
-      discount: item.discount,
-      tax_type: item.tax_type,
-      tax_amount: item.tax_amount,
-      miscellaneous: item.miscellaneous,
-      tooling: item.tooling,
-      parent: this.quotationId,
-      parentfield: 'items',
-      parenttype: 'Supplier Quotation',
-      doctype: 'Quotation Item',
-      unit_price_formatted: this.getFormattedCurrencyAmount(item.unitPrice, item.currency),
-      total_price_formatted: this.getFormattedCurrencyAmount(item.totalPrice, item.currency),
-      tax_amount_formatted: this.getFormattedCurrencyAmount(item.tax_amount, item.currency),
-      miscellaneous_formatted: this.getFormattedCurrencyAmount(item.miscellaneous || 0, item.currency),
-      tooling_formatted: this.getFormattedCurrencyAmount(item.tooling || 0, item.currency)
-    }));
-
-    // Dummy attachments
-    this.quotationAttachments = [
-      {
-        name: 'Quotation-Document.pdf',
-        file: 'quotation-doc.pdf',
-        file_name: 'Quotation-Document.pdf',
-        file_url: '#',
-        file_type: 'pdf',
-        category: 'Quotation',
-        uploaded_on: '2024-01-20 10:30:00'
-      },
-      {
-        name: 'Technical-Specifications.pdf',
-        file: 'tech-specs.pdf',
-        file_name: 'Technical-Specifications.pdf',
-        file_url: '#',
-        file_type: 'pdf',
-        category: 'Technical',
-        uploaded_on: '2024-01-20 10:35:00'
-      },
-      {
-        name: 'Quality-Certificate.pdf',
-        file: 'quality-cert.pdf',
-        file_name: 'Quality-Certificate.pdf',
-        file_url: '#',
-        file_type: 'pdf',
-        category: 'Quality',
-        uploaded_on: '2024-01-22 09:15:00'
-      }
-    ];
-
-    // Dummy activity trail
-    this.activityTrail = [
-      {
-        timestamp: 'January 20, 2024, 10:30 AM',
-        action: 'Quotation Created',
-        user: 'supplier@precisionmfg.com',
-        description: 'Initial quotation created for RFQ-2024-001847',
-        type: 'info'
-      },
-      {
-        timestamp: 'January 20, 2024, 2:15 PM',
-        action: 'Technical Review Completed',
-        user: 'engineer@precisionmfg.com',
-        description: 'All technical specifications reviewed and validated',
-        type: 'success'
-      },
-      {
-        timestamp: 'January 21, 2024, 11:20 AM',
-        action: 'Pricing Updated',
-        user: 'pricing@precisionmfg.com',
-        description: 'Updated pricing based on material cost analysis',
-        type: 'info'
-      },
-      {
-        timestamp: 'January 22, 2024, 3:45 PM',
-        action: 'Quotation Submitted',
-        user: 'supplier@precisionmfg.com',
-        description: 'Final quotation submitted to customer for review',
-        type: 'success'
-      }
-    ];
-
-    this.totalItems = this.quotationItems.length;
-    this.discountType = 'Percentage';
-    this.currencyCode = 'INR';
-  }
-
   // Firebase trigger access method
   accessFirebaseTrigger(docType: string, docName: string) {
     const payload = {
@@ -634,14 +408,23 @@ export class QuotationDetailsComponent implements OnInit {
 
   getQuotationDetails(quotationId: string) {
     this.loading = true;
-    let endPoint = `/api/resource/Supplier Quotation/${quotationId}`;
+    let endPoint = `/api/resource/Wefab Quotation/${quotationId}`;
     
-    this.commonService.getWefabData(endPoint).subscribe({
+    this.commonService.getData(endPoint).subscribe({
       next: (res: any) => {
         console.log('Quotation Details API Response:', res);
         if (res && res.data) {
           this.mapApiResponseToComponent(res.data);
         }
+        this.quotationAttachments = (res.data.attachments || []).map((attachment: any): QuotationAttachment => ({
+          name: attachment.file_name || attachment.name,
+          file: attachment.file || '----',
+          file_name: attachment.file_name || '----',
+          file_url: attachment.file_url || '----',
+          file_type: attachment.file_type || '----',
+          category: attachment.category || '----',
+          uploaded_on: attachment.creation || new Date().toISOString()
+        }));
         this.loading = false;
       },
       error: (error) => {
@@ -670,12 +453,16 @@ export class QuotationDetailsComponent implements OnInit {
       lastModified: this.formatApiDate(apiData.modified),
       workflowState: apiData.status,
       status: apiData.status,
+      projectName: apiData.project_name || '----',
+      deliveryDate: apiData.delivery_date || '----',
+      deliveryLocation: apiData.delivery_location || '----',
       estimatedDuration: apiData.estimated_completion_duration,
       validity: this.formatApiDate(apiData.validity),
       deliveryAddress: '', // Not available in new API structure
       totalAmount: calculatedSubTotal, // Use calculated value
       discountPercentage: apiData.discount_type === 'Percentage' ? apiData.discount_amount : apiData.discount,
       discountAmount: this.calculateDiscountAmount(apiData.sub_total, apiData.discount_type, apiData.discount_amount),
+      
       shippingCharges: apiData.shipping_charges,
       grandTotal: apiData.grand_total,
       taxApplicable: 0,
@@ -699,14 +486,16 @@ export class QuotationDetailsComponent implements OnInit {
       totalMiscellaneous: apiData.total_miscellaneous,
       totalTooling: apiData.total_tooling,
       quoteFrom: {
-        company: apiData.quotation_from,
-        email: '----',
-        phone: '----'
+        company: apiData.quotation_from.split('\n')[0] || '----',
+        address: apiData.quotation_from.split('\n')[1] || '----',
+        email: apiData.quotation_from.split('\n')[2] || '----',
+        phone: apiData.quotation_from.split('\n')[3] || '----'
       },
       quoteTo: {
-        company: apiData.quotation_to.split('\n')[0],
-        email: apiData.quotation_to.split('\n')[1] || '----',
-        location: apiData.quotation_to.split('\n')[2] || '----'
+        company: apiData.quotation_to.split('\n')[0] || '----',
+        address: apiData.quotation_to.split('\n')[1] || '----',
+        email: apiData.quotation_to.split('\n')[2] || '----',
+        phone: apiData.quotation_to.split('\n')[3] || '----'
       }
     };
 
@@ -943,6 +732,7 @@ export class QuotationDetailsComponent implements OnInit {
           <div class="quote-section">
             <h3>Quote From :</h3>
             <div class="company-name">${this.quotationDetails.quoteFrom.company}</div>
+            <div class="contact-info">${this.quotationDetails.quoteFrom.address}</div>
             <div class="contact-info">${this.quotationDetails.quoteFrom.email}</div>
             <div class="contact-info">${this.quotationDetails.quoteFrom.phone}</div>
           </div>
@@ -950,8 +740,9 @@ export class QuotationDetailsComponent implements OnInit {
           <div class="quote-section">
             <h3>Quote To :</h3>
             <div class="company-name">${this.quotationDetails.quoteTo.company}</div>
+            <div class="contact-info">${this.quotationDetails.quoteTo.address}</div>
             <div class="contact-info">${this.quotationDetails.quoteTo.email}</div>
-            <div class="contact-info">${this.quotationDetails.quoteTo.location}</div>
+            <div class="contact-info">${this.quotationDetails.quoteTo.phone}</div>
           </div>
         </div>
 
@@ -1042,7 +833,7 @@ export class QuotationDetailsComponent implements OnInit {
     const actionPayload = {
       action: action,
       doc: {
-        doctype: 'Supplier Quotation',
+        doctype: 'Wefab Quotation',
         name: this.quotationId
       }
     };
@@ -1098,10 +889,39 @@ export class QuotationDetailsComponent implements OnInit {
 
   downloadQuotationAttachment(attachment: QuotationAttachment) {
     if (attachment.file_url) {
-      const link = document.createElement('a');
-      link.href = attachment.file_url;
-      link.download = attachment.file_name;
-      link.click();
+      window.open(attachment.file_url, '_blank');
     }
   }
 }
+
+
+// Quotation details attachmeny
+// this.quotationAttachments = [
+//   {
+//     name: 'Quotation-Document.pdf',
+//     file: 'quotation-doc.pdf',
+//     file_name: 'Quotation-Document.pdf',
+//     file_url: '#',
+//     file_type: 'pdf',
+//     category: 'Quotation',
+//     uploaded_on: '2024-01-20 10:30:00'
+//   },
+//   {
+//     name: 'Technical-Specifications.pdf',
+//     file: 'tech-specs.pdf',
+//     file_name: 'Technical-Specifications.pdf',
+//     file_url: '#',
+//     file_type: 'pdf',
+//     category: 'Technical',
+//     uploaded_on: '2024-01-20 10:35:00'
+//   },
+//   {
+//     name: 'Quality-Certificate.pdf',
+//     file: 'quality-cert.pdf',
+//     file_name: 'Quality-Certificate.pdf',
+//     file_url: '#',
+//     file_type: 'pdf',
+//     category: 'Quality',
+//     uploaded_on: '2024-01-22 09:15:00'
+//   }
+// ];

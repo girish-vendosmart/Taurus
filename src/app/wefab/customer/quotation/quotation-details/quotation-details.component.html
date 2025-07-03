@@ -36,19 +36,15 @@
         <div class="info-rows">
           <div class="info-row">
             <span class="label">Project Name:</span>
-            <span class="value">{{ quotationDetails.quotation_name }}</span>
+            <span class="value">{{ quotationDetails.projectName }}</span>
           </div>
           <div class="info-row">
             <span class="label">Delivery Date:</span>
-            <span class="value">{{ quotationDetails.estimatedDuration }}</span>
+            <span class="value">{{ quotationDetails.deliveryDate }}</span>
           </div>
           <div class="info-row">
             <span class="label">Delivery Location:</span>
-            <span class="value">{{ quotationDetails.deliveryAddress }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Submitted:</span>
-            <span class="value">{{ quotationDetails.createdOn }}</span>
+            <span class="value">{{ quotationDetails.deliveryLocation }}</span>
           </div>
         </div>
       </div>
@@ -89,7 +85,7 @@
         <div class="party-details">
           <div class="company-name">{{ quotationDetails.quoteTo.company }}</div>
           <div class="contact-info">{{ quotationDetails.quoteTo.email }}</div>
-          <div class="contact-info">{{ quotationDetails.quoteTo.location }}</div>
+          <div class="contact-info">{{ quotationDetails.quoteTo.phone }}</div>
         </div>
       </div>
     </div>
@@ -168,9 +164,6 @@
               <div class="attachment-date">{{ formatApiDate(attachment.uploaded_on) }}</div>
             </div>
             <div class="attachment-actions">
-              <button class="view-btn" (click)="viewQuotationAttachment(attachment)" title="View">
-                <i class="pi pi-eye"></i>
-              </button>
               <button class="download-btn" (click)="downloadQuotationAttachment(attachment)" title="Download">
                 <i class="pi pi-download"></i>
               </button>

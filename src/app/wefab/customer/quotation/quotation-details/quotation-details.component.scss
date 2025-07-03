@@ -176,25 +176,6 @@ $danger-red: #EF4444;      // Danger color
   }
 }
 
-// Status Badge
-.status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-
-  &.status-draft { background: rgba($customer-secondary, 0.1); color: $customer-secondary; }
-  &.status-submitted { background: rgba($customer-info, 0.1); color: $customer-info; }
-  &.status-approved { background: rgba($customer-primary, 0.1); color: $customer-primary; }
-  &.status-rejected { background: rgba($customer-danger, 0.1); color: $customer-danger; }
-  &.status-accepted { background: rgba($customer-primary, 0.1); color: $customer-primary; }
-  &.status-received { background: rgba($customer-primary, 0.1); color: $customer-primary; }
-  &.status-default { background: rgba($customer-secondary, 0.1); color: $customer-secondary; }
-}
-
 // Content Grid
 .content-grid {
   display: grid;
