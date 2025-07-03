@@ -8,6 +8,11 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+
+// Services
+import { CustomerAuthService } from '../../../core/services/customer-auth.service';
 
 @Component({
   selector: 'app-login-component',
@@ -18,13 +23,14 @@ import { CheckboxModule } from 'primeng/checkbox';
     InputTextModule,
     PasswordModule,
     ButtonModule,
-    CheckboxModule
+    CheckboxModule,
+    ToastModule
   ],
+  providers: [MessageService],
   templateUrl: './login-component.component.html',
   styleUrl: './login-component.component.scss'
 })
 export class LoginComponentComponent {
-  
   loginData = {
     email: '',
     password: '',
@@ -33,53 +39,50 @@ export class LoginComponentComponent {
 
   isLoading = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private customerAuthService: CustomerAuthService,
+    private router: Router,
+    private messageService: MessageService
+  ) {
+    // Check if already authenticated as customer
+    this.customerAuthService.isCustomerAuthenticated().subscribe(isAuthenticated => {
+      if (isAuthenticated) {
+        this.router.navigate(['/wefab/customer/rfq-list']);
+      }
+    });
+  }
 
   onSubmit() {
     if (this.loginData.email && this.loginData.password) {
       this.isLoading = true;
       
-      console.log('Customer login attempt:', this.loginData);
-      
-      // Simulate API call
-      setTimeout(() => {
-        // Mock successful login
-        this.handleSuccessfulLogin();
-        this.isLoading = false;
-      }, 1500);
+      this.customerAuthService.customerLogin(this.loginData.email, this.loginData.password)
+        .subscribe({
+          next: () => {
+            // Navigate to customer dashboard
+            this.router.navigate(['/wefab/customer/rfq-list']);
+          },
+          error: (error) => {
+            this.isLoading = false;
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Login Failed',
+              detail: error.message || 'Invalid email or password'
+            });
+          }
+        });
     }
-  }
-
-  private handleSuccessfulLogin() {
-    // Store customer authentication data
-    const customerData = {
-      email: this.loginData.email,
-      loginTime: new Date().toISOString(),
-      userType: 'customer'
-    };
-    
-    // Store in localStorage (in production, use secure storage)
-    localStorage.setItem('customer_user_data', JSON.stringify(customerData));
-    localStorage.setItem('customer_auth_token', 'mock-customer-token-' + Date.now());
-    
-    if (this.loginData.rememberMe) {
-      localStorage.setItem('customer_remember_me', 'true');
-    }
-    
-    // Navigate to customer dashboard
-    this.router.navigate(['/wefab/customer/rfq-list']);
   }
 
   onForgotPassword() {
-    console.log('Forgot password clicked');
-    // Implement forgot password functionality
-    // this.router.navigate(['/customer/forgot-password']);
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Password Reset',
+      detail: 'Please contact customer support to reset your password'
+    });
   }
 
   onContactSupport() {
-    console.log('Contact support clicked');
-    // Implement contact support functionality
-    // Could open a modal, navigate to support page, or open email client
-    window.location.href = 'mailto:support@wefab.com';
+    window.location.href = 'mailto:customer.support@wefab.com';
   }
 }

@@ -21,17 +21,17 @@ export const WEFAB_ROUTES: Routes = [
       {
         path: 'supplier',
         loadChildren: () =>
-          import('./supplier/supplier-component.routes').then(m => m.WEFAB_SUPPLIER_ROUTES),
+          import('./supplier/supplier-component.routes').then(m => m.WEFAB_SUPPLIER_ROUTES)
       },
       {
         path: 'wefabTeam',
         loadChildren: () =>
-          import('./wefabTeam/wefabTeam.routes').then(m => m.WEFAB_TEAM_ROUTES),
+          import('./wefabTeam/wefabTeam.routes').then(m => m.WEFAB_TEAM_ROUTES)
       },
       {
         path: 'customer',
         loadChildren: () =>
-          import('./customer/customer-component.routes').then(m => m.WEFAB_CUSTOMER_ROUTES),
+          import('./customer/customer-component.routes').then(m => m.CUSTOMER_ROUTES)
       },
     ]
   },

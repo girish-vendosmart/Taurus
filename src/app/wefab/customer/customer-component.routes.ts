@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { CustomerAuthGuard } from '../../core/guards/customer-auth.guard';
 import { CustomerComponentComponent } from './customer-component.component';
 import { LoginComponentComponent } from './login-component/login-component.component';
 import { CreateRfqComponent } from './rfq/create-rfq/create-rfq.component';
@@ -11,7 +12,7 @@ import { OrderListComponent } from './order/order-list/order-list.component';
 import { QuotationDetailsComponent } from './quotation/quotation-details/quotation-details.component';
 import { OrderDetailsComponent } from './order/order-details/order-details.component';
 
-export const WEFAB_CUSTOMER_ROUTES: Routes = [
+export const CUSTOMER_ROUTES: Routes = [
     // Login route - standalone without sidebar and header
     {
         path: 'login',
@@ -21,6 +22,7 @@ export const WEFAB_CUSTOMER_ROUTES: Routes = [
     {
         path: '',
         component: CustomerComponentComponent,
+        canActivate: [CustomerAuthGuard],
         children: [ 
             {
                 path: 'create-rfq',
