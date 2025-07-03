@@ -920,3 +920,38 @@ $font-weight-bold: 700;
   letter-spacing: 2px;
 }
 
+::ng-deep .p-dropdown {
+  width: 100%
+}
+
+// Override dropdown width for status column
+:host ::ng-deep {
+  .p-datatable {
+    .p-datatable-thead {
+      > tr:last-child > th {
+        .filter-container {
+          // Increase width for status column dropdown
+          .p-dropdown {
+            min-width: 350px; // Increased minimum width
+            
+            .p-dropdown-panel {
+              min-width: 350px; // Match the dropdown panel width
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Ensure dropdown overlay has sufficient width
+:host ::ng-deep .p-overlay-content {
+  .p-dropdown-panel {
+    min-width: 200px; // Match the dropdown width
+    
+    .p-dropdown-items-wrapper {
+      width: 100%;
+    }
+  }
+}
+

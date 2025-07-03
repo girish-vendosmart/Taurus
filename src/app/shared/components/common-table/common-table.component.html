@@ -172,7 +172,7 @@
         </ng-template>
 
         <!-- Loading Message -->
-        <ng-template pTemplate="loadingbody" let-columns="columns">
+        <ng-template pTemplate="loadingbody" let-columns="columns" *ngIf="loading">
           <tr>
             <td [attr.colspan]="getVisibleColumns().length" class="text-center">
               Loading data...

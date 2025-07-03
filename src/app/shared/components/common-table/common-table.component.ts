@@ -12,6 +12,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { CalendarModule } from 'primeng/calendar';
 import { BadgeService } from '../../services/badge.service';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
 
 export interface ActionButton {
   label?: string;
@@ -195,8 +196,18 @@ export class CommonTableComponent implements OnInit, AfterViewInit {
   dropdownFilters: { [key: string]: any } = {};
 
   ngOnChanges(changes: SimpleChanges) {
+    console.log('CommonTable ngOnChanges:', changes);
     
-    console.log('changes', changes);
+    if (changes['data']) {
+      console.log('Data changed in CommonTable:');
+      console.log('  Previous value:', changes['data'].previousValue);
+      console.log('  Current value:', changes['data'].currentValue);
+      console.log('  Data length:', changes['data'].currentValue?.length || 0);
+    }
+    
+    if (changes['loading']) {
+      console.log('Loading state changed:', changes['loading'].currentValue);
+    }
   }
 
   ngOnInit() {

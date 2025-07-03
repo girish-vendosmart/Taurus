@@ -108,6 +108,17 @@ export class RfqListComponent implements OnInit {
   constructor(private router: Router, private commonService: CommonService) {}
 
   ngOnInit(): void {
+    console.log('RFQ List component initialized');
+    
+    // Load mock data first for testing
+    this.updateRFQSummary();
+    
+    console.log('After loading mock data:');
+    console.log('  rfqData:', this.rfqData);
+    console.log('  rfqData.length:', this.rfqData.length);
+    console.log('  loading:', this.loading);
+    
+    // Then try to fetch real data
     this.getRFQList();
   }
 
@@ -118,7 +129,7 @@ export class RfqListComponent implements OnInit {
     // Try using wefab-specific API first
     let apiEndpoint = '/api/resource/Customer Request for Quotation?fields=["*"]';
     
-    this.commonService.getWefabData(apiEndpoint).subscribe({
+    this.commonService.getData(apiEndpoint).subscribe({
       next: (res: any) => {
         console.log('API Response:', res);
         console.log('Response data:', res.data);
@@ -137,15 +148,13 @@ export class RfqListComponent implements OnInit {
         }
         
         this.updateRFQSummary();
+        this.loading = false;
       },
       error: (error) => {
         console.error('Error fetching RFQ list:', error);
         // Fallback to regular getData method
         console.log('Trying fallback API...');
         this.fallbackGetRFQList();
-      },
-      complete: () => {
-        this.loading = false;
       }
     });
   }
@@ -171,14 +180,13 @@ export class RfqListComponent implements OnInit {
         }
         
         this.updateRFQSummary();
+        this.loading = false;
       },
       error: (error) => {
         console.error('Fallback API also failed:', error);
         console.log('Loading mock data due to API failure');
         this.loadMockData();
         this.updateRFQSummary();
-      },
-      complete: () => {
         this.loading = false;
       }
     });
@@ -215,9 +223,12 @@ export class RfqListComponent implements OnInit {
       }
     ] as any[];
     console.log('Mock data loaded:', this.rfqData);
+    console.log('Mock data length:', this.rfqData.length);
   }
 
   updateRFQSummary() {
+    console.log('Updating RFQ summary with data:', this.rfqData);
+    
     const summary = {
       totalRfqs: this.rfqData.length,
       openRfqs: this.rfqData.filter(rfq => rfq.workflow_state === 'Open').length,
@@ -225,6 +236,8 @@ export class RfqListComponent implements OnInit {
       expiredRfqs: this.rfqData.filter(rfq => rfq.workflow_state === 'Expired').length
     };
     this.rfqSummary = summary;
+    
+    console.log('Updated RFQ summary:', this.rfqSummary);
   }
 
   createRFQ(): void {
