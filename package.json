@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "wefab": "ng build --configuration production",
+    "wefab:production": "ng build --configuration production",
     "wefab:qa": "ng build --configuration qa",
     "serve:ssr:we-fab-application": "node dist/we-fab-application/server/server.mjs"
   },

@@ -850,7 +850,7 @@
           </div>
 
           <!-- Bank Details Section -->
-          <div class="info-section">
+          <div class="info-section" *ngIf="country === 'India'">
             <div class="info-section-header">
               <h4 style="color: #1A3A5F !important"><i class="pi pi-university"></i> Bank Details</h4>
             </div>
@@ -1115,21 +1115,22 @@
             <span  *ngIf="!phoneVerified">Phone Number
               Verification Pending</span>
           </li>
-          <li class="verification-item">
+          {{country}}
+          <li class="verification-item" *ngIf="country === 'India'">
             <i class="pi pi-check-circle verified-icon" *ngIf="panVerified"></i>
             <i class="pi pi-times-circle not-verified-icon" *ngIf="!panVerified"></i>
             <span *ngIf="panVerified">PAN Verified</span>
             <span  *ngIf="!panVerified">PAN Verification
               Pending</span>
           </li>
-          <li class="verification-item">
+          <li class="verification-item" *ngIf="country === 'India'">
             <i class="pi pi-check-circle verified-icon" *ngIf="gstVerified"></i>
             <i class="pi pi-times-circle not-verified-icon" *ngIf="!gstVerified"></i>
             <span *ngIf="gstVerified">GSTIN Verified</span>
             <span  *ngIf="!gstVerified">GSTIN Verification
               Pending</span>
           </li>
-          <li class="verification-item">
+          <li class="verification-item" *ngIf="country === 'India'">
             <i class="pi pi-check-circle verified-icon" *ngIf="bankVerified"></i>
             <i class="pi pi-times-circle not-verified-icon" *ngIf="!bankVerified"></i>
             <span *ngIf="bankVerified">Bank Verified</span>
