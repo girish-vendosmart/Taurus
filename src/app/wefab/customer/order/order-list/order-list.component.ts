@@ -52,7 +52,7 @@ export class OrderListComponent implements OnInit {
   tableConfig: TableConfig = {
     columns: [
       {
-        field: 'name',
+        field: 'po_name',
         header: 'Order Id',
         sortable: true,
         filterable: true,
@@ -133,6 +133,7 @@ export class OrderListComponent implements OnInit {
     this.commonService.getData(apiEndpoint).subscribe({
       next: (res: any) => {
         this.orderData = res.data.map((order: any) => ({
+          companySubInfo: order.name || '----',
           ...order,
           routerLink: `/wefab/customer/order-details/${order.name}`,
           formattedGrandTotal: `${order.currency_code} ${order.grand_total.toLocaleString('en-IN', {
