@@ -12,14 +12,16 @@ import { QuotationDetailsComponent } from './quotation/quotation-details/quotati
 import { OrderDetailsComponent } from './order/order-details/order-details.component';
 
 export const WEFAB_CUSTOMER_ROUTES: Routes = [
+    // Login route - standalone without sidebar and header
+    {
+        path: 'login',
+        component: LoginComponentComponent,
+    },
+    // Main customer routes with sidebar and header
     {
         path: '',
         component: CustomerComponentComponent,
         children: [ 
-            {
-                path: 'login',
-                component: LoginComponentComponent,
-            },
             {
                 path: 'create-rfq',
                 component: CreateRfqComponent,
@@ -55,6 +57,12 @@ export const WEFAB_CUSTOMER_ROUTES: Routes = [
             {
                 path: 'order-details/:id',
                 component: OrderDetailsComponent,
+            },
+            // Redirect empty path to RFQ list
+            {
+                path: '',
+                redirectTo: 'rfq-list',
+                pathMatch: 'full'
             }
         ]
     }   

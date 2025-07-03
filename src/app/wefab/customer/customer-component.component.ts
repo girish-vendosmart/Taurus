@@ -17,6 +17,9 @@ export class CustomerComponentComponent implements OnInit {
   @ViewChild(CustomerSidebarComponent) sidebar!: CustomerSidebarComponent;
   @ViewChild(CustomerHeaderComponent) header!: CustomerHeaderComponent;
 
+  // Login page detection
+  isLoginPage = false;
+
   sidebarConfig: SidebarConfig = {
     logoUrl: 'assets/wefab-Logo Design 1.png',
     logoAlt: 'Wefab Logo',
@@ -72,12 +75,14 @@ export class CustomerComponentComponent implements OnInit {
 
   ngOnInit() {
     this.checkScreenSize();
+    this.checkLoginPage();
     this.updateActiveMenuBasedOnRoute();
     
-    // Listen for route changes to update active menu item
+    // Listen for route changes to update active menu item and login page status
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
+        this.checkLoginPage();
         this.updateActiveMenuBasedOnRoute();
       });
     
@@ -85,6 +90,10 @@ export class CustomerComponentComponent implements OnInit {
     window.addEventListener('resize', () => {
       this.checkScreenSize();
     });
+  }
+
+  private checkLoginPage(): void {
+    this.isLoginPage = this.router.url.includes('/login');
   }
 
   private checkScreenSize(): void {

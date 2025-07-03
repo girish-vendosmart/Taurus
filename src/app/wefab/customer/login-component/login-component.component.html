@@ -1,110 +1,121 @@
-<div class="customer-app">
+<div class="customer-app customer-login-page">
   <div class="container-fluid vh-100 p-0">
     <div class="row g-0 h-100">
-      <!-- Left Side - Welcome Section -->
-      <div class="col-lg-6 d-flex align-items-center justify-content-center text-white" style="background-color: #12856E;">
-        <div class="text-center px-4 px-lg-5">
-          <h1 class="display-5 fw-bold mb-4">Welcome to Wefab AI</h1>
-          <p class="lead mb-5">Your trusted manufacturing partner for bringing ideas to life</p>
-          
-          <div class="text-start">
-            <div class="d-flex align-items-center mb-3">
-              <i class="pi pi-check-circle me-3 fs-5"></i>
-              <span class="fs-6">Quality-assured manufacturing</span>
+      <!-- Left Side - Welcome Content -->
+      <div class="col-lg-7 customer-features-section">
+        <div class="customer-features-content">
+          <h1 class="welcome-title">Welcome to<br>WeFab Customer Portal</h1>
+          <p class="welcome-subtitle">Your one-stop platform for managing manufacturing projects and collaborating with suppliers</p>
+
+          <div class="features-list">
+            <div class="feature-item">
+              <div class="feature-icon">
+                <i class="pi pi-file-edit"></i>
+              </div>
+              <div class="feature-content">
+                <h3>RFQ Management</h3>
+                <p>Create and manage RFQs with ease</p>
+              </div>
             </div>
-            <div class="d-flex align-items-center mb-3">
-              <i class="pi pi-check-circle me-3 fs-5"></i>
-              <span class="fs-6">End-to-end project management</span>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <i class="pi pi-users"></i>
+              </div>
+              <div class="feature-content">
+                <h3>Supplier Network</h3>
+                <p>Connect with verified manufacturing suppliers</p>
+              </div>
             </div>
-            <div class="d-flex align-items-center">
-              <i class="pi pi-check-circle me-3 fs-5"></i>
-              <span class="fs-6">Transparent pricing & timelines</span>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <i class="pi pi-box"></i>
+              </div>
+              <div class="feature-content">
+                <h3>Order Tracking</h3>
+                <p>Monitor your orders in real-time</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">
+                <i class="pi pi-comments"></i>
+              </div>
+              <div class="feature-content">
+                <h3>Direct Communication</h3>
+                <p>Seamless interaction with suppliers</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Right Side - Login Form -->
-      <div class="col-lg-6 d-flex align-items-center justify-content-center bg-light">
-        <div class="w-100" style="max-width: 400px;">
+      <div class="col-lg-5 d-flex align-items-center justify-content-center login-section">
+        <div class="login-container">
           <div class="text-center mb-4">
-            <div class="rounded-3 d-inline-flex align-items-center justify-content-center mb-3" 
-                 style="width: 60px; height: 60px; background-color: #12856E;">
-              <i class="pi pi-user text-white fs-3"></i>
+            <div class="logo-container">
+              <i class="pi pi-box"></i>
             </div>
-            <h2 class="fw-bold text-dark mb-2">Customer Login</h2>
-            <p class="text-muted">Access your manufacturing dashboard</p>
+            <h2>Customer Portal</h2>
+            <p>Welcome back! Please login to your account</p>
           </div>
 
           <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-            <div class="mb-3">
-              <label for="email" class="form-label fw-medium">Email Address</label>
-              <span class="p-input-icon-left w-100">
-                <i class="pi pi-envelope mt-0"></i>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <div class="input-container">
+                <i class="pi pi-envelope"></i>
                 <input 
-                  pInputText 
                   type="email" 
                   id="email" 
                   name="email"
                   [(ngModel)]="loginData.email"
                   placeholder="Enter your email"
-                  class="w-100"
-                  style="padding-left: 2.5rem; height: 48px;"
                   required>
-              </span>
-            </div>
-
-            <div class="mb-3">
-              <label for="password" class="form-label fw-medium">Password</label>
-              <div class="password-wrapper position-relative w-100">
-                <i class="pi pi-lock password-icon"></i>
-                <p-password
-                  inputId="password"
-                  name="password"
-                  [(ngModel)]="loginData.password"
-                  placeholder="Enter your password"
-                  [toggleMask]="true"
-                  [feedback]="false"
-                  styleClass="w-100"
-                  inputStyleClass="password-input"
-                  [style]="{'width': '100%'}"
-                  [inputStyle]="{'padding-left': '2.5rem', 'height': '48px', 'width': '100%'}"
-                  required>
-                </p-password>
               </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <!-- <div class="d-flex align-items-center">
-                <p-checkbox 
-                  inputId="rememberMe" 
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-container">
+                <i class="pi pi-lock"></i>
+                <input 
+                  type="password"
+                  id="password"
+                  name="password"
+                  [(ngModel)]="loginData.password"
+                  placeholder="Enter your password"
+                  required>
+                <i class="pi pi-eye toggle-password"></i>
+              </div>
+            </div>
+
+            <div class="form-options">
+              <div class="remember-me">
+                <input 
+                  type="checkbox"
+                  id="rememberMe"
                   name="rememberMe"
-                  [(ngModel)]="loginData.rememberMe"
-                  [binary]="true">
-                </p-checkbox>
-                <label for="rememberMe" class="ms-2 text-muted cursor-pointer">
-                  Remember me
-                </label>
-              </div> -->
-              <a href="#" class="text-decoration-none" style="color: #12856E; margin-left: auto;">
+                  [(ngModel)]="loginData.rememberMe">
+                <label for="rememberMe">Remember me</label>
+              </div>
+              <a href="#" class="forgot-password" (click)="onForgotPassword(); $event.preventDefault()">
                 Forgot password?
               </a>
             </div>
 
-            <p-button 
-              type="submit"
-              label="Sign In"
-              [disabled]="!loginForm.valid"
-              styleClass="w-100 mb-4"
-              [style]="{'height': '48px', 'width': '100%'}">
-            </p-button>
+            <button 
+              type="submit" 
+              class="login-button" 
+              [disabled]="!loginForm.valid || isLoading">
+              {{ isLoading ? 'Logging in...' : 'Log in' }}
+            </button>
 
-            <!-- <div class="text-center">
-              <span class="text-muted">New to Wefab? </span>
-              <a href="#" class="text-decoration-none fw-medium" style="color: #12856E;">
-                Create account
-              </a>
-            </div> -->
+            <div class="support-text">
+              Need help? <a href="#" (click)="onContactSupport(); $event.preventDefault()">Contact Support</a>
+            </div>
           </form>
         </div>
       </div>

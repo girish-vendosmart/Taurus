@@ -1,6 +1,7 @@
 <div class="customer-layout">
-  <!-- Customer Header -->
+  <!-- Customer Header - Hidden on login page -->
   <app-customer-header
+    *ngIf="!isLoginPage"
     [showMobileMenu]="sidebarOpen"
     (logoutEvent)="onLogout()"
     (mobileMenuToggle)="toggleSidebar()"
@@ -9,10 +10,11 @@
   </app-customer-header>
 
   <!-- Main Layout Container -->
-  <div class="main-layout "> 
-    <div class="layout-wrapper d-flex h-100">
-      <!-- Sidebar -->
+  <div class="main-layout" [class.login-layout]="isLoginPage"> 
+    <div class="layout-wrapper d-flex h-100" [class.login-wrapper]="isLoginPage">
+      <!-- Sidebar - Hidden on login page -->
       <div class="sidebar-container" 
+           *ngIf="!isLoginPage"
            [class.mobile-open]="sidebarOpen && isMobile"
            [class.mobile-closed]="!sidebarOpen && isMobile">
         <app-customer-sidebar 
@@ -24,15 +26,16 @@
       </div>
 
       <!-- Main Content Area -->
-      <div class="main-content flex-grow-1">
-        <div class="content-wrapper mt-5">
+      <div class="main-content flex-grow-1" [class.login-content]="isLoginPage">
+        <div class="content-wrapper" [class.login-content-wrapper]="isLoginPage">
           <router-outlet></router-outlet>
         </div>
       </div>
     </div>
 
-    <!-- Mobile Sidebar Overlay -->
+    <!-- Mobile Sidebar Overlay - Hidden on login page -->
     <div class="mobile-sidebar-overlay" 
+         *ngIf="!isLoginPage"
          [class.show]="sidebarOpen && isMobile"
          (click)="closeSidebar()">
     </div>
