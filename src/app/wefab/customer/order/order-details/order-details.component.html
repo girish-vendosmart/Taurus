@@ -20,188 +20,219 @@
       </div>
     </div>
 
-    <!-- Content Grid -->
-    <div class="content-grid">
-      <!-- Order Information -->
-      <div class="info-section">
-        <h3>Order Information</h3>
-        <div class="info-rows">
-          <div class="info-row">
-            <span class="label">Customer PO Number:</span>
-            <span class="value">{{ orderDetails.customer_po_number }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Priority:</span>
-            <span class="value">{{ orderDetails.priority }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Created On:</span>
-            <span class="value">{{ formatApiDate(orderDetails.creation) }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Last Modified:</span>
-            <span class="value">{{ formatApiDate(orderDetails.modified) }}</span>
-          </div>
-        </div>
+    <!-- Tabs Section -->
+    <div class="tabs-container">
+      <div class="tab-headers">
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'overview'"
+          (click)="setActiveTab('overview')">
+          <i class="pi pi-list"></i>
+          Overview
+        </button>
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'comments'"
+          (click)="setActiveTab('comments')">
+          <i class="pi pi-comments"></i>
+          Comments
+        </button>
       </div>
 
-      <!-- Order Summary -->
-      <div class="info-section">
-        <h3>Order Summary</h3>
-        <div class="info-rows">
-          <div class="info-row">
-            <span class="label">Total Line Items:</span>
-            <span class="value">{{ orderItems.length }} parts</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Total Quantity:</span>
-            <span class="value">{{ getTotalQuantity() }} units</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Total Amount:</span>
-            <span class="value">{{ getFormattedCurrencyAmount(orderDetails.grand_total) }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Delivery & Reference Information -->
-    <div class="quote-parties-section">
-      <div class="quote-from">
-        <h4>Delivery Information</h4>
-        <div class="party-details">
-          <div class="info-row">
-            <span class="label">Requested Delivery:</span>
-            <span class="value">{{ orderDetails.expected_delivery }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Promised Delivery:</span>
-            <span class="value">{{ orderDetails.promised_delivery }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Delivery Terms:</span>
-            <span class="value">{{ orderDetails.delivery_terms }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Shipping Method:</span>
-            <span class="value">{{ orderDetails.shipping_method }}</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="quote-to">
-        <h4>Reference Information</h4>
-        <div class="party-details">
-          <div class="info-row">
-            <span class="label">RFQ Reference:</span>
-            <span class="value">{{ orderDetails.rfq_reference }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Quotation ID:</span>
-            <span class="value">{{ orderDetails.quotation_id }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Payment Terms:</span>
-            <span class="value">{{ orderDetails.payment_terms }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Payment Method:</span>
-            <span class="value">{{ orderDetails.payment_method }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Line Items Section -->
-    <div class="line-items-section">
-      <h3>Order Items</h3>
-      
-      <div class="common-table-wrapper">
-        <app-common-table
-          [config]="orderItemsTableConfig"
-          [data]="orderItems"
-          [loading]="loading"
-          (rowClick)="onItemRowClick($event)"
-          (linkClick)="onItemLinkClick($event)"
-          (actionClick)="onItemActionClick($event)">
-        </app-common-table>
-      </div>
-
-      <!-- Summary Section -->
-      <div class="summary-section">
-        <div class="summary-row">
-          <span class="summary-label">Sub Total:</span>
-          <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.sub_total) }}</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">{{ getDiscountDisplayText() }}</span>
-          <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.discount_amount) }}</span>
-        </div>
-        
-        <div class="summary-row" *ngIf="orderDetails.total_tax_amount > 0">
-          <span class="summary-label">Total Tax Amount:</span>
-          <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.total_tax_amount) }}</span>
-        </div>
-        
-        <div class="summary-row" *ngIf="orderDetails.shipping_charges > 0">
-          <span class="summary-label">Shipping Charges:</span>
-          <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.shipping_charges) }}</span>
-        </div>
-        
-        <div class="summary-row total-row">
-          <span class="summary-label">Grand Total:</span>
-          <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.grand_total) }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Requirements Section -->
-    <div class="requirements-section" *ngIf="orderDetails.quality_requirements || orderDetails.packaging_requirements">
-      <h3>Requirements & Instructions</h3>
-      <div class="requirements-grid">
-        <div class="requirement-item" *ngIf="orderDetails.quality_requirements">
-          <h4>Quality Requirements</h4>
-          <p>{{ orderDetails.quality_requirements }}</p>
-        </div>
-        <div class="requirement-item" *ngIf="orderDetails.packaging_requirements">
-          <h4>Packaging Requirements</h4>
-          <p>{{ orderDetails.packaging_requirements }}</p>
-        </div>
-      </div>
-      <div class="general-terms" *ngIf="orderDetails.general_terms">
-        <h4>General Terms</h4>
-        <div [innerHTML]="orderDetails.general_terms"></div>
-      </div>
-    </div>
-
-    <!-- Attachments Section -->
-    <div class="attachments-section" *ngIf="orderAttachments && orderAttachments.length > 0">
-      <h3>Attachments ({{ orderAttachments.length }})</h3>
-      <p class="text-muted">Documents and files related to this order</p>
-      
-      <div class="attachments-grid">
-        <div *ngFor="let attachment of orderAttachments" class="attachment-card">
-          <div class="attachment-content">
-            <div class="file-icon">
-              <i class="pi" [ngClass]="{
-                'pi-file-pdf': isFileTypePdf(attachment.file_name),
-                'pi-file-excel': isFileTypeDocument(attachment.file_name),
-                'pi-image': isFileTypeImage(attachment.file_name),
-                'pi-file': !isFileTypePdf(attachment.file_name) && !isFileTypeDocument(attachment.file_name) && !isFileTypeImage(attachment.file_name)
-              }"></i>
+      <!-- Overview Tab Content -->
+      <div class="tab-content mt-3" *ngIf="activeTab === 'overview'">
+        <!-- Content Grid -->
+        <div class="content-grid">
+          <!-- Order Information -->
+          <div class="info-section">
+            <h3>Order Information</h3>
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="label">Customer PO Number:</span>
+                <span class="value">{{ orderDetails.customer_po_number }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Priority:</span>
+                <span class="value">{{ orderDetails.priority }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Created On:</span>
+                <span class="value">{{ formatApiDate(orderDetails.creation) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Last Modified:</span>
+                <span class="value">{{ formatApiDate(orderDetails.modified) }}</span>
+              </div>
             </div>
-            <div class="attachment-details">
-              <div class="attachment-name">{{ attachment.name }}</div>
-              <div class="attachment-category">{{ attachment.category }}</div>
-              <div class="attachment-date">{{ formatApiDate(attachment.uploaded_on) }}</div>
-            </div>
-            <div class="attachment-actions">
-              <button class="download-btn" (click)="downloadAttachment(attachment)" title="Download">
-                <i class="pi pi-download"></i>
-              </button>
+          </div>
+
+          <!-- Order Summary -->
+          <div class="info-section">
+            <h3>Order Summary</h3>
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="label">Total Line Items:</span>
+                <span class="value">{{ orderItems.length }} parts</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Total Quantity:</span>
+                <span class="value">{{ getTotalQuantity() }} units</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Total Amount:</span>
+                <span class="value">{{ getFormattedCurrencyAmount(orderDetails.grand_total) }}</span>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- Delivery & Reference Information -->
+        <div class="quote-parties-section">
+          <div class="quote-from">
+            <h4>Delivery Information</h4>
+            <div class="party-details">
+              <div class="info-row">
+                <span class="label">Requested Delivery:</span>
+                <span class="value">{{ orderDetails.expected_delivery }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Promised Delivery:</span>
+                <span class="value">{{ orderDetails.promised_delivery }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Delivery Terms:</span>
+                <span class="value">{{ orderDetails.delivery_terms }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Shipping Method:</span>
+                <span class="value">{{ orderDetails.shipping_method }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="quote-to">
+            <h4>Reference Information</h4>
+            <div class="party-details">
+              <div class="info-row">
+                <span class="label">RFQ Reference:</span>
+                <span class="value">{{ orderDetails.rfq_reference }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Quotation ID:</span>
+                <span class="value">{{ orderDetails.quotation_id }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Payment Terms:</span>
+                <span class="value">{{ orderDetails.payment_terms }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Payment Method:</span>
+                <span class="value">{{ orderDetails.payment_method }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Line Items Section -->
+        <div class="line-items-section">
+          <h3>Order Items</h3>
+          
+          <div class="common-table-wrapper">
+            <app-common-table
+              [config]="orderItemsTableConfig"
+              [data]="orderItems"
+              [loading]="loading"
+              (rowClick)="onItemRowClick($event)"
+              (linkClick)="onItemLinkClick($event)"
+              (actionClick)="onItemActionClick($event)">
+            </app-common-table>
+          </div>
+
+          <!-- Summary Section -->
+          <div class="summary-section">
+            <div class="summary-row">
+              <span class="summary-label">Sub Total:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.sub_total) }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">{{ getDiscountDisplayText() }}</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.discount_amount) }}</span>
+            </div>
+            
+            <div class="summary-row" *ngIf="orderDetails.total_tax_amount > 0">
+              <span class="summary-label">Total Tax Amount:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.total_tax_amount) }}</span>
+            </div>
+            
+            <div class="summary-row" *ngIf="orderDetails.shipping_charges > 0">
+              <span class="summary-label">Shipping Charges:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.shipping_charges) }}</span>
+            </div>
+            
+            <div class="summary-row total-row">
+              <span class="summary-label">Grand Total:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(orderDetails.grand_total) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Requirements Section -->
+        <div class="requirements-section" *ngIf="orderDetails.quality_requirements || orderDetails.packaging_requirements">
+          <h3>Requirements & Instructions</h3>
+          <div class="requirements-grid">
+            <div class="requirement-item" *ngIf="orderDetails.quality_requirements">
+              <h4>Quality Requirements</h4>
+              <p>{{ orderDetails.quality_requirements }}</p>
+            </div>
+            <div class="requirement-item" *ngIf="orderDetails.packaging_requirements">
+              <h4>Packaging Requirements</h4>
+              <p>{{ orderDetails.packaging_requirements }}</p>
+            </div>
+          </div>
+          <div class="general-terms" *ngIf="orderDetails.general_terms">
+            <h4>General Terms</h4>
+            <div [innerHTML]="orderDetails.general_terms"></div>
+          </div>
+        </div>
+
+        <!-- Attachments Section -->
+        <div class="attachments-section" *ngIf="orderAttachments && orderAttachments.length > 0">
+          <h3>Attachments ({{ orderAttachments.length }})</h3>
+          <p class="text-muted">Documents and files related to this order</p>
+          
+          <div class="attachments-grid">
+            <div *ngFor="let attachment of orderAttachments" class="attachment-card">
+              <div class="attachment-content">
+                <div class="file-icon">
+                  <i class="pi" [ngClass]="{
+                    'pi-file-pdf': isFileTypePdf(attachment.file_name),
+                    'pi-file-excel': isFileTypeDocument(attachment.file_name),
+                    'pi-image': isFileTypeImage(attachment.file_name),
+                    'pi-file': !isFileTypePdf(attachment.file_name) && !isFileTypeDocument(attachment.file_name) && !isFileTypeImage(attachment.file_name)
+                  }"></i>
+                </div>
+                <div class="attachment-details">
+                  <div class="attachment-name">{{ attachment.name }}</div>
+                  <div class="attachment-category">{{ attachment.category }}</div>
+                  <div class="attachment-date">{{ formatApiDate(attachment.uploaded_on) }}</div>
+                </div>
+                <div class="attachment-actions">
+                  <button class="download-btn" (click)="downloadAttachment(attachment)" title="Download">
+                    <i class="pi pi-download"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments Tab Content -->
+      <div class="tab-content mt-3" *ngIf="activeTab === 'comments'">
+        <app-conversation-trail
+          [docType]="'Customer Purchase Order Messenger'"
+          [docName]="orderDetails.name">
+        </app-conversation-trail>
       </div>
     </div>
   </div>

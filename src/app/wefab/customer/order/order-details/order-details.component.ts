@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonTableComponent, TableConfig } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
+import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
 
 // API Response Interfaces
 export interface CustomerPurchaseOrderApiResponse {
@@ -175,12 +176,16 @@ export interface OrderAttachment {
     CommonModule,
     RouterModule,
     FormsModule,
-    CommonTableComponent
+    CommonTableComponent,
+    ConversationTrailComponent
   ],
   templateUrl: './order-details.component.html',
   styleUrl: './order-details.component.scss'
 })
 export class OrderDetailsComponent implements OnInit {
+  // Tab management
+  activeTab: string = 'overview';
+
   orderId: string = '';
   loading: boolean = false;
   currencyCode: string = 'USD';
@@ -651,5 +656,10 @@ export class OrderDetailsComponent implements OnInit {
     } catch {
       return dateString;
     }
+  }
+
+  // Tab management methods
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
   }
 }

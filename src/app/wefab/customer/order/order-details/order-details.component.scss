@@ -476,3 +476,114 @@ $danger-red: #EF4444;      // Danger color
     }
   }
 }
+
+// Tab styling
+.tabs-container {
+  .tab-headers {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    background: white;
+
+    .tab-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: #6b7280;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      i {
+        font-size: 1rem;
+      }
+
+      &:hover {
+        color: #1f2937;
+        background: #f9fafb;
+      }
+
+      &.active {
+        color: $safety-orange;
+        border-bottom-color: $safety-orange;
+        background: white;
+      }
+    }
+  }
+
+  .tab-content {
+    background: white;
+    
+    .mt-3 {
+      margin-top: 1rem;
+    }
+  }
+}
+
+// Update content grid for tab content
+.tab-content .content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  padding: 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+// Update quote parties section for tab content
+.tab-content .quote-parties-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 0 24px 24px;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+// Update line items section for tab content
+.tab-content .line-items-section {
+  padding: 24px;
+  border-top: 1px solid #e5e7eb;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 24px 0;
+  }
+
+  .common-table-wrapper {
+    margin-bottom: 16px;
+  }
+}
+
+// Update requirements section for tab content
+.tab-content .requirements-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 0 24px 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+// Update attachments section for tab content
+.tab-content .attachments-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 0 24px 24px;
+}
