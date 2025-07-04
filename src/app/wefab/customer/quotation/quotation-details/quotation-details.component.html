@@ -45,6 +45,13 @@
           <i class="pi pi-comments"></i>
           Comments
         </button>
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'activity'"
+          (click)="setActiveTab('activity')">
+          <i class="pi pi-clock"></i>
+          Activity
+        </button>
       </div>
 
       <!-- Overview Tab Content -->
@@ -201,6 +208,16 @@
           [docType]="'Wefab Quotation Messenger'"
           [docName]="quotationId">
         </app-conversation-trail>
+      </div>
+
+      <!-- Activity Tab Content -->
+      <div class="tab-content mt-3 activity-tab" *ngIf="activeTab === 'activity'">
+        <app-activity-trail
+          [activityData]="activityTrail"
+          [loading]="activityTrailLoading"
+          [showHeader]="false"
+          [emptyMessage]="'No activity records found.'">
+        </app-activity-trail>
       </div>
     </div>
   </div>

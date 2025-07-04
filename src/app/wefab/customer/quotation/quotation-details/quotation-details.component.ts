@@ -251,7 +251,7 @@ export class QuotationDetailsComponent implements OnInit {
   totalItems: number = 0;
   loading: boolean = false;
 
-  activityTrail: any[] = [];
+  activityTrail: ActivityLogData[] = [];
   activityTrailLoading: boolean = false;
 
   // Table configuration
@@ -667,8 +667,38 @@ export class QuotationDetailsComponent implements OnInit {
   }
 
   // Tab management
-  setActiveTab(tab: string) {
+  setActiveTab(tab: string): void {
     this.activeTab = tab;
+    if (tab === 'activity') {
+      this.loadActivityTrail();
+    }
+  }
+
+  // Load activity trail data
+  private loadActivityTrail(): void {
+    this.activityTrailLoading = true;
+    let endPoint = `/api/method/wefab.wefab.utils.web_service.get_activity_logs?doctype=Wefab Quotation&docname=${this.quotationId}`;
+
+    this.commonService.getWefabData(endPoint).subscribe({
+      next: (res: any) => {
+        console.log('Activity Trail Response:', res);
+        if (res && res.message) {
+          this.activityTrail = res.message.map((activity: any) => ({
+            timestamp: this.formatApiDate(activity.creation),
+            action: activity.title || activity.subject,
+            user: activity.owner,
+            description: activity.content,
+            type: this.getActivityType(activity.status)
+          }));
+        }
+        this.activityTrailLoading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching activity trail:', error);
+        this.activityTrail = [];
+        this.activityTrailLoading = false;
+      }
+    });
   }
 
   // Status class for status badge

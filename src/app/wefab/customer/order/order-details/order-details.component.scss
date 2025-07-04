@@ -489,7 +489,6 @@ $danger-red: #EF4444;      // Danger color
       &.active {
         color: $safety-orange;
         border-bottom-color: $safety-orange;
-        background: white;
       }
     }
   }
@@ -739,6 +738,104 @@ $danger-red: #EF4444;      // Danger color
               }
             }
           }
+        }
+      }
+    }
+  }
+}
+
+// Activity tab styles
+.activity-tab {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 0 24px 24px;
+
+  ::ng-deep {
+    .activity-trail-container {
+      border: none;
+      box-shadow: none;
+      padding: 0;
+
+      .activity-item {
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        border: 1px solid #e5e7eb;
+        background: #f8fafc;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .activity-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 8px;
+
+          .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+
+            &.success {
+              background: #d1fae5;
+              color: #059669;
+            }
+
+            &.error {
+              background: #fee2e2;
+              color: #dc2626;
+            }
+
+            &.warning {
+              background: #fef3c7;
+              color: #d97706;
+            }
+
+            &.info {
+              background: #e0f2fe;
+              color: #0284c7;
+            }
+          }
+
+          .activity-info {
+            flex: 1;
+
+            .activity-title {
+              font-weight: 500;
+              color: #1f2937;
+              margin-bottom: 4px;
+              font-size: 14px;
+            }
+
+            .activity-meta {
+              display: flex;
+              gap: 16px;
+              color: #6b7280;
+              font-size: 12px;
+
+              .activity-user,
+              .activity-time {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+              }
+            }
+          }
+        }
+
+        .activity-description {
+          color: #4b5563;
+          font-size: 14px;
+          line-height: 1.5;
+          margin: 0;
+          padding-left: 44px;
         }
       }
     }

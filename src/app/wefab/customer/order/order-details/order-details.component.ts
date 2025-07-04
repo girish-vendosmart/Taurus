@@ -6,6 +6,7 @@ import { HttpParams } from '@angular/common/http';
 import { CommonTableComponent, TableConfig } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
 import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
+import { ActivityTrailComponent, ActivityLogData } from '../../../../shared/components/activity-trail/activity-trail.component';
 import { ApprovalWorkflowComponent, WorkflowStep, WorkflowCompletionData, WorkflowStepCompletionData } from '../../../../shared/components/approval-workflow/approval-workflow.component';
 import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
 
@@ -186,6 +187,7 @@ interface WorkflowState {
     FormsModule,
     CommonTableComponent,
     ConversationTrailComponent,
+    ActivityTrailComponent,
     ApprovalWorkflowComponent
   ],
   templateUrl: './order-details.component.html',
@@ -242,6 +244,9 @@ export class OrderDetailsComponent implements OnInit {
   orderItems: OrderItem[] = [];
   rawOrderItems: OrderLineItem[] = [];
   orderAttachments: OrderAttachment[] = [];
+
+  activityTrail: ActivityLogData[] = [];
+  activityTrailLoading: boolean = false;
 
   // Order Items Table Configuration
   orderItemsTableConfig: TableConfig = {
@@ -353,6 +358,7 @@ export class OrderDetailsComponent implements OnInit {
       if (this.orderId) {
         this.accessFirebaseTrigger('Customer Purchase Order', this.orderId);
         this.getOrderTrackerView(this.orderId);
+        this.getActivityTrail('Customer Purchase Order', this.orderId);
       }
     });
   }
@@ -787,6 +793,9 @@ export class OrderDetailsComponent implements OnInit {
   // Tab management methods
   setActiveTab(tab: string) {
     this.activeTab = tab;
+    if (tab === 'activity') {
+      this.loadActivityTrail();
+    }
   }
 
   // Workflow event handlers (for customer view - mostly informational)
@@ -823,5 +832,74 @@ export class OrderDetailsComponent implements OnInit {
       stepDetails,
       'info'
     );
+  }
+
+  // Activity trail methods
+  getActivityTrail(doctype: string, docname: string) {
+    this.activityTrailLoading = true;
+    let endpoint = `/api/method/wefab.wefab.utils.web_service.get_activity_logs?doctype=${doctype}&docname=${docname}`;
+
+    this.commonService.getWefabData(endpoint).subscribe({
+      next: (res: any) => {
+        console.log('Activity Trail Response:', res);
+        if (res && res.message) {
+          this.activityTrail = res.message.map((activity: any) => ({
+            timestamp: this.formatApiDate(activity.creation),
+            action: activity.title || activity.subject,
+            user: activity.owner,
+            description: activity.content,
+            type: this.getActivityType(activity.status)
+          }));
+        }
+        this.activityTrailLoading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching activity trail:', error);
+        this.activityTrailLoading = false;
+      }
+    });
+  }
+
+  // Get activity type for styling
+  getActivityType(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'success':
+      case 'completed':
+        return 'success';
+      case 'error':
+      case 'failed':
+        return 'error';
+      case 'warning':
+        return 'warning';
+      default:
+        return 'info';
+    }
+  }
+
+  // Load activity trail data
+  private loadActivityTrail(): void {
+    this.activityTrailLoading = true;
+    let endPoint = `/api/method/wefab.wefab.utils.web_service.get_activity_logs?doctype=Customer Purchase Order&docname=${this.orderId}`;
+
+    this.commonService.getWefabData(endPoint).subscribe({
+      next: (res: any) => {
+        console.log('Activity Trail Response:', res);
+        if (res && res.message) {
+          this.activityTrail = res.message.map((activity: any) => ({
+            timestamp: this.formatApiDate(activity.creation),
+            action: activity.title || activity.subject,
+            user: activity.owner,
+            description: activity.content,
+            type: this.getActivityType(activity.status)
+          }));
+        }
+        this.activityTrailLoading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching activity trail:', error);
+        this.activityTrail = [];
+        this.activityTrailLoading = false;
+      }
+    });
   }
 }

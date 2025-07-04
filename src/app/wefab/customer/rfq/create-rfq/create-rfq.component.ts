@@ -36,6 +36,16 @@ interface NewProject {
   delivery_location: string;
 }
 
+// Add new interface for new location
+interface NewLocation {
+  address_line1: string;
+  address_line2: string;
+  city: string;
+  state: string;
+  country: string;
+  postal_code: string;
+}
+
 interface TechnicalDrawing {
   name: string;
   size: number;
@@ -145,6 +155,18 @@ export class CreateRfqComponent implements OnInit {
   isLoadingAddresses = false;
   addressLoadError: string = '';
   newProjectForm!: FormGroup;
+  showLocationDialog = false;
+  isCreatingLocation = false;
+  locationCreationError: string = '';
+  
+  newLocation: NewLocation = {
+    address_line1: '',
+    address_line2: '',
+    city: '',
+    state: '',
+    country: '',
+    postal_code: ''
+  };
 
   constructor(
     private fb: FormBuilder, 
@@ -665,5 +687,65 @@ export class CreateRfqComponent implements OnInit {
   // Add method to find address by name
   findAddressByName(name: string): CustomerAddress | undefined {
     return this.customerAddresses.find(addr => addr.name === name);
+  }
+
+  openLocationDialog() {
+    this.showLocationDialog = true;
+    this.isDeliveryDropdownOpen = false;
+    this.locationCreationError = '';
+    // Reset new location form
+    this.newLocation = {
+      address_line1: '',
+      address_line2: '',
+      city: '',
+      state: '',
+      country: '',
+      postal_code: ''
+    };
+  }
+
+  closeLocationDialog() {
+    this.showLocationDialog = false;
+    this.isCreatingLocation = false;
+  }
+
+  createLocation(locationData: NewLocation) {
+    this.isCreatingLocation = true;
+    
+    const locationPayload = {
+      address_line1: locationData.address_line1,
+      address_line2: locationData.address_line2,
+      city: locationData.city,
+      state: locationData.state,
+      country: locationData.country,
+      postal_code: locationData.postal_code
+    };
+    
+    this.commonService.postWefabData('/api/resource/Customer Address', locationPayload).subscribe({
+      next: (response: any) => {
+        console.log('Location created successfully:', response);
+        
+        // Add the new location to the local list
+        const newAddress: CustomerAddress = {
+          name: response.data.name,
+          ...locationPayload
+        };
+        
+        this.customerAddresses = [...this.customerAddresses, newAddress];
+        
+        // Select the newly created location
+        this.selectDeliveryLocation(newAddress);
+        
+        this.closeLocationDialog();
+      },
+      error: (error) => {
+        console.error('Error creating location:', error);
+        this.isCreatingLocation = false;
+        this.locationCreationError = 'Failed to create location. Please try again.';
+        if (error.error && error.error.message) {
+          this.locationCreationError = error.error.message;
+        }
+      }
+    });
   }
 }
