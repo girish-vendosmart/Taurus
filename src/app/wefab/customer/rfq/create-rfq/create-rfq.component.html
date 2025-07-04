@@ -8,18 +8,25 @@
       </button>
     </div>
     <form #projectForm="ngForm" (ngSubmit)="createProject(projectForm.value)">
+      <!-- Error Message -->
+      <div *ngIf="projectCreationError" class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        {{ projectCreationError }}
+      </div>
+      
       <!-- Project Name -->
       <div class="form-group">
         <label for="projectName">Project Name <span class="text-danger">*</span></label>
         <input 
           type="text" 
           id="projectName"
-          name="name"
+          name="project_name"
           class="form-control"
-          [(ngModel)]="newProject.name"
+          [(ngModel)]="newProject.project_name"
           required
           #projectNameInput="ngModel"
-          [class.is-invalid]="projectNameInput.invalid && projectNameInput.touched">
+          [class.is-invalid]="projectNameInput.invalid && projectNameInput.touched"
+          [disabled]="isCreatingProject">
         <div class="invalid-feedback" *ngIf="projectNameInput.invalid && projectNameInput.touched">
           Project name is required
         </div>
@@ -30,11 +37,12 @@
         <label for="projectDescription">Project Description</label>
         <textarea 
           id="projectDescription"
-          name="description"
+          name="project_description"
           class="form-control"
-          [(ngModel)]="newProject.description"
+          [(ngModel)]="newProject.project_description"
           rows="3"
-          placeholder="Enter project description..."></textarea>
+          placeholder="Enter project description..."
+          [disabled]="isCreatingProject"></textarea>
       </div>
 
       <!-- Target Delivery Date -->
@@ -43,13 +51,14 @@
         <input 
           type="date" 
           id="targetDeliveryDate"
-          name="targetDeliveryDate"
+          name="delivery_date"
           class="form-control"
-          [(ngModel)]="newProject.targetDeliveryDate"
+          [(ngModel)]="newProject.delivery_date"
           required
           #deliveryDateInput="ngModel"
           [class.is-invalid]="deliveryDateInput.invalid && deliveryDateInput.touched"
-          [min]="minDeliveryDate">
+          [min]="minDeliveryDate"
+          [disabled]="isCreatingProject">
         <div class="invalid-feedback" *ngIf="deliveryDateInput.invalid && deliveryDateInput.touched">
           Please select a valid delivery date
         </div>
@@ -58,43 +67,30 @@
       <!-- Delivery Location -->
       <div class="form-group">
         <label for="deliveryLocation">Delivery Location <span class="text-danger">*</span></label>
-        <select 
+        <input 
+          type="text" 
           id="deliveryLocation"
-          name="deliveryLocation"
+          name="delivery_location"
           class="form-control"
-          [(ngModel)]="newProject.deliveryLocation"
+          [(ngModel)]="newProject.delivery_location"
           required
           #locationInput="ngModel"
-          [class.is-invalid]="locationInput.invalid && locationInput.touched">
-          <option value="">Select existing address...</option>
-          <option *ngFor="let location of deliveryLocations" [value]="location">
-            {{location}}
-          </option>
-        </select>
+          [class.is-invalid]="locationInput.invalid && locationInput.touched"
+          placeholder="Enter delivery address..."
+          [disabled]="isCreatingProject">
         <div class="invalid-feedback" *ngIf="locationInput.invalid && locationInput.touched">
-          Please select a delivery location
+          Please enter a delivery location
         </div>
       </div>
 
-      <!-- Special Instructions -->
-      <div class="form-group">
-        <label for="specialInstructions">Special Instructions</label>
-        <textarea 
-          id="specialInstructions"
-          name="specialInstructions"
-          class="form-control"
-          [(ngModel)]="newProject.specialInstructions"
-          rows="3"
-          placeholder="Any special requirements, packaging instructions, or handling notes..."></textarea>
-      </div>
-
       <div class="dialog-actions">
-        <button type="button" class="btn btn-outline-secondary" (click)="closeProjectDialog()">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary" (click)="closeProjectDialog()" [disabled]="isCreatingProject">Cancel</button>
         <button 
           type="submit" 
           class="btn btn-primary"
-          [disabled]="!projectForm.valid">
-          Create Project
+          [disabled]="!projectForm.valid || isCreatingProject">
+          <i *ngIf="isCreatingProject" class="fas fa-spinner fa-spin me-2"></i>
+          {{ isCreatingProject ? 'Creating...' : 'Create Project' }}
         </button>
       </div>
     </form>
@@ -131,14 +127,26 @@
               </div>
               <div class="dropdown-menu" [class.show]="isDropdownOpen">
                 <div class="dropdown-options">
+                  <div *ngIf="isLoadingProjects" class="dropdown-item">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Loading projects...</span>
+                  </div>
+                  <div *ngIf="!isLoadingProjects && projects.length === 0 && !projectLoadError" class="dropdown-item">
+                    <i class="fas fa-info-circle"></i>
+                    <span>No projects found</span>
+                  </div>
+                  <div *ngIf="projectLoadError" class="dropdown-item text-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>{{ projectLoadError }}</span>
+                  </div>
                   <div class="dropdown-item" *ngFor="let project of projects" (click)="selectProject(project)">
                     <i class="fas fa-folder"></i>
-                    <span>{{ project.name }}</span>
+                    <span>{{ project.project_name }}</span>
                   </div>
                 </div>
                 <div class="dropdown-item add-new" (click)="openProjectDialog()">
                   <i class="fas fa-plus"></i>
-                  <span>Add New Options</span>
+                  <span>Create New Project</span>
                 </div>
               </div>
             </div>
@@ -271,40 +279,6 @@
               (click)="addLineItem()">
               <i class="fas fa-plus me-2"></i>Add Another Line Item
             </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section 3: Technical Drawings -->
-      <div class="rfq-section mb-4">
-        <div class="section-header">
-          <span class="step-number">3</span>
-          <h4 class="section-title">Technical Drawings</h4>
-        </div>
-        
-        <div class="section-content">
-          <div class="upload-area">
-            <div class="upload-content">
-              <i class="fas fa-file-upload upload-icon"></i>
-              <h5 class="upload-title">Upload Technical Drawings</h5>
-              <p class="upload-description">Upload drawings, CAD files, or specifications for your parts</p>
-              <p class="upload-formats">Supported formats: {{ supportedFormats }}</p>
-              
-              <input 
-                type="file" 
-                id="fileInput"
-                class="file-input"
-                multiple
-                accept=".pdf,.step,.stl,.iges,.dxf,.dwg,.sldprt"
-                (change)="onFileSelect($event)">
-              
-              <button 
-                type="button" 
-                class="btn btn-primary"
-                (click)="triggerFileInput()">
-                <i class="fas fa-cloud-upload-alt me-2"></i>Select Files
-              </button>
-            </div>
           </div>
         </div>
       </div>

@@ -2,23 +2,29 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CommonService } from '../../../../shared/services/common.service';
+import { HttpParams } from '@angular/common/http';
 
 interface Project {
-  id: string;
   name: string;
-  description?: string;
-  targetDeliveryDate: string;
-  deliveryLocation: string;
-  specialInstructions?: string;
-  createdAt: Date;
+  project_name: string;
+  project_description?: string;
+  delivery_date: string;
+  delivery_location: string;
+  creation?: string;
+  modified?: string;
 }
 
 interface NewProject {
-  name: string;
-  description: string;
-  targetDeliveryDate: string;
-  deliveryLocation: string;
-  specialInstructions: string;
+  project_name: string;
+  project_description: string;
+  delivery_date: string;
+  delivery_location: string;
+}
+
+interface ApiResponse {
+  data: Project[];
+  message?: string;
 }
 
 @Component({
@@ -34,13 +40,16 @@ export class CreateRfqComponent implements OnInit {
   isDropdownOpen = false;
   projects: Project[] = [];
   minDeliveryDate: string;
+  isLoadingProjects = false;
+  isCreatingProject = false;
+  projectCreationError: string = '';
+  projectLoadError: string = '';
   
   newProject: NewProject = {
-    name: '',
-    description: '',
-    targetDeliveryDate: '',
-    deliveryLocation: '',
-    specialInstructions: ''
+    project_name: '',
+    project_description: '',
+    delivery_date: '',
+    delivery_location: ''
   };
 
   materialOptions = [
@@ -55,17 +64,10 @@ export class CreateRfqComponent implements OnInit {
     'Carbon Fiber'
   ];
 
-  deliveryLocations = [
-    'New York, NY',
-    'Los Angeles, CA',
-    'Chicago, IL',
-    'Houston, TX',
-    'Philadelphia, PA'
-  ];
-
-  supportedFormats = 'PDF, STEP, STL, IGES, DXF, DWG, SLDPRT';
-
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder, 
+    private commonService: CommonService
+  ) {
     // Set minimum delivery date to tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -91,34 +93,30 @@ export class CreateRfqComponent implements OnInit {
         projectId: ['', [Validators.required]],
         projectName: ['']
       }),
-      lineItems: this.fb.array([this.createLineItem()]),
-      technicalDrawings: this.fb.array([])
+      lineItems: this.fb.array([this.createLineItem()])
     });
   }
 
-  // Load existing projects (mock data for now)
+  // Load existing projects from API
   loadProjects() {
-    // This would typically be a service call
-    this.projects = [
-      {
-        id: '1',
-        name: 'Project Alpha',
-        description: 'Manufacturing project for automotive parts',
-        targetDeliveryDate: '2024-04-01',
-        deliveryLocation: 'New York, NY',
-        specialInstructions: 'Handle with care',
-        createdAt: new Date()
+    this.isLoadingProjects = true;
+    this.projectLoadError = '';
+    const params = new HttpParams().set('fields', '["*"]');
+    
+    this.commonService.getWefabData('/api/resource/Project', params).subscribe({
+      next: (response: any) => {
+        console.log('Projects loaded:', response);
+        this.projects = response.data || [];
+        this.isLoadingProjects = false;
       },
-      {
-        id: '2',
-        name: 'Project Beta',
-        description: 'Custom machinery components',
-        targetDeliveryDate: '2024-04-15',
-        deliveryLocation: 'Los Angeles, CA',
-        specialInstructions: 'Expedited shipping required',
-        createdAt: new Date()
+      error: (error) => {
+        console.error('Error loading projects:', error);
+        this.isLoadingProjects = false;
+        this.projectLoadError = 'Failed to load projects. Please try again.';
+        // Fallback to empty array
+        this.projects = [];
       }
-    ];
+    });
   }
 
   // Toggle dropdown
@@ -128,10 +126,10 @@ export class CreateRfqComponent implements OnInit {
 
   // Get selected project name
   getSelectedProjectName(): string {
-    const projectId = this.createRfqForm.get('projectInfo.projectId')?.value;
-    if (!projectId) return 'Select an option';
-    const project = this.projects.find(p => p.id === projectId);
-    return project ? project.name : 'Select an option';
+    const projectName = this.createRfqForm.get('projectInfo.projectId')?.value;
+    if (!projectName) return 'Select an option';
+    const project = this.projects.find(p => p.name === projectName);
+    return project ? project.project_name : 'Select an option';
   }
 
   // Select project
@@ -139,8 +137,8 @@ export class CreateRfqComponent implements OnInit {
     const projectInfo = this.createRfqForm.get('projectInfo');
     if (projectInfo) {
       projectInfo.patchValue({
-        projectId: project.id,
-        projectName: project.name
+        projectId: project.name,
+        projectName: project.project_name
       });
     }
     this.isDropdownOpen = false;
@@ -150,31 +148,46 @@ export class CreateRfqComponent implements OnInit {
   openProjectDialog() {
     this.showProjectDialog = true;
     this.isDropdownOpen = false;
+    this.projectCreationError = '';
     // Reset new project form
     this.newProject = {
-      name: '',
-      description: '',
-      targetDeliveryDate: '',
-      deliveryLocation: '',
-      specialInstructions: ''
+      project_name: '',
+      project_description: '',
+      delivery_date: '',
+      delivery_location: ''
     };
   }
 
   // Close project creation dialog
   closeProjectDialog() {
     this.showProjectDialog = false;
+    this.isCreatingProject = false;
   }
 
   // Create new project
   createProject(projectData: NewProject) {
-    const newProject: Project = {
-      id: (this.projects.length + 1).toString(), // In real app, this would be generated by backend
-      name: projectData.name,
-      description: projectData.description,
-      targetDeliveryDate: projectData.targetDeliveryDate,
-      deliveryLocation: projectData.deliveryLocation,
-      specialInstructions: projectData.specialInstructions,
-      createdAt: new Date()
+    this.isCreatingProject = true;
+    
+    const projectPayload = {
+      project_name: projectData.project_name,
+      delivery_date: projectData.delivery_date,
+      delivery_location: projectData.delivery_location,
+      project_description: projectData.project_description
+    };
+    
+    this.commonService.postWefabData('/api/resource/Project', projectPayload).subscribe({
+      next: (response: any) => {
+        console.log('Project created successfully:', response);
+        
+        // Add the new project to the local list
+        const newProject: Project = {
+          name: response.data.name,
+          project_name: response.data.project_name,
+          project_description: response.data.project_description,
+          delivery_date: response.data.delivery_date,
+          delivery_location: response.data.delivery_location,
+          creation: response.data.creation,
+          modified: response.data.modified
     };
     
     this.projects = [...this.projects, newProject];
@@ -183,12 +196,22 @@ export class CreateRfqComponent implements OnInit {
     const projectInfo = this.createRfqForm.get('projectInfo');
     if (projectInfo) {
       projectInfo.patchValue({
-        projectId: newProject.id,
-        projectName: newProject.name
+            projectId: newProject.name,
+            projectName: newProject.project_name
       });
     }
     
     this.closeProjectDialog();
+      },
+      error: (error) => {
+        console.error('Error creating project:', error);
+        this.isCreatingProject = false;
+        this.projectCreationError = 'Failed to create project. Please try again.';
+        if (error.error && error.error.message) {
+          this.projectCreationError = error.error.message;
+        }
+      }
+    });
   }
 
   createLineItem(): FormGroup {
@@ -202,10 +225,6 @@ export class CreateRfqComponent implements OnInit {
 
   get lineItems(): FormArray {
     return this.createRfqForm.get('lineItems') as FormArray;
-  }
-
-  get technicalDrawings(): FormArray {
-    return this.createRfqForm.get('technicalDrawings') as FormArray;
   }
 
   addLineItem() {
@@ -232,22 +251,6 @@ export class CreateRfqComponent implements OnInit {
     }
   }
 
-  onFileSelect(event: any) {
-    const files = event.target.files;
-    if (files) {
-      for (let file of files) {
-        this.technicalDrawings.push(this.fb.control(file));
-      }
-    }
-  }
-
-  triggerFileInput() {
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.click();
-    }
-  }
-
   addLineItemsManually() {
     this.addLineItem();
   }
@@ -268,7 +271,8 @@ export class CreateRfqComponent implements OnInit {
 
   submitRfq() {
     if (this.createRfqForm.valid) {
-      console.log('Submitting RFQ:', this.createRfqForm.value);
+      const rfqData = this.createRfqForm.value;
+      console.log('Submitting RFQ:', rfqData);
     } else {
       console.log('Form is invalid');
       this.markFormGroupTouched(this.createRfqForm);
