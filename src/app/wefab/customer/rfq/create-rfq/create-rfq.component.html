@@ -67,19 +67,49 @@
       <!-- Delivery Location -->
       <div class="form-group">
         <label for="deliveryLocation">Delivery Location <span class="text-danger">*</span></label>
-        <input 
-          type="text" 
-          id="deliveryLocation"
-          name="delivery_location"
-          class="form-control"
-          [(ngModel)]="newProject.delivery_location"
-          required
-          #locationInput="ngModel"
-          [class.is-invalid]="locationInput.invalid && locationInput.touched"
-          placeholder="Enter delivery address..."
-          [disabled]="isCreatingProject">
-        <div class="invalid-feedback" *ngIf="locationInput.invalid && locationInput.touched">
-          Please enter a delivery location
+        <div class="custom-dropdown delivery-dropdown" [class.is-invalid]="newProjectForm.get('delivery_location')?.invalid && newProjectForm.get('delivery_location')?.touched">
+          <div class="dropdown-header" (click)="isDeliveryDropdownOpen = !isDeliveryDropdownOpen">
+            <span>
+              <ng-container *ngIf="newProject.delivery_location; else defaultText">
+                {{ findAddressByName(newProject.delivery_location) | formatAddress }}
+              </ng-container>
+              <ng-template #defaultText>Select delivery location...</ng-template>
+            </span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="dropdown-menu" [class.show]="isDeliveryDropdownOpen">
+            <div class="dropdown-options">
+              <!-- Loading State -->
+              <div *ngIf="isLoadingAddresses" class="dropdown-item">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Loading addresses...</span>
+              </div>
+              
+              <!-- Error State -->
+              <div *ngIf="addressLoadError" class="dropdown-item text-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>{{ addressLoadError }}</span>
+              </div>
+              
+              <!-- No Addresses State -->
+              <div *ngIf="!isLoadingAddresses && customerAddresses.length === 0 && !addressLoadError" class="dropdown-item">
+                <i class="fas fa-info-circle"></i>
+                <span>No delivery addresses found</span>
+              </div>
+              
+              <!-- Address List -->
+              <div 
+                *ngFor="let address of customerAddresses" 
+                class="dropdown-item"
+                (click)="selectDeliveryLocation(address); isDeliveryDropdownOpen = false">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ address | formatAddress }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="invalid-feedback" *ngIf="newProjectForm.get('delivery_location')?.invalid && newProjectForm.get('delivery_location')?.touched">
+          Please select a delivery location
         </div>
       </div>
 
@@ -99,10 +129,15 @@
 
 <div class="customer-app">
   <div class="create-rfq-container">
-    <!-- Header -->
-    <div class="create-rfq-header">
-      <h2 class="mb-1">Create RFQ from Blank</h2>
-      <p class="text-muted mb-4">Manually input all your manufacturing requirements</p>
+    <!-- Header Section -->
+    <div class="rfq-header">
+      <div class="header-title">
+        <h2>Create RFQ from Blank</h2>
+        <p class="subtitle">Manually input all your manufacturing requirements</p>
+      </div>
+      <button type="button" class="back-button" (click)="backToOptions()">
+        <i class="fas fa-arrow-left"></i> Back to RFQs List
+      </button>
     </div>
 
     <form [formGroup]="createRfqForm" (ngSubmit)="submitRfq()">
@@ -111,56 +146,266 @@
       <div class="rfq-section mb-4">
         <div class="section-header">
           <span class="step-number">1</span>
-          <h4 class="section-title">Project Information</h4>
+          <h4 class="section-title">RFQ Information</h4>
         </div>
         
         <div class="section-content" formGroupName="projectInfo">
-          <!-- Project Selection -->
-          <div class="form-group">
-            <label for="projectId" class="form-label">
-              Select Project <span class="text-danger">*</span>
-            </label>
-            <div class="custom-dropdown" [class.is-invalid]="isFieldInvalid('projectInfo.projectId')" [class.show]="isDropdownOpen">
-              <div class="dropdown-header" (click)="toggleDropdown()">
-                <span>{{ getSelectedProjectName() }}</span>
-                <i class="fas fa-chevron-down"></i>
+          <!-- Row 1: Project Selection, RFQ Name, and Contact Email -->
+          <div class="row mb-3">
+            <!-- Project Selection -->
+            <div class="col-md-4">
+              <label for="projectId" class="form-label">
+                Select Project <span class="text-danger">*</span>
+              </label>
+              <div class="custom-dropdown project-dropdown" [class.is-invalid]="isFieldInvalid('projectInfo.projectId')" [class.show]="isDropdownOpen">
+                <div class="dropdown-header" (click)="toggleDropdown()">
+                  <span>{{ getSelectedProjectName() }}</span>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-menu" [class.show]="isDropdownOpen">
+                  <div class="dropdown-options">
+                    <div *ngIf="isLoadingProjects" class="dropdown-item">
+                      <i class="fas fa-spinner fa-spin"></i>
+                      <span>Loading projects...</span>
+                    </div>
+                    <div *ngIf="!isLoadingProjects && projects.length === 0 && !projectLoadError" class="dropdown-item">
+                      <i class="fas fa-info-circle"></i>
+                      <span>No projects found</span>
+                    </div>
+                    <div *ngIf="projectLoadError" class="dropdown-item text-danger">
+                      <i class="fas fa-exclamation-triangle"></i>
+                      <span>{{ projectLoadError }}</span>
+                    </div>
+                    <div class="dropdown-item" *ngFor="let project of projects" (click)="selectProject(project)">
+                      <i class="fas fa-folder"></i>
+                      <span>{{ project.project_name }}</span>
+                    </div>
+                  </div>
+                  <div class="dropdown-item add-new" (click)="openProjectDialog()">
+                    <i class="fas fa-plus"></i>
+                    <span>Create New Project</span>
+                  </div>
+                </div>
               </div>
-              <div class="dropdown-menu" [class.show]="isDropdownOpen">
-                <div class="dropdown-options">
-                  <div *ngIf="isLoadingProjects" class="dropdown-item">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <span>Loading projects...</span>
-                  </div>
-                  <div *ngIf="!isLoadingProjects && projects.length === 0 && !projectLoadError" class="dropdown-item">
-                    <i class="fas fa-info-circle"></i>
-                    <span>No projects found</span>
-                  </div>
-                  <div *ngIf="projectLoadError" class="dropdown-item text-danger">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>{{ projectLoadError }}</span>
-                  </div>
-                  <div class="dropdown-item" *ngFor="let project of projects" (click)="selectProject(project)">
-                    <i class="fas fa-folder"></i>
-                    <span>{{ project.project_name }}</span>
-                  </div>
-                </div>
-                <div class="dropdown-item add-new" (click)="openProjectDialog()">
-                  <i class="fas fa-plus"></i>
-                  <span>Create New Project</span>
-                </div>
+              <div class="invalid-feedback" [class.show]="isFieldInvalid('projectInfo.projectId')">
+                Please select a project or create a new one
               </div>
             </div>
-            <div class="invalid-feedback" [class.show]="isFieldInvalid('projectInfo.projectId')">
-              Please select a project or create a new one
+
+            <!-- RFQ Name -->
+            <div class="col-md-4">
+              <label for="rfqName" class="form-label">
+                RFQ Name <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="rfqName"
+                class="form-control"
+                formControlName="rfqName"
+                placeholder="Enter RFQ name"
+                [class.is-invalid]="isFieldInvalid('projectInfo.rfqName')">
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.rfqName')">
+                Please enter an RFQ name
+              </div>
+            </div>
+
+            <!-- Contact Email -->
+            <div class="col-md-4">
+              <label for="contactEmail" class="form-label">
+                Contact Email <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="email" 
+                id="contactEmail"
+                class="form-control"
+                formControlName="contactEmail"
+                placeholder="Enter contact email"
+                [class.is-invalid]="isFieldInvalid('projectInfo.contactEmail')">
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.contactEmail')">
+                Please enter a valid email address
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: Contact Phone, Priority, and Project Type -->
+          <div class="row">
+            <!-- Contact Phone -->
+            <div class="col-md-4">
+              <label for="contactPhone" class="form-label">
+                Contact Phone <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="tel" 
+                id="contactPhone"
+                class="form-control"
+                formControlName="contactPhone"
+                placeholder="Enter contact phone"
+                [class.is-invalid]="isFieldInvalid('projectInfo.contactPhone')">
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.contactPhone')">
+                Please enter a valid phone number
+              </div>
+            </div>
+
+            <!-- Priority -->
+            <div class="col-md-4">
+              <label for="priority" class="form-label">
+                Priority <span class="text-danger">*</span>
+              </label>
+              <select 
+                id="priority"
+                class="form-select"
+                formControlName="priority"
+                [class.is-invalid]="isFieldInvalid('projectInfo.priority')">
+                <option value="" disabled>Select priority...</option>
+                <option value="standard">Standard</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+                <option value="critical">Critical</option>
+              </select>
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.priority')">
+                Please select a priority level
+              </div>
+            </div>
+
+            <!-- Project Type -->
+            <div class="col-md-4">
+              <label for="projectType" class="form-label">
+                Project Type <span class="text-danger">*</span>
+              </label>
+              <select 
+                id="projectType"
+                class="form-select"
+                formControlName="projectType"
+                [class.is-invalid]="isFieldInvalid('projectInfo.projectType')">
+                <option value="" disabled>Select project type...</option>
+                <option value="prototype">Prototype</option>
+                <option value="small_batch">Small Batch</option>
+                <option value="production_run">Production Run</option>
+                <option value="r_and_d">R&D</option>
+              </select>
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.projectType')">
+                Please select a project type
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Section 2: Bill of Materials (BOM) -->
+      <!-- Section 2: Technical Drawings -->
       <div class="rfq-section mb-4">
         <div class="section-header">
           <span class="step-number">2</span>
+          <h4 class="section-title">Technical Drawings</h4>
+        </div>
+        
+        <div class="section-content" formGroupName="technicalDrawings">
+          <div class="technical-drawings-upload">
+            <!-- Upload Area -->
+            <div class="upload-area" [class.has-files]="technicalDrawings.length > 0">
+              <div class="upload-zone" (click)="triggerFileInput()">
+                <div class="upload-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h5>Upload Technical Drawings</h5>
+                <p class="text-muted mb-3">
+                  Drag and drop files here or click to browse
+                </p>
+                <p class="file-info">
+                  <small class="text-muted">
+                    Supported formats: PDF, DWG, DXF, JPG, PNG, TIFF, STEP, IGES<br>
+                    Maximum file size: 10MB per file
+                  </small>
+                </p>
+                <button type="button" class="btn btn-outline-primary" style="margin: auto;">
+                  <i class="fas fa-upload me-2"></i>Choose Files
+                </button>
+              </div>
+              
+              <!-- Hidden File Input -->
+              <input 
+                type="file" 
+                id="technicalDrawingInput"
+                multiple
+                accept=".pdf,.dwg,.dxf,.jpg,.jpeg,.png,.tiff,.step,.stp,.iges,.igs"
+                (change)="onFileSelected($event)"
+                style="display: none;">
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="uploadError" class="alert alert-danger mt-3">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              {{ uploadError }}
+            </div>
+
+            <!-- Uploaded Files Grid -->
+            <div *ngIf="technicalDrawings.length > 0" class="uploaded-files mt-3">
+              <h6 class="mb-2">Uploaded Files ({{ technicalDrawings.length }})</h6>
+              
+              <div class="files-grid">
+                <div 
+                  *ngFor="let drawing of technicalDrawings; let i = index" 
+                  class="file-card">
+                  
+                  <!-- Remove Button -->
+                  <button 
+                    type="button" 
+                    class="remove-btn"
+                    (click)="removeDrawing(i)"
+                    title="Remove file">
+                    <i class="fas fa-times"></i>
+                  </button>
+
+                  <!-- File Preview/Icon -->
+                  <div class="file-preview" *ngIf="isImageFile(drawing.name); else fileIcon">
+                    <img [src]="drawing.url || getLocalImagePreview(drawing.file)" alt="File preview">
+                  </div>
+                  <ng-template #fileIcon>
+                    <div class="file-icon">
+                      <i [class]="getFileIcon(drawing.name)"></i>
+                    </div>
+                  </ng-template>
+
+                  <!-- File Info -->
+                  <div class="file-info">
+                    <div class="file-name" [title]="drawing.name">{{ drawing.name }}</div>
+                    <div class="file-size">{{ formatFileSize(drawing.size) }}</div>
+                  </div>
+
+                  <!-- Upload Progress -->
+                  <div *ngIf="drawing.uploadProgress !== undefined && drawing.uploadProgress < 100" 
+                       class="upload-progress">
+                    <div class="progress">
+                      <div class="progress-bar" 
+                           [style.width.%]="drawing.uploadProgress"
+                           role="progressbar">
+                      </div>
+                    </div>
+                    <small>{{ drawing.uploadProgress }}%</small>
+                  </div>
+
+                  <!-- Success Icon -->
+                  <div *ngIf="drawing.isUploaded" class="upload-success">
+                    <i class="fas fa-check-circle"></i>
+                  </div>
+                </div>
+
+                <!-- Add More Card -->
+                <div class="file-card add-more-card" (click)="triggerFileInput()">
+                  <div class="add-more-content">
+                    <i class="fas fa-plus"></i>
+                    <span>Add More</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Bill of Materials (BOM) -->
+      <div class="rfq-section mb-4">
+        <div class="section-header">
+          <span class="step-number">3</span>
           <h4 class="section-title">Bill of Materials (BOM)</h4>
         </div>
         
@@ -168,12 +413,6 @@
           <!-- BOM Action Buttons -->
           <div class="bom-actions mb-4">
             <div class="d-flex justify-content-end gap-3">
-              <button 
-                type="button" 
-                class="btn btn-primary"
-                (click)="addLineItemsManually()">
-                <i class="fas fa-plus me-2"></i>Add Line Items Manually
-              </button>
               <button 
                 type="button" 
                 class="btn btn-outline-primary"
@@ -288,18 +527,6 @@
     <!-- Action Buttons -->
     <div class="rfq-actions">
       <div class="d-flex justify-content-end gap-3">
-        <button 
-          type="button" 
-          class="btn btn-outline-secondary"
-          (click)="backToOptions()">
-          <i class="fas fa-arrow-left me-2"></i>Back to Options
-        </button>
-        <button 
-          type="button" 
-          class="btn btn-outline-primary"
-          (click)="saveDraft()">
-          <i class="fas fa-save me-2"></i>Save Draft
-        </button>
         <button 
           type="submit" 
           class="btn btn-primary"
