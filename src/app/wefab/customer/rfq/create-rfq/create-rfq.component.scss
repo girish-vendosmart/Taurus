@@ -51,13 +51,19 @@
   border-radius: 10px;
   box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(229, 231, 235, 0.8);
-  overflow: hidden;
+  overflow: visible; // Changed from hidden to visible to allow dropdown to show
   margin-bottom: 1.5rem;
   transition: all 0.3s ease;
+  position: relative; // Ensure proper stacking context
   
   &:hover {
     box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
     transform: translateY(-1px);
+  }
+  
+  // Ensure the first section (with dropdown) has higher z-index
+  &:first-child {
+    z-index: 100;
   }
 }
 
@@ -892,6 +898,7 @@ textarea.form-control {
   position: relative;
   width: 100%;
   background: white;
+  z-index: 1001; // Ensure dropdown container has higher z-index
 
   &.is-invalid {
     .dropdown-header {
@@ -919,10 +926,17 @@ textarea.form-control {
     i {
       color: #6c757d;
       font-size: 12px;
+      transition: transform 0.2s ease;
     }
 
     &:hover {
       border-color: #ced4da;
+    }
+  }
+
+  &.show {
+    .dropdown-header i {
+      transform: rotate(180deg);
     }
   }
 
@@ -931,22 +945,56 @@ textarea.form-control {
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-    z-index: 1000;
+    z-index: 9999; // Much higher z-index to ensure it appears above everything
     display: none;
     background: white;
     border: 1px solid #dee2e6;
     border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15); // Enhanced shadow for better visibility
     padding: 4px 0;
+    max-height: 300px; // Limit height to prevent overflow
+    overflow-y: auto;
 
     &.show {
       display: block;
+      animation: dropdown-fade-in 0.15s ease-out;
+    }
+  }
+
+  // Animation for dropdown appearance
+  @keyframes dropdown-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
   .dropdown-options {
     max-height: 200px;
     overflow-y: auto;
+    
+    // Custom scrollbar styling
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+      
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
   }
 
   .dropdown-item {

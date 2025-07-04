@@ -124,7 +124,7 @@
             <label for="projectId" class="form-label">
               Select Project <span class="text-danger">*</span>
             </label>
-            <div class="custom-dropdown" [class.is-invalid]="isFieldInvalid('projectInfo.projectId')">
+            <div class="custom-dropdown" [class.is-invalid]="isFieldInvalid('projectInfo.projectId')" [class.show]="isDropdownOpen">
               <div class="dropdown-header" (click)="toggleDropdown()">
                 <span>{{ getSelectedProjectName() }}</span>
                 <i class="fas fa-chevron-down"></i>
