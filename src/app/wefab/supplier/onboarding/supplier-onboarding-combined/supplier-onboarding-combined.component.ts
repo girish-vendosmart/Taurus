@@ -2949,18 +2949,6 @@ export class SupplierOnboardingCombinedComponent implements OnInit {
               required: false
             }
           },
-          {
-            className: 'col-md-6 mb-2',
-            key: 'companyFinancials.currency',
-            type: 'input',
-            defaultValue: this.getSelectedCurrency(),
-            templateOptions: {
-              label: 'Currency',
-              placeholder: 'Currency code',
-              required: true,
-              readonly: true
-            }
-          }
         ]
       },
       {
