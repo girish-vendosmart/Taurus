@@ -1,3 +1,106 @@
+<!-- Project Creation Dialog -->
+<div class="project-dialog" *ngIf="showProjectDialog">
+  <div class="dialog-content">
+    <div class="dialog-header">
+      <h3>Create New Project</h3>
+      <button type="button" class="close-btn" (click)="closeProjectDialog()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form #projectForm="ngForm" (ngSubmit)="createProject(projectForm.value)">
+      <!-- Project Name -->
+      <div class="form-group">
+        <label for="projectName">Project Name <span class="text-danger">*</span></label>
+        <input 
+          type="text" 
+          id="projectName"
+          name="name"
+          class="form-control"
+          [(ngModel)]="newProject.name"
+          required
+          #projectNameInput="ngModel"
+          [class.is-invalid]="projectNameInput.invalid && projectNameInput.touched">
+        <div class="invalid-feedback" *ngIf="projectNameInput.invalid && projectNameInput.touched">
+          Project name is required
+        </div>
+      </div>
+
+      <!-- Project Description -->
+      <div class="form-group">
+        <label for="projectDescription">Project Description</label>
+        <textarea 
+          id="projectDescription"
+          name="description"
+          class="form-control"
+          [(ngModel)]="newProject.description"
+          rows="3"
+          placeholder="Enter project description..."></textarea>
+      </div>
+
+      <!-- Target Delivery Date -->
+      <div class="form-group">
+        <label for="targetDeliveryDate">Target Delivery Date <span class="text-danger">*</span></label>
+        <input 
+          type="date" 
+          id="targetDeliveryDate"
+          name="targetDeliveryDate"
+          class="form-control"
+          [(ngModel)]="newProject.targetDeliveryDate"
+          required
+          #deliveryDateInput="ngModel"
+          [class.is-invalid]="deliveryDateInput.invalid && deliveryDateInput.touched"
+          [min]="minDeliveryDate">
+        <div class="invalid-feedback" *ngIf="deliveryDateInput.invalid && deliveryDateInput.touched">
+          Please select a valid delivery date
+        </div>
+      </div>
+
+      <!-- Delivery Location -->
+      <div class="form-group">
+        <label for="deliveryLocation">Delivery Location <span class="text-danger">*</span></label>
+        <select 
+          id="deliveryLocation"
+          name="deliveryLocation"
+          class="form-control"
+          [(ngModel)]="newProject.deliveryLocation"
+          required
+          #locationInput="ngModel"
+          [class.is-invalid]="locationInput.invalid && locationInput.touched">
+          <option value="">Select existing address...</option>
+          <option *ngFor="let location of deliveryLocations" [value]="location">
+            {{location}}
+          </option>
+        </select>
+        <div class="invalid-feedback" *ngIf="locationInput.invalid && locationInput.touched">
+          Please select a delivery location
+        </div>
+      </div>
+
+      <!-- Special Instructions -->
+      <div class="form-group">
+        <label for="specialInstructions">Special Instructions</label>
+        <textarea 
+          id="specialInstructions"
+          name="specialInstructions"
+          class="form-control"
+          [(ngModel)]="newProject.specialInstructions"
+          rows="3"
+          placeholder="Any special requirements, packaging instructions, or handling notes..."></textarea>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-outline-secondary" (click)="closeProjectDialog()">Cancel</button>
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="!projectForm.valid">
+          Create Project
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="customer-app">
   <div class="create-rfq-container">
     <!-- Header -->
@@ -16,69 +119,31 @@
         </div>
         
         <div class="section-content" formGroupName="projectInfo">
-          <div class="row">
-            <!-- Project Name -->
-            <div class="col-12 mb-3">
-              <label for="projectName" class="form-label">
-                Project Name <span class="text-danger">*</span>
-                <i class="fas fa-info-circle ms-1 text-muted"></i>
-              </label>
-              <input 
-                type="text" 
-                id="projectName"
-                class="form-control"
-                formControlName="projectName"
-                placeholder="Enter a descriptive project name"
-                [class.is-invalid]="isFieldInvalid('projectInfo.projectName')">
-              <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.projectName')">
-                Project name is required
+          <!-- Project Selection -->
+          <div class="form-group">
+            <label for="projectId" class="form-label">
+              Select Project <span class="text-danger">*</span>
+            </label>
+            <div class="custom-dropdown" [class.is-invalid]="isFieldInvalid('projectInfo.projectId')">
+              <div class="dropdown-header" (click)="toggleDropdown()">
+                <span>{{ getSelectedProjectName() }}</span>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="dropdown-menu" [class.show]="isDropdownOpen">
+                <div class="dropdown-options">
+                  <div class="dropdown-item" *ngFor="let project of projects" (click)="selectProject(project)">
+                    <i class="fas fa-folder"></i>
+                    <span>{{ project.name }}</span>
+                  </div>
+                </div>
+                <div class="dropdown-item add-new" (click)="openProjectDialog()">
+                  <i class="fas fa-plus"></i>
+                  <span>Add New Options</span>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div class="row">
-            <!-- Target Delivery Date -->
-            <div class="col-md-6 mb-3">
-              <label for="targetDeliveryDate" class="form-label">
-                Target Delivery Date <span class="text-danger">*</span>
-              </label>
-              <input 
-                type="date" 
-                id="targetDeliveryDate"
-                class="form-control"
-                formControlName="targetDeliveryDate"
-                placeholder="dd-mm-yyyy"
-                [class.is-invalid]="isFieldInvalid('projectInfo.targetDeliveryDate')">
-              <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.targetDeliveryDate')">
-                Target delivery date is required
-              </div>
-            </div>
-
-            <!-- Delivery Location -->
-            <div class="col-md-6 mb-3">
-              <label for="deliveryLocation" class="form-label">Delivery Location</label>
-              <select 
-                id="deliveryLocation"
-                class="form-select"
-                formControlName="deliveryLocation">
-                <option value="" disabled>Select existing address...</option>
-                <option *ngFor="let location of deliveryLocations.slice(1)" [value]="location">
-                  {{ location }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Special Instructions -->
-          <div class="row">
-            <div class="col-12 mb-3">
-              <label for="specialInstructions" class="form-label">Special Instructions</label>
-              <textarea 
-                id="specialInstructions"
-                class="form-control"
-                formControlName="specialInstructions"
-                rows="4"
-                placeholder="Any special requirements, packaging instructions, or handling notes..."></textarea>
+            <div class="invalid-feedback" [class.show]="isFieldInvalid('projectInfo.projectId')">
+              Please select a project or create a new one
             </div>
           </div>
         </div>

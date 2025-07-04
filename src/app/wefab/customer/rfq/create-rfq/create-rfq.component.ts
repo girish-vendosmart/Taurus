@@ -1,24 +1,48 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
-interface LineItem {
-  partNumber: string;
+interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  targetDeliveryDate: string;
+  deliveryLocation: string;
+  specialInstructions?: string;
+  createdAt: Date;
+}
+
+interface NewProject {
+  name: string;
   description: string;
-  quantity: number;
-  material: string;
+  targetDeliveryDate: string;
+  deliveryLocation: string;
+  specialInstructions: string;
 }
 
 @Component({
   selector: 'app-create-rfq',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './create-rfq.component.html',
   styleUrl: './create-rfq.component.scss'
 })
 export class CreateRfqComponent implements OnInit {
   createRfqForm!: FormGroup;
+  showProjectDialog = false;
+  isDropdownOpen = false;
+  projects: Project[] = [];
+  minDeliveryDate: string;
   
+  newProject: NewProject = {
+    name: '',
+    description: '',
+    targetDeliveryDate: '',
+    deliveryLocation: '',
+    specialInstructions: ''
+  };
+
   materialOptions = [
     'Aluminum',
     'Steel',
@@ -32,7 +56,6 @@ export class CreateRfqComponent implements OnInit {
   ];
 
   deliveryLocations = [
-    'Select existing address...',
     'New York, NY',
     'Los Angeles, CA',
     'Chicago, IL',
@@ -42,23 +65,130 @@ export class CreateRfqComponent implements OnInit {
 
   supportedFormats = 'PDF, STEP, STL, IGES, DXF, DWG, SLDPRT';
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder) {
+    // Set minimum delivery date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    this.minDeliveryDate = tomorrow.toISOString().split('T')[0];
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const dropdown = document.querySelector('.custom-dropdown');
+    if (dropdown && !dropdown.contains(event.target as Node)) {
+      this.isDropdownOpen = false;
+    }
+  }
 
   ngOnInit() {
     this.initializeForm();
+    this.loadProjects();
   }
 
   initializeForm() {
     this.createRfqForm = this.fb.group({
       projectInfo: this.fb.group({
-        projectName: ['', [Validators.required]],
-        targetDeliveryDate: ['', [Validators.required]],
-        deliveryLocation: ['', [Validators.required]],
-        specialInstructions: ['']
+        projectId: ['', [Validators.required]],
+        projectName: ['']
       }),
       lineItems: this.fb.array([this.createLineItem()]),
       technicalDrawings: this.fb.array([])
     });
+  }
+
+  // Load existing projects (mock data for now)
+  loadProjects() {
+    // This would typically be a service call
+    this.projects = [
+      {
+        id: '1',
+        name: 'Project Alpha',
+        description: 'Manufacturing project for automotive parts',
+        targetDeliveryDate: '2024-04-01',
+        deliveryLocation: 'New York, NY',
+        specialInstructions: 'Handle with care',
+        createdAt: new Date()
+      },
+      {
+        id: '2',
+        name: 'Project Beta',
+        description: 'Custom machinery components',
+        targetDeliveryDate: '2024-04-15',
+        deliveryLocation: 'Los Angeles, CA',
+        specialInstructions: 'Expedited shipping required',
+        createdAt: new Date()
+      }
+    ];
+  }
+
+  // Toggle dropdown
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  // Get selected project name
+  getSelectedProjectName(): string {
+    const projectId = this.createRfqForm.get('projectInfo.projectId')?.value;
+    if (!projectId) return 'Select an option';
+    const project = this.projects.find(p => p.id === projectId);
+    return project ? project.name : 'Select an option';
+  }
+
+  // Select project
+  selectProject(project: Project) {
+    const projectInfo = this.createRfqForm.get('projectInfo');
+    if (projectInfo) {
+      projectInfo.patchValue({
+        projectId: project.id,
+        projectName: project.name
+      });
+    }
+    this.isDropdownOpen = false;
+  }
+
+  // Open project creation dialog
+  openProjectDialog() {
+    this.showProjectDialog = true;
+    this.isDropdownOpen = false;
+    // Reset new project form
+    this.newProject = {
+      name: '',
+      description: '',
+      targetDeliveryDate: '',
+      deliveryLocation: '',
+      specialInstructions: ''
+    };
+  }
+
+  // Close project creation dialog
+  closeProjectDialog() {
+    this.showProjectDialog = false;
+  }
+
+  // Create new project
+  createProject(projectData: NewProject) {
+    const newProject: Project = {
+      id: (this.projects.length + 1).toString(), // In real app, this would be generated by backend
+      name: projectData.name,
+      description: projectData.description,
+      targetDeliveryDate: projectData.targetDeliveryDate,
+      deliveryLocation: projectData.deliveryLocation,
+      specialInstructions: projectData.specialInstructions,
+      createdAt: new Date()
+    };
+    
+    this.projects = [...this.projects, newProject];
+    
+    // Update form with new project data
+    const projectInfo = this.createRfqForm.get('projectInfo');
+    if (projectInfo) {
+      projectInfo.patchValue({
+        projectId: newProject.id,
+        projectName: newProject.name
+      });
+    }
+    
+    this.closeProjectDialog();
   }
 
   createLineItem(): FormGroup {
@@ -119,17 +249,14 @@ export class CreateRfqComponent implements OnInit {
   }
 
   addLineItemsManually() {
-    // Add multiple line items functionality
     this.addLineItem();
   }
 
   uploadBOMFile() {
-    // Implement BOM file upload functionality
     console.log('Upload BOM File clicked');
   }
 
   backToOptions() {
-    // Navigate back to options
     console.log('Back to Options clicked');
   }
 

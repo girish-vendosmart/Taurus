@@ -224,17 +224,14 @@ textarea.form-control {
 }
 
 .invalid-feedback {
-  color: $customer-danger;
-  font-size: 0.75rem;
-  font-weight: 500;
-  margin-top: 0.4rem;
-  display: flex;
-  align-items: center;
-  
-  &::before {
-    content: '⚠';
-    margin-right: 0.4rem;
-    font-size: 0.9rem;
+  display: none;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: #dc3545;
+
+  &.show {
+    display: block;
   }
 }
 
@@ -697,5 +694,404 @@ textarea.form-control {
   
   .rfq-actions {
     display: none !important;
+  }
+}
+
+// Project Dialog Styles
+.project-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+
+  .dialog-content {
+    background: white;
+    border-radius: 8px;
+    width: 100%;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    padding: 0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    animation: dialogFadeIn 0.3s ease;
+    
+    .dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 2px solid rgba(18, 133, 110, 0.1);
+      
+      h3 {
+        margin: 0;
+        color: $customer-text-dark;
+        font-weight: 700;
+        font-size: 1.25rem;
+      }
+      
+      .close-btn {
+        background: none;
+        border: none;
+        color: $customer-text-secondary;
+        font-size: 1.25rem;
+        padding: 0.25rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          color: $customer-danger;
+          transform: scale(1.1);
+        }
+      }
+    }
+    
+    form {
+      padding: 1.5rem;
+      
+      .form-group {
+        margin-bottom: 1.25rem;
+        
+        label {
+          color: $customer-text-dark;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+          font-size: 0.85rem;
+          display: block;
+        }
+      }
+    }
+    
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+      
+      .btn {
+        padding: 0.6rem 1.25rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Project Selection Styles
+.project-selection {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  
+  .form-select {
+    flex: 1;
+  }
+  
+  .create-project-btn {
+    padding: 0.65rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    border-color: $customer-primary;
+    color: $customer-primary;
+    
+    i {
+      font-size: 0.8rem;
+    }
+    
+    &:hover {
+      background: $customer-primary;
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(18, 133, 110, 0.15);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.75rem;
+    
+    .create-project-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+// Project Dropdown Styles
+.project-dropdown {
+  position: relative;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background: white;
+  
+  .form-select {
+    border: none;
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    width: 100%;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    
+    &:focus {
+      outline: none;
+      box-shadow: none;
+      border-color: #dee2e6;
+    }
+    
+    &.is-invalid {
+      border-color: $customer-danger;
+    }
+  }
+  
+  .new-project-option {
+    border-top: 1px solid #dee2e6;
+    padding: 0.5rem;
+    
+    .btn-block {
+      width: 100%;
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+      color: white;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      border-radius: 4px;
+      
+      &:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+      }
+    }
+  }
+}
+
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+  background: white;
+
+  &.is-invalid {
+    .dropdown-header {
+      border-color: #dc3545;
+    }
+  }
+
+  .dropdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    cursor: pointer;
+    min-height: 42px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    color: #495057;
+    background-color: #fff;
+    font-size: 14px;
+
+    span {
+      color: #6c757d;
+    }
+
+    i {
+      color: #6c757d;
+      font-size: 12px;
+    }
+
+    &:hover {
+      border-color: #ced4da;
+    }
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: none;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 4px 0;
+
+    &.show {
+      display: block;
+    }
+  }
+
+  .dropdown-options {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #212529;
+    font-size: 14px;
+
+    i {
+      color: #6c757d;
+      width: 16px;
+      font-size: 14px;
+    }
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+
+    &.add-new {
+      color: #0d6efd;
+      padding-top: 8px;
+      margin-top: 4px;
+      border-top: 1px solid #dee2e6;
+      
+      i {
+        color: #0d6efd;
+      }
+
+      &:hover {
+        background-color: #f8f9fa;
+      }
+    }
+  }
+}
+
+.project-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+
+  .dialog-content {
+    background: white;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+      color: #6c757d;
+
+      &:hover {
+        color: #343a40;
+      }
+    }
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+
+      &:focus {
+        outline: none;
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+      }
+    }
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+
+      &.btn-outline-secondary {
+        border: 1px solid #6c757d;
+        background: none;
+        color: #6c757d;
+
+        &:hover {
+          background: #6c757d;
+          color: white;
+        }
+      }
+
+      &.btn-primary {
+        background: #0d6efd;
+        border: 1px solid #0d6efd;
+        color: white;
+
+        &:hover {
+          background: #0b5ed7;
+        }
+
+        &:disabled {
+          background: #ccc;
+          border-color: #ccc;
+          cursor: not-allowed;
+        }
+      }
+    }
   }
 }
