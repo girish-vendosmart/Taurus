@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonTableComponent, TableConfig, TableColumn } from '../../../../shared/components/common-table/common-table.component';
 import { CommonService } from '../../../../shared/services/common.service';
 import { ConversationTrailComponent } from '../../../../shared/components/conversation-trail/conversation-trail.component';
+import { ActivityTrailComponent, ActivityLogData } from '../../../../shared/components/activity-trail/activity-trail.component';
 
 interface RfqAttachment {
   name: string;
@@ -30,13 +31,23 @@ interface ReviewStage {
 @Component({
   selector: 'app-submitted-rfq',
   standalone: true,
-  imports: [CommonModule, FormsModule, CommonTableComponent, ConversationTrailComponent],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    CommonTableComponent, 
+    ConversationTrailComponent,
+    ActivityTrailComponent
+  ],
   templateUrl: './submitted-rfq.component.html',
   styleUrl: './submitted-rfq.component.scss'
 })
 export class SubmittedRfqComponent implements OnInit {
   // Tab management
   activeTab: string = 'overview';
+  
+  // Activity trail properties
+  activityTrail: ActivityLogData[] = [];
+  activityTrailLoading: boolean = false;
   
   // Comments functionality
   newComment: string = '';
@@ -430,6 +441,28 @@ export class SubmittedRfqComponent implements OnInit {
     // Here you would typically navigate to dashboard page
   }
 
+  setActiveTab(tab: string): void {
+    this.activeTab = tab;
+    if (tab === 'activity') {
+      this.loadActivityTrail();
+    }
+  }
+
+  private loadActivityTrail(): void {
+    this.activityTrailLoading = true;
+    this.commonService.getData('/api/method/wefab.wefab.api.common.engine.trail.activity.get_new_versions_trail?doctype=Customer Request for Quotation&docname=' + this.currentRfqId)
+      .subscribe({
+        next: (response: any) => {
+          this.activityTrail = response.data || [];
+          this.activityTrailLoading = false;
+        },
+        error: () => {
+          this.activityTrail = [];
+          this.activityTrailLoading = false;
+        }
+      });
+  }
+
   // Navigate back to RFQ list
   goBack() {
     console.log('Navigating back to RFQ list');
@@ -502,7 +535,25 @@ export class SubmittedRfqComponent implements OnInit {
   }
 
   // Tab management methods
-  setActiveTab(tab: string) {
-    this.activeTab = tab;
-  }
+  // setActiveTab(tab: string): void {
+  //   this.activeTab = tab;
+  //   if (tab === 'activity') {
+  //     this.loadActivityTrail();
+  //   }
+  // }
+
+  // private loadActivityTrail(): void {
+  //   this.activityTrailLoading = true;
+  //   this.commonService.getData('/api/method/wefab.wefab.api.common.engine.trail.activity.get_new_versions_trail?doctype=Customer Request for Quotation&docname=' + this.currentRfqId)
+  //     .subscribe({
+  //       next: (response: any) => {
+  //         this.activityTrail = response.data || [];
+  //         this.activityTrailLoading = false;
+  //       },
+  //       error: () => {
+  //         this.activityTrail = [];
+  //         this.activityTrailLoading = false;
+  //       }
+  //     });
+  // }
 }
