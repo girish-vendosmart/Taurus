@@ -45,79 +45,6 @@
           [disabled]="isCreatingProject"></textarea>
       </div>
 
-      <!-- Target Delivery Date -->
-      <div class="form-group">
-        <label for="targetDeliveryDate">Target Delivery Date <span class="text-danger">*</span></label>
-        <input 
-          type="date" 
-          id="targetDeliveryDate"
-          name="delivery_date"
-          class="form-control"
-          [(ngModel)]="newProject.delivery_date"
-          required
-          #deliveryDateInput="ngModel"
-          [class.is-invalid]="deliveryDateInput.invalid && deliveryDateInput.touched"
-          [min]="minDeliveryDate"
-          [disabled]="isCreatingProject">
-        <div class="invalid-feedback" *ngIf="deliveryDateInput.invalid && deliveryDateInput.touched">
-          Please select a valid delivery date
-        </div>
-      </div>
-
-      <!-- Delivery Location -->
-      <div class="form-group">
-        <label for="deliveryLocation">Delivery Location <span class="text-danger">*</span></label>
-        <div class="custom-dropdown delivery-dropdown" [class.is-invalid]="newProjectForm.get('delivery_location')?.invalid && newProjectForm.get('delivery_location')?.touched">
-          <div class="dropdown-header" (click)="isDeliveryDropdownOpen = !isDeliveryDropdownOpen">
-            <span>
-              <ng-container *ngIf="newProject.delivery_location; else defaultText">
-                {{ findAddressByName(newProject.delivery_location) | formatAddress }}
-              </ng-container>
-              <ng-template #defaultText>Select delivery location...</ng-template>
-            </span>
-            <i class="fas fa-chevron-down"></i>
-          </div>
-          <div class="dropdown-menu" [class.show]="isDeliveryDropdownOpen">
-            <div class="dropdown-options">
-              <!-- Loading State -->
-              <div *ngIf="isLoadingAddresses" class="dropdown-item">
-                <i class="fas fa-spinner fa-spin"></i>
-                <span>Loading addresses...</span>
-              </div>
-              
-              <!-- Error State -->
-              <div *ngIf="addressLoadError" class="dropdown-item text-danger">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>{{ addressLoadError }}</span>
-              </div>
-              
-              <!-- No Addresses State -->
-              <div *ngIf="!isLoadingAddresses && customerAddresses.length === 0 && !addressLoadError" class="dropdown-item">
-                <i class="fas fa-info-circle"></i>
-                <span>No delivery addresses found</span>
-              </div>
-              
-              <!-- Address List -->
-              <div 
-                *ngFor="let address of customerAddresses" 
-                class="dropdown-item"
-                (click)="selectDeliveryLocation(address); isDeliveryDropdownOpen = false">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>{{ address | formatAddress }}</span>
-              </div>
-            </div>
-            <!-- Add New Location Option -->
-            <div class="dropdown-item add-new" (click)="openLocationDialog()">
-              <i class="fas fa-plus"></i>
-              <span>Add New Location</span>
-            </div>
-          </div>
-        </div>
-        <div class="invalid-feedback" *ngIf="newProjectForm.get('delivery_location')?.invalid && newProjectForm.get('delivery_location')?.touched">
-          Please select a delivery location
-        </div>
-      </div>
-
       <div class="dialog-actions">
         <button type="button" class="btn btn-outline-secondary" (click)="closeProjectDialog()" [disabled]="isCreatingProject">Cancel</button>
         <button 
@@ -365,7 +292,7 @@
           </div>
 
           <!-- Row 2: Contact Phone, Priority, and Project Type -->
-          <div class="row">
+          <div class="row mb-3">
             <!-- Contact Phone -->
             <div class="col-md-4">
               <label for="contactPhone" class="form-label">
@@ -422,6 +349,77 @@
               </select>
               <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.projectType')">
                 Please select a project type
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 3: Delivery Date and Delivery Location -->
+          <div class="row">
+            <!-- Target Delivery Date -->
+            <div class="col-md-4">
+              <label for="deliveryDate" class="form-label">
+                Target Delivery Date <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="date" 
+                id="deliveryDate"
+                class="form-control"
+                formControlName="deliveryDate"
+                [min]="minDeliveryDate"
+                [class.is-invalid]="isFieldInvalid('projectInfo.deliveryDate')">
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.deliveryDate')">
+                Please select a valid delivery date
+              </div>
+            </div>
+
+            <!-- Delivery Location -->
+            <div class="col-md-4">
+              <label for="deliveryLocation" class="form-label">
+                Delivery Location <span class="text-danger">*</span>
+              </label>
+              <div class="custom-dropdown delivery-dropdown" [class.is-invalid]="isFieldInvalid('projectInfo.deliveryLocation')" [class.show]="isDeliveryDropdownOpen">
+                <div class="dropdown-header" (click)="toggleDeliveryDropdown()">
+                  <span>{{ getSelectedDeliveryLocationName() }}</span>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-menu" [class.show]="isDeliveryDropdownOpen">
+                  <div class="dropdown-options">
+                    <!-- Loading State -->
+                    <div *ngIf="isLoadingAddresses" class="dropdown-item">
+                      <i class="fas fa-spinner fa-spin"></i>
+                      <span>Loading addresses...</span>
+                    </div>
+                    
+                    <!-- Error State -->
+                    <div *ngIf="addressLoadError" class="dropdown-item text-danger">
+                      <i class="fas fa-exclamation-triangle"></i>
+                      <span>{{ addressLoadError }}</span>
+                    </div>
+                    
+                    <!-- No Addresses State -->
+                    <div *ngIf="!isLoadingAddresses && customerAddresses.length === 0 && !addressLoadError" class="dropdown-item">
+                      <i class="fas fa-info-circle"></i>
+                      <span>No delivery addresses found</span>
+                    </div>
+                    
+                    <!-- Address List -->
+                    <div 
+                      *ngFor="let address of customerAddresses" 
+                      class="dropdown-item"
+                      (click)="selectDeliveryLocation(address)">
+                      <i class="fas fa-map-marker-alt"></i>
+                      <span>{{ address | formatAddress }}</span>
+                    </div>
+                  </div>
+                  <!-- Add New Location Option -->
+                  <div class="dropdown-item add-new" (click)="openLocationDialog()">
+                    <i class="fas fa-plus"></i>
+                    <span>Add New Location</span>
+                  </div>
+                </div>
+              </div>
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.deliveryLocation')">
+                Please select a delivery location
               </div>
             </div>
           </div>
@@ -489,7 +487,7 @@
                     class="remove-btn"
                     (click)="removeDrawing(i)"
                     title="Remove file">
-                    <i class="fas fa-times"></i>
+                    <i class="pi pi-times"></i>
                   </button>
 
                   <!-- File Preview/Icon -->

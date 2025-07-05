@@ -33,8 +33,6 @@ export interface CustomerAddress {
 interface NewProject {
   project_name: string;
   project_description: string;
-  delivery_date: string;
-  delivery_location: string;
 }
 
 // Add new interface for new location
@@ -142,9 +140,7 @@ export class CreateRfqComponent implements OnInit {
   
   newProject: NewProject = {
     project_name: '',
-    project_description: '',
-    delivery_date: '',
-    delivery_location: ''
+    project_description: ''
   };
 
   materialOptions = [
@@ -219,6 +215,7 @@ export class CreateRfqComponent implements OnInit {
     this.initializeForm();
     this.loadProjects();
     this.initializeNewProjectForm();
+    this.loadCustomerAddresses();
   }
 
   initializeForm() {
@@ -230,7 +227,9 @@ export class CreateRfqComponent implements OnInit {
         contactEmail: ['', [Validators.required, Validators.email]],
         contactPhone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
         priority: ['', [Validators.required]],
-        projectType: ['', [Validators.required]]
+        projectType: ['', [Validators.required]],
+        deliveryDate: ['', [Validators.required]],
+        deliveryLocation: ['', [Validators.required]]
       }),
       technicalDrawings: this.fb.group({
         hasDrawings: [false],
@@ -243,9 +242,7 @@ export class CreateRfqComponent implements OnInit {
   initializeNewProjectForm() {
     this.newProjectForm = this.fb.group({
       project_name: ['', [Validators.required]],
-      project_description: [''],
-      delivery_date: ['', [Validators.required]],
-      delivery_location: ['', [Validators.required]]
+      project_description: ['']
     });
   }
 
@@ -304,12 +301,8 @@ export class CreateRfqComponent implements OnInit {
     // Reset new project form
     this.newProject = {
       project_name: '',
-      project_description: '',
-      delivery_date: '',
-      delivery_location: ''
+      project_description: ''
     };
-    // Load customer addresses when opening dialog
-    this.loadCustomerAddresses();
   }
 
   // Close project creation dialog
@@ -322,11 +315,16 @@ export class CreateRfqComponent implements OnInit {
   createProject(projectData: NewProject) {
     this.isCreatingProject = true;
     
+    // Get delivery information from main form
+    const projectInfo = this.createRfqForm.get('projectInfo');
+    const deliveryDate = projectInfo?.get('deliveryDate')?.value;
+    const deliveryLocation = projectInfo?.get('deliveryLocation')?.value;
+    
     const projectPayload = {
       project_name: projectData.project_name,
-      delivery_date: projectData.delivery_date,
-      delivery_location: projectData.delivery_location,
-      project_description: projectData.project_description
+      project_description: projectData.project_description,
+      delivery_date: deliveryDate || '',
+      delivery_location: deliveryLocation || ''
     };
     
     this.commonService.postWefabData('/api/resource/Project', projectPayload).subscribe({
@@ -342,20 +340,19 @@ export class CreateRfqComponent implements OnInit {
           delivery_location: response.data.delivery_location,
           creation: response.data.creation,
           modified: response.data.modified
-    };
-    
-    this.projects = [...this.projects, newProject];
-    
-    // Update form with new project data
-    const projectInfo = this.createRfqForm.get('projectInfo');
-    if (projectInfo) {
-      projectInfo.patchValue({
+        };
+        
+        this.projects = [...this.projects, newProject];
+        
+        // Update form with new project data
+        if (projectInfo) {
+          projectInfo.patchValue({
             projectId: newProject.name,
             projectName: newProject.project_name
-      });
-    }
-    
-    this.closeProjectDialog();
+          });
+        }
+        
+        this.closeProjectDialog();
       },
       error: (error) => {
         console.error('Error creating project:', error);
@@ -492,9 +489,12 @@ export class CreateRfqComponent implements OnInit {
     const today = new Date();
     const rfqDate = today.toISOString().split('T')[0];
 
-    // Calculate required by date (default to 30 days from now)
-    const requiredByDate = new Date(today);
-    requiredByDate.setDate(requiredByDate.getDate() + 30);
+    // Use delivery date from form, or calculate required by date (default to 30 days from now)
+    const requiredByDate = projectInfo.deliveryDate ? projectInfo.deliveryDate : (() => {
+      const date = new Date(today);
+      date.setDate(date.getDate() + 30);
+      return date.toISOString().split('T')[0];
+    })();
 
     // Calculate expiry date (default to 60 days from now)
     const expiryDate = new Date(today);
@@ -538,7 +538,7 @@ export class CreateRfqComponent implements OnInit {
       contact_email: projectInfo.contactEmail,
       contact_phone: projectInfo.contactPhone,
       rfq_date: rfqDate,
-      required_by_date: requiredByDate.toISOString().split('T')[0],
+      required_by_date: requiredByDate,
       priority: priorityMap[projectInfo.priority] || projectInfo.priority,
       project_type: projectTypeMap[projectInfo.projectType] || projectInfo.projectType,
       project_description: selectedProject?.project_description || '',
@@ -683,18 +683,18 @@ export class CreateRfqComponent implements OnInit {
   getFileIcon(fileName: string): string {
     const extension = fileName.split('.').pop()?.toLowerCase();
     switch (extension) {
-      case 'pdf': return 'fas fa-file-pdf';
+      case 'pdf': return 'pi pi-file-pdf pi-lg';
       case 'dwg':
-      case 'dxf': return 'fas fa-drafting-compass';
+      case 'dxf': return 'pi pi-drafting-compass';
       case 'jpg':
       case 'jpeg':
       case 'png':
-      case 'tiff': return 'fas fa-file-image';
+      case 'tiff': return 'pi pi-file-image pi-lg';
       case 'step':
       case 'stp':
       case 'iges':
-      case 'igs': return 'fas fa-cube';
-      default: return 'fas fa-file';
+      case 'igs': return 'pi pi-cube';
+      default: return 'pi pi-file pi-lg';
     }
   }
 
@@ -718,27 +718,6 @@ export class CreateRfqComponent implements OnInit {
     return URL.createObjectURL(file);
   }
 
-  // Add new method to load customer addresses
-  loadCustomerAddresses() {
-    this.isLoadingAddresses = true;
-    this.addressLoadError = '';
-    const params = new HttpParams().set('fields', '["*"]');
-    
-    this.commonService.getWefabData('/api/resource/Customer Address', params).subscribe({
-      next: (response: any) => {
-        console.log('Customer addresses loaded:', response);
-        this.customerAddresses = response.data || [];
-        this.isLoadingAddresses = false;
-      },
-      error: (error) => {
-        console.error('Error loading addresses:', error);
-        this.isLoadingAddresses = false;
-        this.addressLoadError = 'Failed to load delivery addresses. Please try again.';
-        this.customerAddresses = [];
-      }
-    });
-  }
-
   // Add method to format address for display
   formatAddress(address: CustomerAddress): string {
     const parts = [
@@ -751,19 +730,6 @@ export class CreateRfqComponent implements OnInit {
     ].filter(part => part); // Remove empty/undefined parts
     
     return parts.join(', ');
-  }
-
-  // Add method to handle address selection
-  selectDeliveryLocation(address: CustomerAddress) {
-    this.newProject.delivery_location = address.name;
-    this.newProjectForm.patchValue({
-      delivery_location: address.name
-    });
-  }
-
-  // Add method to find address by name
-  findAddressByName(name: string): CustomerAddress | undefined {
-    return this.customerAddresses.find(addr => addr.name === name);
   }
 
   openLocationDialog() {
@@ -844,5 +810,55 @@ export class CreateRfqComponent implements OnInit {
 
     // Save file
     XLSX.writeFile(wb, 'bom_template.xlsx');
+  }
+
+  // Add method to load customer addresses
+  loadCustomerAddresses() {
+    this.isLoadingAddresses = true;
+    this.addressLoadError = '';
+    const params = new HttpParams().set('fields', '["*"]');
+    
+    this.commonService.getWefabData('/api/resource/Customer Address', params).subscribe({
+      next: (response: any) => {
+        console.log('Customer addresses loaded:', response);
+        this.customerAddresses = response.data || [];
+        this.isLoadingAddresses = false;
+      },
+      error: (error) => {
+        console.error('Error loading addresses:', error);
+        this.isLoadingAddresses = false;
+        this.addressLoadError = 'Failed to load delivery addresses. Please try again.';
+        this.customerAddresses = [];
+      }
+    });
+  }
+
+  // Add method to handle address selection for main form
+  selectDeliveryLocation(address: CustomerAddress) {
+    const projectInfo = this.createRfqForm.get('projectInfo');
+    if (projectInfo) {
+      projectInfo.patchValue({
+        deliveryLocation: address.name
+      });
+    }
+    this.isDeliveryDropdownOpen = false;
+  }
+
+  // Add method to find address by name
+  findAddressByName(name: string): CustomerAddress | undefined {
+    return this.customerAddresses.find(addr => addr.name === name);
+  }
+
+  // Get selected delivery location name for display
+  getSelectedDeliveryLocationName(): string {
+    const deliveryLocation = this.createRfqForm.get('projectInfo.deliveryLocation')?.value;
+    if (!deliveryLocation) return 'Select delivery location...';
+    const address = this.findAddressByName(deliveryLocation);
+    return address ? this.formatAddress(address) : 'Select delivery location...';
+  }
+
+  // Toggle delivery dropdown
+  toggleDeliveryDropdown() {
+    this.isDeliveryDropdownOpen = !this.isDeliveryDropdownOpen;
   }
 }
