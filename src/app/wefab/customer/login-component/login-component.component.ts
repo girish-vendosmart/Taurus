@@ -46,6 +46,7 @@ export class LoginComponentComponent {
   ) {
     // Check if already authenticated as customer
     this.customerAuthService.isCustomerAuthenticated().subscribe(isAuthenticated => {
+      console.log('Authentication check:', isAuthenticated);
       if (isAuthenticated) {
         this.router.navigate(['/wefab/customer/rfq-list']);
       }
@@ -59,14 +60,41 @@ export class LoginComponentComponent {
       this.customerAuthService.customerLogin(this.loginData.email, this.loginData.password)
         .subscribe({
           next: (response) => {
-            if (response.frappeResponse?.message?.token) {
+            console.log('Login response:', response);
+            if (response.firebaseToken) {
               // Store remember me preference if selected
               if (this.loginData.rememberMe) {
                 localStorage.setItem('customer_remember_me', 'true');
               }
               
-              // Navigate to customer dashboard
-              this.router.navigate(['/wefab/customer/rfq-list']);
+              console.log('Attempting navigation to /wefab/customer/rfq-list');
+              // Try both with and without leading slash
+              this.router.navigate(['/wefab/customer/rfq-list'])
+                .then(success => {
+                  console.log('Navigation result:', success);
+                  if (!success) {
+                    console.log('Trying alternative navigation...');
+                    this.router.navigate(['wefab/customer/rfq-list'])
+                      .then(altSuccess => {
+                        console.log('Alternative navigation result:', altSuccess);
+                        if (!altSuccess) {
+                          this.messageService.add({
+                            severity: 'error',
+                            summary: 'Navigation Failed',
+                            detail: 'Could not navigate to dashboard. Please check route configuration.'
+                          });
+                        }
+                      });
+                  }
+                })
+                .catch(err => {
+                  console.error('Navigation error:', err);
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'Navigation Failed',
+                    detail: 'Error during navigation: ' + err.message
+                  });
+                });
             } else {
               this.messageService.add({
                 severity: 'error',
@@ -77,6 +105,7 @@ export class LoginComponentComponent {
             this.isLoading = false;
           },
           error: (error) => {
+            console.error('Login error:', error);
             this.isLoading = false;
             let errorMessage = 'An error occurred during login';
             

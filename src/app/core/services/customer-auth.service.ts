@@ -14,7 +14,7 @@ import { environment } from '../../../enviornments/environment.customer';
 
 export interface CustomerAuthState {
   isAuthenticated: boolean;
-  user: any | null;
+  userType: string | null;
   token: string | null;
   firebaseToken: string | null;
 }
@@ -26,7 +26,7 @@ export class CustomerAuthService {
   private auth: FirebaseAuth;
   private authState = new BehaviorSubject<CustomerAuthState>({
     isAuthenticated: false,
-    user: null,
+    userType: null,
     token: null,
     firebaseToken: null
   });
@@ -41,17 +41,17 @@ export class CustomerAuthService {
   }
 
   private checkStoredAuth() {
-    const storedToken = localStorage.getItem('customer_auth_token');
-    const storedFirebaseToken = localStorage.getItem('customer_firebase_token');
-    const storedUser = localStorage.getItem('customer_user_data');
+    debugger
+    const storedToken = localStorage.getItem('token');
+    const storedFirebaseToken = localStorage.getItem('firebaseToken');
+    const storedUser = localStorage.getItem('user_type');
 
     if (storedToken && storedFirebaseToken && storedUser) {
-      const userData = JSON.parse(storedUser);
       // Only restore auth if it's a customer user
-      if (userData.userType === 'customer') {
+      if (storedUser === 'customer') {
         this.authState.next({
           isAuthenticated: true,
-          user: userData,
+          userType: storedUser,
           token: storedToken,
           firebaseToken: storedFirebaseToken
         });
@@ -63,9 +63,9 @@ export class CustomerAuthService {
   }
 
   private clearAuthData() {
-    localStorage.removeItem('customer_auth_token');
-    localStorage.removeItem('customer_firebase_token');
-    localStorage.removeItem('customer_user_data');
+    localStorage.removeItem('token');
+    localStorage.removeItem('firebaseToken');
+    localStorage.removeItem('user_type');
     localStorage.removeItem('customer_remember_me');
   }
 
@@ -99,27 +99,47 @@ export class CustomerAuthService {
             }))
           );
         }),
-        tap(({ userCredential, firebaseToken, frappeResponse }) => {
-          if (frappeResponse.message && frappeResponse.message.token) {
-            // Store auth data with customer type
-            const userData = {
-              email: userCredential.user.email,
-              uid: userCredential.user.uid,
-              userType: 'customer',
-              loginTime: new Date().toISOString()
-            };
-
-            localStorage.setItem('customer_auth_token', frappeResponse.message.token);
-            localStorage.setItem('customer_firebase_token', firebaseToken);
-            localStorage.setItem('customer_user_data', JSON.stringify(userData));
+        tap(({ userCredential, firebaseToken, frappeResponse: response }) => {
+          console.log('User Credential', userCredential);
+          console.log("User Response", response);
+          if(response && response.data && response.data.token){
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('firebaseToken', firebaseToken);
+            localStorage.setItem('primary_email_id', response.data.email_id);
+            localStorage.setItem('country', response.data.country);
+            localStorage.setItem('user_type', response.data.user_type);
+          }
+          if(response.data.user_type === 'customer'){
+            localStorage.setItem('customer_id', response.data.customer_info.customer_company_id);
+            localStorage.setItem('customer_company_name', response.data.customer_info.customer_company_name)
+          }
 
             this.authState.next({
               isAuthenticated: true,
-              user: userData,
-              token: frappeResponse.message.token,
+              userType: response.data.user_type,
+              token: response.data.token,
               firebaseToken: firebaseToken
             });
-          }
+          // if (frappeResponse.message && frappeResponse.message.token) {
+          //   // Store auth data with customer type
+          //   const userData = {
+          //     email: userCredential.user.email,
+          //     uid: userCredential.user.uid,
+          //     userType: 'customer',
+          //     loginTime: new Date().toISOString()
+          //   };
+
+          //   localStorage.setItem('customer_auth_token', frappeResponse.message.token);
+          //   localStorage.setItem('customer_firebase_token', firebaseToken);
+          //   localStorage.setItem('customer_user_data', JSON.stringify(userData));
+
+          //   this.authState.next({
+          //     isAuthenticated: true,
+          //     user: userData,
+          //     token: frappeResponse.message.token,
+          //     firebaseToken: firebaseToken
+          //   });
+          // }
         }),
         catchError((error) => {
           console.error('Customer login error:', error);
@@ -135,7 +155,7 @@ export class CustomerAuthService {
           this.clearAuthData();
           this.authState.next({
             isAuthenticated: false,
-            user: null,
+            userType: null,
             token: null,
             firebaseToken: null
           });
@@ -150,17 +170,17 @@ export class CustomerAuthService {
   isCustomerAuthenticated(): Observable<boolean> {
     return this.getCustomerAuthState()
       .pipe(
-        map(state => state.isAuthenticated && state.user?.userType === 'customer')
+        map(state => state.isAuthenticated && state.userType === 'customer')
       );
   }
 
   getCustomerToken(): string | null {
     const state = this.authState.value;
-    return state.isAuthenticated && state.user?.userType === 'customer' ? state.token : null;
+    return state.isAuthenticated && state.userType === 'customer' ? state.token : null;
   }
 
   getFirebaseToken(): string | null {
     const state = this.authState.value;
-    return state.isAuthenticated && state.user?.userType === 'customer' ? state.firebaseToken : null;
-  }
+    return state.isAuthenticated && state.userType === 'customer' ? state.firebaseToken : null;
+  } 
 } 

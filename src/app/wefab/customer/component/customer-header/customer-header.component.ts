@@ -216,18 +216,37 @@ export class CustomerHeaderComponent implements OnInit {
 
   onLogout(): void {
     this.isUserDropdownOpen = false;
-    this.logoutEvent.emit();
     
-    // Clear user data only in browser
+    // Clear all auth-related data
     if (isPlatformBrowser(this.platformId)) {
+      // Clear all possible auth tokens and user data
+      localStorage.removeItem('token');
+      localStorage.removeItem('firebaseToken');
+      localStorage.removeItem('user_type');
       localStorage.removeItem('customer_user_data');
       localStorage.removeItem('customer_auth_token');
+      localStorage.removeItem('customer_session');
+      localStorage.removeItem('customer_remember_me');
     }
     
-    // Navigate to login
-    this.router.navigate(['/customer/login']);
+    // Emit logout event to parent component
+    this.logoutEvent.emit();
     
-    console.log('User logged out');
+    // Navigate to login page with error handling
+    this.router.navigate(['/wefab/customer/login'])
+      .then(success => {
+        if (!success) {
+          console.error('Navigation to login page failed');
+          // Try alternative navigation
+          return this.router.navigate(['wefab/customer/login']);
+        }
+        return Promise.resolve(success);
+      })
+      .catch(error => {
+        console.error('Error during logout navigation:', error);
+        // Force reload as last resort
+        window.location.href = '/wefab/customer/login';
+      });
   }
 
   onMobileMenuToggle(): void {

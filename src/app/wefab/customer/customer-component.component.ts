@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { CustomerSidebarComponent, MenuItem, SidebarConfig } from './component/customer-sidebar/customer-sidebar.component';
 import { CustomerHeaderComponent } from './component/customer-header/customer-header.component';
 
@@ -153,25 +153,37 @@ export class CustomerComponentComponent implements OnInit {
   onLogout(): void {
     console.log('Logout initiated from header');
     
-    // Clear customer-specific data
+    // Clear all auth-related data
+    localStorage.removeItem('token');
+    localStorage.removeItem('firebaseToken');
+    localStorage.removeItem('user_type');
     localStorage.removeItem('customer_user_data');
     localStorage.removeItem('customer_auth_token');
     localStorage.removeItem('customer_session');
+    localStorage.removeItem('customer_remember_me');
     
-    // Navigate to customer login
-    this.router.navigate(['/customer/login']);
-    
-    // You can also add logout API call here
-    // this.authService.logout().subscribe(() => {
-    //   this.router.navigate(['/customer/login']);
-    // });
+    // Navigate to login page with error handling
+    this.router.navigate(['/wefab/customer/login'])
+      .then(success => {
+        if (!success) {
+          console.error('Navigation to login page failed');
+          // Try alternative navigation
+          return this.router.navigate(['wefab/customer/login']);
+        }
+        return Promise.resolve(success);
+      })
+      .catch(error => {
+        console.error('Error during logout navigation:', error);
+        // Force reload as last resort
+        window.location.href = '/wefab/customer/login';
+      });
   }
 
   onProfileClick(): void {
     console.log('Profile clicked from header');
     
     // Navigate to customer profile page
-    this.router.navigate(['/customer/profile']);
+    this.router.navigate(['/wefab/customer/profile']);
     
     // Close sidebar if open on mobile
     if (this.isMobile) {
