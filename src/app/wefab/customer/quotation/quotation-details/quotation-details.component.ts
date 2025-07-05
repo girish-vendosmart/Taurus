@@ -33,6 +33,7 @@ export interface CustomerQuotationApiResponse {
   status: string;
   quotation_name: string;
   rfq_id: string;
+  customer_rfq_id: string;
   supplier_id: string;
   currency_code: string;
   quotation_from: string;
@@ -88,6 +89,7 @@ export interface QuotationLineItem {
 export interface QuotationDetails {
   quotationId: string;
   rfqId: string;
+  customerRfqId: string;
   createdOn: string;
   lastModified: string;
   workflowState: string;
@@ -190,6 +192,7 @@ export class QuotationDetailsComponent implements OnInit {
   quotationDetails: QuotationDetails = {
     quotationId: '',
     rfqId: '',
+    customerRfqId: '',
     createdOn: '',
     lastModified: '',
     workflowState: '',
@@ -485,6 +488,7 @@ export class QuotationDetailsComponent implements OnInit {
     this.quotationDetails = {
       quotationId: apiData.name,
       rfqId: apiData.rfq_id,
+      customerRfqId: apiData.customer_rfq_id,
       createdOn: this.formatApiDate(apiData.creation),
       lastModified: this.formatApiDate(apiData.modified),
       workflowState: apiData.status,

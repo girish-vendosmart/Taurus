@@ -28,6 +28,39 @@
       </div>
     </div>
 
+    <!-- Highlighted Important Details Section -->
+    <div class="highlighted-details">
+      <div class="highlight-card">
+        <div class="highlight-icon">
+          <i class="pi pi-money-bill"></i>
+        </div>
+        <div class="highlight-content">
+          <span class="highlight-label">Grand Total</span>
+          <span class="highlight-value">{{ getFormattedCurrencyAmount(quotationDetails.grandTotal) }}</span>
+        </div>
+      </div>
+      
+      <div class="highlight-card">
+        <div class="highlight-icon">
+          <i class="pi pi-file"></i>
+        </div>
+        <div class="highlight-content">
+          <span class="highlight-label">Customer RFQ ID</span>
+          <span class="highlight-value">{{ quotationDetails.customerRfqId || '----' }}</span>
+        </div>
+      </div>
+      
+      <div class="highlight-card">
+        <div class="highlight-icon">
+          <i class="pi pi-calendar"></i>
+        </div>
+        <div class="highlight-content">
+          <span class="highlight-label">Validity</span>
+          <span class="highlight-value">{{ quotationDetails.validity || '----' }}</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Tabs Section -->
     <div class="tabs-container">
       <div class="tab-headers">
