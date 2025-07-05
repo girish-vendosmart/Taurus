@@ -13,7 +13,8 @@
     "start:customer": "ng serve --configuration=customer",
     "start:supplier": "ng serve --configuration=wefab",
     "build:customer": "ng build --configuration=customer",
-    "build:supplier": "ng build --configuration=wefab"
+    "build:supplier": "ng build --configuration=wefab",
+    "build:customer-prod": "ng build --configuration=customer-production"
   },
   "private": true,
   "dependencies": {
