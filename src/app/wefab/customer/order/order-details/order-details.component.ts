@@ -385,59 +385,60 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   getOrderTrackerView(orderId: string) {
-    let endPoint = `/api/method/wefab.wefab.api.common.po_tracker_api.get_po_workflow_states?po_name=${orderId}`;
+    let endPoint = `/api/method/wefab.wefab.api.common.po_tracker_api.get_po_workflow_states?doc_name=${orderId}&doctype=Customer Purchase Order`;
     
     // Show loading state
     this.loading = true;
     
     this.commonService.getWefabData(endPoint).subscribe({
       next: (res: any) => {
-        res = {
-          message: {
-              success: true,
-              data: {
-                  current_state: "Supplier Confirmation",
-                  states: [
-                      {
-                          state_name: "Draft",
-                          status: "Completed"
-                      },
-                      {
-                          state_name: "Approval",
-                          status: "Completed"
-                      },
-                      {
-                          state_name: "Supplier Confirmation",
-                          status: "In Progress"
-                      },
-                      {
-                          state_name: "Preparation",
-                          status: "Yet to Start"
-                      },
-                      {
-                          state_name: "Work in Progress",
-                          status: "Yet to Start"
-                      },
-                      {
-                          state_name: "Finishing",
-                          status: "Yet to Start"
-                      },
-                      {
-                          state_name: "Quality Inspection",
-                          status: "Yet to Start"
-                      },
-                      {
-                          state_name: "Dispatch",
-                          status: "Yet to Start"
-                      },
-                      {
-                          state_name: "Order Complete",
-                          status: "Yet to Start"
-                      }
-                  ]
-              }
-          }
-      }
+      //   res = 
+      //   {
+      //     message: {
+      //         success: true,
+      //         data: {
+      //             current_state: "Supplier Confirmation",
+      //             states: [
+      //                 {
+      //                     state_name: "Draft",
+      //                     status: "Completed"
+      //                 },
+      //                 {
+      //                     state_name: "Approval",
+      //                     status: "Completed"
+      //                 },
+      //                 {
+      //                     state_name: "Supplier Confirmation",
+      //                     status: "In Progress"
+      //                 },
+      //                 {
+      //                     state_name: "Preparation",
+      //                     status: "Yet to Start"
+      //                 },
+      //                 {
+      //                     state_name: "Work in Progress",
+      //                     status: "Yet to Start"
+      //                 },
+      //                 {
+      //                     state_name: "Finishing",
+      //                     status: "Yet to Start"
+      //                 },
+      //                 {
+      //                     state_name: "Quality Inspection",
+      //                     status: "Yet to Start"
+      //                 },
+      //                 {
+      //                     state_name: "Dispatch",
+      //                     status: "Yet to Start"
+      //                 },
+      //                 {
+      //                     state_name: "Order Complete",
+      //                     status: "Yet to Start"
+      //                 }
+      //             ]
+      //         }
+      //     }
+      // }
         
         if (res.message && res.message.data.states) {
           // Filter out Draft and Approval states
