@@ -27,9 +27,9 @@ export class CustomerHeaderComponent implements OnInit {
   @Output() helpEvent = new EventEmitter<void>();
 
   // User properties
-  userName: string = 'John Anderson';
-  userEmail: string = 'john.anderson@company.com';
-  userInitials: string = 'JA';
+  userName: string = localStorage.getItem('customer_company_name') || '';
+  userEmail: string = localStorage.getItem('primary_email_id') || '';
+  userInitials: string = this.getInitials(this.userName);
   userProfileImage: string = ''; // Can be set to image URL
 
   // Dropdown states
