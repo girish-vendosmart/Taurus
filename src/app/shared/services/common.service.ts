@@ -70,7 +70,8 @@ export class CommonService {
     postData(endPoint: string, body: any, params?: HttpParams) {
         // Create headers with Authorization token
         let headers = new HttpHeaders({
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Token 3f36743188b20d5:afcc7c21d6aeac0`,
         });
         if (localStorage.getItem('token')) {
             headers = new HttpHeaders({

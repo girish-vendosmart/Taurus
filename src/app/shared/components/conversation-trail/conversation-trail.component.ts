@@ -21,7 +21,7 @@ export class ConversationTrailComponent implements OnInit {
   messages: any[] = [];
   supplierId: string = '';
   loading = false;
-  currentUser: any = localStorage.getItem('primary_email_id') || 'suriya@vendosmart.com';
+  currentUser: any = localStorage.getItem('primary_email_id') || 'chirag@mailinator.com';
   newMessage: string = '';
   attachedFile: File | null = null;
   previewImageUrl: string | null = null;

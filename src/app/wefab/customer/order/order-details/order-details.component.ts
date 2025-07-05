@@ -358,7 +358,7 @@ export class OrderDetailsComponent implements OnInit {
       if (this.orderId) {
         this.accessFirebaseTrigger('Customer Purchase Order', this.orderId);
         this.getOrderTrackerView(this.orderId);
-        this.getActivityTrail('Customer Purchase Order', this.orderId);
+        this.loadActivityTrail();
       }
     });
   }
@@ -837,7 +837,7 @@ export class OrderDetailsComponent implements OnInit {
   // Activity trail methods
   getActivityTrail(doctype: string, docname: string) {
     this.activityTrailLoading = true;
-    let endpoint = `/api/method/wefab.wefab.utils.web_service.get_activity_logs?doctype=${doctype}&docname=${docname}`;
+    let endpoint = `/api/method/wefab.wefab.api.common.engine.trail.activity.get_new_versions_trail?doctype=${doctype}&docname=${docname}`;
 
     this.commonService.getWefabData(endpoint).subscribe({
       next: (res: any) => {
@@ -879,20 +879,12 @@ export class OrderDetailsComponent implements OnInit {
   // Load activity trail data
   private loadActivityTrail(): void {
     this.activityTrailLoading = true;
-    let endPoint = `/api/method/wefab.wefab.utils.web_service.get_activity_logs?doctype=Customer Purchase Order&docname=${this.orderId}`;
+    let endPoint = `/api/method/wefab.wefab.api.common.engine.trail.activity.get_new_versions_trail?doctype=Customer Purchase Order&docname=${this.orderId}`;
 
     this.commonService.getWefabData(endPoint).subscribe({
       next: (res: any) => {
         console.log('Activity Trail Response:', res);
-        if (res && res.message) {
-          this.activityTrail = res.message.map((activity: any) => ({
-            timestamp: this.formatApiDate(activity.creation),
-            action: activity.title || activity.subject,
-            user: activity.owner,
-            description: activity.content,
-            type: this.getActivityType(activity.status)
-          }));
-        }
+        this.activityTrail = res.data || [];
         this.activityTrailLoading = false;
       },
       error: (error) => {

@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { FormatAddressPipe } from '../../../../shared/pipes/format-address.pipe';
 import { FileUploadService, FileUploadResult } from '../../../../shared/services/file-upload.service';
 import { SweetAlertService } from '../../../../shared/services/sweet-alert.service';
+import * as XLSX from 'xlsx';
 
 interface Project {
   name: string;
@@ -106,6 +107,13 @@ interface UploadError {
   code?: string;
 }
 
+interface BomItem {
+  partNumber: string;
+  description: string;
+  quantity: number;
+  material: string;
+}
+
 @Component({
   selector: 'app-create-rfq',
   standalone: true,
@@ -167,6 +175,17 @@ export class CreateRfqComponent implements OnInit {
     country: '',
     postal_code: ''
   };
+
+  isUploadingBom = false;
+  bomUploadError: string = '';
+  bomTemplate: BomItem[] = [
+    {
+      partNumber: 'PART-001',
+      description: 'Sample Part Description',
+      quantity: 1,
+      material: 'Aluminum'
+    }
+  ];
 
   constructor(
     private fb: FormBuilder, 
@@ -390,8 +409,66 @@ export class CreateRfqComponent implements OnInit {
     this.addLineItem();
   }
 
-  uploadBOMFile() {
-    console.log('Upload BOM File clicked');
+  uploadBOMFile(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel' // .xls
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      this.bomUploadError = 'Please upload a valid Excel file (.xlsx or .xls)';
+      return;
+    }
+
+    this.isUploadingBom = true;
+    this.bomUploadError = '';
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet) as BomItem[];
+
+        // Clear existing line items
+        while (this.lineItems.length) {
+          this.lineItems.removeAt(0);
+        }
+
+        // Add new line items from Excel
+        jsonData.forEach(item => {
+          if (item.partNumber && item.description) {
+            const lineItem = this.fb.group({
+              partNumber: [item.partNumber, [Validators.required]],
+              description: [item.description, [Validators.required]],
+              quantity: [item.quantity || 1, [Validators.required, Validators.min(1)]],
+              material: [item.material || '', [Validators.required]]
+            });
+            this.lineItems.push(lineItem);
+          }
+        });
+
+        this.isUploadingBom = false;
+        this.sweetAlertService.success('BOM file uploaded successfully');
+      } catch (error) {
+        console.error('Error processing BOM file:', error);
+        this.isUploadingBom = false;
+        this.bomUploadError = 'Error processing the BOM file. Please make sure it follows the template format.';
+      }
+    };
+
+    reader.onerror = () => {
+      this.isUploadingBom = false;
+      this.bomUploadError = 'Error reading the file. Please try again.';
+    };
+
+    reader.readAsArrayBuffer(file);
   }
 
   backToOptions() {
@@ -747,5 +824,25 @@ export class CreateRfqComponent implements OnInit {
         }
       }
     });
+  }
+
+  downloadBomTemplate() {
+    // Create worksheet
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.bomTemplate);
+    
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 15 }, // Part Number
+      { wch: 30 }, // Description
+      { wch: 10 }, // Quantity
+      { wch: 20 }  // Material
+    ];
+
+    // Create workbook
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'BOM Template');
+
+    // Save file
+    XLSX.writeFile(wb, 'bom_template.xlsx');
   }
 }

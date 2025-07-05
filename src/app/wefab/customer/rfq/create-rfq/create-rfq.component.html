@@ -552,11 +552,31 @@
             <div class="d-flex justify-content-end gap-3">
               <button 
                 type="button" 
-                class="btn btn-outline-primary"
-                (click)="uploadBOMFile()">
-                <i class="fas fa-upload me-2"></i>Upload BOM File
+                class="btn btn-outline-secondary"
+                (click)="downloadBomTemplate()">
+                <i class="fas fa-download me-2"></i>Download Template
               </button>
+              <div class="upload-btn-wrapper">
+                <button 
+                  type="button" 
+                  class="btn btn-outline-primary"
+                  [disabled]="isUploadingBom">
+                  <i class="fas fa-upload me-2"></i>
+                  {{ isUploadingBom ? 'Uploading...' : 'Upload BOM File' }}
+                </button>
+                <input 
+                  type="file" 
+                  accept=".xlsx,.xls" 
+                  (change)="uploadBOMFile($event)"
+                  [disabled]="isUploadingBom">
+              </div>
             </div>
+          </div>
+
+          <!-- BOM Upload Error -->
+          <div *ngIf="bomUploadError" class="alert alert-danger mb-4">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ bomUploadError }}
           </div>
 
           <!-- Line Items -->
