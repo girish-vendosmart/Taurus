@@ -244,7 +244,7 @@ export class QuotationDetailsComponent implements OnInit {
 
   quotationItems: QuotationItem[] = [];
   rawQuotationItems: QuotationLineItem[] = []; // Raw API data for table
-  currencyCode: string = 'USD'; // Default currency code
+  currencyCode: string = 'INR'; // Default currency code
 
   quotationAttachments: QuotationAttachment[] = [];
 
@@ -481,8 +481,8 @@ export class QuotationDetailsComponent implements OnInit {
     // Calculate sub total from items since API might return 0
     const calculatedSubTotal = apiData.items.reduce((total, item) => total + item.total_price, 0);
 
-    // Extract currency code from first item or default to USD
-    this.currencyCode = apiData.currency_code;
+    // Extract currency code from API data
+    this.currencyCode = apiData.currency_code || 'INR';
 
     // Map main quotation details
     this.quotationDetails = {
@@ -502,7 +502,6 @@ export class QuotationDetailsComponent implements OnInit {
       totalAmount: calculatedSubTotal, // Use calculated value
       discountPercentage: apiData.discount_type === 'Percentage' ? apiData.discount_amount : apiData.discount,
       discountAmount: this.calculateDiscountAmount(apiData.sub_total, apiData.discount_type, apiData.discount_amount),
-      
       shippingCharges: apiData.shipping_charges,
       grandTotal: apiData.grand_total,
       taxApplicable: 0,
@@ -548,7 +547,7 @@ export class QuotationDetailsComponent implements OnInit {
       description: item.item_description,
       quantity: item.quantity,
       unit: item.unit,
-      currency: item.currency_code,
+      currency: item.currency_code || this.currencyCode,
       unitPrice: item.unit_price,
       totalPrice: item.total_price,
       comments: item.comments,
@@ -562,11 +561,11 @@ export class QuotationDetailsComponent implements OnInit {
 
     this.rawQuotationItems = apiData.items.map(item => ({
       ...item,
-      unit_price_formatted: this.getFormattedCurrencyAmount(item.unit_price, item.currency_code),
-      total_price_formatted: this.getFormattedCurrencyAmount(item.total_price, item.currency_code),
-      tax_amount_formatted: this.getFormattedCurrencyAmount(item.tax_amount, item.currency_code),
-      miscellaneous_formatted: this.getFormattedCurrencyAmount(item.miscellaneous || 0, item.currency_code),
-      tooling_formatted: this.getFormattedCurrencyAmount(item.tooling || 0, item.currency_code)
+      unit_price_formatted: this.getFormattedCurrencyAmount(item.unit_price, item.currency_code || this.currencyCode),
+      total_price_formatted: this.getFormattedCurrencyAmount(item.total_price, item.currency_code || this.currencyCode),
+      tax_amount_formatted: this.getFormattedCurrencyAmount(item.tax_amount, item.currency_code || this.currencyCode),
+      miscellaneous_formatted: this.getFormattedCurrencyAmount(item.miscellaneous || 0, item.currency_code || this.currencyCode),
+      tooling_formatted: this.getFormattedCurrencyAmount(item.tooling || 0, item.currency_code || this.currencyCode)
     }));
     
     this.totalItems = this.quotationItems.length;
@@ -632,25 +631,13 @@ export class QuotationDetailsComponent implements OnInit {
 
   // Format currency amount
   getFormattedCurrencyAmount(amount: number, currency?: string): string {
-    if (!amount && amount !== 0) return '₹0.00';
+    if (!amount && amount !== 0) return `${this.currencyCode} 0.00`;
     
-    const currencySymbol = this.getCurrencySymbol(currency || this.currencyCode);
-    return `${currencySymbol}${amount.toLocaleString('en-IN', {
+    const currencyCode = currency || this.currencyCode;
+    return `${currencyCode} ${amount.toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })}`;
-  }
-
-  // Get currency symbol
-  getCurrencySymbol(currencyCode: string): string {
-    const currencySymbols: { [key: string]: string } = {
-      'USD': '$',
-      'EUR': '€',
-      'GBP': '£',
-      'INR': '₹',
-      'JPY': '¥'
-    };
-    return currencySymbols[currencyCode] || '₹';
   }
 
   // Get discount display text based on discount type
