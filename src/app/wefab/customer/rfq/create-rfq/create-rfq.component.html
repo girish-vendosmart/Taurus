@@ -269,7 +269,7 @@
                 placeholder="Enter RFQ name"
                 [class.is-invalid]="isFieldInvalid('projectInfo.rfqName')">
               <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.rfqName')">
-                Please enter an RFQ name
+                {{ getErrorMessage('projectInfo.rfqName') }}
               </div>
             </div>
 
@@ -286,7 +286,7 @@
                 placeholder="Enter contact email"
                 [class.is-invalid]="isFieldInvalid('projectInfo.contactEmail')">
               <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.contactEmail')">
-                Please enter a valid email address
+                {{ getErrorMessage('projectInfo.contactEmail') }}
               </div>
             </div>
           </div>
@@ -306,7 +306,7 @@
                 placeholder="Enter contact phone"
                 [class.is-invalid]="isFieldInvalid('projectInfo.contactPhone')">
               <div class="invalid-feedback" *ngIf="isFieldInvalid('projectInfo.contactPhone')">
-                Please enter a valid phone number
+                {{ getErrorMessage('projectInfo.contactPhone') }}
               </div>
             </div>
 
@@ -607,6 +607,9 @@
                     formControlName="item_name"
                     placeholder="Item name"
                     [class.is-invalid]="isFieldInvalid('lineItems.' + i + '.item_name')">
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('lineItems.' + i + '.item_name')">
+                    {{ getErrorMessage('lineItems.' + i + '.item_name') }}
+                  </div>
                 </div>
 
                 <!-- Part Number -->
@@ -620,6 +623,9 @@
                     formControlName="partNumber"
                     placeholder="Part number"
                     [class.is-invalid]="isFieldInvalid('lineItems.' + i + '.partNumber')">
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('lineItems.' + i + '.partNumber')">
+                    {{ getErrorMessage('lineItems.' + i + '.partNumber') }}
+                  </div>
                 </div>
 
                 <!-- Description -->
@@ -633,6 +639,9 @@
                     formControlName="description"
                     placeholder="Part description"
                     [class.is-invalid]="isFieldInvalid('lineItems.' + i + '.description')">
+                  <div class="invalid-feedback" *ngIf="isFieldInvalid('lineItems.' + i + '.description')">
+                    {{ getErrorMessage('lineItems.' + i + '.description') }}
+                  </div>
                 </div>
 
                 <!-- Quantity -->
@@ -714,7 +723,7 @@
           type="submit" 
           class="btn btn-primary"
           (click)="submitRfq()">
-          <i class="fas fa-paper-plane me-2"></i>Submit RFQ
+          <i class="fas fa-paper-plane me-2"></i>Create RFQ
         </button>
       </div>
     </div>

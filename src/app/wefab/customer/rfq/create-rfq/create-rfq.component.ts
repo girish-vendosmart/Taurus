@@ -245,8 +245,8 @@ export class CreateRfqComponent implements OnInit {
       projectInfo: this.fb.group({
         projectId: ['', [Validators.required]],
         projectName: [''],
-        rfqName: ['', [Validators.required]],
-        contactEmail: ['', [Validators.required, Validators.email]],
+        rfqName: ['', [Validators.required, Validators.minLength(3)]],
+        contactEmail: ['', [Validators.required, Validators.email, Validators.pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')]],
         contactPhone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
         priority: ['', [Validators.required]],
         projectType: ['', [Validators.required]],
@@ -389,9 +389,9 @@ export class CreateRfqComponent implements OnInit {
 
   createLineItem(): FormGroup {
     return this.fb.group({
-      item_name: ['', [Validators.required]],
-      partNumber: ['', [Validators.required]],
-      description: ['', [Validators.required]],
+      item_name: ['', [Validators.required, Validators.minLength(3)]],
+      partNumber: ['', [Validators.required, Validators.pattern('^[A-Za-z0-9-_.]+(\\.[0-9]+)?$')]],
+      description: ['', [Validators.required, Validators.minLength(10)]],
       quantity: [1, [Validators.required, Validators.min(1)]],
       material: ['', [Validators.required]],
       unit: ['pcs', [Validators.required]]
@@ -588,20 +588,19 @@ export class CreateRfqComponent implements OnInit {
       
       this.commonService.postWefabData('/api/resource/Customer Request for Quotation', rfqData).subscribe({
         next: (response: any) => {
-          console.log('RFQ submitted successfully:', response);
-          this.sweetAlertService.success('RFQ submitted successfully');
+          console.log('RFQ created successfully:', response);
+          this.sweetAlertService.success('RFQ created successfully');
           this.router.navigate(['/wefab/customer/rfq-details/', response.data.name]);
-          // Handle success (e.g., show success message, redirect)
-          // this.router.navigate(['/wefab/customer/rfq-list']);
         },
         error: (error) => {
-          console.error('Error submitting RFQ:', error);
-          // Handle error (e.g., show error message)
+          console.error('Error creating RFQ:', error);
+          this.sweetAlertService.error('Failed to create RFQ. Please try again.');
         }
       });
     } else {
       console.log('Form is invalid');
       this.markFormGroupTouched(this.createRfqForm);
+      this.sweetAlertService.error('Please fill in all required fields correctly');
     }
   }
 
@@ -619,6 +618,37 @@ export class CreateRfqComponent implements OnInit {
   isFieldInvalid(fieldPath: string): boolean {
     const field = this.createRfqForm.get(fieldPath);
     return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  getErrorMessage(fieldPath: string): string {
+    const control = this.createRfqForm.get(fieldPath);
+    if (!control) return '';
+    
+    if (control.hasError('required')) {
+      return 'This field is required';
+    }
+    if (control.hasError('email')) {
+      return 'Please enter a valid email address';
+    }
+    if (control.hasError('pattern')) {
+      if (fieldPath === 'projectInfo.contactPhone') {
+        return 'Please enter a valid 10-digit phone number';
+      }
+      if (fieldPath.includes('partNumber')) {
+        return 'Part number can only contain letters, numbers, hyphens, underscores and decimal points';
+      }
+      if (fieldPath === 'projectInfo.contactEmail') {
+        return 'Please enter a valid email address';
+      }
+    }
+    if (control.hasError('minlength')) {
+      const minLength = control.errors?.['minlength']?.requiredLength;
+      return `Minimum length is ${minLength} characters`;
+    }
+    if (control.hasError('min')) {
+      return 'Value must be greater than 0';
+    }
+    return '';
   }
 
   // Technical Drawing Methods

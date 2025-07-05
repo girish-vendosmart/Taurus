@@ -295,9 +295,9 @@ export class SubmittedRfqComponent implements OnInit {
       this.rfqStatus = res.data.workflow_state;
       this.rfqData.rfqNumber = res.data.name;
       this.rfqData.reference = res.data.reference || '----';
-      this.rfqData.projectInfo.projectName = res.data.project_name || '----';
+      this.rfqData.projectInfo.projectName = res.data.project || '----';
       this.rfqData.projectInfo.deliveryDate = res.data.required_by_date || '----';
-      this.rfqData.projectInfo.deliveryLocation = res.data.delivery_location || '----';
+      this.rfqData.projectInfo.deliveryLocation = res.data.full_delivery_address || '----';
       
       // Transform line items
       const transformedLineItems = (res.data.line_items || []).map((item: any) => ({

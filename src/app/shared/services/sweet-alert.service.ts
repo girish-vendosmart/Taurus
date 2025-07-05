@@ -32,9 +32,9 @@ export class SweetAlertService {
         popup: 'swal2-popup',
         title: 'swal2-title',
         htmlContainer: 'swal2-html-container',
-        confirmButton: 'swal2-confirm',
-        cancelButton: 'swal2-cancel',
-        denyButton: 'swal2-deny'
+        confirmButton: 'swal2-confirm btn-primary',
+        cancelButton: 'swal2-cancel btn-secondary',
+        denyButton: 'swal2-deny btn-danger'
       }
     });
     
@@ -46,9 +46,9 @@ export class SweetAlertService {
     document.documentElement.style.setProperty('--swal2-color', this.brandColors.precisionBlack);
     
     // Button colors
-    document.documentElement.style.setProperty('--swal2-confirm-button-background-color', this.brandColors.blueprintBlue);
-    document.documentElement.style.setProperty('--swal2-cancel-button-background-color', this.brandColors.machineGray);
-    document.documentElement.style.setProperty('--swal2-deny-button-background-color', this.brandColors.safetyOrange);
+    document.documentElement.style.setProperty('--swal2-confirm-button-background-color', '#FF5722');
+    document.documentElement.style.setProperty('--swal2-cancel-button-background-color', '#6c757d');
+    document.documentElement.style.setProperty('--swal2-deny-button-background-color', '#dc3545');
     
     // Status colors
     document.documentElement.style.setProperty('--swal2-success-color', this.brandColors.processGreen);
@@ -73,11 +73,36 @@ export class SweetAlertService {
         font-size: 15px !important;
         line-height: 1.5 !important;
       }
-      .swal2-confirm, .swal2-cancel, .swal2-deny {
+      .swal2-actions > button {
         font-weight: 500 !important;
         font-size: 15px !important;
         padding: 10px 24px !important;
         border-radius: 4px !important;
+        text-transform: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease-in-out !important;
+      }
+      .swal2-confirm {
+        background: #FF5722 !important;
+        color: #fff !important;
+      }
+      .swal2-confirm:hover {
+        background: #f4511e !important;
+      }
+      .swal2-cancel {
+        background: #6c757d !important;
+        color: #fff !important;
+      }
+      .swal2-cancel:hover {
+        background: #5a6268 !important;
+      }
+      .swal2-deny {
+        background: #dc3545 !important;
+        color: #fff !important;
+      }
+      .swal2-deny:hover {
+        background: #c82333 !important;
       }
     `;
     document.head.appendChild(style);
@@ -167,16 +192,14 @@ export class SweetAlertService {
     title: string, 
     text: string, 
     icon: SweetAlertIcon = 'warning',
-    confirmButtonText: string = 'Yes',
-    cancelButtonText: string = 'No'
+    confirmButtonText: string = 'Yes, Submit for Review',
+    cancelButtonText: string = 'Cancel'
   ): Promise<SweetAlertResult<any>> {
     return Swal.fire({
       title: title,
       text: text,
       icon: icon,
       showCancelButton: true,
-      confirmButtonColor: this.brandColors.blueprintBlue,
-      cancelButtonColor: this.brandColors.machineGray,
       confirmButtonText: confirmButtonText,
       cancelButtonText: cancelButtonText
     });

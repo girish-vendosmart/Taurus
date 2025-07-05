@@ -129,7 +129,7 @@ export class RfqListComponent implements OnInit {
     console.log('Fetching RFQ list...');
     
     // Try using wefab-specific API first
-    let apiEndpoint = '/api/resource/Customer Request for Quotation?fields=["*"]';
+    let apiEndpoint = '/api/resource/Customer Request for Quotation?fields=["*"]&limit=400&order_by=creation desc';
     
     this.commonService.getData(apiEndpoint).subscribe({
       next: (res: any) => {
