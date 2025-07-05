@@ -715,25 +715,17 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   getFormattedCurrencyAmount(amount: number, currency?: string): string {
-    if (!amount && amount !== 0) return '$0.00';
+    if (!amount && amount !== 0) return `${this.currencyCode} 0.00`;
     
-    const currencySymbol = this.getCurrencySymbol(currency || this.currencyCode);
-    return `${currencySymbol}${amount.toLocaleString('en-IN', {
+    return `${currency || this.currencyCode} ${amount.toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })}`;
   }
 
-  // Get currency symbol
+  // Get currency symbol - This method is no longer needed but keeping for backward compatibility
   getCurrencySymbol(currencyCode: string): string {
-    const currencySymbols: { [key: string]: string } = {
-      'USD': '$',
-      'EUR': '€',
-      'GBP': '£',
-      'INR': '₹',
-      'JPY': '¥'
-    };
-    return currencySymbols[currencyCode] || '$';
+    return currencyCode;
   }
 
   // Get discount display text based on discount type
