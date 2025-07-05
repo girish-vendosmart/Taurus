@@ -87,6 +87,28 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "customer": {
+              "fileReplacements": [
+                {
+                  "replace": "src/enviornments/environment.ts",
+                  "with": "src/enviornments/environment.customer.ts"
+                }
+              ],
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
+            "wefab": {
+              "fileReplacements": [
+                {
+                  "replace": "src/enviornments/environment.ts",
+                  "with": "src/enviornments/enviornment.wefab.ts"
+                }
+              ],
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
@@ -99,6 +121,12 @@
             },
             "development": {
               "buildTarget": "we-fab-application:build:development"
+            },
+            "customer": {
+              "buildTarget": "we-fab-application:build:customer"
+            },
+            "wefab": {
+              "buildTarget": "we-fab-application:build:wefab"
             }
           },
           "defaultConfiguration": "development"

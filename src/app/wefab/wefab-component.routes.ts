@@ -1,7 +1,9 @@
 import { Routes } from "@angular/router";
 import { WefabComponentComponent } from "./wefab-component.component";
 import { LoginComponentComponent } from "../shared/components/login-component/login-component.component";
+import { LoginComponentComponent as CustomerLoginComponent } from "../wefab/customer/login-component/login-component.component";
 import { AuthGuard } from "../core/guards/auth.guard";
+import { environment } from '../../enviornments/enviornment';
 
 export const WEFAB_ROUTES: Routes = [
   {
@@ -10,8 +12,13 @@ export const WEFAB_ROUTES: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'customer/login',
+    component: CustomerLoginComponent,
+    canActivate: [AuthGuard]
+  },
+  {
     path: '',
-    redirectTo: 'supplier/login',
+    redirectTo: environment.isCustomerBranch ? 'customer/login' : 'supplier/login',
     pathMatch: 'full'
   },
   {
@@ -37,6 +44,6 @@ export const WEFAB_ROUTES: Routes = [
   },
   {
     path: '**', // wildcard route
-    redirectTo: 'supplier/login'
+    redirectTo: environment.isCustomerBranch ? 'customer/login' : 'supplier/login'
   }
 ];

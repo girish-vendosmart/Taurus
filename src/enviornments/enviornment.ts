@@ -2,6 +2,7 @@ export const environment = {
   production: false,
   apiUrl: 'https://fabsterqa.wefab.ai',
   wefabApiUrl: 'https://fabsterqa.wefab.ai',
+  isCustomerBranch: true,
   firebaseConfig: {
     apiKey: "AIzaSyDcYuSy6cy-RrJAHKl1xIqmRmC9yb-r5Dw",
     authDomain: "esourcing-trial.firebaseapp.com",
