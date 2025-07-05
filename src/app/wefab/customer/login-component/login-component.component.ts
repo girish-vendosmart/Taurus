@@ -58,16 +58,65 @@ export class LoginComponentComponent {
       
       this.customerAuthService.customerLogin(this.loginData.email, this.loginData.password)
         .subscribe({
-          next: () => {
-            // Navigate to customer dashboard
-            this.router.navigate(['/wefab/customer/rfq-list']);
+          next: (response) => {
+            if (response.frappeResponse?.message?.token) {
+              // Store remember me preference if selected
+              if (this.loginData.rememberMe) {
+                localStorage.setItem('customer_remember_me', 'true');
+              }
+              
+              // Navigate to customer dashboard
+              this.router.navigate(['/wefab/customer/rfq-list']);
+            } else {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Login Failed',
+                detail: 'Token verification failed'
+              });
+            }
+            this.isLoading = false;
           },
           error: (error) => {
             this.isLoading = false;
+            let errorMessage = 'An error occurred during login';
+            
+            // Handle Firebase auth errors
+            if (error.code) {
+              switch (error.code) {
+                case 'auth/invalid-email':
+                  errorMessage = 'Invalid email address';
+                  break;
+                case 'auth/user-disabled':
+                  errorMessage = 'This account has been disabled';
+                  break;
+                case 'auth/user-not-found':
+                  errorMessage = 'No account found with this email';
+                  break;
+                case 'auth/wrong-password':
+                  errorMessage = 'Invalid password';
+                  break;
+                default:
+                  errorMessage = error.message || 'Authentication failed';
+              }
+            } 
+            // Handle Frappe API errors
+            else if (error.error) {
+              if (error.error.message) {
+                errorMessage = error.error.message;
+              } else if (error.error._server_messages) {
+                try {
+                  const serverMessages = JSON.parse(error.error._server_messages);
+                  errorMessage = serverMessages[0] || errorMessage;
+                } catch {
+                  errorMessage = 'Token verification failed';
+                }
+              }
+            }
+            
             this.messageService.add({
               severity: 'error',
               summary: 'Login Failed',
-              detail: error.message || 'Invalid email or password'
+              detail: errorMessage
             });
           }
         });

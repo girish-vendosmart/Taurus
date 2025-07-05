@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, from } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
+import { map, tap, catchError, switchMap } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -15,6 +16,7 @@ export interface CustomerAuthState {
   isAuthenticated: boolean;
   user: any | null;
   token: string | null;
+  firebaseToken: string | null;
 }
 
 @Injectable({
@@ -25,10 +27,11 @@ export class CustomerAuthService {
   private authState = new BehaviorSubject<CustomerAuthState>({
     isAuthenticated: false,
     user: null,
-    token: null
+    token: null,
+    firebaseToken: null
   });
 
-  constructor() {
+  constructor(private http: HttpClient) {
     // Initialize Firebase with customer config
     const app = initializeApp(environment.firebaseConfig, 'customer-app');
     this.auth = getAuth(app);
@@ -39,16 +42,18 @@ export class CustomerAuthService {
 
   private checkStoredAuth() {
     const storedToken = localStorage.getItem('customer_auth_token');
+    const storedFirebaseToken = localStorage.getItem('customer_firebase_token');
     const storedUser = localStorage.getItem('customer_user_data');
 
-    if (storedToken && storedUser) {
+    if (storedToken && storedFirebaseToken && storedUser) {
       const userData = JSON.parse(storedUser);
       // Only restore auth if it's a customer user
       if (userData.userType === 'customer') {
         this.authState.next({
           isAuthenticated: true,
           user: userData,
-          token: storedToken
+          token: storedToken,
+          firebaseToken: storedFirebaseToken
         });
       } else {
         // Clear invalid customer data
@@ -59,36 +64,62 @@ export class CustomerAuthService {
 
   private clearAuthData() {
     localStorage.removeItem('customer_auth_token');
+    localStorage.removeItem('customer_firebase_token');
     localStorage.removeItem('customer_user_data');
     localStorage.removeItem('customer_remember_me');
   }
 
-  customerLogin(email: string, password: string): Observable<UserCredential> {
+  private verifyTokenWithFrappe(firebaseToken: string): Observable<any> {
+    const verifyData = {
+      firebase_token: firebaseToken
+    };
+
+    return this.http.post(
+      `${environment.apiUrl}/api/method/wefab.wefab.api.common.core.authentication.auth.api_token_auth_frappe`,
+      verifyData
+    );
+  }
+
+  customerLogin(email: string, password: string): Observable<any> {
+    // First authenticate with Firebase
     return from(signInWithEmailAndPassword(this.auth, email, password))
       .pipe(
-        tap(async (userCredential) => {
-          // Get the Firebase token
-          const token = await userCredential.user.getIdToken();
-          
-          // For demo purposes, we'll use a dummy token
-          const dummyToken = 'dummy-customer-token-' + Date.now();
-          
-          // Store auth data with customer type
-          const userData = {
-            email: userCredential.user.email,
-            uid: userCredential.user.uid,
-            userType: 'customer',
-            loginTime: new Date().toISOString()
-          };
+        switchMap(async (userCredential) => {
+          // Get Firebase token
+          const firebaseToken = await userCredential.user.getIdToken();
+          return { userCredential, firebaseToken };
+        }),
+        switchMap(({ userCredential, firebaseToken }) => {
+          // Verify Firebase token with Frappe
+          return this.verifyTokenWithFrappe(firebaseToken).pipe(
+            map(response => ({
+              userCredential,
+              firebaseToken,
+              frappeResponse: response
+            }))
+          );
+        }),
+        tap(({ userCredential, firebaseToken, frappeResponse }) => {
+          if (frappeResponse.message && frappeResponse.message.token) {
+            // Store auth data with customer type
+            const userData = {
+              email: userCredential.user.email,
+              uid: userCredential.user.uid,
+              userType: 'customer',
+              loginTime: new Date().toISOString()
+            };
 
-          localStorage.setItem('customer_auth_token', dummyToken);
-          localStorage.setItem('customer_user_data', JSON.stringify(userData));
+            localStorage.setItem('customer_auth_token', frappeResponse.message.token);
+            localStorage.setItem('customer_firebase_token', firebaseToken);
+            localStorage.setItem('customer_user_data', JSON.stringify(userData));
 
-          this.authState.next({
-            isAuthenticated: true,
-            user: userData,
-            token: dummyToken
-          });
+            this.authState.next({
+              isAuthenticated: true,
+              user: userData,
+              token: frappeResponse.message.token,
+              firebaseToken: firebaseToken
+            });
+          }
         }),
         catchError((error) => {
           console.error('Customer login error:', error);
@@ -105,7 +136,8 @@ export class CustomerAuthService {
           this.authState.next({
             isAuthenticated: false,
             user: null,
-            token: null
+            token: null,
+            firebaseToken: null
           });
         })
       );
@@ -125,5 +157,10 @@ export class CustomerAuthService {
   getCustomerToken(): string | null {
     const state = this.authState.value;
     return state.isAuthenticated && state.user?.userType === 'customer' ? state.token : null;
+  }
+
+  getFirebaseToken(): string | null {
+    const state = this.authState.value;
+    return state.isAuthenticated && state.user?.userType === 'customer' ? state.firebaseToken : null;
   }
 } 
