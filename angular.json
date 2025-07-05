@@ -115,6 +115,7 @@
               "sourceMap": true
             },
             "customer": {
+              "outputPath": "dist/customer",
               "fileReplacements": [
                 {
                   "replace": "src/enviornments/environment.ts",
@@ -126,6 +127,7 @@
               "sourceMap": true
             },
             "wefab": {
+              "outputPath": "dist/supplier",
               "fileReplacements": [
                 {
                   "replace": "src/enviornments/environment.ts",
