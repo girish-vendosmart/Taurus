@@ -1,4 +1,5 @@
 @import '../../../../assets/scss/variables.scss';
+@import '../../../wefab/customer/styles/customer-variables.scss';
 
 .split-button-container {
   display: inline-flex;
@@ -26,22 +27,22 @@
     }
 
     &:focus {
-      box-shadow: 0 0 0 0.2rem rgba(26, 58, 95, 0.25) !important;
+      box-shadow: 0 0 0 0.2rem rgba($customer-primary, 0.25) !important;
     }
 
     &.primary {
-      background-color: $blueprint-blue !important;
-      border-color: $blueprint-blue !important;
+      background-color: $customer-primary !important;
+      border-color: $customer-primary !important;
       color: white !important;
       
       &:hover:not(:disabled) {
-        background-color: darken($blueprint-blue, 8%) !important;
-        border-color: darken($blueprint-blue, 8%) !important;
+        background-color: $customer-primary-hover !important;
+        border-color: $customer-primary-hover !important;
       }
       
       &:active:not(:disabled) {
-        background-color: darken($blueprint-blue, 12%) !important;
-        border-color: darken($blueprint-blue, 12%) !important;
+        background-color: $customer-primary-dark !important;
+        border-color: $customer-primary-dark !important;
       }
     }
 
@@ -108,22 +109,26 @@
     min-width: 40px;
     
     &:focus {
-      box-shadow: 0 0 0 0.2rem rgba(26, 58, 95, 0.25) !important;
+      box-shadow: 0 0 0 0.2rem rgba($customer-primary, 0.25) !important;
     }
 
     .pi-chevron-down {
       font-size: 0.875rem;
     }
 
-    // Same color variants as main button
     &.primary {
-      background-color: $blueprint-blue !important;
-      border-color: $blueprint-blue !important;
+      background-color: $customer-primary !important;
+      border-color: $customer-primary !important;
       color: white !important;
       
       &:hover:not(:disabled) {
-        background-color: darken($blueprint-blue, 8%) !important;
-        border-color: darken($blueprint-blue, 8%) !important;
+        background-color: $customer-primary-hover !important;
+        border-color: $customer-primary-hover !important;
+      }
+      
+      &:active:not(:disabled) {
+        background-color: $customer-primary-dark !important;
+        border-color: $customer-primary-dark !important;
       }
     }
 
@@ -188,7 +193,7 @@
 ::ng-deep .split-button-menu {
   .p-menu {
     background: #ffffff !important;
-    border: 1px solid #d1d5db !important;
+    border: 1px solid $customer-border-default !important;
     border-radius: 6px !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
     min-width: 160px !important;
@@ -243,11 +248,8 @@
 
         &:focus {
           outline: none !important;
-          background-color: #dbeafe !important;
-          color: #1e40af !important;
-          text-decoration: none !important;
-          text-decoration-line: none !important;
-          text-decoration-style: none !important;
+          background-color: rgba($customer-primary, 0.1) !important;
+          color: $customer-primary !important;
         }
 
         &:link, &:visited, &:active {

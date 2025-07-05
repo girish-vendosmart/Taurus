@@ -52,7 +52,6 @@
 .back-button-section {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 20px;
 
   .back-button {
     display: inline-flex;
@@ -106,15 +105,6 @@
       }
     }
   }
-
-  @media (max-width: 768px) {
-    padding: 16px 20px 0 20px;
-
-    .back-button {
-      width: 100%;
-      justify-content: center;
-    }
-  }
 }
 
 // Card Header
@@ -141,6 +131,67 @@
     }
   }
 
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+
+    .customer-split-button {
+      ::ng-deep {
+        .split-button-main, .split-button-dropdown {
+          background-color: $customer-primary !important;
+          border-color: $customer-primary !important;
+          color: $customer-text-light !important;
+
+          &:hover:not(:disabled) {
+            background-color: $customer-primary-hover !important;
+            border-color: $customer-primary-hover !important;
+          }
+
+          &:active:not(:disabled) {
+            background-color: $customer-primary-dark !important;
+            border-color: $customer-primary-dark !important;
+          }
+
+          &:focus {
+            box-shadow: 0 0 0 0.2rem rgba($customer-primary, 0.25) !important;
+          }
+        }
+
+        .p-menu {
+          .p-menuitem-link {
+            &:hover {
+              background-color: rgba($customer-primary, 0.1) !important;
+              color: $customer-primary !important;
+            }
+          }
+        }
+      }
+    }
+
+    .back-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid $customer-border-default;
+      border-radius: 5px;
+      background-color: white;
+      color: $customer-text-secondary;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: $customer-bg-light;
+        color: $customer-primary;
+        border-color: $customer-primary;
+      }
+
+      i {
+        font-size: 0.875rem;
+      }
+    }
+  }
+
   .rfq-number {
     text-align: right;
 
@@ -155,6 +206,32 @@
       font-size: 16px;
       font-weight: 600;
       color: #1f2937;
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 16px 20px 0 20px;
+
+    .action-buttons {
+      flex-wrap: wrap;
+      width: 100%;
+      justify-content: flex-start;
+
+      app-split-button {
+        flex: 1;
+        min-width: 120px;
+      }
+      
+      .back-button-section {
+        flex: 1;
+        
+        .back-button {
+          width: 100%;
+          justify-content: center;
+        }
+      }
     }
   }
 }
@@ -1239,5 +1316,41 @@
         font-size: 12px;
       }
     }
+  }
+}
+
+// Status Badge Styles
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+
+  &.status-draft {
+    background-color: rgba($customer-info, 0.1);
+    color: $customer-info;
+  }
+
+  &.status-open {
+    background-color: rgba($customer-primary, 0.1);
+    color: $customer-primary;
+  }
+
+  &.status-review {
+    background-color: rgba($customer-warning, 0.1);
+    color: $customer-warning;
+  }
+
+  &.status-approved {
+    background-color: rgba($customer-success, 0.1);
+    color: $customer-success;
+  }
+
+  &.status-rejected {
+    background-color: rgba($customer-danger, 0.1);
+    color: $customer-danger;
   }
 }

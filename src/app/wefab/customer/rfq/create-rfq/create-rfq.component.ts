@@ -60,20 +60,22 @@ interface ApiResponse {
 }
 
 interface LineItem {
+  item_name: string;
   partNumber: string;
   description: string;
   quantity: number;
   material: string;
+  unit: string;
 }
 
 interface RfqLineItem {
-  item_name: string;
+  item_number: string;
   item_description: string;
   quantity: number;
   unit: string;
   ai_analyzed: number;
   ai_complexity: string;
-}
+} 
 
 interface RfqAttachment {
   file_url: string;
@@ -106,9 +108,11 @@ interface UploadError {
 }
 
 interface BomItem {
+  item_name: string;
   partNumber: string;
   description: string;
   quantity: number;
+  unit: string;
   material: string;
 }
 
@@ -155,6 +159,19 @@ export class CreateRfqComponent implements OnInit {
     'Carbon Fiber'
   ];
 
+  unitOptions = [
+    'pcs',
+    'kg',
+    'g',
+    'mm',
+    'cm',
+    'm',
+    'in',
+    'ft',
+    'lb',
+    'set'
+  ];
+
   customerAddresses: CustomerAddress[] = [];
   isLoadingAddresses = false;
   addressLoadError: string = '';
@@ -176,9 +193,11 @@ export class CreateRfqComponent implements OnInit {
   bomUploadError: string = '';
   bomTemplate: BomItem[] = [
     {
+      item_name: 'Sample Item',
       partNumber: 'PART-001',
       description: 'Sample Part Description',
       quantity: 1,
+      unit: 'pcs',
       material: 'Aluminum'
     }
   ];
@@ -367,10 +386,12 @@ export class CreateRfqComponent implements OnInit {
 
   createLineItem(): FormGroup {
     return this.fb.group({
+      item_name: ['', [Validators.required]],
       partNumber: ['', [Validators.required]],
       description: ['', [Validators.required]],
       quantity: [1, [Validators.required, Validators.min(1)]],
-      material: ['', [Validators.required]]
+      material: ['', [Validators.required]],
+      unit: ['pcs', [Validators.required]]
     });
   }
 
@@ -440,11 +461,13 @@ export class CreateRfqComponent implements OnInit {
 
         // Add new line items from Excel
         jsonData.forEach(item => {
-          if (item.partNumber && item.description) {
+          if (item.item_name && item.partNumber && item.description) {
             const lineItem = this.fb.group({
+              item_name: [item.item_name, [Validators.required]],
               partNumber: [item.partNumber, [Validators.required]],
               description: [item.description, [Validators.required]],
               quantity: [item.quantity || 1, [Validators.required, Validators.min(1)]],
+              unit: [item.unit || 'pcs', [Validators.required]],
               material: [item.material || '', [Validators.required]]
             });
             this.lineItems.push(lineItem);
@@ -502,10 +525,11 @@ export class CreateRfqComponent implements OnInit {
 
     // Transform line items
     const lineItems: RfqLineItem[] = formValue.lineItems.map((item: LineItem) => ({
-      item_name: item.partNumber,
+      item_name: item.item_name,
+      name: item.partNumber,
       item_description: item.description,
       quantity: item.quantity,
-      unit: 'pcs', // Default unit
+      unit: item.unit, // Default unit
       ai_analyzed: 0, // Default value
       ai_complexity: 'Low' // Default value
     }));
@@ -517,7 +541,7 @@ export class CreateRfqComponent implements OnInit {
 
     // Map priority values
     const priorityMap: { [key: string]: string } = {
-      'standard': 'Normal',
+      'standard': 'Standard',
       'high': 'High',
       'urgent': 'Urgent',
       'critical': 'Critical'
@@ -533,7 +557,7 @@ export class CreateRfqComponent implements OnInit {
 
     return {
       customer_rfq_name: projectInfo.rfqName,
-      customer: '',
+      customer: 'h1pf8lha7b',
       project: selectedProject?.project_name || '',
       contact_email: projectInfo.contactEmail,
       contact_phone: projectInfo.contactPhone,
@@ -798,9 +822,11 @@ export class CreateRfqComponent implements OnInit {
     
     // Set column widths
     ws['!cols'] = [
+      { wch: 20 }, // Item Name
       { wch: 15 }, // Part Number
       { wch: 30 }, // Description
       { wch: 10 }, // Quantity
+      { wch: 10 }, // Unit
       { wch: 20 }  // Material
     ];
 

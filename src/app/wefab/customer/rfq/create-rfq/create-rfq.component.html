@@ -596,8 +596,21 @@
               </div>
 
               <div class="row">
+                <!-- Item Name -->
+                <div class="col-md-2 mb-3">
+                  <label class="form-label">
+                    Item Name <span class="text-danger">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    class="form-control"
+                    formControlName="item_name"
+                    placeholder="Item name"
+                    [class.is-invalid]="isFieldInvalid('lineItems.' + i + '.item_name')">
+                </div>
+
                 <!-- Part Number -->
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
                   <label class="form-label">
                     Part Number <span class="text-danger">*</span>
                   </label>
@@ -610,7 +623,7 @@
                 </div>
 
                 <!-- Description -->
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
                   <label class="form-label">
                     Description <span class="text-danger">*</span>
                   </label>
@@ -649,8 +662,23 @@
                   </div>
                 </div>
 
+                <!-- Unit -->
+                <div class="col-md-2 mb-3">
+                  <label class="form-label">
+                    Unit <span class="text-danger">*</span>
+                  </label>
+                  <select 
+                    class="form-select"
+                    formControlName="unit"
+                    [class.is-invalid]="isFieldInvalid('lineItems.' + i + '.unit')">
+                    <option *ngFor="let unit of unitOptions" [value]="unit">
+                      {{ unit }}
+                    </option>
+                  </select>
+                </div>
+
                 <!-- Material -->
-                <div class="col-md-4 mb-3">
+                <div class="col-md-2 mb-3">
                   <label class="form-label">Material</label>
                   <select 
                     class="form-select"

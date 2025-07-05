@@ -9,11 +9,25 @@
         <p class="reference-text">{{ rfqData.rfqNumber }}</p>
         <span [class]="'status-badge ' + getStatusClass(rfqStatus)">{{ rfqStatus }}</span>
       </div>
-      <div class="back-button-section">
-        <button class="back-button" (click)="goBack()">
-          <i class="pi pi-arrow-left"></i>
-          <span>Back to RFQ List</span>
-        </button>
+      <div class="action-buttons">
+        <!-- Split Button for Workflow Actions -->
+        <app-split-button 
+          *ngIf="hasAvailableActionsList()"
+          [options]="severityOptions"
+          [severity]="'primary'"
+          [label]="'Actions'"
+          [icon]="'pi pi-cog'"
+          (optionSelected)="onActionClick($event)"
+          class="customer-split-button">
+        </app-split-button>
+        
+        <!-- Back Button -->
+        <div class="back-button-section">
+          <button class="back-button" (click)="goBack()">
+            <i class="pi pi-arrow-left"></i>
+            <span>Back to RFQ List</span>
+          </button>
+        </div>
       </div>
     </div>
 
