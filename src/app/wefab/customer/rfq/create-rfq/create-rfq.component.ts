@@ -23,6 +23,7 @@ interface Project {
 export interface CustomerAddress {
   name: string;
   address_line1: string;
+  address_title: string;
   address_line2?: string;
   city: string;
   state: string;
@@ -87,6 +88,7 @@ interface RfqSubmissionData {
   project: string;
   contact_email: string;
   contact_phone: string;
+  delivery_address: CustomerAddress | null; 
   rfq_date: string;
   required_by_date: string;
   priority: string;
@@ -201,6 +203,7 @@ export class CreateRfqComponent implements OnInit {
       material: 'Aluminum'
     }
   ];
+  selectedDeliveryLocation: CustomerAddress | null = null;
 
   constructor(
     private fb: FormBuilder, 
@@ -561,6 +564,7 @@ export class CreateRfqComponent implements OnInit {
       project: selectedProject?.project_name || '',
       contact_email: projectInfo.contactEmail,
       contact_phone: projectInfo.contactPhone,
+      delivery_address: projectInfo.deliveryLocation,
       rfq_date: rfqDate,
       required_by_date: requiredByDate,
       priority: priorityMap[projectInfo.priority] || projectInfo.priority,
@@ -793,8 +797,8 @@ export class CreateRfqComponent implements OnInit {
         console.log('Location created successfully:', response);
         
         // Add the new location to the local list
-        const newAddress: CustomerAddress = {
-          name: response.data.name,
+        const newAddress: any = {
+          address_title: response.data.address_title,
           ...locationPayload
         };
         
@@ -864,9 +868,11 @@ export class CreateRfqComponent implements OnInit {
     const projectInfo = this.createRfqForm.get('projectInfo');
     if (projectInfo) {
       projectInfo.patchValue({
-        deliveryLocation: address.name
+        deliveryLocation: address.address_title
       });
     }
+
+    this.selectedDeliveryLocation = address;
     this.isDeliveryDropdownOpen = false;
   }
 
