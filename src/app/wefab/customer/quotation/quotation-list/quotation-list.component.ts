@@ -116,9 +116,23 @@ export class QuotationListComponent implements OnInit {
   constructor(private router: Router, private commonService: CommonService) {}
 
   ngOnInit(): void {
+    this.getQuotationCount();
     this.getQuotationList();
   }
 
+  getQuotationCount() {
+    let apiEndpoint = '/api/method/frappe.desk.query_report.run?report_name=Wefab Quotation Status Distribution Report';
+    this.commonService.getWefabData(apiEndpoint).subscribe({
+      next: (res: any) => {
+        console.log('Quotation Count Response:', res);
+        this.quotationSummary.totalQuotations = res.message.result[5].count;
+        this.quotationSummary.openQuotations = res.message.result[1].count;
+        this.quotationSummary.submittedQuotations = res.message.result[2].count;
+        this.quotationSummary.expiredQuotations = res.message.result[4].count;
+      }
+    });
+  }
+ 
   getQuotationList() {
     this.loading = true;
     let apiEndpoint = '/api/resource/Wefab Quotation?fields=["*"]&filters=[["status","!=","Draft"]]';

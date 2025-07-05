@@ -4,47 +4,48 @@
     <!-- Quotation Statistics Header -->
     <div class="quotation-statistics">
       <div class="stats-grid">
-        <!-- Total Quotations -->
-        <div class="stat-card total-quotations">
-          <div class="stat-icon">
-            <i class="pi pi-file-o"></i>
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">{{ quotationSummary.totalQuotations }}</div>
-            <div class="stat-label">Total Quotations</div>
-          </div>
-        </div>
 
-        <!-- Open Quotations -->
+        <!-- Submitted Quotations -->
         <div class="stat-card open-quotations">
           <div class="stat-icon">
             <i class="pi pi-folder-open"></i>
           </div>
           <div class="stat-content">
             <div class="stat-number">{{ quotationSummary.openQuotations }}</div>
-            <div class="stat-label">Open Quotations</div>
+            <div class="stat-label">Submitted Quotations</div>
           </div>
         </div>
 
-        <!-- Submitted Quotations -->
+        <!-- Awarded Quotations -->
         <div class="stat-card submitted-quotations">
           <div class="stat-icon">
             <i class="pi pi-check-circle"></i>
           </div>
           <div class="stat-content">
             <div class="stat-number">{{ quotationSummary.submittedQuotations }}</div>
-            <div class="stat-label">Submitted Quotations</div>
+            <div class="stat-label">Awarded Quotations</div>
           </div>
         </div>
 
-        <!-- Expired Quotations -->
+        <!-- Freezed Quotations -->
+        <div class="stat-card total-quotations">
+          <div class="stat-icon">
+            <i class="pi pi-file-o"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ quotationSummary.totalQuotations }}</div>
+            <div class="stat-label">Freezed Quotations</div>
+          </div>
+        </div>
+
+        <!-- Cancelled Quotations -->
         <div class="stat-card expired-quotations">
           <div class="stat-icon">
             <i class="pi pi-lock"></i>
           </div>
           <div class="stat-content">
             <div class="stat-number">{{ quotationSummary.expiredQuotations }}</div>
-            <div class="stat-label">Expired Quotations</div>
+            <div class="stat-label">Cancelled Quotations</div>
           </div>
         </div>
       </div>
