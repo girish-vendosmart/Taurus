@@ -112,6 +112,8 @@ export class RfqListComponent implements OnInit {
     
     // Load mock data first for testing
     this.updateRFQSummary();
+
+    this.getRFQCount()
     
     console.log('After loading mock data:');
     console.log('  rfqData:', this.rfqData);
@@ -224,6 +226,21 @@ export class RfqListComponent implements OnInit {
     ] as any[];
     console.log('Mock data loaded:', this.rfqData);
     console.log('Mock data length:', this.rfqData.length);
+  }
+
+  getRFQCount() {
+    let apiEndpoint = '/api/method/frappe.desk.query_report.run?report_name=Customer RFQ Status Distribution Report';
+    this.commonService.getWefabData(apiEndpoint).subscribe({
+      next: (res: any) => {
+        debugger
+        console.log('RFQ Count Response:', res)
+        // this.rfqSummary = res.data;
+        this.rfqSummary.totalRfqs = res.message.result[0].count;
+        this.rfqSummary.openRfqs = res.message.result[1].count; // Submitted RFQ
+        this.rfqSummary.quotedRfqs = res.message.result[4].count; // Quoted RFQ
+        this.rfqSummary.expiredRfqs = res.message.result[6].count; // Rejected RFQ
+      }
+    });
   }
 
   updateRFQSummary() {
