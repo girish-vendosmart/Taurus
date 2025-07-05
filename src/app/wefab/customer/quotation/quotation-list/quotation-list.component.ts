@@ -135,7 +135,7 @@ export class QuotationListComponent implements OnInit {
  
   getQuotationList() {
     this.loading = true;
-    let apiEndpoint = '/api/resource/Wefab Quotation?fields=["*"]&filters=[["status","!=","Draft"]]';
+    let apiEndpoint = '/api/resource/Wefab Quotation?fields=["*"]&filters=[["status","!=","Draft"]]&limit=400&order_by=creation desc';
     this.commonService.getData(apiEndpoint).subscribe({
       next: (res: any) => {
         this.quotationData = res.data.map((quotation: any) => ({
