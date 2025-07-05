@@ -1,0 +1,75 @@
+<div class="customer-app">
+  <div class="quotation-list-container">
+    
+    <!-- Quotation Statistics Header -->
+    <div class="quotation-statistics">
+      <div class="stats-grid">
+
+        <!-- Submitted Quotations -->
+        <div class="stat-card open-quotations">
+          <div class="stat-icon">
+            <i class="pi pi-folder-open"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ quotationSummary.openQuotations }}</div>
+            <div class="stat-label">Submitted Quotations</div>
+          </div>
+        </div>
+
+        <!-- Awarded Quotations -->
+        <div class="stat-card submitted-quotations">
+          <div class="stat-icon">
+            <i class="pi pi-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ quotationSummary.submittedQuotations }}</div>
+            <div class="stat-label">Awarded Quotations</div>
+          </div>
+        </div>
+
+        <!-- Freezed Quotations -->
+        <div class="stat-card total-quotations">
+          <div class="stat-icon">
+            <i class="pi pi-file-o"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ quotationSummary.totalQuotations }}</div>
+            <div class="stat-label">Freezed Quotations</div>
+          </div>
+        </div>
+
+        <!-- Cancelled Quotations -->
+        <div class="stat-card expired-quotations">
+          <div class="stat-icon">
+            <i class="pi pi-lock"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ quotationSummary.expiredQuotations }}</div>
+            <div class="stat-label">Cancelled Quotations</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quotation Table Section -->
+    <div class="quotation-table-section">
+      <div class="table-card customer-card">
+        <div class="table-header">
+          <h3 class="table-title">Quotation List</h3>
+        </div>
+        
+        <div class="table-content">
+          <app-common-table
+            [config]="tableConfig"
+            [data]="quotationData"
+            [loading]="loading"
+            (rowClick)="onRowClick($event)"
+            (linkClick)="onLinkClick($event)"
+            (actionClick)="onActionClick($event)">
+          </app-common-table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

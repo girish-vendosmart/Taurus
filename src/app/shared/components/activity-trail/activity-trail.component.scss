@@ -17,9 +17,6 @@ $font-weight-bold: 700;
 
 .activity-trail-container {
   background-color: white;
-  border-radius: 12px;
-  border: 1px solid $material-finish-silver;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 
   .activity-trail-header {
@@ -118,7 +115,6 @@ $font-weight-bold: 700;
     .empty-icon {
       font-size: 2.5rem;
       color: $material-finish-silver;
-      margin-bottom: 1rem;
       opacity: 0.7;
     }
 
@@ -132,13 +128,11 @@ $font-weight-bold: 700;
 
   .activity-timeline {
     position: relative;
-    padding: 1.5rem;
 
     .activity-item {
       position: relative;
       display: flex;
       gap: 1rem;
-      margin-bottom: 1.5rem;
 
       &:last-child {
         margin-bottom: 0;
@@ -226,9 +220,7 @@ $font-weight-bold: 700;
         flex: 1;
         position: relative;
         background-color: $technical-white;
-        border-radius: 8px;
         padding: 1rem;
-        border: 1px solid $material-finish-silver;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         
         .activity-badge {
@@ -283,7 +275,6 @@ $font-weight-bold: 700;
         }
 
         .activity-description {
-          margin-bottom: 1rem;
 
           .activity-main-text {
             display: flex;
@@ -433,7 +424,6 @@ $font-weight-bold: 700;
 
       .activity-item {
         gap: 0.75rem;
-        margin-bottom: 1rem;
 
         .timeline-connector {
           width: 32px;
@@ -499,7 +489,6 @@ $font-weight-bold: 700;
 
       .activity-item {
         gap: 0.5rem;
-        margin-bottom: 1rem;
 
         .timeline-connector {
           width: 28px;

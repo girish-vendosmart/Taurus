@@ -1,0 +1,257 @@
+<div class="success-container p-4">
+  <!-- Quotation Details Card -->
+  <div class="quotation-details-card">
+    <!-- Header Section -->
+    <div class="quotation-header">
+      <div class="title-section">
+        <h2>{{ quotationDetails.quotation_name }}</h2>
+        <p class="reference-text">{{ quotationDetails.quotationId }}</p>
+        <span [class]="'status-badge ' + getStatusClass(quotationDetails.workflowState)">{{ quotationDetails.workflowState }}</span>
+      </div>
+      <div class="action-buttons">
+        <button class="print-btn" (click)="printQuotation()">
+          <i class="pi pi-print"></i>
+          Print
+        </button>
+        <button class="award-btn" *ngIf="quotationDetails.workflowState === 'Submitted' || quotationDetails.workflowState === 'Received'" (click)="awardQuotation()">
+          <i class="pi pi-star"></i>
+          Award
+        </button>
+        <button class="cancel-btn" *ngIf="quotationDetails.workflowState === 'Submitted' || quotationDetails.workflowState === 'Received'" (click)="cancelQuotation()">
+          <i class="pi pi-times"></i>
+          Cancel
+        </button>
+        <button class="back-btn" (click)="onBackToQuotations()">
+          <i class="pi pi-arrow-left"></i>
+          Back to Quotations
+        </button>
+      </div>
+    </div>
+
+    <!-- Highlighted Important Details Section -->
+    <div class="highlighted-details">
+      <div class="highlight-card">
+        <div class="highlight-icon">
+          <i class="pi pi-money-bill"></i>
+        </div>
+        <div class="highlight-content">
+          <span class="highlight-label">Grand Total</span>
+          <span class="highlight-value">{{ getFormattedCurrencyAmount(quotationDetails.grandTotal) }}</span>
+        </div>
+      </div>
+      
+      <div class="highlight-card">
+        <div class="highlight-icon">
+          <i class="pi pi-file"></i>
+        </div>
+        <div class="highlight-content">
+          <span class="highlight-label">Customer RFQ ID</span>
+          <span class="highlight-value">{{ quotationDetails.customerRfqId || '----' }}</span>
+        </div>
+      </div>
+      
+      <div class="highlight-card">
+        <div class="highlight-icon">
+          <i class="pi pi-calendar"></i>
+        </div>
+        <div class="highlight-content">
+          <span class="highlight-label">Validity</span>
+          <span class="highlight-value">{{ quotationDetails.validity || '----' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="tabs-container">
+      <div class="tab-headers">
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'overview'"
+          (click)="setActiveTab('overview')">
+          <i class="pi pi-list"></i>
+          Overview
+        </button>
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'comments'"
+          (click)="setActiveTab('comments')">
+          <i class="pi pi-comments"></i>
+          Comments
+        </button>
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'activity'"
+          (click)="setActiveTab('activity')">
+          <i class="pi pi-clock"></i>
+          Activity
+        </button>
+      </div>
+
+      <!-- Overview Tab Content -->
+      <div class="tab-content mt-3" *ngIf="activeTab === 'overview'">
+        <!-- Content Grid -->
+        <div class="content-grid">
+          <!-- Project Information -->
+          <div class="info-section">
+            <h3>Project Information</h3>
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="label">Project Name:</span>
+                <span class="value">{{ quotationDetails.projectName }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Delivery Date:</span>
+                <span class="value">{{ quotationDetails.deliveryDate }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Delivery Location:</span>
+                <span class="value">{{ quotationDetails.deliveryLocation }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quote Summary -->
+          <div class="info-section">
+            <h3>Quote Summary</h3>
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="label">Total Line Items:</span>
+                <span class="value">{{ quotationItems.length }} parts</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Total Quantity:</span>
+                <span class="value">{{ getTotalQuantity() }} units</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Total Amount:</span>
+                <span class="value">{{ getFormattedCurrencyAmount(quotationDetails.grandTotal) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quote From/To Section -->
+        <div class="quote-parties-section">
+          <div class="quote-from">
+            <h4>Quote From</h4>
+            <div class="party-details">
+              <div class="company-name">{{ quotationDetails.quoteFrom.company }}</div>
+              <div class="contact-info">{{ quotationDetails.quoteFrom.email }}</div>
+              <div class="contact-info">{{ quotationDetails.quoteFrom.phone }}</div>
+            </div>
+          </div>
+          
+          <div class="quote-to">
+            <h4>Quote To</h4>
+            <div class="party-details">
+              <div class="company-name">{{ quotationDetails.quoteTo.company }}</div>
+              <div class="contact-info">{{ quotationDetails.quoteTo.email }}</div>
+              <div class="contact-info">{{ quotationDetails.quoteTo.phone }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Line Items Section -->
+        <div class="line-items-section">
+          <h3>Line Items</h3>
+          
+          <div class="common-table-wrapper">
+            <app-common-table
+              [config]="tableConfig"
+              [data]="rawQuotationItems"
+              [loading]="loading"
+              (rowClick)="onRowClick($event)"
+              (linkClick)="onLinkClick($event)"
+              (actionClick)="onActionClick($event)">
+            </app-common-table>
+          </div>
+
+          <!-- Summary Section -->
+          <div class="summary-section">
+            <div class="summary-row">
+              <span class="summary-label">Sub Total:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.sub_total) }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">{{ getDiscountDisplayText() }}</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.discountAmount) }}</span>
+            </div>
+            
+            <div class="summary-row" *ngIf="quotationDetails.totalMiscellaneous > 0">
+              <span class="summary-label">Total Miscellaneous:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.totalMiscellaneous) }}</span>
+            </div>
+            
+            <div class="summary-row" *ngIf="quotationDetails.totalTooling > 0">
+              <span class="summary-label">Total Tooling:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.totalTooling) }}</span>
+            </div>
+            
+            <div class="summary-row" *ngIf="quotationDetails.totalTaxAmount > 0">
+              <span class="summary-label">Total Tax Amount:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.totalTaxAmount) }}</span>
+            </div>
+            
+            <div class="summary-row" *ngIf="quotationDetails.shippingCharges > 0">
+              <span class="summary-label">Shipping Charges:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.shippingCharges) }}</span>
+            </div>
+            
+            <div class="summary-row total-row">
+              <span class="summary-label">Grand Total:</span>
+              <span class="summary-value">{{ getFormattedCurrencyAmount(quotationDetails.grandTotal) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attachments Section -->
+        <div class="attachments-section m-4 p-3" *ngIf="quotationAttachments && quotationAttachments.length > 0">
+          <h3>Attachments ({{ quotationAttachments.length }})</h3>
+          <p class="text-muted">Documents and files related to this quotation</p>
+          
+          <div class="attachments-grid">
+            <div *ngFor="let attachment of quotationAttachments" class="attachment-card">
+              <div class="attachment-content">
+                <div class="file-icon">
+                  <i class="pi" [ngClass]="{
+                    'pi-file-pdf': isFileTypePdf(attachment.file_name),
+                    'pi-file-excel': isFileTypeDocument(attachment.file_name),
+                    'pi-image': isFileTypeImage(attachment.file_name),
+                    'pi-file': !isFileTypePdf(attachment.file_name) && !isFileTypeDocument(attachment.file_name) && !isFileTypeImage(attachment.file_name)
+                  }"></i>
+                </div>
+                <div class="attachment-details">
+                  <div class="attachment-name">{{ attachment.name }}</div>
+                  <div class="attachment-date">{{ formatApiDate(attachment.uploaded_on) }}</div>
+                </div>
+                <div class="attachment-actions">
+                  <button class="download-btn" (click)="downloadQuotationAttachment(attachment)" title="Download">
+                    <i class="pi pi-download"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments Tab Content -->
+      <div class="tab-content mt-3" *ngIf="activeTab === 'comments'">
+        <app-conversation-trail
+          [docType]="'Wefab Quotation Messenger'"
+          [docName]="quotationId">
+        </app-conversation-trail>
+      </div>
+
+      <!-- Activity Tab Content -->
+      <div class="tab-content mt-3 activity-tab" *ngIf="activeTab === 'activity'">
+        <app-activity-trail
+          [activityData]="activityTrail"
+          [loading]="activityTrailLoading"
+          [showHeader]="false"
+          [emptyMessage]="'No activity records found.'">
+        </app-activity-trail>
+      </div>
+    </div>
+  </div>
+</div>

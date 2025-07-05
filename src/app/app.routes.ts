@@ -7,9 +7,14 @@ import { ConfigurableButtonDemoComponent } from './shared/components/configurabl
 import { CommonCardComponent } from './shared/components/common-card/common-card.component';
 import { SupplierOnboardingCombinedComponent } from './wefab/supplier/onboarding/supplier-onboarding-combined/supplier-onboarding-combined.component';
 import { ApprovalWorkflowDemoComponent } from './shared/components/approval-workflow/demo/approval-workflow-demo.component';
+import { environment } from '../enviornments/enviornment';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'wefab', pathMatch: 'full' },
+  { 
+    path: '', 
+    redirectTo: environment.isCustomerBranch ? 'wefab/customer/login' : 'wefab/supplier/login', 
+    pathMatch: 'full' 
+  },
   { path: 'common-sidebar', component: CommonSidebarComponent},
   { path: 'common-header', component: CommonHeaderComponent},
   { path: 'google-places', component: GooglePlacesComponentComponent},
@@ -26,7 +31,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'dashboard',
+    redirectTo: environment.isCustomerBranch ? 'wefab/customer/login' : 'wefab/supplier/login',
     pathMatch: 'full'
   },
   {

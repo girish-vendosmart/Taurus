@@ -48,7 +48,6 @@
     .workflow-step {
       display: flex;
       align-items: flex-start;
-      margin-bottom: 20px;
       position: relative;
       transition: all 0.2s ease;
       cursor: default;
@@ -123,11 +122,11 @@
         
         .step-connector {
           position: absolute;
-          top: 48px;
+          top: 46px;
           left: 50%;
           transform: translateX(-50%);
           width: 2px;
-          height: 28px;
+          height: 44px;
           background-color: #e5e7eb;
           z-index: 1;
           transition: background-color 0.3s ease;
@@ -142,7 +141,7 @@
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 4px;
+          margin-bottom: 8px;
           
           .step-title {
             font-size: 1rem;
@@ -185,8 +184,23 @@
         
         .step-description {
           color: #6b7280;
-          margin: 0;
+          margin: 0 0 8px 0;
           font-size: 0.875rem;
+          line-height: 1.5;
+        }
+
+        .step-time-estimate {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.75rem;
+          color: #9ca3af;
+          font-weight: 500;
+          margin-top: 4px;
+
+          i {
+            font-size: 0.75rem;
+          }
         }
       }
       
@@ -514,6 +528,10 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 8px;
+
+            .step-title {
+              margin-right: 0;
+            }
           }
         }
       }

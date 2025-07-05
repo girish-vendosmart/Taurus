@@ -69,6 +69,32 @@
               ],
               "outputHashing": "all"
             },
+            "customer-production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "10kb",
+                  "maximumError": "70kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/enviornments/environment.ts",
+                  "with": "src/enviornments/environment.customer.prod.ts"
+                }
+              ],
+              "outputHashing": "all",
+              "optimization": true,
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false
+            },
             "qa": {
               "fileReplacements": [
                 {
@@ -87,6 +113,28 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "customer": {
+              "fileReplacements": [
+                {
+                  "replace": "src/enviornments/environment.ts",
+                  "with": "src/enviornments/environment.customer.ts"
+                }
+              ],
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
+            "wefab": {
+              "fileReplacements": [
+                {
+                  "replace": "src/enviornments/environment.ts",
+                  "with": "src/enviornments/enviornment.wefab.ts"
+                }
+              ],
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
@@ -97,8 +145,17 @@
             "production": {
               "buildTarget": "we-fab-application:build:production"
             },
+            "customer-production": {
+              "buildTarget": "we-fab-application:build:customer-production"
+            },
             "development": {
               "buildTarget": "we-fab-application:build:development"
+            },
+            "customer": {
+              "buildTarget": "we-fab-application:build:customer"
+            },
+            "wefab": {
+              "buildTarget": "we-fab-application:build:wefab"
             }
           },
           "defaultConfiguration": "development"

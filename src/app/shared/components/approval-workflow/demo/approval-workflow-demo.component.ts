@@ -69,7 +69,6 @@ import { ApprovalWorkflowComponent, WorkflowStep, WorkflowCompletionData } from 
       display: flex;
       gap: 12px;
       margin-bottom: 8px;
-      font-family: monospace;
     }
 
     .log-time {

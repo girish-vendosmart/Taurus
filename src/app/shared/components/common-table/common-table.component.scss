@@ -257,6 +257,18 @@ $font-weight-bold: 700;
           &:last-child {
             border-right: none;
           }
+
+          // Style for empty values
+          &:empty::before,
+          &:has(> :empty)::before {
+            content: "-------";
+            @extend .empty-value;
+          }
+          
+          // Apply empty value style to our dashes
+          &:contains("-------") {
+            @extend .empty-value;
+          }
         }
 
         &:hover {
@@ -442,6 +454,10 @@ $font-weight-bold: 700;
     cursor: col-resize !important;
     user-select: none !important;
   }
+}
+
+::ng-deep .p-column-filter {
+  width: 100% !important;
 }
 
 
@@ -874,6 +890,67 @@ $font-weight-bold: 700;
     
     &:not(:last-child) {
       border-right: 1px solid #dee2e6;
+    }
+  }
+}
+
+.empty-message {
+  padding: 2rem;
+  text-align: center;
+  
+  span {
+    font-size: 1.5rem;
+    color: #6b7280;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
+
+// Empty value styling
+.empty-value {
+  color: #6b7280;
+  font-weight: normal;
+  opacity: 0.75;
+  letter-spacing: 2px;
+}
+
+::ng-deep .p-dropdown {
+  width: 100%
+}
+
+// Override dropdown width for status column
+:host ::ng-deep {
+  .p-datatable {
+    .p-datatable-thead {
+      > tr:last-child > th {
+        .filter-container {
+          // Increase width for status column dropdown
+          .p-dropdown {
+            min-width: 350px; // Increased minimum width
+            
+            .p-dropdown-panel {
+              min-width: 350px; // Match the dropdown panel width
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Ensure dropdown overlay has sufficient width
+:host ::ng-deep .p-overlay-content {
+  .p-dropdown-panel {
+    min-width: 200px; // Match the dropdown width
+    
+    .p-dropdown-items-wrapper {
+      width: 100%;
     }
   }
 }

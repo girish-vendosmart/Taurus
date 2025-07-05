@@ -1,0 +1,43 @@
+<div class="customer-layout">
+  <!-- Customer Header - Hidden on login page -->
+  <app-customer-header
+    *ngIf="!isLoginPage"
+    [showMobileMenu]="sidebarOpen"
+    (logoutEvent)="onLogout()"
+    (mobileMenuToggle)="toggleSidebar()"
+    (profileEvent)="onProfileClick()"
+    (helpEvent)="onHelpClick()">
+  </app-customer-header>
+
+  <!-- Main Layout Container -->
+  <div class="main-layout" [class.login-layout]="isLoginPage"> 
+    <div class="layout-wrapper d-flex h-100" [class.login-wrapper]="isLoginPage">
+      <!-- Sidebar - Hidden on login page -->
+      <div class="sidebar-container" 
+           *ngIf="!isLoginPage"
+           [class.mobile-open]="sidebarOpen && isMobile"
+           [class.mobile-closed]="!sidebarOpen && isMobile">
+        <app-customer-sidebar 
+          [config]="sidebarConfig"
+          (menuItemClick)="onMenuItemClick($event)"
+          (helpClick)="onHelpClick()"
+          (progressUpdate)="onProgressUpdate($event)">
+        </app-customer-sidebar>
+      </div>
+
+      <!-- Main Content Area -->
+      <div class="main-content flex-grow-1" [class.login-content]="isLoginPage">
+        <div class="content-wrapper mt-5" [class.login-content-wrapper]="isLoginPage">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay - Hidden on login page -->
+    <div class="mobile-sidebar-overlay" 
+         *ngIf="!isLoginPage"
+         [class.show]="sidebarOpen && isMobile"
+         (click)="closeSidebar()">
+    </div>
+  </div>
+</div>

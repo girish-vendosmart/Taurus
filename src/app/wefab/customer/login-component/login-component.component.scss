@@ -1,0 +1,560 @@
+// Import customer theme variables
+@import '../styles/customer-variables.scss';
+
+// Customer login page to match the screenshot
+.customer-login-page {
+  height: 100vh;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  // Left side - Login form (white background)
+  .customer-login-section {
+    background: #ffffff;
+    padding: 2rem 1rem;
+  }
+  
+  // Login form container
+  .customer-login-form {
+    background: #ffffff;
+    padding: 2rem;
+  }
+  
+  // Logo container
+  .customer-logo-container {
+    .customer-logo-icon {
+      width: 56px;
+      height: 56px;
+      background: $customer-primary;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      
+      i {
+        color: white;
+        font-size: 24px;
+      }
+    }
+  }
+  
+  // Portal title
+  .customer-portal-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+  
+  // Welcome text
+  .customer-welcome-text {
+    color: #6b7280;
+    font-size: 1rem;
+    margin-bottom: 0;
+  }
+  
+  // Form labels
+  .customer-form-label {
+    color: #374151;
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  
+  // Input wrapper
+  .customer-input-wrapper {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+  
+  // Input icons
+  .customer-input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $customer-primary;
+    font-size: 16px;
+    z-index: 2;
+  }
+  
+  // Checkbox label
+  .customer-checkbox-label {
+    color: #6b7280;
+    font-size: 0.875rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  // Help link
+  .customer-help-link {
+    color: $customer-primary;
+    font-size: 0.875rem;
+    text-decoration: none;
+    font-weight: 500;
+    
+    &:hover {
+      color: $customer-primary-dark;
+      text-decoration: none;
+    }
+  }
+  
+  // Support text
+  .customer-support-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-top: 1.5rem;
+    
+    i {
+      color: $customer-primary;
+      font-size: 16px;
+    }
+  }
+  
+  // Right side - Features section (orange background)
+  .customer-features-section {
+    background: linear-gradient(135deg, #FF5722 0%, #FF8A65 100%);
+    padding: 4rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -10%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+    
+    .customer-features-content {
+      max-width: 900px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .welcome-title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    
+    .welcome-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-bottom: 3rem;
+    }
+    
+    .features-list {
+      margin-top: 3rem;
+      
+      .feature-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        .feature-icon {
+          background: rgba(255, 255, 255, 0.2);
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 1.5rem;
+          flex-shrink: 0;
+          
+          i {
+            font-size: 1.4rem;
+            color: white;
+          }
+        }
+        
+        .feature-content {
+          h3 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: white;
+          }
+          
+          p {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin: 0;
+            color: white;
+          }
+        }
+      }
+    }
+  }
+  
+  // Login section
+  .login-section {
+    background: white;
+    padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 2rem;
+      
+      .logo-container {
+        width: 60px;
+        height: 60px;
+        background: #FF5722;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        
+        i {
+          font-size: 1.8rem;
+          color: white;
+        }
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2D3748;
+        margin-bottom: 0.5rem;
+      }
+      
+      p {
+        color: #718096;
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+      }
+      
+      .form-group {
+        margin-bottom: 1.5rem;
+        
+        label {
+          display: block;
+          color: #4A5568;
+          font-size: 0.9rem;
+          margin-bottom: 0.5rem;
+        }
+        
+        .input-container {
+          position: relative;
+          
+          i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #A0AEC0;
+            font-size: 1rem;
+            
+            &.toggle-password {
+              left: auto;
+              right: 1rem;
+              cursor: pointer;
+            }
+          }
+          
+          input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #2D3748;
+            transition: all 0.2s;
+            
+            &::placeholder {
+              color: #A0AEC0;
+            }
+            
+            &:focus {
+              outline: none;
+              border-color: #FF5722;
+              box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1);
+            }
+          }
+        }
+      }
+      
+      .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        
+        .remember-me {
+          display: flex;
+          align-items: center;
+          
+          input[type="checkbox"] {
+            margin-right: 0.5rem;
+          }
+          
+          label {
+            color: #4A5568;
+            font-size: 0.9rem;
+            cursor: pointer;
+          }
+        }
+        
+        .forgot-password {
+          color: #FF5722;
+          font-size: 0.9rem;
+          text-decoration: none;
+          
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+      
+      .login-button {
+        width: 100%;
+        padding: 0.75rem;
+        background: #FF5722;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        
+        &:hover {
+          background: darken(#FF5722, 5%);
+        }
+        
+        &:disabled {
+          background: #CBD5E0;
+          cursor: not-allowed;
+        }
+      }
+      
+      .support-text {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #718096;
+        font-size: 0.9rem;
+        
+        a {
+          color: #FF5722;
+          text-decoration: none;
+          
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+}
+
+// PrimeNG component customizations
+:host ::ng-deep {
+  
+  // Input styling
+  .customer-input.p-inputtext {
+    width: 100%;
+    height: 48px;
+    padding: 12px 16px 12px 44px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #374151;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    
+    &:focus {
+      border-color: $customer-primary;
+      box-shadow: 0 0 0 3px rgba($customer-primary, 0.1);
+      outline: none;
+    }
+    
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+  
+  // Password field styling
+  .customer-password-field {
+    width: 100%;
+    
+    .p-password-input {
+      width: 100%;
+      height: 48px;
+      padding: 12px 44px 12px 44px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: #374151;
+      background: #ffffff;
+      transition: all 0.2s ease;
+      
+      &:focus {
+        border-color: $customer-primary;
+        box-shadow: 0 0 0 3px rgba($customer-primary, 0.1);
+        outline: none;
+      }
+      
+      &::placeholder {
+        color: #9ca3af;
+      }
+    }
+    
+    .p-password-toggle {
+      right: 12px;
+      color: #6b7280;
+      
+      &:hover {
+        color: $customer-primary;
+      }
+    }
+  }
+  
+  // Checkbox styling
+  .customer-checkbox {
+    .p-checkbox-box {
+      width: 16px;
+      height: 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      background: #ffffff;
+      transition: all 0.2s ease;
+      
+      &.p-highlight {
+        background: $customer-primary;
+        border-color: $customer-primary;
+        
+        .p-checkbox-icon {
+          color: white;
+          font-size: 10px;
+        }
+      }
+      
+      &:focus {
+        box-shadow: 0 0 0 3px rgba($customer-primary, 0.1);
+      }
+    }
+  }
+  
+  // Access Portal button
+  .customer-access-button.p-button {
+    width: 100%;
+    height: 48px;
+    background: $customer-primary;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: white;
+    transition: all 0.2s ease;
+    margin-bottom: 1rem;
+    
+    &:enabled:hover {
+      background: $customer-primary-dark;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba($customer-primary, 0.3);
+    }
+    
+    &:enabled:active {
+      transform: translateY(0);
+    }
+    
+    &:disabled {
+      background: #e5e7eb;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 991.98px) {
+  .customer-login-page {
+    .customer-features-section {
+      padding: 2rem 1rem;
+      min-height: 40vh;
+    }
+    
+    .customer-features-title {
+      font-size: 2.5rem;
+    }
+    
+    .customer-login-form {
+      padding: 1.5rem;
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .customer-login-page {
+    .customer-features-section {
+      padding: 1.5rem 1rem;
+      min-height: 35vh;
+      
+      &::after {
+        width: 200px;
+        height: 200px;
+        top: -50px;
+        right: -50px;
+      }
+    }
+    
+    .customer-features-title {
+      font-size: 2rem;
+    }
+    
+    .customer-features-list {
+      gap: 1.5rem;
+    }
+    
+    .customer-login-form {
+      padding: 1rem;
+    }
+  }
+}
+
+// Ensure full height
+:host {
+  display: block;
+  height: 100vh;
+  width: 100%;
+}
+
+// Loading state
+.customer-form.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+// Accessibility
+@media (prefers-reduced-motion: reduce) {
+  :host ::ng-deep {
+    .customer-access-button.p-button {
+      &:enabled:hover {
+        transform: none;
+      }
+    }
+  }
+}

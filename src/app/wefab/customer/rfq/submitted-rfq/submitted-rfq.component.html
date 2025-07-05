@@ -1,0 +1,210 @@
+<div class="success-container p-4"> 
+  <!-- RFQ Details Card -->
+  <div class="rfq-details-card">
+
+    <!-- Header Section -->
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div class="rfq-info">
+        <h2>{{ rfqName }}</h2>
+        <p class="reference-text">{{ rfqData.rfqNumber }}</p>
+        <span [class]="'status-badge ' + getStatusClass(rfqStatus)">{{ rfqStatus }}</span>
+      </div>
+      <div class="action-buttons">
+        <!-- Split Button for Workflow Actions -->
+        <app-split-button 
+          *ngIf="hasAvailableActionsList()"
+          [options]="severityOptions"
+          [severity]="'primary'"
+          [label]="'Actions'"
+          [icon]="'pi pi-cog'"
+          (optionSelected)="onActionClick($event)"
+          class="customer-split-button">
+        </app-split-button>
+        
+        <!-- Back Button -->
+        <div class="back-button-section">
+          <button class="back-button" (click)="goBack()">
+            <i class="pi pi-arrow-left"></i>
+            <span>Back to RFQ List</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="tabs-container">
+      <div class="tab-headers">
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'overview'"
+          (click)="setActiveTab('overview')">
+          <i class="pi pi-list"></i>
+          Overview
+        </button>
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'comments'"
+          (click)="setActiveTab('comments')">
+          <i class="pi pi-comments"></i>
+          Comments
+        </button>
+        <button 
+          class="tab-header" 
+          [class.active]="activeTab === 'activity'"
+          (click)="setActiveTab('activity')">
+          <i class="pi pi-clock"></i>
+          Activity
+        </button>
+      </div>
+
+      <!-- Overview Tab Content --> 
+      <div class="tab-content mt-3" *ngIf="activeTab === 'overview'">
+        <!-- Content Grid -->
+        <div class="content-grid">
+          <!-- Project Information -->
+          <div class="info-section">
+            <h3>Project Information</h3>
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="label">Project Name:</span>
+                <span class="value">{{ rfqData.projectInfo.projectName }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Delivery Date:</span>
+                <span class="value">{{ rfqData.projectInfo.deliveryDate }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Delivery Location:</span>
+                <span class="value">{{ rfqData.projectInfo.deliveryLocation }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOM Summary -->
+          <div class="info-section">
+            <h3>BOM Summary</h3>
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="label">Total Line Items:</span>
+                <span class="value">{{ rfqData.bomSummary.totalLineItems }} parts</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Drawings Uploaded:</span>
+                <span class="value">{{ rfqData.bomSummary.drawingsUploaded }} files</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Total Quantity:</span>
+                <span class="value">{{ rfqData.bomSummary.totalQuantity }} units</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Line Items Section -->
+        <div class="line-items-section">
+          <h3>Line Items</h3>
+          
+          <div class="common-table-wrapper">
+            <app-common-table
+              [config]="lineItemsTableConfig"
+              [data]="rfqData.allLineItems"
+              [loading]="false"
+              (rowClick)="onLineItemRowClick($event)"
+              (linkClick)="onLineItemLinkClick($event)"
+              (actionClick)="onLineItemActionClick($event)">
+            </app-common-table>
+          </div>
+        </div>
+
+        <!-- Attachments Section -->
+        <div class="attachments-section m-4 p-3">
+          <h3>Attachments ({{ rfqData.allAttachments.length }})</h3>
+          <p class="text-muted">Documents and files related to this quotation</p>
+          
+          <div class="attachments-grid">
+            <div *ngFor="let attachment of displayedAttachments" class="attachment-card">
+              <div class="attachment-content">
+                <div class="file-icon">
+                  <i class="pi pi-file-pdf"></i>
+                </div>
+                <div class="attachment-details">
+                  <div class="attachment-name">{{ attachment.name }}</div>
+                  <div class="attachment-date">{{ attachment.creation | date:'MMM dd, yyyy, HH:mm a' }}</div>
+                </div>
+                <div class="attachment-actions">
+                  <button class="download-btn" (click)="downloadAttachment(attachment)" title="Download">
+                    <i class="pi pi-download"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+            <!-- Comments Tab Content -->
+      <div class="tab-content mt-3" *ngIf="activeTab === 'comments'">
+        <app-conversation-trail
+          [docType]="'Customer Request For Quotation Messenger'"
+          [docName]="rfqData.rfqNumber">
+        </app-conversation-trail>
+      </div>
+
+      <!-- Activity Tab Content -->
+      <div class="tab-content activity-tab" *ngIf="activeTab === 'activity'">
+        <app-activity-trail
+          [activityData]="activityTrail"
+          [loading]="activityTrailLoading"
+          [showHeader]="false"
+          [emptyMessage]="'No activity records found.'">
+        </app-activity-trail>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Status Section -->
+  <!-- <div class="order-tracking-card">
+    <h3>Review Status</h3>
+    
+    <div class="tracking-timeline">
+      <div *ngFor="let stage of rfqData.reviewStatus.stages" class="tracking-item">
+        <div class="tracking-marker" [ngClass]="{
+          'completed': stage.status === 'completed',
+          'in-progress': stage.status === 'in-progress',
+          'pending': stage.status === 'pending'
+        }">
+          <i class="pi" [ngClass]="{
+            'pi-check': stage.status === 'completed',
+            'pi-play': stage.status === 'in-progress',
+            'pi-clock': stage.status === 'pending'
+          }"></i>
+        </div>
+        <div class="tracking-content">
+          <div class="tracking-title">{{ stage.title }}</div>
+          <div class="tracking-description">{{ stage.description }}</div>
+          <div class="tracking-status" [ngClass]="{
+            'status-completed': stage.status === 'completed',
+            'status-in-progress': stage.status === 'in-progress',
+            'status-pending': stage.status === 'pending'
+          }">
+            {{ stage.status === 'completed' ? 'Completed' : 
+               stage.status === 'in-progress' ? 'In Progress' : 
+               'Pending' }}
+          </div>
+          <div *ngIf="stage.completedDate" class="tracking-date">
+            {{ stage.completedDate | date:'MMM dd, yyyy' }}
+          </div>
+          <div *ngIf="stage.estimatedCompletion" class="tracking-estimate">
+            {{ stage.estimatedCompletion }}
+          </div>
+          <div *ngIf="stage.hasReportLink && stage.status === 'completed'" class="tracking-actions">
+            <button class="report-link-btn" (click)="viewTechnicalReviewReport()">
+              <i class="pi pi-external-link"></i>
+              {{ stage.reportLinkText }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+</div>

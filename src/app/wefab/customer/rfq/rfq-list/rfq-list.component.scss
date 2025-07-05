@@ -1,0 +1,236 @@
+/* Import customer styling */
+@import '../../../customer/styles/customer-variables.scss';
+@import '../../../customer/styles/customer-styles.scss';
+
+.rfq-list-container {
+  padding: 1.5rem;
+  background-color: #f6f7f9;
+  min-height: 100vh;
+}
+
+/* RFQ Statistics Section */
+.rfq-statistics {
+  margin-bottom: 2rem;
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    width: 100%;
+  }
+  
+  .stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: white;
+    }
+    
+    .stat-content {
+      flex: 1;
+      
+      .stat-number {
+        font-size: 1.6rem;
+        font-weight: 600;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+      }
+      
+      .stat-label {
+        font-size: 0.85rem;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    }
+    
+    /* Total RFQs - Default/Primary */
+    &.total-rfqs {
+      border-left-color: #545A64;
+      
+      .stat-icon {
+        background-color: #545A64;
+      }
+      
+      .stat-number {
+        color: #545A64;
+      }
+    }
+    
+    /* Open RFQs - Blue */
+    &.open-rfqs {
+      border-left-color: #3B82F6;
+      
+      .stat-icon {
+        background-color: #3B82F6;
+      }
+      
+      .stat-number {
+        color: #3B82F6;
+      }
+    }
+    
+    /* Quoted RFQs - Success/Customer Primary */
+    &.quoted-rfqs {
+      border-left-color: $customer-primary;
+      
+      .stat-icon {
+        background-color: $customer-primary;
+      }
+      
+      .stat-number {
+        color: $customer-primary;
+      }
+    }
+    
+    /* Expired RFQs - Danger */
+    &.expired-rfqs {
+      border-left-color: #EF4444;
+      
+      .stat-icon {
+        background-color: #EF4444;
+      }
+      
+      .stat-number {
+        color: #EF4444;
+      }
+    }
+  }
+}
+
+/* RFQ Table Section */
+.rfq-table-section {
+  .table-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    
+    .table-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .table-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: $customer-text-dark;
+      }
+      
+      .create-rfq-btn {
+        background-color: $customer-primary;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background-color: darken($customer-primary, 10%);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+        
+        i {
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .rfq-statistics .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .rfq-list-container {
+    padding: 1rem;
+  }
+  
+  .rfq-statistics .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .stat-card {
+    padding: 0.75rem !important;
+    
+    .stat-icon {
+      width: 35px !important;
+      height: 35px !important;
+      font-size: 1rem !important;
+    }
+    
+    .stat-content .stat-number {
+      font-size: 1.25rem !important;
+    }
+  }
+  
+  .table-card .table-header {
+    padding: 0.75rem 1rem !important;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+    
+    .table-title {
+      font-size: 1rem !important;
+      text-align: center;
+    }
+    
+    .create-rfq-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 0.75rem 1rem !important;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .rfq-statistics .stat-card {
+    .stat-content {
+      .stat-number {
+        font-size: 1.1rem !important;
+      }
+      
+      .stat-label {
+        font-size: 0.75rem !important;
+      }
+    }
+  }
+}

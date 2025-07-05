@@ -1,0 +1,74 @@
+<div class="customer-app">
+  <div class="order-list-container">
+    
+    <!-- Order Statistics Header -->
+    <div class="order-statistics">
+      <div class="stats-grid">
+        <!-- Total Orders -->
+        <div class="stat-card total-orders">
+          <div class="stat-icon">
+            <i class="pi pi-shopping-cart"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ orderSummary.totalOrders }}</div>
+            <div class="stat-label">Draft Orders</div>
+          </div>
+        </div>
+
+        <!-- Confirmed Orders -->
+        <div class="stat-card confirmed-orders">
+          <div class="stat-icon">
+            <i class="pi pi-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ orderSummary.confirmedOrders }}</div>
+            <div class="stat-label">Confirmed Orders</div>
+          </div>
+        </div>
+
+        <!-- In Progress Orders -->
+        <div class="stat-card inprogress-orders">
+          <div class="stat-icon">
+            <i class="pi pi-cog"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ orderSummary.inProgressOrders }}</div>
+            <div class="stat-label">In Progress Orders</div>
+          </div>
+        </div>
+
+        <!-- Delivered Orders -->
+        <div class="stat-card delivered-orders">
+          <div class="stat-icon">
+            <i class="pi pi-send"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ orderSummary.deliveredOrders }}</div>
+            <div class="stat-label">Delivered Orders</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Table Section -->
+    <div class="order-table-section">
+      <div class="table-card customer-card">
+        <div class="table-header">
+          <h3 class="table-title">Order List</h3>
+        </div>
+        
+        <div class="table-content">
+          <app-common-table
+            [config]="tableConfig"
+            [data]="orderData"
+            [loading]="loading"
+            (rowClick)="onRowClick($event)"
+            (linkClick)="onLinkClick($event)"
+            (actionClick)="onActionClick($event)">
+          </app-common-table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
