@@ -231,7 +231,7 @@ export class SupplierOrderDetailsComponent implements OnInit {
   }
 
   getOrderTrackerView(orderId: string) {
-    let endPoint = `/api/method/wefab.wefab.api.common.po_tracker_api.get_po_workflow_states?po_name=${orderId}`;
+    let endPoint = `/api/method/wefab.wefab.api.common.po_tracker_api.get_po_workflow_states?doc_name=${orderId}&doctype=Purchase Order`;
     
     // Show loading state
     this.loading = true;
