@@ -82,7 +82,7 @@ interface RfqAttachment {
 interface RfqSubmissionData {
   customer_rfq_name: string;
   customer: string;
-  customer_name: string;
+  project: string;
   contact_email: string;
   contact_phone: string;
   rfq_date: string;
@@ -533,8 +533,8 @@ export class CreateRfqComponent implements OnInit {
 
     return {
       customer_rfq_name: projectInfo.rfqName,
-      customer: selectedProject?.name || '',
-      customer_name: selectedProject?.project_name || '',
+      customer: '',
+      project: selectedProject?.project_name || '',
       contact_email: projectInfo.contactEmail,
       contact_phone: projectInfo.contactPhone,
       rfq_date: rfqDate,
