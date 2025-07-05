@@ -124,13 +124,27 @@ export class OrderListComponent implements OnInit {
   constructor(private router: Router, private commonService: CommonService) {}
 
   ngOnInit(): void {
+    this.getOrderCount();
     this.getOrderList();
+  } 
+
+  getOrderCount() {
+
+    let apiEndpoint = '/api/method/frappe.desk.query_report.run?report_name=Customer Purchase Order Status Distribution Report';
+    this.commonService.getWefabData(apiEndpoint).subscribe({
+      next: (res: any) => {
+        this.orderSummary.totalOrders = res.message.result[0].count;
+        this.orderSummary.confirmedOrders = res.message.result[4].count;
+        this.orderSummary.inProgressOrders = res.message.result[6].count;
+        this.orderSummary.deliveredOrders = res.message.result[9].count;
+      }
+    });
   }
 
   getOrderList() {
     this.loading = true;
     let apiEndpoint = '/api/resource/Customer Purchase Order?fields=["*"]';
-    this.commonService.getData(apiEndpoint).subscribe({
+    this.commonService.getData(apiEndpoint).subscribe({ 
       next: (res: any) => {
         this.orderData = res.data.map((order: any) => ({
           companySubInfo: order.name || '----',
