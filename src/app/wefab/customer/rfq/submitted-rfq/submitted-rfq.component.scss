@@ -979,7 +979,6 @@
 
     app-activity-trail {
       display: block;
-      margin-top: 1rem;
     }
   }
 }
@@ -1028,64 +1027,6 @@
   .tab-content {
     background: white;
     min-height: 400px;
-
-    // Activity Trail specific styles
-    app-activity-trail {
-      display: block;
-      margin-top: 16px;
-
-      ::ng-deep {
-        .activity-header {
-          margin-bottom: 24px;
-        }
-
-        .activity-item {
-          padding: 16px;
-          border-radius: 8px;
-          background-color: #f8fafc;
-          margin-bottom: 16px;
-          border: 1px solid #e5e7eb;
-
-          &:hover {
-            background-color: #f1f5f9;
-          }
-
-          .activity-title {
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 8px;
-          }
-
-          .activity-meta {
-            font-size: 12px;
-            color: #6b7280;
-          }
-
-          .activity-content {
-            margin-top: 8px;
-            color: #374151;
-          }
-        }
-
-        .empty-message {
-          text-align: center;
-          padding: 48px 24px;
-          color: #6b7280;
-          font-size: 14px;
-          background-color: #f8fafc;
-          border-radius: 8px;
-          border: 1px dashed #e5e7eb;
-        }
-
-        .loading-spinner {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: 200px;
-          color: $customer-primary;
-        }
-      }
-    }
   }
 }
 
