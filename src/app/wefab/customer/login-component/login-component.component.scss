@@ -1,11 +1,18 @@
 // Import customer theme variables
 @import '../styles/customer-variables.scss';
 
+// Base font size variables
+:root {
+  --base-font-size: 16px;
+  --scale-ratio: 1.2;
+}
+
 // Customer login page to match the screenshot
 .customer-login-page {
   height: 100vh;
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: var(--base-font-size);
   
   // Left side - Login form (white background)
   .customer-login-section {
@@ -118,7 +125,7 @@
   // Right side - Features section (orange background)
   .customer-features-section {
     background: linear-gradient(135deg, #FF5722 0%, #FF8A65 100%);
-    padding: 4rem;
+    padding: clamp(2rem, 5vw, 4rem);
     color: white;
     position: relative;
     overflow: hidden;
@@ -131,70 +138,68 @@
       position: absolute;
       top: -10%;
       right: -10%;
-      width: 400px;
-      height: 400px;
+      width: min(400px, 50vw);
+      height: min(400px, 50vw);
       background: rgba(255, 255, 255, 0.1);
       border-radius: 50%;
     }
     
     .customer-features-content {
-      max-width: 900px;
+      max-width: min(900px, 90vw);
       position: relative;
       z-index: 1;
     }
     
     .welcome-title {
-      font-size: 2.5rem;
+      font-size: clamp(2rem, 4vw, 3rem);
       font-weight: 600;
-      margin-bottom: 1rem;
+      margin-bottom: clamp(1rem, 2vw, 2rem);
       line-height: 1.2;
     }
     
     .welcome-subtitle {
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 2vw, 1.25rem);
       opacity: 0.9;
-      margin-bottom: 3rem;
+      margin-bottom: clamp(2rem, 4vw, 3rem);
     }
     
     .features-list {
-      margin-top: 3rem;
+      margin-top: clamp(2rem, 4vw, 3rem);
+      display: grid;
+      gap: clamp(1.5rem, 3vw, 2rem);
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       
       .feature-item {
         display: flex;
-        align-items: center;
-        margin-bottom: 2rem;
-        
-        &:last-child {
-          margin-bottom: 0;
-        }
+        align-items: flex-start;
+        gap: 1.5rem;
         
         .feature-icon {
           background: rgba(255, 255, 255, 0.2);
-          width: 48px;
-          height: 48px;
+          width: clamp(40px, 6vw, 48px);
+          height: clamp(40px, 6vw, 48px);
           border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-right: 1.5rem;
           flex-shrink: 0;
           
           i {
-            font-size: 1.4rem;
+            font-size: clamp(1.2rem, 2vw, 1.4rem);
             color: white;
           }
         }
         
         .feature-content {
           h3 {
-            font-size: 1.1rem;
+            font-size: clamp(1rem, 2vw, 1.25rem);
             font-weight: 500;
             margin-bottom: 0.5rem;
             color: white;
           }
           
           p {
-            font-size: 1rem;
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
             opacity: 0.8;
             margin: 0;
             color: white;
@@ -207,7 +212,7 @@
   // Login section
   .login-section {
     background: white;
-    padding: 2rem;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -215,12 +220,12 @@
     
     .login-container {
       width: 100%;
-      max-width: 400px;
-      padding: 2rem;
+      max-width: min(450px, 90vw);
+      padding: clamp(1.5rem, 3vw, 2.5rem);
       
       .logo-container {
-        width: 60px;
-        height: 60px;
+        width: clamp(50px, 8vw, 70px);
+        height: clamp(50px, 8vw, 70px);
         background: #FF5722;
         border-radius: 12px;
         display: flex;
@@ -229,13 +234,13 @@
         margin: 0 auto 1.5rem;
         
         i {
-          font-size: 1.8rem;
+          font-size: clamp(1.5rem, 2.5vw, 2rem);
           color: white;
         }
       }
       
       h2 {
-        font-size: 1.5rem;
+        font-size: clamp(1.5rem, 2.5vw, 2rem);
         font-weight: 600;
         color: #2D3748;
         margin-bottom: 0.5rem;
@@ -243,18 +248,36 @@
       
       p {
         color: #718096;
-        font-size: 0.9rem;
+        font-size: clamp(0.9rem, 1.5vw, 1.1rem);
         margin-bottom: 2rem;
       }
       
       .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: clamp(1.25rem, 2vw, 1.75rem);
         
         label {
           display: block;
           color: #4A5568;
-          font-size: 0.9rem;
+          font-size: clamp(0.9rem, 1.5vw, 1.1rem);
           margin-bottom: 0.5rem;
+          font-weight: 600;
+        }
+        
+        .password-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.5rem;
+
+          .forgot-link {
+            font-size: 0.8rem;
+            color: #1a73e8;
+            text-decoration: none;
+            
+            &:hover {
+              text-decoration: underline;
+            }
+          }
         }
         
         .input-container {
@@ -266,80 +289,156 @@
             top: 50%;
             transform: translateY(-50%);
             color: #A0AEC0;
-            font-size: 1rem;
+            font-size: clamp(1rem, 1.5vw, 1.2rem);
             
             &.toggle-password {
               left: auto;
               right: 1rem;
               cursor: pointer;
+              
+              &:hover {
+                color: #333;
+              }
             }
           }
           
           input {
             width: 100%;
-            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            padding: clamp(0.75rem, 1.5vw, 1rem) 1rem clamp(0.75rem, 1.5vw, 1rem) 2.5rem;
             border: 1px solid #E2E8F0;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
             color: #2D3748;
             transition: all 0.2s;
+            height: clamp(45px, 6vw, 55px);
             
             &::placeholder {
               color: #A0AEC0;
             }
             
             &:focus {
+              border-color: #2563eb;
+              box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
               outline: none;
-              border-color: #FF5722;
-              box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1);
+            }
+
+            &.ng-invalid.ng-dirty {
+              border-color: #e53935;
             }
           }
         }
       }
       
-      .form-options {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        
-        .remember-me {
-          display: flex;
-          align-items: center;
-          
-          input[type="checkbox"] {
-            margin-right: 0.5rem;
+      .forgot-password-container {
+        .reset-form {
+          .reset-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+            text-align: center;
           }
-          
-          label {
-            color: #4A5568;
-            font-size: 0.9rem;
-            cursor: pointer;
+
+          .reset-button {
+            margin-bottom: 1rem;
+            background-color: #FF5722;
+            
+            &:hover {
+              background-color: #E64A19;
+            }
+            
+            &:disabled {
+              background-color: #FFAB91;
+            }
           }
         }
-        
-        .forgot-password {
-          color: #FF5722;
-          font-size: 0.9rem;
-          text-decoration: none;
+
+        .reset-success {
+          text-align: center;
           
-          &:hover {
-            text-decoration: underline;
+          .success-icon {
+            margin-bottom: 1.5rem;
+            
+            i {
+              font-size: 4rem;
+              color: #22c55e;
+            }
+          }
+          
+          h3 {
+            color: #22c55e;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+          }
+          
+          .success-message {
+            color: #333;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            
+            strong {
+              color: #1a73e8;
+            }
+          }
+          
+          .instruction-message {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+          }
+          
+          .check-spam {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+          }
+        }
+
+        .back-button {
+          width: 100%;
+          padding: clamp(0.75rem, 1.5vw, 1rem);
+          font-weight: 500;
+          font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+          height: clamp(45px, 6vw, 55px);
+          margin-top: 1rem;
+          
+          &.p-button-text {
+            color: #666;
+            background: transparent;
+            border: none;
+            
+            &:hover {
+              background: rgba(0, 0, 0, 0.04);
+              color: #333;
+            }
+          }
+          
+          &.p-button-outlined {
+            color: #1a73e8;
+            border: 1px solid #1a73e8;
+            background: transparent;
+            
+            &:hover {
+              background: rgba(26, 115, 232, 0.04);
+            }
           }
         }
       }
       
       .login-button {
         width: 100%;
-        padding: 0.75rem;
+        padding: clamp(0.75rem, 1.5vw, 1rem);
         background: #FF5722;
         color: white;
         border: none;
         border-radius: 8px;
-        font-size: 0.9rem;
+        font-size: clamp(0.9rem, 1.5vw, 1.1rem);
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s;
+        height: clamp(45px, 6vw, 55px);
         
         &:hover {
           background: darken(#FF5722, 5%);
@@ -353,9 +452,9 @@
       
       .support-text {
         text-align: center;
-        margin-top: 1.5rem;
+        margin-top: clamp(1.25rem, 2vw, 1.75rem);
         color: #718096;
-        font-size: 0.9rem;
+        font-size: clamp(0.9rem, 1.5vw, 1.1rem);
         
         a {
           color: #FF5722;
@@ -489,72 +588,83 @@
   }
 }
 
-// Responsive design
+// Media queries for responsive design
+@media (max-width: 1200px) {
+  .customer-login-page {
+    .features-list {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+  }
+}
+
 @media (max-width: 991.98px) {
   .customer-login-page {
+    overflow-y: auto;
+    height: auto;
+    
     .customer-features-section {
-      padding: 2rem 1rem;
-      min-height: 40vh;
+      min-height: auto;
+      padding: clamp(3rem, 6vw, 4rem) clamp(1.5rem, 3vw, 2rem);
     }
     
-    .customer-features-title {
-      font-size: 2.5rem;
-    }
-    
-    .customer-login-form {
-      padding: 1.5rem;
+    .login-section {
+      min-height: auto;
+      padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2rem);
     }
   }
 }
 
 @media (max-width: 767.98px) {
   .customer-login-page {
-    .customer-features-section {
-      padding: 1.5rem 1rem;
-      min-height: 35vh;
-      
-      &::after {
-        width: 200px;
-        height: 200px;
-        top: -50px;
-        right: -50px;
-      }
+    .features-list {
+      grid-template-columns: 1fr;
     }
     
-    .customer-features-title {
-      font-size: 2rem;
-    }
-    
-    .customer-features-list {
-      gap: 1.5rem;
-    }
-    
-    .customer-login-form {
-      padding: 1rem;
+    .form-options {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
     }
   }
 }
 
-// Ensure full height
-:host {
-  display: block;
-  height: 100vh;
-  width: 100%;
-}
-
-// Loading state
-.customer-form.loading {
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-// Accessibility
+// Accessibility improvements
 @media (prefers-reduced-motion: reduce) {
-  :host ::ng-deep {
-    .customer-access-button.p-button {
-      &:enabled:hover {
-        transform: none;
-      }
+  .customer-login-page * {
+    transition: none !important;
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .customer-login-page {
+    .customer-features-section {
+      background: #FF5722;
+    }
+    
+    .login-button,
+    .logo-container {
+      background: #D32F2F;
+    }
+  }
+}
+
+// Support for larger screens
+@media (min-width: 1400px) {
+  :root {
+    --base-font-size: 18px;
+  }
+}
+
+// Support for smaller screens
+@media (max-width: 480px) {
+  :root {
+    --base-font-size: 14px;
+  }
+  
+  .customer-login-page {
+    .login-container {
+      padding: 1rem;
     }
   }
 }

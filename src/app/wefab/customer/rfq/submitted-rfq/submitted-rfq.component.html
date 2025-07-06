@@ -3,10 +3,10 @@
   <div class="rfq-details-card">
 
     <!-- Header Section -->
-    <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div class="card-header">
       <div class="rfq-info">
         <h2>{{ rfqName }}</h2>
-        <p class="reference-text">{{ rfqData.rfqNumber }}</p>
+        <p class="reference-text">RFQ #{{ rfqData.rfqNumber }}</p>
         <span [class]="'status-badge ' + getStatusClass(rfqStatus)">{{ rfqStatus }}</span>
       </div>
       <div class="action-buttons">

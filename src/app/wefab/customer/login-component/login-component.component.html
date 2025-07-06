@@ -59,11 +59,12 @@
             <div class="logo-container">
               <i class="pi pi-box"></i>
             </div>
-            <h2>Customer Portal</h2>
-            <p>Welcome back! Please login to your account</p>
+            <h2>{{ showForgotPassword ? 'Reset Password' : 'Customer Portal' }}</h2>
+            <p>{{ showForgotPassword ? 'Reset your password' : 'Welcome back! Please login to your account' }}</p>
           </div>
 
-          <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+          <!-- Login Form -->
+          <form *ngIf="!showForgotPassword" (ngSubmit)="onSubmit()" #loginForm="ngForm">
             <div class="form-group">
               <label for="email">Email</label>
               <div class="input-container">
@@ -79,17 +80,25 @@
             </div>
 
             <div class="form-group">
-              <label for="password">Password</label>
+              <div class="password-header">
+                <label for="password">Password</label>
+                <a href="javascript:void(0)" class="forgot-link" (click)="onForgotPassword()">Forgot password?</a>
+              </div>
               <div class="input-container">
                 <i class="pi pi-lock"></i>
                 <input 
-                  type="password"
+                  [type]="showPassword ? 'text' : 'password'"
                   id="password"
                   name="password"
                   [(ngModel)]="loginData.password"
                   placeholder="Enter your password"
                   required>
-                <i class="pi pi-eye toggle-password"></i>
+                <i 
+                  class="pi toggle-password" 
+                  [ngClass]="showPassword ? 'pi-eye-slash' : 'pi-eye'" 
+                  (click)="togglePasswordVisibility()"
+                  pTooltip="Toggle Password Visibility"
+                ></i>
               </div>
             </div>
 
@@ -102,9 +111,6 @@
                   [(ngModel)]="loginData.rememberMe">
                 <label for="rememberMe">Remember me</label>
               </div>
-              <a href="#" class="forgot-password" (click)="onForgotPassword(); $event.preventDefault()">
-                Forgot password?
-              </a>
             </div>
 
             <button 
@@ -118,6 +124,64 @@
               Need help? <a href="#" (click)="onContactSupport(); $event.preventDefault()">Contact Support</a>
             </div>
           </form>
+
+          <!-- Forgot Password Form -->
+          <div *ngIf="showForgotPassword" class="forgot-password-container">
+            <div *ngIf="!resetEmailSent" class="reset-form">
+              <p class="reset-description">
+                Enter your email address and we'll send you a link to reset your password.
+              </p>
+              
+              <div class="form-group">
+                <label for="resetEmail">Email Address</label>
+                <div class="input-container">
+                  <i class="pi pi-envelope"></i>
+                  <input 
+                    type="email" 
+                    id="resetEmail"
+                    [(ngModel)]="resetEmail"
+                    placeholder="Enter your email"
+                    required>
+                </div>
+              </div>
+
+              <button 
+                class="login-button reset-button" 
+                (click)="sendPasswordResetEmail()"
+                [disabled]="!resetEmail || isResettingPassword">
+                {{ isResettingPassword ? 'Sending...' : 'Send Reset Link' }}
+              </button>
+
+              <button 
+                class="back-button p-button-text" 
+                (click)="backToLogin()">
+                Back to Login
+              </button>
+            </div>
+
+            <div *ngIf="resetEmailSent" class="reset-success">
+              <div class="success-icon">
+                <i class="pi pi-check-circle"></i>
+              </div>
+              <h3>Reset Password Link Sent!</h3>
+              <p class="success-message">
+                We've sent a password reset link to <strong>{{ resetEmail }}</strong>
+              </p>
+              <p class="instruction-message">
+                Please check your email and click the link to reset your password. 
+                The link will expire in 1 hour for security reasons.
+              </p>
+              <p class="check-spam">
+                Don't see the email? Check your spam folder
+              </p>
+
+              <button 
+                class="back-button p-button-outlined" 
+                (click)="backToLogin()">
+                Back to Login
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

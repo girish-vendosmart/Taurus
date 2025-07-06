@@ -10,7 +10,7 @@ import {
   PhoneAuthProvider,
   RecaptchaVerifier,
   signInWithPhoneNumber,
-  sendPasswordResetEmail
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail
 } from 'firebase/auth';
 import { Observable, from } from 'rxjs';
 
@@ -38,7 +38,7 @@ export class FirebaseService {
   }
 
   sendPasswordResetEmail(email: string): Observable<void> {
-    return from(sendPasswordResetEmail(this.auth, email));
+    return from(firebaseSendPasswordResetEmail(this.auth, email));
   }
 
   // Get the current user

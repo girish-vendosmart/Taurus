@@ -10,9 +10,11 @@ import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 
 // Services
 import { CustomerAuthService } from '../../../core/services/customer-auth.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 
 @Component({
   selector: 'app-login-component',
@@ -24,7 +26,8 @@ import { CustomerAuthService } from '../../../core/services/customer-auth.servic
     PasswordModule,
     ButtonModule,
     CheckboxModule,
-    ToastModule
+    ToastModule,
+    TooltipModule
   ],
   providers: [MessageService],
   templateUrl: './login-component.component.html',
@@ -37,10 +40,16 @@ export class LoginComponentComponent {
     rememberMe: false
   };
 
+  showPassword = false;
   isLoading = false;
+  showForgotPassword = false;
+  resetEmail = '';
+  isResettingPassword = false;
+  resetEmailSent = false;
 
   constructor(
     private customerAuthService: CustomerAuthService,
+    private firebaseService: FirebaseService,
     private router: Router,
     private messageService: MessageService
   ) {
@@ -53,6 +62,10 @@ export class LoginComponentComponent {
     });
   }
 
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
   onSubmit() {
     if (this.loginData.email && this.loginData.password) {
       this.isLoading = true;
@@ -62,33 +75,24 @@ export class LoginComponentComponent {
           next: (response) => {
             console.log('Login response:', response);
             if (response.firebaseToken) {
-              // Store remember me preference if selected
               if (this.loginData.rememberMe) {
                 localStorage.setItem('customer_remember_me', 'true');
               }
               
-              console.log('Attempting navigation to /wefab/customer/rfq-list');
-              // Try both with and without leading slash
               this.router.navigate(['/wefab/customer/rfq-list'])
                 .then(success => {
-                  console.log('Navigation result:', success);
                   if (!success) {
-                    console.log('Trying alternative navigation...');
                     this.router.navigate(['wefab/customer/rfq-list'])
-                      .then(altSuccess => {
-                        console.log('Alternative navigation result:', altSuccess);
-                        if (!altSuccess) {
-                          this.messageService.add({
-                            severity: 'error',
-                            summary: 'Navigation Failed',
-                            detail: 'Could not navigate to dashboard. Please check route configuration.'
-                          });
-                        }
+                      .catch(err => {
+                        this.messageService.add({
+                          severity: 'error',
+                          summary: 'Navigation Failed',
+                          detail: 'Could not navigate to dashboard. Please check route configuration.'
+                        });
                       });
                   }
                 })
                 .catch(err => {
-                  console.error('Navigation error:', err);
                   this.messageService.add({
                     severity: 'error',
                     summary: 'Navigation Failed',
@@ -109,7 +113,6 @@ export class LoginComponentComponent {
             this.isLoading = false;
             let errorMessage = 'An error occurred during login';
             
-            // Handle Firebase auth errors
             if (error.code) {
               switch (error.code) {
                 case 'auth/invalid-email':
@@ -127,9 +130,7 @@ export class LoginComponentComponent {
                 default:
                   errorMessage = error.message || 'Authentication failed';
               }
-            } 
-            // Handle Frappe API errors
-            else if (error.error) {
+            } else if (error.error) {
               if (error.error.message) {
                 errorMessage = error.error.message;
               } else if (error.error._server_messages) {
@@ -153,11 +154,59 @@ export class LoginComponentComponent {
   }
 
   onForgotPassword() {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Password Reset',
-      detail: 'Please contact customer support to reset your password'
-    });
+    this.showForgotPassword = true;
+    this.resetEmail = this.loginData.email; // Pre-fill email if available
+  }
+
+  async sendPasswordResetEmail() {
+    if (!this.resetEmail) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please enter your email address'
+      });
+      return;
+    }
+
+    this.isResettingPassword = true;
+    try {
+      await this.firebaseService.sendPasswordResetEmail(this.resetEmail);
+      this.resetEmailSent = true;
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Password reset email has been sent successfully'
+      });
+    } catch (error: any) {
+      let errorMessage = 'Failed to send password reset email';
+      
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/invalid-email':
+            errorMessage = 'Invalid email address';
+            break;
+          case 'auth/user-not-found':
+            errorMessage = 'No account found with this email';
+            break;
+          default:
+            errorMessage = error.message || 'Failed to send reset email';
+        }
+      }
+      
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: errorMessage
+      });
+    } finally {
+      this.isResettingPassword = false;
+    }
+  }
+
+  backToLogin() {
+    this.showForgotPassword = false;
+    this.resetEmailSent = false;
+    this.resetEmail = '';
   }
 
   onContactSupport() {

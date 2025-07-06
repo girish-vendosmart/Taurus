@@ -112,22 +112,30 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 24px 24px 0 24px;
+  padding: 24px 24px 20px 24px;
   border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 20px;
 
   .rfq-info {
+    flex: 1;
+    padding-right: 16px;
+
     h2 {
       font-size: 24px;
-      margin-bottom: 0px;
+      margin-bottom: 8px;
       font-weight: 600;
       color: #1f2937;
+      word-break: break-word;
     }
 
     .reference-text {
       font-size: 14px;
       color: #6b7280;
-      margin: 0;
+      margin: 0 0 8px 0;
+    }
+
+    .status-badge {
+      display: inline-block;
+      margin-top: 0;
     }
   }
 
@@ -135,8 +143,11 @@
     display: flex;
     gap: 1rem;
     align-items: center;
+    justify-content: flex-end;
+    min-width: fit-content;
 
     .customer-split-button {
+      min-width: 120px;
       ::ng-deep {
         .split-button-main, .split-button-dropdown {
           background-color: $customer-primary !important;
@@ -157,79 +168,93 @@
             box-shadow: 0 0 0 0.2rem rgba($customer-primary, 0.25) !important;
           }
         }
-
-        .p-menu {
-          .p-menuitem-link {
-            &:hover {
-              background-color: rgba($customer-primary, 0.1) !important;
-              color: $customer-primary !important;
-            }
-          }
-        }
       }
     }
 
     .back-button {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border: 1px solid $customer-border-default;
-      border-radius: 5px;
+      gap: 8px;
+      padding: 8px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
       background-color: white;
-      color: $customer-text-secondary;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 500;
       transition: all 0.2s ease;
+      white-space: nowrap;
 
       &:hover {
-        background-color: $customer-bg-light;
-        color: $customer-primary;
         border-color: $customer-primary;
+        color: $customer-primary;
+        background-color: rgba($customer-primary, 0.05);
       }
 
       i {
-        font-size: 0.875rem;
+        font-size: 14px;
       }
-    }
-  }
-
-  .rfq-number {
-    text-align: right;
-
-    .number-label {
-      display: block;
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 4px;
-    }
-
-    .number-value {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1f2937;
     }
   }
 
   @media (max-width: 768px) {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 1rem;
-    padding: 16px 20px 0 20px;
+    padding: 16px;
+
+    .rfq-info {
+      min-width: 200px;
+      padding-right: 0;
+
+      h2 {
+        font-size: 20px;
+        margin-bottom: 6px;
+      }
+
+      .reference-text {
+        margin-bottom: 6px;
+      }
+    }
 
     .action-buttons {
-      flex-wrap: wrap;
-      width: 100%;
-      justify-content: flex-start;
+      gap: 0.75rem;
 
-      app-split-button {
-        flex: 1;
-        min-width: 120px;
-      }
-      
+      .customer-split-button,
       .back-button-section {
-        flex: 1;
-        
+        ::ng-deep {
+          .p-splitbutton {
+            .p-button {
+              padding: 8px 16px;
+              font-size: 14px;
+            }
+          }
+        }
+      }
+
+      .back-button {
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .rfq-info {
+      h2 {
+        font-size: 18px;
+      }
+    }
+
+    .action-buttons {
+      width: 100%;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+
+      .customer-split-button,
+      .back-button-section {
         .back-button {
-          width: 100%;
-          justify-content: center;
+          min-width: 120px;
         }
       }
     }
@@ -1264,11 +1289,16 @@
 .status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  margin-top: 0.5rem;
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.65rem;
+  }
 
   &.status-draft {
     background-color: rgba($customer-info, 0.1);
